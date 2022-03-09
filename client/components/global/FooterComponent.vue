@@ -15,11 +15,7 @@
                   v-list-item-title {{ $t('index.theme.change') }}
       v-row
         v-col(cols="12" md="9")
-          .body-2.gray-text &copy; {{ $t('index.rights') }}. {{ new Date().getFullYear() }}&nbsp;
-            strong #[a(href="https://devind.ru" style="text-decoration: none") {{ $t('index.support') }}.]
-        v-col.text-right(cols="12" md="3")
-          a(href="https://www.liveinternet.ru/click" style="display: block; width: 88px; height: 31px;" target="_blank")
-            img(:src="counterSrc" alt="" width="88" height="31")
+          .body-2.gray-text &copy; {{ $t('index.rights') }}. {{ new Date().getFullYear() }}
     v-btn(v-show="upVisible$" @click="$vuetify.goTo(0)" size="small" fab fixed bottom right color="primary")
       v-icon mdi-chevron-up
 </template>

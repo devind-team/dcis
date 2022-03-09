@@ -279,6 +279,44 @@ type ApplicationType implements Node {
   user: UserType
 }
 
+input AuthCbiasMutationInput {
+  """Открытый идентификатор приложения"""
+  clientId: String
+  """Секретный идентификатор приложения"""
+  clientSecret: String
+  """Тип авторизации"""
+  grantType: String = "password"
+  """Идентификатор пользователя"""
+  uid: String!
+}
+
+type AuthCbiasMutationOutput {
+  """Ошибки"""
+  errors: [ErrorType]
+  """Статус операции"""
+  success: Boolean!
+  """Информация о токене доступа"""
+  token: AuthTokenInfoType
+  """Авторизованный пользователь"""
+  user: UserType
+}
+
+"""Информация о сгенерированном токене доступа."""
+type AuthTokenInfoType {
+  """Токен доступа"""
+  accessToken: String
+  """Время жизни токена"""
+  expiresIn: Int
+  """Переадресация при авторизации"""
+  redirectUris: String
+  """Токен обновления"""
+  refreshToken: String
+  """Разрешения"""
+  scope: String
+  """Тип токена"""
+  tokenType: String
+}
+
 """Категория"""
 type CategoryType implements Node {
   """Аватар"""
@@ -1097,6 +1135,11 @@ type ErrorFieldType {
   messages: [String!]!
 }
 
+type ErrorType {
+  field: String!
+  messages: [String!]!
+}
+
 """Файл пользователя."""
 type FileType implements Node {
   """Дата добавления файла"""
@@ -1304,7 +1347,7 @@ type MailingType {
   user: UserType!
 }
 
-"""Мутации на изменение чего-либо"""
+"""Мутации на изменение чего-либо."""
 type Mutation {
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
@@ -1324,6 +1367,8 @@ type Mutation {
   addSectionText(input: AddSectionTextMutationInput!): AddSectionTextMutationPayload!
   """Добавление тега"""
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
+  """Авторизация через портал https://cbias.ru"""
+  authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
   """Мутация для изменения аватара пользователя."""
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
   """Мутации для изменения категории"""
@@ -1736,7 +1781,7 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-"""Схема запросов данных"""
+"""Схема запросов данных."""
 type Query {
   _debug: DjangoDebug
   """Статистика активности"""
@@ -2134,7 +2179,7 @@ type SettingType {
   value: String!
 }
 
-"""Подписки на сокеты"""
+"""Подписки на сокеты."""
 type Subscription {
   """Поток новых уведомлений"""
   notifications: NotificationsSubscription!

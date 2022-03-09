@@ -319,6 +319,46 @@ export type ApplicationType = Node & {
   user?: Maybe<UserType>;
 };
 
+export type AuthCbiasMutationInput = {
+  /** Открытый идентификатор приложения */
+  clientId?: InputMaybe<Scalars['String']>;
+  /** Секретный идентификатор приложения */
+  clientSecret?: InputMaybe<Scalars['String']>;
+  /** Тип авторизации */
+  grantType?: InputMaybe<Scalars['String']>;
+  /** Идентификатор пользователя */
+  uid: Scalars['String'];
+};
+
+export type AuthCbiasMutationOutput = {
+  __typename?: 'AuthCbiasMutationOutput';
+  /** Ошибки */
+  errors?: Maybe<Array<Maybe<ErrorType>>>;
+  /** Статус операции */
+  success: Scalars['Boolean'];
+  /** Информация о токене доступа */
+  token?: Maybe<AuthTokenInfoType>;
+  /** Авторизованный пользователь */
+  user?: Maybe<UserType>;
+};
+
+/** Информация о сгенерированном токене доступа. */
+export type AuthTokenInfoType = {
+  __typename?: 'AuthTokenInfoType';
+  /** Токен доступа */
+  accessToken?: Maybe<Scalars['String']>;
+  /** Время жизни токена */
+  expiresIn?: Maybe<Scalars['Int']>;
+  /** Переадресация при авторизации */
+  redirectUris?: Maybe<Scalars['String']>;
+  /** Токен обновления */
+  refreshToken?: Maybe<Scalars['String']>;
+  /** Разрешения */
+  scope?: Maybe<Scalars['String']>;
+  /** Тип токена */
+  tokenType?: Maybe<Scalars['String']>;
+};
+
 /** Категория */
 export type CategoryType = Node & {
   __typename?: 'CategoryType';
@@ -1195,6 +1235,12 @@ export type ErrorFieldType = {
   messages: Array<Scalars['String']>;
 };
 
+export type ErrorType = {
+  __typename?: 'ErrorType';
+  field: Scalars['String'];
+  messages: Array<Scalars['String']>;
+};
+
 /** Файл пользователя. */
 export type FileType = Node & {
   __typename?: 'FileType';
@@ -1420,7 +1466,7 @@ export type MailingType = {
   user: UserType;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type Mutation = {
   __typename?: 'Mutation';
   /** Мутация для добавления категории */
@@ -1441,6 +1487,8 @@ export type Mutation = {
   addSectionText: AddSectionTextMutationPayload;
   /** Добавление тега */
   addTag: AddTagMutationPayload;
+  /** Авторизация через портал https://cbias.ru */
+  authCbias?: Maybe<AuthCbiasMutationOutput>;
   /** Мутация для изменения аватара пользователя. */
   changeAvatar: ChangeAvatarMutationPayload;
   /** Мутации для изменения категории */
@@ -1529,262 +1577,267 @@ export type Mutation = {
   uploadUsers: UploadUsersMutationPayload;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddCategoryArgs = {
   input: AddCategoryMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddFileArgs = {
   input: AddFileMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddGroupArgs = {
   input: AddGroupMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddPageArgs = {
   input: AddPageMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddProfileArgs = {
   input: AddProfileMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddSectionFilesArgs = {
   input: AddSectionFilesMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddSectionGalleryArgs = {
   input: AddSectionGalleryMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddSectionTextArgs = {
   input: AddSectionTextMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationAddTagArgs = {
   input: AddTagMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
+export type MutationAuthCbiasArgs = {
+  payload: AuthCbiasMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationChangeAvatarArgs = {
   input: ChangeAvatarMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeCategoryArgs = {
   input: ChangeCategoryMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeCategoryAvatarArgs = {
   input: ChangeCategoryAvatarMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeCategoryParentArgs = {
   input: ChangeCategoryParentMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeCategoryPositionArgs = {
   input: ChangeCategoryPositionMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeFileArgs = {
   input: ChangeFileMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeGroupNameArgs = {
   input: ChangeGroupNameMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeGroupPermissionsArgs = {
   input: ChangeGroupPermissionsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeNotificationArgs = {
   input: ChangeNotificationMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeNotificationsArgs = {
   input: ChangeNotificationsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePageAvatarArgs = {
   input: ChangePageAvatarMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePageBooleanPropertyArgs = {
   input: ChangePageBooleanPropertyMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePageCategoryArgs = {
   input: ChangePageCategoryMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePageKindArgs = {
   input: ChangePageKindMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePageTagsArgs = {
   input: ChangePageTagsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePageTitleArgs = {
   input: ChangePageTitleMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangePasswordArgs = {
   input: ChangePasswordMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeProfileValueArgs = {
   input: ChangeProfileValueMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeProfileVisibilityArgs = {
   input: ChangeProfileVisibilityMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeSectionFilesArgs = {
   input: ChangeSectionFilesMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeSectionGalleryArgs = {
   input: ChangeSectionGalleryMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeSectionTextArgs = {
   input: ChangeSectionTextMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeSettingsArgs = {
   input: ChangeSettingsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeUserGroupsArgs = {
   input: ChangeUserGroupsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationChangeUserPropsArgs = {
   input: ChangeUserPropsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationConfirmEmailArgs = {
   input: ConfirmEmailMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteCategoryArgs = {
   input: DeleteCategoryMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteFileArgs = {
   input: DeleteFileMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteGroupArgs = {
   input: DeleteGroupMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteNoticeArgs = {
   input: DeleteNoticeMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeletePageArgs = {
   input: DeletePageMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteProfileArgs = {
   input: DeleteProfileMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteSectionArgs = {
   input: DeleteSectionMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteSessionsArgs = {
   input: DeleteSessionsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationGetTokenArgs = {
   input: GetTokenMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationLogoutArgs = {
   input: LogoutMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationRecoveryPasswordArgs = {
   input: RecoveryPasswordMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationRegisterArgs = {
   input: RegisterMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationRequestCodeArgs = {
   input: RequestCodeMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationResetSettingsArgs = {
   input: ResetSettingsMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationRestorePasswordArgs = {
   input: RestorePasswordMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationSupportSubmitArgs = {
   input: SupportSubmitMutationInput;
 };
 
-/** Мутации на изменение чего-либо */
+/** Мутации на изменение чего-либо. */
 export type MutationUploadUsersArgs = {
   input: UploadUsersMutationInput;
 };
@@ -2140,7 +2193,7 @@ export type ProfileValueType = {
   visibility: Scalars['Boolean'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type Query = {
   __typename?: 'Query';
   _debug?: Maybe<DjangoDebug>;
@@ -2199,7 +2252,7 @@ export type Query = {
   users: UserTypeConnection;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryCategoriesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2211,12 +2264,12 @@ export type QueryCategoriesArgs = {
   text_Icontains?: InputMaybe<Scalars['String']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryCategoryArgs = {
   categoryId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryFilesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2227,7 +2280,7 @@ export type QueryFilesArgs = {
   userId?: InputMaybe<Scalars['ID']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryLogEntryArgs = {
   action_Contains?: InputMaybe<Scalars['String']>;
   after?: InputMaybe<Scalars['String']>;
@@ -2244,7 +2297,7 @@ export type QueryLogEntryArgs = {
   userId?: InputMaybe<Scalars['ID']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryLogRequestsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2259,7 +2312,7 @@ export type QueryLogRequestsArgs = {
   userId?: InputMaybe<Scalars['ID']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryNoticesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2269,12 +2322,12 @@ export type QueryNoticesArgs = {
   user?: InputMaybe<Scalars['ID']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryNotificationArgs = {
   notificationId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryNotificationsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2286,17 +2339,17 @@ export type QueryNotificationsArgs = {
   user?: InputMaybe<Scalars['ID']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryPageArgs = {
   pageId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryPageKindArgs = {
   pageKindId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryPagesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2308,22 +2361,22 @@ export type QueryPagesArgs = {
   title_Icontains?: InputMaybe<Scalars['String']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryProfileInformationArgs = {
   userId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryProfilesValueArgs = {
   userId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QuerySessionsArgs = {
   userId?: InputMaybe<Scalars['ID']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryTagsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2333,17 +2386,17 @@ export type QueryTagsArgs = {
   offset?: InputMaybe<Scalars['Int']>;
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryUserArgs = {
   userId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryUserInformationArgs = {
   userId: Scalars['ID'];
 };
 
-/** Схема запросов данных */
+/** Схема запросов данных. */
 export type QueryUsersArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -2695,7 +2748,7 @@ export type SettingType = {
   value: Scalars['String'];
 };
 
-/** Подписки на сокеты */
+/** Подписки на сокеты. */
 export type Subscription = {
   __typename?: 'Subscription';
   /** Поток новых уведомлений */
@@ -3180,6 +3233,14 @@ export type ActiveStatisticsQuery = { __typename?: 'Query', activeStatistics: { 
 export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
+
+export type AuthCbiasMutationVariables = Exact<{
+  uid: Scalars['String'];
+  clientId?: InputMaybe<Scalars['String']>;
+  clientSecret: Scalars['String'];
+}>;
+
+export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 
