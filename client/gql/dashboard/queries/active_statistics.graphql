@@ -1,0 +1,15 @@
+query ActiveStatistics {
+  activeStatistics {
+    queries {
+      date
+      value
+      __typename
+    }
+    times {
+      date
+      value
+      __typename
+    }
+    __typename
+  }
+}

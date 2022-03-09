@@ -1,0 +1,29 @@
+mutation Registration(
+  $username: String!,
+  $email: String!,
+  $lastName: String!,
+  $firstName: String!,
+  $sirName: String,
+  $birthday: Date!,
+  $password: String!,
+  $agreement: Boolean!
+) {
+  register(input: {
+    username: $username,
+    email: $email,
+    lastName: $lastName,
+    firstName: $firstName,
+    sirName: $sirName,
+    birthday: $birthday,
+    password: $password,
+    agreement: $agreement
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    __typename
+  }
+}

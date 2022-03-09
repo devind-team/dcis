@@ -1,0 +1,11 @@
+fragment FileFields on FileType {
+  id
+  name
+  src
+  ext
+  size
+  deleted
+  createdAt
+  updatedAt
+  __typename
+}

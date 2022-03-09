@@ -1,0 +1,14 @@
+#import "../../fragments/section_fields.graphql"
+mutation ChangeSectionGallery ($sectionId: ID!, $text: String!, $newImages: [Upload!], $oldImages: [ID!]!) {
+  changeSectionGallery(input: {sectionId: $sectionId, newImages: $newImages, text: $text, oldImages: $oldImages}) {
+    success
+    errors {
+      field
+      messages
+    }
+    section {
+      ...SectionFields
+    }
+    __typename
+  }
+}

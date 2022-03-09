@@ -1,0 +1,16 @@
+mutation ConfirmEmail($email: String!, $code: String!) {
+  confirmEmail(input: { email: $email, code: $code }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    user {
+      email
+      agreement
+      __typename
+    }
+    __typename
+  }
+}

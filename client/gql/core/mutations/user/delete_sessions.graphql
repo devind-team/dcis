@@ -1,0 +1,9 @@
+mutation DeleteSessions {
+  deleteSessions(input: {}) {
+    success
+    errors {
+      field
+      messages
+    }
+  }
+}

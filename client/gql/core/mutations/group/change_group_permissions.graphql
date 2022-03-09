@@ -1,0 +1,13 @@
+mutation ChangeGroupPermissions($groupId: Int!, $permissionsId: [Int]!, $action: ActionRelationShip!) {
+  changeGroupPermissions(input: { groupId: $groupId, permissionsId: $permissionsId, action: $action }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    permissionsId
+    action
+    __typename
+  }
+}

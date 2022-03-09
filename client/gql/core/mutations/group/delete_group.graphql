@@ -1,0 +1,11 @@
+mutation DeleteGroup($groupId: Int!) {
+  deleteGroup(input: { groupId: $groupId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    __typename
+  }
+}

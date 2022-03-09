@@ -1,0 +1,41 @@
+mutation UploadUser ($groupsId: [Int], $file: Upload!) {
+  uploadUsers(input: { groupsId: $groupsId, file: $file }) {
+    success
+    errors {
+      row
+      errors {
+        field
+        messages
+        __typename
+      }
+      __typename
+    }
+    table {
+      headers
+      rows {
+        index
+        cells {
+          header
+          value
+        }
+      }
+    }
+    users {
+      id
+      avatar
+      username
+      email
+      firstName
+      lastName
+      sirName
+      isActive
+      createdAt
+      __typename
+      groups {
+        id
+        name
+        __typename
+      }
+    }
+  }
+}

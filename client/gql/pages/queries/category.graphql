@@ -1,0 +1,16 @@
+#import "../fragments/category_fields.graphql"
+
+query Category($categoryId: ID!) {
+  category(categoryId: $categoryId) {
+    ...CategoryFields
+    parent {
+      ...CategoryFields
+    }
+    children {
+      ...CategoryFields
+    }
+    nc {
+      ...CategoryFields
+    }
+  }
+}

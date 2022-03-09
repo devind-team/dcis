@@ -1,0 +1,23 @@
+#import "../../fragments/page_fields.graphql"
+
+mutation ChangePageBooleanProperty (
+    $pageId: ID!,
+    $field: String!,
+    $value: Boolean!
+  ) {
+  changePageBooleanProperty(input: {
+    pageId: $pageId
+    field: $field
+    value: $value
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    page {
+      ...PageFields
+    }
+  }
+}

@@ -1,0 +1,10 @@
+#import "../fragments/profile_fields.graphql"
+
+query Profiles {
+  profiles {
+    ...ProfileFields
+    children {
+      ...ProfileFields
+    }
+  }
+}

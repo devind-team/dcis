@@ -1,0 +1,7 @@
+#import "../fragments/setting_fields.graphql"
+
+query settings {
+  settings {
+    ...SettingFields
+  }
+}

@@ -1,0 +1,11 @@
+#import "../../core/fragments/user_fields.graphql"
+
+fragment NoticeInterfaceFields on NoticeInterface {
+  id
+  kind
+  payload
+  objectId
+  createdAt
+  user { ...UserFields }
+  __typename
+}

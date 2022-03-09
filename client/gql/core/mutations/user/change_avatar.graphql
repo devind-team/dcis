@@ -1,0 +1,13 @@
+mutation ChangeAvatar($userId: ID!, $file: Upload!) {
+  changeAvatar(input: {
+    userId: $userId,
+    file: $file
+  }) {
+    success,
+    errors {
+      field,
+      messages,
+    },
+    avatar
+  }
+}

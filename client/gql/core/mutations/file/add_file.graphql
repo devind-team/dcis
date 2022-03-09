@@ -1,0 +1,17 @@
+#import "../../fragments/file_fields.graphql"
+
+mutation AddFile($userId: ID!, $files: [Upload!]!) {
+  addFile(input: {
+    userId: $userId,
+    files: $files
+  }) {
+    success
+    errors {
+      field
+      messages
+    }
+    files {
+      ...FileFields
+    }
+  }
+}

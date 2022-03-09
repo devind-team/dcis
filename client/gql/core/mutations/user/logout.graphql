@@ -1,0 +1,13 @@
+mutation Logout($sessionId: ID!) {
+  logout(input: {
+    sessionId: $sessionId
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    __typename
+  }
+}

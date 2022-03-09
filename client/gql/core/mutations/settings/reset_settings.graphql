@@ -1,0 +1,16 @@
+#import "../../fragments/setting_fields.graphql"
+
+mutation ResetSettings($userId: ID!) {
+  resetSettings(input: {userId: $userId}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    settings {
+      ...SettingFields
+    }
+    __typename
+  }
+}

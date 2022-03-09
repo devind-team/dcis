@@ -1,0 +1,16 @@
+mutation ChangeCategory($categoryId: ID!, $text: String!) {
+  changeCategory(input: { categoryId: $categoryId, text: $text }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    category {
+      id
+      text
+      __typename
+    }
+    __typename
+  }
+}

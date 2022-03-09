@@ -1,0 +1,16 @@
+#import "../../fragments/section_fields.graphql"
+
+mutation AddSectionGallery($pageId: ID!, $text: String!, $images: [Upload!]!) {
+  addSectionGallery(input: { pageId: $pageId, text: $text, images: $images }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    section {
+      ...SectionFields
+    }
+    __typename
+  }
+}

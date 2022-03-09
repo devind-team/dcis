@@ -1,0 +1,36 @@
+mutation AddPage(
+    $avatar: Upload,
+    $parallax: Boolean,
+    $title: String!,
+    $signature: String,
+    $hide: Boolean,
+    $priority: Boolean,
+    $kindId: Int,
+    $categoryId: ID!,
+    $tagNames: [String!],
+    $text: String
+  ) {
+  addPage(input: {
+    avatar: $avatar,
+    parallax: $parallax,
+    title: $title,
+    signature: $signature,
+    hide: $hide,
+    priority: $priority,
+    kindId: $kindId,
+    categoryId: $categoryId,
+    tagNames: $tagNames,
+    text: $text
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    page {
+      id
+      __typename
+    }
+  }
+}

@@ -1,0 +1,9 @@
+fragment SessionFields on SessionType {
+  id
+  ip
+  browser
+  os
+  device
+  date
+  __typename
+}

@@ -1,0 +1,17 @@
+#import "../../fragments/setting_fields.graphql"
+
+mutation changeSettings($userId: ID!, $key: String!, $value: String!) {
+  changeSettings(input: { userId: $userId, key: $key, value: $value }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    setting {
+      ...SettingFields
+    }
+    __typename
+  }
+}
+

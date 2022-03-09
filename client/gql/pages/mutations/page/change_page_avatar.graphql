@@ -1,0 +1,22 @@
+#import "../../fragments/page_fields.graphql"
+
+mutation ChangePageAvatar(
+    $pageId: ID!,
+    $avatar: Upload
+  ) {
+  changePageAvatar(input: {
+    pageId: $pageId,
+    avatar: $avatar
+  }) {
+    success
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    page {
+      ...PageFields
+    }
+  }
+}

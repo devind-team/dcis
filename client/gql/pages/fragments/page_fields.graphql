@@ -1,0 +1,30 @@
+#import "./page_kind_fields.graphql"
+#import "./category_fields.graphql"
+#import "./tag_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
+
+fragment PageFields on PageType {
+  id
+  avatar
+  parallax
+  title
+  kind {
+    ...PageKindFields
+  }
+  views
+  signature
+  hide
+  priority
+  createdAt
+  updatedAt
+  category {
+    ...CategoryFields
+  }
+  tags {
+    ...TagFields
+  }
+  user {
+    ...UserFields
+  }
+  __typename
+}

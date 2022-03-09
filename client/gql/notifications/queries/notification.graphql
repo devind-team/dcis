@@ -1,0 +1,31 @@
+#import "../fragments/notification_fields.graphql"
+#import "../fragments/notice_interface_fields.graphql"
+#import "../../pages/fragments/page_fields.graphql"
+#import "../../pages/fragments/section_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
+#import "../../notifications/fragments/mailing_fields.graphql"
+
+query Notification($notificationId: ID!) {
+  notification(notificationId: $notificationId){
+    ...NotificationFields
+    notice {
+      ...NoticeInterfaceFields
+      ...on NoticePageType {
+        page {
+          ...PageFields
+          sections {
+            ...SectionFields
+          }
+          user {
+            ...UserFields
+          }
+        }
+      }
+      ...on NoticeMailingType {
+        mailing {
+          ...MailingFields
+        }
+      }
+    }
+  }
+}

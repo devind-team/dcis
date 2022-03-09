@@ -1,0 +1,7 @@
+#import "../../core/fragments/user_fields.graphql"
+
+query UserInformation($userId: ID!) {
+  userInformation(userId: $userId) {
+    ...UserFields
+  }
+}

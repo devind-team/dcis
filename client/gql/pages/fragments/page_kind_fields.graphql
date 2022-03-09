@@ -1,0 +1,5 @@
+fragment PageKindFields on PageKindType {
+  id
+  name
+  __typename
+}

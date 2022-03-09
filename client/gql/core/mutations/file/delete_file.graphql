@@ -1,0 +1,7 @@
+mutation DeleteFile($fileId: ID!) {
+  deleteFile(input: { fileId: $fileId }) {
+    success
+    id
+    __typename
+  }
+}

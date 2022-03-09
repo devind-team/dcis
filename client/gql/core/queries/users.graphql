@@ -1,0 +1,40 @@
+query Users($first: Int, $after: String, $search: String) {
+  users(
+    first: $first,
+    after: $after,
+    email_Icontains: $search,
+    username_Icontains: $search,
+    lastName_Icontains: $search,
+    firstName_Icontains: $search,
+    sirName_Icontains: $search
+  ) {
+    totalCount
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+      __typename
+    }
+    edges {
+      node {
+        id
+        avatar
+        username
+        email
+        firstName
+        lastName
+        sirName
+        isActive
+        createdAt
+        groups {
+          id
+          name
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+}

@@ -1,0 +1,26 @@
+#import "../fragments/page_fields.graphql"
+#import "../fragments/tag_fields.graphql"
+#import "../fragments/category_fields.graphql"
+#import "../fragments/section_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
+
+query Page($pageId: ID!) {
+  page(pageId: $pageId) {
+    ...PageFields
+    sections {
+      ...SectionFields
+    }
+    user {
+      ...UserFields
+    }
+    category {
+      ...CategoryFields
+      parent {
+        ...CategoryFields
+      }
+      nc {
+        ...CategoryFields
+      }
+    }
+  }
+}

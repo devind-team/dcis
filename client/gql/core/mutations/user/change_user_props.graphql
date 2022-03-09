@@ -1,0 +1,23 @@
+#import "../../fragments/user_fields.graphql"
+
+mutation ChangeUserProps($userId: ID!, $email: String!, $firstName: String!, $lastName: String!, $sirName: String!, $birthday: Date!) {
+  changeUserProps(input: {
+    userId: $userId,
+    email: $email,
+    firstName: $firstName,
+    lastName: $lastName,
+    sirName: $sirName,
+    birthday: $birthday
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    user {
+      ...UserFields
+    }
+    __typename
+  }
+}

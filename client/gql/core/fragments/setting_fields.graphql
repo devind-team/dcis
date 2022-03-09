@@ -1,0 +1,8 @@
+fragment SettingFields on SettingType {
+  id
+  key
+  value
+  kindValue
+  readonly
+  __typename
+}

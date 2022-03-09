@@ -1,0 +1,23 @@
+#import "../fragments/notification_fields.graphql"
+#import "../fragments/notice_interface_fields.graphql"
+
+query Notifications($userId: ID!, $first: Int, $after: String, $hide: Boolean = false) {
+  notifications(user: $userId, first: $first, after: $after, hide: $hide) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    edges {
+      node {
+        ...NotificationFields
+        notice { ...NoticeInterfaceFields }
+      }
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,10 @@
+fragment MailingFields on MailingType {
+  id
+  dispatchers
+  address
+  header
+  text
+  attachments
+  createdAt
+  __typename
+}

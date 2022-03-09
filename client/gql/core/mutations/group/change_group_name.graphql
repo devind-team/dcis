@@ -1,0 +1,22 @@
+mutation ChangeGroupName($name: String!, $groupId: Int!) {
+  changeGroupName(input: { name: $name, groupId: $groupId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    group {
+      id
+      name
+      __typename
+      permissions {
+        id
+        name
+        codename
+        __typename
+      }
+    }
+    __typename
+  }
+}

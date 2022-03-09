@@ -1,0 +1,7 @@
+fragment NotificationFields on NotificationType {
+  id
+  hide
+  read
+  createdAt
+  __typename
+}

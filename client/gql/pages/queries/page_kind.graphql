@@ -1,0 +1,7 @@
+query PageKind($pageKindId: ID!) {
+  pageKind(pageKindId: $pageKindId) {
+    id
+    name
+    __typename
+  }
+}

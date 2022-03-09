@@ -1,0 +1,40 @@
+#import "../../fragments/session_fields.graphql"
+#import "../../fragments/user_fields.graphql"
+
+mutation GetToken(
+  $clientId: String!,
+  $clientSecret: String!,
+  $grantType: String!,
+  $username: String!,
+  $password: String!
+) {
+  getToken(input: {
+    clientId: $clientId,
+    clientSecret: $clientSecret,
+    grantType: $grantType,
+    username: $username,
+    password: $password
+  }) {
+    success
+    errors {
+      field
+      messages
+    }
+    accessToken
+    expiresIn
+    tokenType
+    scope
+    refreshToken
+    user {
+      __typename
+      birthday
+      isActive
+      agreement
+      permissions
+      ...UserFields
+      session {
+        ...SessionFields
+      }
+    }
+  }
+}

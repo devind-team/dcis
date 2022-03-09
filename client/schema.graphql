@@ -1,0 +1,2300 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"""Токен."""
+type AccessTokenType {
+  application: ApplicationType
+  created: DateTime!
+  expires: DateTime!
+  id: ID!
+  scope: String!
+  session: SessionType
+  token: String!
+  updated: DateTime!
+  user: UserType
+}
+
+"""
+Типы измнения связей между записями в базе данных
+- ADD - Добавление
+- DELETE - Удаление
+"""
+enum ActionRelationShip {
+  ADD
+  DELETE
+}
+
+"""Информация активности пользователей и времени ответа браузеров."""
+type ActiveStatisticsType {
+  """Запросы"""
+  queries: [DateStatisticsType]!
+  """Время ответа сервера"""
+  times: [DateStatisticsType]!
+}
+
+input AddCategoryMutationInput {
+  """Аватар"""
+  avatar: Upload
+  clientMutationId: String
+  """Идентификатор родительской категории"""
+  parentId: ID
+  """Название категории"""
+  text: String!
+}
+
+"""Мутация для добавления категории"""
+type AddCategoryMutationPayload {
+  """Добавленная котегория"""
+  category: CategoryType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddFileMutationInput {
+  clientMutationId: String
+  """Загружаемые файлы"""
+  files: [Upload!]!
+  """Идентификатор пользователя"""
+  userId: ID
+}
+
+"""Мутация для загрузки файлов"""
+type AddFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Загруженные файлы"""
+  files: [FileType]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddGroupMutationInput {
+  clientMutationId: String
+  """Название группы"""
+  name: String!
+  permissionFrom: Int
+}
+
+"""Мутация для добавления группы."""
+type AddGroupMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленная группа"""
+  group: GroupType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddPageMutationInput {
+  """Аватар"""
+  avatar: Upload
+  """Категория страницы"""
+  categoryId: ID!
+  clientMutationId: String
+  """Скрываем ли страницу"""
+  hide: Boolean
+  """Тип страницы"""
+  kindId: Int
+  """Показывать параллакс или нет"""
+  parallax: Boolean
+  """Приоритет"""
+  priority: Boolean
+  """Подпись страницы"""
+  signature: String
+  """Теги на странице"""
+  tagNames: [String!]
+  """Первоначальное добавление текста страницы"""
+  text: String
+  """Заголовок"""
+  title: String!
+}
+
+"""Добавление страницы"""
+type AddPageMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddProfileMutationInput {
+  clientMutationId: String
+  """Уникальный код настройки"""
+  code: String!
+  """Тип настройки: [0-3]"""
+  kind: Int
+  """Название настройки"""
+  name: String!
+  """Родительская настройка"""
+  parentId: Int
+}
+
+"""Мутация для добавления записи профиля."""
+type AddProfileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленный профайл"""
+  profile: ProfileType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddSectionFilesMutationInput {
+  clientMutationId: String
+  """Загружаемые изображения"""
+  files: [Upload!]!
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Текст страницы"""
+  text: String!
+}
+
+"""Добавление секции"""
+type AddSectionFilesMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Поле с файлами"""
+  section: SectionFilesType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddSectionGalleryMutationInput {
+  clientMutationId: String
+  """Загружаемые изображения"""
+  images: [Upload!]!
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Текст страницы"""
+  text: String!
+}
+
+"""Добавление секции"""
+type AddSectionGalleryMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Поле с файлами"""
+  section: SectionGalleryType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddSectionTextMutationInput {
+  clientMutationId: String
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Текст страницы"""
+  text: String!
+}
+
+"""Добавление секции"""
+type AddSectionTextMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Текстовое поле"""
+  section: SectionTextType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddTagMutationInput {
+  clientMutationId: String
+  name: String!
+}
+
+"""Добавление тега"""
+type AddTagMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Добавленный тег"""
+  tag: TagType
+}
+
+"""An enumeration."""
+enum ApplicationAlgorithm {
+  """No OIDC support"""
+  A_
+  """HMAC with SHA-2 256"""
+  HS256
+  """RSA with SHA-2 256"""
+  RS256
+}
+
+"""An enumeration."""
+enum ApplicationAuthorizationGrantType {
+  """Authorization code"""
+  AUTHORIZATION_CODE
+  """Client credentials"""
+  CLIENT_CREDENTIALS
+  """Implicit"""
+  IMPLICIT
+  """OpenID connect hybrid"""
+  OPENID_HYBRID
+  """Resource owner password-based"""
+  PASSWORD
+}
+
+"""An enumeration."""
+enum ApplicationClientType {
+  """Confidential"""
+  CONFIDENTIAL
+  """Public"""
+  PUBLIC
+}
+
+"""Приложение."""
+type ApplicationType implements Node {
+  accesstokenSet: [AccessTokenType!]!
+  algorithm: ApplicationAlgorithm
+  authorizationGrantType: ApplicationAuthorizationGrantType!
+  clientId: String!
+  clientSecret: String!
+  clientType: ApplicationClientType!
+  created: DateTime!
+  """The ID of the object."""
+  id: ID!
+  name: String!
+  """Allowed URIs list, space separated"""
+  redirectUris: String!
+  skipAuthorization: Boolean!
+  updated: DateTime!
+  user: UserType
+}
+
+"""Категория"""
+type CategoryType implements Node {
+  """Аватар"""
+  avatar: String
+  """Дочерние категории"""
+  children: [CategoryType]!
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Соседние категории"""
+  nc: [CategoryType]!
+  """Страницы"""
+  pages(after: String, before: String, category_Id: ID, first: Int, kind_Id: ID, last: Int, offset: Int, title_Icontains: String): PageTypeConnection
+  """Родительская категория"""
+  parent: CategoryType
+  """Позиция вывода"""
+  position: Int!
+  """Текст"""
+  text: String!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь"""
+  user: UserType
+}
+
+type CategoryTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [CategoryTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `CategoryType` and its cursor."""
+type CategoryTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: CategoryType
+}
+
+input ChangeAvatarMutationInput {
+  clientMutationId: String
+  """Загружаемый файл аватара"""
+  file: Upload!
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация для изменения аватара пользователя."""
+type ChangeAvatarMutationPayload {
+  """Загруженный аватар"""
+  avatar: String!
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeCategoryAvatarMutationInput {
+  """Аватар"""
+  avatar: Upload
+  """Идентификатор мутации"""
+  categoryId: ID!
+  clientMutationId: String
+}
+
+"""Мутация для изменения аватара категории"""
+type ChangeCategoryAvatarMutationPayload {
+  """Добавленная котегория"""
+  category: CategoryType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeCategoryMutationInput {
+  """Идентификатор мутации"""
+  categoryId: ID!
+  clientMutationId: String
+  """Название категории"""
+  text: String!
+}
+
+"""Мутации для изменения категории"""
+type ChangeCategoryMutationPayload {
+  """Добавленная котегория"""
+  category: CategoryType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeCategoryParentMutationInput {
+  """Идентификатор категории"""
+  categoryId: ID!
+  clientMutationId: String
+  """Идентификатор родителя"""
+  parentId: ID
+}
+
+"""Мутация для изменения родителя"""
+type ChangeCategoryParentMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeCategoryPositionMutationInput {
+  """Идентификаторы категорий"""
+  categoriesId: [ID]!
+  clientMutationId: String
+}
+
+"""Мутация для изменения порядка следования вывода категорий"""
+type ChangeCategoryPositionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeFileMutationInput {
+  clientMutationId: String
+  """Поле файла"""
+  field: String!
+  """Идентификатор файла"""
+  fileId: ID!
+  """Значение поля файла"""
+  value: String!
+}
+
+"""Мутация для изменения файла"""
+type ChangeFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный файл"""
+  file: FileType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeGroupNameMutationInput {
+  clientMutationId: String
+  """Идентификатор группы"""
+  groupId: Int!
+  """Название группы"""
+  name: String!
+}
+
+"""Мутация для изменения имени группы."""
+type ChangeGroupNameMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная группа"""
+  group: GroupType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeGroupPermissionsMutationInput {
+  """Действие"""
+  action: ActionRelationShip!
+  clientMutationId: String
+  """Идентификатор группы"""
+  groupId: Int!
+  """Идентификаторы привилегий"""
+  permissionsId: [Int]!
+}
+
+"""Мутация для изменения привилегий группы."""
+type ChangeGroupPermissionsMutationPayload {
+  """Действие"""
+  action: ActionRelationShip!
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификаторы привилегий"""
+  permissionsId: [Int]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeNotificationMutationInput {
+  clientMutationId: String
+  """Название поля"""
+  field: String!
+  """Идентификатор уведомления"""
+  notificationId: ID!
+  """Значение"""
+  value: Boolean!
+}
+
+"""Изменение уведомления"""
+type ChangeNotificationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeNotificationsMutationInput {
+  clientMutationId: String
+  """Название поля"""
+  field: String!
+  """Идентификаторы уведомлений"""
+  notificationsId: [ID]!
+  """Значение"""
+  value: Boolean!
+}
+
+"""Изменение всех уведомлений"""
+type ChangeNotificationsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePageAvatarMutationInput {
+  """Новый аватар страницы"""
+  avatar: Upload
+  clientMutationId: String
+  """Идентификатор страницы"""
+  pageId: ID!
+}
+
+"""Изменение аватара на странице"""
+type ChangePageAvatarMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePageBooleanPropertyMutationInput {
+  clientMutationId: String
+  field: String!
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Значение"""
+  value: Boolean!
+}
+
+"""Изменение boolean свойств страницы"""
+type ChangePageBooleanPropertyMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePageCategoryMutationInput {
+  """Идентификатор категории"""
+  categoryId: ID!
+  clientMutationId: String
+  """Идентификатор страницы"""
+  pageId: ID!
+}
+
+"""Изменение категории страницы"""
+type ChangePageCategoryMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePageKindMutationInput {
+  clientMutationId: String
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Идентификатор типа страницы"""
+  pageKindId: Int
+}
+
+"""Изменение типа страницы"""
+type ChangePageKindMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePageTagsMutationInput {
+  clientMutationId: String
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Теги"""
+  tagNames: [String!]!
+}
+
+"""Изменения тегов страницы"""
+type ChangePageTagsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePageTitleMutationInput {
+  clientMutationId: String
+  """Идентификатор страницы"""
+  pageId: ID!
+  """Заголовок страницы"""
+  title: String!
+}
+
+"""Изменение названия страницы"""
+type ChangePageTitleMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная страница"""
+  page: PageType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePasswordMutationInput {
+  clientMutationId: String
+  """Старый пароль"""
+  password: String!
+  """Новый пароль"""
+  passwordNew: String!
+}
+
+"""Мутация для изменения пароля пользователя."""
+type ChangePasswordMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeProfileValueMutationInput {
+  clientMutationId: String
+  """Идентификатор записи профиля"""
+  profileId: ID!
+  """Идентификатор пользователя"""
+  userId: ID!
+  """Значение записи"""
+  value: String!
+}
+
+"""Мутация на изменение значения профиля."""
+type ChangeProfileValueMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленное значение профиля"""
+  profileValue: ProfileValueType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeProfileVisibilityMutationInput {
+  clientMutationId: String
+  """Идентификатор записи"""
+  profileValueId: ID!
+  """Значение доступности"""
+  visibility: Boolean!
+}
+
+"""Матция для изменения видимости."""
+type ChangeProfileVisibilityMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененное значение поля"""
+  profileValue: ProfileValueType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeSectionFilesMutationInput {
+  clientMutationId: String
+  """Загружаемые изображения"""
+  newFiles: [Upload!]
+  """Изображения"""
+  oldFiles: [ID!]!
+  """Идентификатор секции"""
+  sectionId: ID!
+  """Текст мутации"""
+  text: String!
+}
+
+"""Изменение текста секции"""
+type ChangeSectionFilesMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Секция галереи"""
+  section: SectionFilesType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeSectionGalleryMutationInput {
+  clientMutationId: String
+  """Загружаемые изображения"""
+  newImages: [Upload!]
+  """Изображения"""
+  oldImages: [ID!]!
+  """Идентификатор секции"""
+  sectionId: ID!
+  """Текст мутации"""
+  text: String!
+}
+
+"""Изменение текста секции"""
+type ChangeSectionGalleryMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Секция галереи"""
+  section: SectionGalleryType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeSectionTextMutationInput {
+  clientMutationId: String
+  """Идентификатор секции"""
+  sectionId: ID!
+  """Текст мутации"""
+  text: String!
+}
+
+"""Изменение текста секции"""
+type ChangeSectionTextMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Текстовая секция"""
+  section: SectionTextType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeSettingsMutationInput {
+  clientMutationId: String
+  """Идентификатор настройки"""
+  key: String!
+  """Идентификатор пользователя"""
+  userId: ID!
+  """Значение настройки"""
+  value: String!
+}
+
+"""Мутация для изменения настроек"""
+type ChangeSettingsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная настройка"""
+  setting: SettingType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeUserGroupsMutationInput {
+  clientMutationId: String
+  """Идентификатор групп"""
+  groupsId: [Int]!
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация для изменения групп конкретного пользователя."""
+type ChangeUserGroupsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Новые группы"""
+  groups: [GroupType]
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeUserPropsMutationInput {
+  """Дата рождения"""
+  birthday: Date!
+  clientMutationId: String
+  """Email"""
+  email: String!
+  """Имя"""
+  firstName: String!
+  """Фамилия"""
+  lastName: String!
+  """Отчество"""
+  sirName: String!
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация для изменения полей пользователя."""
+type ChangeUserPropsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененный пользователь"""
+  user: UserType!
+}
+
+"""Комментарии"""
+type CommentType implements Node {
+  """Дочерние комментарии"""
+  children: [CategoryType]!
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Страница"""
+  page: PageType!
+  """Рейтинг"""
+  rating: Int!
+  """Текст"""
+  text: String!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь, оставивший комментарий"""
+  user: UserType!
+}
+
+type CommentTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [CommentTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `CommentType` and its cursor."""
+type CommentTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: CommentType
+}
+
+input ConfirmEmailMutationInput {
+  clientMutationId: String
+  """Код, полученный по Email"""
+  code: String!
+  """Email адрес"""
+  email: String!
+}
+
+"""Подтверждение кода."""
+type ConfirmEmailMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Пользователь"""
+  user: UserType
+}
+
+"""
+Типы уведомления пользователей
+- CONNECT - Присоединился
+- DISCONNECT - Отсоединился
+- ADD - Пользователь добавил данные (по умолчанию)
+- CHANGE - Пользователь изменил данные
+- DELETE - Удаление объекта
+- ERROR - Ошибка ввода данных
+- TYPING - Печатет, готовиться отправить сообщение
+- TYPING_FINISH - Закончил печатать
+- EXCEPTION - Пользователь исключен из потока уведомлений
+"""
+enum ConsumerActionType {
+  ADD
+  CHANGE
+  CONNECT
+  DELETE
+  DISCONNECT
+  ERROR
+  EXCEPTION
+  TYPING
+  TYPING_FINISH
+}
+
+"""Тип модели Django."""
+type ContentTypeType {
+  appLabel: String!
+  id: ID!
+  """Модель, связанная с действием"""
+  logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
+  model: String!
+  permissionSet: [PermissionType!]!
+}
+
+"""
+The `Date` scalar type represents a Date
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar Date
+
+"""Информация по показателям во временной развертке."""
+type DateStatisticsType {
+  """Дата"""
+  date: Date!
+  """Значение"""
+  value: Float!
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+input DeleteCategoryMutationInput {
+  """Идентификатор мутации"""
+  categoryId: ID!
+  clientMutationId: String
+}
+
+"""Мутация для удаления категории"""
+type DeleteCategoryMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteFileMutationInput {
+  clientMutationId: String
+  """Идентификатор файла"""
+  fileId: ID!
+}
+
+"""Мутация для полного удаления файла"""
+type DeleteFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаляемого файла"""
+  id: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteGroupMutationInput {
+  clientMutationId: String
+  """Идентификатор группы"""
+  groupId: Int!
+}
+
+"""Мутация для удаления группы."""
+type DeleteGroupMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteNoticeMutationInput {
+  clientMutationId: String
+  """Идентификатор уведомления"""
+  noticeId: ID!
+}
+
+"""Удаление всех уведомлений"""
+type DeleteNoticeMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeletePageMutationInput {
+  clientMutationId: String
+  pageId: ID!
+}
+
+"""Удаление страницы"""
+type DeletePageMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteProfileMutationInput {
+  clientMutationId: String
+  """Идентификатор записи"""
+  profileId: Int!
+}
+
+"""Мутация для удаления записи профиля."""
+type DeleteProfileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteSectionMutationInput {
+  clientMutationId: String
+  """Идентификатор секции"""
+  sectionId: ID!
+}
+
+"""Удаление секции"""
+type DeleteSectionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteSessionsMutationInput {
+  clientMutationId: String
+}
+
+"""Мутация для удаления всех сессий кроме текущей."""
+type DeleteSessionsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Debugging information for the current query."""
+type DjangoDebug {
+  """Executed SQL queries for this API query."""
+  sql: [DjangoDebugSQL]
+}
+
+"""Represents a single database query made to a Django managed DB."""
+type DjangoDebugSQL {
+  """The Django database alias (e.g. 'default')."""
+  alias: String!
+  """Duration of this database query in seconds."""
+  duration: Float!
+  """Postgres connection encoding if available."""
+  encoding: String
+  """Whether this database query was a SELECT."""
+  isSelect: Boolean!
+  """Whether this database query took more than 10 seconds."""
+  isSlow: Boolean!
+  """Postgres isolation level if available."""
+  isoLevel: String
+  """JSON encoded database query parameters."""
+  params: String!
+  """The raw SQL of this query, without params."""
+  rawSql: String!
+  """The actual SQL sent to this database."""
+  sql: String
+  """Start time of this database query."""
+  startTime: Float!
+  """Stop time of this database query."""
+  stopTime: Float!
+  """Postgres transaction ID if available."""
+  transId: String
+  """Postgres transaction status if available."""
+  transStatus: String
+  """The type of database being used (e.g. postrgesql, mysql, sqlite)."""
+  vendor: String!
+}
+
+"""Ошибка в поле формы"""
+type ErrorFieldType {
+  """Поле формы"""
+  field: String!
+  """Ошибки"""
+  messages: [String!]!
+}
+
+"""Файл пользователя."""
+type FileType implements Node {
+  """Дата добавления файла"""
+  createdAt: DateTime!
+  """Помечаем удаленный файл"""
+  deleted: Boolean!
+  """Расширение файла"""
+  ext: String
+  """The ID of the object."""
+  id: ID!
+  """Название файла"""
+  name: String!
+  """Размер файла в байтах"""
+  size: Int
+  """Путь к файлу"""
+  src: String!
+  """Дата обновления файла"""
+  updatedAt: DateTime!
+  """Пользователь, добавивший файл"""
+  user: UserType
+}
+
+type FileTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [FileTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `FileType` and its cursor."""
+type FileTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: FileType
+}
+
+input GetTokenMutationInput {
+  """Открытый идентификатор приложения"""
+  clientId: String
+  clientMutationId: String
+  """Секретный идентификатор приложения"""
+  clientSecret: String
+  """Тип авторизации"""
+  grantType: String
+  """Пароль"""
+  password: String
+  """Имя пользователя"""
+  username: String
+}
+
+"""Мутация для получения токена авторизации."""
+type GetTokenMutationPayload {
+  """Токен доступа"""
+  accessToken: String
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Время жизни токена"""
+  expiresIn: Int
+  """Токен обновления"""
+  refreshToken: String
+  """Разрешения"""
+  scope: String
+  """Успех мутации"""
+  success: Boolean!
+  """Тип токена"""
+  tokenType: String
+  """Авторизованный пользователь"""
+  user: UserType
+}
+
+"""Группа пользователей."""
+type GroupType {
+  id: ID!
+  name: String!
+  permissions: [PermissionType!]!
+  """Группы, к которым принадлежит данный пользователь. Пользователь получит все права, указанные в каждой из его/её групп."""
+  userSet(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+"""An enumeration."""
+enum LogEntryAction {
+  """addition"""
+  A_1
+  """change"""
+  A_2
+  """deletion"""
+  A_3
+}
+
+"""Логирование действия пользователя."""
+type LogEntryType implements Node {
+  """Действие пользователя"""
+  action: LogEntryAction!
+  """Модель, связанная с действием"""
+  contentType: ContentTypeType
+  """Дата и время действия"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Идентификатор модели"""
+  objectId: String
+  """Измененные данные"""
+  payload: JSONString!
+  """Сессия пользователя"""
+  session: SessionType
+}
+
+type LogEntryTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [LogEntryTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `LogEntryType` and its cursor."""
+type LogEntryTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: LogEntryType
+}
+
+"""Лог запроса."""
+type LogRequestType implements Node {
+  """Дата и время запроса"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Страница, с которой отправлен запрос"""
+  page: String
+  """Сессия пользователя"""
+  session: SessionType
+  """Время работы страницы"""
+  time: Float!
+}
+
+type LogRequestTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [LogRequestTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `LogRequestType` and its cursor."""
+type LogRequestTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: LogRequestType
+}
+
+input LogoutMutationInput {
+  clientMutationId: String
+  """Идентификатор сессии"""
+  sessionId: ID!
+}
+
+"""Мутация выхода"""
+type LogoutMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Оповещение"""
+type MailingType {
+  """Адрес отправки"""
+  address: String!
+  """Массив прикрепленных файлов"""
+  attachments: [String!]
+  """Дата добавления"""
+  createdAt: DateTime!
+  """Средства отправки"""
+  dispatchers: [String!]!
+  """Заголовок сообщения"""
+  header: String!
+  id: ID!
+  """Текст сообщения"""
+  text: String!
+  """Пользователь"""
+  user: UserType!
+}
+
+"""Мутации на изменение чего-либо"""
+type Mutation {
+  """Мутация для добавления категории"""
+  addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
+  """Мутация для загрузки файлов"""
+  addFile(input: AddFileMutationInput!): AddFileMutationPayload!
+  """Мутация для добавления группы."""
+  addGroup(input: AddGroupMutationInput!): AddGroupMutationPayload!
+  """Добавление страницы"""
+  addPage(input: AddPageMutationInput!): AddPageMutationPayload!
+  """Мутация для добавления записи профиля."""
+  addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
+  """Добавление секции"""
+  addSectionFiles(input: AddSectionFilesMutationInput!): AddSectionFilesMutationPayload!
+  """Добавление секции"""
+  addSectionGallery(input: AddSectionGalleryMutationInput!): AddSectionGalleryMutationPayload!
+  """Добавление секции"""
+  addSectionText(input: AddSectionTextMutationInput!): AddSectionTextMutationPayload!
+  """Добавление тега"""
+  addTag(input: AddTagMutationInput!): AddTagMutationPayload!
+  """Мутация для изменения аватара пользователя."""
+  changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
+  """Мутации для изменения категории"""
+  changeCategory(input: ChangeCategoryMutationInput!): ChangeCategoryMutationPayload!
+  """Мутация для изменения аватара категории"""
+  changeCategoryAvatar(input: ChangeCategoryAvatarMutationInput!): ChangeCategoryAvatarMutationPayload!
+  """Мутация для изменения родителя"""
+  changeCategoryParent(input: ChangeCategoryParentMutationInput!): ChangeCategoryParentMutationPayload!
+  """Мутация для изменения порядка следования вывода категорий"""
+  changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
+  """Мутация для изменения файла"""
+  changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
+  """Мутация для изменения имени группы."""
+  changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
+  """Мутация для изменения привилегий группы."""
+  changeGroupPermissions(input: ChangeGroupPermissionsMutationInput!): ChangeGroupPermissionsMutationPayload!
+  """Изменение свойств уведомления"""
+  changeNotification(input: ChangeNotificationMutationInput!): ChangeNotificationMutationPayload!
+  """Изменение свойств уведомлений"""
+  changeNotifications(input: ChangeNotificationsMutationInput!): ChangeNotificationsMutationPayload!
+  """Изменение аватара на странице"""
+  changePageAvatar(input: ChangePageAvatarMutationInput!): ChangePageAvatarMutationPayload!
+  """Изменение boolean свойств страницы"""
+  changePageBooleanProperty(input: ChangePageBooleanPropertyMutationInput!): ChangePageBooleanPropertyMutationPayload!
+  """Изменение категории страницы"""
+  changePageCategory(input: ChangePageCategoryMutationInput!): ChangePageCategoryMutationPayload!
+  """Изменение типа страницы"""
+  changePageKind(input: ChangePageKindMutationInput!): ChangePageKindMutationPayload!
+  """Изменения тегов страницы"""
+  changePageTags(input: ChangePageTagsMutationInput!): ChangePageTagsMutationPayload!
+  """Изменение названия страницы"""
+  changePageTitle(input: ChangePageTitleMutationInput!): ChangePageTitleMutationPayload!
+  """Мутация для изменения пароля пользователя."""
+  changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
+  """Мутация на изменение значения профиля."""
+  changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
+  """Матция для изменения видимости."""
+  changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
+  """Изменение текста секции"""
+  changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
+  """Изменение текста секции"""
+  changeSectionGallery(input: ChangeSectionGalleryMutationInput!): ChangeSectionGalleryMutationPayload!
+  """Изменение текста секции"""
+  changeSectionText(input: ChangeSectionTextMutationInput!): ChangeSectionTextMutationPayload!
+  """Мутация для изменения настроек"""
+  changeSettings(input: ChangeSettingsMutationInput!): ChangeSettingsMutationPayload!
+  """Мутация для изменения групп конкретного пользователя."""
+  changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
+  """Мутация для изменения полей пользователя."""
+  changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
+  """Подтверждение кода."""
+  confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
+  """Мутация для удаления категории"""
+  deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
+  """Мутация для полного удаления файла"""
+  deleteFile(input: DeleteFileMutationInput!): DeleteFileMutationPayload!
+  """Мутация для удаления группы."""
+  deleteGroup(input: DeleteGroupMutationInput!): DeleteGroupMutationPayload!
+  """Удаление уведомления"""
+  deleteNotice(input: DeleteNoticeMutationInput!): DeleteNoticeMutationPayload!
+  """Удаление страницы"""
+  deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
+  """Мутация для удаления записи профиля."""
+  deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
+  """Удаление секции"""
+  deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
+  """Мутация для удаления всех сессий кроме текущей."""
+  deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
+  """Мутация для получения токена авторизации."""
+  getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
+  """Мутация выхода"""
+  logout(input: LogoutMutationInput!): LogoutMutationPayload!
+  """Мутация для сброса пароля пользователя."""
+  recoveryPassword(input: RecoveryPasswordMutationInput!): RecoveryPasswordMutationPayload!
+  """Мутация регистрации новых пользователей."""
+  register(input: RegisterMutationInput!): RegisterMutationPayload!
+  """Отправка email с кодом на электронную почту."""
+  requestCode(input: RequestCodeMutationInput!): RequestCodeMutationPayload!
+  """Мутация для сброса настроек по умолчанию"""
+  resetSettings(input: ResetSettingsMutationInput!): ResetSettingsMutationPayload!
+  """Мутация для сброса пароля пользователя."""
+  restorePassword(input: RestorePasswordMutationInput!): RestorePasswordMutationPayload!
+  """Отправка письма поддержки"""
+  supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
+  """Мутация для загрузки пользователей из файла excel | csv."""
+  uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
+}
+
+"""An object with an ID"""
+interface Node {
+  """The ID of the object."""
+  id: ID!
+}
+
+"""Уведомление без дополнительного содержимого"""
+type NoticeEmptyType implements NoticeInterface {
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Тип уведомления"""
+  kind: Int!
+  """Идентификатор объекта"""
+  objectId: String!
+  """Полезная нагрузка"""
+  payload: String!
+  """Пользователь"""
+  user: UserType
+}
+
+"""Переопределение стандартного интерфейса уведомлений."""
+interface NoticeInterface {
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Тип уведомления"""
+  kind: Int!
+  """Идентификатор объекта"""
+  objectId: String!
+  """Полезная нагрузка"""
+  payload: String!
+  """Пользователь"""
+  user: UserType
+}
+
+"""An enumeration."""
+enum NoticeKind {
+  """info"""
+  A_0
+  """page"""
+  A_1
+  """comment"""
+  A_2
+  """message"""
+  A_3
+  """task"""
+  A_4
+  """billing"""
+  A_5
+  """paid"""
+  A_6
+  """mailing"""
+  A_7
+  """happy_birthday"""
+  A_8
+}
+
+"""Уведомление типа 'Пришло уведомление'."""
+type NoticeMailingType implements NoticeInterface {
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Тип уведомления"""
+  kind: Int!
+  """Оповещение пользователя"""
+  mailing: MailingType
+  """Идентификатор объекта"""
+  objectId: String!
+  """Полезная нагрузка"""
+  payload: String!
+  """Пользователь"""
+  user: UserType
+}
+
+"""Уведомление типа 'Добавлена новая страница'"""
+type NoticePageType implements NoticeInterface {
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Тип уведомления"""
+  kind: Int!
+  """Идентификатор объекта"""
+  objectId: String!
+  """Страница"""
+  page: PageType
+  """Полезная нагрузка"""
+  payload: String!
+  """Пользователь"""
+  user: UserType
+}
+
+"""Уведомление"""
+type NoticeType implements Node {
+  """Дата добавления"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Тип уведомления"""
+  kind: NoticeKind!
+  """Идентификатор объекта"""
+  objectId: String!
+  """Полезная нагрузка"""
+  payload: String!
+  """Пользователь"""
+  user: UserType
+}
+
+type NoticeTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [NoticeTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `NoticeType` and its cursor."""
+type NoticeTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: NoticeType
+}
+
+"""Оповещение пользователей"""
+type NotificationType implements Node {
+  """Дата добавления"""
+  createdAt: DateTime!
+  """Скрыть уведомление"""
+  hide: Boolean!
+  """The ID of the object."""
+  id: ID!
+  """Уведомление"""
+  notice: NoticeInterface!
+  """Прочитано ли уведомление"""
+  read: Boolean!
+  """Пользователь"""
+  user: UserType!
+}
+
+type NotificationTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [NotificationTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `NotificationType` and its cursor."""
+type NotificationTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: NotificationType
+}
+
+"""Подписка на обновление событий."""
+type NotificationsSubscription {
+  """Действие пользователя"""
+  action: ConsumerActionType!
+  """Идентификатор объекта"""
+  id: ID!
+  notification: NotificationType
+}
+
+"""The Relay compliant `PageInfo` type, containing data necessary to paginate this connection."""
+type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+}
+
+"""Тип страницы"""
+type PageKindType {
+  id: ID!
+  """Название"""
+  name: String!
+  """Странички"""
+  pages: [PageType]!
+  """Сегментные элементы"""
+  segmentElements: [SegmentElementType]!
+}
+
+"""Страница"""
+type PageType implements Node {
+  """Аватар"""
+  avatar: String
+  """Категория"""
+  category: CategoryType!
+  """Комментарии"""
+  comments(after: String, before: String, first: Int, last: Int, offset: Int, text_Icontains: String): CommentTypeConnection!
+  """Дата создания"""
+  createdAt: DateTime!
+  """Скрываем ли страницу"""
+  hide: Boolean!
+  """The ID of the object."""
+  id: ID!
+  """Тип"""
+  kind: PageKindType
+  """Показывать параллакс или нет"""
+  parallax: Boolean!
+  """Первая текстовая секция"""
+  preview: String
+  """Приоритет"""
+  priority: Boolean!
+  """Секции"""
+  sections: [SectionInterface]!
+  """Подпись страницы"""
+  signature: String
+  """Теги на странице"""
+  tags: [TagType]!
+  """Заголовок"""
+  title: String!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь, создавший страницу"""
+  user: UserType
+  """Количество просмотров"""
+  views: Int!
+}
+
+type PageTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [PageTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `PageType` and its cursor."""
+type PageTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: PageType
+}
+
+"""Привилегия пользователя или группы пользователей."""
+type PermissionType {
+  codename: String!
+  """Тип модели Django"""
+  contentType: ContentTypeType!
+  """Группы"""
+  groups: GroupType
+  id: ID!
+  name: String!
+}
+
+"""Информация по показателям для типов различных показателей."""
+type PointStatisticsType {
+  """Название"""
+  name: String!
+  """Текущее значение"""
+  value: Int!
+}
+
+"""An enumeration."""
+enum ProfileKind {
+  """text"""
+  A_0
+  """date"""
+  A_1
+  """bool"""
+  A_2
+  """file"""
+  A_3
+  """choice"""
+  A_4
+}
+
+"""Тип параметров пользователей."""
+type ProfileType {
+  """Доступные дочерние поля"""
+  available: [ProfileType!]!
+  """Дочерние"""
+  children: [ProfileType!]!
+  """Уникальный код настройки"""
+  code: String!
+  id: ID!
+  """Тип настройки"""
+  kind: ProfileKind!
+  """Название настройки"""
+  name: String!
+  """Позиция"""
+  position: Int!
+  """Значение пользователя"""
+  value: ProfileValueType
+}
+
+"""Значение параметров пользователей."""
+type ProfileValueType {
+  """Дата создания"""
+  createdAt: DateTime!
+  id: ID!
+  """Профиль"""
+  profile: ProfileType!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь"""
+  user: UserType!
+  """Значение хранимой информации"""
+  value: String!
+  """Доступность настройки"""
+  visibility: Boolean!
+}
+
+"""Схема запросов данных"""
+type Query {
+  _debug: DjangoDebug
+  """Статистика активности"""
+  activeStatistics: ActiveStatisticsType!
+  """Приложения"""
+  applications: [ApplicationType!]!
+  """Категории"""
+  categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
+  """Категория"""
+  category(categoryId: ID!): CategoryType!
+  files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
+  groups: [GroupType!]!
+  """Установлены ли настройки приложения"""
+  hasSettings: Boolean!
+  logEntry(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int, userId: ID): LogEntryTypeConnection!
+  logRequests(after: String, before: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, offset: Int, page_Icontains: String, userId: ID): LogRequestTypeConnection!
+  """Информация обо мне"""
+  me: UserType
+  """Источник уведомлений"""
+  notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection!
+  """Детализация уведомления"""
+  notification(
+    """Идентификатор уведомления"""
+    notificationId: ID!
+  ): NotificationType!
+  """Уведомления пользователя"""
+  notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection!
+  """Страница"""
+  page(pageId: ID!): PageType!
+  """Получение типа страницы"""
+  pageKind(pageKindId: ID!): PageKindType!
+  """Типы страниц"""
+  pageKinds: [PageKindType!]!
+  """Страницы"""
+  pages(after: String, before: String, category_Id: ID, first: Int, kind_Id: ID, last: Int, offset: Int, title_Icontains: String): PageTypeConnection!
+  permissions: [PermissionType!]!
+  """Доступные значения профиля пользователя"""
+  profileInformation(
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): [ProfileType!]!
+  """Список настроек профиля"""
+  profiles: [ProfileType!]!
+  """Значение профиля пользователя"""
+  profilesValue(
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): [ProfileValueType!]!
+  """Статистика запросов"""
+  requestStatistics: RequestStatisticsType!
+  """Сегменты страницы"""
+  segments: [SegmentType!]!
+  """Доступные сессии"""
+  sessions(userId: ID): [SessionType!]!
+  """Настройки приложения"""
+  settings: [SettingType!]!
+  """Теги"""
+  tags(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): TagTypeConnection!
+  """Информация о указанном пользователе"""
+  user(userId: ID!): UserType
+  """Доступная информация о пользователе"""
+  userInformation(
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): UserType
+  """Пользователи приложения"""
+  users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+}
+
+input RecoveryPasswordMutationInput {
+  clientMutationId: String
+  """Email адрес"""
+  email: String!
+}
+
+"""Мутация для сброса пароля пользователя."""
+type RecoveryPasswordMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input RegisterMutationInput {
+  """Согласие на обработку персональных данных"""
+  agreement: Boolean!
+  """Дата рождения"""
+  birthday: Date!
+  clientMutationId: String
+  """Email"""
+  email: String!
+  """Имя"""
+  firstName: String!
+  """Фамилия"""
+  lastName: String!
+  """Пароль"""
+  password: String!
+  """Отчество"""
+  sirName: String
+  """Логин"""
+  username: String!
+}
+
+"""Мутация регистрации новых пользователей."""
+type RegisterMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input RequestCodeMutationInput {
+  clientMutationId: String
+  """Email адрес"""
+  email: String!
+}
+
+"""Отправка email с кодом на электронную почту."""
+type RequestCodeMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Информация по клиентам, с которых делаются запросы."""
+type RequestStatisticsType {
+  """Клиенты"""
+  browsers: [PointStatisticsType]!
+  """Устройства"""
+  device: [PointStatisticsType]!
+  """Операционные системы"""
+  os: [PointStatisticsType]!
+}
+
+input ResetSettingsMutationInput {
+  clientMutationId: String
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация для сброса настроек по умолчанию"""
+type ResetSettingsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Лист настроек"""
+  settings: [SettingType!]
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input RestorePasswordMutationInput {
+  clientMutationId: String
+  """Пароль"""
+  password: String!
+  """Токен"""
+  token: String!
+}
+
+"""Мутация для сброса пароля пользователя."""
+type RestorePasswordMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Ошибка в строке."""
+type RowFieldErrorType {
+  """Ошибки, возникающие в строке"""
+  errors: [ErrorFieldType]!
+  """Номер строки с ошибкой"""
+  row: Int!
+}
+
+type SectionFilesType implements SectionInterface {
+  """Файлы"""
+  files: [FileType]!
+  """Идентификатор"""
+  id: Int!
+  """Тип страницы"""
+  kind: Int!
+  """Страница"""
+  page: PageType!
+  """Конструкции"""
+  payload: JSONString
+  """Порядок вывода"""
+  position: Int!
+  """Текст страницы"""
+  text: String!
+  """Пользователь"""
+  user: UserType!
+}
+
+type SectionGalleryType implements SectionInterface {
+  """Идентификатор"""
+  id: Int!
+  """Изображения"""
+  images: [FileType]!
+  """Тип страницы"""
+  kind: Int!
+  """Страница"""
+  page: PageType!
+  """Конструкции"""
+  payload: JSONString
+  """Порядок вывода"""
+  position: Int!
+  """Текст страницы"""
+  text: String!
+  """Пользователь"""
+  user: UserType!
+}
+
+interface SectionInterface {
+  """Идентификатор"""
+  id: Int!
+  """Тип страницы"""
+  kind: Int!
+  """Страница"""
+  page: PageType!
+  """Порядок вывода"""
+  position: Int!
+  """Текст страницы"""
+  text: String!
+  """Пользователь"""
+  user: UserType!
+}
+
+"""Секции"""
+type SectionTextType implements SectionInterface {
+  """Идентификатор"""
+  id: Int!
+  """Тип страницы"""
+  kind: Int!
+  """Страница"""
+  page: PageType!
+  """Порядок вывода"""
+  position: Int!
+  """Текст страницы"""
+  text: String!
+  """Пользователь"""
+  user: UserType!
+}
+
+type SectionUsersType implements SectionInterface {
+  """Идентификатор"""
+  id: Int!
+  """Тип страницы"""
+  kind: Int!
+  """Страница"""
+  page: PageType!
+  """Конструкции"""
+  payload: JSONString
+  """Порядок вывода"""
+  position: Int!
+  """Текст страницы"""
+  text: String!
+  """Пользователь"""
+  user: UserType!
+  """Пользователи"""
+  users: [UserType]!
+}
+
+"""An enumeration."""
+enum SegmentAlign {
+  """Left"""
+  A_0
+  """Center"""
+  A_1
+  """Right"""
+  A_2
+}
+
+"""An enumeration."""
+enum SegmentElementRepresent {
+  """grid"""
+  A_0
+  """card"""
+  A_1
+  """list"""
+  A_2
+  """slider"""
+  A_3
+}
+
+"""Элемент сегмента"""
+type SegmentElementType {
+  """Колонок в элементе"""
+  columns: Int!
+  """Дата создания"""
+  createdAt: DateTime!
+  id: ID!
+  """Тип страницы"""
+  pageKind: PageKindType!
+  """Количество страниц в запросе"""
+  pageSize: Int!
+  """Позиция в сортировке"""
+  position: Int!
+  """Представление"""
+  represent: SegmentElementRepresent
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь"""
+  user: UserType!
+  """Тип элемента для рендера"""
+  view: SegmentElementView
+  """Ширина колонки"""
+  width: Int!
+}
+
+"""An enumeration."""
+enum SegmentElementView {
+  """empty"""
+  A_0
+  """card"""
+  A_1
+}
+
+"""Сегмент"""
+type SegmentType {
+  """Выравнивание заголовка"""
+  align: SegmentAlign!
+  """Дата создания"""
+  createdAt: DateTime!
+  """Элементы сегмента страницы"""
+  elements: [SegmentElementType]!
+  id: ID!
+  """Заголовок страницы"""
+  name: String
+  """Позиция в сортировке"""
+  position: Int!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Тип элемента для рендера"""
+  view: SegmentView
+}
+
+"""An enumeration."""
+enum SegmentView {
+  """empty"""
+  A_0
+  """card"""
+  A_1
+}
+
+"""Сессия пользователя."""
+type SessionType implements Node {
+  """Количество действий в сессии пользователя"""
+  activity: Int!
+  """Браузер пользователя"""
+  browser: String!
+  """Дата сессии пользователя"""
+  date: DateTime
+  """Устройство пользователя"""
+  device: String!
+  """Количество запросов в сессии пользователя"""
+  history: Int!
+  """The ID of the object."""
+  id: ID!
+  """ip-адрес сессии"""
+  ip: String!
+  """Операционная система пользователя"""
+  os: String!
+  """Пользователь"""
+  user: UserType!
+}
+
+"""An enumeration."""
+enum SettingKindValue {
+  """text"""
+  A_0
+  """file"""
+  A_1
+  """json"""
+  A_2
+  """bool"""
+  A_4
+}
+
+"""Настройка приложения."""
+type SettingType {
+  id: ID!
+  """Ключ настройки"""
+  key: String!
+  """Тип значения настройки"""
+  kindValue: SettingKindValue!
+  """Может ли поле быть изменено"""
+  readonly: Boolean!
+  """Значение"""
+  value: String!
+}
+
+"""Подписки на сокеты"""
+type Subscription {
+  """Поток новых уведомлений"""
+  notifications: NotificationsSubscription!
+}
+
+input SupportSubmitMutationInput {
+  clientMutationId: String
+  """Загружаемые файлы"""
+  files: [Upload!]
+  """Текст"""
+  text: String!
+  """Тема"""
+  topic: String!
+}
+
+"""Отправка письма поддержки"""
+type SupportSubmitMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Ячейка документа."""
+type TableCellType {
+  """Выравнивание"""
+  align: String
+  """Заголовок ячейки"""
+  header: String!
+  """Тип ячейки"""
+  type: String
+  """Значение ячейки"""
+  value: String
+}
+
+"""Строка документа."""
+type TableRowType {
+  """Строка документа"""
+  cells: [TableCellType]!
+  """Индекс строки"""
+  index: Int!
+}
+
+"""Документ, представлющий собой таблицу."""
+type TableType {
+  """Заголовки документа"""
+  headers: [String]!
+  """Строки документа"""
+  rows: [TableRowType]!
+}
+
+"""Тег"""
+type TagType implements Node {
+  """Дата создания"""
+  createdAt: DateTime!
+  """The ID of the object."""
+  id: ID!
+  """Название"""
+  name: String!
+  """Пользователь, создавший тег"""
+  user: UserType
+}
+
+type TagTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [TagTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `TagType` and its cursor."""
+type TagTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: TagType
+}
+
+"""
+Create scalar that ignores normal serialization/deserialization, since
+that will be handled by the multipart request spec
+"""
+scalar Upload
+
+input UploadUsersMutationInput {
+  clientMutationId: String
+  """Источник данных, файл xlsx или csv"""
+  file: Upload!
+  """Для загрузки пользователей"""
+  groupsId: [Int]
+}
+
+"""Мутация для загрузки пользователей из файла excel | csv."""
+type UploadUsersMutationPayload {
+  clientMutationId: String
+  """Ошибки валидации"""
+  errors: [RowFieldErrorType]!
+  """Успех мутации"""
+  success: Boolean!
+  """Валидируемый документ"""
+  table: TableType
+  """Загруженные пользователи"""
+  users: [UserType]
+}
+
+"""Описание пользовательского типа."""
+type UserType implements Node {
+  """Пользовательское соглашение"""
+  agreement: DateTime
+  """Аватар"""
+  avatar: String
+  """День рождения"""
+  birthday: Date
+  """Дата добавления"""
+  createdAt: DateTime!
+  """email"""
+  email: String!
+  """Имя"""
+  firstName: String!
+  """Группы пользователя"""
+  groups: [GroupType]!
+  """The ID of the object."""
+  id: ID!
+  """Является ли пользователь активным"""
+  isActive: Boolean!
+  """Фамилия"""
+  lastName: String!
+  notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection!
+  notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection!
+  """Привилегии пользователя"""
+  permissions: [String]!
+  profileValues: [ProfileValueType]!
+  """Сессия пользователя"""
+  session: SessionType
+  """Отчество"""
+  sirName: String
+  """login"""
+  username: String!
+}
+
+type UserTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [UserTypeEdge]!
+  """Number of nodes."""
+  nodeCount: Int!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `UserType` and its cursor."""
+type UserTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: UserType
+}

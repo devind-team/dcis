@@ -1,0 +1,16 @@
+query RequestStatistics {
+  requestStatistics {
+    browsers {
+      name
+      value
+    }
+    os {
+      name
+      value
+    }
+    device {
+      name
+      value
+    }
+  }
+}

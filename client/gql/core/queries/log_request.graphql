@@ -1,0 +1,28 @@
+query LogRequests($userId: ID, $pageContains: String, $first: Int, $after: String) {
+  logRequests(userId: $userId, page_Icontains: $pageContains, first: $first, after: $after,) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+      __typename
+    }
+    edges {
+      node {
+        id
+        page
+        session {
+          browser
+          device
+          os
+          __typename
+        }
+        time
+        createdAt
+        __typename
+      }
+    }
+    __typename
+  }
+}

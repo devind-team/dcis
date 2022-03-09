@@ -1,0 +1,38 @@
+query LogGeneralRequests($pageContains: String, $first: Int, $after: String) {
+  logRequests(page_Icontains: $pageContains, first: $first, after: $after) {
+    totalCount
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+      __typename
+    }
+    edges {
+      node {
+        id
+        page
+        time
+        createdAt
+        __typename
+        session {
+          browser
+          device
+          os
+          __typename
+          user {
+            id
+            username
+            lastName
+            firstName
+            sirName
+            email
+            __typename
+          }
+        }
+      }
+      __typename
+    }
+    __typename
+  }
+}

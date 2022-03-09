@@ -1,0 +1,33 @@
+query LogEntry($userId: ID, $first: Int, $after: String){
+  logEntry(userId: $userId, first: $first, after: $after) {
+    totalCount
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+      __typename
+    }
+    edges {
+      node {
+        id
+        action
+        objectId
+        payload
+        createdAt
+        __typename
+        session {
+          os
+          browser
+          __typename
+        }
+        contentType {
+          appLabel
+          model
+          __typename
+        }
+      }
+    }
+    __typename
+  }
+}

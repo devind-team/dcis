@@ -1,0 +1,11 @@
+fragment SegementFields on SegmentType {
+  id
+  name
+  align
+  name
+  view
+  position
+  createdAt
+  updatedAt
+  __typename
+}

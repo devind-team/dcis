@@ -1,0 +1,8 @@
+fragment ProfileFields on ProfileType {
+  id
+  name
+  code
+  kind
+  position
+  __typename
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "text": "Категория №1",
+    "position": 0,
+    "user": 1,
+    "children": [
+      {
+        "id": 2,
+        "text": "Категория №2",
+        "position": 0,
+        "user": 1
+      },
+      {
+        "id": 3,
+        "text": "Категория №3",
+        "position": 0,
+        "user": 1
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "text": "Категория №4",
+    "position": 0,
+    "user": 1,
+    "children": [
+      {
+        "id": 5,
+        "text": "Категория №5",
+        "position": 0,
+        "user": 1
+      }
+    ]
+  }
+]

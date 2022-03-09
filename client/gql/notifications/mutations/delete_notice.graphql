@@ -1,0 +1,6 @@
+mutation DeleteNotice($noticeId: ID!) {
+  deleteNotice(input: { noticeId: $noticeId }) {
+    success
+    __typename
+  }
+}

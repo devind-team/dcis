@@ -1,0 +1,17 @@
+#import "../../fragments/tag_fields.graphql"
+
+mutation AddTag($name: String!) {
+  addTag(input: {
+    name: $name
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    tag {
+      ...TagFields
+    }
+  }
+}

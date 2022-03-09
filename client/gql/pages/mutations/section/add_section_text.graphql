@@ -1,0 +1,16 @@
+#import "../../fragments/section_fields.graphql"
+
+mutation AddSectionText($pageId: ID!, $text: String!) {
+  addSectionText(input: { pageId: $pageId, text: $text }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    section {
+      ...SectionFields
+    }
+    __typename
+  }
+}

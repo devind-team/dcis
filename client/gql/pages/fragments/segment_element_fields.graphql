@@ -1,0 +1,9 @@
+fragment SegmentElementFields on SegmentElementType {
+  id
+  view
+  represent
+  width
+  columns
+  pageSize
+  __typename
+}

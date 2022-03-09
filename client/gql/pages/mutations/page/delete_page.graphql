@@ -1,0 +1,10 @@
+mutation DeletePage($pageId: ID!) {
+  deletePage(input: { pageId: $pageId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+  }
+}

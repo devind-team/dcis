@@ -1,0 +1,21 @@
+overwrite: true
+schema: "http://127.0.0.1:8000/graphql/"
+documents: 'gql/**/*.graphql'
+generates:
+  schema.graphql:
+    plugins:
+      - schema-ast
+    config:
+      includeDirectives: true
+  ./types/graphql.d.ts:
+    hooks:
+      afterOneFileWrite:
+        - eslint --fix
+    plugins:
+      - typescript
+      - typescript-operations
+      # - typescript-vue-apollo
+    config:
+      enumsAsTypes: true
+      # withCompositionFunctions: true
+      # vueCompositionApiImportFrom: vue

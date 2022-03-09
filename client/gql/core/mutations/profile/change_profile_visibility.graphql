@@ -1,0 +1,19 @@
+#import "../../fragments/profile_fields.graphql"
+#import "../../fragments/profile_value_fields.graphql"
+
+mutation ChangeProfileVisibility($profileValueId: ID!, $visibility: Boolean!) {
+  changeProfileVisibility(input: { profileValueId: $profileValueId, visibility: $visibility }) {
+    profileValue {
+      ...ProfileValueFields
+      profile {
+        ...ProfileFields
+      }
+    }
+    errors {
+      field
+      messages
+    }
+    success
+    __typename
+  }
+}

@@ -1,0 +1,11 @@
+mutation ChangeNotifications($notificationsId:[ID]!, $field: String!, $value: Boolean!) {
+  changeNotifications(input: { notificationsId: $notificationsId, field: $field, value: $value }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    __typename
+  }
+}

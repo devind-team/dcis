@@ -1,0 +1,13 @@
+query Groups {
+  groups {
+    id
+    name
+    permissions {
+      id
+      name
+      codename
+      __typename
+    }
+    __typename
+  }
+}

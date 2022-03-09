@@ -1,0 +1,14 @@
+#import "../fragments/notification_fields.graphql"
+#import "../fragments/notice_interface_fields.graphql"
+
+subscription NotificationsSubscription {
+  notifications {
+    action
+    id
+    notification {
+      ...NotificationFields
+      notice { ...NoticeInterfaceFields }
+    }
+    __typename
+  }
+}

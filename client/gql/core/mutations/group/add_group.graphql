@@ -1,0 +1,22 @@
+mutation AddGroup($name: String!, $permissionFrom: Int) {
+  addGroup(input: { name: $name, permissionFrom: $permissionFrom }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    group {
+      id
+      name
+      __typename
+      permissions {
+        id
+        name
+        codename
+        __typename
+      }
+    }
+    __typename
+  }
+}

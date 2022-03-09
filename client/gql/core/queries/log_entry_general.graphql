@@ -1,0 +1,42 @@
+query LogEntryGeneral($first: Int, $modelContains:String, $offset: Int){
+  logEntry(first: $first, offset: $offset, contentType_Model_Icontains:$modelContains) {
+    totalCount
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+      __typename
+    }
+    edges {
+      node {
+        id
+        action
+        objectId
+        payload
+        createdAt
+        __typename
+        session {
+          os
+          browser
+          user {
+            id
+            username
+            lastName
+            firstName
+            sirName
+            email
+          }
+          __typename
+        }
+        contentType {
+          appLabel
+          model
+          __typename
+        }
+      }
+      __typename
+    }
+    __typename
+  }
+}

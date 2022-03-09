@@ -1,0 +1,9 @@
+mutation SupportSubmit($topic: String!, $text: String!, $files: [Upload!]) {
+  supportSubmit(input: { text: $text, topic: $topic, files: $files }) {
+    success
+    errors {
+      field
+      messages
+    }
+  }
+}

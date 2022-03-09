@@ -1,0 +1,16 @@
+mutation ChangeUserGroups($userId: ID!, $groupsId: [Int]!) {
+  changeUserGroups(input: { userId: $userId, groupsId: $groupsId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    groups {
+      id
+      name
+      __typename
+    }
+    __typename
+  }
+}

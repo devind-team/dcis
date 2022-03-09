@@ -1,0 +1,8 @@
+fragment ProfileValueFields on ProfileValueType {
+  id
+  value
+  visibility
+  createdAt
+  updatedAt
+  __typename
+}

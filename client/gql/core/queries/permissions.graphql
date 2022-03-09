@@ -1,0 +1,13 @@
+query Permissions {
+  permissions {
+    id
+    name
+    codename
+    contentType {
+      appLabel
+      model
+      __typename
+    }
+    __typename
+  }
+}

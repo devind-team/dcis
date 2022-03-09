@@ -1,0 +1,16 @@
+mutation ChangeSectionText($sectionId: ID!, $text: String!) {
+  changeSectionText(input: { sectionId: $sectionId, text: $text }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    section {
+      id
+      text
+      __typename
+    }
+    __typename
+  }
+}

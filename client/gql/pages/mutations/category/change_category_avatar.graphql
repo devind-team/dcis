@@ -1,0 +1,11 @@
+mutation ChangeCategoryAvatar($categoryId: ID!, $avatar: Upload) {
+  changeCategoryAvatar(input: { categoryId: $categoryId, avatar: $avatar }) {
+    success
+    category {
+      id
+      avatar
+      __typename
+    }
+    __typename
+  }
+}

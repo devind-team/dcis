@@ -1,0 +1,7 @@
+.nuxt/
+node_modules/
+.editorconfig
+.env
+.env.example
+README.md
+yarn.lock

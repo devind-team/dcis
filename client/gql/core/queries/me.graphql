@@ -1,0 +1,16 @@
+#import "../fragments/session_fields.graphql"
+#import "../fragments/user_fields.graphql"
+
+query Me {
+  me {
+    __typename
+    birthday
+    isActive
+    agreement
+    permissions
+    ...UserFields
+    session {
+      ...SessionFields
+    }
+  }
+}

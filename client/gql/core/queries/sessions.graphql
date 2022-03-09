@@ -1,0 +1,12 @@
+query Sessions($userId: ID) {
+  sessions(userId: $userId) {
+    id
+    ip
+    browser
+    device
+    os
+    date
+    activity
+    history
+  }
+}
