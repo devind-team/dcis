@@ -1,0 +1,27 @@
+#import "../../core/fragments/session_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
+
+mutation AuthCbias($uid: String!, $clientId: String, $clientSecret: String!) {
+  authCbias(payload: {uid: $uid, clientId: $clientId, clientSecret: $clientSecret}) {
+    success
+    token {
+      accessToken
+      expiresIn
+      tokenType
+      scope
+      redirectUris
+    }
+    user {
+      __typename
+      birthday
+      isActive
+      agreement
+      permissions
+      ...UserFields
+      session {
+        ...SessionFields
+      }
+    }
+    __typename
+  }
+}

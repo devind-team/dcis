@@ -1,6 +1,7 @@
 import graphene
 import devind_core.schema
 import devind_notifications.schema
+import apps.core.schema
 import apps.dashboard.schema
 import apps.pages.schema
 import apps.notifications.schema
@@ -14,7 +15,7 @@ class Query(
     apps.pages.schema.Query,
     graphene.ObjectType
 ):
-    """Схема запросов данных"""
+    """Схема запросов данных."""
 
     debug = graphene.Field(DjangoDebug, name='_debug')
 
@@ -22,10 +23,11 @@ class Query(
 class Mutation(
     devind_core.schema.Mutation,
     devind_notifications.schema.Mutation,
+    apps.core.schema.Mutation,
     apps.pages.schema.Mutation,
     graphene.ObjectType
 ):
-    """Мутации на изменение чего-либо"""
+    """Мутации на изменение чего-либо."""
 
     pass
 
@@ -34,7 +36,7 @@ class Subscription(
     devind_notifications.schema.Subscription,
     graphene.ObjectType
 ):
-    """Подписки на сокеты"""
+    """Подписки на сокеты."""
 
     pass
 
