@@ -226,14 +226,10 @@ if not exists(DOCUMENTS_DIR):
 DEFAULT_PAGE_SIZE = 12
 
 
-# Настройки для подключения к боевому серверу
-SSH_CONNECT = {
-    'HOST': os.getenv('SSH_HOST'),
-    'PORT': os.getenv('SSH_PORT'),
-    'USERNAME': os.getenv('SSH_USER'),
-    'PASSWORD': os.getenv('SSH_PASSWORD'),
-    'DB_NAME': os.getenv('SSH_DB_NAME'),
-}
-
 DEVIND_CORE_USER_TYPE = 'apps.core.schema.UserType'
 DEVIND_NOTIFICATION_NOTICE_INTERFACE = 'apps.notifications.schema.NoticeInterface'
+
+
+EXTERNAL_URLS = {
+    'cbias': 'https://cbias.ru/sso_app/remote_auth.spf?uid=%s&ris=36'
+}

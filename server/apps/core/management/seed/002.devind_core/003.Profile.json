@@ -5,87 +5,23 @@
     "position": 0,
     "children": [
       {
-        "name": "Дата рождения",
-        "code": "birthday",
-        "position": 0,
-        "kind": 1
-      },
-      {
-        "name": "Пол",
-        "code": "gender",
-        "position": 1,
-        "kind": 4
-      },
-      {
-        "name": "Уровень образования",
-        "code": "education_level",
-        "position": 2
-      },
-      {
-        "name": "Квалификация",
-        "code": "qualification",
-        "position": 3
-      },
-      {
-        "name": "Ученая степень",
-        "code": "degree",
-        "position": 4
-      },
-      {
-        "name": "Ученое звание",
-        "code": "rank",
-        "position": 5
-      },
-      {
-        "name": "Специальность или направление подготовки",
-        "code": "speciality",
-        "position": 6
-      },
-      {
-        "name": "Стажировка",
-        "code": "internship",
-        "position": 7
-      },
-      {
-        "name": "Дата начала общего стажа работы",
-        "code": "general_experience",
-        "kind": 1,
-        "position": 8
-      },
-      {
-        "name": "Дата начала стажа работы по специальности",
-        "code": "specialty_experience",
-        "kind": 1,
-        "position": 9
-      }
-    ]
-  },
-  {
-    "name": "Дополнительная информация",
-    "code": "additional",
-    "position": 1,
-    "children": [
-      {
-        "name": "Нуждаюсь в общежитии",
-        "code": "hostel",
-        "kind": 2,
+        "name": "Идентификатор uuid4",
+        "code": "uuid",
         "position": 0
       },
       {
-        "name": "Бюджетная форма обучения",
-        "code": "budget",
-        "kind": 2,
+        "name": "Занимаемая должность",
+        "code": "post",
         "position": 1
       },
       {
-        "name": "Целевая форма обучения",
-        "code": "target",
-        "kind": 2,
+        "name": "Внешний телефон",
+        "code": "external_phone",
         "position": 2
       },
       {
-        "name": "Телефон",
-        "code": "phones",
+        "name": "Внутренний телефон",
+        "code": "internal_phone",
         "position": 3
       },
       {
@@ -94,45 +30,8 @@
         "position": 4
       },
       {
-        "name": "Гражданство",
-        "code": "citizenship",
-        "position": 5
-      }
-    ]
-  },
-  {
-    "name": "Социальные сети",
-    "code": "socialNetworks",
-    "position": 2,
-    "children": [
-      {
-        "name": "ВКонтакте",
-        "code": "vk",
-        "position": 0
-      },
-      {
-        "name": "Facebook",
-        "code": "fb",
-        "position": 1
-      },
-      {
-        "name": "Одноклассники",
-        "code": "ok",
-        "position": 2
-      },
-      {
-        "name": "Skype",
-        "code": "skype",
-        "position": 3
-      },
-      {
-        "name": "Instagram",
-        "code": "instagram",
-        "position": 4
-      },
-      {
-        "name": "LinkedIn",
-        "code": "li",
+        "name": "Аудитория",
+        "code": "room",
         "position": 5
       }
     ]
