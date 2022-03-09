@@ -8,6 +8,8 @@
   )
     bread-crumbs(:items="breadCrumbs")
       validation-observer.row(v-slot="{ handleSubmit, invalid }" tag="div")
+        v-col.mx-auto(lg="4" md="6" cols="12" align-self="center" )
+          v-btn(href="https://cbias.ru" color="primary") Авторизоваться через портал
         v-col.mx-auto(lg="4" md="6" cols="12")
           form(@submit.prevent="handleSubmit(mutate)")
             v-card
