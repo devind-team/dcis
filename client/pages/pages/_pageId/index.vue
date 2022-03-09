@@ -16,7 +16,7 @@
 import { ApolloQueryResult } from '@apollo/client'
 import type { ComputedRef } from '#app'
 import { computed, defineComponent, onUnmounted, useRoute } from '#app'
-import {useCommonQuery, useI18n, usePage } from '~/composables'
+import { useCommonQuery, useI18n, usePage } from '~/composables'
 import { useAuthStore, usePageStore } from '~/store'
 import { PageQuery, PageQueryVariables } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'

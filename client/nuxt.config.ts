@@ -6,9 +6,7 @@ export default defineNuxtConfig({
     baseURL: '/'
   },
   bridge: {
-    nitro: process.env.NODE_ENV === 'development',
-    capi: true,
-    scriptSetup: true
+    nitro: process.env.NODE_ENV === 'development'
   },
   alias: {
     tslib: 'tslib/tslib.es6.js'
