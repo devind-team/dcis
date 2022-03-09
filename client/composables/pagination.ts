@@ -1,6 +1,6 @@
 import defu from 'defu'
 import type { Ref, ComputedRef } from '#app'
-import { useState, computed } from '#app'
+import { ref, computed } from '#app'
 import { PageInfo } from '~/types/graphql'
 import { cursor } from '~/services/graphql-relay'
 
@@ -34,10 +34,10 @@ export function useOffsetPagination (paginationOptions: PaginationOptions = {}):
   }
   const options: PaginationOptions = defu(paginationOptions, defaultOptions)
 
-  const page: Ref<number> = useState<number>('page', () => options.page)
-  const pageSize: Ref<number> = useState('pageSize', () => options.pageSize)
-  const count: Ref<number> = useState('count', () => 0)
-  const totalCount: Ref<number> = useState('totalCount', () => 0)
+  const page: Ref<number> = ref<number>(options.page)
+  const pageSize: Ref<number> = ref<number>(options.pageSize)
+  const count: Ref<number> = ref<number>(0)
+  const totalCount: Ref<number> = ref<number>(0)
 
   const extendVariables: ComputedRef<PaginationVariablesType> = computed(() => ({
     first: pageSize.value,
@@ -57,21 +57,24 @@ export function useOffsetPagination (paginationOptions: PaginationOptions = {}):
   const fetchMore: ComputedRef<boolean> = computed<boolean>(() => {
     return page.value * pageSize.value < totalCount.value
   })
+
   /**
    * Пересчитываем значение позиции страницы
    */
   const recountPage = (): void => {
     page.value = Math.ceil(count.value / pageSize.value)
   }
+
   /**
    * Устанавливаем новую страницу
-    * @param p
+   * @param p
    */
   const setPage = (p: number = 1): void => {
     page.value = p
   }
+
   /**
-   * Устанаваливаем количество записей
+   * Устанавливаем количество записей
    * @param tc - totalCount
    * @param c - count
    */
@@ -110,10 +113,10 @@ export function useCursorPagination (paginationOptions: PaginationOptions = {}):
     setQueryInfo: setQueryInfoParent
   } = useOffsetPagination(paginationOptions)
 
-  const pageInfo: Ref<PageInfo> = useState('pageInfo', () => ({
+  const pageInfo: Ref<PageInfo> = ref<PageInfo>({
     hasPreviousPage: true,
     hasNextPage: true
-  }))
+  })
 
   const variables: ComputedRef<PaginationVariablesType> = computed<PaginationVariablesType>(() => ({
     first: pageSize.value
@@ -129,7 +132,7 @@ export function useCursorPagination (paginationOptions: PaginationOptions = {}):
   })
 
   /**
-   * Устанаваливаем количество записей
+   * Устанавливаем количество записей
    * @param tc - totalCount
    * @param c - количество записей
    * @param pi - pageInfo

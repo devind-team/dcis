@@ -15,8 +15,8 @@
             disable-pagination
             hide-default-footer
           )
-            template(v-slot:item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
-            template(v-slot:item.time="{ item }") {{ item.time.toFixed(3) }} с.
+            template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+            template(#item.time="{ item }") {{ item.time.toFixed(3) }} с.
 </template>
 
 <script lang="ts">

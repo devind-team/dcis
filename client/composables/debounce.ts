@@ -1,5 +1,5 @@
 import defu from 'defu'
-import { useState, watch } from '#app'
+import { ref, watch } from '#app'
 import type { Ref } from '#app'
 import { debouncedWatch } from '@vueuse/core'
 
@@ -17,8 +17,8 @@ export function useDebounceSearch (debounceOptions: DebounceOptions = {}): Debou
   }
   const { debounce, callback }: DebounceOptions = defu(debounceOptions, defaultOptions)
 
-  const search: Ref<string | null> = useState<string | null>('search', () => null)
-  const debounceSearch: Ref<string | null> = useState<string | null>('debounceSearch', () => null)
+  const search: Ref<string | null> = ref<string | null>(null)
+  const debounceSearch: Ref<string | null> = ref<string | null>(null)
 
   // Если у нас значение пустое, то устанавливаем сразу
   watch(search, () => {
