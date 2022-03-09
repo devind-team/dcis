@@ -16,6 +16,7 @@ import user from '~/lang/ru/user'
 import support from '~/lang/ru/support'
 import error from '~/lang/ru/error'
 import notifications from '~/lang/ru/notifications'
+import grid from '~/lang/ru/grid'
 
 export default {
   ...main,
@@ -35,5 +36,6 @@ export default {
   user,
   support,
   error,
-  notifications
+  notifications,
+  grid
 }
