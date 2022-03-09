@@ -30,7 +30,7 @@
     "nuxt-edge": "latest",
     "pinia": "^2.0.11",
     "v-viewer": "^1.6.4",
-    "vee-validate": "^3.4.14",
+    "vee-validate": "^4.5.10",
     "vue-apexcharts": "^1.6.2",
     "vue-rx": "^6.2.0",
     "vue-server-renderer": "^2.6.14",
