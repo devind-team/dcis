@@ -1,2 +1,2 @@
 #!/bin/bash
-ln -s ~/PycharmProjects/devind-template/server/storage  ~/PycharmProjects/devind-template/client/static/storage
+ln -s ~/PycharmProjects/dcis/server/storage  ~/PycharmProjects/dcis/client/static/storage
