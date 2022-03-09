@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'devind_core',
     'devind_notifications',
+    'devind_dictionaries',
     'apps.core',
     'apps.pages',
     'apps.dashboard',
