@@ -175,7 +175,7 @@ class DocumentType(DjangoObjectType):
             'version',
             'created_at',
             'updated_at',
-            'sheet',
+            'sheets',
             'content_type',
             'object_id',
         )
@@ -333,7 +333,7 @@ class LimitationType(DjangoObjectType):
     class Meta:
         model = Limitation
         fields = (
-            'id'
+            'id',
             'operator',
             'condition',
             'value',
