@@ -1,3 +1,4 @@
+from typing import List
 from openpyexcel.utils.cell import get_column_letter
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -219,12 +220,34 @@ class MergedCell(models.Model):
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 
+    class Meta:
+        unique_together = [['min_col', 'min_row', 'sheet']]
+
     def __str__(self) -> str:
         return f'{get_column_letter(self.min_col)}{self.min_row}:' \
                f'{get_column_letter(self.max_col)}{self.max_row}'
 
-    class Meta:
-        unique_together = [['min_col', 'min_row', 'sheet']]
+    @property
+    def colspan(self) -> int:
+        return self.max_col - self.min_col + 1
+
+    @property
+    def rowspan(self) -> int:
+        return self.max_row - self.min_row + 1
+
+    @property
+    def target(self) -> str:
+        return f'{get_column_letter(self.min_col)}{self.min_row}'
+
+    @property
+    def cells(self) -> List[str]:
+        not_cell: List[str] = []
+        for col in range(self.min_col, self.max_col + 1):
+            for row in range(self.min_row, self.max_row + 1):
+                if col == 1 and row == 1:
+                    continue
+                not_cell.append(f'{get_column_letter(col)}{row}')
+        return not_cell
 
 
 class Value(models.Model):

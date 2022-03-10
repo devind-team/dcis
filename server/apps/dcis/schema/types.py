@@ -355,6 +355,10 @@ class MergedCellType(DjangoObjectType):
             'max_col',
             'max_row',
             'range',
+            'colspan',
+            'rowspan',
+            'target',
+            'cells'
         )
 
     @staticmethod
