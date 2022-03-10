@@ -55,7 +55,7 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
 
-    sheet = models.ManyToManyField(Sheet)
+    sheets = models.ManyToManyField(Sheet)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
