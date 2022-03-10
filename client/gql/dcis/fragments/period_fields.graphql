@@ -1,0 +1,8 @@
+fragment PeriodFields on PeriodType {
+  id
+  name
+  multiple
+  status
+  start
+  expiration
+}

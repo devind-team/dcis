@@ -1,6 +1,6 @@
 import graphene
 
-from apps.dcis.schema.types import ProjectType
+from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.schema.mutations import ProjectMutations
 
 

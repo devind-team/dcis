@@ -14,6 +14,7 @@ mutation CreateProject(
   }) {
     project {
       ...ProjectFields
+      __typename
     }
     __typename
   }

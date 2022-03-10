@@ -1,0 +1,27 @@
+#import "../../fragments/period_fields.graphql"
+
+mutation CreatePeriod(
+  $name: String!,
+  $multiple: Boolean!,
+  $start: DateTime!,
+  $expiration: DateTime!,
+  $userId: ID!,
+  $projectId: ID!,
+  $methodicalSupportIds: [ID!]!
+) {
+  createPeriod(input: {
+    name: $name,
+    multiple: $multiple,
+    start: $start,
+    expiration: $expiration,
+    user: $userId,
+    project: $projectId,
+    methodicalSupport: $methodicalSupportIds
+  }) {
+    period {
+      ...PeriodFields
+      __typename
+    }
+    __typename
+  }
+}

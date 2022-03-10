@@ -1010,6 +1010,36 @@ type ContentTypeType {
   rowdimensionSet: [RowDimensionType!]!
 }
 
+input CreatePeriodInput {
+  attributeSet: [ID]
+  divisionSet: [ID]
+  """Дата окончания"""
+  expiration: DateTime
+  """Методическая поддержка"""
+  methodicalSupport: [ID]!
+  """Множественное заполнение"""
+  multiple: Boolean
+  """Наименование периода"""
+  name: String!
+  periodgroupSet: [ID]
+  periodprivilegeSet: [ID]
+  """Проект сборов"""
+  project: ID!
+  sheetSet: [ID]
+  """Дата начала"""
+  start: DateTime
+  """Статус проекта"""
+  status: PeriodStatus
+  """Организатор сборов"""
+  user: ID
+}
+
+"""Мутация для создания периода."""
+type CreatePeriodMutation {
+  """Добавленный период"""
+  period: PeriodType
+}
+
 input CreateProjectInput {
   """Описание проекта"""
   description: String!
@@ -1562,6 +1592,8 @@ type Mutation {
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
+  """Мутация для создания периода."""
+  createPeriod(input: CreatePeriodInput!): CreatePeriodMutation!
   """Мутация для создания проекта."""
   createProject(input: CreateProjectInput!): CreateProjectMutation!
   """Мутация для удаления категории"""

@@ -1113,6 +1113,37 @@ export type ContentTypeTypeLogentrySetArgs = {
   offset?: InputMaybe<Scalars['Int']>;
 };
 
+export type CreatePeriodInput = {
+  attributeSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  divisionSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  /** Дата окончания */
+  expiration?: InputMaybe<Scalars['DateTime']>;
+  /** Методическая поддержка */
+  methodicalSupport: Array<InputMaybe<Scalars['ID']>>;
+  /** Множественное заполнение */
+  multiple?: InputMaybe<Scalars['Boolean']>;
+  /** Наименование периода */
+  name: Scalars['String'];
+  periodgroupSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  periodprivilegeSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  /** Проект сборов */
+  project: Scalars['ID'];
+  sheetSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  /** Дата начала */
+  start?: InputMaybe<Scalars['DateTime']>;
+  /** Статус проекта */
+  status?: InputMaybe<PeriodStatus>;
+  /** Организатор сборов */
+  user?: InputMaybe<Scalars['ID']>;
+};
+
+/** Мутация для создания периода. */
+export type CreatePeriodMutation = {
+  __typename?: 'CreatePeriodMutation';
+  /** Добавленный период */
+  period?: Maybe<PeriodType>;
+};
+
 export type CreateProjectInput = {
   /** Описание проекта */
   description: Scalars['String'];
@@ -1687,6 +1718,8 @@ export type Mutation = {
   changeUserProps: ChangeUserPropsMutationPayload;
   /** Подтверждение кода. */
   confirmEmail: ConfirmEmailMutationPayload;
+  /** Мутация для создания периода. */
+  createPeriod: CreatePeriodMutation;
   /** Мутация для создания проекта. */
   createProject: CreateProjectMutation;
   /** Мутация для удаления категории */
@@ -1905,6 +1938,11 @@ export type MutationChangeUserPropsArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationConfirmEmailArgs = {
   input: ConfirmEmailMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationCreatePeriodArgs = {
+  input: CreatePeriodInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3533,6 +3571,8 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
+export type PeriodFieldsFragment = { __typename?: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null };
+
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean };
 
 export type AuthCbiasMutationVariables = Exact<{
@@ -3542,6 +3582,18 @@ export type AuthCbiasMutationVariables = Exact<{
 }>;
 
 export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
+
+export type CreatePeriodMutationVariables = Exact<{
+  name: Scalars['String'];
+  multiple: Scalars['Boolean'];
+  start: Scalars['DateTime'];
+  expiration: Scalars['DateTime'];
+  userId: Scalars['ID'];
+  projectId: Scalars['ID'];
+  methodicalSupportId: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+export type CreatePeriodMutation = { __typename?: 'Mutation', createPeriod: { __typename: 'CreatePeriodMutation', period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null } | null } };
 
 export type CreateProjectMutationVariables = Exact<{
   name: Scalars['String'];
