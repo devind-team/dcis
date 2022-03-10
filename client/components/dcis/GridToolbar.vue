@@ -18,8 +18,8 @@
 <script lang="ts">
 import { defineComponent, computed } from '#app'
 import type { PropType } from '#app'
-import type { DocumentType, SheetType } from '~/types/grid'
-import GridToolbarAvatar from '~/components/grid/GridToolbarAvatar.vue'
+import type { DocumentType, SheetType } from '~/types/dcis'
+import GridToolbarAvatar from '~/components/dcis/GridToolbarAvatar.vue'
 
 export default defineComponent({
   components: {

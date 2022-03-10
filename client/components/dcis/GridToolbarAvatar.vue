@@ -18,7 +18,7 @@
 import { defineComponent } from '#app'
 import type { PropType } from '#app'
 import { useI18n } from '~/composables'
-import type { DocumentUserType } from '~/types/grid'
+import type { DocumentUserType } from '~/types/dcis'
 
 export default defineComponent({
   props: {
