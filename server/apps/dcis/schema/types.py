@@ -375,13 +375,3 @@ class ValueType(DjangoObjectType):
             'column',
             'row',
         )
-
-
-
-
-
-
-
-
-
-

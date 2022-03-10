@@ -59,8 +59,8 @@ class Style(models.Model):
     italic = models.BooleanField(default=False, help_text='Курсив')
     strike = models.BooleanField(default=False, help_text='Зачеркнутый')
     underline = models.PositiveIntegerField(default=NONE, choices=KIND_UNDERLINE, help_text='Тип подчеркивания')
-    color = models.PositiveIntegerField(default=65, help_text='Цвет индекса')
-    background = models.PositiveIntegerField(default=65, help_text='Цвет фона')
+    color = models.CharField(max_length=7, default='#000000', help_text='Цвет индекса')
+    background = models.CharField(max_length=7, default='#FFFFFF', help_text='Цвет фона')
 
     class Meta:
         abstract = True
@@ -74,6 +74,7 @@ class SheetDivision(models.Model):
     - object_id - идентификатор дивизиона Department, Organization.
     - content_object - генерация связи к дивизиону.
     """
+
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.SET_NULL)
     object_id = models.PositiveIntegerField(null=True)
