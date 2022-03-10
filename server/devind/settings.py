@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.pages',
     'apps.dashboard',
+    'apps.dcis',
     'push_notifications'
 ]
 
