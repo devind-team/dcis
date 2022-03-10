@@ -5,6 +5,7 @@ from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
 from ..models import (
@@ -158,9 +159,9 @@ class SheetType(DjangoObjectType):
         return MergedCell.objects.filter(sheet=sheet).all()
 
     @staticmethod
-    def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: int, *args, **kwargs):
+    def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: str, *args, **kwargs):
         """Получение значений, связанных с листом."""
-        return Value.objects.filter(sheet=sheet, document_id=document_id).all()
+        return Value.objects.filter(sheet=sheet, document_id=from_global_id(document_id)[1]).all()
 
 
 class DocumentType(DjangoObjectType):
