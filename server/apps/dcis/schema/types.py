@@ -43,6 +43,7 @@ class PeriodType(DjangoObjectType):
             'name',
             'status',
             'multiple',
+            'privately',
             'start',
             'expiration',
             'created_at',
