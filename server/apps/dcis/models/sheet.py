@@ -130,7 +130,7 @@ class RowDimension(Style, SheetDivision, models.Model):
         choices=KIND_AGGREGATION,
         help_text='Агрегирование перечисление (мин, макс) для динамических строк'
     )
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, help_text='Родительское правило')
+    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
     document = models.ForeignKey(
         Document,
         null=True,
@@ -205,7 +205,7 @@ class Limitation(models.Model):
     value = models.TextField(help_text='Значение')
 
     parent = models.ForeignKey('self', on_delete=models.CASCADE, help_text='Родительское правило')
-    meta = models.ForeignKey(Cell, on_delete=models.CASCADE, help_text='Ячейка')
+    cell = models.ForeignKey(Cell, on_delete=models.CASCADE, help_text='Ячейка')
 
 
 class MergedCell(models.Model):
@@ -221,6 +221,9 @@ class MergedCell(models.Model):
     def __str__(self) -> str:
         return f'{get_column_letter(self.min_col)}{self.min_row}:' \
                f'{get_column_letter(self.max_col)}{self.max_row}'
+
+    class Meta:
+        unique_together = [['min_col', 'min_row', 'sheet']]
 
 
 class Value(models.Model):
