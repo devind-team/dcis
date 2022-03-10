@@ -283,7 +283,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='document',
-            name='sheet',
+            name='sheets',
             field=models.ManyToManyField(to='dcis.Sheet'),
         ),
         migrations.CreateModel(
