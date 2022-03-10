@@ -1,9 +1,8 @@
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from apps.core.models import User
 
-from devind_dictionaries.models import Department, Organization
 from devind_core.models import File
 
 
@@ -71,3 +70,8 @@ class Division(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['content_type', 'object_id'])
+        ]
