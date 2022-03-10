@@ -1,7 +1,10 @@
+from itertools import count
+
 from devind_core.models import File
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
+from django.db import connection
 from django_seed import Seed
 
 from apps.core.models import User
@@ -25,15 +28,10 @@ class Command(BaseCommand):
     def clear() -> None:
         """Очистка моделей."""
 
-        Project.objects.all().delete()
-        Period.objects.all().delete()
-        Sheet.objects.all().delete()
-        ColumnDimension.objects.all().delete()
-        RowDimension.objects.all().delete()
-        Document.objects.all().delete()
-        Cell.objects.all().delete()
-        MergedCell.objects.all().delete()
-        Value.objects.all().delete()
+        with connection.cursor() as cursor:
+            for model in (Project, Period, Sheet, ColumnDimension, RowDimension, Document, Cell, MergedCell, Value):
+                model.objects.all().delete()
+                cursor.execute(f'ALTER SEQUENCE {model._meta.db_table}_id_seq RESTART WITH 1;')
 
     def handle(self, *args, **options) -> None:
         self.clear()
@@ -43,7 +41,10 @@ class Command(BaseCommand):
         seeder.add_entity(File, 5)
         seeder.add_entity(Project, 5)
         seeder.add_entity(Period, 5)
-        seeder.add_entity(Sheet, 60)
+        number_generator = iter(count(1))
+        seeder.add_entity(Sheet, 60, {
+            'name': lambda ie: f'Sheet {next(number_generator)}'
+        })
         seeder.add_entity(Document, 15, {
             'content_type': ContentType.objects.get_for_model(Department),
             'object_id': department.id
