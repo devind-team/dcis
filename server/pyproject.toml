@@ -46,7 +46,8 @@ devind-helpers = "^0.3.0"
 devind-core = "^0.2.1"
 devind-notifications = "^0.1.2"
 django-cbias-auth = "^0.1.2"
-devind-dictionaries = "^0.2.0"
+devind-dictionaries = "^0.2.1"
+openpyexcel = "^2.5.14"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
