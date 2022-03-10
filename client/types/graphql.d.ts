@@ -419,6 +419,45 @@ export type CategoryTypeEdge = {
   node?: Maybe<CategoryType>;
 };
 
+/** An enumeration. */
+export type CellKind =
+  /** text */
+  | 'A_0'
+  /** computing */
+  | 'A_1'
+  /** money */
+  | 'A_2'
+  /** date */
+  | 'A_3'
+  /** datetime */
+  | 'A_4'
+  /** file */
+  | 'A_5';
+
+/** Тип ячейки. */
+export type CellType = {
+  __typename?: 'CellType';
+  /** Колонка */
+  column?: Maybe<ColumnDimensionType>;
+  /** Комментарий */
+  comment?: Maybe<Scalars['String']>;
+  /** Значение по умолчанию */
+  default?: Maybe<Scalars['String']>;
+  /** Формула */
+  formula?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  /** Тип значения */
+  kind: CellKind;
+  /** Ограничения на ячейку */
+  limitations?: Maybe<Array<Maybe<LimitationType>>>;
+  /** Маска для ввода значений */
+  mask?: Maybe<Scalars['String']>;
+  /** Строка */
+  row?: Maybe<RowDimensionType>;
+  /** Подсказка */
+  tooltip?: Maybe<Scalars['String']>;
+};
+
 export type ChangeAvatarMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Загружаемый файл аватара */
@@ -938,6 +977,25 @@ export type ChangeUserPropsMutationPayload = {
   user: UserType;
 };
 
+/** Тип колонок. */
+export type ColumnDimensionType = {
+  __typename?: 'ColumnDimensionType';
+  /** Дивизион */
+  contentType?: Maybe<ContentTypeType>;
+  /** Фиксация колонки */
+  fixed: Scalars['Boolean'];
+  id: Scalars['ID'];
+  /** Индекс колонки */
+  index: Scalars['Int'];
+  objectId?: Maybe<Scalars['Int']>;
+  /** Листы */
+  sheet?: Maybe<SheetType>;
+  /** Пользователь */
+  user?: Maybe<Array<Maybe<UserType>>>;
+  /** Ширина колонки */
+  width?: Maybe<Scalars['Int']>;
+};
+
 /** Комментарии */
 export type CommentType = Node & {
   __typename?: 'CommentType';
@@ -1027,11 +1085,15 @@ export type ConsumerActionType =
 export type ContentTypeType = {
   __typename?: 'ContentTypeType';
   appLabel: Scalars['String'];
+  columndimensionSet: Array<ColumnDimensionType>;
+  divisionSet: Array<DivisionType>;
+  documentSet: Array<DocumentType>;
   id: Scalars['ID'];
   /** Модель, связанная с действием */
   logentrySet: LogEntryTypeConnection;
   model: Scalars['String'];
   permissionSet: Array<PermissionType>;
+  rowdimensionSet: Array<RowDimensionType>;
 };
 
 /** Тип модели Django. */
@@ -1186,6 +1248,17 @@ export type DeleteSessionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Список участвующих дивизионов в сборе. */
+export type DivisionType = {
+  __typename?: 'DivisionType';
+  /** Дивизион: Department, Organizations */
+  contentType: ContentTypeType;
+  id: Scalars['ID'];
+  objectId: Scalars['Int'];
+  /** Период */
+  period: PeriodType;
+};
+
 /** Debugging information for the current query. */
 export type DjangoDebug = {
   __typename?: 'DjangoDebug';
@@ -1224,6 +1297,24 @@ export type DjangoDebugSql = {
   transStatus?: Maybe<Scalars['String']>;
   /** The type of database being used (e.g. postrgesql, mysql, sqlite). */
   vendor: Scalars['String'];
+};
+
+/** Тип моделей документа. */
+export type DocumentType = {
+  __typename?: 'DocumentType';
+  /** Комментарий */
+  comment: Scalars['String'];
+  contentType: ContentTypeType;
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  id: Scalars['ID'];
+  objectId: Scalars['Int'];
+  /** Листы */
+  sheets?: Maybe<Array<SheetType>>;
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
+  /** Версия документа */
+  version: Scalars['Int'];
 };
 
 /** Ошибка в поле формы */
@@ -1346,6 +1437,40 @@ export type GroupTypeUserSetArgs = {
 };
 
 /** An enumeration. */
+export type LimitationCondition =
+  /** < */
+  | 'A_0'
+  /** > */
+  | 'A_1'
+  /** = */
+  | 'A_2'
+  /** <= */
+  | 'A_3'
+  /** >= */
+  | 'A_4';
+
+/** An enumeration. */
+export type LimitationOperator =
+  /** and */
+  | 'AND'
+  /** or */
+  | 'OR';
+
+/** Ограничения на ячейку. */
+export type LimitationType = {
+  __typename?: 'LimitationType';
+  /** Ячейка */
+  cell?: Maybe<CellType>;
+  /** Состояние */
+  condition: LimitationCondition;
+  id: Scalars['ID'];
+  /** Оператор */
+  operator: LimitationOperator;
+  /** Значение */
+  value: Scalars['String'];
+};
+
+/** An enumeration. */
 export type LogEntryAction =
   /** addition */
   | 'A_1'
@@ -1464,6 +1589,22 @@ export type MailingType = {
   text: Scalars['String'];
   /** Пользователь */
   user: UserType;
+};
+
+/** Тип для объединенных ячеек. */
+export type MergedCellType = {
+  __typename?: 'MergedCellType';
+  id: Scalars['ID'];
+  /** Конечная позиция в колонке */
+  maxCol: Scalars['Int'];
+  /** Конечная позиция в строке */
+  maxRow: Scalars['Int'];
+  /** Начальная позиция в колонке */
+  minCol: Scalars['Int'];
+  /** Начальная позиция в строке */
+  minRow: Scalars['Int'];
+  /** Объединенный диапазон */
+  range: Scalars['String'];
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2121,6 +2262,40 @@ export type PageTypeEdge = {
   node?: Maybe<PageType>;
 };
 
+/** An enumeration. */
+export type PeriodStatus =
+  /** preparation */
+  | 'A_0'
+  /** open */
+  | 'A_1'
+  /** close */
+  | 'A_2';
+
+/** Тип периода. */
+export type PeriodType = {
+  __typename?: 'PeriodType';
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  /** Дата окончания */
+  expiration?: Maybe<Scalars['DateTime']>;
+  id: Scalars['ID'];
+  methodicalSupport?: Maybe<Array<FileType>>;
+  /** Множественное заполнение */
+  multiple: Scalars['Boolean'];
+  /** Наименование периода */
+  name: Scalars['String'];
+  /** Проект */
+  project?: Maybe<ProjectType>;
+  /** Дата начала */
+  start?: Maybe<Scalars['DateTime']>;
+  /** Статус проекта */
+  status: PeriodStatus;
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
+  /** Пользователь */
+  user: UserType;
+};
+
 /** Привилегия пользователя или группы пользователей. */
 export type PermissionType = {
   __typename?: 'PermissionType';
@@ -2193,6 +2368,26 @@ export type ProfileValueType = {
   visibility: Scalars['Boolean'];
 };
 
+/** Тип модели проектов. */
+export type ProjectType = {
+  __typename?: 'ProjectType';
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  /** Описание проекта */
+  description: Scalars['String'];
+  id: Scalars['ID'];
+  /** Наименование проекта */
+  name: Scalars['String'];
+  /** Сокращенное наименование проекта */
+  short: Scalars['String'];
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
+  /** Пользователь */
+  user: UserType;
+  /** Видимость проекта */
+  visibility: Scalars['Boolean'];
+};
+
 /** Схема запросов данных. */
 export type Query = {
   __typename?: 'Query';
@@ -2205,6 +2400,8 @@ export type Query = {
   categories: CategoryTypeConnection;
   /** Категория */
   category: CategoryType;
+  /** Документ */
+  document?: Maybe<DocumentType>;
   files: FileTypeConnection;
   groups: Array<GroupType>;
   /** Установлены ли настройки приложения */
@@ -2267,6 +2464,11 @@ export type QueryCategoriesArgs = {
 /** Схема запросов данных. */
 export type QueryCategoryArgs = {
   categoryId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryDocumentArgs = {
+  documentId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Схема запросов данных. */
@@ -2519,6 +2721,40 @@ export type RestorePasswordMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** An enumeration. */
+export type RowDimensionAggregation =
+  /** max */
+  | 'MAX'
+  /** min */
+  | 'MIN';
+
+/** Тип строк. */
+export type RowDimensionType = {
+  __typename?: 'RowDimensionType';
+  /** Агрегирование перечисление (мин, макс) для динамических строк */
+  aggregation?: Maybe<RowDimensionAggregation>;
+  /** Дочерние строки */
+  children?: Maybe<Array<Maybe<RowDimensionType>>>;
+  /** Дивизион */
+  contentType?: Maybe<ContentTypeType>;
+  /** Документ, для динамических строк */
+  document?: Maybe<DocumentType>;
+  /** Динамическая ли строка */
+  dynamic: Scalars['Boolean'];
+  /** Высота колонки */
+  height?: Maybe<Scalars['Int']>;
+  id: Scalars['ID'];
+  /** Индекс строки */
+  index: Scalars['Int'];
+  objectId?: Maybe<Scalars['Int']>;
+  /** Родительские строки */
+  parent?: Maybe<RowDimensionType>;
+  /** Лист */
+  sheet: SheetType;
+  /** Пользователь */
+  user?: Maybe<Array<Maybe<UserType>>>;
+};
+
 /** Ошибка в строке. */
 export type RowFieldErrorType = {
   __typename?: 'RowFieldErrorType';
@@ -2748,6 +2984,39 @@ export type SettingType = {
   value: Scalars['String'];
 };
 
+/** Тип моделей листов. */
+export type SheetType = {
+  __typename?: 'SheetType';
+  /** Мета информация о ячейках */
+  cells?: Maybe<Array<Maybe<CellType>>>;
+  /** Колонки */
+  columns?: Maybe<Array<Maybe<ColumnDimensionType>>>;
+  /** Комментарий */
+  comment: Scalars['String'];
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  id: Scalars['ID'];
+  /** Объединенные ячейки */
+  mergedCells?: Maybe<Array<Maybe<MergedCellType>>>;
+  /** Наименование */
+  name: Scalars['String'];
+  /** Период */
+  period?: Maybe<PeriodType>;
+  /** Позиция */
+  position: Scalars['Int'];
+  /** Строки */
+  rows?: Maybe<Array<Maybe<RowDimensionType>>>;
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
+  /** Значения документа */
+  values?: Maybe<Array<Maybe<ValueType>>>;
+};
+
+/** Тип моделей листов. */
+export type SheetTypeValuesArgs = {
+  documentId: Scalars['ID'];
+};
+
 /** Подписки на сокеты. */
 export type Subscription = {
   __typename?: 'Subscription';
@@ -2939,6 +3208,26 @@ export type UserTypeEdge = {
   cursor: Scalars['String'];
   /** The item at the end of the edge */
   node?: Maybe<UserType>;
+};
+
+/** Тип для значений. */
+export type ValueType = {
+  __typename?: 'ValueType';
+  /** Колонка */
+  column: ColumnDimensionType;
+  /** Документ */
+  document: DocumentType;
+  /** Текст ошибки */
+  error?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  /** Строка */
+  row: RowDimensionType;
+  /** Лист */
+  sheet: SheetType;
+  /** Значение */
+  value: Scalars['String'];
+  /** Валидно ли поле */
+  verified: Scalars['Boolean'];
 };
 
 export type FileFieldsFragment = { __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any };
@@ -3241,6 +3530,12 @@ export type AuthCbiasMutationVariables = Exact<{
 }>;
 
 export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
+
+export type DocumentQueryVariables = Exact<{
+  documentId: Scalars['ID'];
+}>;
+
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, width?: number | null } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string } | null> | null }> | null } | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 

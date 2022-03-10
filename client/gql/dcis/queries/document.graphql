@@ -1,0 +1,42 @@
+query Document($documentId: ID!) {
+  document(documentId: $documentId) {
+    id
+    comment
+    version
+    createdAt
+    updatedAt
+    sheets {
+      id
+      columns {
+        id
+        width
+        __typename
+      }
+      rows {
+        id
+        height
+        __typename
+      }
+      cells {
+        id
+        __typename
+      }
+      mergedCells {
+        id
+        minCol
+        maxCol
+        minRow
+        maxRow
+        range
+        __typename
+      }
+      values(documentId: $documentId) {
+        id
+        value
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

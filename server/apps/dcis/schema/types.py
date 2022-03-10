@@ -116,7 +116,7 @@ class SheetType(DjangoObjectType):
     merged_cells = graphene.List(lambda: MergedCellType, description='Объединенные ячейки')
     values = graphene.List(
         lambda: ValueType,
-        document_id=graphene.Int(required=True, description='Идентификатор документа'),
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
         description='Значения документа'
     )
 
@@ -251,7 +251,7 @@ class AttributeValueType(DjangoObjectType):
 class ColumnDimensionType(DjangoObjectType):
     """Тип колонок."""
 
-    sheets = DjangoListField(SheetType, description='Листы')
+    sheet = graphene.Field(SheetType, description='Листы')
     user = graphene.List(UserType, description='Пользователь')
     content_type = graphene.Field(ContentTypeType, description='Дивизион')
 
@@ -310,6 +310,7 @@ class CellType(DjangoObjectType):
     class Meta:
         model = Cell
         fields = (
+            'id',
             'kind',
             'formula',
             'comment',
