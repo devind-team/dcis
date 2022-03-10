@@ -1,18 +1,20 @@
 import graphene
-
-from graphql import ResolveInfo
+from devind_core.schema.types import FileType, ContentTypeType
+from devind_helpers.optimized import OptimizedDjangoObjectType
+from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
-from devind_helpers.schema.connections import CountableConnection
-from devind_helpers.optimized import OptimizedDjangoObjectType
-from devind_core.schema.types import FileType, ContentTypeType
+from graphql import ResolveInfo
 
 from apps.core.schema import UserType
-from ..models import Project, Period, Division, \
-    Privilege, PeriodGroup, PeriodPrivilege, \
-    Status, Sheet, Document, DocumentStatus, \
-    Attribute, AttributeValue, \
-    ColumnDimension, RowDimension, Cell, Limitation, MergedCell, Value
+from ..models import (
+    Project, Period, Division,
+    Privilege, PeriodGroup, PeriodPrivilege,
+    Status, Sheet, Document, DocumentStatus,
+    Attribute, AttributeValue, ColumnDimension,
+    RowDimension, Cell, Limitation, MergedCell,
+    Value
+)
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -142,7 +144,7 @@ class SheetType(DjangoObjectType):
     @staticmethod
     @resolver_hints(model_field='rowdimension_set')
     def resolve_rows(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
-        """Получения всех строк"""
+        """Получения всех строк."""
         return sheet.rowdimension_set.all()
 
     @staticmethod
@@ -155,7 +157,7 @@ class SheetType(DjangoObjectType):
 
     @staticmethod
     def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: int, *args, **kwargs):
-        """Получение значений, связанных с документом"""
+        """Получение значений, связанных с документом."""
         return Value.objects.filter(sheet=sheet, document_id=document_id).all()
 
 

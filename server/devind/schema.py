@@ -3,6 +3,7 @@ import devind_core.schema
 import devind_notifications.schema
 import apps.core.schema
 import apps.dashboard.schema
+import apps.dcis.schema
 import apps.pages.schema
 import apps.notifications.schema
 from graphene_django.debug import DjangoDebug
@@ -12,6 +13,7 @@ class Query(
     devind_core.schema.Query,
     devind_notifications.schema.Query,
     apps.dashboard.schema.Query,
+    apps.dcis.schema.Query,
     apps.pages.schema.Query,
     graphene.ObjectType
 ):
@@ -24,6 +26,7 @@ class Mutation(
     devind_core.schema.Mutation,
     devind_notifications.schema.Mutation,
     apps.core.schema.Mutation,
+    apps.dcis.schema.Mutation,
     apps.pages.schema.Mutation,
     graphene.ObjectType
 ):
