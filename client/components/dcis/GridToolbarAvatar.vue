@@ -11,7 +11,7 @@
         .headline(v-else) {{ documentUser.user.lastName[0] }}{{ documentUser.user.firstName[0] }}
     .d-flex.flex-column.align-center
       span {{ $getUserFullName(documentUser.user) }}
-      span {{ documentUser.active ? t('grid.toolbarAvatar.active') : t('grid.toolbarAvatar.notActive') }}
+      span {{ documentUser.active ? t('dcis.grid.toolbarAvatar.active') : t('dcis.grid.toolbarAvatar.notActive') }}
 </template>
 
 <script lang="ts">

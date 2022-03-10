@@ -16,7 +16,7 @@ import user from '~/lang/en/user'
 import error from '~/lang/en/error'
 import support from '~/lang/en/support'
 import notifications from '~/lang/en/notifications'
-import grid from '~/lang/en/grid'
+import dcis from '~/lang/en/dcis'
 
 export default {
   ...main,
@@ -37,5 +37,5 @@ export default {
   error,
   support,
   notifications,
-  grid
+  dcis
 }

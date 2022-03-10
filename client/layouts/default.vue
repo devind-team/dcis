@@ -21,8 +21,11 @@ import { updateQueryNotifications } from '~/components/global/Notification.vue'
   components: { AppBar, Navigation, FooterComponent },
   computed: mapGetters({ user: 'auth/user', loginIn: 'auth/loginIn' }),
   watch: {
-    '$colorMode.value' () {
-      this.$vuetify.theme.dark = this.$colorMode.value === 'dark'
+    '$colorMode.value': {
+      handler () {
+        this.$vuetify.theme.dark = this.$colorMode.value === 'dark'
+      },
+      immediate: true
     }
   },
   apollo: {
