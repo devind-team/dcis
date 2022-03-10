@@ -1,7 +1,7 @@
-from openpyexcel.utils.cell import get_column_letter
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from openpyexcel.utils.cell import get_column_letter
 
 from apps.core.models import User
 from .document import Document, Sheet
@@ -205,7 +205,7 @@ class Limitation(models.Model):
     condition = models.PositiveIntegerField(default=EQUAL, choices=KIND_CONDITION, help_text='Состояние')
     value = models.TextField(help_text='Значение')
 
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, help_text='Родительское правило')
+    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
     cell = models.ForeignKey(Cell, on_delete=models.CASCADE, help_text='Ячейка')
 
 
