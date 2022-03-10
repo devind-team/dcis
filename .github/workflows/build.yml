@@ -28,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/dcis-server
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -55,7 +55,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/client
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/dcis-client
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
