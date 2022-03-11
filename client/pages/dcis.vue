@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, useNuxt2Meta} from '#app'
+import { defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 
 export default defineComponent({

@@ -51,19 +51,24 @@ class Command(BaseCommand):
         })
         seeder.execute()
         for sheet in Sheet.objects.all():
-            for i in range(20):
-                column_dimension = ColumnDimension.objects.create(
+            columns_dimension = [
+                ColumnDimension.objects.create(
                     index=i, sheet=sheet, width=75, content_object=department, user=user
-                )
-                row_dimension = RowDimension.objects.create(
+                ) for i in range(20)
+            ]
+            rows_dimension = [
+                RowDimension.objects.create(
                     index=i, sheet=sheet, height=35, content_object=department, user=user
-                )
-                Cell.objects.create(column=column_dimension, row=row_dimension)
-                MergedCell.objects.create(sheet=sheet, min_row=1, min_col=1, max_row=2, max_col=2)
-                Value.objects.create(
-                    sheet=sheet,
-                    document=sheet.document_set.first() or Document.objects.first(),
-                    column=column_dimension,
-                    row=row_dimension,
-                    value=f'{column_dimension.index}{row_dimension.index}'
-                )
+                ) for i in range(20)
+            ]
+            for column_dimension in columns_dimension:
+                for row_dimension in rows_dimension:
+                    Cell.objects.create(column=column_dimension, row=row_dimension)
+                    MergedCell.objects.create(sheet=sheet, min_row=1, min_col=1, max_row=2, max_col=2)
+                    Value.objects.create(
+                        sheet=sheet,
+                        document=sheet.document_set.first() or Document.objects.first(),
+                        column=column_dimension,
+                        row=row_dimension,
+                        value=f'{column_dimension.index}{row_dimension.index}'
+                    )

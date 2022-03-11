@@ -1,60 +1,60 @@
 import { computed } from '#app'
 import type { ComputedRef } from '#app'
-import type { BuildColumnType, BuildRowType, BuildCellType, SheetType } from '~/types/dcis'
+import type { SheetType, ColumnDimensionType, RowDimensionType, CellType, ValueType } from '~/types/graphql'
 import { positionToLetter } from '~/services/grid'
 
-export function useGrid (sheet: ComputedRef<SheetType>) {
-  const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => {
-    const result: BuildColumnType[] = []
-    for (let i = 0; i < sheet.value.columnsCount; i++) {
-      let style: Record<string, string> = {}
-      if (sheet.value.columnsDimension[i]) {
-        style = {
-          width: `${sheet.value.columnsDimension[i].width}px`
-        }
-      }
-      result.push({
-        name: positionToLetter(i + 1),
-        style
-      })
-    }
-    return result
-  })
-  const rows: ComputedRef<BuildRowType[]> = computed<BuildRowType[]>(() => {
-    const result: BuildRowType[] = []
-    for (let i = 0; i < sheet.value.rowsCount; i++) {
-      const rowIndex = i + 1
-      let style: Record<string, string> = {}
-      if (sheet.value.rowsDimension[i]) {
-        style = {
-          height: `${sheet.value.rowsDimension[i].height}px`
-        }
-      }
-      const row: BuildRowType = {
-        rowIndex,
-        buildCells: [],
-        style,
-        originRow: sheet.value.rows[i]
-      }
-      for (let j = 0; j < sheet.value.columnsCount; j++) {
-        const columnIndex = j + 1
-        const position = `${positionToLetter(columnIndex)}${rowIndex}`
-        const cell: BuildCellType = {
-          columnIndex,
-          position,
-          colspan: 1,
-          rowspan: 1,
-          originCell: sheet.value.rows[i].cells[j]
-        }
-        if (position in sheet.value.mergeCells) {
-          row.buildCells.push({ ...cell, ...sheet.value.mergeCells[position] })
-        } else {
-          row.buildCells.push(cell)
-        }
-      }
-      result.push(row)
-    }
-    return result
-  })
+export type BuildCell = {
+  value: ValueType
+  cell: CellType
+  colspan?: number
+  rowspan?: number
+}
+
+export type BuildColumn = {
+  name: string
+  style: Record<string, string>
+  dimension: ColumnDimensionType
+}
+
+export type BuildRow = {
+  name: string
+  style: Record<string, string>
+  dimension: RowDimensionType
+  cells: BuildCell[]
+}
+
+export function useGrid (sheet: ComputedRef<SheetType | null>) {
+  const columns: ComputedRef<BuildColumn[]> = computed<BuildColumn[]>(
+    () => sheet.value
+      ? sheet.value.columns.map(columnDimension => ({
+        name: positionToLetter(columnDimension.index + 1),
+        style: {
+          width: `${columnDimension.width}px`
+        },
+        dimension: columnDimension
+      }))
+      : []
+  )
+  const rows: ComputedRef<BuildRow[]> = computed<BuildRow[]>(
+    () => sheet.value
+      ? sheet.value.rows.map(rowDimension => ({
+        name: String(rowDimension.index + 1),
+        style: {
+          height: `${rowDimension.height}px`
+        },
+        dimension: rowDimension,
+        cells: sheet.value.cells
+          .filter(cell => cell.row.id === rowDimension.id)
+          .map((cell) => {
+            const value = sheet.value.values
+              .filter(value => value.row.id === cell.row.id && value.column.id === cell.column.id)[0]
+            return {
+              cell,
+              value
+            }
+          })
+      }))
+      : []
+  )
   return { columns, rows }
 }

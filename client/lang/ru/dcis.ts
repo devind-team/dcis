@@ -1,9 +1,8 @@
 export default {
   home: 'Проекты сборов',
   grid: {
-    toolbarAvatar: {
-      active: 'Активен',
-      notActive: 'Неактивен'
+    toolbar: {
+      addRow: 'Добавить строку'
     }
   }
 }

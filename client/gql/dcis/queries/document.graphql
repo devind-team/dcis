@@ -10,16 +10,26 @@ query Document($documentId: ID!) {
       name
       columns {
         id
+        index
         width
         __typename
       }
       rows {
         id
+        index
         height
         __typename
       }
       cells {
         id
+        column {
+          id
+          __typename
+        }
+        row {
+          id
+          __typename
+        }
         __typename
       }
       mergedCells {
@@ -34,6 +44,14 @@ query Document($documentId: ID!) {
       values(documentId: $documentId) {
         id
         value
+        column {
+          id
+          __typename
+        }
+        row {
+          id
+          __typename
+        }
         __typename
       }
       __typename
