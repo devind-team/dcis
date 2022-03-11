@@ -1,4 +1,6 @@
-from typing import Dict, Optional, cast
+import datetime
+from typing import Dict
+from django.utils.timezone import make_aware
 
 from django.conf import settings
 from django.db.models import QuerySet
@@ -39,6 +41,8 @@ class AuthCbiasMutation(CbiasAuthMutation):
                 user=user,
                 value=data['uid']
             )
+        user.agreement = make_aware(datetime.datetime.now())
+        user.save(update_fields=('agreement',))
         return user
 
     @staticmethod
