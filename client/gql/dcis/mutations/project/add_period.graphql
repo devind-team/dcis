@@ -1,0 +1,16 @@
+#import "../../fragments/period_fields.graphql"
+
+mutation AddPeriod($name: String!, $projectId: ID!, $file: Upload!) {
+  addPeriod(input: {name: $name, projectId: $projectId, file: $file}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    period {
+      ...PeriodFields
+    }
+    __typename
+  }
+}

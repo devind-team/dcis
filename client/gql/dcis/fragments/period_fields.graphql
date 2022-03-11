@@ -5,4 +5,11 @@ fragment PeriodFields on PeriodType {
   status
   start
   expiration
+  methodicalSupport {
+    name
+    src
+    size
+    __typename
+  }
+  __typename
 }

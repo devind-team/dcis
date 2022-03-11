@@ -1,0 +1,16 @@
+#import "../../fragments/project_fields.graphql"
+
+mutation AddProject($name: String!, $short: String!, $description: String!) {
+  addProject(input: {name: $name, short: $short, description: $description}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    project {
+      ...ProjectFields
+    }
+    __typename
+  }
+}

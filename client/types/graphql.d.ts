@@ -165,6 +165,28 @@ export type AddPageMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddPeriodMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Xlsx файл с проектом */
+  file: Scalars['Upload'];
+  /** Название периода */
+  name: Scalars['String'];
+  /** Идентификатор проекта */
+  projectId: Scalars['ID'];
+};
+
+/** Мутация для создания периода. */
+export type AddPeriodMutationPayload = {
+  __typename?: 'AddPeriodMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Добавленный период */
+  period?: Maybe<PeriodType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddProfileMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Уникальный код настройки */
@@ -185,6 +207,28 @@ export type AddProfileMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Добавленный профайл */
   profile?: Maybe<ProfileType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type AddProjectMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Описание проекта */
+  description: Scalars['String'];
+  /** Название проекта */
+  name: Scalars['String'];
+  /** Название проекта */
+  short: Scalars['String'];
+};
+
+/** Мутация для добавления проекта. */
+export type AddProjectMutationPayload = {
+  __typename?: 'AddProjectMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Добавленный проект */
+  project?: Maybe<ProjectType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -421,18 +465,24 @@ export type CategoryTypeEdge = {
 
 /** An enumeration. */
 export type CellKind =
-  /** text */
-  | 'A_0'
-  /** computing */
-  | 'A_1'
-  /** money */
-  | 'A_2'
-  /** date */
-  | 'A_3'
-  /** datetime */
-  | 'A_4'
-  /** file */
-  | 'A_5';
+  /** b */
+  | 'B'
+  /** d */
+  | 'D'
+  /** e */
+  | 'E'
+  /** f */
+  | 'F'
+  /** fl */
+  | 'FL'
+  /** inlineStr */
+  | 'INLINESTR'
+  /** n */
+  | 'N'
+  /** s */
+  | 'S'
+  /** str */
+  | 'STR';
 
 /** Тип ячейки. */
 export type CellType = {
@@ -1013,7 +1063,7 @@ export type ColumnDimensionType = {
   /** Пользователь */
   user?: Maybe<Array<Maybe<UserType>>>;
   /** Ширина колонки */
-  width?: Maybe<Scalars['Int']>;
+  width: Scalars['Int'];
 };
 
 /** Комментарии */
@@ -1106,14 +1156,32 @@ export type ContentTypeType = {
   __typename?: 'ContentTypeType';
   appLabel: Scalars['String'];
   columndimensionSet: Array<ColumnDimensionType>;
-  divisionSet: Array<DivisionType>;
-  documentSet: Array<DocumentType>;
+  divisionSet: DivisionTypeConnection;
+  documentSet: DocumentTypeConnection;
   id: Scalars['ID'];
   /** Модель, связанная с действием */
   logentrySet: LogEntryTypeConnection;
   model: Scalars['String'];
   permissionSet: Array<PermissionType>;
   rowdimensionSet: Array<RowDimensionType>;
+};
+
+/** Тип модели Django. */
+export type ContentTypeTypeDivisionSetArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Тип модели Django. */
+export type ContentTypeTypeDocumentSetArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Тип модели Django. */
@@ -1269,14 +1337,34 @@ export type DeleteSessionsMutationPayload = {
 };
 
 /** Список участвующих дивизионов в сборе. */
-export type DivisionType = {
+export type DivisionType = Node & {
   __typename?: 'DivisionType';
   /** Дивизион: Department, Organizations */
   contentType: ContentTypeType;
+  /** The ID of the object. */
   id: Scalars['ID'];
   objectId: Scalars['Int'];
   /** Период */
   period: PeriodType;
+};
+
+export type DivisionTypeConnection = {
+  __typename?: 'DivisionTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<DivisionTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `DivisionType` and its cursor. */
+export type DivisionTypeEdge = {
+  __typename?: 'DivisionTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<DivisionType>;
 };
 
 /** Debugging information for the current query. */
@@ -1320,13 +1408,14 @@ export type DjangoDebugSql = {
 };
 
 /** Тип моделей документа. */
-export type DocumentType = {
+export type DocumentType = Node & {
   __typename?: 'DocumentType';
   /** Комментарий */
   comment: Scalars['String'];
   contentType: ContentTypeType;
   /** Дата создания */
   createdAt: Scalars['DateTime'];
+  /** The ID of the object. */
   id: Scalars['ID'];
   objectId: Scalars['Int'];
   /** Листы */
@@ -1335,6 +1424,25 @@ export type DocumentType = {
   updatedAt: Scalars['DateTime'];
   /** Версия документа */
   version: Scalars['Int'];
+};
+
+export type DocumentTypeConnection = {
+  __typename?: 'DocumentTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<DocumentTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `DocumentType` and its cursor. */
+export type DocumentTypeEdge = {
+  __typename?: 'DocumentTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<DocumentType>;
 };
 
 /** Ошибка в поле формы */
@@ -1614,6 +1722,8 @@ export type MailingType = {
 /** Тип для объединенных ячеек. */
 export type MergedCellType = {
   __typename?: 'MergedCellType';
+  cells?: Maybe<Array<Maybe<Scalars['String']>>>;
+  colspan?: Maybe<Scalars['Int']>;
   id: Scalars['ID'];
   /** Конечная позиция в колонке */
   maxCol: Scalars['Int'];
@@ -1625,6 +1735,8 @@ export type MergedCellType = {
   minRow: Scalars['Int'];
   /** Объединенный диапазон */
   range: Scalars['String'];
+  rowspan?: Maybe<Scalars['Int']>;
+  target?: Maybe<Scalars['String']>;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -1638,8 +1750,12 @@ export type Mutation = {
   addGroup: AddGroupMutationPayload;
   /** Добавление страницы */
   addPage: AddPageMutationPayload;
+  /** Мутация для создания периода. */
+  addPeriod: AddPeriodMutationPayload;
   /** Мутация для добавления записи профиля. */
   addProfile: AddProfileMutationPayload;
+  /** Мутация для добавления проекта. */
+  addProject: AddProjectMutationPayload;
   /** Добавление секции */
   addSectionFiles: AddSectionFilesMutationPayload;
   /** Добавление секции */
@@ -1761,8 +1877,18 @@ export type MutationAddPageArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationAddPeriodArgs = {
+  input: AddPeriodMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationAddProfileArgs = {
   input: AddProfileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddProjectArgs = {
+  input: AddProjectMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2311,6 +2437,8 @@ export type PeriodType = {
   multiple: Scalars['Boolean'];
   /** Наименование периода */
   name: Scalars['String'];
+  /** Приватность полей */
+  privately: Scalars['Boolean'];
   /** Проект */
   project?: Maybe<ProjectType>;
   /** Дата начала */
@@ -2395,13 +2523,32 @@ export type ProfileValueType = {
   visibility: Scalars['Boolean'];
 };
 
+export type ProjectFilterInputType = {
+  /** `And` field */
+  and?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
+  /** `Name` field */
+  name?: InputMaybe<ProjectNameFilterInputType>;
+  /** `Not` field */
+  not?: InputMaybe<ProjectFilterInputType>;
+  /** `Or` field */
+  or?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
+  /** `User` field */
+  user?: InputMaybe<ProjectUserFilterInputType>;
+};
+
+export type ProjectNameFilterInputType = {
+  /** `Icontains` lookup */
+  icontains?: InputMaybe<Scalars['String']>;
+};
+
 /** Тип модели проектов. */
-export type ProjectType = {
+export type ProjectType = Node & {
   __typename?: 'ProjectType';
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** Описание проекта */
   description: Scalars['String'];
+  /** The ID of the object. */
   id: Scalars['ID'];
   /** Наименование проекта */
   name: Scalars['String'];
@@ -2413,6 +2560,32 @@ export type ProjectType = {
   user: UserType;
   /** Видимость проекта */
   visibility: Scalars['Boolean'];
+};
+
+export type ProjectTypeConnection = {
+  __typename?: 'ProjectTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<ProjectTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `ProjectType` and its cursor. */
+export type ProjectTypeEdge = {
+  __typename?: 'ProjectTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<ProjectType>;
+};
+
+export type ProjectUserFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['ID']>;
+  /** `In` lookup */
+  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Схема запросов данных. */
@@ -2458,6 +2631,7 @@ export type Query = {
   profiles: Array<ProfileType>;
   /** Значение профиля пользователя */
   profilesValue: Array<ProfileValueType>;
+  projects?: Maybe<ProjectTypeConnection>;
   /** Статистика запросов */
   requestStatistics: RequestStatisticsType;
   /** Сегменты страницы */
@@ -2598,6 +2772,16 @@ export type QueryProfileInformationArgs = {
 /** Схема запросов данных. */
 export type QueryProfilesValueArgs = {
   userId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryProjectsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<ProjectFilterInputType>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Схема запросов данных. */
@@ -2750,10 +2934,14 @@ export type RestorePasswordMutationPayload = {
 
 /** An enumeration. */
 export type RowDimensionAggregation =
+  /** avg */
+  | 'AVG'
   /** max */
   | 'MAX'
   /** min */
-  | 'MIN';
+  | 'MIN'
+  /** sum */
+  | 'SUM';
 
 /** Тип строк. */
 export type RowDimensionType = {
@@ -3550,6 +3738,10 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
+export type PeriodFieldsFragment = { __typename?: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null };
+
+export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean };
+
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
   clientId?: InputMaybe<Scalars['String']>;
@@ -3569,7 +3761,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width: number } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 
@@ -3674,7 +3866,7 @@ export type DeleteCategoryMutationVariables = Exact<{
   categoryId: Scalars['ID'];
 }>;
 
-export type DeleteCategoryMutation = { __typename?: 'Mutation', deleteCategory: { __typename?: 'DeleteCategoryMutationPayload', success: boolean } };
+export type DeleteCategoryMutation = { __typename?: 'Mutation', deleteCategory: { __typename: 'DeleteCategoryMutationPayload', success: boolean } };
 
 export type AddPageMutationVariables = Exact<{
   avatar?: InputMaybe<Scalars['Upload']>;
