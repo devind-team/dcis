@@ -15,7 +15,12 @@
         :style="buildRow.style"
       )
         td.header {{ buildRow.name }}
-        td(v-for="buildCell in buildRow.cells" :key="buildCell.cell.id") {{ buildCell.value.value }}
+        td(
+          v-for="buildCell in buildRow.cells"
+          :key="buildCell.cell.id"
+          :colspan="buildCell.colspan"
+          :rowspan="buildCell.rowspan"
+        ) {{ buildCell.value.value }}
 </template>
 
 <script lang="ts">
@@ -43,6 +48,7 @@ export default defineComponent({
 <style lang="sass">
 .grid__table
   border-collapse: collapse
+  user-select: none
   .header
     text-align: center
     background: lightgrey

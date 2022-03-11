@@ -24,10 +24,12 @@ query Document($documentId: ID!) {
         id
         column {
           id
+          index
           __typename
         }
         row {
           id
+          index
           __typename
         }
         __typename

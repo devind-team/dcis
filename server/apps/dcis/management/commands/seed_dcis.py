@@ -64,7 +64,6 @@ class Command(BaseCommand):
             for column_dimension in columns_dimension:
                 for row_dimension in rows_dimension:
                     Cell.objects.create(column=column_dimension, row=row_dimension)
-                    MergedCell.objects.create(sheet=sheet, min_row=1, min_col=1, max_row=2, max_col=2)
                     Value.objects.create(
                         sheet=sheet,
                         document=sheet.document_set.first() or Document.objects.first(),
@@ -72,3 +71,5 @@ class Command(BaseCommand):
                         row=row_dimension,
                         value=f'{column_dimension.index}{row_dimension.index}'
                     )
+            MergedCell.objects.create(sheet=sheet, min_col=1, min_row=1, max_col=2, max_row=2)
+            MergedCell.objects.create(sheet=sheet, min_col=5, max_col=7, min_row=3, max_row=6)
