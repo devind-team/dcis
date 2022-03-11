@@ -105,7 +105,7 @@ class ColumnDimension(Style, SheetDivision, models.Model):
     """
 
     index = models.PositiveIntegerField(help_text='Индекс колонки')
-    width = models.PositiveIntegerField(help_text='Ширина колонки')
+    width = models.PositiveIntegerField(null=True, help_text='Ширина колонки')
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
     hidden = models.BooleanField(default=False, help_text='Скрытое поле')
     auto_size = models.BooleanField(default=False, help_text='Автоматическая ширина')
@@ -221,7 +221,6 @@ class Cell(Style, models.Model):
 
     class Meta:
         unique_together = (('column', 'row'),)
-        indexes = [models.Index(fields=['column', 'row'])]
 
 
 class Limitation(models.Model):

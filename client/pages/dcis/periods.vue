@@ -14,7 +14,7 @@ export default defineComponent({
     const { localePath } = useI18n()
 
     const breadCrumbs: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
-      { text: 'Сбор', to: localePath({ name: 'dcis-periods' }), exact: true }
+      { text: 'Проекты сборов', to: localePath({ name: 'dcis-periods' }), exact: true }
     ]))
     return { breadCrumbs }
   }

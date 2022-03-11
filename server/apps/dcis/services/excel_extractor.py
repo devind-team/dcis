@@ -1,5 +1,5 @@
 from pathlib import PosixPath
-from typing import List, Iterator, Tuple, Dict
+from typing import Any, List, Iterator, Tuple, Dict, Optional
 
 from openpyexcel import load_workbook
 from openpyexcel.styles.colors import COLOR_INDEX
@@ -41,6 +41,13 @@ class ExcelExtractor:
                 row: RowDimension = RowDimension.objects.create(sheet=sheet, **row_dimension)
                 rows_mapper[row.index] = row.id
             for cell in extract_sheet['cells']:
+                if cell['column_id'] not in columns_mapper:
+                    #   Значит, что используется ячейка по умолчанию
+                    column: ColumnDimension = ColumnDimension.objects.create(
+                        sheet=sheet,
+                        index=cell['column_id']
+                    )
+                    columns_mapper[cell['column_id']] = column.id
                 cell['column_id'] = columns_mapper[cell['column_id']]
                 cell['row_id'] = rows_mapper[cell['row_id']]
                 Cell.objects.create(**cell)
@@ -133,10 +140,10 @@ class ExcelExtractor:
         Переданный параметр rows представляет собой матрицу.
         Каждая строка включает в себя массив ячеек, который соотноситься с колонками.
         """
-        rows: List[Dict] = []
+        rows_result: List[Dict] = []
         for row in rows:
             for cell in row:
-                rows.append({
+                rows_result.append({
                     'column_id': cell.col_idx,
                     'row_id': cell.row,
 
@@ -161,7 +168,7 @@ class ExcelExtractor:
                     if cell.fill.bgColor.type == 'rgb'
                     else COLOR_INDEX[cell.fill.bgColor.value]
                 })
-        return rows
+        return rows_result
 
     @staticmethod
     def _parse_merged_cells(ranges: List[MergeCell]) -> List[Dict]:

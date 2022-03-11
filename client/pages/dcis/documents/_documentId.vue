@@ -1,9 +1,10 @@
 <template lang="pug">
   v-container
-    v-card
+    v-card(v-if="!loading")
       grid-toolbar(v-model="activeSheet" :document="document")
       v-card-text
         grid(:sheet="activeSheet")
+    v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
@@ -18,7 +19,7 @@ export default defineComponent({
   components: { GridToolbar, Grid },
   setup () {
     const route = useRoute()
-    const { data: document } = useCommonQuery<DocumentType, DocumentQueryVariables>({
+    const { data: document, loading } = useCommonQuery<DocumentType, DocumentQueryVariables>({
       document: require('~/gql/dcis/queries/document'),
       variables: () => ({
         documentId: route.params.documentId
@@ -31,7 +32,8 @@ export default defineComponent({
 
     return {
       activeSheet,
-      document
+      document,
+      loading
     }
   }
 })

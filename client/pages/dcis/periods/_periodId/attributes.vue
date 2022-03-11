@@ -1,15 +1,34 @@
 <template lang="pug">
-  v-container(fluid)
-    v-row it work
+  bread-crumbs(:items="bc")
+    v-card
+      v-card-title {{ period.name }}
+      v-card-text Ворк
 </template>
 
 <script lang="ts">
-import { defineComponent, useNuxt2Meta } from '#app'
+import type { ComputedRef, PropType } from '#app'
+import { computed, defineComponent, useNuxt2Meta } from '#app'
+import { useI18n } from '~/composables'
+import { BreadCrumbsItem } from '~/types/devind'
+import { PeriodType } from '~/types/graphql'
+import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 
 export default defineComponent({
+  components: { BreadCrumbs },
   middleware: 'auth',
-  setup () {
-    useNuxt2Meta({ title: 'Атрибуты' })
+  props: {
+    breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
+    period: { type: Object as PropType<PeriodType>, required: true }
+  },
+  setup (props) {
+    const { localePath } = useI18n()
+    useNuxt2Meta({ title: props.period.name })
+
+    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+      ...props.breadCrumbs,
+      { text: 'Атрибуты', to: localePath({ name: 'dcis-periods-periodId-attributes' }), exact: true }
+    ]))
+    return { bc }
   }
 })
 </script>
