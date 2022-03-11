@@ -1,7 +1,17 @@
+import { useMutation } from '@vue/apollo-composable'
 import { computed, ref } from '#app'
 import type { ComputedRef, Ref } from '#app'
-import type { SheetType, ColumnDimensionType, RowDimensionType, CellType, ValueType } from '~/types/graphql'
+import type {
+  SheetType,
+  ColumnDimensionType,
+  RowDimensionType,
+  CellType,
+  ValueType,
+  ChangeValueMutation,
+  ChangeValueMutationVariables
+} from '~/types/graphql'
 import { positionToLetter } from '~/services/grid'
+import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
 
 export type BuildCell = {
   cell: CellType
@@ -20,7 +30,8 @@ export type Cell = BuildCell | BuildMergedCell
 
 export type EditableCell = {
   cell: Cell
-  value: string
+  value: ValueType
+  newValue: string
 }
 
 export type BuildColumn = {
@@ -37,6 +48,10 @@ export type BuildRow = {
 }
 
 export function useGrid (sheet: ComputedRef<SheetType | null>) {
+  const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(
+    changeValueMutation
+  )
+
   const getValue = (cell: CellType): ValueType => sheet.value.values
     .find(value => value.row.id === cell.row.id && value.column.id === cell.column.id)!
 
@@ -119,32 +134,37 @@ export function useGrid (sheet: ComputedRef<SheetType | null>) {
     return isActive(cell) || isEditable(cell)
   }
 
-  const changeCellValue = (editableCell: EditableCell): void => {
-    console.log(editableCell)
+  const changeCellValue = async (editableCell: EditableCell): Promise<void> => {
+    await changeValueMutate({
+      valueId: editableCell.value.id,
+      value: editableCell.newValue
+    })
   }
 
-  const activateCell = (cell: Cell): void => {
+  const activateCell = async (cell: Cell): Promise<void> => {
     if (isCurrent(cell)) {
       return
     }
-    activeCell.value = cell
     if (editableCell.value) {
-      changeCellValue(editableCell.value)
+      await changeCellValue(editableCell.value)
     }
+    activeCell.value = cell
     editableCell.value = null
   }
 
-  const editCell = (cell: Cell): void => {
+  const editCell = async (cell: Cell): Promise<void> => {
     if (isEditable(cell)) {
       return
     }
-    activeCell.value = cell
     if (editableCell.value) {
-      changeCellValue(editableCell.value)
+      await changeCellValue(editableCell.value)
     }
+    activeCell.value = cell
+    const value = getValue(cell.cell)
     editableCell.value = {
       cell,
-      value: getValue(cell.cell).value
+      value,
+      newValue: value.value
     }
   }
 

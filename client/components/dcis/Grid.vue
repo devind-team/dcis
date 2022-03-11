@@ -25,7 +25,7 @@
           @dblclick="editCell(buildCell)"
         )
           template(v-if="isEditable(buildCell)")
-            input.input(v-model="editableCell.value" v-focus)
+            input.input(v-model="editableCell.newValue" v-focus)
           template(v-else) {{ buildCell.value.value }}
 </template>
 

@@ -895,6 +895,25 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
+input ChangeValueInput {
+  clientMutationId: String
+  """Значение"""
+  value: String!
+  """Идентификатор значения"""
+  valueId: ID!
+}
+
+"""Изменение значения."""
+type ChangeValuePayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененное значение"""
+  value: ValueType
+}
+
 """Тип колонок."""
 type ColumnDimensionType {
   """Дивизион"""
@@ -1557,6 +1576,8 @@ type Mutation {
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
+  """Изменение значения."""
+  changeValue(input: ChangeValueInput!): ChangeValuePayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация для удаления категории"""

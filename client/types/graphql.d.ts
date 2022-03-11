@@ -977,6 +977,26 @@ export type ChangeUserPropsMutationPayload = {
   user: UserType;
 };
 
+export type ChangeValueInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Значение */
+  value: Scalars['String'];
+  /** Идентификатор значения */
+  valueId: Scalars['ID'];
+};
+
+/** Изменение значения. */
+export type ChangeValuePayload = {
+  __typename?: 'ChangeValuePayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Измененное значение */
+  value?: Maybe<ValueType>;
+};
+
 /** Тип колонок. */
 export type ColumnDimensionType = {
   __typename?: 'ColumnDimensionType';
@@ -1680,6 +1700,8 @@ export type Mutation = {
   changeUserGroups: ChangeUserGroupsMutationPayload;
   /** Мутация для изменения полей пользователя. */
   changeUserProps: ChangeUserPropsMutationPayload;
+  /** Изменение значения. */
+  changeValue: ChangeValuePayload;
   /** Подтверждение кода. */
   confirmEmail: ConfirmEmailMutationPayload;
   /** Мутация для удаления категории */
@@ -1891,6 +1913,11 @@ export type MutationChangeUserGroupsArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeUserPropsArgs = {
   input: ChangeUserPropsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeValueArgs = {
+  input: ChangeValueInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3531,11 +3558,18 @@ export type AuthCbiasMutationVariables = Exact<{
 
 export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
 
+export type ChangeValueMutationVariables = Exact<{
+  valueId: Scalars['ID'];
+  value: Scalars['String'];
+}>;
+
+export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValuePayload', value?: { __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null } };
+
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, width?: number | null } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, row?: { __typename: 'RowDimensionType', id: string } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 

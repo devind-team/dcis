@@ -1,0 +1,17 @@
+mutation ChangeValue($valueId: ID!, $value: String!) {
+  changeValue(input: { valueId: $valueId, value: $value }) {
+    value {
+      id
+      value
+      column {
+        id
+        __typename
+      }
+      row {
+        id
+        __typename
+      }
+      __typename
+    }
+  }
+}
