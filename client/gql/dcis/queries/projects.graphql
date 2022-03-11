@@ -1,0 +1,20 @@
+#import "../fragments/project_fields.graphql"
+
+query Projects($first: Int, $after: String) {
+  projects(first: $first, after: $after) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasPreviousPage
+      hasNextPage
+      __typename
+    }
+    totalCount
+    edges {
+      node {
+        ...ProjectFields
+      }
+    }
+    __typename
+  }
+}

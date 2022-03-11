@@ -1,5 +1,7 @@
 <template lang="pug">
-  v-progress-circular(indeterminate color="primary" )
+  v-row
+    v-col.text-center
+      v-progress-circular(color="primary" size="50" indeterminate)
 </template>
 
 <script lang="ts">
@@ -9,9 +11,9 @@ import { useI18n } from '~/composables'
 export default defineComponent({
   middleware: 'auth',
   setup () {
-    const router = useRouter()
     const { localePath } = useI18n()
-    router.push(localePath({ name: 'dcis-projects' }))
+    const router = useRouter()
+    router.push(localePath({ name: 'dcis-projects-projectId-periods' }))
   }
 })
 </script>

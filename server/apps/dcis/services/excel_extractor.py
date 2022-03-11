@@ -34,18 +34,18 @@ class ExcelExtractor:
             columns_mapper: Dict[int, int] = {}
             rows_mapper: Dict[int, int] = {}
 
-            for column_dimension in sheet['columns_dimension']:
-                column: ColumnDimension = ColumnDimension.objects.create(**column_dimension)
+            for column_dimension in extract_sheet['columns_dimension']:
+                column: ColumnDimension = ColumnDimension.objects.create(sheet=sheet, **column_dimension)
                 columns_mapper[column.index] = column.id
-            for row_dimension in sheet['rows_dimension']:
-                row: RowDimension = RowDimension.objects.create(**row_dimension)
+            for row_dimension in extract_sheet['rows_dimension']:
+                row: RowDimension = RowDimension.objects.create(sheet=sheet, **row_dimension)
                 rows_mapper[row.index] = row.id
-            for cell in sheet['cells']:
+            for cell in extract_sheet['cells']:
                 cell['column_id'] = columns_mapper[cell['column_id']]
                 cell['row_id'] = rows_mapper[cell['row_id']]
                 Cell.objects.create(**cell)
-            for merged_cell in sheet['merged_cells']:
-                MergedCell.objects.create(**merged_cell)
+            for merged_cell in extract_sheet['merged_cells']:
+                MergedCell.objects.create(sheet=sheet, **merged_cell)
 
     def extract(self) -> List[Dict]:
         """Парсинг файла эксель.

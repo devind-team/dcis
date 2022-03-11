@@ -1,0 +1,11 @@
+#import "../fragments/project_fields.graphql"
+#import "../fragments/period_fields.graphql"
+
+query Project($projectId: ID!) {
+  project(projectId: $projectId) {
+    ...ProjectFields
+    periods {
+      ...PeriodFields
+    }
+  }
+}

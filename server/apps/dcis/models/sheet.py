@@ -68,8 +68,8 @@ class Style(models.Model):
         choices=KIND_UNDERLINE,
         help_text='Тип подчеркивания'
     )
-    color = models.CharField(max_length=7, default='#000000', help_text='Цвет индекса')
-    background = models.CharField(max_length=7, default='#FFFFFF', help_text='Цвет фона')
+    color = models.CharField(max_length=16, default='#000000', help_text='Цвет индекса')
+    background = models.CharField(max_length=16, default='#FFFFFF', help_text='Цвет фона')
 
     class Meta:
         abstract = True

@@ -1,0 +1,19 @@
+#import "../fragments/project_fields.graphql"
+#import "../fragments/period_fields.graphql"
+
+query Period($periodId: ID!) {
+  period(periodId: $periodId) {
+    ...PeriodFields
+    project {
+      ...ProjectFields
+      __typename
+    }
+    documents {
+      id
+      version
+      comment
+      createdAt
+      __typename
+    }
+  }
+}

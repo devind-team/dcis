@@ -56,6 +56,25 @@ type AddCategoryMutationPayload {
   success: Boolean!
 }
 
+input AddDocumentInput {
+  clientMutationId: String
+  """Комментарий"""
+  comment: String!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Добавление документа."""
+type AddDocumentPayload {
+  clientMutationId: String
+  """Созданный документ"""
+  document: DocumentType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddFileMutationInput {
   clientMutationId: String
   """Загружаемые файлы"""
@@ -1293,6 +1312,8 @@ type DocumentType implements Node {
   """The ID of the object."""
   id: ID!
   objectId: Int!
+  """Период сбора"""
+  period: PeriodType
   """Листы"""
   sheets: [SheetType!]
   """Дата обновления"""
@@ -1596,6 +1617,8 @@ type MergedCellType {
 type Mutation {
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
+  """Добавление документа."""
+  addDocument(input: AddDocumentInput!): AddDocumentPayload!
   """Мутация для загрузки файлов"""
   addFile(input: AddFileMutationInput!): AddFileMutationPayload!
   """Мутация для добавления группы."""
@@ -1977,6 +2000,8 @@ enum PeriodStatus {
 type PeriodType {
   """Дата создания"""
   createdAt: DateTime!
+  """Собираемые документв"""
+  documents: [DocumentType]
   """Дата окончания"""
   expiration: DateTime
   id: ID!
@@ -2096,6 +2121,8 @@ type ProjectType implements Node {
   id: ID!
   """Наименование проекта"""
   name: String!
+  """Периоды"""
+  periods: [PeriodType]
   """Сокращенное наименование проекта"""
   short: String!
   """Дата обновления"""
@@ -2171,6 +2198,11 @@ type Query {
   pageKinds: [PageKindType!]!
   """Страницы"""
   pages(after: String, before: String, category_Id: ID, first: Int, kind_Id: ID, last: Int, offset: Int, title_Icontains: String): PageTypeConnection!
+  """Информация по периоду"""
+  period(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): PeriodType!
   permissions: [PermissionType!]!
   """Доступные значения профиля пользователя"""
   profileInformation(
@@ -2184,6 +2216,11 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID!
   ): [ProfileValueType!]!
+  """Получение информации по проекту"""
+  project(
+    """Идентификатор проекта"""
+    projectId: ID!
+  ): ProjectType!
   projects(
     after: String
     before: String

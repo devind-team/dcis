@@ -1,0 +1,17 @@
+mutation AddDocument($comment: String!, $periodId: ID!) {
+  addDocument(input: {comment: $comment, periodId: $periodId}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    document {
+      id
+      version
+      comment
+      createdAt
+      __typename
+    }
+  }
+}

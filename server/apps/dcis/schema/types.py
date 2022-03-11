@@ -22,6 +22,7 @@ from ..filters import ProjectFilter
 class ProjectType(OptimizedDjangoObjectType):
     """Тип модели проектов."""
 
+    periods = graphene.List(lambda: PeriodType, description='Периоды')
     user = graphene.Field(UserType, required=True, description='Пользователь')
 
     class Meta:
@@ -31,6 +32,11 @@ class ProjectType(OptimizedDjangoObjectType):
         filterset_class = ProjectFilter
         connection_class = CountableConnection
 
+    @staticmethod
+    @resolver_hints(model_field='period_set')
+    def resolve_periods(project: Project, info: ResolveInfo):
+        return project.period_set.all()
+
 
 class PeriodType(DjangoObjectType):
     """Тип периода."""
@@ -38,6 +44,8 @@ class PeriodType(DjangoObjectType):
     user = graphene.Field(UserType, required=True, description='Пользователь')
     project = graphene.Field(ProjectType, description='Проект')
     methodical_support = DjangoListField(FileType)
+    # Нужно будет отфильтровать в зависимости от прав пользователя
+    documents = graphene.List(lambda: DocumentType, description='Собираемые документв')
 
     class Meta:
         model = Period
@@ -54,7 +62,13 @@ class PeriodType(DjangoObjectType):
             'user',
             'project',
             'methodical_support',
+            'documents',
         )
+
+    @staticmethod
+    @resolver_hints(model_field='')
+    def resolve_documents(period: Period, info: ResolveInfo, *args, **kwargs):
+        return period.document_set.all()
 
 
 class DivisionType(OptimizedDjangoObjectType):
@@ -170,6 +184,7 @@ class SheetType(DjangoObjectType):
 class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
+    period = graphene.Field(PeriodType, description='Период сбора')
     sheets = DjangoListField(SheetType, description='Листы')
 
     class Meta:
@@ -181,6 +196,7 @@ class DocumentType(DjangoObjectType):
             'version',
             'created_at',
             'updated_at',
+            'period',
             'sheets',
             'content_type',
             'object_id',

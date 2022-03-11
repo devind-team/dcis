@@ -9,10 +9,11 @@ import { defineComponent, useRouter } from '#app'
 import { useI18n } from '~/composables'
 
 export default defineComponent({
+  middleware: 'auth',
   setup () {
     const { localePath } = useI18n()
     const router = useRouter()
-    router.push(localePath({ name: 'dcis-projectId-collection' }))
+    router.push(localePath({ name: 'dcis-periods-periodId-document' }))
   }
 })
 </script>

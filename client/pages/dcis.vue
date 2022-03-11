@@ -7,6 +7,7 @@ import { defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 
 export default defineComponent({
+  middleware: 'auth',
   setup () {
     const { t, localePath } = useI18n()
     const bc = [

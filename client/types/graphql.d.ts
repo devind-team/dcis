@@ -90,6 +90,26 @@ export type AddCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddDocumentInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Комментарий */
+  comment: Scalars['String'];
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Добавление документа. */
+export type AddDocumentPayload = {
+  __typename?: 'AddDocumentPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Созданный документ */
+  document?: Maybe<DocumentType>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddFileMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Загружаемые файлы */
@@ -1418,6 +1438,8 @@ export type DocumentType = Node & {
   /** The ID of the object. */
   id: Scalars['ID'];
   objectId: Scalars['Int'];
+  /** Период сбора */
+  period?: Maybe<PeriodType>;
   /** Листы */
   sheets?: Maybe<Array<SheetType>>;
   /** Дата обновления */
@@ -1744,6 +1766,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   /** Мутация для добавления категории */
   addCategory: AddCategoryMutationPayload;
+  /** Добавление документа. */
+  addDocument: AddDocumentPayload;
   /** Мутация для загрузки файлов */
   addFile: AddFileMutationPayload;
   /** Мутация для добавления группы. */
@@ -1859,6 +1883,11 @@ export type Mutation = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddCategoryArgs = {
   input: AddCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddDocumentArgs = {
+  input: AddDocumentInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2429,6 +2458,8 @@ export type PeriodType = {
   __typename?: 'PeriodType';
   /** Дата создания */
   createdAt: Scalars['DateTime'];
+  /** Собираемые документв */
+  documents?: Maybe<Array<Maybe<DocumentType>>>;
   /** Дата окончания */
   expiration?: Maybe<Scalars['DateTime']>;
   id: Scalars['ID'];
@@ -2552,6 +2583,8 @@ export type ProjectType = Node & {
   id: Scalars['ID'];
   /** Наименование проекта */
   name: Scalars['String'];
+  /** Периоды */
+  periods?: Maybe<Array<Maybe<PeriodType>>>;
   /** Сокращенное наименование проекта */
   short: Scalars['String'];
   /** Дата обновления */
@@ -2624,6 +2657,8 @@ export type Query = {
   pageKinds: Array<PageKindType>;
   /** Страницы */
   pages: PageTypeConnection;
+  /** Информация по периоду */
+  period: PeriodType;
   permissions: Array<PermissionType>;
   /** Доступные значения профиля пользователя */
   profileInformation: Array<ProfileType>;
@@ -2631,6 +2666,8 @@ export type Query = {
   profiles: Array<ProfileType>;
   /** Значение профиля пользователя */
   profilesValue: Array<ProfileValueType>;
+  /** Получение информации по проекту */
+  project: ProjectType;
   projects?: Maybe<ProjectTypeConnection>;
   /** Статистика запросов */
   requestStatistics: RequestStatisticsType;
@@ -2765,6 +2802,11 @@ export type QueryPagesArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryPeriodArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
 export type QueryProfileInformationArgs = {
   userId: Scalars['ID'];
 };
@@ -2772,6 +2814,11 @@ export type QueryProfileInformationArgs = {
 /** Схема запросов данных. */
 export type QueryProfilesValueArgs = {
   userId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryProjectArgs = {
+  projectId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -3738,7 +3785,7 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
-export type PeriodFieldsFragment = { __typename?: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null };
+export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null };
 
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean };
 
@@ -3750,6 +3797,13 @@ export type AuthCbiasMutationVariables = Exact<{
 
 export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
 
+export type AddDocumentMutationVariables = Exact<{
+  comment: Scalars['String'];
+  periodId: Scalars['ID'];
+}>;
+
+export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any } | null } };
+
 export type ChangeValueMutationVariables = Exact<{
   valueId: Scalars['ID'];
   value: Scalars['String'];
@@ -3757,11 +3811,46 @@ export type ChangeValueMutationVariables = Exact<{
 
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValuePayload', value?: { __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null } };
 
+export type AddPeriodMutationVariables = Exact<{
+  name: Scalars['String'];
+  projectId: Scalars['ID'];
+  file: Scalars['Upload'];
+}>;
+
+export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
+
+export type AddProjectMutationVariables = Exact<{
+  name: Scalars['String'];
+  short: Scalars['String'];
+  description: Scalars['String'];
+}>;
+
+export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null } };
+
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
 export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width: number } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
+
+export type PeriodQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+
+export type ProjectQueryVariables = Exact<{
+  projectId: Scalars['ID'];
+}>;
+
+export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, periods?: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null> | null } };
+
+export type ProjectsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
+}>;
+
+export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null } | null> } | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 
