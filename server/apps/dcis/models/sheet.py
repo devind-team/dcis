@@ -60,7 +60,7 @@ class Style(models.Model):
     size = models.PositiveIntegerField(default=12, help_text='Размер шрифта')
     strong = models.BooleanField(default=False, help_text='Жирный шрифт')
     italic = models.BooleanField(default=False, help_text='Курсив')
-    strike = models.BooleanField(default=False, null=True, help_text='Зачеркнутый')
+    strike = models.BooleanField(default=None, null=True, help_text='Зачеркнутый')
     underline = models.CharField(
         max_length=20,
         default=None,
@@ -104,8 +104,8 @@ class ColumnDimension(Style, SheetDivision, models.Model):
     - auto_size - если True, то поле width не имеет значения
     """
 
-    index = models.PositiveIntegerField(default=0, help_text='Индекс колонки')
-    width = models.PositiveIntegerField(null=True, help_text='Ширина колонки')
+    index = models.PositiveIntegerField(help_text='Индекс колонки')
+    width = models.PositiveIntegerField(help_text='Ширина колонки')
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
     hidden = models.BooleanField(default=False, help_text='Скрытое поле')
     auto_size = models.BooleanField(default=False, help_text='Автоматическая ширина')
@@ -121,7 +121,7 @@ class RowDimension(Style, SheetDivision, models.Model):
     """Модель стилей для строки таблицы.
 
     Кроме того, что таблица плоская, могут быть еще промежуточные агрегаций,
-    они реализуются с помощью дополнительных полей
+    они реализуются с помощью дополнительных полей.
 
     - dynamic - описывает динамическую строку
     - aggregation - способ агрегации дочерних строк (SUM, MIN, MAX, AVG)
@@ -157,9 +157,16 @@ class RowDimension(Style, SheetDivision, models.Model):
         choices=KIND_AGGREGATION,
         help_text='Агрегирование перечисление (мин, макс) для динамических строк'
     )
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
+    parent = models.ForeignKey(
+        'self',
+        default=None,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text='Родительское правило'
+    )
     document = models.ForeignKey(
         Document,
+        default=None,
         null=True,
         on_delete=models.CASCADE,
         help_text='Документ, для динамических строк'
@@ -172,23 +179,32 @@ class RowDimension(Style, SheetDivision, models.Model):
 class Cell(Style, models.Model):
     """Модель ячейки."""
 
-    TEXT = 0
-    COMPUTING = 1
-    MONEY = 2
-    DATE = 3
-    DATETIME = 4
-    FILE = 5
+    # Формат из openpyxl
+    NUMERIC = 'n'
+    STRING = 's'
+    FORMULA = 'f'
+    BOOL = 'b'
+    INLINE = 'inlineStr'
+    ERROR = 'e'
+    FORMULA_CACHE_STRING = 'str'
+    DATE = 'd'
+
+    # Дополнительный набор
+    FILE = 'fl'
 
     KIND_VALUE = (
-        (TEXT, 'text'),
-        (COMPUTING, 'computing'),
-        (MONEY, 'money'),
-        (DATE, 'date'),
-        (DATETIME, 'datetime'),
-        (FILE, 'file')
+        (NUMERIC, 'n'),
+        (STRING, 's'),
+        (FORMULA, 'f'),
+        (BOOL, 'b'),
+        (INLINE, 'inlineStr'),
+        (ERROR, 'e'),
+        (FORMULA_CACHE_STRING, 'str'),
+        (DATE, 'd'),
+        (FILE, 'fl'),
     )
 
-    kind = models.PositiveIntegerField(default=TEXT, choices=KIND_VALUE, help_text='Тип значения')
+    kind = models.PositiveIntegerField(default=NUMERIC, choices=KIND_VALUE, help_text='Тип значения')
     formula = models.TextField(null=True, help_text='Формула')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
