@@ -11,9 +11,9 @@ from .document import Document, Sheet
 class Style(models.Model):
     """Абстрактная модель применяемых стилей для страниц сборов."""
 
-    LEFT = 0
-    CENTER = 1
-    RIGHT = 2
+    LEFT = 'left'
+    CENTER = 'center'
+    RIGHT = 'right'
 
     KIND_HORIZONTAL_ALIGN = (
         (LEFT, 'left'),
@@ -27,39 +27,47 @@ class Style(models.Model):
 
     KIND_VERTICAL_ALIGN = (
         (TOP, 'top'),
+        (MIDDLE, 'middle'),
         (BOTTOM, 'bottom'),
-        (MIDDLE, 'middle')
     )
 
-    NONE = 0
-    SINGLE = 1
-    DOUBLE = 2
-    SINGLE_ACCOUNTING = 3
-    DOUBLE_ACCOUNTING = 4
+    SINGLE = 'single'
+    DOUBLE = 'double'
+    SINGLE_ACCOUNTING = 'single_accounting'
+    DOUBLE_ACCOUNTING = 'double_accounting'
 
     KIND_UNDERLINE = (
-        (NONE, 'none'),
         (SINGLE, 'single'),
         (DOUBLE, 'double'),
         (SINGLE_ACCOUNTING, 'single_accounting'),
         (DOUBLE_ACCOUNTING, 'double_accounting')
     )
 
-    horizontal_align = models.PositiveIntegerField(
-        default=LEFT,
+    horizontal_align = models.CharField(
+        max_length=10,
+        default=None,
+        null=True,
         choices=KIND_HORIZONTAL_ALIGN,
         help_text='Горизонтальное выравнивание'
     )
-    vertical_align = models.PositiveIntegerField(
-        default=MIDDLE,
+    vertical_align = models.CharField(
+        max_length=10,
+        default=None,
+        null=True,
         choices=KIND_VERTICAL_ALIGN,
         help_text='Вертикальное выравнивание'
     )
     size = models.PositiveIntegerField(default=12, help_text='Размер шрифта')
     strong = models.BooleanField(default=False, help_text='Жирный шрифт')
     italic = models.BooleanField(default=False, help_text='Курсив')
-    strike = models.BooleanField(default=False, help_text='Зачеркнутый')
-    underline = models.PositiveIntegerField(default=NONE, choices=KIND_UNDERLINE, help_text='Тип подчеркивания')
+    strike = models.BooleanField(default=False, null=True, help_text='Зачеркнутый')
+    underline = models.CharField(
+        max_length=20,
+        default=None,
+        null=True,
+        choices=KIND_UNDERLINE,
+        help_text='Тип подчеркивания'
+    )
     color = models.CharField(max_length=7, default='#000000', help_text='Цвет индекса')
     background = models.CharField(max_length=7, default='#FFFFFF', help_text='Цвет фона')
 
@@ -74,6 +82,8 @@ class SheetDivision(models.Model):
     - content_type - дивизион Department, Organization.
     - object_id - идентификатор дивизиона Department, Organization.
     - content_object - генерация связи к дивизиону.
+
+    При первоначальном заполнении таблицы все поля устанавливаются по умолчанию.
     """
 
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
@@ -86,11 +96,19 @@ class SheetDivision(models.Model):
 
 
 class ColumnDimension(Style, SheetDivision, models.Model):
-    """Модель стилей для колонки таблицы."""
+    """Модель стилей для колонки таблицы.
+
+    Ссылка на оригинальный класс из openpyxl:
+    https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.0/openpyxl/worksheet/dimensions.py
+
+    - auto_size - если True, то поле width не имеет значения
+    """
 
     index = models.PositiveIntegerField(default=0, help_text='Индекс колонки')
     width = models.PositiveIntegerField(null=True, help_text='Ширина колонки')
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
+    hidden = models.BooleanField(default=False, help_text='Скрытое поле')
+    auto_size = models.BooleanField(default=False, help_text='Автоматическая ширина')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 
@@ -106,7 +124,7 @@ class RowDimension(Style, SheetDivision, models.Model):
     они реализуются с помощью дополнительных полей
 
     - dynamic - описывает динамическую строку
-    - aggregation - способ агрегации дочерних строк
+    - aggregation - способ агрегации дочерних строк (SUM, MIN, MAX, AVG)
     - parent - ссылка на родительскую строку
     - document - ссылка на документ.
         Это поле необходимо для того, чтобы к обычным строкам плоской таблицы
@@ -114,12 +132,16 @@ class RowDimension(Style, SheetDivision, models.Model):
         однако, должны участвовать при заполнении финальной версии документа.
     """
 
+    SUM = 'SUM'
     MIN = 'MIN'
     MAX = 'MAX'
+    AVG = 'AVG'
 
     KIND_AGGREGATION = (
+        (SUM, 'sum'),
         (MIN, 'min'),
-        (MAX, 'max')
+        (MAX, 'max'),
+        (AVG, 'avg'),
     )
 
     index = models.PositiveIntegerField(default=0, help_text='Индекс строки')
