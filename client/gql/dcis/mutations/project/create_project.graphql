@@ -1,0 +1,21 @@
+#import "../../fragments/project_fields.graphql"
+
+mutation CreateProject(
+  $name: String!,
+  $short: String!,
+  $description: String!,
+  $userId: ID!
+) {
+  createProject(input: {
+    name: $name,
+    short: $short,
+    description: $description,
+    user: $userId,
+  }) {
+    project {
+      ...ProjectFields
+      __typename
+    }
+    __typename
+  }
+}

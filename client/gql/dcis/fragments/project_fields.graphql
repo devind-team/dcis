@@ -1,0 +1,8 @@
+fragment ProjectFields on ProjectType {
+  id
+  name
+  short
+  description
+  visibility
+  __typename
+}

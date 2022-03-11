@@ -1,0 +1,8 @@
+mutation DeleteProject(
+  $projectId: ID!
+) {
+  deleteProject(id: $projectId) {
+    deletedId
+    __typename
+  }
+}

@@ -5,6 +5,7 @@ import apps.core.schema
 import apps.dashboard.schema
 import apps.dcis.schema
 import apps.pages.schema
+import apps.dcis.schema
 import apps.notifications.schema
 from graphene_django.debug import DjangoDebug
 
