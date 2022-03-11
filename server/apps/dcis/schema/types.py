@@ -43,6 +43,7 @@ class PeriodType(DjangoObjectType):
             'name',
             'status',
             'multiple',
+            'privately',
             'start',
             'expiration',
             'created_at',
@@ -355,6 +356,10 @@ class MergedCellType(DjangoObjectType):
             'max_col',
             'max_row',
             'range',
+            'colspan',
+            'rowspan',
+            'target',
+            'cells'
         )
 
     @staticmethod
