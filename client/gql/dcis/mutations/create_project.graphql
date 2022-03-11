@@ -4,7 +4,7 @@ mutation CreateProject(
   $name: String!,
   $short: String!,
   $description: String!,
-  $userId: ID!
+  $userId: Int!
 ) {
   createProject(input: {
     name: $name,

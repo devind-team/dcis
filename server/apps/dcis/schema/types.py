@@ -15,6 +15,7 @@ from ..models import (
     RowDimension, Cell, Limitation, MergedCell,
     Value
 )
+from ..filters import ProjectFilter
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -24,8 +25,9 @@ class ProjectType(OptimizedDjangoObjectType):
 
     class Meta:
         model = Project
-        interface = (graphene.relay.Node,)
+        interfaces = (graphene.relay.Node,)
         fields = ('id', 'name', 'short', 'description', 'visibility', 'created_at', 'updated_at', 'user',)
+        filterset_class = ProjectFilter
         connection_class = CountableConnection
 
 
@@ -62,7 +64,7 @@ class DivisionType(OptimizedDjangoObjectType):
 
     class Meta:
         model = Division
-        interface = (graphene.relay.Node,)
+        interfaces = (graphene.relay.Node,)
         fields = ('id', 'period', 'content_type', 'object_id',)
         connection_class = CountableConnection
 
@@ -169,7 +171,7 @@ class DocumentType(DjangoObjectType):
 
     class Meta:
         model = Document
-        interface = (graphene.relay.Node,)
+        interfaces = (graphene.relay.Node,)
         fields = (
             'id',
             'comment',
@@ -346,6 +348,10 @@ class MergedCellType(DjangoObjectType):
     """Тип для объединенных ячеек."""
 
     range = graphene.String(required=True, description='Смердженный диапазон')
+    colspan = graphene.Int()
+    rowspan = graphene.Int()
+    target = graphene.String()
+    cells = graphene.List(graphene.String)
 
     class Meta:
         model = MergedCell

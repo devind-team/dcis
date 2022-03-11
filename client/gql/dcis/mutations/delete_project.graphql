@@ -1,6 +1,4 @@
-mutation DeleteProject(
-  $projectId: ID!
-) {
+mutation DeleteProject($projectId: ID!) {
   deleteProject(id: $projectId) {
     deletedId
     __typename

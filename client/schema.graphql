@@ -364,18 +364,24 @@ type CategoryTypeEdge {
 
 """An enumeration."""
 enum CellKind {
-  """text"""
-  A_0
-  """computing"""
-  A_1
-  """money"""
-  A_2
-  """date"""
-  A_3
-  """datetime"""
-  A_4
-  """file"""
-  A_5
+  """b"""
+  B
+  """d"""
+  D
+  """e"""
+  E
+  """f"""
+  F
+  """fl"""
+  FL
+  """inlineStr"""
+  INLINESTR
+  """n"""
+  N
+  """s"""
+  S
+  """str"""
+  STR
 }
 
 """Тип ячейки."""
@@ -911,7 +917,7 @@ type ColumnDimensionType {
   """Пользователь"""
   user: [UserType]
   """Ширина колонки"""
-  width: Int
+  width: Int!
 }
 
 """Комментарии"""
@@ -1000,8 +1006,8 @@ enum ConsumerActionType {
 type ContentTypeType {
   appLabel: String!
   columndimensionSet: [ColumnDimensionType!]!
-  divisionSet: [DivisionType!]!
-  documentSet: [DocumentType!]!
+  divisionSet(after: String, before: String, first: Int, last: Int, offset: Int): DivisionTypeConnection!
+  documentSet(after: String, before: String, first: Int, last: Int, offset: Int): DocumentTypeConnection!
   id: ID!
   """Модель, связанная с действием"""
   logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
@@ -1023,6 +1029,8 @@ input CreatePeriodInput {
   name: String!
   periodgroupSet: [ID]
   periodprivilegeSet: [ID]
+  """Приватность полей"""
+  privately: Boolean
   """Проект сборов"""
   project: ID!
   sheetSet: [ID]
@@ -1210,13 +1218,31 @@ type DeleteSessionsMutationPayload {
 }
 
 """Список участвующих дивизионов в сборе."""
-type DivisionType {
+type DivisionType implements Node {
   """Дивизион: Department, Organizations"""
   contentType: ContentTypeType!
+  """The ID of the object."""
   id: ID!
   objectId: Int!
   """Период"""
   period: PeriodType!
+}
+
+type DivisionTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DivisionTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DivisionType` and its cursor."""
+type DivisionTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DivisionType
 }
 
 """Debugging information for the current query."""
@@ -1258,12 +1284,13 @@ type DjangoDebugSQL {
 }
 
 """Тип моделей документа."""
-type DocumentType {
+type DocumentType implements Node {
   """Комментарий"""
   comment: String!
   contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
+  """The ID of the object."""
   id: ID!
   objectId: Int!
   """Листы"""
@@ -1272,6 +1299,23 @@ type DocumentType {
   updatedAt: DateTime!
   """Версия документа"""
   version: Int!
+}
+
+type DocumentTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DocumentTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DocumentType` and its cursor."""
+type DocumentTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DocumentType
 }
 
 """Ошибка в поле формы"""
@@ -1394,12 +1438,23 @@ enum LimitationCondition {
   A_4
 }
 
+"""An enumeration."""
+enum LimitationOperator {
+  """and"""
+  AND
+  """or"""
+  OR
+}
+
 """Ограничения на ячейку."""
 type LimitationType {
   """Ячейка"""
   cell: CellType
   """Состояние"""
   condition: LimitationCondition!
+  id: ID!
+  """Оператор"""
+  operator: LimitationOperator!
   """Значение"""
   value: String!
 }
@@ -1911,6 +1966,8 @@ type PeriodType {
   multiple: Boolean!
   """Наименование периода"""
   name: String!
+  """Приватность полей"""
+  privately: Boolean!
   """Проект"""
   project: ProjectType
   """Дата начала"""
@@ -1992,12 +2049,31 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
+input ProjectFilterInputType {
+  """`And` field"""
+  and: [ProjectFilterInputType]
+  """`Name` field"""
+  name: ProjectNameFilterInputType
+  """`Not` field"""
+  not: ProjectFilterInputType
+  """`Or` field"""
+  or: [ProjectFilterInputType]
+  """`User` field"""
+  user: ProjectUserFilterInputType
+}
+
+input ProjectNameFilterInputType {
+  """`Icontains` lookup"""
+  icontains: String
+}
+
 """Тип модели проектов."""
-type ProjectType {
+type ProjectType implements Node {
   """Дата создания"""
   createdAt: DateTime!
   """Описание проекта"""
   description: String!
+  """The ID of the object."""
   id: ID!
   """Наименование проекта"""
   name: String!
@@ -2009,6 +2085,30 @@ type ProjectType {
   user: UserType!
   """Видимость проекта"""
   visibility: Boolean!
+}
+
+type ProjectTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [ProjectTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `ProjectType` and its cursor."""
+type ProjectTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: ProjectType
+}
+
+input ProjectUserFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [ID]
 }
 
 """Схема запросов данных."""
@@ -2060,6 +2160,15 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID!
   ): [ProfileValueType!]!
+  projects(
+    after: String
+    before: String
+    """Advanced filter field"""
+    filter: ProjectFilterInputType
+    first: Int
+    last: Int
+    offset: Int
+  ): ProjectTypeConnection
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
   """Сегменты страницы"""
@@ -2186,10 +2295,14 @@ type RestorePasswordMutationPayload {
 
 """An enumeration."""
 enum RowDimensionAggregation {
+  """avg"""
+  AVG
   """max"""
   MAX
   """min"""
   MIN
+  """sum"""
+  SUM
 }
 
 """Тип строк."""
