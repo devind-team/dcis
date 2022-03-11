@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_celery_results',
     'django_celery_beat',
+    'django_seed',
     'devind_core',
     'devind_notifications',
     'devind_dictionaries',

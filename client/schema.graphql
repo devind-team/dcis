@@ -364,24 +364,18 @@ type CategoryTypeEdge {
 
 """An enumeration."""
 enum CellKind {
-  """b"""
-  B
-  """d"""
-  D
-  """e"""
-  E
-  """f"""
-  F
-  """fl"""
-  FL
-  """inlineStr"""
-  INLINESTR
-  """n"""
-  N
-  """s"""
-  S
-  """str"""
-  STR
+  """text"""
+  A_0
+  """computing"""
+  A_1
+  """money"""
+  A_2
+  """date"""
+  A_3
+  """datetime"""
+  A_4
+  """file"""
+  A_5
 }
 
 """Тип ячейки."""
@@ -394,6 +388,7 @@ type CellType {
   default: String
   """Формула"""
   formula: String
+  id: ID!
   """Тип значения"""
   kind: CellKind!
   """Ограничения на ячейку"""
@@ -900,6 +895,25 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
+input ChangeValueInput {
+  clientMutationId: String
+  """Значение"""
+  value: String!
+  """Идентификатор значения"""
+  valueId: ID!
+}
+
+"""Изменение значения."""
+type ChangeValuePayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененное значение"""
+  value: ValueType
+}
+
 """Тип колонок."""
 type ColumnDimensionType {
   """Дивизион"""
@@ -910,14 +924,12 @@ type ColumnDimensionType {
   """Индекс колонки"""
   index: Int!
   objectId: Int
-  """Лист"""
-  sheet: SheetType!
   """Листы"""
-  sheets: [SheetType!]
+  sheet: SheetType
   """Пользователь"""
   user: [UserType]
   """Ширина колонки"""
-  width: Int!
+  width: Int
 }
 
 """Комментарии"""
@@ -1006,66 +1018,14 @@ enum ConsumerActionType {
 type ContentTypeType {
   appLabel: String!
   columndimensionSet: [ColumnDimensionType!]!
-  divisionSet(after: String, before: String, first: Int, last: Int, offset: Int): DivisionTypeConnection!
-  documentSet(after: String, before: String, first: Int, last: Int, offset: Int): DocumentTypeConnection!
+  divisionSet: [DivisionType!]!
+  documentSet: [DocumentType!]!
   id: ID!
   """Модель, связанная с действием"""
   logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
   model: String!
   permissionSet: [PermissionType!]!
   rowdimensionSet: [RowDimensionType!]!
-}
-
-input CreatePeriodInput {
-  attributeSet: [ID]
-  divisionSet: [ID]
-  """Дата окончания"""
-  expiration: DateTime
-  """Методическая поддержка"""
-  methodicalSupport: [ID]!
-  """Множественное заполнение"""
-  multiple: Boolean
-  """Наименование периода"""
-  name: String!
-  periodgroupSet: [ID]
-  periodprivilegeSet: [ID]
-  """Приватность полей"""
-  privately: Boolean
-  """Проект сборов"""
-  project: ID!
-  sheetSet: [ID]
-  """Дата начала"""
-  start: DateTime
-  """Статус проекта"""
-  status: PeriodStatus
-  """Организатор сборов"""
-  user: ID
-}
-
-"""Мутация для создания периода."""
-type CreatePeriodMutation {
-  """Добавленный период"""
-  period: PeriodType
-}
-
-input CreateProjectInput {
-  """Описание проекта"""
-  description: String!
-  """Наименование проекта"""
-  name: String!
-  periodSet: [ID]
-  """Сокращенное наименование проекта"""
-  short: String!
-  """Организатор сборов"""
-  user: ID
-  """Видимость проекта"""
-  visibility: Boolean
-}
-
-"""Мутация для создания проекта."""
-type CreateProjectMutation {
-  """Добавленный проект"""
-  project: ProjectType
 }
 
 """
@@ -1181,14 +1141,6 @@ type DeleteProfileMutationPayload {
   success: Boolean!
 }
 
-"""Мутация для удаления проекта."""
-type DeleteProjectMutation {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
-  found: Boolean
-}
-
 input DeleteSectionMutationInput {
   clientMutationId: String
   """Идентификатор секции"""
@@ -1218,31 +1170,13 @@ type DeleteSessionsMutationPayload {
 }
 
 """Список участвующих дивизионов в сборе."""
-type DivisionType implements Node {
+type DivisionType {
   """Дивизион: Department, Organizations"""
   contentType: ContentTypeType!
-  """The ID of the object."""
   id: ID!
   objectId: Int!
   """Период"""
   period: PeriodType!
-}
-
-type DivisionTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DivisionTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DivisionType` and its cursor."""
-type DivisionTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DivisionType
 }
 
 """Debugging information for the current query."""
@@ -1284,13 +1218,12 @@ type DjangoDebugSQL {
 }
 
 """Тип моделей документа."""
-type DocumentType implements Node {
+type DocumentType {
   """Комментарий"""
   comment: String!
   contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
-  """The ID of the object."""
   id: ID!
   objectId: Int!
   """Листы"""
@@ -1299,23 +1232,6 @@ type DocumentType implements Node {
   updatedAt: DateTime!
   """Версия документа"""
   version: Int!
-}
-
-type DocumentTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DocumentTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DocumentType` and its cursor."""
-type DocumentTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DocumentType
 }
 
 """Ошибка в поле формы"""
@@ -1573,6 +1489,21 @@ type MailingType {
   user: UserType!
 }
 
+"""Тип для объединенных ячеек."""
+type MergedCellType {
+  id: ID!
+  """Конечная позиция в колонке"""
+  maxCol: Int!
+  """Конечная позиция в строке"""
+  maxRow: Int!
+  """Начальная позиция в колонке"""
+  minCol: Int!
+  """Начальная позиция в строке"""
+  minRow: Int!
+  """Объединенный диапазон"""
+  range: String!
+}
+
 """Мутации на изменение чего-либо."""
 type Mutation {
   """Мутация для добавления категории"""
@@ -1645,12 +1576,10 @@ type Mutation {
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
+  """Изменение значения."""
+  changeValue(input: ChangeValueInput!): ChangeValuePayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
-  """Мутация для создания периода."""
-  createPeriod(input: CreatePeriodInput!): CreatePeriodMutation!
-  """Мутация для создания проекта."""
-  createProject(input: CreateProjectInput!): CreateProjectMutation!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Мутация для полного удаления файла"""
@@ -1663,8 +1592,6 @@ type Mutation {
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
-  """Мутация для удаления проекта."""
-  deleteProject(id: ID!): DeleteProjectMutation!
   """Удаление секции"""
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
@@ -1966,8 +1893,6 @@ type PeriodType {
   multiple: Boolean!
   """Наименование периода"""
   name: String!
-  """Приватность полей"""
-  privately: Boolean!
   """Проект"""
   project: ProjectType
   """Дата начала"""
@@ -2049,31 +1974,12 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-input ProjectFilterInputType {
-  """`And` field"""
-  and: [ProjectFilterInputType]
-  """`Name` field"""
-  name: ProjectNameFilterInputType
-  """`Not` field"""
-  not: ProjectFilterInputType
-  """`Or` field"""
-  or: [ProjectFilterInputType]
-  """`User` field"""
-  user: ProjectUserFilterInputType
-}
-
-input ProjectNameFilterInputType {
-  """`Icontains` lookup"""
-  icontains: String
-}
-
 """Тип модели проектов."""
-type ProjectType implements Node {
+type ProjectType {
   """Дата создания"""
   createdAt: DateTime!
   """Описание проекта"""
   description: String!
-  """The ID of the object."""
   id: ID!
   """Наименование проекта"""
   name: String!
@@ -2087,30 +1993,6 @@ type ProjectType implements Node {
   visibility: Boolean!
 }
 
-type ProjectTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [ProjectTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `ProjectType` and its cursor."""
-type ProjectTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: ProjectType
-}
-
-input ProjectUserFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
-}
-
 """Схема запросов данных."""
 type Query {
   _debug: DjangoDebug
@@ -2122,6 +2004,11 @@ type Query {
   categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
   """Категория"""
   category(categoryId: ID!): CategoryType!
+  """Документ"""
+  document(
+    """Идентификатор документа"""
+    documentId: ID
+  ): DocumentType
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
@@ -2160,15 +2047,6 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID!
   ): [ProfileValueType!]!
-  projects(
-    after: String
-    before: String
-    """Advanced filter field"""
-    filter: ProjectFilterInputType
-    first: Int
-    last: Int
-    offset: Int
-  ): ProjectTypeConnection
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
   """Сегменты страницы"""
@@ -2295,14 +2173,10 @@ type RestorePasswordMutationPayload {
 
 """An enumeration."""
 enum RowDimensionAggregation {
-  """avg"""
-  AVG
   """max"""
   MAX
   """min"""
   MIN
-  """sum"""
-  SUM
 }
 
 """Тип строк."""
@@ -2567,6 +2441,8 @@ type SheetType {
   """Дата создания"""
   createdAt: DateTime!
   id: ID!
+  """Объединенные ячейки"""
+  mergedCells: [MergedCellType]
   """Наименование"""
   name: String!
   """Период"""
@@ -2580,7 +2456,7 @@ type SheetType {
   """Значения документа"""
   values(
     """Идентификатор документа"""
-    documentId: Int!
+    documentId: ID!
   ): [ValueType]
 }
 
