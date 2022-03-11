@@ -5,6 +5,7 @@ from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
 from ..models import (
@@ -113,9 +114,10 @@ class SheetType(DjangoObjectType):
     columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
     rows = graphene.List(lambda: RowDimensionType, description='Строки')
     cells = graphene.List(lambda: CellType, description='Мета информация о ячейках')
+    merged_cells = graphene.List(lambda: MergedCellType, description='Объединенные ячейки')
     values = graphene.List(
         lambda: ValueType,
-        document_id=graphene.Int(required=True, description='Идентификатор документа'),
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
         description='Значения документа'
     )
 
@@ -129,10 +131,6 @@ class SheetType(DjangoObjectType):
             'created_at',
             'updated_at',
             'period',
-            'rows',
-            'columns',
-            'cells',
-            'values'
         )
 
     @staticmethod
@@ -156,9 +154,14 @@ class SheetType(DjangoObjectType):
         return Cell.objects.filter(column_id__in=sheet.columndimension_set.values_list('pk', flat=True)).all()
 
     @staticmethod
-    def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: int, *args, **kwargs):
-        """Получение значений, связанных с документом."""
-        return Value.objects.filter(sheet=sheet, document_id=document_id).all()
+    def resolve_merged_cells(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
+        """Получение всех объединенных ячеек связанных с листом."""
+        return MergedCell.objects.filter(sheet=sheet).all()
+
+    @staticmethod
+    def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: str, *args, **kwargs):
+        """Получение значений, связанных с листом."""
+        return Value.objects.filter(sheet=sheet, document_id=from_global_id(document_id)[1]).all()
 
 
 class DocumentType(DjangoObjectType):
@@ -249,7 +252,7 @@ class AttributeValueType(DjangoObjectType):
 class ColumnDimensionType(DjangoObjectType):
     """Тип колонок."""
 
-    sheets = DjangoListField(SheetType, description='Листы')
+    sheet = graphene.Field(SheetType, description='Листы')
     user = graphene.List(UserType, description='Пользователь')
     content_type = graphene.Field(ContentTypeType, description='Дивизион')
 
@@ -308,6 +311,7 @@ class CellType(DjangoObjectType):
     class Meta:
         model = Cell
         fields = (
+            'id',
             'kind',
             'formula',
             'comment',
@@ -344,7 +348,7 @@ class LimitationType(DjangoObjectType):
 class MergedCellType(DjangoObjectType):
     """Тип для объединенных ячеек."""
 
-    range = graphene.String(required=True, description='Смердженный диапазон')
+    range = graphene.String(required=True, description='Объединенный диапазон')
 
     class Meta:
         model = MergedCell
@@ -354,7 +358,6 @@ class MergedCellType(DjangoObjectType):
             'min_row',
             'max_col',
             'max_row',
-            'range',
         )
 
     @staticmethod

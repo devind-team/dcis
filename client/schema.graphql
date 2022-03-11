@@ -362,6 +362,45 @@ type CategoryTypeEdge {
   node: CategoryType
 }
 
+"""An enumeration."""
+enum CellKind {
+  """text"""
+  A_0
+  """computing"""
+  A_1
+  """money"""
+  A_2
+  """date"""
+  A_3
+  """datetime"""
+  A_4
+  """file"""
+  A_5
+}
+
+"""Тип ячейки."""
+type CellType {
+  """Колонка"""
+  column: ColumnDimensionType
+  """Комментарий"""
+  comment: String
+  """Значение по умолчанию"""
+  default: String
+  """Формула"""
+  formula: String
+  id: ID!
+  """Тип значения"""
+  kind: CellKind!
+  """Ограничения на ячейку"""
+  limitations: [LimitationType]
+  """Маска для ввода значений"""
+  mask: String
+  """Строка"""
+  row: RowDimensionType
+  """Подсказка"""
+  tooltip: String
+}
+
 input ChangeAvatarMutationInput {
   clientMutationId: String
   """Загружаемый файл аватара"""
@@ -856,6 +895,43 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
+input ChangeValueInput {
+  clientMutationId: String
+  """Значение"""
+  value: String!
+  """Идентификатор значения"""
+  valueId: ID!
+}
+
+"""Изменение значения."""
+type ChangeValuePayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененное значение"""
+  value: ValueType
+}
+
+"""Тип колонок."""
+type ColumnDimensionType {
+  """Дивизион"""
+  contentType: ContentTypeType
+  """Фиксация колонки"""
+  fixed: Boolean!
+  id: ID!
+  """Индекс колонки"""
+  index: Int!
+  objectId: Int
+  """Листы"""
+  sheet: SheetType
+  """Пользователь"""
+  user: [UserType]
+  """Ширина колонки"""
+  width: Int
+}
+
 """Комментарии"""
 type CommentType implements Node {
   """Дочерние комментарии"""
@@ -941,11 +1017,15 @@ enum ConsumerActionType {
 """Тип модели Django."""
 type ContentTypeType {
   appLabel: String!
+  columndimensionSet: [ColumnDimensionType!]!
+  divisionSet: [DivisionType!]!
+  documentSet: [DocumentType!]!
   id: ID!
   """Модель, связанная с действием"""
   logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
   model: String!
   permissionSet: [PermissionType!]!
+  rowdimensionSet: [RowDimensionType!]!
 }
 
 """
@@ -1089,6 +1169,16 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
+"""Список участвующих дивизионов в сборе."""
+type DivisionType {
+  """Дивизион: Department, Organizations"""
+  contentType: ContentTypeType!
+  id: ID!
+  objectId: Int!
+  """Период"""
+  period: PeriodType!
+}
+
 """Debugging information for the current query."""
 type DjangoDebug {
   """Executed SQL queries for this API query."""
@@ -1125,6 +1215,23 @@ type DjangoDebugSQL {
   transStatus: String
   """The type of database being used (e.g. postrgesql, mysql, sqlite)."""
   vendor: String!
+}
+
+"""Тип моделей документа."""
+type DocumentType {
+  """Комментарий"""
+  comment: String!
+  contentType: ContentTypeType!
+  """Дата создания"""
+  createdAt: DateTime!
+  id: ID!
+  objectId: Int!
+  """Листы"""
+  sheets: [SheetType!]
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Версия документа"""
+  version: Int!
 }
 
 """Ошибка в поле формы"""
@@ -1232,6 +1339,41 @@ Use of this type is *not recommended* as you lose the benefits of having a defin
 schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
+
+"""An enumeration."""
+enum LimitationCondition {
+  """<"""
+  A_0
+  """>"""
+  A_1
+  """="""
+  A_2
+  """<="""
+  A_3
+  """>="""
+  A_4
+}
+
+"""An enumeration."""
+enum LimitationOperator {
+  """and"""
+  AND
+  """or"""
+  OR
+}
+
+"""Ограничения на ячейку."""
+type LimitationType {
+  """Ячейка"""
+  cell: CellType
+  """Состояние"""
+  condition: LimitationCondition!
+  id: ID!
+  """Оператор"""
+  operator: LimitationOperator!
+  """Значение"""
+  value: String!
+}
 
 """An enumeration."""
 enum LogEntryAction {
@@ -1347,6 +1489,21 @@ type MailingType {
   user: UserType!
 }
 
+"""Тип для объединенных ячеек."""
+type MergedCellType {
+  id: ID!
+  """Конечная позиция в колонке"""
+  maxCol: Int!
+  """Конечная позиция в строке"""
+  maxRow: Int!
+  """Начальная позиция в колонке"""
+  minCol: Int!
+  """Начальная позиция в строке"""
+  minRow: Int!
+  """Объединенный диапазон"""
+  range: String!
+}
+
 """Мутации на изменение чего-либо."""
 type Mutation {
   """Мутация для добавления категории"""
@@ -1419,6 +1576,8 @@ type Mutation {
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
+  """Изменение значения."""
+  changeValue(input: ChangeValueInput!): ChangeValuePayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация для удаления категории"""
@@ -1712,6 +1871,40 @@ type PageTypeEdge {
   node: PageType
 }
 
+"""An enumeration."""
+enum PeriodStatus {
+  """preparation"""
+  A_0
+  """open"""
+  A_1
+  """close"""
+  A_2
+}
+
+"""Тип периода."""
+type PeriodType {
+  """Дата создания"""
+  createdAt: DateTime!
+  """Дата окончания"""
+  expiration: DateTime
+  id: ID!
+  methodicalSupport: [FileType!]
+  """Множественное заполнение"""
+  multiple: Boolean!
+  """Наименование периода"""
+  name: String!
+  """Проект"""
+  project: ProjectType
+  """Дата начала"""
+  start: DateTime
+  """Статус проекта"""
+  status: PeriodStatus!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь"""
+  user: UserType!
+}
+
 """Привилегия пользователя или группы пользователей."""
 type PermissionType {
   codename: String!
@@ -1781,6 +1974,25 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
+"""Тип модели проектов."""
+type ProjectType {
+  """Дата создания"""
+  createdAt: DateTime!
+  """Описание проекта"""
+  description: String!
+  id: ID!
+  """Наименование проекта"""
+  name: String!
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Пользователь"""
+  user: UserType!
+  """Видимость проекта"""
+  visibility: Boolean!
+}
+
 """Схема запросов данных."""
 type Query {
   _debug: DjangoDebug
@@ -1792,6 +2004,11 @@ type Query {
   categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
   """Категория"""
   category(categoryId: ID!): CategoryType!
+  """Документ"""
+  document(
+    """Идентификатор документа"""
+    documentId: ID
+  ): DocumentType
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
@@ -1952,6 +2169,40 @@ type RestorePasswordMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+}
+
+"""An enumeration."""
+enum RowDimensionAggregation {
+  """max"""
+  MAX
+  """min"""
+  MIN
+}
+
+"""Тип строк."""
+type RowDimensionType {
+  """Агрегирование перечисление (мин, макс) для динамических строк"""
+  aggregation: RowDimensionAggregation
+  """Дочерние строки"""
+  children: [RowDimensionType]
+  """Дивизион"""
+  contentType: ContentTypeType
+  """Документ, для динамических строк"""
+  document: DocumentType
+  """Динамическая ли строка"""
+  dynamic: Boolean!
+  """Высота колонки"""
+  height: Int
+  id: ID!
+  """Индекс строки"""
+  index: Int!
+  objectId: Int
+  """Родительские строки"""
+  parent: RowDimensionType
+  """Лист"""
+  sheet: SheetType!
+  """Пользователь"""
+  user: [UserType]
 }
 
 """Ошибка в строке."""
@@ -2179,6 +2430,36 @@ type SettingType {
   value: String!
 }
 
+"""Тип моделей листов."""
+type SheetType {
+  """Мета информация о ячейках"""
+  cells: [CellType]
+  """Колонки"""
+  columns: [ColumnDimensionType]
+  """Комментарий"""
+  comment: String!
+  """Дата создания"""
+  createdAt: DateTime!
+  id: ID!
+  """Объединенные ячейки"""
+  mergedCells: [MergedCellType]
+  """Наименование"""
+  name: String!
+  """Период"""
+  period: PeriodType
+  """Позиция"""
+  position: Int!
+  """Строки"""
+  rows: [RowDimensionType]
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Значения документа"""
+  values(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [ValueType]
+}
+
 """Подписки на сокеты."""
 type Subscription {
   """Поток новых уведомлений"""
@@ -2342,4 +2623,23 @@ type UserTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: UserType
+}
+
+"""Тип для значений."""
+type ValueType {
+  """Колонка"""
+  column: ColumnDimensionType!
+  """Документ"""
+  document: DocumentType!
+  """Текст ошибки"""
+  error: String
+  id: ID!
+  """Строка"""
+  row: RowDimensionType!
+  """Лист"""
+  sheet: SheetType!
+  """Значение"""
+  value: String!
+  """Валидно ли поле"""
+  verified: Boolean!
 }
