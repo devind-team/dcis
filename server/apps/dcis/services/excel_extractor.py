@@ -1,17 +1,17 @@
+from pathlib import PosixPath
 from typing import List, Iterator, Tuple, Dict
-from dataclasses import dataclass, asdict
-from enum import Enum
-from pathlib import PosixPath, Path
+
 from openpyexcel import load_workbook
-from openpyexcel.worksheet.dimensions import DimensionHolder, ColumnDimension, RowDimension
-from openpyexcel.cell.cell import Cell
-from openpyexcel.worksheet.merge import MergeCell
-from openpyexcel.utils.cell import get_column_letter, column_index_from_string
 from openpyexcel.styles.colors import COLOR_INDEX
+from openpyexcel.utils.cell import column_index_from_string
+from openpyexcel.worksheet.dimensions import DimensionHolder
+from openpyexcel.worksheet.merge import MergeCell
+
+from ..models import Period, Sheet, Cell, MergedCell, RowDimension, ColumnDimension
 
 
 class ExcelExtractor:
-    """Парсинг эксель файла в структуру данных для последовательной загрузки в базу данных."""
+    """Парсинг xlsx файла в структуру данных для последовательной загрузки в базу данных."""
 
     def __init__(self, path: PosixPath):
         """Инициализация.
@@ -20,6 +20,32 @@ class ExcelExtractor:
         """
         self.path = path
         self.work_book = load_workbook(path)
+
+    def save(self, period: Period):
+        """Сохранение обработанного файла в базу данных."""
+        extract_sheets: List[Dict] = self.extract()
+        for position, extract_sheet in enumerate(extract_sheets):
+            sheet = Sheet.objects.create(
+                name=extract_sheet['name'],
+                position=position,
+                period=period
+            )
+            # Соотношение позиции и созданных идентификаторов
+            columns_mapper: Dict[int, int] = {}
+            rows_mapper: Dict[int, int] = {}
+
+            for column_dimension in sheet['columns_dimension']:
+                column: ColumnDimension = ColumnDimension.objects.create(**column_dimension)
+                columns_mapper[column.index] = column.id
+            for row_dimension in sheet['rows_dimension']:
+                row: RowDimension = RowDimension.objects.create(**row_dimension)
+                rows_mapper[row.index] = row.id
+            for cell in sheet['cells']:
+                cell['column_id'] = columns_mapper[cell['column_id']]
+                cell['row_id'] = rows_mapper[cell['row_id']]
+                Cell.objects.create(**cell)
+            for merged_cell in sheet['merged_cells']:
+                MergedCell.objects.create(**merged_cell)
 
     def extract(self) -> List[Dict]:
         """Парсинг файла эксель.
