@@ -1,5 +1,5 @@
-import { computed } from '#app'
-import type { ComputedRef } from '#app'
+import { computed, ref } from '#app'
+import type { ComputedRef, Ref } from '#app'
 import type { SheetType, ColumnDimensionType, RowDimensionType, CellType, ValueType } from '~/types/graphql'
 import { positionToLetter } from '~/services/grid'
 
@@ -16,6 +16,13 @@ export type BuildMergedCell = {
   cells: CellType[]
 }
 
+export type Cell = BuildCell | BuildMergedCell
+
+export type EditableCell = {
+  cell: Cell
+  value: string
+}
+
 export type BuildColumn = {
   name: string
   style: Record<string, string>
@@ -26,7 +33,7 @@ export type BuildRow = {
   name: string
   style: Record<string, string>
   dimension: RowDimensionType
-  cells: (BuildCell | BuildMergedCell)[]
+  cells: Cell[]
 }
 
 export function useGrid (sheet: ComputedRef<SheetType | null>) {
@@ -58,7 +65,7 @@ export function useGrid (sheet: ComputedRef<SheetType | null>) {
   const findCell = (
     rowDimension: RowDimensionType,
     columnDimension: ColumnDimensionType
-  ): BuildCell | BuildMergedCell | null => {
+  ): Cell | null => {
     for (const mergedCell of mergedCells.value) {
       if (mergedCell.cell.row.id === rowDimension.id && mergedCell.cell.column.id === columnDimension.id) {
         return mergedCell
@@ -96,5 +103,50 @@ export function useGrid (sheet: ComputedRef<SheetType | null>) {
     }))
     : []
   )
-  return { columns, rows }
+
+  const activeCell: Ref<Cell | null> = ref<Cell | null>(null)
+  const editableCell: Ref<EditableCell | null> = ref<EditableCell | null>(null)
+
+  const isActive = (cell: Cell): boolean => {
+    return activeCell.value && activeCell.value.cell.id === cell.cell.id
+  }
+
+  const isEditable = (cell: Cell): boolean => {
+    return editableCell.value && editableCell.value.cell.cell.id === cell.cell.id
+  }
+
+  const isCurrent = (cell: Cell): boolean => {
+    return isActive(cell) || isEditable(cell)
+  }
+
+  const changeCellValue = (editableCell: EditableCell): void => {
+    console.log(editableCell)
+  }
+
+  const activateCell = (cell: Cell): void => {
+    if (isCurrent(cell)) {
+      return
+    }
+    activeCell.value = cell
+    if (editableCell.value) {
+      changeCellValue(editableCell.value)
+    }
+    editableCell.value = null
+  }
+
+  const editCell = (cell: Cell): void => {
+    if (isEditable(cell)) {
+      return
+    }
+    activeCell.value = cell
+    if (editableCell.value) {
+      changeCellValue(editableCell.value)
+    }
+    editableCell.value = {
+      cell,
+      value: getValue(cell.cell).value
+    }
+  }
+
+  return { columns, rows, activeCell, editableCell, isActive, isEditable, isCurrent, activateCell, editCell }
 }
