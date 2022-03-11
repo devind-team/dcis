@@ -1,42 +1,35 @@
 [
   {
-    "id": 1,
     "name": "Общая информация",
     "code": "general",
     "position": 0,
     "children": [
       {
-        "id": 2,
         "name": "Идентификатор uuid4",
         "code": "uuid",
         "position": 0
       },
       {
-        "id": 3,
         "name": "Занимаемая должность",
         "code": "post",
         "position": 1
       },
       {
-        "id": 4,
         "name": "Внешний телефон",
         "code": "external_phone",
         "position": 2
       },
       {
-        "id": 5,
         "name": "Внутренний телефон",
         "code": "internal_phone",
         "position": 3
       },
       {
-        "id": 6,
         "name": "Адрес",
         "code": "address",
         "position": 4
       },
       {
-        "id": 7,
         "name": "Аудитория",
         "code": "room",
         "position": 5
