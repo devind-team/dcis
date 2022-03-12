@@ -7,13 +7,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, useNuxt2Meta, useNuxtApp } from '#app'
+import { defineComponent, useNuxt2Meta, useNuxtApp, useRouter } from '#app'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { useAuthStore } from '~/store/auth-store'
 
 export default defineComponent({
   middleware: 'auth',
   setup () {
+    const router = useRouter()
     const { t, localePath } = useI18n()
     const { onLogout, defaultClient } = useApolloHelpers()
     const { $store } = useNuxtApp()
@@ -25,12 +26,10 @@ export default defineComponent({
       userStore.logout()
       // Убрать после удаления vuex
       $store.dispatch('auth/logout')
-      onLogout(defaultClient)
+      onLogout(defaultClient, true)
     }
     // Необходимо для нормальной перезагрузки сокетов
-    if (process.client) {
-      window.location.href = localePath({ name: 'index' })
-    }
+    router.push(localePath({ name: 'index' }))
   }
 })
 </script>

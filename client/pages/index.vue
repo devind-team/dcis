@@ -3,10 +3,11 @@
     page-segment(v-if="!loading" v-for="segment in segments" :key="segment.id" :segment="segment")
     v-row(v-else)
       v-progress-circular.mt-12.mx-auto(size="60" color="primary" indeterminate)
+    pre {{ user }}
 </template>
 
 <script lang="ts">
-import { defineComponent, useNuxt2Meta } from '#app'
+import { defineComponent, toRefs, useNuxt2Meta } from '#app'
 import { SegmentsQuery, SegmentsQueryVariables } from '~/types/graphql'
 import { useAuthStore } from '~/store'
 import { useCommonQuery, useI18n } from '~/composables'
@@ -17,13 +18,15 @@ export default defineComponent({
   components: { PageSegment },
   setup () {
     const { t } = useI18n()
+    const authStore = useAuthStore()
+    const { user } = toRefs(authStore)
     useNuxt2Meta({ title: t('homePage') as string })
 
     const { data: segments, loading } = useCommonQuery<SegmentsQuery, SegmentsQueryVariables>({
       document: segmentsQuery
     })
 
-    return { segments, loading }
+    return { segments, loading, user }
   }
 })
 </script>
