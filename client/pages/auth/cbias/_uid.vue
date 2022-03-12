@@ -60,9 +60,7 @@ export default defineComponent({
         // Убрать после удаления vuex
         $store.dispatch('auth/fetchExistUser', Object.assign({}, user))
         // Необходимо для нормальной перезагрузки сокетов
-        if (process.client) {
-          window.location.href = (route.query.to as string) || localePath({ name: 'index' })
-        }
+        window.location.href = (route.query.to as string) || localePath({ name: 'index' })
         // router.push((route.query.to as string) || localePath({ name: 'index' }))
       }
     })
