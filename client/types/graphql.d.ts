@@ -3852,6 +3852,21 @@ export type ProjectsQueryVariables = Exact<{
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null } | null> } | null };
 
+export type CreateProjectMutationVariables = Exact<{
+  name: Scalars['String'];
+  short: Scalars['String'];
+  description: Scalars['String'];
+  userId: Scalars['ID'];
+}>;
+
+export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename: 'CreateProjectMutation', project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null } };
+
+export type DeleteProjectMutationVariables = Exact<{
+  projectId: Scalars['ID'];
+}>;
+
+export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutation', deletedId?: string | null } };
+
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 
 export type NoticeFieldsFragment = { __typename: 'NoticeType', id: string, kind: NoticeKind, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null };

@@ -48,6 +48,12 @@ class ExcelExtractor:
                         index=cell['column_id']
                     )
                     columns_mapper[cell['column_id']] = column.id
+                if cell['row_id'] not in rows_mapper:
+                    row: RowDimension = RowDimension.objects.create(
+                        sheet=sheet,
+                        index=cell['row_id']
+                    )
+                    rows_mapper[cell['row_id']] = row.id
                 cell['column_id'] = columns_mapper[cell['column_id']]
                 cell['row_id'] = rows_mapper[cell['row_id']]
                 Cell.objects.create(**cell)
