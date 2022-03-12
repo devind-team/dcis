@@ -17,12 +17,12 @@ export default defineComponent({
   components: { PageSegment },
   setup () {
     const { t } = useI18n()
+    const authStore = useAuthStore()
     useNuxt2Meta({ title: t('homePage') as string })
 
     const { data: segments, loading } = useCommonQuery<SegmentsQuery, SegmentsQueryVariables>({
       document: segmentsQuery
     })
-
     return { segments, loading }
   }
 })

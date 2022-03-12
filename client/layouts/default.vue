@@ -10,11 +10,11 @@
 <script lang="ts">
 import { Vue, Component, Provide } from 'vue-property-decorator'
 import { mapGetters } from 'vuex'
+import notificationsQuery from '~/gql/notifications/queries/notifications.graphql'
+import { NotificationsQuery, NotificationType, NotificationTypeEdge, PageInfo, UserType } from '~/types/graphql'
 import Navigation from '~/components/global/Navigation.vue'
 import AppBar from '~/components/global/AppBar.vue'
 import FooterComponent from '~/components/global/FooterComponent.vue'
-import notificationsQuery from '~/gql/notifications/queries/notifications.graphql'
-import { NotificationsQuery, NotificationType, NotificationTypeEdge, PageInfo, UserType } from '~/types/graphql'
 import { updateQueryNotifications } from '~/components/global/Notification.vue'
 
 @Component<DefaultLayout>({
@@ -38,15 +38,9 @@ import { updateQueryNotifications } from '~/components/global/Notification.vue'
       },
       subscribeToMore: {
         document: require('~/gql/notifications/subscriptions/notifications.graphql'),
-        updateQuery: updateQueryNotifications,
-        onError () {
-          typeof window !== 'undefined' && window.location.reload()
-        }
+        updateQuery: updateQueryNotifications
       },
       loadingKey: 'notificationLoading',
-      error () {
-        typeof window !== 'undefined' && window.location.reload()
-      },
       skip () {
         return !this.loginIn
       }
