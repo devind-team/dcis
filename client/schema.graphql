@@ -996,7 +996,7 @@ type ColumnDimensionType {
   """Пользователь"""
   user: [UserType]
   """Ширина колонки"""
-  width: Int!
+  width: Int
 }
 
 """Комментарии"""

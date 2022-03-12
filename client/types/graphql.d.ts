@@ -1083,7 +1083,7 @@ export type ColumnDimensionType = {
   /** Пользователь */
   user?: Maybe<Array<Maybe<UserType>>>;
   /** Ширина колонки */
-  width: Scalars['Int'];
+  width?: Maybe<Scalars['Int']>;
 };
 
 /** Комментарии */
@@ -3831,7 +3831,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width: number } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
 
 export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
@@ -3851,21 +3851,6 @@ export type ProjectsQueryVariables = Exact<{
 }>;
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null } | null> } | null };
-
-export type CreateProjectMutationVariables = Exact<{
-  name: Scalars['String'];
-  short: Scalars['String'];
-  description: Scalars['String'];
-  userId: Scalars['ID'];
-}>;
-
-export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename: 'CreateProjectMutation', project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean } | null } };
-
-export type DeleteProjectMutationVariables = Exact<{
-  projectId: Scalars['ID'];
-}>;
-
-export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutation', deletedId?: string | null } };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 

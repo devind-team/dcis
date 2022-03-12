@@ -38,15 +38,9 @@ import { updateQueryNotifications } from '~/components/global/Notification.vue'
       },
       subscribeToMore: {
         document: require('~/gql/notifications/subscriptions/notifications.graphql'),
-        updateQuery: updateQueryNotifications,
-        onError () {
-          typeof window !== 'undefined' && window.location.reload()
-        }
+        updateQuery: updateQueryNotifications
       },
       loadingKey: 'notificationLoading',
-      error () {
-        typeof window !== 'undefined' && window.location.reload()
-      },
       skip () {
         return !this.loginIn
       }
