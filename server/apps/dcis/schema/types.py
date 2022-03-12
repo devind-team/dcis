@@ -285,8 +285,18 @@ class ColumnDimensionType(DjangoObjectType):
             'sheet',
             'user',
             'content_type',
-            'object_id'
+            'object_id',
+            'horizontal_align',
+            'vertical_align',
+            'size',
+            'strong',
+            'italic',
+            'strike',
+            'underline',
+            'color',
+            'background',
         )
+        convert_choices_to_enum = False
 
 
 class RowDimensionType(DjangoObjectType):
@@ -311,8 +321,18 @@ class RowDimensionType(DjangoObjectType):
             'children',
             'user',
             'content_type',
-            'object_id'
+            'object_id',
+            'horizontal_align',
+            'vertical_align',
+            'size',
+            'strong',
+            'italic',
+            'strike',
+            'underline',
+            'color',
+            'background',
         )
+        convert_choices_to_enum = False
 
     @staticmethod
     @resolver_hints(model_field='rowdimension_set')
@@ -324,7 +344,9 @@ class CellType(DjangoObjectType):
     """Тип ячейки."""
 
     column = graphene.Field(ColumnDimensionType, description='Колонка')
+    column_id = graphene.Int(description='Идентификатор колонки')
     row = graphene.Field(RowDimensionType, description='Строка')
+    row_id = graphene.Int(description='Идентификатор строки')
     limitations = graphene.List(lambda: LimitationType, description='Ограничения на ячейку')
 
     class Meta:
@@ -338,9 +360,21 @@ class CellType(DjangoObjectType):
             'mask',
             'tooltip',
             'column',
+            'column_id',
             'row',
+            'row_id',
+            'horizontal_align',
+            'vertical_align',
+            'size',
+            'strong',
+            'italic',
+            'strike',
+            'underline',
+            'color',
+            'background',
             'limitations',
         )
+        convert_choices_to_enum = False
 
     @staticmethod
     @resolver_hints(model_field='limitation_set')
@@ -396,6 +430,9 @@ class MergedCellType(DjangoObjectType):
 class ValueType(DjangoObjectType):
     """Тип для значений."""
 
+    column_id = graphene.Int(description='Идентификатор колонки')
+    row_id = graphene.Int(description='Идентификатор строки')
+
     class Meta:
         model = Value
         fields = (
@@ -406,5 +443,7 @@ class ValueType(DjangoObjectType):
             'document',
             'sheet',
             'column',
+            'column_id',
             'row',
+            'row_id',
         )

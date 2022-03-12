@@ -1,3 +1,10 @@
+#import "../fragments/sheet_fields.graphql"
+#import "../fragments/column_dimension_fields.graphql"
+#import "../fragments/row_dimension_fields.graphql"
+#import "../fragments/merged_cell_fields.graphql"
+#import "../fragments/cell_fields.graphql"
+#import "../fragments/value_fields.graphql"
+
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
@@ -6,57 +13,22 @@ query Document($documentId: ID!) {
     createdAt
     updatedAt
     sheets {
-      id
-      name
+      ...SheetFields
       columns {
-        id
-        index
-        width
-        __typename
+        ...ColumnDimensionFields
       }
       rows {
-        id
-        index
-        height
-        __typename
+        ...RowDimensionFields
       }
       cells {
-        id
-        column {
-          id
-          index
-          __typename
-        }
-        row {
-          id
-          index
-          __typename
-        }
-        __typename
+        ...CellFields
       }
       mergedCells {
-        id
-        minCol
-        maxCol
-        minRow
-        maxRow
-        range
-        __typename
+        ...MergedCellsFields
       }
       values(documentId: $documentId) {
-        id
-        value
-        column {
-          id
-          __typename
-        }
-        row {
-          id
-          __typename
-        }
-        __typename
+        ...ValueFields
       }
-      __typename
     }
     __typename
   }

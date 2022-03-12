@@ -8,7 +8,6 @@
 <script lang="ts">
 import { defineComponent, useNuxt2Meta } from '#app'
 import { SegmentsQuery, SegmentsQueryVariables } from '~/types/graphql'
-import { useAuthStore } from '~/store'
 import { useCommonQuery, useI18n } from '~/composables'
 import segmentsQuery from '~/gql/pages/queries/segments.graphql'
 import PageSegment from '~/components/pages/PageSegment.vue'
@@ -17,7 +16,6 @@ export default defineComponent({
   components: { PageSegment },
   setup () {
     const { t } = useI18n()
-    const authStore = useAuthStore()
     useNuxt2Meta({ title: t('homePage') as string })
 
     const { data: segments, loading } = useCommonQuery<SegmentsQuery, SegmentsQueryVariables>({

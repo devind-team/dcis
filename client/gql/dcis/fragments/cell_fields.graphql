@@ -1,0 +1,20 @@
+fragment CellFields on CellType {
+  id
+  kind
+  formula
+  comment
+  default
+  tooltip
+  horizontalAlign
+  verticalAlign
+  size
+  strong
+  italic
+  strike
+  underline
+  color
+  background
+  columnId
+  rowId
+  __typename
+}

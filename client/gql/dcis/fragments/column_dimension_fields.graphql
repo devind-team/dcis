@@ -1,0 +1,16 @@
+fragment ColumnDimensionFields on ColumnDimensionType {
+  id
+  index
+  width
+  fixed
+  horizontalAlign
+  verticalAlign
+  size
+  strong
+  italic
+  strike
+  underline
+  color
+  background
+  __typename
+}

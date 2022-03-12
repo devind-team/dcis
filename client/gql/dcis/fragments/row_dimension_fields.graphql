@@ -1,0 +1,16 @@
+fragment RowDimensionFields on RowDimensionType {
+  id
+  index
+  height
+  dynamic
+  horizontalAlign
+  verticalAlign
+  size
+  strong
+  italic
+  strike
+  underline
+  color
+  background
+  __typename
+}

@@ -1,16 +1,13 @@
 <template lang="pug">
   v-container
     v-card(v-if="!loading")
-      grid-toolbar(v-model="activeSheet" :document="document")
       v-card-text
-        grid(:sheet="activeSheet")
-    v-progress-circular(v-else color="primary" indeterminate)
+        pre {{ document }}
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, useRoute } from '#app'
-import type { ComputedRef } from '#app'
-import type { DocumentType, SheetType, DocumentQueryVariables } from '~/types/graphql'
+import { defineComponent, useRoute } from '#app'
+import type { DocumentType, DocumentQueryVariables } from '~/types/graphql'
 import { useCommonQuery } from '~/composables'
 import GridToolbar from '~/components/dcis/GridToolbar.vue'
 import Grid from '~/components/dcis/Grid.vue'
@@ -26,12 +23,7 @@ export default defineComponent({
       })
     })
 
-    const activeSheet: ComputedRef<SheetType> = computed<SheetType>(() =>
-      document.value && document.value.sheets.length ? document.value.sheets[0] : null
-    )
-
     return {
-      activeSheet,
       document,
       loading
     }
