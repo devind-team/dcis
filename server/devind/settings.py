@@ -136,7 +136,7 @@ OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 GRAPHENE = {
     'SCHEMA': 'devind.schema.schema',
     'MIDDLEWARE': [
-        'graphene_django.debug.DjangoDebugMiddleware'
+        'graphene_django.debug.DjangoDebugMiddleware',
     ]
 }
 

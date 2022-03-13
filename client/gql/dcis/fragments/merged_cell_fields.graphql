@@ -1,0 +1,8 @@
+fragment MergedCellsFields on MergedCellType {
+  id
+  colspan
+  rowspan
+  target
+  cells
+  __typename
+}

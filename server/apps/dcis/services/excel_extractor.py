@@ -1,5 +1,5 @@
 from pathlib import PosixPath
-from typing import Any, List, Iterator, Tuple, Dict, Optional
+from typing import List, Iterator, Tuple, Dict
 
 from openpyexcel import load_workbook
 from openpyexcel.styles.colors import COLOR_INDEX
@@ -33,24 +33,39 @@ class ExcelExtractor:
             # Соотношение позиции и созданных идентификаторов
             columns_mapper: Dict[int, int] = {}
             rows_mapper: Dict[int, int] = {}
-
-            for column_dimension in extract_sheet['columns_dimension']:
-                column: ColumnDimension = ColumnDimension.objects.create(sheet=sheet, **column_dimension)
-                columns_mapper[column.index] = column.id
-            for row_dimension in extract_sheet['rows_dimension']:
-                row: RowDimension = RowDimension.objects.create(sheet=sheet, **row_dimension)
-                rows_mapper[row.index] = row.id
+            columns_styles: Dict[int, Dict[str, str]] = {}
+            rows_styles: Dict[int, Dict[str, str]] = {}
             for cell in extract_sheet['cells']:
-                if cell['column_id'] not in columns_mapper:
-                    #   Значит, что используется ячейка по умолчанию
-                    column: ColumnDimension = ColumnDimension.objects.create(
-                        sheet=sheet,
-                        index=cell['column_id']
-                    )
-                    columns_mapper[cell['column_id']] = column.id
-                cell['column_id'] = columns_mapper[cell['column_id']]
-                cell['row_id'] = rows_mapper[cell['row_id']]
-                Cell.objects.create(**cell)
+                column_id: int = cell['column_id']
+                row_id: int = cell['row_id']
+                columns_styles[column_id] = {}
+                rows_styles[row_id] = {}
+
+                if column_id not in columns_mapper:
+                    column_parameters = {'index': column_id}
+                    if column_id in extract_sheet['columns_dimension']:
+                        columns_styles[column_id] = extract_sheet['columns_dimension'][column_id].pop('style')
+                        column_parameters = {**column_parameters, **extract_sheet['columns_dimension'][column_id]}
+                    column: ColumnDimension = ColumnDimension.objects.create(sheet=sheet, **column_parameters)
+                    columns_mapper[column_id] = column.id
+
+                if row_id not in rows_mapper:
+                    row_parameters = {'index': row_id}
+                    if row_id in extract_sheet['rows_dimension']:
+                        rows_styles[row_id] = extract_sheet['rows_dimension'][row_id].pop('style')
+                        row_parameters = {**row_parameters, **extract_sheet['rows_dimension'][row_id]}
+                    row: RowDimension = RowDimension.objects.create(sheet=sheet, **row_parameters)
+                    rows_mapper[row_id] = row.id
+
+                cell['column_id'] = columns_mapper[column_id]
+                cell['row_id'] = rows_mapper[row_id]
+                # Объединяем стили cell <- row <- col
+                Cell.objects.create(**{
+                    **columns_styles[column_id],
+                    **rows_styles[row_id],
+                    **cell
+                })
+
             for merged_cell in extract_sheet['merged_cells']:
                 MergedCell.objects.create(sheet=sheet, **merged_cell)
 
@@ -64,8 +79,8 @@ class ExcelExtractor:
         sheets: List[Dict] = []
         for sheet in self.work_book.worksheets:
             name: str = sheet.title
-            columns_dimension = self._parse_columns_dimension(sheet.column_dimensions)
-            rows_dimension = self._parse_rows_dimension(sheet.row_dimensions)
+            columns_dimension: Dict[int, object] = self._parse_columns_dimension(sheet.column_dimensions)
+            rows_dimension: Dict[int, object] = self._parse_rows_dimension(sheet.row_dimensions)
             cells = self._parse_cells(sheet.rows)
             merged_cells = self._parse_merged_cells(sheet.merged_cells.ranges)
 
@@ -79,59 +94,55 @@ class ExcelExtractor:
         return sheets
 
     @staticmethod
-    def _parse_columns_dimension(holder: DimensionHolder) -> List[Dict]:
-        """Парсинг имеющихся колонок"""
-        columns: List[Dict] = []
-        for col_letter, column in holder.items():
-            if col_letter == 'worksheet':
-                continue
-            columns.append({
-                'index': column_index_from_string(col_letter),
+    def _parse_columns_dimension(holder: DimensionHolder) -> Dict:
+        """Парсинг имеющихся колонок."""
+        return {
+            column_index_from_string(col_letter): {
                 'width': column.width,
                 'fixed': False,
                 'hidden': column.hidden,
                 'auto_size': column.auto_size,
-
-                'horizontal_align': column.alignment.horizontal,
-                'vertical_align': column.alignment.vertical,
-                'size': column.font.sz,
-                'strong': column.font.b,
-                'italic': column.font.i,
-                'strike': column.font.strike,
-                'underline': column.font.u,
-                'color': column.font.color.value
-                if column.font.color.type == 'rgb'
-                else COLOR_INDEX[column.font.color.index],
-                'background': column.fill.bgColor.value
-                if column.fill.bgColor.type == 'rgb'
-                else COLOR_INDEX[column.fill.bgColor.value]
-            })
-        return columns
+                'style': {
+                    'horizontal_align': column.alignment.horizontal,
+                    'vertical_align': column.alignment.vertical,
+                    'size': column.font.sz,
+                    'strong': column.font.b,
+                    'italic': column.font.i,
+                    'strike': column.font.strike,
+                    'underline': column.font.u,
+                    'color': column.font.color.value
+                    if column.font.color.type == 'rgb'
+                    else COLOR_INDEX[column.font.color.index],
+                    'background': column.fill.bgColor.value
+                    if column.fill.bgColor.type == 'rgb'
+                    else COLOR_INDEX[column.fill.bgColor.value]
+                }
+            } for col_letter, column in holder.items()
+        }
 
     @staticmethod
-    def _parse_rows_dimension(holder: DimensionHolder) -> List[Dict]:
+    def _parse_rows_dimension(holder: DimensionHolder) -> Dict:
         """Парсинг имеющихся строк."""
-        rows: List[Dict] = []
-        for index, row in holder.items():
-            rows.append({
-                'index': row.index,
+        return {
+            row.index: {
                 'height': row.height,
-
-                'horizontal_align': row.alignment.horizontal,
-                'vertical_align': row.alignment.vertical,
-                'size': row.font.sz,
-                'strong': row.font.b,
-                'italic': row.font.i,
-                'strike': row.font.strike,
-                'underline': row.font.u,
-                'color': row.font.color.value
-                if row.font.color.type == 'rgb'
-                else COLOR_INDEX[row.font.color.index],
-                'background': row.fill.bgColor.value
-                if row.fill.bgColor.type == 'rgb'
-                else COLOR_INDEX[row.fill.bgColor.value]
-            })
-        return rows
+                'style': {
+                    'horizontal_align': row.alignment.horizontal,
+                    'vertical_align': row.alignment.vertical,
+                    'size': row.font.sz,
+                    'strong': row.font.b,
+                    'italic': row.font.i,
+                    'strike': row.font.strike,
+                    'underline': row.font.u,
+                    'color': row.font.color.value
+                    if row.font.color.type == 'rgb'
+                    else COLOR_INDEX[row.font.color.index],
+                    'background': row.fill.bgColor.value
+                    if row.fill.bgColor.type == 'rgb'
+                    else COLOR_INDEX[row.fill.bgColor.value]
+                }
+            } for index, row in holder.items()
+        }
 
     @staticmethod
     def _parse_cells(rows: Iterator[Tuple[Cell]]) -> List[Dict]:
@@ -153,7 +164,6 @@ class ExcelExtractor:
                     else None,
                     'comment': cell.comment,
                     'default': cell.value,
-
                     'horizontal_align': cell.alignment.horizontal,
                     'vertical_align': cell.alignment.vertical,
                     'size': cell.font.sz,

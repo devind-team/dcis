@@ -1,0 +1,9 @@
+fragment SheetFields on SheetType {
+  id
+  name
+  position
+  comment
+  createdAt
+  updatedAt
+  __typename
+}

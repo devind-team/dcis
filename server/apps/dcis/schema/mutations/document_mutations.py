@@ -13,7 +13,7 @@ from devind_helpers.orm_utils import get_object_or_404
 from graphql_relay import from_global_id
 from django.db.models import Max
 
-from apps.dcis.models import Period, Document, Value
+from apps.dcis.models import Period, Document, Value, Sheet
 from apps.dcis.schema.types import DocumentType, ValueType
 from apps.dcis.services.excel_unload import DocumentUnload
 
@@ -65,18 +65,39 @@ class ChangeValue(BaseMutation):
     """Изменение значения."""
 
     class Input:
-        value_id = graphene.ID(required=True, description='Идентификатор значения')
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        sheet_id = graphene.Int(required=True, description='Иднтификатор листа')
+        column_id = graphene.Int(required=True, description='Идентификатор колонки')
+        row_id = graphene.Int(required=True, description='Идентификатор строки')
         value = graphene.String(required=True, description='Значение')
 
     value = graphene.Field(ValueType, description='Измененное значение')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, value_id: str, value: str):
-        value_obj = Value.objects.get(pk=value_id)
-        value_obj.value = value
-        value_obj.save()
-        return ChangeValue(value=value_obj)
+    def mutate_and_get_payload(
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: int,
+        column_id: int,
+        row_id: int,
+        value: str
+    ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
+        # cell: Cell = Cell.objects.get(column_id=column_id, row_id=row_id)
+        # В зависимости от типа применяем форматирование
+        val, created = Value.objects.update_or_create(
+            column_id=column_id,
+            row_id=row_id,
+            document=document,
+            sheet=sheet,
+            defaults={
+                'value': value
+            }
+        )
+        return ChangeValue(value=val)
 
 
 class DocumentMutations(graphene.ObjectType):

@@ -7,32 +7,41 @@
           v-for="buildColumn in columns"
           :key="buildColumn.dimension.id"
           :style="buildColumn.style"
-        ).header-cell {{ buildColumn.name }}
+        ).header-cell {{ buildColumn.positional }}
     tbody
       tr(
-        v-for="buildRow in rows"
-        :key="buildRow.dimension.id"
-        :style="buildRow.style"
+        v-for="row in rows"
+        :key="row.dimension.id"
+        :style="row.style"
       )
-        td.header-cell {{ buildRow.name }}
+        td.header-cell {{ row.index }}
         td(
-          v-for="buildCell in buildRow.cells"
-          :key="buildCell.cell.id"
-          :class="{ 'active-cell': isActive(buildCell) }"
-          :colspan="buildCell.colspan"
-          :rowspan="buildCell.rowspan"
-          @click="activateCell(buildCell)"
-          @dblclick="editCell(buildCell)"
+          v-for="cell in row.cells"
+          :key="cell.cell.id"
+          :colspan="cell.colspan"
+          :rowspan="cell.rowspan"
+          :class="{marked: active === cell.position}"
+          :style="cell.style"
+          @click="setActive(cell.position)"
+          @dblclick="setActive(cell.position, true)"
         )
-          template(v-if="isEditable(buildCell)")
-            input.input(v-model="editableCell.newValue" v-focus)
-          template(v-else) {{ buildCell.value.value }}
+          input(
+            v-if="active === cell.position"
+            v-focus
+            :value="cell.value"
+            @keyup.enter="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
+            style="width: 100%;"
+          )
+          template(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '#app'
-import type { ComputedRef, PropType } from '#app'
-import { SheetType } from '~/types/graphql'
+import { useMutation } from '@vue/apollo-composable'
+import { defineComponent, inject } from '#app'
+import type { PropType } from '#app'
+import { ChangeValueMutation, ChangeValueMutationVariables, SheetType } from '~/types/graphql'
+import { useGrid } from '~/composables/grid'
+import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
 
 export default defineComponent({
   directives: {
@@ -43,23 +52,51 @@ export default defineComponent({
     }
   },
   props: {
-    sheet: {
-      type: Object as PropType<SheetType>,
-      required: true
-    }
+    documentId: { type: String, required: true },
+    sheet: { type: Object as PropType<SheetType>, required: true }
   },
   setup (props) {
-    const sheet: ComputedRef<SheetType> = computed<SheetType>(() => props.sheet)
-    const { columns, rows, editableCell, isActive, isEditable, isCurrent, activateCell, editCell } = useGrid(sheet)
-    return {
-      columns, rows, editableCell, isActive, isEditable, isCurrent, activateCell, editCell
+    const {
+      columns,
+      rows,
+      mergeCells,
+      mergedCells,
+      active,
+      setActive
+    } = useGrid(props.sheet)
+
+    const documentUpdate: any = inject('documentUpdate')
+
+    const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(changeValueMutation, {
+      update: (cache, result) => documentUpdate(cache, result, (dataCache, { data: { changeValue: { success, value } }}) => {
+        if (success) {
+          dataCache.document.sheets.find((sheet: SheetType) => (sheet.id === props.sheet.id)).values.push(value)
+          setActive(null)
+        }
+        return dataCache
+      })
+    })
+
+    const changeValue = (columnId: number, rowId: number, value: string) => {
+      changeValueMutate({
+        documentId: props.documentId,
+        sheetId: +props.sheet.id,
+        columnId,
+        rowId,
+        value
+      })
     }
+    return { columns, rows, mergedCells, mergeCells, active, setActive, changeValue }
   }
 })
 </script>
 
 <style lang="sass">
 .grid__table
+  tr td
+    box-sizing: border-box
+    &.marked
+      border: 2px solid blue
   border-collapse: collapse
   user-select: none
   .header-cell

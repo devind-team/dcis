@@ -423,49 +423,51 @@ type CategoryTypeEdge {
   node: CategoryType
 }
 
-"""An enumeration."""
-enum CellKind {
-  """b"""
-  B
-  """d"""
-  D
-  """e"""
-  E
-  """f"""
-  F
-  """fl"""
-  FL
-  """inlineStr"""
-  INLINESTR
-  """n"""
-  N
-  """s"""
-  S
-  """str"""
-  STR
-}
-
 """Тип ячейки."""
 type CellType {
+  """Цвет фона"""
+  background: String!
+  """Цвет индекса"""
+  color: String!
   """Колонка"""
   column: ColumnDimensionType
+  """Идентификатор колонки"""
+  columnId: Int
   """Комментарий"""
   comment: String
   """Значение по умолчанию"""
   default: String
+  """Редактируемая ячейка"""
+  editable: Boolean!
   """Формула"""
   formula: String
+  """Горизонтальное выравнивание"""
+  horizontalAlign: String
   id: ID!
+  """Курсив"""
+  italic: Boolean!
   """Тип значения"""
-  kind: CellKind!
+  kind: String!
   """Ограничения на ячейку"""
   limitations: [LimitationType]
   """Маска для ввода значений"""
   mask: String
   """Строка"""
   row: RowDimensionType
+  """Идентификатор строки"""
+  rowId: Int
+  """Размер шрифта"""
+  size: Int!
+  """Зачеркнутый"""
+  strike: Boolean
+  """Жирный шрифт"""
+  strong: Boolean!
   """Подсказка"""
   tooltip: String
+  """Тип подчеркивания"""
+  underline: String
+  """Вертикальное выравнивание"""
+  verticalAlign: String
 }
 
 input ChangeAvatarMutationInput {
@@ -964,10 +966,16 @@ type ChangeUserPropsMutationPayload {
 
 input ChangeValueInput {
   clientMutationId: String
+  """Идентификатор колонки"""
+  columnId: Int!
+  """Идентификатор документа"""
+  documentId: ID!
+  """Идентификатор строки"""
+  rowId: Int!
+  """Иднтификатор листа"""
+  sheetId: Int!
   """Значение"""
   value: String!
-  """Идентификатор значения"""
-  valueId: ID!
 }
 
 """Изменение значения."""
@@ -983,6 +991,8 @@ type ChangeValuePayload {
 
 """Тип колонок."""
 type ColumnDimensionType {
+  """Ячейки"""
+  cells: [CellType]
   """Дивизион"""
   contentType: ContentTypeType
   """Фиксация колонки"""
@@ -995,6 +1005,11 @@ type ColumnDimensionType {
   sheet: SheetType
   """Пользователь"""
   user: [UserType]
+  """Значения документа"""
+  values(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [ValueType]
   """Ширина колонки"""
   width: Int
 }
@@ -1445,37 +1460,15 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
-"""An enumeration."""
-enum LimitationCondition {
-  """<"""
-  A_0
-  """>"""
-  A_1
-  """="""
-  A_2
-  """<="""
-  A_3
-  """>="""
-  A_4
-}
-
-"""An enumeration."""
-enum LimitationOperator {
-  """and"""
-  AND
-  """or"""
-  OR
-}
-
 """Ограничения на ячейку."""
 type LimitationType {
   """Ячейка"""
   cell: CellType
   """Состояние"""
-  condition: LimitationCondition!
+  condition: String!
   id: ID!
   """Оператор"""
-  operator: LimitationOperator!
+  operator: String!
   """Значение"""
   value: String!
 }
@@ -2356,22 +2349,12 @@ type RestorePasswordMutationPayload {
   success: Boolean!
 }
 
-"""An enumeration."""
-enum RowDimensionAggregation {
-  """avg"""
-  AVG
-  """max"""
-  MAX
-  """min"""
-  MIN
-  """sum"""
-  SUM
-}
-
 """Тип строк."""
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
-  aggregation: RowDimensionAggregation
+  aggregation: String
+  """Ячейки"""
+  cells: [CellType]
   """Дочерние строки"""
   children: [RowDimensionType]
   """Дивизион"""
@@ -2835,6 +2818,8 @@ type UserTypeEdge {
 type ValueType {
   """Колонка"""
   column: ColumnDimensionType!
+  """Идентификатор колонки"""
+  columnId: Int
   """Документ"""
   document: DocumentType!
   """Текст ошибки"""
@@ -2842,6 +2827,8 @@ type ValueType {
   id: ID!
   """Строка"""
   row: RowDimensionType!
+  """Идентификатор строки"""
+  rowId: Int
   """Лист"""
   sheet: SheetType!
   """Значение"""

@@ -54,12 +54,12 @@ export default defineComponent({
     onDone(({ data: { authCbias: { success, token, user } }}: AuthMutationResult) => {
       result.value = success
       if (success) {
-        onLogin(token.accessToken, defaultClient, { maxAge: token.expiresIn, path: '/' })
-        userStore.user = user as UserType
+        onLogin(token.accessToken, defaultClient, { maxAge: token.expiresIn, path: '/' }, true)
+        userStore.user = Object.assign({}, user) as UserType
 
         // Убрать после удаления vuex
         $store.dispatch('auth/fetchExistUser', Object.assign({}, user))
-
+        // Необходимо для нормальной перезагрузки сокетов
         router.push((route.query.to as string) || localePath({ name: 'index' }))
       }
     })
