@@ -1,17 +1,19 @@
-import { useMutation } from '@vue/apollo-composable'
-import { computed, ref } from '#app'
-import type { ComputedRef, Ref } from '#app'
-import type {
+import defu from 'defu'
+import type { Ref, ComputedRef } from '#app'
+import { computed, ref, isRef } from '#app'
+
+import {GridMode, RangePositionsType} from '~/types/grid-types'
+import {
   SheetType,
   ColumnDimensionType,
   RowDimensionType,
+  MergedCellType,
   CellType,
-  ValueType,
-  ChangeValueMutation,
-  ChangeValueMutationVariables
+  ValueType
 } from '~/types/graphql'
-import { positionToLetter } from '~/services/grid'
-import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
+
+import {letterToPosition, normalizationRange, parseRangeToPosition, positionToLetter} from '~/services/grid'
+import avatarDialog from "~/components/users/AvatarDialog.vue";
 
 export type BuildCell = {
   cell: CellType
@@ -44,129 +46,146 @@ export type BuildRow = {
   name: string
   style: Record<string, string>
   dimension: RowDimensionType
-  cells: Cell[]
 }
 
-export function useGrid (sheet: ComputedRef<SheetType | null>) {
-  const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(
-    changeValueMutation
-  )
+export function useGrid (sheet: Ref<SheetType> | SheetType, gridOptions = {}) {
 
-  const getValue = (cell: CellType): ValueType => sheet.value.values
-    .find(value => value.row.id === cell.row.id && value.column.id === cell.column.id)!
-
-  const mergedCells: ComputedRef<BuildMergedCell[]> = computed<BuildMergedCell[]>(() => sheet.value
-    ? sheet.value.mergedCells.map((mergedCell) => {
-      const cells: CellType[] = []
-      for (let column = mergedCell.minCol; column <= mergedCell.maxCol; column++) {
-        for (let row = mergedCell.minRow; row <= mergedCell.maxRow; row++) {
-          cells.push(
-            sheet.value.cells.find(cell => column === cell.column.index + 1 && row === cell.row.index + 1)!
-          )
-        }
-      }
-      const cell = cells[0]
-      return {
-        cell,
-        value: getValue(cell),
-        colspan: mergedCell.maxCol - mergedCell.minCol + 1,
-        rowspan: mergedCell.maxRow - mergedCell.minRow + 1,
-        cells
-      }
-    })
-    : []
-  )
-
-  const findCell = (
-    rowDimension: RowDimensionType,
-    columnDimension: ColumnDimensionType
-  ): Cell | null => {
-    for (const mergedCell of mergedCells.value) {
-      if (mergedCell.cell.row.id === rowDimension.id && mergedCell.cell.column.id === columnDimension.id) {
-        return mergedCell
-      }
-      if (mergedCell.cells.find(cell => cell.row.id === rowDimension.id && cell.column.id === columnDimension.id)) {
-        return null
-      }
-    }
-    const cell = sheet.value.cells
-      .find(cell => cell.row.id === rowDimension.id && cell.column.id === columnDimension.id)!
-    return {
-      cell,
-      value: getValue(cell)
-    }
+  const defaultOptions = {
+    name: 'sheet',
+    columns: 3,
+    rows: 3,
+    mode: GridMode.EDIT,
+    classPrefix: 'grid-'
   }
+  const options = defu(gridOptions, defaultOptions)
 
-  const columns: ComputedRef<BuildColumn[]> = computed<BuildColumn[]>(() => sheet.value
-    ? sheet.value.columns.map(columnDimension => ({
-      name: positionToLetter(columnDimension.index + 1),
+  const grid: Ref<SheetType> = ref<SheetType>(isRef(sheet) ? sheet.value : sheet)
+
+  const columns: ComputedRef = computed(() => (
+    grid.value.columns.map((columnDimension: ColumnDimensionType) => ({
+      id: columnDimension.id,
+      index: columnDimension.index,
+      positional: positionToLetter(columnDimension.index),
       style: {
-        width: `${columnDimension.width}px`
+        width: columnDimension.width ? `${columnDimension.width}em` : undefined
       },
       dimension: columnDimension
     }))
-    : []
-  )
-  const rows: ComputedRef<BuildRow[]> = computed<BuildRow[]>(() => sheet.value
-    ? sheet.value.rows.map(rowDimension => ({
-      name: String(rowDimension.index + 1),
-      style: {
-        height: `${rowDimension.height}px`
-      },
-      dimension: rowDimension,
-      cells: sheet.value.columns.map(columnDimension => findCell(rowDimension, columnDimension)).filter(cell => cell)
-    }))
-    : []
-  )
+  ))
 
-  const activeCell: Ref<Cell | null> = ref<Cell | null>(null)
-  const editableCell: Ref<EditableCell | null> = ref<EditableCell | null>(null)
-
-  const isActive = (cell: Cell): boolean => {
-    return activeCell.value && activeCell.value.cell.id === cell.cell.id
-  }
-
-  const isEditable = (cell: Cell): boolean => {
-    return editableCell.value && editableCell.value.cell.cell.id === cell.cell.id
-  }
-
-  const isCurrent = (cell: Cell): boolean => {
-    return isActive(cell) || isEditable(cell)
-  }
-
-  const changeCellValue = async (editableCell: EditableCell): Promise<void> => {
-    await changeValueMutate({
-      valueId: editableCell.value.id,
-      value: editableCell.newValue
-    })
-  }
-
-  const activateCell = async (cell: Cell): Promise<void> => {
-    if (isCurrent(cell)) {
-      return
+  /**
+   * Собираем структуру для быстрого поиска
+   */
+  const cells: ComputedRef = computed(() => {
+    const buildCells = {}
+    for (const cell of grid.value.cells) {
+      if (!(cell.rowId in buildCells)) {
+        buildCells[cell.rowId] = {}
+      }
+      buildCells[cell.rowId][cell.columnId] = cell
     }
-    if (editableCell.value) {
-      await changeCellValue(editableCell.value)
+    return buildCells
+  })
+
+  /**
+   * Формируем значения
+   */
+  const values: ComputedRef = computed(() => {
+    const buildValues = {}
+    for (const value of grid.value.values) {
+      if (!(value.rowId in buildValues)) {
+        buildValues[value.rowId] = {}
+      }
+      buildValues[value.rowId][value.columnId] = Object.assign(value, {
+        isEditable: false
+      })
     }
-    activeCell.value = cell
-    editableCell.value = null
+    return buildValues
+  })
+
+  const rows: ComputedRef = computed(() => {
+    const buildRows = []
+    for (let rowIndex = 0; rowIndex < grid.value.rows.length; ++rowIndex) {
+      const row = grid.value.rows[rowIndex]
+      const buildRow = {
+        id: row.id,
+        index: row.index,
+        dynamic: row.dynamic,
+        style: {
+          height: row.height ? `${row.height}px` : undefined
+        },
+        cells: [],
+        dimension: row
+      }
+      const rowCells = cells.value[row.id]
+      const valueCells = row.id in values.value ? values.value[row.id] : null
+      for (let columnIndex = 0; columnIndex < grid.value.columns.length; ++columnIndex) {
+        const column: ColumnDimensionType = grid.value.columns[columnIndex]
+        const cell: CellType = rowCells[column.id]
+        const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
+        const position: string = `${positionToLetter(column.index)}${row.index}`
+        // Стили должны формироваться на основе предпочтения cell <- row <- col
+        const buildCell = {
+          position,
+          value: value ? value.value : cell.default,
+          editable: cell.editable,
+          kind: cell.kind,
+          colspan: 1,
+          rowspan: 1,
+          style: {
+            'text-align': cell.horizontalAlign,
+            'vertical-align': cell.verticalAlign,
+            'font-size': cell.size,
+            'font-weight': cell.strong ? 'bold' : 'normal',
+            'font-style': cell.italic ? 'italic' : 'normal',
+            'text-decoration': cell.underline ? 'underline' : undefined,
+            color: cell.color,
+            background: cell.background
+          },
+          cell
+        }
+        if (position in mergeCells.value) {
+          buildRow.cells.push(Object.assign(buildCell, mergeCells.value[position]))
+        } else if (!mergedCells.value.includes(position)) {
+          buildRow.cells.push(buildCell)
+        }
+      }
+      buildRows.push(buildRow)
+    }
+    return buildRows
+  })
+
+  const mergeCells: ComputedRef = computed(() => (
+    grid.value.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
+  ))
+
+  const mergedCells: ComputedRef<string[]> = computed(() => {
+    return Object.values<MergedCellType>(grid.value.mergedCells)
+      .reduce<string[]>((a: string[], c: MergedCellType)=> ([...a, ...c.cells]), [])
+  })
+
+  /**
+   * Блок выделения
+   */
+  const active: Ref<string | null> = ref<string | null>(null)
+
+  const setActive = (position: string, dbl: boolean = false) => {
+    if (active.value === null && dbl) {
+      active.value = position
+    } else if (active.value !== position) {
+      active.value = null
+    }
   }
 
-  const editCell = async (cell: Cell): Promise<void> => {
-    if (isEditable(cell)) {
-      return
-    }
-    if (editableCell.value) {
-      await changeCellValue(editableCell.value)
-    }
-    activeCell.value = cell
-    const value = getValue(cell.cell)
-    editableCell.value = {
-      cell,
-      value,
-      newValue: value.value
-    }
+  return {
+    sheet,
+    cells,
+    columns,
+    rows,
+    values,
+    mergeCells,
+    mergedCells,
+    active,
+    setActive
   }
-
-  return { columns, rows, activeCell, editableCell, isActive, isEditable, isCurrent, activateCell, editCell }
 }

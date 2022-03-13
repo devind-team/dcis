@@ -1,0 +1,7 @@
+fragment RowDimensionFields on RowDimensionType {
+  id
+  index
+  height
+  dynamic
+  __typename
+}

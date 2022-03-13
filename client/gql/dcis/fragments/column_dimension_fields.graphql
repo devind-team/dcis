@@ -1,0 +1,7 @@
+fragment ColumnDimensionFields on ColumnDimensionType {
+  id
+  index
+  width
+  fixed
+  __typename
+}
