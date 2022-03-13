@@ -72,7 +72,7 @@ export default defineComponent({
 
     const periodUpdate: any = inject('periodUpdate')
 
-    const { mutate: AddDocumentMutate } = useMutation<AddDocumentMutation, AddDocumentMutationVariables>(addDocumentMutation, {
+    const { mutate: addDocumentMutate } = useMutation<AddDocumentMutation, AddDocumentMutationVariables>(addDocumentMutation, {
       update: (cache, result) => periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }) => {
         if (success) {
           active.value = false
@@ -93,7 +93,7 @@ export default defineComponent({
       { text: 'Действия', value: 'actions', sortable: false }
     ]
 
-    return { active, comment, bc, headers, AddDocumentMutate, unloadDocumentDone }
+    return { active, comment, bc, headers, addDocumentMutate, unloadDocumentDone }
   }
 })
 </script>

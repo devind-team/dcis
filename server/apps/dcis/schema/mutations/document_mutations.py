@@ -1,17 +1,17 @@
+
 from typing import Optional
 
 import graphene
-import socket
-
-from django.contrib.contenttypes.models import ContentType
-from devind_helpers.schema.mutations import BaseMutation
 from devind_dictionaries.models import Department
-from graphql import ResolveInfo
 from devind_helpers.decorators import permission_classes
-from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.orm_utils import get_object_or_404
-from graphql_relay import from_global_id
+from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.schema.mutations import BaseMutation
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
+from django.http.request import HttpRequest
+from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.dcis.models import Period, Document, Value, Sheet
 from apps.dcis.schema.types import DocumentType, ValueType
@@ -56,7 +56,8 @@ class UnloadDocumentMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str):
-        du: DocumentUnload = DocumentUnload(document_id, socket.gethostname())
+        document = Document.objects.get(pk=from_global_id(document_id)[1])
+        du: DocumentUnload = DocumentUnload(document, HttpRequest.get_host(info.context))
         src: str = du.xlsx()
         return UnloadDocumentMutation(src=src)
 

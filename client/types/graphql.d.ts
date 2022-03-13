@@ -1874,6 +1874,8 @@ export type Mutation = {
   restorePassword: RestorePasswordMutationPayload;
   /** Отправка письма поддержки */
   supportSubmit: SupportSubmitMutationPayload;
+  /** Выгрузка документа. */
+  unloadDocument: UnloadDocumentMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -2156,6 +2158,11 @@ export type MutationRestorePasswordArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationSupportSubmitArgs = {
   input: SupportSubmitMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUnloadDocumentArgs = {
+  input: UnloadDocumentMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3360,6 +3367,24 @@ export type TagTypeEdge = {
   node?: Maybe<TagType>;
 };
 
+export type UnloadDocumentMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Документ */
+  documentId: Scalars['ID'];
+};
+
+/** Выгрузка документа. */
+export type UnloadDocumentMutationPayload = {
+  __typename?: 'UnloadDocumentMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UploadUsersMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Источник данных, файл xlsx или csv */
@@ -3818,6 +3843,12 @@ export type ChangeValueMutationVariables = Exact<{
 }>;
 
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValuePayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null } };
+
+export type UnloadDocumentMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+}>;
+
+export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
