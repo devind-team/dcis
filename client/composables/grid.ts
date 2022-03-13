@@ -45,10 +45,9 @@ export type BuildRow = {
   dimension: RowDimensionType
 }
 
-export function useGrid (sheet: SheetType) {
-
+export function useGrid (sheet: Ref<SheetType>) {
   const columns: ComputedRef = computed(() => (
-    sheet.columns.map((columnDimension: ColumnDimensionType) => ({
+    sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
       id: columnDimension.id,
       index: columnDimension.index,
       positional: positionToLetter(columnDimension.index),
@@ -64,7 +63,7 @@ export function useGrid (sheet: SheetType) {
    */
   const cells: ComputedRef = computed(() => {
     const buildCells = {}
-    for (const cell of sheet.cells) {
+    for (const cell of sheet.value.cells) {
       if (!(cell.rowId in buildCells)) {
         buildCells[cell.rowId] = {}
       }
@@ -78,7 +77,7 @@ export function useGrid (sheet: SheetType) {
    */
   const values: ComputedRef = computed(() => {
     const buildValues = {}
-    for (const value of sheet.values) {
+    for (const value of sheet.value.values) {
       if (!(value.rowId in buildValues)) {
         buildValues[value.rowId] = {}
       }
@@ -89,8 +88,8 @@ export function useGrid (sheet: SheetType) {
 
   const rows: ComputedRef = computed(() => {
     const buildRows = []
-    for (let rowIndex = 0; rowIndex < sheet.rows.length; ++rowIndex) {
-      const row = sheet.rows[rowIndex]
+    for (let rowIndex = 0; rowIndex < sheet.value.rows.length; ++rowIndex) {
+      const row = sheet.value.rows[rowIndex]
       const buildRow = {
         id: row.id,
         index: row.index,
@@ -103,8 +102,8 @@ export function useGrid (sheet: SheetType) {
       }
       const rowCells = cells.value[row.id]
       const valueCells = row.id in values.value ? values.value[row.id] : null
-      for (let columnIndex = 0; columnIndex < sheet.columns.length; ++columnIndex) {
-        const column: ColumnDimensionType = sheet.columns[columnIndex]
+      for (let columnIndex = 0; columnIndex < sheet.value.columns.length; ++columnIndex) {
+        const column: ColumnDimensionType = sheet.value.columns[columnIndex]
         const cell: CellType = rowCells[column.id]
         const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
         const position: string = `${positionToLetter(column.index)}${row.index}`
@@ -140,11 +139,11 @@ export function useGrid (sheet: SheetType) {
   })
 
   const mergeCells: ComputedRef = computed(() => (
-    sheet.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
+    sheet.value.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
   ))
 
   const mergedCells: ComputedRef<string[]> = computed(() => {
-    return Object.values<MergedCellType>(sheet.mergedCells)
+    return Object.values<MergedCellType>(sheet.value.mergedCells)
       .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
   })
 

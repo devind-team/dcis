@@ -12,7 +12,7 @@
 <script lang="ts">
 import type { Ref } from '#app'
 import { defineComponent, ref, useRoute, provide } from '#app'
-import type { DocumentQueryVariables, DocumentQuery} from '~/types/graphql'
+import type { DocumentQueryVariables, DocumentQuery } from '~/types/graphql'
 import { useCommonQuery } from '~/composables'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import GridToolbar from '~/components/dcis/GridToolbar.vue'

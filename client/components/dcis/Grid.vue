@@ -37,8 +37,8 @@
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
-import type {ComputedRef, PropType} from '#app'
-import {computed, defineComponent, inject} from '#app'
+import type {ComputedRef, PropType, Ref} from '#app'
+import { computed, defineComponent, inject, toRef} from '#app'
 import {ChangeValueMutation, ChangeValueMutationVariables, DocumentQuery, SheetType, ValueType} from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
@@ -58,6 +58,7 @@ export default defineComponent({
     sheet: { type: Object as PropType<SheetType>, required: true }
   },
   setup (props) {
+    const sheet: Ref<SheetType> = toRef(props, 'sheet')
     const {
       columns,
       rows,
@@ -65,7 +66,7 @@ export default defineComponent({
       mergedCells,
       active,
       setActive
-    } = useGrid(props.sheet)
+    } = useGrid(sheet)
 
     const documentUpdate: any = inject('documentUpdate')
 
