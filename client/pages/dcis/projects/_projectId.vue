@@ -26,8 +26,14 @@ export default defineComponent({
     const drawer: Ref<boolean> = ref<boolean>(false)
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: 'Периоды', to: 'dcis-projects-projectId-periods', icon: 'file-table-box-multiple-outline' },
-      { title: 'Пользователи', to: 'dcis-projects-projectId-accounts', icon: 'account-wrench' },
-      { title: 'Настройки', to: 'dcis-projects-projectId-settings', icon: 'cogs' }
+      { title: 'Пользователи', to: 'dcis-projects-projectId-accounts', icon: 'account-wrench', permissions: 'core.view_experimental' },
+      {
+        title: 'Настройки',
+        to: 'dcis-projects-projectId-settings',
+        icon: 'cogs',
+        permissions: ['dcis.change_project', 'dcis.delete_project'],
+        permOr: true
+      }
     ]))
     const { data: project, loading, update } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
       document: projectQuery,
@@ -42,7 +48,11 @@ export default defineComponent({
       }
       return [
         ...props.breadCrumbs,
-        { text: project.value.name, to: localePath({ name: 'dcis-projects-projectId', params: route.params }), exact: true }
+        {
+          text: project.value.name,
+          to: localePath({ name: 'dcis-projects-projectId-periods', params: route.params }),
+          exact: true
+        }
       ]
     })
     return { bc, drawer, links, project, loading }

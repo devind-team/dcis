@@ -37,11 +37,13 @@
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
-import { defineComponent, inject } from '#app'
-import type { PropType } from '#app'
-import { ChangeValueMutation, ChangeValueMutationVariables, SheetType } from '~/types/graphql'
+import type {ComputedRef, PropType} from '#app'
+import {computed, defineComponent, inject} from '#app'
+import {ChangeValueMutation, ChangeValueMutationVariables, DocumentQuery, SheetType, ValueType} from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
+
+export type ChangeValueMutationResult = { data: ChangeValueMutation }
 
 export default defineComponent({
   directives: {
@@ -68,13 +70,19 @@ export default defineComponent({
     const documentUpdate: any = inject('documentUpdate')
 
     const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(changeValueMutation, {
-      update: (cache, result) => documentUpdate(cache, result, (dataCache, { data: { changeValue: { success, value } }}) => {
-        if (success) {
-          dataCache.document.sheets.find((sheet: SheetType) => (sheet.id === props.sheet.id)).values.push(value)
-          setActive(null)
-        }
-        return dataCache
-      })
+      update: (store, result) => documentUpdate(
+        store,
+        result,
+        (dataCache: DocumentQuery, { data: { changeValue: { success, value } } }: ChangeValueMutationResult) => {
+          if (success) {
+            dataCache.document.sheets!.find(sheet => sheet.id === props.sheet.id)!.values = dataCache.document.sheets!
+              .find(sheet => sheet.id === props.sheet.id)
+              .values.filter((v: ValueType) => v.id !== value.id)
+            dataCache.document.sheets!.find(sheet => sheet.id === props.sheet.id)!.values.push(value)
+            setActive(null)
+          }
+          return dataCache
+        })
     })
 
     const changeValue = (columnId: number, rowId: number, value: string) => {

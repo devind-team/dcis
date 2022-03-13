@@ -13,9 +13,10 @@ from django.db.models import Max
 
 from apps.dcis.models import Period, Document, Value, Sheet
 from apps.dcis.schema.types import DocumentType, ValueType
+from apps.dcis.permissions import AddDocument
 
 
-class AddDocument(BaseMutation):
+class AddDocumentMutation(BaseMutation):
     """Добавление документа."""
 
     class Input:
@@ -25,7 +26,7 @@ class AddDocument(BaseMutation):
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, AddDocument,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str):
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
         content_type: ContentType = ContentType.objects.get_for_model(Department)    # Временно департаменты
@@ -39,10 +40,10 @@ class AddDocument(BaseMutation):
             period=period
         )
         document.sheets.add(*period.sheet_set.all())
-        return AddDocument(document=document)
+        return AddDocumentMutation(document=document)
 
 
-class ChangeValue(BaseMutation):
+class ChangeValueMutation(BaseMutation):
     """Изменение значения."""
 
     class Input:
@@ -78,12 +79,12 @@ class ChangeValue(BaseMutation):
                 'value': value
             }
         )
-        return ChangeValue(value=val)
+        return ChangeValueMutation(value=val)
 
 
 class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
-    add_document = AddDocument.Field(required=True)
+    add_document = AddDocumentMutation.Field(required=True)
 
-    change_value = ChangeValue.Field(required=True)
+    change_value = ChangeValueMutation.Field(required=True)

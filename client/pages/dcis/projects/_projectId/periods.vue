@@ -1,5 +1,5 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
+  bread-crumbs(:items="breadCrumbs")
     v-card
       v-card-title Периоды
         v-spacer
@@ -29,9 +29,9 @@
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import { DataTableHeader } from 'vuetify'
-import type { Ref, ComputedRef, PropType } from '#app'
-import { computed, defineComponent, inject, ref } from '#app'
-import { useFilters, useI18n } from '~/composables'
+import type { Ref, PropType } from '#app'
+import { defineComponent, inject, ref } from '#app'
+import { useFilters } from '~/composables'
 import { AddPeriodMutation, AddPeriodMutationVariables, ProjectType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import addPeriodMutations from '~/gql/dcis/mutations/project/add_period.graphql'
@@ -45,17 +45,13 @@ export default defineComponent({
     project: { type: Object as PropType<ProjectType>, required: true },
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
-  setup (props) {
-    const { localePath } = useI18n()
+  setup () {
     const { dateTimeHM } = useFilters()
 
     const active: Ref<boolean> = ref<boolean>(false)
     const name: Ref<string> = ref<string>('')
     const file: Ref<File | null> = ref<File | null>(null)
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
-      ...props.breadCrumbs,
-      { text: 'Периоды', to: localePath({ name: 'dcis-projects-projectId-periods' }), exact: true }
-    ]))
+
     const headers: DataTableHeader[] = [
       { text: '#', value: 'id' },
       { text: 'Название', value: 'name' },
@@ -73,7 +69,7 @@ export default defineComponent({
         return cacheData
       })
     })
-    return { bc, active, name, file, headers, mutate, dateTimeHM, toGlobalId }
+    return { active, name, file, headers, mutate, dateTimeHM, toGlobalId }
   }
 })
 </script>

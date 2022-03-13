@@ -447,10 +447,6 @@ class ValueType(DjangoObjectType):
             'value',
             'verified',
             'error',
-            'document',
-            'sheet',
-            'column',
             'column_id',
-            'row',
             'row_id',
         )

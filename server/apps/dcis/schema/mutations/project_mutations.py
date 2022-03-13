@@ -14,6 +14,7 @@ from devind_core.models import File
 from apps.dcis.models import Project, Period
 from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
+from apps.dcis.permissions import AddProject, AddPeriod
 
 
 class AddProjectMutation(BaseMutation):
@@ -27,7 +28,7 @@ class AddProjectMutation(BaseMutation):
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, AddProject,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, short: str, description: str, *args, **kwargs):
         project: Project = Project.objects.create(
             name=name,
@@ -49,7 +50,7 @@ class AddPeriodMutation(BaseMutation):
     period = graphene.Field(PeriodType, description='Добавленный период')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, AddPeriod,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, project_id: str, file: InMemoryUploadedFile):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
         period: Period = Period.objects.create(
@@ -70,5 +71,6 @@ class AddPeriodMutation(BaseMutation):
 
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
+
     add_project = AddProjectMutation.Field(required=True)
     add_period = AddPeriodMutation.Field(required=True)

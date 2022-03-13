@@ -1,5 +1,5 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
+  bread-crumbs(:items="breadCrumbs")
     v-card
       v-card-title {{ period.name }}
         v-spacer
@@ -26,9 +26,8 @@
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import { DataTableHeader } from 'vuetify'
-import type { ComputedRef, PropType, Ref } from '#app'
-import { computed, defineComponent, ref, useNuxt2Meta, inject } from '#app'
-import { useI18n } from '~/composables'
+import type { PropType, Ref } from '#app'
+import { defineComponent, ref, useNuxt2Meta, inject } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { AddDocumentMutation, AddDocumentMutationVariables, PeriodType } from '~/types/graphql'
 import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
@@ -42,16 +41,10 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const { localePath } = useI18n()
     useNuxt2Meta({ title: props.period.name })
 
     const active: Ref<boolean> = ref<boolean>(false)
     const comment: Ref<string> = ref<string>('')
-
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
-      ...props.breadCrumbs,
-      { text: 'Документы', to: localePath({ name: 'dcis-periods-periodId-document' }), exact: true }
-    ]))
 
     const periodUpdate: any = inject('periodUpdate')
 
@@ -71,7 +64,7 @@ export default defineComponent({
       { text: 'Дата создания', value: 'createdAt' }
     ]
 
-    return { active, comment, bc, headers, mutate }
+    return { active, comment, headers, mutate }
   }
 })
 </script>

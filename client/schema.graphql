@@ -56,7 +56,7 @@ type AddCategoryMutationPayload {
   success: Boolean!
 }
 
-input AddDocumentInput {
+input AddDocumentMutationInput {
   clientMutationId: String
   """Комментарий"""
   comment: String!
@@ -65,7 +65,7 @@ input AddDocumentInput {
 }
 
 """Добавление документа."""
-type AddDocumentPayload {
+type AddDocumentMutationPayload {
   clientMutationId: String
   """Созданный документ"""
   document: DocumentType
@@ -964,7 +964,7 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
-input ChangeValueInput {
+input ChangeValueMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
   columnId: Int!
@@ -979,7 +979,7 @@ input ChangeValueInput {
 }
 
 """Изменение значения."""
-type ChangeValuePayload {
+type ChangeValueMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1611,7 +1611,7 @@ type Mutation {
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление документа."""
-  addDocument(input: AddDocumentInput!): AddDocumentPayload!
+  addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
   """Мутация для загрузки файлов"""
   addFile(input: AddFileMutationInput!): AddFileMutationPayload!
   """Мутация для добавления группы."""
@@ -1685,7 +1685,7 @@ type Mutation {
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения."""
-  changeValue(input: ChangeValueInput!): ChangeValuePayload!
+  changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация для удаления категории"""
@@ -2797,21 +2797,13 @@ type UserTypeEdge {
 
 """Тип для значений."""
 type ValueType {
-  """Колонка"""
-  column: ColumnDimensionType!
   """Идентификатор колонки"""
   columnId: Int
-  """Документ"""
-  document: DocumentType!
   """Текст ошибки"""
   error: String
   id: ID!
-  """Строка"""
-  row: RowDimensionType!
   """Идентификатор строки"""
   rowId: Int
-  """Лист"""
-  sheet: SheetType!
   """Значение"""
   value: String!
   """Валидно ли поле"""

@@ -26,7 +26,7 @@ export default defineComponent({
     const drawer: Ref<boolean> = ref<boolean>(false)
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: 'Документ', to: 'dcis-periods-periodId-document', icon: 'file-table-box-multiple-outline' },
-      { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'file-table-box-multiple-outline' }
+      { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' }
     ]))
     const { data: period, loading, update } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
       document: periodQuery,
@@ -43,10 +43,10 @@ export default defineComponent({
         ...props.breadCrumbs,
         {
           text: period.value.project.name,
-          to: localePath({ name: 'dcis-projects-projectId', params: { projectId: period.value.project.id } }),
+          to: localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: period.value.project.id } }),
           exact: true
         },
-        { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId' }), exact: true },
+        { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId-document' }), exact: true },
       ]
     })
     return { bc, drawer, links, period, loading }

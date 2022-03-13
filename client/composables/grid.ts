@@ -48,17 +48,7 @@ export type BuildRow = {
   dimension: RowDimensionType
 }
 
-export function useGrid (sheet: Ref<SheetType> | SheetType, gridOptions = {}) {
-
-  const defaultOptions = {
-    name: 'sheet',
-    columns: 3,
-    rows: 3,
-    mode: GridMode.EDIT,
-    classPrefix: 'grid-'
-  }
-  const options = defu(gridOptions, defaultOptions)
-
+export function useGrid (sheet: Ref<SheetType> | SheetType) {
   const grid: Ref<SheetType> = ref<SheetType>(isRef(sheet) ? sheet.value : sheet)
 
   const columns: ComputedRef = computed(() => (
@@ -96,9 +86,7 @@ export function useGrid (sheet: Ref<SheetType> | SheetType, gridOptions = {}) {
       if (!(value.rowId in buildValues)) {
         buildValues[value.rowId] = {}
       }
-      buildValues[value.rowId][value.columnId] = Object.assign(value, {
-        isEditable: false
-      })
+      buildValues[value.rowId][value.columnId] = value
     }
     return buildValues
   })

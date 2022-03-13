@@ -4,5 +4,6 @@ fragment ProjectFields on ProjectType {
   short
   description
   visibility
+  createdAt
   __typename
 }

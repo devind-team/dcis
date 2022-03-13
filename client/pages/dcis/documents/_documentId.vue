@@ -1,19 +1,20 @@
 <template lang="pug">
   v-container(fluid)
     v-card(v-if="!loading")
-      v-card-title {{ document.period.name }}. Версия: {{ document.version }}
-      v-card-subtitle {{ document.comment }}
+      v-card-title {{ doc.period.name }}. Версия: {{ doc.version }}
+      v-card-subtitle {{ doc.comment }}
       v-tabs(v-model="active")
-        v-tab(v-for="sheet in document.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
-        v-tab-item(v-for="sheet in document.sheets" :key="sheet.id")
-          grid(:document-id="document.id" :sheet="sheet")
+        v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
+        v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
+          grid(:document-id="doc.id" :sheet="sheet")
 </template>
 
 <script lang="ts">
 import type { Ref } from '#app'
 import { defineComponent, ref, useRoute, provide } from '#app'
-import type { DocumentType, DocumentQueryVariables } from '~/types/graphql'
+import type { DocumentQueryVariables, DocumentQuery} from '~/types/graphql'
 import { useCommonQuery } from '~/composables'
+import documentQuery from '~/gql/dcis/queries/document.graphql'
 import GridToolbar from '~/components/dcis/GridToolbar.vue'
 import Grid from '~/components/dcis/Grid.vue'
 
@@ -22,8 +23,8 @@ export default defineComponent({
   setup () {
     const route = useRoute()
     const active: Ref<number> = ref<number>(0)
-    const { data: document, loading, update } = useCommonQuery<DocumentType, DocumentQueryVariables>({
-      document: require('~/gql/dcis/queries/document'),
+    const { data: doc, loading, update } = useCommonQuery<DocumentQuery, DocumentQueryVariables>({
+      document: documentQuery,
       variables: () => ({
         documentId: route.params.documentId
       })
@@ -32,7 +33,7 @@ export default defineComponent({
 
     return {
       active,
-      document,
+      doc,
       loading
     }
   }
