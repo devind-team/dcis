@@ -1,8 +1,6 @@
-import defu from 'defu'
 import type { Ref, ComputedRef } from '#app'
-import { computed, ref, isRef } from '#app'
+import { computed, ref } from '#app'
 
-import {GridMode, RangePositionsType} from '~/types/grid-types'
 import {
   SheetType,
   ColumnDimensionType,
@@ -12,8 +10,7 @@ import {
   ValueType
 } from '~/types/graphql'
 
-import {letterToPosition, normalizationRange, parseRangeToPosition, positionToLetter} from '~/services/grid'
-import avatarDialog from "~/components/users/AvatarDialog.vue";
+import { positionToLetter } from '~/services/grid'
 
 export type BuildCell = {
   cell: CellType
@@ -48,11 +45,10 @@ export type BuildRow = {
   dimension: RowDimensionType
 }
 
-export function useGrid (sheet: Ref<SheetType> | SheetType) {
-  const grid: Ref<SheetType> = ref<SheetType>(isRef(sheet) ? sheet.value : sheet)
+export function useGrid (sheet: SheetType) {
 
   const columns: ComputedRef = computed(() => (
-    grid.value.columns.map((columnDimension: ColumnDimensionType) => ({
+    sheet.columns.map((columnDimension: ColumnDimensionType) => ({
       id: columnDimension.id,
       index: columnDimension.index,
       positional: positionToLetter(columnDimension.index),
@@ -68,7 +64,7 @@ export function useGrid (sheet: Ref<SheetType> | SheetType) {
    */
   const cells: ComputedRef = computed(() => {
     const buildCells = {}
-    for (const cell of grid.value.cells) {
+    for (const cell of sheet.cells) {
       if (!(cell.rowId in buildCells)) {
         buildCells[cell.rowId] = {}
       }
@@ -82,7 +78,7 @@ export function useGrid (sheet: Ref<SheetType> | SheetType) {
    */
   const values: ComputedRef = computed(() => {
     const buildValues = {}
-    for (const value of grid.value.values) {
+    for (const value of sheet.values) {
       if (!(value.rowId in buildValues)) {
         buildValues[value.rowId] = {}
       }
@@ -93,8 +89,8 @@ export function useGrid (sheet: Ref<SheetType> | SheetType) {
 
   const rows: ComputedRef = computed(() => {
     const buildRows = []
-    for (let rowIndex = 0; rowIndex < grid.value.rows.length; ++rowIndex) {
-      const row = grid.value.rows[rowIndex]
+    for (let rowIndex = 0; rowIndex < sheet.rows.length; ++rowIndex) {
+      const row = sheet.rows[rowIndex]
       const buildRow = {
         id: row.id,
         index: row.index,
@@ -107,8 +103,8 @@ export function useGrid (sheet: Ref<SheetType> | SheetType) {
       }
       const rowCells = cells.value[row.id]
       const valueCells = row.id in values.value ? values.value[row.id] : null
-      for (let columnIndex = 0; columnIndex < grid.value.columns.length; ++columnIndex) {
-        const column: ColumnDimensionType = grid.value.columns[columnIndex]
+      for (let columnIndex = 0; columnIndex < sheet.columns.length; ++columnIndex) {
+        const column: ColumnDimensionType = sheet.columns[columnIndex]
         const cell: CellType = rowCells[column.id]
         const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
         const position: string = `${positionToLetter(column.index)}${row.index}`
@@ -144,12 +140,12 @@ export function useGrid (sheet: Ref<SheetType> | SheetType) {
   })
 
   const mergeCells: ComputedRef = computed(() => (
-    grid.value.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
+    sheet.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
   ))
 
   const mergedCells: ComputedRef<string[]> = computed(() => {
-    return Object.values<MergedCellType>(grid.value.mergedCells)
-      .reduce<string[]>((a: string[], c: MergedCellType)=> ([...a, ...c.cells]), [])
+    return Object.values<MergedCellType>(sheet.mergedCells)
+      .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
   })
 
   /**
