@@ -966,10 +966,16 @@ type ChangeUserPropsMutationPayload {
 
 input ChangeValueInput {
   clientMutationId: String
+  """Идентификатор колонки"""
+  columnId: Int!
+  """Идентификатор документа"""
+  documentId: ID!
+  """Идентификатор строки"""
+  rowId: Int!
+  """Иднтификатор листа"""
+  sheetId: Int!
   """Значение"""
   value: String!
-  """Идентификатор значения"""
-  valueId: ID!
 }
 
 """Изменение значения."""

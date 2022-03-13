@@ -6,12 +6,12 @@
       v-tabs(v-model="active")
         v-tab(v-for="sheet in document.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
         v-tab-item(v-for="sheet in document.sheets" :key="sheet.id")
-          grid(:sheet="sheet")
+          grid(:document-id="document.id" :sheet="sheet")
 </template>
 
 <script lang="ts">
 import type { Ref } from '#app'
-import { defineComponent, ref, useRoute } from '#app'
+import { defineComponent, ref, useRoute, provide } from '#app'
 import type { DocumentType, DocumentQueryVariables } from '~/types/graphql'
 import { useCommonQuery } from '~/composables'
 import GridToolbar from '~/components/dcis/GridToolbar.vue'
@@ -22,12 +22,13 @@ export default defineComponent({
   setup () {
     const route = useRoute()
     const active: Ref<number> = ref<number>(0)
-    const { data: document, loading } = useCommonQuery<DocumentType, DocumentQueryVariables>({
+    const { data: document, loading, update } = useCommonQuery<DocumentType, DocumentQueryVariables>({
       document: require('~/gql/dcis/queries/document'),
       variables: () => ({
         documentId: route.params.documentId
       })
     })
+    provide('documentUpdate', update)
 
     return {
       active,

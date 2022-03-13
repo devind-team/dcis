@@ -25,15 +25,23 @@
           @click="setActive(cell.position)"
           @dblclick="setActive(cell.position, true)"
         )
-          input(v-if="active === cell.position" v-focus :value="cell.value" style="width: 100%;")
+          input(
+            v-if="active === cell.position"
+            v-focus
+            :value="cell.value"
+            @keyup.enter="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
+            style="width: 100%;"
+          )
           template(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">
-import { defineComponent } from '#app'
+import { useMutation } from '@vue/apollo-composable'
+import { defineComponent, inject } from '#app'
 import type { PropType } from '#app'
-import { SheetType } from '~/types/graphql'
+import { ChangeValueMutation, ChangeValueMutationVariables, SheetType } from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
+import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
 
 export default defineComponent({
   directives: {
@@ -44,6 +52,7 @@ export default defineComponent({
     }
   },
   props: {
+    documentId: { type: String, required: true },
     sheet: { type: Object as PropType<SheetType>, required: true }
   },
   setup (props) {
@@ -55,7 +64,29 @@ export default defineComponent({
       active,
       setActive
     } = useGrid(props.sheet)
-    return { columns, rows, mergedCells, mergeCells, active, setActive }
+
+    const documentUpdate: any = inject('documentUpdate')
+
+    const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(changeValueMutation, {
+      update: (cache, result) => documentUpdate(cache, result, (dataCache, { data: { changeValue: { success, value } }}) => {
+        if (success) {
+          dataCache.document.sheets.find((sheet: SheetType) => (sheet.id === props.sheet.id)).values.push(value)
+          setActive(null)
+        }
+        return dataCache
+      })
+    })
+
+    const changeValue = (columnId: number, rowId: number, value: string) => {
+      changeValueMutate({
+        documentId: props.documentId,
+        sheetId: +props.sheet.id,
+        columnId,
+        rowId,
+        value
+      })
+    }
+    return { columns, rows, mergedCells, mergeCells, active, setActive, changeValue }
   }
 })
 </script>
