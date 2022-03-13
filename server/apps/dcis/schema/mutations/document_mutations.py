@@ -1,6 +1,8 @@
 from typing import Optional
 
 import graphene
+import socket
+
 from django.contrib.contenttypes.models import ContentType
 from devind_helpers.schema.mutations import BaseMutation
 from devind_dictionaries.models import Department
@@ -13,6 +15,7 @@ from django.db.models import Max
 
 from apps.dcis.models import Period, Document, Value
 from apps.dcis.schema.types import DocumentType, ValueType
+from apps.dcis.services.excel_unload import DocumentUnload
 
 
 class AddDocument(BaseMutation):
@@ -42,6 +45,22 @@ class AddDocument(BaseMutation):
         return AddDocument(document=document)
 
 
+class UnloadDocumentMutation(BaseMutation):
+    """Выгрузка документа."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Документ')
+
+    src = graphene.String(description='Ссылка на сгенерированный файл')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str):
+        du: DocumentUnload = DocumentUnload(document_id, socket.gethostname())
+        src: str = du.xlsx()
+        return UnloadDocumentMutation(src=src)
+
+
 class ChangeValue(BaseMutation):
     """Изменение значения."""
 
@@ -64,5 +83,6 @@ class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
     add_document = AddDocument.Field(required=True)
+    unload_document = UnloadDocumentMutation.Field(required=True)
 
     change_value = ChangeValue.Field(required=True)

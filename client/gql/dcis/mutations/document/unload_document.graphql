@@ -1,0 +1,12 @@
+mutation UnloadDocument($documentId: ID!) {
+  unloadDocument(input: { documentId: $documentId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    src
+    __typename
+  }
+}

@@ -1083,7 +1083,7 @@ export type ColumnDimensionType = {
   /** Пользователь */
   user?: Maybe<Array<Maybe<UserType>>>;
   /** Ширина колонки */
-  width: Scalars['Int'];
+  width?: Maybe<Scalars['Int']>;
 };
 
 /** Комментарии */
@@ -1876,6 +1876,8 @@ export type Mutation = {
   restorePassword: RestorePasswordMutationPayload;
   /** Отправка письма поддержки */
   supportSubmit: SupportSubmitMutationPayload;
+  /** Выгрузка документа. */
+  unloadDocument: UnloadDocumentMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -2158,6 +2160,11 @@ export type MutationRestorePasswordArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationSupportSubmitArgs = {
   input: SupportSubmitMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUnloadDocumentArgs = {
+  input: UnloadDocumentMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3371,6 +3378,24 @@ export type TagTypeEdge = {
   node?: Maybe<TagType>;
 };
 
+export type UnloadDocumentMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Документ */
+  documentId: Scalars['ID'];
+};
+
+/** Выгрузка документа. */
+export type UnloadDocumentMutationPayload = {
+  __typename?: 'UnloadDocumentMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UploadUsersMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Источник данных, файл xlsx или csv */
@@ -3811,6 +3836,12 @@ export type ChangeValueMutationVariables = Exact<{
 
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValuePayload', value?: { __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null } };
 
+export type UnloadDocumentMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+}>;
+
+export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
   projectId: Scalars['ID'];
@@ -3831,7 +3862,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width: number } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, column?: { __typename: 'ColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'RowDimensionType', id: string, index: number } | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, minCol: number, maxCol: number, minRow: number, maxRow: number, range: string } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, column: { __typename: 'ColumnDimensionType', id: string }, row: { __typename: 'RowDimensionType', id: string } } | null> | null }> | null } | null };
 
 export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
