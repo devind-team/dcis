@@ -171,14 +171,16 @@ class SheetType(DjangoObjectType):
         return Cell.objects.filter(column_id__in=sheet.columndimension_set.values_list('pk', flat=True)).all()
 
     @staticmethod
+    @resolver_hints(model_field='mergedcell_set')
     def resolve_merged_cells(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
         """Получение всех объединенных ячеек связанных с листом."""
-        return MergedCell.objects.filter(sheet=sheet).all()
+        return sheet.mergedcell_set.all()
 
     @staticmethod
+    @resolver_hints(model_field='value_set')
     def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: str, *args, **kwargs):
         """Получение значений, связанных с листом."""
-        return Value.objects.filter(sheet=sheet, document_id=from_global_id(document_id)[1]).all()
+        return sheet.value_set.filter(document_id=from_global_id(document_id)[1]).all()
 
 
 class DocumentType(DjangoObjectType):
@@ -274,6 +276,12 @@ class ColumnDimensionType(DjangoObjectType):
     sheet = graphene.Field(SheetType, description='Листы')
     user = graphene.List(UserType, description='Пользователь')
     content_type = graphene.Field(ContentTypeType, description='Дивизион')
+    cells = graphene.List(lambda: CellType, description='Ячейки')
+    values = graphene.List(
+        lambda: ValueType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        description='Значения документа'
+    )
 
     class Meta:
         model = ColumnDimension
@@ -286,17 +294,21 @@ class ColumnDimensionType(DjangoObjectType):
             'user',
             'content_type',
             'object_id',
-            'horizontal_align',
-            'vertical_align',
-            'size',
-            'strong',
-            'italic',
-            'strike',
-            'underline',
-            'color',
-            'background',
+            'cells',
+            'values',
         )
         convert_choices_to_enum = False
+
+    @staticmethod
+    @resolver_hints(model_field='cell_set')
+    def resolve_cells(column: ColumnDimension, info: ResolveInfo, *args, **kwargs):
+        return column.cell_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='value_set')
+    def resolve_values(column: ColumnDimension, info: ResolveInfo, document_id: str, *args, **kwargs):
+        """Получение значений, связанных с листом."""
+        return column.value_set.filter(document_id=from_global_id(document_id)[1]).all()
 
 
 class RowDimensionType(DjangoObjectType):
@@ -306,6 +318,7 @@ class RowDimensionType(DjangoObjectType):
     children = graphene.List(lambda: RowDimensionType, description='Дочерние строки')
     user = graphene.List(UserType, description='Пользователь')
     content_type = graphene.Field(ContentTypeType, description='Дивизион')
+    cells = graphene.List(lambda: CellType, description='Ячейки')
 
     class Meta:
         model = RowDimension
@@ -322,15 +335,7 @@ class RowDimensionType(DjangoObjectType):
             'user',
             'content_type',
             'object_id',
-            'horizontal_align',
-            'vertical_align',
-            'size',
-            'strong',
-            'italic',
-            'strike',
-            'underline',
-            'color',
-            'background',
+            'cells',
         )
         convert_choices_to_enum = False
 
@@ -354,6 +359,7 @@ class CellType(DjangoObjectType):
         fields = (
             'id',
             'kind',
+            'editable',
             'formula',
             'comment',
             'default',
@@ -396,6 +402,7 @@ class LimitationType(DjangoObjectType):
             'value',
             'cell',
         )
+        convert_choices_to_enum = False
 
 
 class MergedCellType(DjangoObjectType):

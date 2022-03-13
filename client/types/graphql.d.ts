@@ -498,6 +498,8 @@ export type CellType = {
   comment?: Maybe<Scalars['String']>;
   /** Значение по умолчанию */
   default?: Maybe<Scalars['String']>;
+  /** Редактируемая ячейка */
+  editable: Scalars['Boolean'];
   /** Формула */
   formula?: Maybe<Scalars['String']>;
   /** Горизонтальное выравнивание */
@@ -1071,38 +1073,29 @@ export type ChangeValuePayload = {
 /** Тип колонок. */
 export type ColumnDimensionType = {
   __typename?: 'ColumnDimensionType';
-  /** Цвет фона */
-  background: Scalars['String'];
-  /** Цвет индекса */
-  color: Scalars['String'];
+  /** Ячейки */
+  cells?: Maybe<Array<Maybe<CellType>>>;
   /** Дивизион */
   contentType?: Maybe<ContentTypeType>;
   /** Фиксация колонки */
   fixed: Scalars['Boolean'];
-  /** Горизонтальное выравнивание */
-  horizontalAlign?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   /** Индекс колонки */
   index: Scalars['Int'];
-  /** Курсив */
-  italic: Scalars['Boolean'];
   objectId?: Maybe<Scalars['Int']>;
   /** Листы */
   sheet?: Maybe<SheetType>;
-  /** Размер шрифта */
-  size: Scalars['Int'];
-  /** Зачеркнутый */
-  strike?: Maybe<Scalars['Boolean']>;
-  /** Жирный шрифт */
-  strong: Scalars['Boolean'];
-  /** Тип подчеркивания */
-  underline?: Maybe<Scalars['String']>;
   /** Пользователь */
   user?: Maybe<Array<Maybe<UserType>>>;
-  /** Вертикальное выравнивание */
-  verticalAlign?: Maybe<Scalars['String']>;
+  /** Значения документа */
+  values?: Maybe<Array<Maybe<ValueType>>>;
   /** Ширина колонки */
   width?: Maybe<Scalars['Int']>;
+};
+
+/** Тип колонок. */
+export type ColumnDimensionTypeValuesArgs = {
+  documentId: Scalars['ID'];
 };
 
 /** Комментарии */
@@ -1605,36 +1598,16 @@ export type GroupTypeUserSetArgs = {
   username_Icontains?: InputMaybe<Scalars['String']>;
 };
 
-/** An enumeration. */
-export type LimitationCondition =
-  /** < */
-  | 'A_0'
-  /** > */
-  | 'A_1'
-  /** = */
-  | 'A_2'
-  /** <= */
-  | 'A_3'
-  /** >= */
-  | 'A_4';
-
-/** An enumeration. */
-export type LimitationOperator =
-  /** and */
-  | 'AND'
-  /** or */
-  | 'OR';
-
 /** Ограничения на ячейку. */
 export type LimitationType = {
   __typename?: 'LimitationType';
   /** Ячейка */
   cell?: Maybe<CellType>;
   /** Состояние */
-  condition: LimitationCondition;
+  condition: Scalars['String'];
   id: Scalars['ID'];
   /** Оператор */
-  operator: LimitationOperator;
+  operator: Scalars['String'];
   /** Значение */
   value: Scalars['String'];
 };
@@ -3003,12 +2976,10 @@ export type RowDimensionType = {
   __typename?: 'RowDimensionType';
   /** Агрегирование перечисление (мин, макс) для динамических строк */
   aggregation?: Maybe<Scalars['String']>;
-  /** Цвет фона */
-  background: Scalars['String'];
+  /** Ячейки */
+  cells?: Maybe<Array<Maybe<CellType>>>;
   /** Дочерние строки */
   children?: Maybe<Array<Maybe<RowDimensionType>>>;
-  /** Цвет индекса */
-  color: Scalars['String'];
   /** Дивизион */
   contentType?: Maybe<ContentTypeType>;
   /** Документ, для динамических строк */
@@ -3017,30 +2988,16 @@ export type RowDimensionType = {
   dynamic: Scalars['Boolean'];
   /** Высота колонки */
   height?: Maybe<Scalars['Int']>;
-  /** Горизонтальное выравнивание */
-  horizontalAlign?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   /** Индекс строки */
   index: Scalars['Int'];
-  /** Курсив */
-  italic: Scalars['Boolean'];
   objectId?: Maybe<Scalars['Int']>;
   /** Родительские строки */
   parent?: Maybe<RowDimensionType>;
   /** Лист */
   sheet: SheetType;
-  /** Размер шрифта */
-  size: Scalars['Int'];
-  /** Зачеркнутый */
-  strike?: Maybe<Scalars['Boolean']>;
-  /** Жирный шрифт */
-  strong: Scalars['Boolean'];
-  /** Тип подчеркивания */
-  underline?: Maybe<Scalars['String']>;
   /** Пользователь */
   user?: Maybe<Array<Maybe<UserType>>>;
-  /** Вертикальное выравнивание */
-  verticalAlign?: Maybe<Scalars['String']>;
 };
 
 /** Ошибка в строке. */
@@ -3817,7 +3774,7 @@ export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: 
 
 export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, columnId?: number | null, rowId?: number | null };
 
-export type ColumnDimensionFieldsFragment = { __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string };
+export type ColumnDimensionFieldsFragment = { __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean };
 
 export type MergedCellsFieldsFragment = { __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null };
 
@@ -3825,7 +3782,7 @@ export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name:
 
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean };
 
-export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string };
+export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean };
 
 export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any };
 
@@ -3873,7 +3830,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
 
 export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];

@@ -8,6 +8,11 @@
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
+    period {
+      id
+      name
+      __typename
+    }
     comment
     version
     createdAt

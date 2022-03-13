@@ -3,14 +3,5 @@ fragment ColumnDimensionFields on ColumnDimensionType {
   index
   width
   fixed
-  horizontalAlign
-  verticalAlign
-  size
-  strong
-  italic
-  strike
-  underline
-  color
-  background
   __typename
 }

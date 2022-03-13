@@ -95,7 +95,7 @@ class SheetDivision(models.Model):
         abstract = True
 
 
-class ColumnDimension(Style, SheetDivision, models.Model):
+class ColumnDimension(SheetDivision, models.Model):
     """Модель стилей для колонки таблицы.
 
     Ссылка на оригинальный класс из openpyxl:
@@ -117,7 +117,7 @@ class ColumnDimension(Style, SheetDivision, models.Model):
         unique_together = [['index', 'sheet']]
 
 
-class RowDimension(Style, SheetDivision, models.Model):
+class RowDimension(SheetDivision, models.Model):
     """Модель стилей для строки таблицы.
 
     Кроме того, что таблица плоская, могут быть еще промежуточные агрегаций,
@@ -144,7 +144,7 @@ class RowDimension(Style, SheetDivision, models.Model):
         (AVG, 'avg'),
     )
 
-    index = models.PositiveIntegerField(default=0, help_text='Индекс строки')
+    index = models.PositiveIntegerField(help_text='Индекс строки')
     height = models.PositiveIntegerField(null=True, help_text='Высота колонки')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
@@ -210,6 +210,7 @@ class Cell(Style, models.Model):
         choices=KIND_VALUE,
         help_text='Тип значения'
     )
+    editable = models.BooleanField(default=True, help_text='Редактируемая ячейка')
     formula = models.TextField(null=True, help_text='Формула')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
@@ -221,24 +222,27 @@ class Cell(Style, models.Model):
 
     class Meta:
         unique_together = (('column', 'row'),)
+        indexes = [
+            models.Index(fields=['column'])
+        ]
 
 
 class Limitation(models.Model):
     """Накладываемые на ячейку ограничения."""
 
-    AND = 'AND'
-    OR = 'OR'
+    AND = 'and'
+    OR = 'or'
 
     KIND_OPERATOR = (
         (AND, 'and'),
         (OR, 'or')
     )
 
-    LT = 0
-    GT = 1
-    EQUAL = 2
-    LTE = 3
-    GTE = 4
+    LT = 'lt'
+    GT = 'gt'
+    EQUAL = 'equal'
+    LTE = 'lte'
+    GTE = 'gte'
 
     KIND_CONDITION = (
         (LT, '<'),
@@ -248,7 +252,7 @@ class Limitation(models.Model):
         (GTE, '>=')
     )
     operator = models.CharField(max_length=3, default=AND, choices=KIND_OPERATOR, help_text='Оператор')
-    condition = models.PositiveIntegerField(default=EQUAL, choices=KIND_CONDITION, help_text='Состояние')
+    condition = models.CharField(max_length=8, default=EQUAL, choices=KIND_CONDITION, help_text='Состояние')
     value = models.TextField(help_text='Значение')
 
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
@@ -315,5 +319,5 @@ class Value(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['document', 'sheet']),
-            models.Index(fields=['document', 'sheet', 'column', 'row'])
+            models.Index(fields=['document', 'column'])
         ]

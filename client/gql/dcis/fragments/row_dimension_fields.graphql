@@ -3,14 +3,5 @@ fragment RowDimensionFields on RowDimensionType {
   index
   height
   dynamic
-  horizontalAlign
-  verticalAlign
-  size
-  strong
-  italic
-  strike
-  underline
-  color
-  background
   __typename
 }

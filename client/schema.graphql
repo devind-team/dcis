@@ -437,6 +437,8 @@ type CellType {
   comment: String
   """Значение по умолчанию"""
   default: String
+  """Редактируемая ячейка"""
+  editable: Boolean!
   """Формула"""
   formula: String
   """Горизонтальное выравнивание"""
@@ -983,36 +985,25 @@ type ChangeValuePayload {
 
 """Тип колонок."""
 type ColumnDimensionType {
-  """Цвет фона"""
-  background: String!
-  """Цвет индекса"""
-  color: String!
+  """Ячейки"""
+  cells: [CellType]
   """Дивизион"""
   contentType: ContentTypeType
   """Фиксация колонки"""
   fixed: Boolean!
-  """Горизонтальное выравнивание"""
-  horizontalAlign: String
   id: ID!
   """Индекс колонки"""
   index: Int!
-  """Курсив"""
-  italic: Boolean!
   objectId: Int
   """Листы"""
   sheet: SheetType
-  """Размер шрифта"""
-  size: Int!
-  """Зачеркнутый"""
-  strike: Boolean
-  """Жирный шрифт"""
-  strong: Boolean!
-  """Тип подчеркивания"""
-  underline: String
   """Пользователь"""
   user: [UserType]
-  """Вертикальное выравнивание"""
-  verticalAlign: String
+  """Значения документа"""
+  values(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [ValueType]
   """Ширина колонки"""
   width: Int
 }
@@ -1463,37 +1454,15 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
-"""An enumeration."""
-enum LimitationCondition {
-  """<"""
-  A_0
-  """>"""
-  A_1
-  """="""
-  A_2
-  """<="""
-  A_3
-  """>="""
-  A_4
-}
-
-"""An enumeration."""
-enum LimitationOperator {
-  """and"""
-  AND
-  """or"""
-  OR
-}
-
 """Ограничения на ячейку."""
 type LimitationType {
   """Ячейка"""
   cell: CellType
   """Состояние"""
-  condition: LimitationCondition!
+  condition: String!
   id: ID!
   """Оператор"""
-  operator: LimitationOperator!
+  operator: String!
   """Значение"""
   value: String!
 }
@@ -2376,12 +2345,10 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
-  """Цвет фона"""
-  background: String!
+  """Ячейки"""
+  cells: [CellType]
   """Дочерние строки"""
   children: [RowDimensionType]
-  """Цвет индекса"""
-  color: String!
   """Дивизион"""
   contentType: ContentTypeType
   """Документ, для динамических строк"""
@@ -2390,30 +2357,16 @@ type RowDimensionType {
   dynamic: Boolean!
   """Высота колонки"""
   height: Int
-  """Горизонтальное выравнивание"""
-  horizontalAlign: String
   id: ID!
   """Индекс строки"""
   index: Int!
-  """Курсив"""
-  italic: Boolean!
   objectId: Int
   """Родительские строки"""
   parent: RowDimensionType
   """Лист"""
   sheet: SheetType!
-  """Размер шрифта"""
-  size: Int!
-  """Зачеркнутый"""
-  strike: Boolean
-  """Жирный шрифт"""
-  strong: Boolean!
-  """Тип подчеркивания"""
-  underline: String
   """Пользователь"""
   user: [UserType]
-  """Вертикальное выравнивание"""
-  verticalAlign: String
 }
 
 """Ошибка в строке."""
