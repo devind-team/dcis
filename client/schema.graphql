@@ -62,6 +62,8 @@ input AddDocumentMutationInput {
   comment: String!
   """Идентификатор периода"""
   periodId: ID!
+  """Начальный статус документа"""
+  statusId: Int!
 }
 
 """Добавление документа."""
@@ -1317,6 +1319,21 @@ type DjangoDebugSQL {
   vendor: String!
 }
 
+"""Тип статусов для документов."""
+type DocumentStatusType {
+  """Комментарий"""
+  comment: String!
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  id: ID!
+  """Установленный статус"""
+  status: StatusType!
+  """Пользователь"""
+  user: UserType!
+}
+
 """Тип моделей документа."""
 type DocumentType implements Node {
   """Комментарий"""
@@ -1326,6 +1343,8 @@ type DocumentType implements Node {
   createdAt: DateTime!
   """The ID of the object."""
   id: ID!
+  """Последний статус документа"""
+  lastStatus: DocumentStatusType
   objectId: Int!
   """Период сбора"""
   period: PeriodType
@@ -2231,6 +2250,8 @@ type Query {
   sessions(userId: ID): [SessionType!]!
   """Настройки приложения"""
   settings: [SettingType!]!
+  """Статусы документов"""
+  statuses: [StatusType!]
   """Теги"""
   tags(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): TagTypeConnection!
   """Информация о указанном пользователе"""
@@ -2628,6 +2649,17 @@ type SheetType {
     """Идентификатор документа"""
     documentId: ID!
   ): [ValueType]
+}
+
+"""Тип статусов документов."""
+type StatusType {
+  """Комментарий"""
+  comment: String
+  """Можно ли редактировать"""
+  edit: Boolean!
+  id: ID!
+  """Наименование статуса"""
+  name: String!
 }
 
 """Подписки на сокеты."""

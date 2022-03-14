@@ -1,3 +1,5 @@
+from typing import Any
+
 import graphene
 from devind_core.schema.types import FileType, ContentTypeType
 from devind_helpers.optimized import OptimizedDjangoObjectType
@@ -188,6 +190,7 @@ class DocumentType(DjangoObjectType):
 
     period = graphene.Field(PeriodType, description='Период сбора')
     sheets = DjangoListField(SheetType, description='Листы')
+    last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     class Meta:
         model = Document
@@ -202,8 +205,16 @@ class DocumentType(DjangoObjectType):
             'sheets',
             'content_type',
             'object_id',
+            'last_status'
         )
         connection_class = CountableConnection
+
+    @staticmethod
+    def resolve_last_status(document: Document, info: ResolveInfo, *args, **kwargs):
+        try:
+            return document.documentstatus_set.latest('created_at')
+        except DocumentStatus.DoesNotExist:
+            return None
 
 
 class DocumentStatusType(DjangoObjectType):

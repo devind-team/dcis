@@ -96,6 +96,8 @@ export type AddDocumentMutationInput = {
   comment: Scalars['String'];
   /** Идентификатор периода */
   periodId: Scalars['ID'];
+  /** Начальный статус документа */
+  statusId: Scalars['Int'];
 };
 
 /** Добавление документа. */
@@ -1445,6 +1447,22 @@ export type DjangoDebugSql = {
   vendor: Scalars['String'];
 };
 
+/** Тип статусов для документов. */
+export type DocumentStatusType = {
+  __typename?: 'DocumentStatusType';
+  /** Комментарий */
+  comment: Scalars['String'];
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  /** Документ */
+  document?: Maybe<DocumentType>;
+  id: Scalars['ID'];
+  /** Установленный статус */
+  status: StatusType;
+  /** Пользователь */
+  user: UserType;
+};
+
 /** Тип моделей документа. */
 export type DocumentType = Node & {
   __typename?: 'DocumentType';
@@ -1455,6 +1473,8 @@ export type DocumentType = Node & {
   createdAt: Scalars['DateTime'];
   /** The ID of the object. */
   id: Scalars['ID'];
+  /** Последний статус документа */
+  lastStatus?: Maybe<DocumentStatusType>;
   objectId: Scalars['Int'];
   /** Период сбора */
   period?: Maybe<PeriodType>;
@@ -2675,6 +2695,8 @@ export type Query = {
   sessions: Array<SessionType>;
   /** Настройки приложения */
   settings: Array<SettingType>;
+  /** Статусы документов */
+  statuses?: Maybe<Array<StatusType>>;
   /** Теги */
   tags: TagTypeConnection;
   /** Информация о указанном пользователе */
@@ -3268,6 +3290,18 @@ export type SheetTypeValuesArgs = {
   documentId: Scalars['ID'];
 };
 
+/** Тип статусов документов. */
+export type StatusType = {
+  __typename?: 'StatusType';
+  /** Комментарий */
+  comment?: Maybe<Scalars['String']>;
+  /** Можно ли редактировать */
+  edit: Scalars['Boolean'];
+  id: Scalars['ID'];
+  /** Наименование статуса */
+  name: Scalars['String'];
+};
+
 /** Подписки на сокеты. */
 export type Subscription = {
   __typename?: 'Subscription';
@@ -3784,6 +3818,8 @@ export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: s
 
 export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any };
 
+export type StatusFieldsFragment = { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean };
+
 export type ValueFieldsFragment = { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null };
 
 export type AuthCbiasMutationVariables = Exact<{
@@ -3797,9 +3833,10 @@ export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typen
 export type AddDocumentMutationVariables = Exact<{
   comment: Scalars['String'];
   periodId: Scalars['ID'];
+  statusId: Scalars['Int'];
 }>;
 
-export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any } | null } };
+export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -3837,7 +3874,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, createdAt: any } | null, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: PeriodStatus, start?: any | null, expiration?: any | null, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, createdAt: any } | null, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];
@@ -3851,6 +3888,10 @@ export type ProjectsQueryVariables = Exact<{
 }>;
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, createdAt: any } | null } | null> } | null };
+
+export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
+
+export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
 

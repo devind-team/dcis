@@ -1,9 +1,10 @@
 import graphene
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from graphene_django import DjangoListField
 
 from apps.dcis.models import Document
-from apps.dcis.schema.types import DocumentType
+from apps.dcis.schema.types import DocumentType, StatusType
 
 
 class DocumentQueries(graphene.ObjectType):
@@ -14,6 +15,8 @@ class DocumentQueries(graphene.ObjectType):
         description='Документ',
         document_id=graphene.ID(description='Идентификатор документа')
     )
+
+    statuses = DjangoListField(StatusType, description='Статусы документов')
 
     @staticmethod
     def resolve_document(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> None:

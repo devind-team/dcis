@@ -11,7 +11,7 @@ from devind_helpers.orm_utils import get_object_or_404
 from graphql_relay import from_global_id
 from django.db.models import Max
 
-from apps.dcis.models import Period, Document, Value, Sheet
+from apps.dcis.models import Period, Document, Value, Sheet, Status
 from apps.dcis.schema.types import DocumentType, ValueType
 from apps.dcis.permissions import AddDocument
 
@@ -22,13 +22,15 @@ class AddDocumentMutation(BaseMutation):
     class Input:
         comment = graphene.String(required=True, description='Комментарий')
         period_id = graphene.ID(required=True, description='Идентификатор периода')
+        status_id = graphene.Int(required=True, description='Начальный статус документа')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
     @permission_classes((IsAuthenticated, AddDocument,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
+        status: Status = get_object_or_404(Status, pk=status_id)
         content_type: ContentType = ContentType.objects.get_for_model(Department)    # Временно департаменты
         object_id: int = 1  # Служба поддержки
         max_version: Optional[int] = Document.objects.aggregate(version=Max('version'))['version']
@@ -38,6 +40,11 @@ class AddDocumentMutation(BaseMutation):
             content_type=content_type,
             object_id=object_id,
             period=period
+        )
+        document.documentstatus_set.create(
+            comment='Создание документа.',
+            user=info.context.user,
+            status=status
         )
         document.sheets.add(*period.sheet_set.all())
         return AddDocumentMutation(document=document)

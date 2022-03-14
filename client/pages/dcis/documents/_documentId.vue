@@ -1,12 +1,13 @@
 <template lang="pug">
-  v-container(fluid)
+  v-container(fluid :key="$route.fullpath")
     v-card(v-if="!loading")
       v-card-title {{ doc.period.name }}. Версия: {{ doc.version }}
       v-card-subtitle {{ doc.comment }}
       v-tabs(v-model="active")
         v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
         v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
-          grid(:document-id="doc.id" :sheet="sheet")
+          grid(:document-id="doc.id" :sheet="sheet" :key="`grid${sheet.id}`")
+          pre {{ sheet.values }}
 </template>
 
 <script lang="ts">
@@ -15,11 +16,10 @@ import { defineComponent, ref, useRoute, provide } from '#app'
 import type { DocumentQueryVariables, DocumentQuery } from '~/types/graphql'
 import { useCommonQuery } from '~/composables'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
-import GridToolbar from '~/components/dcis/GridToolbar.vue'
 import Grid from '~/components/dcis/Grid.vue'
 
 export default defineComponent({
-  components: { GridToolbar, Grid },
+  components: { Grid },
   setup () {
     const route = useRoute()
     const active: Ref<number> = ref<number>(0)

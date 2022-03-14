@@ -76,10 +76,10 @@ export default defineComponent({
         result,
         (dataCache: DocumentQuery, { data: { changeValue: { success, value } } }: ChangeValueMutationResult) => {
           if (success) {
-            dataCache.document.sheets!.find(sheet => sheet.id === props.sheet.id)!.values = dataCache.document.sheets!
+            const values: ValueType[] = dataCache.document.sheets!
               .find(sheet => sheet.id === props.sheet.id)
               .values.filter((v: ValueType) => v.id !== value.id)
-            dataCache.document.sheets!.find(sheet => sheet.id === props.sheet.id)!.values.push(value)
+            dataCache.document.sheets!.find(sheet => sheet.id === props.sheet.id)!.values = [...values, value] as any
             setActive(null)
           }
           return dataCache

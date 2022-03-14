@@ -1,0 +1,7 @@
+fragment StatusFields on StatusType {
+  id
+  name
+  comment
+  edit
+  __typename
+}

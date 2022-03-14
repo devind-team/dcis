@@ -26,12 +26,13 @@ export function useCommonQuery<TResult = any, TVariables = any> (
     result: Omit<FetchResult<TResultMutation>, 'context'>,
     transform: TransformUpdate<TResult, TResultMutation>
   ): void => {
+    const variablesValue = getValue<TVariables>(variables)
     const cacheData: TResult = cache.readQuery<TResult, TVariables>({
       query: document as DocumentNode,
-      variables: getValue(variables)
+      variables: variablesValue
     })
     const data: TResult = transform(cacheData, result)
-    cache.writeQuery({ query: document as DocumentNode, variables, data })
+    cache.writeQuery({ query: document as DocumentNode, variables: variablesValue, data })
   }
   /**
    * Результат выполнения мутации

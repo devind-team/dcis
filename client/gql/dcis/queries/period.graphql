@@ -1,5 +1,6 @@
 #import "../fragments/project_fields.graphql"
 #import "../fragments/period_fields.graphql"
+#import "../fragments/status_fields.graphql"
 
 query Period($periodId: ID!) {
   period(periodId: $periodId) {
@@ -14,6 +15,16 @@ query Period($periodId: ID!) {
       comment
       createdAt
       __typename
+
+      lastStatus {
+        id
+        comment
+        createdAt
+        __typename
+        status {
+          ...StatusFields
+        }
+      }
     }
   }
 }
