@@ -255,6 +255,35 @@ export type AddProjectMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddRowDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Позиция вставки */
+  position: Scalars['String'];
+  /** Идентификатор строки */
+  rowId: Scalars['Int'];
+};
+
+/**
+ * Вставка строк.
+ *
+ * После добавления строки бы то не было, строка приобретает новый индекс,
+ * соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
+ */
+export type AddRowDimensionMutationPayload = {
+  __typename?: 'AddRowDimensionMutationPayload';
+  /** Добавленные ячейки */
+  cells: Array<Maybe<CellType>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Добавленная строка */
+  rowDimension: RowDimensionType;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddSectionFilesMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Загружаемые изображения */
@@ -1346,6 +1375,26 @@ export type DeleteProfileMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteRowDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор строки */
+  rowId: Scalars['Int'];
+};
+
+/** Мутация для удаления строки. */
+export type DeleteRowDimensionMutationPayload = {
+  __typename?: 'DeleteRowDimensionMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Измененные строки */
+  index: Scalars['Int'];
+  /** Идентификатор удаленной строки */
+  rowId: Scalars['Int'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteSectionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор секции */
@@ -1798,6 +1847,13 @@ export type Mutation = {
   addProfile: AddProfileMutationPayload;
   /** Мутация для добавления проекта. */
   addProject: AddProjectMutationPayload;
+  /**
+   * Вставка строк.
+   *
+   * После добавления строки бы то не было, строка приобретает новый индекс,
+   * соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
+   */
+  addRowDimension: AddRowDimensionMutationPayload;
   /** Добавление секции */
   addSectionFiles: AddSectionFilesMutationPayload;
   /** Добавление секции */
@@ -1874,6 +1930,8 @@ export type Mutation = {
   deletePage: DeletePageMutationPayload;
   /** Мутация для удаления записи профиля. */
   deleteProfile: DeleteProfileMutationPayload;
+  /** Мутация для удаления строки. */
+  deleteRowDimension: DeleteRowDimensionMutationPayload;
   /** Удаление секции */
   deleteSection: DeleteSectionMutationPayload;
   /** Мутация для удаления всех сессий кроме текущей. */
@@ -1938,6 +1996,11 @@ export type MutationAddProfileArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddProjectArgs = {
   input: AddProjectMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddRowDimensionArgs = {
+  input: AddRowDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2128,6 +2191,11 @@ export type MutationDeletePageArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteProfileArgs = {
   input: DeleteProfileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteRowDimensionArgs = {
+  input: DeleteRowDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3894,6 +3962,20 @@ export type AddProjectMutationVariables = Exact<{
 }>;
 
 export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, createdAt: any } | null } };
+
+export type AddRowDimensionMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  rowId: Scalars['Int'];
+  position: Scalars['String'];
+}>;
+
+export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, columnId?: number | null, rowId?: number | null } | null> } };
+
+export type DeleteRowDimensionMutationVariables = Exact<{
+  rowId: Scalars['Int'];
+}>;
+
+export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowId: number, index: number } };
 
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];

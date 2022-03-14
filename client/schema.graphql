@@ -214,6 +214,34 @@ type AddProjectMutationPayload {
   success: Boolean!
 }
 
+input AddRowDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Позиция вставки"""
+  position: String!
+  """Идентификатор строки"""
+  rowId: Int!
+}
+
+"""
+Вставка строк.
+
+После добавления строки бы то не было, строка приобретает новый индекс,
+соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
+"""
+type AddRowDimensionMutationPayload {
+  """Добавленные ячейки"""
+  cells: [CellType]!
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленная строка"""
+  rowDimension: RowDimensionType!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddSectionFilesMutationInput {
   clientMutationId: String
   """Загружаемые изображения"""
@@ -1225,6 +1253,25 @@ type DeleteProfileMutationPayload {
   success: Boolean!
 }
 
+input DeleteRowDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор строки"""
+  rowId: Int!
+}
+
+"""Мутация для удаления строки."""
+type DeleteRowDimensionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененные строки"""
+  index: Int!
+  """Идентификатор удаленной строки"""
+  rowId: Int!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteSectionMutationInput {
   clientMutationId: String
   """Идентификатор секции"""
@@ -1643,6 +1690,13 @@ type Mutation {
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
   addProject(input: AddProjectMutationInput!): AddProjectMutationPayload!
+  """
+  Вставка строк.
+  
+  После добавления строки бы то не было, строка приобретает новый индекс,
+  соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
+  """
+  addRowDimension(input: AddRowDimensionMutationInput!): AddRowDimensionMutationPayload!
   """Добавление секции"""
   addSectionFiles(input: AddSectionFilesMutationInput!): AddSectionFilesMutationPayload!
   """Добавление секции"""
@@ -1719,6 +1773,8 @@ type Mutation {
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
+  """Мутация для удаления строки."""
+  deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
   """Удаление секции"""
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""

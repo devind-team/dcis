@@ -1,0 +1,24 @@
+#import "../../fragments/row_dimension_fields.graphql"
+#import "../../fragments/cell_fields.graphql"
+
+mutation AddRowDimension($documentId: ID!, $rowId: Int!, $position: String!) {
+  addRowDimension(input: {
+    documentId: $documentId,
+    rowId: $rowId,
+    position: $position
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    rowDimension {
+      ...RowDimensionFields
+    }
+    cells {
+      ...CellFields
+    }
+    __typename
+  }
+}

@@ -52,7 +52,8 @@ class DocumentUnload:
                     # color=cell.color
                 )
                 # Заливка ячейки
-                ws.cell(row_position, column_position).fill = PatternFill(bgColor=cell.background)
+                # Этот колор ругается
+                # ws.cell(row_position, column_position).fill = PatternFill(bgColor=cell.background)
 
             # Ширина и высота для колонок и строк соответственно
             for column in columns:

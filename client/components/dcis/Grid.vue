@@ -14,7 +14,23 @@
         :key="row.dimension.id"
         :style="row.style"
       )
-        td.header-cell {{ row.index }}
+        td.header-cell
+          v-menu(bottom close-on-content-click)
+            template(#activator="{ on, attrs }")
+              div(v-on="on" v-bind="attrs") {{ row.index }}
+            v-list
+              v-list-item(@click="addRowDimension(+row.dimension.id, 'before')")
+                v-list-item-icon
+                  v-icon mdi-table-row-plus-before
+                v-list-item-content Добавить строку выше
+              v-list-item(@click="addRowDimension(+row.dimension.id, 'after')")
+                v-list-item-icon
+                  v-icon mdi-table-row-plus-after
+                v-list-item-content Добавить строку ниже
+              v-list-item(@click="deleteRowDimension(+row.dimension.id)")
+                v-list-item-icon
+                  v-icon(color="error") mdi-delete
+                v-list-item-content(color="error") Удалить строку
         td(
           v-for="cell in row.cells"
           :key="cell.cell.id"
@@ -38,12 +54,26 @@
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import type { PropType, Ref } from '#app'
-import { defineComponent, inject, toRef} from '#app'
-import {ChangeValueMutation, ChangeValueMutationVariables, DocumentQuery, SheetType, ValueType} from '~/types/graphql'
+import { defineComponent, inject, toRef } from '#app'
+import {
+  AddRowDimensionMutation,
+  AddRowDimensionMutationVariables,
+  ChangeValueMutation,
+  ChangeValueMutationVariables,
+  DeleteRowDimensionMutation, DeleteRowDimensionMutationVariables,
+  DocumentQuery, RowDimensionType,
+  SheetType,
+  ValueType
+} from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
+import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
+import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
+import row from "vuetify/src/components/VDataTable/Row";
 
 export type ChangeValueMutationResult = { data: ChangeValueMutation }
+export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
+export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
 
 export default defineComponent({
   directives: {
@@ -70,16 +100,66 @@ export default defineComponent({
 
     const documentUpdate: any = inject('documentUpdate')
 
+    const addRowDimension = (rowId: number, position: 'after' | 'before') => {
+      const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
+        update: (cache, result) => documentUpdate(
+          cache,
+          result,
+          (dataCache: DocumentQuery, { data: { addRowDimension: { success, rowDimension, cells } } }: AddRowDimensionMutationResult) => {
+            if (success) {
+              dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).cells.push(...cells)
+              const rows: RowDimensionType[] = dataCache.document.sheets
+                .find(sh => sh.id === props.sheet.id)
+                .rows
+                .map((r: RowDimensionType | any) => (
+                  r.index >= rowDimension.index ? Object.assign(r, { index: r.index + 1 }) : r)
+                )
+              rows.splice(rowDimension.index - 1, 0, rowDimension as RowDimensionType)
+              dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).rows = rows as any
+            }
+            return dataCache
+          }
+        )
+      })
+      mutate({ documentId: props.documentId, rowId, position })
+    }
+
+    const deleteRowDimension = (rowId: number) => {
+      const { mutate } = useMutation<DeleteRowDimensionMutation, DeleteRowDimensionMutationVariables>(
+        deleteRowDimensionMutation, {
+          update: (cache, result) => documentUpdate(
+            cache,
+            result,
+            (dataCache: DocumentQuery, { data: { deleteRowDimension: { success, rowId, index } } }: DeleteRowDimensionMutationResult) => {
+              if (success) {
+                console.log(rowId, index)
+                const rows: RowDimensionType[] = dataCache.document.sheets
+                  .find(sheet => sheet.id === props.sheet.id)
+                  .rows
+                  .filter((r: RowDimensionType | any) => Number(r.id) !== rowId)
+                  .map((r: RowDimensionType | any) => (
+                    r.index > index ? Object.assign(r, { index: r.index - 1 }) : r
+                  ))
+                dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).rows = rows as any
+              }
+              return dataCache
+            }
+          )
+        }
+      )
+      mutate({ rowId })
+    }
+
     const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(changeValueMutation, {
-      update: (store, result) => documentUpdate(
-        store,
+      update: (cache, result) => documentUpdate(
+        cache,
         result,
         (dataCache: DocumentQuery, { data: { changeValue: { success, value } } }: ChangeValueMutationResult) => {
           if (success) {
             const values: ValueType[] = dataCache.document.sheets!
-              .find(sheet => sheet.id === props.sheet.id)
+              .find(sh => sh.id === props.sheet.id)
               .values.filter((v: ValueType) => v.id !== value.id)
-            dataCache.document.sheets!.find(sheet => sheet.id === props.sheet.id)!.values = [...values, value] as any
+            dataCache.document.sheets!.find(sh => sh.id === props.sheet.id)!.values = [...values, value] as any
             setActive(null)
           }
           return dataCache
@@ -95,7 +175,7 @@ export default defineComponent({
         value
       })
     }
-    return { columns, rows, mergedCells, mergeCells, active, setActive, changeValue }
+    return { columns, rows, mergedCells, mergeCells, active, setActive, addRowDimension, deleteRowDimension, changeValue }
   }
 })
 </script>
@@ -111,6 +191,7 @@ export default defineComponent({
   .header-cell
     text-align: center
     background: lightgrey
+    cursor: pointer
   .active-cell
     border: 2px solid blue
   .input

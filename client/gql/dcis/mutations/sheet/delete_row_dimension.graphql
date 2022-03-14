@@ -1,0 +1,8 @@
+mutation DeleteRowDimension($rowId: Int!) {
+  deleteRowDimension(input: { rowId: $rowId }) {
+    success
+    rowId
+    index
+    __typename
+  }
+}
