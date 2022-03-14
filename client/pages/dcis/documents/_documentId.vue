@@ -7,16 +7,16 @@
         v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
         v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
           grid(:document-id="doc.id" :sheet="sheet" :key="`grid${sheet.id}`")
-          pre {{ sheet.values }}
 </template>
 
 <script lang="ts">
 import type { Ref } from '#app'
-import { defineComponent, ref, useRoute, provide } from '#app'
+import { defineComponent, ref, useRoute, provide, inject, onUnmounted } from '#app'
 import type { DocumentQueryVariables, DocumentQuery } from '~/types/graphql'
 import { useCommonQuery } from '~/composables'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import Grid from '~/components/dcis/Grid.vue'
+import DefaultLayout from "~/layouts/default.vue";
 
 export default defineComponent({
   components: { Grid },
@@ -30,6 +30,12 @@ export default defineComponent({
       })
     })
     provide('documentUpdate', update)
+
+    const layoutInstance = inject<DefaultLayout>('layoutInstance')
+    layoutInstance.setFooter(false)
+    onUnmounted(() => {
+      layoutInstance.setFooter(true)
+    })
 
     return {
       active,

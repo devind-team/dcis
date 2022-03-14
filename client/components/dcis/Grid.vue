@@ -30,15 +30,15 @@
             v-focus
             :value="cell.value"
             @keyup.enter="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
-            style="width: 100%;"
+            style="width: 100%; min-width:100px;"
           )
           template(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
-import type {ComputedRef, PropType, Ref} from '#app'
-import { computed, defineComponent, inject, toRef} from '#app'
+import type { PropType, Ref } from '#app'
+import { defineComponent, inject, toRef} from '#app'
 import {ChangeValueMutation, ChangeValueMutationVariables, DocumentQuery, SheetType, ValueType} from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
