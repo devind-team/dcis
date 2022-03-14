@@ -1,18 +1,20 @@
 from typing import Optional
 
 import graphene
-from django.contrib.contenttypes.models import ContentType
-from devind_helpers.schema.mutations import BaseMutation
 from devind_dictionaries.models import Department
-from graphql import ResolveInfo
 from devind_helpers.decorators import permission_classes
-from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.orm_utils import get_object_or_404
-from graphql_relay import from_global_id
+from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.schema.mutations import BaseMutation
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
+from django.http.request import HttpRequest
+from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.dcis.models import Period, Document, Value, Sheet, Status
 from apps.dcis.schema.types import DocumentType, ValueType
+from apps.dcis.services.excel_unload import DocumentUnload
 from apps.dcis.permissions import AddDocument
 
 
@@ -48,6 +50,23 @@ class AddDocumentMutation(BaseMutation):
         )
         document.sheets.add(*period.sheet_set.all())
         return AddDocumentMutation(document=document)
+
+
+class UnloadDocumentMutation(BaseMutation):
+    """Выгрузка документа."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Документ')
+
+    src = graphene.String(description='Ссылка на сгенерированный файл')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str):
+        document = Document.objects.get(pk=from_global_id(document_id)[1])
+        du: DocumentUnload = DocumentUnload(document, HttpRequest.get_host(info.context))
+        src: str = du.xlsx()
+        return UnloadDocumentMutation(src=src)
 
 
 class ChangeValueMutation(BaseMutation):
@@ -93,5 +112,6 @@ class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
     add_document = AddDocumentMutation.Field(required=True)
+    unload_document = UnloadDocumentMutation.Field(required=True)
 
     change_value = ChangeValueMutation.Field(required=True)

@@ -1739,6 +1739,8 @@ type Mutation {
   restorePassword(input: RestorePasswordMutationInput!): RestorePasswordMutationPayload!
   """Отправка письма поддержки"""
   supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
+  """Выгрузка документа."""
+  unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
 }
@@ -2744,6 +2746,23 @@ type TagTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: TagType
+}
+
+input UnloadDocumentMutationInput {
+  clientMutationId: String
+  """Документ"""
+  documentId: ID!
+}
+
+"""Выгрузка документа."""
+type UnloadDocumentMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный файл"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
 }
 
 """
