@@ -3,7 +3,7 @@ from datetime import datetime
 from os.path import join
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 
 from apps.dcis.models import Cell, Document
@@ -51,6 +51,14 @@ class DocumentUnload:
                     underline=cell.underline,
                     # color=cell.color
                 )
+                if cell.border_style:
+                    ws.cell(row_position, column_position).border = Border(
+                        top=Side(border_style=cell.border_style['top'], color=cell.border_color['top']),
+                        bottom=Side(border_style=cell.border_style['bottom'], color=cell.border_color['bottom']),
+                        left=Side(border_style=cell.border_style['left'], color=cell.border_color['left']),
+                        right=Side(border_style=cell.border_style['right'], color=cell.border_color['right']),
+                        diagonal=Side(border_style=cell.border_style['diagonal'], color=cell.border_color['diagonal'])
+                    )
                 # Заливка ячейки
                 # Этот колор ругается
                 # ws.cell(row_position, column_position).fill = PatternFill(bgColor=cell.background)

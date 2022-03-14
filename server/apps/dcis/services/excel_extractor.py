@@ -115,7 +115,21 @@ class ExcelExtractor:
                     else COLOR_INDEX[column.font.color.index],
                     'background': column.fill.bgColor.value
                     if column.fill.bgColor.type == 'rgb'
-                    else COLOR_INDEX[column.fill.bgColor.value]
+                    else COLOR_INDEX[column.fill.bgColor.value],
+                    'border_style': {
+                        'top': column.border.top.style,
+                        'bottom': column.border.bottom.style,
+                        'left': column.border.left.style,
+                        'right': column.border.right.style,
+                        'diagonal': column.border.diagonal.style
+                    },
+                    'border_color': {
+                        'top': column.border.top.color,
+                        'bottom': column.border.bottom.color,
+                        'left': column.border.left.color,
+                        'right': column.border.right.color,
+                        'diagonal': column.border.diagonal.color
+                    }
                 }
             } for col_letter, column in holder.items()
         }
@@ -139,7 +153,21 @@ class ExcelExtractor:
                     else COLOR_INDEX[row.font.color.index],
                     'background': row.fill.bgColor.value
                     if row.fill.bgColor.type == 'rgb'
-                    else COLOR_INDEX[row.fill.bgColor.value]
+                    else COLOR_INDEX[row.fill.bgColor.value],
+                    'border_style': {
+                        'top': row.border.top.style,
+                        'bottom': row.border.bottom.style,
+                        'left': row.border.left.style,
+                        'right': row.border.right.style,
+                        'diagonal': row.border.diagonal.style
+                    },
+                    'border_color': {
+                        'top': row.border.top.color,
+                        'bottom': row.border.bottom.color,
+                        'left': row.border.left.color,
+                        'right': row.border.right.color,
+                        'diagonal': row.border.diagonal.color
+                    }
                 }
             } for index, row in holder.items()
         }
@@ -176,7 +204,21 @@ class ExcelExtractor:
                     else COLOR_INDEX[cell.font.color.index],
                     'background': cell.fill.bgColor.value
                     if cell.fill.bgColor.type == 'rgb'
-                    else COLOR_INDEX[cell.fill.bgColor.value]
+                    else COLOR_INDEX[cell.fill.bgColor.value],
+                    'border_style': {
+                        'top': cell.border.top.style,
+                        'bottom': cell.border.bottom.style,
+                        'left': cell.border.left.style,
+                        'right': cell.border.right.style,
+                        'diagonal': cell.border.diagonal.style
+                    },
+                    'border_color': {
+                        'top': cell.border.top.color,
+                        'bottom': cell.border.bottom.color,
+                        'left': cell.border.left.color,
+                        'right': cell.border.right.color,
+                        'diagonal': cell.border.diagonal.color
+                    }
                 })
         return rows_result
 

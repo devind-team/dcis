@@ -70,6 +70,8 @@ class Style(models.Model):
     )
     color = models.CharField(max_length=16, default='#000000', help_text='Цвет индекса')
     background = models.CharField(max_length=16, default='#FFFFFF', help_text='Цвет фона')
+    border_style = models.JSONField(null=True, help_text='Стили границ')
+    border_color = models.JSONField(null=True, help_text='Цвет границ')
 
     class Meta:
         abstract = True
