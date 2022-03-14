@@ -64,8 +64,8 @@ class UnloadDocumentMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str):
         document = Document.objects.get(pk=from_global_id(document_id)[1])
-        du: DocumentUnload = DocumentUnload(document, HttpRequest.get_host(info.context))
-        src: str = du.xlsx()
+        document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host())
+        src: str = document_unload.xlsx()
         return UnloadDocumentMutation(src=src)
 
 

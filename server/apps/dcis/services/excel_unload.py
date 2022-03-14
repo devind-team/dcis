@@ -6,7 +6,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from apps.dcis.models import Cell, Sheet, Document
+from apps.dcis.models import Cell, Document
 from devind import settings
 
 
@@ -14,25 +14,29 @@ class DocumentUnload:
 
     def __init__(self, document: Document, host: str):
         """Генерация."""
+        self.document = document
+        self.sheets = document.sheets.all()
         self.host = host
-        self.sheets = Sheet.objects.filter(document=document)
-        self.cells = Cell.objects.all()
-        self.path: str = join(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}')
+        self.path: str = join(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
 
     def xlsx(self):
         """Генерация выгрузки."""
         workbook: Workbook = Workbook()
         for sheet in self.sheets:
             ws = workbook.create_sheet(sheet.name, -1)
-            rows = sheet.rowdimension_set.all()
             columns = sheet.columndimension_set.all()
-            cells = self.cells.filter(row__in=rows, column__in=columns)
-
+            rows = sheet.rowdimension_set.all()
+            cells = Cell.objects.filter(column__in=columns).prefetch_related('row', 'column').all()
+            values = sheet.value_set.filter(document=self.document).all()
+            build_values = {}
+            for build_value in values:
+                key = f'{build_value.column_id}:{build_value.row_id}'
+                build_values[key] = build_value.value
             # Вписываем значения в ячейки
             for cell in cells:
                 row_position = cell.row.index
                 column_position = cell.column.index
-                value = cell.default or ''
+                value = build_values.get(f'{cell.column_id}:{cell.row_id}', cell.default or '')
                 ws.cell(row_position, column_position, f'{value}').alignment = Alignment(
                     vertical=cell.vertical_align,
                     horizontal=cell.horizontal_align,
@@ -45,7 +49,7 @@ class DocumentUnload:
                     italic=cell.italic,
                     strike=cell.strike,
                     underline=cell.underline,
-                    color=cell.color
+                    # color=cell.color
                 )
                 # Заливка ячейки
                 ws.cell(row_position, column_position).fill = PatternFill(bgColor=cell.background)
@@ -66,6 +70,5 @@ class DocumentUnload:
                     end_row=mc.max_row,
                     end_column=mc.max_col
                 )
-        path_output = f'{self.path}.xlsx'
-        workbook.save(path_output)
-        return posixpath.relpath(path_output, settings.BASE_DIR)
+        workbook.save(self.path)
+        return posixpath.relpath(self.path, settings.BASE_DIR)
