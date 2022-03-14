@@ -20,7 +20,7 @@
     "@pinia/nuxt": "^0.1.8",
     "@tailwindcss/typography": "^0.5.2",
     "@vue/apollo-composable": "^4.0.0-alpha.16",
-    "@vueuse/core": "^7.7.1",
+    "@vueuse/core": "^8.0.1",
     "@vueuse/integrations": "^7.7.1",
     "accounting": "^0.4.1",
     "apexcharts": "^3.33.2",
