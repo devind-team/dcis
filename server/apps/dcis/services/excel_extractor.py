@@ -113,9 +113,9 @@ class ExcelExtractor:
                     'color': column.font.color.value
                     if column.font.color.type == 'rgb'
                     else COLOR_INDEX[column.font.color.index],
-                    'background': column.fill.bgColor.value
-                    if column.fill.bgColor.type == 'rgb'
-                    else COLOR_INDEX[column.fill.bgColor.value],
+                    'background': '#FFFFFF'
+                    if column.fill.patternType is None
+                    else f'#{column.fill.fgColor.value[2:]}',
                     'border_style': {
                         'top': column.border.top.style,
                         'bottom': column.border.bottom.style,
@@ -151,9 +151,9 @@ class ExcelExtractor:
                     'color': row.font.color.value
                     if row.font.color.type == 'rgb'
                     else COLOR_INDEX[row.font.color.index],
-                    'background': row.fill.bgColor.value
-                    if row.fill.bgColor.type == 'rgb'
-                    else COLOR_INDEX[row.fill.bgColor.value],
+                    'background': '#FFFFFF'
+                    if row.fill.patternType is None
+                    else f'#{row.fill.fgColor.value[2:]}',
                     'border_style': {
                         'top': row.border.top.style,
                         'bottom': row.border.bottom.style,
@@ -182,6 +182,7 @@ class ExcelExtractor:
         rows_result: List[Dict] = []
         for row in rows:
             for cell in row:
+                print(cell.fill)
                 rows_result.append({
                     'column_id': cell.col_idx,
                     'row_id': cell.row,
@@ -202,9 +203,9 @@ class ExcelExtractor:
                     'color': cell.font.color.value
                     if cell.font.color.type == 'rgb'
                     else COLOR_INDEX[cell.font.color.index],
-                    'background': cell.fill.bgColor.value
-                    if cell.fill.bgColor.type == 'rgb'
-                    else COLOR_INDEX[cell.fill.bgColor.value],
+                    'background': '#FFFFFF'
+                    if cell.fill.patternType is None
+            else f'#{cell.fill.fgColor.value[2:]}',
                     'border_style': {
                         'top': cell.border.top.style,
                         'bottom': cell.border.bottom.style,

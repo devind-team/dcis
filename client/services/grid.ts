@@ -27,7 +27,7 @@ const getDefaultCell = (): CellType => {
 }
 
 /**
- * Разбираем кординату на состовляющие
+ * Разбираем координату на составляющие
  * parseCoordinate('A1') -> { column: 'A', row: '1' }
  * parseCoordinate('$A1') -> { column: 'A', row: '1' }
  * parseCoordinate('A$1') -> { column: 'A', row: '1' }
@@ -138,7 +138,7 @@ const rangePositionToCells = (
   return cells
 }
 /**
- * Вспомогательная фнкция для применения действия к диапазону
+ * Вспомогательная функция для применения действия к диапазону
  * @param rangePosition
  * @param callback
  */
@@ -183,7 +183,7 @@ const normalizationRange = (range: string): string => {
 }
 
 /**
- * Вовзращение свойство ячески в формате :style=""
+ * Возвращение свойство ячейки в формате style=""
  * @param cellOptions
  */
 const styleCell = (cellOptions: CellOptionsType): string => {
@@ -198,7 +198,19 @@ const styleCell = (cellOptions: CellOptionsType): string => {
     style += `color: ${cellOptions.color}; `
   }
   if (cellOptions.background) {
-    style += `background: ${cellOptions.background}`
+    style += `background: ${cellOptions.background}; `
+  }
+  if (cellOptions.borderTop) {
+    style += `border-top: ${cellOptions.borderTop}; `
+  }
+  if (cellOptions.borderBottom) {
+    style += `border-bottom: ${cellOptions.borderBottom}; `
+  }
+  if (cellOptions.borderLeft) {
+    style += `border-left: ${cellOptions.borderLeft}; `
+  }
+  if (cellOptions.borderRight) {
+    style += `border-right: ${cellOptions.borderRight}`
   }
   return style
 }

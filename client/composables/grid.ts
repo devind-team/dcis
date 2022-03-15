@@ -108,6 +108,7 @@ export function useGrid (sheet: Ref<SheetType>) {
         const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
         const position: string = `${positionToLetter(column.index)}${row.index}`
         // Стили должны формироваться на основе предпочтения cell <- row <- col
+        const borderStyle = JSON.parse(cell.borderStyle)
         const buildCell = {
           position,
           value: value ? value.value : cell.default,
@@ -123,10 +124,15 @@ export function useGrid (sheet: Ref<SheetType>) {
             'font-style': cell.italic ? 'italic' : 'normal',
             'text-decoration': cell.underline ? 'underline' : undefined,
             color: cell.color,
-            background: cell.background
+            background: cell.background,
+            borderTop: borderStyle.top === 'thin' ? 'solid' : borderStyle.top,
+            borderBottom: borderStyle.bottom === 'thin' ? 'solid' : borderStyle.bottom,
+            borderLeft: borderStyle.left === 'thin' ? 'solid' : borderStyle.left,
+            borderRight: borderStyle.right === 'thin' ? 'solid' : borderStyle.right
           },
           cell
         }
+        console.log(buildCell.style)
         if (position in mergeCells.value) {
           buildRow.cells.push(Object.assign(buildCell, mergeCells.value[position]))
         } else if (!mergedCells.value.includes(position)) {

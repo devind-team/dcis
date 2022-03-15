@@ -390,6 +390,8 @@ class CellType(DjangoObjectType):
             'color',
             'background',
             'limitations',
+            'border_style',
+            'border_color'
         )
         convert_choices_to_enum = False
 

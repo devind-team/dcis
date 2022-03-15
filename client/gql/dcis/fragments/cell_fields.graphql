@@ -15,6 +15,8 @@ fragment CellFields on CellType {
   underline
   color
   background
+  borderStyle
+  borderColor
   columnId
   rowId
   __typename
