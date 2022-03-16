@@ -3,7 +3,7 @@ from datetime import datetime
 from os.path import join
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 
 from apps.dcis.models import Cell, Document
@@ -49,12 +49,38 @@ class DocumentUnload:
                     italic=cell.italic,
                     strike=cell.strike,
                     underline=cell.underline,
-                    # color=cell.color
+                    color=f'{cell.color[1:]}'
                 )
+                if cell.border_style:
+                    ws.cell(row_position, column_position).border = Border(
+                        top=Side(
+                            border_style=cell.border_style['top'],
+                            color=f'{cell.border_color["top"][1:]}' if cell.border_color['top'] else None
+                        ),
+                        bottom=Side(
+                            border_style=cell.border_style['bottom'],
+                            color=f'{cell.border_color["bottom"][1:]}' if cell.border_color['bottom'] else None
+                        ),
+                        left=Side(
+                            border_style=cell.border_style['left'],
+                            color=f'{cell.border_color["left"][1:]}' if cell.border_color['left'] else None
+                        ),
+                        right=Side(
+                            border_style=cell.border_style['right'],
+                            color=f'{cell.border_color["right"][1:]}' if cell.border_color['right'] else None
+                        ),
+                        diagonal=Side(
+                            border_style=cell.border_style['diagonal'],
+                            color=f'{cell.border_color["diagonal"][1:]}' if cell.border_color['diagonal'] else None
+                        )
+                    )
                 # Заливка ячейки
-                # Этот колор ругается
-                # ws.cell(row_position, column_position).fill = PatternFill(bgColor=cell.background)
-
+                if cell.background != '#FFFFFF':
+                    ws.cell(row_position, column_position).fill = PatternFill(
+                        fill_type='solid',
+                        start_color=f'{cell.background[1:]}',
+                        end_color=f'{cell.background[1:]}'
+                    )
             # Ширина и высота для колонок и строк соответственно
             for column in columns:
                 if column.width:

@@ -69,7 +69,6 @@ import { useGrid } from '~/composables/grid'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
-import row from "vuetify/src/components/VDataTable/Row";
 
 export type ChangeValueMutationResult = { data: ChangeValueMutation }
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
@@ -132,7 +131,6 @@ export default defineComponent({
             result,
             (dataCache: DocumentQuery, { data: { deleteRowDimension: { success, rowId, index } } }: DeleteRowDimensionMutationResult) => {
               if (success) {
-                console.log(rowId, index)
                 const rows: RowDimensionType[] = dataCache.document.sheets
                   .find(sheet => sheet.id === props.sheet.id)
                   .rows

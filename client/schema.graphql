@@ -457,6 +457,10 @@ type CategoryTypeEdge {
 type CellType {
   """Цвет фона"""
   background: String!
+  """Цвет границ"""
+  borderColor: JSONString
+  """Стили границ"""
+  borderStyle: JSONString
   """Цвет индекса"""
   color: String!
   """Колонка"""

@@ -27,7 +27,7 @@ const getDefaultCell = (): CellType => {
 }
 
 /**
- * Разбираем кординату на состовляющие
+ * Разбираем координату на составляющие
  * parseCoordinate('A1') -> { column: 'A', row: '1' }
  * parseCoordinate('$A1') -> { column: 'A', row: '1' }
  * parseCoordinate('A$1') -> { column: 'A', row: '1' }
@@ -138,7 +138,7 @@ const rangePositionToCells = (
   return cells
 }
 /**
- * Вспомогательная фнкция для применения действия к диапазону
+ * Вспомогательная функция для применения действия к диапазону
  * @param rangePosition
  * @param callback
  */
@@ -183,7 +183,7 @@ const normalizationRange = (range: string): string => {
 }
 
 /**
- * Вовзращение свойство ячески в формате :style=""
+ * Возвращение свойство ячейки в формате style=""
  * @param cellOptions
  */
 const styleCell = (cellOptions: CellOptionsType): string => {
@@ -198,7 +198,31 @@ const styleCell = (cellOptions: CellOptionsType): string => {
     style += `color: ${cellOptions.color}; `
   }
   if (cellOptions.background) {
-    style += `background: ${cellOptions.background}`
+    style += `background: ${cellOptions.background}; `
+  }
+  if (cellOptions.borderTop) {
+    style += `border-top-style: ${cellOptions.borderTop}; `
+  }
+  if (cellOptions.borderBottom) {
+    style += `border-bottom-style: ${cellOptions.borderBottom}; `
+  }
+  if (cellOptions.borderLeft) {
+    style += `border-left-style: ${cellOptions.borderLeft}; `
+  }
+  if (cellOptions.borderRight) {
+    style += `border-right-style: ${cellOptions.borderRight}; `
+  }
+  if (cellOptions.borderTopColor) {
+    style += `border-top-color: ${cellOptions.borderTopColor}; `
+  }
+  if (cellOptions.borderBottomColor) {
+    style += `border-bottom-color: ${cellOptions.borderBottomColor}; `
+  }
+  if (cellOptions.borderLeftColor) {
+    style += `border-left-color: ${cellOptions.borderLeftColor}; `
+  }
+  if (cellOptions.borderRightColor) {
+    style += `border-right-color: ${cellOptions.borderRightColor}`
   }
   return style
 }

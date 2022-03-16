@@ -24,7 +24,7 @@ export enum AlignText {
 /**
  * Кодовые ошибки
  */
-export enum  ErrorCode {
+export enum ErrorCode {
   NULL= '#NULL!',
   DIV = '#DIV/0!',
   VALUE = '#VALUE!',
@@ -60,7 +60,6 @@ export enum KindCell {
 export type CellPositionType = string
 export type RangeType = string
 
-
 export type RangePositionsType = {
   minColumn: number,
   minRow: number,
@@ -74,13 +73,20 @@ export type RangePositionsType = {
 
 export type CellOptionValueType = string | boolean | null
 
-
 export type CellOptionsType = {
   align: AlignText
   bold: boolean
   italic: boolean
   color?: string
   background?: string
+  borderTop?: string
+  borderBottom?: string
+  borderLeft?: string
+  borderRight?: string
+  borderTopColor?: string
+  borderBottomColor?: string
+  borderLeftColor?: string
+  borderRightColor?: string
 }
 /**
  * Описание значений ячейки
@@ -97,7 +103,7 @@ export type CellType = {
 /**
  * Тип ячейки
  * cells - набор ячеек
- * dynamic - динмическа ли ячейка
+ * dynamic - динамическая ли ячейка
  * aggregation - набор агрегаций для колонок
  */
 export type RowType = {
@@ -115,7 +121,7 @@ export type RowType = {
 /**
  * cell - позиция ячейки формата A1, B2, C10 ...
  *   colspan - объединение по столбцам
- *   rowspan - объединение по строка
+ *   rowspan - объединение по строкам
  *   cells - объединенные ячейки (значения объединенных ячеек всегда null)
  */
 export type MergeCellType = {
@@ -161,7 +167,6 @@ export type RangeSpanType = {
 export type StyleCellType = {
   [cell: RangeType]: string
 }
-
 
 export type SheetType = MergeRowType[]
 
