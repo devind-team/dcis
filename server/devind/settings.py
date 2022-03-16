@@ -30,7 +30,8 @@ load_dotenv(dotenv_path=ENV_PATH)
 
 # Вспомогательные настройки
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'bg27w2$xx#(yeco%ns1257@e(w12j!dphsn@gzh6y80b^hs2jt'
+SECRET_KEY = os.getenv('SECRET_KEY', None)
+assert SECRET_KEY,  'Не установлен SECRET_KEY в переменную окружения.'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG: bool = os.getenv('DEBUG', 'True') == 'True'
 
