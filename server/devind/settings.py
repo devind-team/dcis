@@ -233,5 +233,5 @@ DEVIND_NOTIFICATION_NOTICE_INTERFACE = 'apps.notifications.schema.NoticeInterfac
 
 
 EXTERNAL_URLS = {
-    'cbias': 'https://cbias.ru/sso_app/remote_auth.spf?uid=%s&ris=36'
+    'cbias': 'https://cbias.ru/sso_app/remote_auth.spf?uid=%s&ris=61'
 }
