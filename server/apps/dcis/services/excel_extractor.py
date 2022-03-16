@@ -110,7 +110,7 @@ class ExcelExtractor:
                     'italic': column.font.i,
                     'strike': column.font.strike,
                     'underline': column.font.u,
-                    'color': column.font.color.value
+                    'color': f'#{column.font.color.value[2:]}'
                     if column.font.color.type == 'rgb'
                     else COLOR_INDEX[column.font.color.index],
                     'background': '#FFFFFF'
@@ -124,11 +124,16 @@ class ExcelExtractor:
                         'diagonal': column.border.diagonal.style
                     },
                     'border_color': {
-                        'top': column.border.top.color,
-                        'bottom': column.border.bottom.color,
-                        'left': column.border.left.color,
-                        'right': column.border.right.color,
-                        'diagonal': column.border.diagonal.color
+                        'top': f'#{column.border.top.color.value[2:]}'
+                        if column.border.top.color else None,
+                        'bottom': f'#{column.border.bottom.color.value[2:]}'
+                        if column.border.bottom.color else None,
+                        'left': f'#{column.border.left.color.value[2:]}'
+                        if column.border.left.color else None,
+                        'right': f'#{column.border.right.color.value[2:]}'
+                        if column.border.right.color else None,
+                        'diagonal': f'#{column.border.diagonal.color.value[2:]}'
+                        if column.border.diagonal.color else None
                     }
                 }
             } for col_letter, column in holder.items()
@@ -148,7 +153,7 @@ class ExcelExtractor:
                     'italic': row.font.i,
                     'strike': row.font.strike,
                     'underline': row.font.u,
-                    'color': row.font.color.value
+                    'color': f'#{row.font.color.value[2:]}'
                     if row.font.color.type == 'rgb'
                     else COLOR_INDEX[row.font.color.index],
                     'background': '#FFFFFF'
@@ -162,11 +167,16 @@ class ExcelExtractor:
                         'diagonal': row.border.diagonal.style
                     },
                     'border_color': {
-                        'top': row.border.top.color,
-                        'bottom': row.border.bottom.color,
-                        'left': row.border.left.color,
-                        'right': row.border.right.color,
-                        'diagonal': row.border.diagonal.color
+                        'top': f'#{row.border.top.color.value[2:]}'
+                        if row.border.top.color else None,
+                        'bottom': f'#{row.border.bottom.color.value[2:]}'
+                        if row.border.bottom.color else None,
+                        'left': f'#{row.border.left.color.value[2:]}'
+                        if row.border.left.color else None,
+                        'right': f'#{row.border.right.color.value[2:]}'
+                        if row.border.right.color else None,
+                        'diagonal': f'#{row.border.diagonal.color.value[2:]}'
+                        if row.border.diagonal.color else None
                     }
                 }
             } for index, row in holder.items()
@@ -182,7 +192,7 @@ class ExcelExtractor:
         rows_result: List[Dict] = []
         for row in rows:
             for cell in row:
-                print(cell.fill)
+                print(cell.border)
                 rows_result.append({
                     'column_id': cell.col_idx,
                     'row_id': cell.row,
@@ -200,12 +210,12 @@ class ExcelExtractor:
                     'italic': cell.font.i,
                     'strike': cell.font.strike,
                     'underline': cell.font.u,
-                    'color': cell.font.color.value
+                    'color': f'#{cell.font.color.value[2:]}'
                     if cell.font.color.type == 'rgb'
                     else COLOR_INDEX[cell.font.color.index],
                     'background': '#FFFFFF'
                     if cell.fill.patternType is None
-            else f'#{cell.fill.fgColor.value[2:]}',
+                    else f'#{cell.fill.fgColor.value[2:]}',
                     'border_style': {
                         'top': cell.border.top.style,
                         'bottom': cell.border.bottom.style,
@@ -214,11 +224,16 @@ class ExcelExtractor:
                         'diagonal': cell.border.diagonal.style
                     },
                     'border_color': {
-                        'top': cell.border.top.color,
-                        'bottom': cell.border.bottom.color,
-                        'left': cell.border.left.color,
-                        'right': cell.border.right.color,
-                        'diagonal': cell.border.diagonal.color
+                        'top': f'#{cell.border.top.color.value[2:]}'
+                        if cell.border.top.color else None,
+                        'bottom': f'#{cell.border.bottom.color.value[2:]}'
+                        if cell.border.bottom.color else None,
+                        'left': f'#{cell.border.left.color.value[2:]}'
+                        if cell.border.left.color else None,
+                        'right': f'#{cell.border.right.color.value[2:]}'
+                        if cell.border.right.color else None,
+                        'diagonal': f'#{cell.border.diagonal.color.value[2:]}'
+                        if cell.border.diagonal.color else None
                     }
                 })
         return rows_result

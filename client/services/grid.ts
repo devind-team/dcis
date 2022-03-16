@@ -201,16 +201,28 @@ const styleCell = (cellOptions: CellOptionsType): string => {
     style += `background: ${cellOptions.background}; `
   }
   if (cellOptions.borderTop) {
-    style += `border-top: ${cellOptions.borderTop}; `
+    style += `border-top-style: ${cellOptions.borderTop}; `
   }
   if (cellOptions.borderBottom) {
-    style += `border-bottom: ${cellOptions.borderBottom}; `
+    style += `border-bottom-style: ${cellOptions.borderBottom}; `
   }
   if (cellOptions.borderLeft) {
-    style += `border-left: ${cellOptions.borderLeft}; `
+    style += `border-left-style: ${cellOptions.borderLeft}; `
   }
   if (cellOptions.borderRight) {
-    style += `border-right: ${cellOptions.borderRight}`
+    style += `border-right-style: ${cellOptions.borderRight}; `
+  }
+  if (cellOptions.borderTopColor) {
+    style += `border-top-color: ${cellOptions.borderTopColor}; `
+  }
+  if (cellOptions.borderBottomColor) {
+    style += `border-bottom-color: ${cellOptions.borderBottomColor}; `
+  }
+  if (cellOptions.borderLeftColor) {
+    style += `border-left-color: ${cellOptions.borderLeftColor}; `
+  }
+  if (cellOptions.borderRightColor) {
+    style += `border-right-color: ${cellOptions.borderRightColor}`
   }
   return style
 }

@@ -109,6 +109,7 @@ export function useGrid (sheet: Ref<SheetType>) {
         const position: string = `${positionToLetter(column.index)}${row.index}`
         // Стили должны формироваться на основе предпочтения cell <- row <- col
         const borderStyle = JSON.parse(cell.borderStyle)
+        const borderColor = JSON.parse(cell.borderColor)
         const buildCell = {
           position,
           value: value ? value.value : cell.default,
@@ -125,14 +126,17 @@ export function useGrid (sheet: Ref<SheetType>) {
             'text-decoration': cell.underline ? 'underline' : undefined,
             color: cell.color,
             background: cell.background,
-            borderTop: borderStyle.top === 'thin' ? 'solid' : borderStyle.top,
-            borderBottom: borderStyle.bottom === 'thin' ? 'solid' : borderStyle.bottom,
-            borderLeft: borderStyle.left === 'thin' ? 'solid' : borderStyle.left,
-            borderRight: borderStyle.right === 'thin' ? 'solid' : borderStyle.right
+            borderTop: borderStyle.top === 'thin' || borderStyle.top === 'hair' ? 'solid 2px' : borderStyle.top,
+            borderBottom: borderStyle.bottom === 'thin' || borderStyle.bottom === 'hair' ? 'solid 2px' : borderStyle.bottom,
+            borderLeft: borderStyle.left === 'thin' || borderStyle.left === 'hair' ? 'solid 2px' : borderStyle.left,
+            borderRight: borderStyle.right === 'thin' || borderStyle.right === 'hair' ? 'solid 2px' : borderStyle.right,
+            borderTopColor: borderColor.top,
+            borderBottomColor: borderColor.bottom,
+            borderLeftColor: borderColor.left,
+            borderRightColor: borderColor.right
           },
           cell
         }
-        console.log(buildCell.style)
         if (position in mergeCells.value) {
           buildRow.cells.push(Object.assign(buildCell, mergeCells.value[position]))
         } else if (!mergedCells.value.includes(position)) {

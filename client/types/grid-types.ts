@@ -83,6 +83,10 @@ export type CellOptionsType = {
   borderBottom?: string
   borderLeft?: string
   borderRight?: string
+  borderTopColor?: string
+  borderBottomColor?: string
+  borderLeftColor?: string
+  borderRightColor?: string
 }
 /**
  * Описание значений ячейки
@@ -99,7 +103,7 @@ export type CellType = {
 /**
  * Тип ячейки
  * cells - набор ячеек
- * dynamic - динмическа ли ячейка
+ * dynamic - динамическая ли ячейка
  * aggregation - набор агрегаций для колонок
  */
 export type RowType = {
@@ -117,7 +121,7 @@ export type RowType = {
 /**
  * cell - позиция ячейки формата A1, B2, C10 ...
  *   colspan - объединение по столбцам
- *   rowspan - объединение по строка
+ *   rowspan - объединение по строкам
  *   cells - объединенные ячейки (значения объединенных ячеек всегда null)
  */
 export type MergeCellType = {

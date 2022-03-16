@@ -11,20 +11,20 @@ from .document import Document, Sheet
 def get_default_border_style():
     """Стиль границ по умолчанию."""
     return {
-        'top': None,
-        'bottom': None,
-        'left': None,
-        'right': None
+        "top": None,
+        "bottom": None,
+        "left": None,
+        "right": None
     }
 
 
 def get_default_border_color():
     """Цвет границ по умолчанию."""
     return {
-        'top': None,
-        'bottom': None,
-        'left': None,
-        'right': None
+        "top": None,
+        "bottom": None,
+        "left": None,
+        "right": None
     }
 
 
