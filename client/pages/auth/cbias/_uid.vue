@@ -60,7 +60,7 @@ export default defineComponent({
         // Убрать после удаления vuex
         $store.dispatch('auth/fetchExistUser', Object.assign({}, user))
         // Необходимо для нормальной перезагрузки сокетов
-        router.push((route.query.to as string) || localePath({ name: 'index' }))
+        router.push(localePath({ name: 'dcis-projects' }))
       }
     })
 
