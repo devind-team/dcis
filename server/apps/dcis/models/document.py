@@ -64,7 +64,7 @@ class Document(models.Model):
 
     class Meta:
         ordering = ('-version', '-created_at',)
-        unique_together = (('version', 'content_type', 'object_id',),)
+        unique_together = (('period', 'version', 'content_type', 'object_id',),)
         indexes = [
             models.Index(fields=['content_type', 'object_id'])
         ]
