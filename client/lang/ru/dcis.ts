@@ -13,6 +13,9 @@ export default {
       description: 'Описание проекта',
       visibility: 'Видимость',
       buttonText: 'Добавить проект'
+    },
+    changeProject: {
+      archive: 'Архивировать'
     }
   }
 }

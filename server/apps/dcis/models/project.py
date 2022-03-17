@@ -13,6 +13,7 @@ class Project(models.Model):
     short = models.CharField(max_length=30, help_text='Сокращенное наименование проекта')
     description = models.TextField(max_length=1023, help_text='Описание проекта')
     visibility = models.BooleanField(default=True, help_text='Видимость проекта')
+    archive = models.BooleanField(default=False, help_text='Архив')
 
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')

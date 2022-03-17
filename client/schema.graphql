@@ -193,21 +193,8 @@ type AddProfileMutationPayload {
   success: Boolean!
 }
 
-input AddProjectMutationInput {
-  clientMutationId: String
-  """Описание проекта"""
-  description: String!
-  """Название проекта"""
-  name: String!
-  """Название проекта"""
-  short: String!
-  """Видимость проекта"""
-  visibility: Boolean! = true
-}
-
 """Мутация для добавления проекта."""
 type AddProjectMutationPayload {
-  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Добавленный проект"""
@@ -868,6 +855,16 @@ type ChangeProfileVisibilityMutationPayload {
   success: Boolean!
 }
 
+"""Мутация изменения настроек проекта."""
+type ChangeProjectMutationPayload {
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный проект"""
+  project: ProjectType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeSectionFilesMutationInput {
   clientMutationId: String
   """Загружаемые изображения"""
@@ -1144,6 +1141,22 @@ type ContentTypeType {
   model: String!
   permissionSet: [PermissionType!]!
   rowdimensionSet: [RowDimensionType!]!
+}
+
+input CreateProjectInput {
+  """Архив"""
+  archive: Boolean
+  """Описание проекта"""
+  description: String!
+  """Наименование проекта"""
+  name: String!
+  periodSet: [ID]
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Организатор сборов"""
+  user: ID
+  """Видимость проекта"""
+  visibility: Boolean
 }
 
 """
@@ -1695,7 +1708,7 @@ type Mutation {
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
-  addProject(input: AddProjectMutationInput!): AddProjectMutationPayload!
+  addProject(input: CreateProjectInput!): AddProjectMutationPayload!
   """
   Вставка строк.
   
@@ -1751,6 +1764,8 @@ type Mutation {
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""
   changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
+  """Мутация изменения настроек проекта."""
+  changeProject(id: ID!, input: PatchProjectInput!): ChangeProjectMutationPayload!
   """Изменение текста секции"""
   changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
   """Изменение текста секции"""
@@ -2062,6 +2077,26 @@ type PageTypeEdge {
   node: PageType
 }
 
+input PatchProjectInput {
+  """Архив"""
+  archive: Boolean
+  """Дата создания"""
+  createdAt: DateTime
+  """Описание проекта"""
+  description: String
+  """Наименование проекта"""
+  name: String
+  periodSet: [ID]
+  """Сокращенное наименование проекта"""
+  short: String
+  """Дата обновления"""
+  updatedAt: DateTime
+  """Организатор сборов"""
+  user: ID
+  """Видимость проекта"""
+  visibility: Boolean
+}
+
 """An enumeration."""
 enum PeriodStatus {
   """preparation"""
@@ -2189,6 +2224,8 @@ input ProjectNameFilterInputType {
 
 """Тип модели проектов."""
 type ProjectType implements Node {
+  """Архив"""
+  archive: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Описание проекта"""
