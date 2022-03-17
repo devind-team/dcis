@@ -12,6 +12,7 @@
         v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
         v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
           grid(:document-id="doc.id" :sheet="sheet" :key="`grid${sheet.id}`")
+    v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
@@ -58,13 +59,7 @@ export default defineComponent({
       layoutInstance.setFooter(true)
     })
 
-    return {
-      active,
-      doc,
-      loading,
-      mutate,
-      unloadLoading
-    }
+    return { active, doc, loading, mutate, unloadLoading }
   }
 })
 </script>
