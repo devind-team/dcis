@@ -35,7 +35,7 @@ class AddDocumentMutation(BaseMutation):
         status: Status = get_object_or_404(Status, pk=status_id)
         content_type: ContentType = ContentType.objects.get_for_model(Department)    # Временно департаменты
         object_id: int = 1  # Служба поддержки
-        max_version: Optional[int] = Document.objects.aggregate(version=Max('version'))['version']
+        max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
         document = Document.objects.create(
             version=max_version + 1 if max_version is not None else 1,
             comment=comment,
