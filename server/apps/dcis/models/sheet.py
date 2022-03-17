@@ -8,23 +8,13 @@ from apps.core.models import User
 from .document import Document, Sheet
 
 
-def get_default_border_style():
-    """Стиль границ по умолчанию."""
+def get_default_border():
+    """Стиль и цвет границ по умолчанию."""
     return {
-        "top": None,
-        "bottom": None,
-        "left": None,
-        "right": None
-    }
-
-
-def get_default_border_color():
-    """Цвет границ по умолчанию."""
-    return {
-        "top": None,
-        "bottom": None,
-        "left": None,
-        "right": None
+        'top': None,
+        'bottom': None,
+        'left': None,
+        'right': None
     }
 
 
@@ -90,8 +80,8 @@ class Style(models.Model):
     )
     color = models.CharField(max_length=16, default='#000000', help_text='Цвет индекса')
     background = models.CharField(max_length=16, default='#FFFFFF', help_text='Цвет фона')
-    border_style = models.JSONField(default=get_default_border_style, help_text='Стили границ')
-    border_color = models.JSONField(default=get_default_border_color, help_text='Цвет границ')
+    border_style = models.JSONField(default=get_default_border, help_text='Стили границ')
+    border_color = models.JSONField(default=get_default_border, help_text='Цвет границ')
 
     class Meta:
         abstract = True
