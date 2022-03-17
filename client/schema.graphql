@@ -238,6 +238,8 @@ type AddRowDimensionMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Объединенные ячейки"""
+  mergedCells: [MergedCellType]!
   """Добавленная строка"""
   rowDimension: RowDimensionType!
   """Успех мутации"""
@@ -1272,6 +1274,8 @@ type DeleteRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Измененные строки"""
   index: Int!
+  """Объединенные ячейки"""
+  mergedCells: [MergedCellType]!
   """Идентификатор удаленной строки"""
   rowId: Int!
   """Успех мутации"""

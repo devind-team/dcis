@@ -11,7 +11,7 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 
 from apps.dcis.models import Document, RowDimension, Sheet, Cell
-from apps.dcis.schema.types import RowDimensionType, CellType
+from apps.dcis.schema.types import RowDimensionType, CellType, MergedCellType
 
 
 class AddRowDimensionMutation(BaseMutation):
@@ -28,6 +28,7 @@ class AddRowDimensionMutation(BaseMutation):
 
     row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
     cells = graphene.List(CellType, required=True, description='Добавленные ячейки')
+    merged_cells = graphene.List(MergedCellType, required=True, description='Объединенные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -43,9 +44,17 @@ class AddRowDimensionMutation(BaseMutation):
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         # Нужно будет добавить ограничение по документу
         sheet.rowdimension_set.filter(index__gte=insert_index).update(index=F('index') + 1)
+        # Обновляем объединенные ячейки
+        sheet.mergedcell_set\
+            .filter(min_row__gte=insert_index)\
+            .update(min_row=F('min_row') + 1, max_row=F('max_row') + 1)
         row_dimension = RowDimension.objects.create(sheet=sheet, index=insert_index, document=document)
         cells = [Cell.objects.create(row=row_dimension, column=column) for column in sheet.columndimension_set.all()]
-        return AddRowDimensionMutation(row_dimension=row_dimension, cells=cells)
+        return AddRowDimensionMutation(
+            row_dimension=row_dimension,
+            cells=cells,
+            merged_cells=sheet.mergedcell_set.all()
+        )
 
 
 class DeleteRowDimensionMutation(BaseMutation):
@@ -56,6 +65,7 @@ class DeleteRowDimensionMutation(BaseMutation):
 
     row_id = graphene.Int(required=True, description='Идентификатор удаленной строки')
     index = graphene.Int(required=True, description='Измененные строки')
+    merged_cells = graphene.List(MergedCellType, required=True, description='Объединенные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -64,7 +74,10 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         row.delete()
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
-        return DeleteRowDimensionMutation(row_id=row_id, index=row.index)
+        sheet.mergedcell_set\
+            .filter(min_row__gt=row.index)\
+            .update(min_row=F('min_row') - 1, max_row=F('max_row') - 1)
+        return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 
 class SheetMutations(graphene.ObjectType):
