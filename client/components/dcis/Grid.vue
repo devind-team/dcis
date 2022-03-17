@@ -7,6 +7,7 @@
           v-for="buildColumn in columns"
           :key="buildColumn.dimension.id"
           :style="buildColumn.style"
+          style="min-width: 50px"
         ).header-cell {{ buildColumn.positional }}
     tbody
       tr(
@@ -45,8 +46,10 @@
             v-if="active === cell.position"
             v-focus
             :value="cell.value"
+            @keyup.esc="setActive(null)"
+            @blur="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
             @keyup.enter="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
-            style="width: 100%; min-width:100px;"
+            style="min-width:50px;"
           )
           template(v-else) {{ cell.value }}
 </template>
@@ -104,7 +107,7 @@ export default defineComponent({
         update: (cache, result) => documentUpdate(
           cache,
           result,
-          (dataCache: DocumentQuery, { data: { addRowDimension: { success, rowDimension, cells } } }: AddRowDimensionMutationResult) => {
+          (dataCache: DocumentQuery, { data: { addRowDimension: { success, rowDimension, cells, mergedCells } } }: AddRowDimensionMutationResult) => {
             if (success) {
               dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).cells.push(...cells)
               const rows: RowDimensionType[] = dataCache.document.sheets
@@ -115,6 +118,7 @@ export default defineComponent({
                 )
               rows.splice(rowDimension.index - 1, 0, rowDimension as RowDimensionType)
               dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).rows = rows as any
+              dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).mergedCells = mergedCells
             }
             return dataCache
           }
@@ -129,7 +133,7 @@ export default defineComponent({
           update: (cache, result) => documentUpdate(
             cache,
             result,
-            (dataCache: DocumentQuery, { data: { deleteRowDimension: { success, rowId, index } } }: DeleteRowDimensionMutationResult) => {
+            (dataCache: DocumentQuery, { data: { deleteRowDimension: { success, rowId, index, mergedCells } } }: DeleteRowDimensionMutationResult) => {
               if (success) {
                 const rows: RowDimensionType[] = dataCache.document.sheets
                   .find(sheet => sheet.id === props.sheet.id)
@@ -139,6 +143,7 @@ export default defineComponent({
                     r.index > index ? Object.assign(r, { index: r.index - 1 }) : r
                   ))
                 dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).rows = rows as any
+                dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).mergedCells = mergedCells
               }
               return dataCache
             }

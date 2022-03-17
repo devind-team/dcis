@@ -1,8 +1,13 @@
+#import "../../fragments/merged_cell_fields.graphql"
+
 mutation DeleteRowDimension($rowId: Int!) {
   deleteRowDimension(input: { rowId: $rowId }) {
     success
     rowId
     index
+    mergedCells {
+      ...MergedCellsFields
+    }
     __typename
   }
 }

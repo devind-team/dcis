@@ -280,6 +280,8 @@ export type AddRowDimensionMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Объединенные ячейки */
+  mergedCells: Array<Maybe<MergedCellType>>;
   /** Добавленная строка */
   rowDimension: RowDimensionType;
   /** Успех мутации */
@@ -1395,6 +1397,8 @@ export type DeleteRowDimensionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Измененные строки */
   index: Scalars['Int'];
+  /** Объединенные ячейки */
+  mergedCells: Array<Maybe<MergedCellType>>;
   /** Идентификатор удаленной строки */
   rowId: Scalars['Int'];
   /** Успех мутации */
@@ -3976,13 +3980,13 @@ export type AddRowDimensionMutationVariables = Exact<{
   position: Scalars['String'];
 }>;
 
-export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> } };
+export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowId: Scalars['Int'];
 }>;
 
-export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowId: number, index: number } };
+export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowId: number, index: number, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
 
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
