@@ -35,5 +35,12 @@ export function useFilters () {
     return formatter.format(new Date(rd))
   }
 
-  return { money, basename, date, dateTimeHM, timeHM, textLength }
+  const snakeToCamel = (value: string): string => value.replace(
+    /([-_][a-z])/g,
+    (group: string) => group.toUpperCase()
+      .replace('-', '')
+      .replace('_', '')
+  )
+
+  return { money, basename, date, dateTimeHM, timeHM, textLength, snakeToCamel }
 }
