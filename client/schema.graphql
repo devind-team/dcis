@@ -201,6 +201,8 @@ input AddProjectMutationInput {
   name: String!
   """Название проекта"""
   short: String!
+  """Видимость проекта"""
+  visibility: Boolean! = true
 }
 
 """Мутация для добавления проекта."""
@@ -458,9 +460,9 @@ type CellType {
   """Цвет фона"""
   background: String!
   """Цвет границ"""
-  borderColor: JSONString
+  borderColor: JSONString!
   """Стили границ"""
-  borderStyle: JSONString
+  borderStyle: JSONString!
   """Цвет индекса"""
   color: String!
   """Колонка"""

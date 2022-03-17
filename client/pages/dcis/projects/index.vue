@@ -4,17 +4,9 @@
       v-card-title {{ $t('dcis.home') }}
         template(v-if="hasPerm('dcis.add_project')")
           v-spacer
-          v-dialog(v-model="active" width="600" )
+          add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
             template(#activator="{ on }")
-              v-btn(v-on="on" color="primary") Добавить проект сборов
-            v-card
-              v-card-title Добавление проекта
-              v-card-text
-                v-text-field(v-model="name" label="Название проекта")
-              v-card-actions
-                v-btn(@click="active = false") Закрыть
-                v-spacer
-                v-btn(@click="mutate({ name, short: name, description: `Описание ${name}` })" color="primary") Добавить
+              v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.header') }}
       v-card-subtitle {{ $t('shownOf', { count, totalCount }) }}
       v-card-text
         v-data-table(:headers="headers" :items="projects" :loading="loading" disable-pagination hide-default-footer)
@@ -27,25 +19,22 @@
 
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
-import { useMutation } from '@vue/apollo-composable'
 import type { PropType, Ref } from '#app'
 import { defineComponent, useNuxt2Meta, ref, toRef } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useCursorPagination, useFilters, useI18n, useQueryRelay } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/store'
 import projectsQuery from '~/gql/dcis/queries/projects.graphql'
-import addProjectMutation from '~/gql/dcis/mutations/project/add_project.graphql'
 import {
-  AddProjectMutation,
-  AddProjectMutationVariables,
   ProjectsQuery,
   ProjectsQueryVariables,
   ProjectType
 } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import AddProject from '~/components/dcis/projects/AddProject.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs },
+  components: { AddProject, BreadCrumbs },
   middleware: 'auth',
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
@@ -76,11 +65,6 @@ export default defineComponent({
       pagination: useCursorPagination()
     })
 
-    const { mutate, onDone } = useMutation<AddProjectMutation, AddProjectMutationVariables>(addProjectMutation, {
-      update: (cache, result) => addUpdate(cache, result, 'project')
-    })
-    onDone(() => { active.value = false })
-
     return {
       hasPerm,
       active,
@@ -90,8 +74,8 @@ export default defineComponent({
       count,
       totalCount,
       loading,
-      mutate,
-      dateTimeHM
+      dateTimeHM,
+      addUpdate
     }
   }
 })
