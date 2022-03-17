@@ -7,6 +7,7 @@ from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from devind_helpers.decorators import permission_classes
 from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.schema.types import ErrorFieldType
 from graphql_relay import from_global_id
 from devind_helpers.orm_utils import get_object_or_404
 from devind_core.models import File
@@ -15,6 +16,7 @@ from apps.dcis.models import Project, Period
 from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.permissions import AddProject, AddPeriod
+from apps.dcis.validators import ProjectValidator
 
 
 class AddProjectMutation(BaseMutation):
@@ -24,19 +26,18 @@ class AddProjectMutation(BaseMutation):
         name = graphene.String(required=True, description='Название проекта')
         short = graphene.String(required=True, description='Название проекта')
         description = graphene.String(required=True, description='Описание проекта')
+        visibility = graphene.Boolean(default_value=True, required=True, description='Видимость проекта')
 
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
     @staticmethod
     @permission_classes((IsAuthenticated, AddProject,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, short: str, description: str, *args, **kwargs):
-        project: Project = Project.objects.create(
-            name=name,
-            short=short,
-            description=description,
-            user=info.context.user
-        )
-        return AddProjectMutation(project=project)
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, *args, **kwargs):
+        validator: ProjectValidator = ProjectValidator(kwargs)
+        if validator.validate():
+            project: Project = Project.objects.create(user=info.context.user, **kwargs)
+            return AddProjectMutation(project=project)
+        return AddProjectMutation(success=True, errors=ErrorFieldType.from_validator(validator.get_message()))
 
 
 class AddPeriodMutation(BaseMutation):
