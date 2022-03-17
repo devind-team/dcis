@@ -1,9 +1,9 @@
 <template lang="pug">
   bread-crumbs(:items="bc")
-    v-row
+    v-row(v-if="result")
       v-col Подождите, идет авторизация.
         v-progress-circular(color="primary" indeterminate)
-    v-row(v-if="result === false")
+    v-row(v-else)
       v-col
         v-alert(type="warning") Авторизация не удалась, обратитесь к администратору портала.
 </template>
