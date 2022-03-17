@@ -187,44 +187,44 @@ const normalizationRange = (range: string): string => {
  * @param cellOptions
  */
 const styleCell = (cellOptions: CellOptionsType): string => {
-  let style: string = `text-align: ${cellOptions.align};`
+  const styles = [`text-align: ${cellOptions.align}`]
   if (cellOptions.bold) {
-    style += 'font-weight: bold; '
+    styles.push('font-weight: bold')
   }
   if (cellOptions.italic) {
-    style += 'font-style: italic; '
+    styles.push('font-style: italic')
   }
   if (cellOptions.color) {
-    style += `color: ${cellOptions.color}; `
+    styles.push(`color: ${cellOptions.color}`)
   }
   if (cellOptions.background) {
-    style += `background: ${cellOptions.background}; `
+    styles.push(`background: ${cellOptions.background}`)
   }
   if (cellOptions.borderTop) {
-    style += `border-top-style: ${cellOptions.borderTop}; `
+    styles.push(`border-top-style: ${cellOptions.borderTop}`)
   }
   if (cellOptions.borderBottom) {
-    style += `border-bottom-style: ${cellOptions.borderBottom}; `
+    styles.push(`border-bottom-style: ${cellOptions.borderBottom}`)
   }
   if (cellOptions.borderLeft) {
-    style += `border-left-style: ${cellOptions.borderLeft}; `
+    styles.push(`border-left-style: ${cellOptions.borderLeft}`)
   }
   if (cellOptions.borderRight) {
-    style += `border-right-style: ${cellOptions.borderRight}; `
+    styles.push(`border-right-style: ${cellOptions.borderRight}`)
   }
   if (cellOptions.borderTopColor) {
-    style += `border-top-color: ${cellOptions.borderTopColor}; `
+    styles.push(`border-top-color: ${cellOptions.borderTopColor}`)
   }
   if (cellOptions.borderBottomColor) {
-    style += `border-bottom-color: ${cellOptions.borderBottomColor}; `
+    styles.push(`border-bottom-color: ${cellOptions.borderBottomColor}`)
   }
   if (cellOptions.borderLeftColor) {
-    style += `border-left-color: ${cellOptions.borderLeftColor}; `
+    styles.push(`border-left-color: ${cellOptions.borderLeftColor}`)
   }
   if (cellOptions.borderRightColor) {
-    style += `border-right-color: ${cellOptions.borderRightColor}`
+    styles.push(`border-right-color: ${cellOptions.borderRightColor}`)
   }
-  return style
+  return styles.join('; ')
 }
 
 /**

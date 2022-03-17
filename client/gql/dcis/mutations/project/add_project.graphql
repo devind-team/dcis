@@ -1,7 +1,7 @@
 #import "../../fragments/project_fields.graphql"
 
-mutation AddProject($name: String!, $short: String!, $description: String!) {
-  addProject(input: {name: $name, short: $short, description: $description}) {
+mutation AddProject($name: String!, $short: String!, $description: String!, $visibility: Boolean = false) {
+  addProject(input: {name: $name, short: $short, description: $description, visibility: $visibility}) {
     success
     errors {
       field

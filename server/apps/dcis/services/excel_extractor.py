@@ -2,9 +2,10 @@ from pathlib import PosixPath
 from typing import List, Iterator, Tuple, Dict
 
 from openpyexcel import load_workbook
-from openpyexcel.styles.colors import COLOR_INDEX
+from openpyexcel.styles.colors import COLOR_INDEX, Color
 from openpyexcel.utils.cell import column_index_from_string
 from openpyexcel.worksheet.dimensions import DimensionHolder
+from io import BytesIO
 from openpyexcel.worksheet.merge import MergeCell
 
 from ..models import Period, Sheet, Cell, MergedCell, RowDimension, ColumnDimension
@@ -123,18 +124,6 @@ class ExcelExtractor:
                         'right': column.border.right.style,
                         'diagonal': column.border.diagonal.style
                     },
-                    'border_color': {
-                        'top': f'#{column.border.top.color.value[2:]}'
-                        if column.border.top.color else None,
-                        'bottom': f'#{column.border.bottom.color.value[2:]}'
-                        if column.border.bottom.color else None,
-                        'left': f'#{column.border.left.color.value[2:]}'
-                        if column.border.left.color else None,
-                        'right': f'#{column.border.right.color.value[2:]}'
-                        if column.border.right.color else None,
-                        'diagonal': f'#{column.border.diagonal.color.value[2:]}'
-                        if column.border.diagonal.color else None
-                    }
                 }
             } for col_letter, column in holder.items()
         }
@@ -165,18 +154,6 @@ class ExcelExtractor:
                         'left': row.border.left.style,
                         'right': row.border.right.style,
                         'diagonal': row.border.diagonal.style
-                    },
-                    'border_color': {
-                        'top': f'#{row.border.top.color.value[2:]}'
-                        if row.border.top.color else None,
-                        'bottom': f'#{row.border.bottom.color.value[2:]}'
-                        if row.border.bottom.color else None,
-                        'left': f'#{row.border.left.color.value[2:]}'
-                        if row.border.left.color else None,
-                        'right': f'#{row.border.right.color.value[2:]}'
-                        if row.border.right.color else None,
-                        'diagonal': f'#{row.border.diagonal.color.value[2:]}'
-                        if row.border.diagonal.color else None
                     }
                 }
             } for index, row in holder.items()
@@ -192,11 +169,34 @@ class ExcelExtractor:
         rows_result: List[Dict] = []
         for row in rows:
             for cell in row:
-                print(cell.border)
+                top_color = cell.border.top.color
+                bottom_color = cell.border.bottom.color
+                left_color = cell.border.left.color
+                right_color = cell.border.right.color
+                diagonal_color = cell.border.diagonal.color
+                colors = [
+                    top_color,
+                    bottom_color,
+                    left_color,
+                    right_color,
+                    diagonal_color
+                ]
+                for color in colors:
+                    if color and color.type == 'indexed':
+                        if color.index == 64 or color.index == 65:
+                            color = None
+                        else:
+                            color.type = 'rgb'
+                            color.value = COLOR_INDEX[color.index]
+
+                # Временная заглушка
+                if cell.font.color.index == 1 and cell.fill.patternType is None:
+                    cell.font.color.type = 'rgb'
+                    cell.font.color.value = '00000000'
+
                 rows_result.append({
                     'column_id': cell.col_idx,
                     'row_id': cell.row,
-
                     'kind': cell.data_type,
                     'formula': cell.value
                     if isinstance(cell.value, str) and cell.value and cell.value[0] == '='
@@ -212,7 +212,7 @@ class ExcelExtractor:
                     'underline': cell.font.u,
                     'color': f'#{cell.font.color.value[2:]}'
                     if cell.font.color.type == 'rgb'
-                    else COLOR_INDEX[cell.font.color.index],
+                    else f'#{COLOR_INDEX[cell.font.color.index][2:]}',
                     'background': '#FFFFFF'
                     if cell.fill.patternType is None
                     else f'#{cell.fill.fgColor.value[2:]}',
@@ -224,16 +224,16 @@ class ExcelExtractor:
                         'diagonal': cell.border.diagonal.style
                     },
                     'border_color': {
-                        'top': f'#{cell.border.top.color.value[2:]}'
-                        if cell.border.top.color else None,
-                        'bottom': f'#{cell.border.bottom.color.value[2:]}'
-                        if cell.border.bottom.color else None,
-                        'left': f'#{cell.border.left.color.value[2:]}'
-                        if cell.border.left.color else None,
-                        'right': f'#{cell.border.right.color.value[2:]}'
-                        if cell.border.right.color else None,
-                        'diagonal': f'#{cell.border.diagonal.color.value[2:]}'
-                        if cell.border.diagonal.color else None
+                        'top': f'#{top_color.value[2:]}'
+                        if top_color and top_color.type == 'rgb' else None,
+                        'bottom': f'#{bottom_color.value[2:]}'
+                        if bottom_color and bottom_color.type == 'rgb' else None,
+                        'left': f'#{left_color.value[2:]}'
+                        if left_color and left_color.type == 'rgb' else None,
+                        'right': f'#{right_color.value[2:]}'
+                        if right_color and right_color.type == 'rgb' else None,
+                        'diagonal': f'#{diagonal_color.value[2:]}'
+                        if diagonal_color and diagonal_color.type == 'rgb' else None
                     }
                 })
         return rows_result

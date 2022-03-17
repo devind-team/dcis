@@ -241,6 +241,8 @@ export type AddProjectMutationInput = {
   name: Scalars['String'];
   /** Название проекта */
   short: Scalars['String'];
+  /** Видимость проекта */
+  visibility?: Scalars['Boolean'];
 };
 
 /** Мутация для добавления проекта. */
@@ -3963,6 +3965,7 @@ export type AddProjectMutationVariables = Exact<{
   name: Scalars['String'];
   short: Scalars['String'];
   description: Scalars['String'];
+  visibility?: InputMaybe<Scalars['Boolean']>;
 }>;
 
 export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, createdAt: any } | null } };

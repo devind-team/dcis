@@ -201,6 +201,8 @@ input AddProjectMutationInput {
   name: String!
   """Название проекта"""
   short: String!
+  """Видимость проекта"""
+  visibility: Boolean! = true
 }
 
 """Мутация для добавления проекта."""
