@@ -25,7 +25,7 @@ export default defineComponent({
     const route = useRoute()
     const drawer: Ref<boolean> = ref<boolean>(false)
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
-      { title: 'Документ', to: 'dcis-periods-periodId-document', icon: 'file-table-box-multiple-outline' },
+      { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
       { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' }
     ]))
     const { data: period, loading, update } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
@@ -46,7 +46,7 @@ export default defineComponent({
           to: localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: period.value.project.id } }),
           exact: true
         },
-        { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId-document' }), exact: true },
+        { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId-documents' }), exact: true }
       ]
     })
     return { bc, drawer, links, period, loading }
