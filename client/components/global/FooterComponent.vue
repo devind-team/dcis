@@ -3,8 +3,8 @@
     v-container
       v-row
         v-col(cols="12" md="9")
-          .body-2 Email:&nbsp;
-            strong {{ $getSettingValue('APP_EMAIL') }}
+          a.caption(href="https://www.cbias.ru/sso_app/support.spf" target="_blank")
+            | Обращение в службу технической поддержки.
         v-col(cols="12" md="3")
           v-list(width="280" style="background: inherit;" dense)
             theme-color(v-slot="{ on }")
