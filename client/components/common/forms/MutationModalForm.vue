@@ -42,53 +42,55 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Ref } from 'vue-property-decorator'
+import { VueConstructor } from 'vue'
+import type { Ref, ComputedRef } from '#app'
+import { computed, defineComponent, getCurrentInstance, ref } from '#app'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
 
-@Component<MutationModalForm>({
+type MutateFormType = InstanceType<typeof MutationForm> | null
+
+export default defineComponent({
   components: { MutationForm },
   inheritAttrs: false,
-  computed: {
-    mutationListeners () {
-      const vm = this
-      return Object.assign({}, this.$listeners, {
+  props: {
+    mutationName: { type: String, required: true },
+    successClose: { type: Boolean, default: true },
+    errorsInAlert: { type: Boolean, default: false },
+    fullscreen: { type: Boolean, default: false },
+    canMinimize: { type: Boolean, default: false },
+    header: { type: String, default: '' },
+    subheader: { type: String, default: '' },
+    buttonText: { type: String, default: '' },
+    i18nPath: { type: String, default: '' },
+    width: { type: [String, Number], default: 600 },
+    hideAlertTimeout: { type: Number, default: 2000 }
+  },
+  setup (props, { emit }) {
+    const instance = getCurrentInstance()
+    const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
+    // @ts-ignore: TS2322
+    const mutationForm: Ref<MutateFormType> = ref<MutateFormType>(null)
+    const active: Ref<boolean> = ref<boolean>(false)
+
+    const mutationListeners: ComputedRef = computed(() => (
+      Object.assign({}, vm.$listeners, {
         done (result: any) {
-          const { success } = result.data[vm.mutationName]
-          if (success && vm.successClose) {
-            vm.close()
+          const { success } = result.data[props.mutationName]
+          if (success && props.successClose) {
+            close()
           }
-          vm.$emit('done', result)
+          emit('done', result)
         }
       })
+    ))
+
+    const close = () => {
+      active.value = false
+      mutationForm.value.clear()
+      emit('close')
     }
+
+    return { active, mutationForm, mutationListeners, close }
   }
 })
-export default class MutationModalForm extends Vue {
-  @Prop({ type: String, required: true }) readonly mutationName!: string
-  @Prop({ type: Boolean, default: true }) readonly successClose!: string
-  @Prop({ type: Boolean, default: false }) readonly errorsInAlert!: boolean
-  @Prop({ type: Boolean, default: false }) readonly fullscreen!: boolean
-  @Prop({ type: Boolean, default: false }) readonly canMinimize!: boolean
-  @Prop({ type: String, default: '' }) readonly header!: string
-  @Prop({ type: String, default: '' }) readonly subheader!: string
-  @Prop({ type: String, default: '' }) readonly buttonText!: string
-  @Prop({ type: String, default: '' }) readonly i18nPath!: string
-  @Prop({ type: [Number, String], default: 600 }) readonly width!: number | string
-  @Prop({ type: Number, default: 20000 }) readonly hideAlertTimeout!: number
-
-  @Ref() readonly mutationForm!: InstanceType<typeof MutationForm>
-
-  readonly mutationListeners!: Function[]
-
-  active: boolean = false
-
-  /**
-   * Закрытие модального окна
-   */
-  close (): void {
-    this.active = false
-    this.mutationForm.clear()
-    this.$emit('close')
-  }
-}
 </script>

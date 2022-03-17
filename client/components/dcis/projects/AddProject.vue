@@ -4,8 +4,9 @@
     :button-text="$t('dcis.projects.addProject.buttonText')"
     :mutation="addProject"
     :variables="{ name, short, description, visibility }"
-    :update="update"
+    :update="addProjectUpdate"
     mutation-name="addProject"
+    i18n-path="dcis.projects.addProject"
     width="700"
     @close="close"
   )
@@ -37,7 +38,7 @@ export default defineComponent({
   props: {
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
-  setup () {
+  setup (props) {
     const name: Ref<string> = ref<string>('')
     const short: Ref<string> = ref<string>('')
     const description: Ref<string> = ref<string>('')
@@ -50,7 +51,14 @@ export default defineComponent({
       visibility.value = true
     }
 
-    return { name, short, description, visibility, close, addProject }
+    const addProjectUpdate = (cache: DataProxy, result: AddProjectMutationResult) => {
+      const { success } = result.data.addProject
+      if (success) {
+        props.update(cache, result)
+      }
+    }
+
+    return { name, short, description, visibility, close, addProject, addProjectUpdate }
   }
 })
 </script>

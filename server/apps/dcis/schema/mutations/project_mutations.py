@@ -37,7 +37,7 @@ class AddProjectMutation(BaseMutation):
         if validator.validate():
             project: Project = Project.objects.create(user=info.context.user, **kwargs)
             return AddProjectMutation(project=project)
-        return AddProjectMutation(success=True, errors=ErrorFieldType.from_validator(validator.get_message()))
+        return AddProjectMutation(success=False, errors=ErrorFieldType.from_validator(validator.get_message()))
 
 
 class AddPeriodMutation(BaseMutation):

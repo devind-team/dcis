@@ -9,8 +9,7 @@
       form(@submit.prevent="handleSubmit(mutate)")
         v-card
           v-card-title
-            slot(name="header" :header="header")
-              span {{ header }}
+            slot(name="header" :header="header") {{ header }}
           v-card-subtitle
             slot(name="subheader" :subheader="subheader")
               span {{ subheader }}
@@ -36,13 +35,20 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { VueConstructor } from 'vue'
 import { ApolloError } from 'apollo-client'
+import { ValidationObserver } from 'vee-validate'
+import type { Ref, ComputedRef } from '#app'
+import { defineComponent, computed, getCurrentInstance, ref, nextTick } from '#app'
+import { useFilters, useI18n } from '~/composables'
 import { ErrorFieldType } from '~/types/graphql'
 import { ErrorType } from '~/types/devind'
 import MutationResultAlert, { TableErrors } from '~/components/common/MutationResultAlert.vue'
 
-export default Vue.extend<any, any, any, any>({
+type MutationResultAlertType = InstanceType<typeof MutationResultAlert> | null
+type ValidationObserverType = InstanceType<typeof ValidationObserver> | null
+
+export default defineComponent({
   components: { MutationResultAlert },
   inheritAttrs: false,
   props: {
@@ -55,93 +61,79 @@ export default Vue.extend<any, any, any, any>({
     hideAlertTimeout: { type: Number, default: 20000 },
     successMessage: { type: String, default: '' }
   },
-  computed: {
-    mutationListeners () {
-      const vm = this
-      return Object.assign({}, this.$listeners, {
-        error (error: ApolloError): void {
-          vm.setApolloError(error)
-          vm.$emit('error', error)
-        },
-        done (result: any): void {
-          vm.mutationDone(result)
-          vm.$emit('done', result)
-        }
-      })
+  setup (props, { emit }) {
+    const { t } = useI18n()
+    const { snakeToCamel } = useFilters()
+
+    const instance = getCurrentInstance()
+    const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
+    const validationObserver: Ref<ValidationObserverType> = ref<ValidationObserverType>(null)
+    // @ts-ignore: TS2322
+    const mutationResultAlert: Ref<MutationResultAlertType> = ref<MutationResultAlertType>(null)
+
+    const setApolloError = (error: ApolloError): void => {
+      mutationResultAlert.value.setApolloError(error)
     }
-  },
-  methods: {
-    /**
-     * Установка ошибки Apollo
-     * @param error
-     */
-    setApolloError (error: ApolloError): void {
-      this.$refs.mutationResultAlert.setApolloError(error)
-    },
-    /**
-     * Установка ошибки
-     * @param message
-     * @param type
-     */
-    setError (message: string, type: ErrorType): void {
-      this.$refs.mutationResultAlert.setError(message, type)
-    },
-    /**
-     * Установка успеха
-     */
-    setSuccess (): void {
-      this.$refs.mutationResultAlert.setSuccess()
-    },
-    /**
-     * Установка таблицы ошибок
-     */
-    setTableErrors (tableErrors: TableErrors): void {
-      this.$refs.mutationResultAlert.setTableErrors(tableErrors)
-    },
-    /**
-     * Установка ошибок после мутации
-     * @param errors
-     * @param showInAlert
-     */
-    setFormErrors (errors: ErrorFieldType[], showInAlert: boolean = false): void {
+
+    const setError = (message: string, type: ErrorType): void => {
+      mutationResultAlert.value.setError(message, type)
+    }
+
+    const setSuccess = (): void => {
+      mutationResultAlert.value.setSuccess()
+    }
+
+    const setTableErrors = (tableErrors: TableErrors): void => {
+      mutationResultAlert.value.setTableErrors(tableErrors)
+    }
+
+    const setFormErrors = (errors: ErrorFieldType[], showInAlert: boolean = false): void => {
       if (showInAlert) {
-        const errorString: string = errors.reduce((a: string, c: ErrorFieldType) =>
-          a.concat(c.messages.join(', ')), '')
-        this.setError(errorString, 'BusinessLogicError')
+        const errorString: string = errors.reduce((a: string, c: ErrorFieldType) => a.concat(c.messages.join(', ')), '')
+        setError(errorString, 'BusinessLogicError')
       } else {
-        this.$refs.validationObserver.setErrors(errors.reduce(
+        validationObserver.value.setErrors(errors.reduce(
           (a: { [key: string]: string[] }, c: ErrorFieldType) => {
             return {
               ...a,
-              [this.$t(`${this.i18nPath}.${this.$snakeToCamel(c.field)}`) as string]: c.messages
+              [t(`${props.i18nPath}.${snakeToCamel(c.field)}`) as string]: c.messages
             }
           }, {}))
       }
-    },
-    /**
-     * Обработка окончания выполнения мутации
-     * @param result
-     */
-    mutationDone (result: any): void {
-      const { success, errors, table } = result.data[this.mutationName]
+    }
+
+    const mutationDone = (result: any): void => {
+      const { success, errors, table } = result.data[props.mutationName]
       if (success) {
-        this.setSuccess()
+        setSuccess()
       } else {
         const tableErrors = table ? { table, errors } : null
-        if (tableErrors) {
-          this.setTableErrors(tableErrors)
-        } else {
-          this.setFormErrors(errors, this.errorsInAlert)
-        }
+        tableErrors ? setTableErrors(tableErrors) : setFormErrors(errors, props.errorsInAlert)
       }
-    },
+    }
+
+    const mutationListeners: ComputedRef = computed(() => (Object.assign({}, vm.$listeners, {
+      error (error: ApolloError): void {
+        setApolloError(error)
+        emit('error', error)
+      },
+      done (result: any): void {
+        mutationDone(result)
+        emit('done', result)
+      }
+    })))
+
     /**
      * Очистка валидатора и результата мутации
      */
-    clear (): void {
-      this.$refs.mutationResultAlert.clear()
-      this.$nextTick(() => { this.$refs.validationObserver.reset() })
+    const clear = (): void => {
+      mutationResultAlert.value.clear()
+      nextTick(() => {
+        validationObserver.value.reset()
+      })
     }
+
+    return { mutationListeners, setFormErrors, setError, setSuccess, clear, validationObserver, mutationResultAlert }
   }
 })
 </script>
