@@ -45,8 +45,10 @@
 import { useMutation } from '@vue/apollo-composable'
 import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
-import {defineComponent, ref, useNuxt2Meta, inject, useRoute, toRef} from '#app'
+import { defineComponent, ref, useNuxt2Meta, inject, useRoute, toRef } from '#app'
 import { useCommonQuery, useFilters } from '~/composables'
+import type { HasPermissionFnType } from '~/store'
+import { useAuthStore } from '~/store'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   AddDocumentMutation,
@@ -59,7 +61,6 @@ import {
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import {HasPermissionFnType, useAuthStore} from "~/store";
 
 export default defineComponent({
   components: { BreadCrumbs },

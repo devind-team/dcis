@@ -21,7 +21,7 @@
         v-data-table(:headers="headers" :items="project.periods" disable-pagination hide-default-footer)
           template(#item.name="{ item }")
             nuxt-link(
-              :to="localePath({ name: 'dcis-periods-periodId', params: { periodId: toGlobalId('PeriodType', item.id) } })"
+              :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
             ) {{ item.name }}
           template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
