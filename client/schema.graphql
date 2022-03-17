@@ -458,9 +458,9 @@ type CellType {
   """Цвет фона"""
   background: String!
   """Цвет границ"""
-  borderColor: JSONString
+  borderColor: JSONString!
   """Стили границ"""
-  borderStyle: JSONString
+  borderStyle: JSONString!
   """Цвет индекса"""
   color: String!
   """Колонка"""
