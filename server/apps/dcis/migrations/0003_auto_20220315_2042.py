@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cell',
             name='border_color',
-            field=models.JSONField(default=apps.dcis.models.sheet.get_default_border_color, help_text='Цвет границ'),
+            field=models.JSONField(default=apps.dcis.models.sheet.get_default_border, help_text='Цвет границ'),
         ),
         migrations.AddField(
             model_name='cell',
             name='border_style',
-            field=models.JSONField(default=apps.dcis.models.sheet.get_default_border_style, help_text='Стили границ'),
+            field=models.JSONField(default=apps.dcis.models.sheet.get_default_border, help_text='Стили границ'),
         ),
     ]
