@@ -193,21 +193,8 @@ type AddProfileMutationPayload {
   success: Boolean!
 }
 
-input AddProjectMutationInput {
-  clientMutationId: String
-  """Описание проекта"""
-  description: String!
-  """Название проекта"""
-  name: String!
-  """Название проекта"""
-  short: String!
-  """Видимость проекта"""
-  visibility: Boolean! = true
-}
-
 """Мутация для добавления проекта."""
 type AddProjectMutationPayload {
-  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Добавленный проект"""
@@ -870,6 +857,16 @@ type ChangeProfileVisibilityMutationPayload {
   success: Boolean!
 }
 
+"""Мутация изменения настроек проекта."""
+type ChangeProjectMutationPayload {
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный проект"""
+  project: ProjectType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeSectionFilesMutationInput {
   clientMutationId: String
   """Загружаемые изображения"""
@@ -1148,6 +1145,22 @@ type ContentTypeType {
   rowdimensionSet: [RowDimensionType!]!
 }
 
+input CreateProjectInput {
+  """Архив"""
+  archive: Boolean
+  """Описание проекта"""
+  description: String!
+  """Наименование проекта"""
+  name: String!
+  periodSet: [ID]
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Организатор сборов"""
+  user: ID
+  """Видимость проекта"""
+  visibility: Boolean
+}
+
 """
 The `Date` scalar type represents a Date
 value as specified by
@@ -1257,6 +1270,18 @@ type DeleteProfileMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Мутация на удаление проекта."""
+type DeleteProjectMutationPayload {
+  deletedId: ID
+  deletedInputId: ID
+  deletedRawId: ID
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -1699,7 +1724,7 @@ type Mutation {
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
-  addProject(input: AddProjectMutationInput!): AddProjectMutationPayload!
+  addProject(input: CreateProjectInput!): AddProjectMutationPayload!
   """
   Вставка строк.
   
@@ -1755,6 +1780,8 @@ type Mutation {
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""
   changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
+  """Мутация изменения настроек проекта."""
+  changeProject(id: ID!, input: UpdateProjectInput!): ChangeProjectMutationPayload!
   """Изменение текста секции"""
   changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
   """Изменение текста секции"""
@@ -1783,6 +1810,8 @@ type Mutation {
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
+  """Мутация на удаление проекта."""
+  deleteProject(id: ID!): DeleteProjectMutationPayload!
   """Мутация для удаления строки."""
   deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
   """Удаление секции"""
@@ -2193,6 +2222,8 @@ input ProjectNameFilterInputType {
 
 """Тип модели проектов."""
 type ProjectType implements Node {
+  """Архив"""
+  archive: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Описание проекта"""
@@ -2829,6 +2860,22 @@ type UnloadDocumentMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
+}
+
+input UpdateProjectInput {
+  """Архив"""
+  archive: Boolean
+  """Описание проекта"""
+  description: String!
+  """Наименование проекта"""
+  name: String!
+  periodSet: [ID]
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Организатор сборов"""
+  user: ID
+  """Видимость проекта"""
+  visibility: Boolean
 }
 
 """
