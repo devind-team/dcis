@@ -20,16 +20,12 @@
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
-import { defineComponent, useNuxt2Meta, ref, toRef } from '#app'
+import { defineComponent, ref, toRef, useNuxt2Meta } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useCursorPagination, useFilters, useI18n, useQueryRelay } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/store'
 import projectsQuery from '~/gql/dcis/queries/projects.graphql'
-import {
-  ProjectsQuery,
-  ProjectsQueryVariables,
-  ProjectType
-} from '~/types/graphql'
+import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
 

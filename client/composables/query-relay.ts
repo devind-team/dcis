@@ -10,11 +10,11 @@ import type {
   UseQueryReturn
 } from '@vue/apollo-composable/dist/useQuery'
 import { computed, ComputedRef } from '#app'
+import { ExtractSingleKey } from '@vue/apollo-composable/dist/util/ExtractSingleKey'
+import { UseResultReturn } from '@vue/apollo-composable/dist/useResult'
 import { PageInfo } from '~/types/graphql'
 import { getValue } from '~/services/graphql-relay'
 import { PaginationInterface, useOffsetPagination } from '~/composables/pagination'
-import {UseResultReturn} from "@vue/apollo-composable/dist/useResult";
-import {ExtractSingleKey} from "@vue/apollo-composable/dist/util/ExtractSingleKey";
 
 export type ResultDefaultValueType<TNode> = {
   totalCount: number,

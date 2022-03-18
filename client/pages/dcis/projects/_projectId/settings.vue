@@ -86,10 +86,10 @@
 </template>
 
 <script lang="ts">
-import type { ComputedRef, PropType, Ref } from '#app'
+import type {ComputedRef, PropType, Ref } from '#app'
 import { computed, defineComponent, toRefs, useRouter } from '#app'
 import { promiseTimeout } from '@vueuse/core'
-import { ProjectType, ChangeProjectMutationPayload, DeleteProjectMutationPayload, UserType } from '~/types/graphql'
+import { ChangeProjectMutationPayload, DeleteProjectMutationPayload, ProjectType, UserType} from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import { useI18n } from '~/composables'
