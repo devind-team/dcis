@@ -13,6 +13,8 @@ import { computed, ComputedRef } from '#app'
 import { PageInfo } from '~/types/graphql'
 import { getValue } from '~/services/graphql-relay'
 import { PaginationInterface, useOffsetPagination } from '~/composables/pagination'
+import {UseResultReturn} from "@vue/apollo-composable/dist/useResult";
+import {ExtractSingleKey} from "@vue/apollo-composable/dist/util/ExtractSingleKey";
 
 export type ResultDefaultValueType<TNode> = {
   totalCount: number,
@@ -35,12 +37,26 @@ export type QueryRelayOptions = {
   fetchThrottle?: number
 }
 
-export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number} = any> (
+export type UseResultDefaultValueType<TNode> = { totalCount: number, edges: { node: TNode }[] }
+
+export type QueryRelayResult<TResult = any, TVariables = any, TNode extends { id: string | number } = any> = UseQueryReturn<TResult, TVariables> & {
+  dataQuery: UseResultReturn<UseResultDefaultValueType<TNode> | ExtractSingleKey<NonNullable<TResult>>>
+  data: ComputedRef<TNode[]>
+  pagination: PaginationInterface
+  fetchMoreAvailable: ComputedRef<boolean>
+  fetchMoreData: () => void
+  update: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, transform: TransformUpdate<TResult, TResultMutation>) => void
+  addUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key: string | null) => void
+  changeUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key: string | null) => void
+  deleteUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>) => void
+}
+
+export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number } = any> (
   queryParams: QueryRelayParams<TResult, TVariables>,
   queryOptions: QueryRelayOptions = {
     pagination: useOffsetPagination()
   }
-) {
+): QueryRelayResult<TResult, TVariables, TNode> {
   const { document, variables, options } = queryParams
   const { pagination, fetchScroll, fetchThrottle } = queryOptions
   /**
