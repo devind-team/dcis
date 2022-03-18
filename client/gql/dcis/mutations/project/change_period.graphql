@@ -1,0 +1,35 @@
+#import "../../fragments/period_fields.graphql"
+#import "../../fragments/project_fields.graphql"
+#import "../../../core/fragments/user_fields.graphql"
+
+mutation ChangePeriod(
+  $id: ID!,
+  $name: String!,
+  $status:  String!,
+  $multiple: Boolean!,
+  $privately: Boolean!,
+  $start: Date,
+  $expiration: Date
+) {
+  changePeriod(id: $id, input: {
+    name: $name,
+    status: $status,
+    multiple: $multiple,
+    privately: $privately,
+    start: $start,
+    expiration: $expiration
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    period {
+      ...PeriodFields
+      user { ...UserFields }
+      project { ...ProjectFields }
+    }
+    __typename
+  }
+}

@@ -817,6 +817,16 @@ type ChangePasswordMutationPayload {
   success: Boolean!
 }
 
+"""Мутация на изменение настроек периода."""
+type ChangePeriodMutationPayload {
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный период"""
+  period: PeriodType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeProfileValueMutationInput {
   clientMutationId: String
   """Идентификатор записи профиля"""
@@ -1255,6 +1265,18 @@ type DeletePageMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+"""Мутация на удаление периода."""
+type DeletePeriodMutationPayload {
+  deletedId: ID
+  deletedInputId: ID
+  deletedRawId: ID
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -1776,6 +1798,8 @@ type Mutation {
   changePageTitle(input: ChangePageTitleMutationInput!): ChangePageTitleMutationPayload!
   """Мутация для изменения пароля пользователя."""
   changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
+  """Мутация на изменение настроек периода."""
+  changePeriod(id: ID!, input: UpdatePeriodInput!): ChangePeriodMutationPayload!
   """Мутация на изменение значения профиля."""
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""
@@ -1808,6 +1832,8 @@ type Mutation {
   deleteNotice(input: DeleteNoticeMutationInput!): DeleteNoticeMutationPayload!
   """Удаление страницы"""
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
+  """Мутация на удаление периода."""
+  deletePeriod(id: ID!): DeletePeriodMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
   """Мутация на удаление проекта."""
@@ -2095,16 +2121,6 @@ type PageTypeEdge {
   node: PageType
 }
 
-"""An enumeration."""
-enum PeriodStatus {
-  """preparation"""
-  A_0
-  """open"""
-  A_1
-  """close"""
-  A_2
-}
-
 """Тип периода."""
 type PeriodType {
   """Дата создания"""
@@ -2112,7 +2128,7 @@ type PeriodType {
   """Собираемые документв"""
   documents: [DocumentType]
   """Дата окончания"""
-  expiration: DateTime
+  expiration: Date
   id: ID!
   methodicalSupport: [FileType!]
   """Множественное заполнение"""
@@ -2124,9 +2140,9 @@ type PeriodType {
   """Проект"""
   project: ProjectType
   """Дата начала"""
-  start: DateTime
+  start: Date
   """Статус проекта"""
-  status: PeriodStatus!
+  status: String!
   """Дата обновления"""
   updatedAt: DateTime!
   """Пользователь"""
@@ -2860,6 +2876,29 @@ type UnloadDocumentMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
+}
+
+input UpdatePeriodInput {
+  attributeSet: [ID]
+  divisionSet: [ID]
+  documentSet: [ID]
+  """Дата окончания"""
+  expiration: Date
+  """Множественное заполнение"""
+  multiple: Boolean
+  """Наименование периода"""
+  name: String!
+  periodgroupSet: [ID]
+  periodprivilegeSet: [ID]
+  """Приватность полей"""
+  privately: Boolean
+  sheetSet: [ID]
+  """Дата начала"""
+  start: Date
+  """Статус проекта"""
+  status: String
+  """Организатор сборов"""
+  user: ID
 }
 
 input UpdateProjectInput {

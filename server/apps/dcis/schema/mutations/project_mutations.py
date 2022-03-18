@@ -16,7 +16,7 @@ from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project, Period
 from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
-from apps.dcis.permissions import AddProject, AddPeriod, ChangeProject, DeleteProject
+from apps.dcis.permissions import AddProject, AddPeriod, ChangeProject, DeleteProject, ChangePeriod, DeletePeriod
 from apps.dcis.validators import ProjectValidator
 
 
@@ -86,6 +86,26 @@ class AddPeriodMutation(BaseMutation):
         return AddPeriodMutation(period=period)
 
 
+class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
+    """Мутация на изменение настроек периода."""
+
+    class Meta:
+        model = Period
+        exclude_fields = ('project', 'methodical_support',)
+        optional_fields = ('start', 'expiration', 'user',)
+        permissions = (IsAuthenticated, ChangePeriod,)
+
+    period = graphene.Field(PeriodType, description='Измененный период')
+
+
+class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+    """Мутация на удаление периода."""
+
+    class Meta:
+        model = Period
+        permissions = (IsAuthenticated, DeletePeriod,)
+
+
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
@@ -93,3 +113,5 @@ class ProjectMutations(graphene.ObjectType):
     change_project = ChangeProjectMutationPayload.Field(required=True)
     delete_project = DeleteProjectMutationPayload.Field(required=True)
     add_period = AddPeriodMutation.Field(required=True)
+    change_period = ChangePeriodMutationPayload.Field(required=True)
+    delete_period = DeletePeriodMutationPayload.Field(required=True)

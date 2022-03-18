@@ -21,5 +21,20 @@ export default {
       save: '@:save',
       deleteItemName: 'проект'
     }
+  },
+  periods: {
+    header: 'Настройки периода',
+    name: 'Наименование периода',
+    status: 'Статус проекта',
+    multiple: 'Множественное заполнение',
+    privately: 'Приватность полей',
+    start: 'Дата начала периода',
+    expiration: 'Дата окончания периода',
+    deleteItemName: 'период',
+    actions: {
+      delete: '@:delete',
+      save: '@:save',
+      deleteItemName: 'период'
+    }
   }
 }

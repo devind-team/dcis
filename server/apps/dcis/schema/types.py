@@ -66,6 +66,7 @@ class PeriodType(DjangoObjectType):
             'methodical_support',
             'documents',
         )
+        convert_choices_to_enum = False
 
     @staticmethod
     @resolver_hints(model_field='')

@@ -8,7 +8,6 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
-from django.http.request import HttpRequest
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
