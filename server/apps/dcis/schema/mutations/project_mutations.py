@@ -8,7 +8,6 @@ from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from devind_helpers.decorators import permission_classes
 from devind_helpers.permissions import IsAuthenticated
-from devind_helpers.schema.types import ErrorFieldType
 from graphql_relay import from_global_id
 from devind_helpers.orm_utils import get_object_or_404
 from devind_core.models import File
