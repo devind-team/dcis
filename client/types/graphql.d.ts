@@ -1395,6 +1395,19 @@ export type DeleteProfileMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Мутация на удаление проекта. */
+export type DeleteProjectMutationPayload = {
+  __typename?: 'DeleteProjectMutationPayload';
+  deletedId?: Maybe<Scalars['ID']>;
+  deletedInputId?: Maybe<Scalars['ID']>;
+  deletedRawId?: Maybe<Scalars['ID']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  found?: Maybe<Scalars['Boolean']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор строки */
@@ -1952,6 +1965,8 @@ export type Mutation = {
   deletePage: DeletePageMutationPayload;
   /** Мутация для удаления записи профиля. */
   deleteProfile: DeleteProfileMutationPayload;
+  /** Мутация на удаление проекта. */
+  deleteProject: DeleteProjectMutationPayload;
   /** Мутация для удаления строки. */
   deleteRowDimension: DeleteRowDimensionMutationPayload;
   /** Удаление секции */
@@ -2148,7 +2163,7 @@ export type MutationChangeProfileVisibilityArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeProjectArgs = {
   id: Scalars['ID'];
-  input: PatchProjectInput;
+  input: UpdateProjectInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2219,6 +2234,11 @@ export type MutationDeletePageArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteProfileArgs = {
   input: DeleteProfileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteProjectArgs = {
+  id: Scalars['ID'];
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2563,26 +2583,6 @@ export type PageTypeEdge = {
   cursor: Scalars['String'];
   /** The item at the end of the edge */
   node?: Maybe<PageType>;
-};
-
-export type PatchProjectInput = {
-  /** Архив */
-  archive?: InputMaybe<Scalars['Boolean']>;
-  /** Дата создания */
-  createdAt?: InputMaybe<Scalars['DateTime']>;
-  /** Описание проекта */
-  description?: InputMaybe<Scalars['String']>;
-  /** Наименование проекта */
-  name?: InputMaybe<Scalars['String']>;
-  periodSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  /** Сокращенное наименование проекта */
-  short?: InputMaybe<Scalars['String']>;
-  /** Дата обновления */
-  updatedAt?: InputMaybe<Scalars['DateTime']>;
-  /** Организатор сборов */
-  user?: InputMaybe<Scalars['ID']>;
-  /** Видимость проекта */
-  visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
 /** An enumeration. */
@@ -3537,6 +3537,22 @@ export type UnloadDocumentMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UpdateProjectInput = {
+  /** Архив */
+  archive?: InputMaybe<Scalars['Boolean']>;
+  /** Описание проекта */
+  description: Scalars['String'];
+  /** Наименование проекта */
+  name: Scalars['String'];
+  periodSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  /** Сокращенное наименование проекта */
+  short: Scalars['String'];
+  /** Организатор сборов */
+  user?: InputMaybe<Scalars['ID']>;
+  /** Видимость проекта */
+  visibility?: InputMaybe<Scalars['Boolean']>;
+};
+
 export type UploadUsersMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Источник данных, файл xlsx или csv */
@@ -4024,6 +4040,12 @@ export type ChangeProjectMutationVariables = Exact<{
 }>;
 
 export type ChangeProjectMutation = { __typename?: 'Mutation', changeProject: { __typename: 'ChangeProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null } };
+
+export type DeleteProjectMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];

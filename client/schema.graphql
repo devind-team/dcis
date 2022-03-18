@@ -1272,6 +1272,18 @@ type DeleteProfileMutationPayload {
   success: Boolean!
 }
 
+"""Мутация на удаление проекта."""
+type DeleteProjectMutationPayload {
+  deletedId: ID
+  deletedInputId: ID
+  deletedRawId: ID
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  found: Boolean
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteRowDimensionMutationInput {
   clientMutationId: String
   """Идентификатор строки"""
@@ -1765,7 +1777,7 @@ type Mutation {
   """Матция для изменения видимости."""
   changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
   """Мутация изменения настроек проекта."""
-  changeProject(id: ID!, input: PatchProjectInput!): ChangeProjectMutationPayload!
+  changeProject(id: ID!, input: UpdateProjectInput!): ChangeProjectMutationPayload!
   """Изменение текста секции"""
   changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
   """Изменение текста секции"""
@@ -1794,6 +1806,8 @@ type Mutation {
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
+  """Мутация на удаление проекта."""
+  deleteProject(id: ID!): DeleteProjectMutationPayload!
   """Мутация для удаления строки."""
   deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
   """Удаление секции"""
@@ -2075,26 +2089,6 @@ type PageTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: PageType
-}
-
-input PatchProjectInput {
-  """Архив"""
-  archive: Boolean
-  """Дата создания"""
-  createdAt: DateTime
-  """Описание проекта"""
-  description: String
-  """Наименование проекта"""
-  name: String
-  periodSet: [ID]
-  """Сокращенное наименование проекта"""
-  short: String
-  """Дата обновления"""
-  updatedAt: DateTime
-  """Организатор сборов"""
-  user: ID
-  """Видимость проекта"""
-  visibility: Boolean
 }
 
 """An enumeration."""
@@ -2862,6 +2856,22 @@ type UnloadDocumentMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
+}
+
+input UpdateProjectInput {
+  """Архив"""
+  archive: Boolean
+  """Описание проекта"""
+  description: String!
+  """Наименование проекта"""
+  name: String!
+  periodSet: [ID]
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Организатор сборов"""
+  user: ID
+  """Видимость проекта"""
+  visibility: Boolean
 }
 
 """

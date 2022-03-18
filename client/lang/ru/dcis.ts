@@ -15,7 +15,11 @@ export default {
       buttonText: 'Добавить проект'
     },
     changeProject: {
-      archive: 'Архивировать'
+      header: 'Настройки проекта',
+      archive: 'Архивировать',
+      delete: '@:delete',
+      save: '@:save',
+      deleteItemName: 'проект'
     }
   }
 }
