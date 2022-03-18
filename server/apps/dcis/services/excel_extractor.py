@@ -2,10 +2,9 @@ from pathlib import PosixPath
 from typing import List, Iterator, Tuple, Dict
 
 from openpyexcel import load_workbook
-from openpyexcel.styles.colors import COLOR_INDEX, Color
+from openpyexcel.styles.colors import COLOR_INDEX
 from openpyexcel.utils.cell import column_index_from_string
 from openpyexcel.worksheet.dimensions import DimensionHolder
-from io import BytesIO
 from openpyexcel.worksheet.merge import MergeCell
 
 from ..models import Period, Sheet, Cell, MergedCell, RowDimension, ColumnDimension
@@ -194,6 +193,9 @@ class ExcelExtractor:
                     cell.font.color.type = 'rgb'
                     cell.font.color.value = '00000000'
 
+                if cell.fill.patternType is None:
+                    cell.fill.fgColor.value = 'FFFFFFFF'
+                print(cell.fill.fgColor)
                 rows_result.append({
                     'column_id': cell.col_idx,
                     'row_id': cell.row,
@@ -213,9 +215,9 @@ class ExcelExtractor:
                     'color': f'#{cell.font.color.value[2:]}'
                     if cell.font.color.type == 'rgb'
                     else f'#{COLOR_INDEX[cell.font.color.index][2:]}',
-                    'background': '#FFFFFF'
-                    if cell.fill.patternType is None
-                    else f'#{cell.fill.fgColor.value[2:]}',
+                    'background': f'#{cell.fill.fgColor.value[2:]}'
+                    if cell.fill.fgColor.type == 'rgb'
+                    else f'#{COLOR_INDEX[cell.fill.fgColor.index][2:]}',
                     'border_style': {
                         'top': cell.border.top.style,
                         'bottom': cell.border.bottom.style,
