@@ -5,6 +5,7 @@ from os.path import join
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.styles.colors import WHITE
 
 from apps.dcis.models import Cell, Document
 from devind import settings
@@ -71,11 +72,13 @@ class DocumentUnload:
                         ),
                         diagonal=Side(
                             border_style=cell.border_style['diagonal'],
-                            color=f'{cell.border_color["diagonal"][1:]}' if cell.border_color['diagonal'] else None
-                        )
+                            color=f'{cell.border_color["diagonal"][1:]}' if cell.border_color['diagonal'] else None,
+                        ),
+                        diagonalDown=cell.border_style['diagonalDown'],
+                        diagonalUp=cell.border_style['diagonalUp']
                     )
                 # Заливка ячейки
-                if cell.background != '#FFFFFF':
+                if cell.background != '#FFFFFF' and cell.background != '#FFFFFFFF' and cell.background != WHITE:
                     ws.cell(row_position, column_position).fill = PatternFill(
                         fill_type='solid',
                         start_color=f'{cell.background[1:]}',
