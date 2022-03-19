@@ -112,8 +112,7 @@ class ExcelExtractor:
                     'strike': column.font.strike,
                     'underline': column.font.u,
                     'color': f'#{column.font.color.value[2:]}'
-                    if column.font.color.type == 'rgb'
-                    else COLOR_INDEX[column.font.color.index],
+                    if column.font.color and column.font.color.type == 'rgb' else '#000000',
                     'background': '#FFFFFF'
                     if column.fill.patternType is None
                     else f'#{column.fill.fgColor.value[2:]}',
@@ -143,8 +142,7 @@ class ExcelExtractor:
                     'strike': row.font.strike,
                     'underline': row.font.u,
                     'color': f'#{row.font.color.value[2:]}'
-                    if row.font.color.type == 'rgb'
-                    else COLOR_INDEX[row.font.color.index],
+                    if row.font.color and row.font.color.type == 'rgb' else '#000000',
                     'background': '#FFFFFF'
                     if row.fill.patternType is None
                     else f'#{row.fill.fgColor.value[2:]}',
