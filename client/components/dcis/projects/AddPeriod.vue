@@ -15,7 +15,7 @@
       slot(name="activator" :on="on")
     template(#form)
       validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addPeriod.name')" rules="required|min:3|max:250")
-        v-text-field(v-model="name" :label="$t('dcis.projects.addProject.name')" :error-messages="errors" :success="valid")
+        v-text-field(v-model="name" :label="$t('dcis.projects.addPeriod.name')" :error-messages="errors" :success="valid")
       validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addPeriod.file')" rules="required")
         v-file-input(v-model="file" :label="$t('dcis.projects.addPeriod.file')" :error-messages="errors" :success="valid")
 </template>
