@@ -7,7 +7,6 @@
     :update="addProjectUpdate"
     mutation-name="addProject"
     i18n-path="dcis.projects.addProject"
-    width="700"
     @close="close"
   )
     template(#activator="{ on }")

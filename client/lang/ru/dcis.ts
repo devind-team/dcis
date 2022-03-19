@@ -20,6 +20,12 @@ export default {
       delete: '@:delete',
       save: '@:save',
       deleteItemName: 'проект'
+    },
+    addPeriod: {
+      header: 'Добавление периода',
+      name: 'Название периода',
+      file: 'Файл с формой сбора',
+      buttonText: 'Добавить период'
     }
   }
 }

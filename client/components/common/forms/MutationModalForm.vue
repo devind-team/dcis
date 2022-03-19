@@ -23,8 +23,7 @@
         v-btn(@click="close" icon)
           v-icon mdi-close
       template(#subheader)
-        slot(name="subheader" :subheader="subheader")
-          span {{ subheader }}
+        slot(name="subheader" :subheader="subheader") {{ subheader }}
       template(#form)
         slot(name="form")
       template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
