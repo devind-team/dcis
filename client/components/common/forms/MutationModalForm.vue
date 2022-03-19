@@ -63,7 +63,7 @@ export default defineComponent({
     buttonText: { type: String, default: '' },
     i18nPath: { type: String, default: '' },
     width: { type: [String, Number], default: 600 },
-    hideAlertTimeout: { type: Number, default: 2000 }
+    hideAlertTimeout: { type: Number, default: 5000 }
   },
   setup (props, { emit }) {
     const instance = getCurrentInstance()
