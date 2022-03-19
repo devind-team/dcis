@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" scrollable)
+  v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="persistent" scrollable)
     template(#activator="{ on }")
       slot(name="activator" :on="on" :close="close")
     mutation-form(
@@ -57,6 +57,7 @@ export default defineComponent({
     successClose: { type: Boolean, default: true },
     errorsInAlert: { type: Boolean, default: false },
     fullscreen: { type: Boolean, default: false },
+    persistent: { type: Boolean, default: false },
     canMinimize: { type: Boolean, default: false },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
