@@ -1,7 +1,7 @@
 import graphene
+from graphene_django import DjangoListField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
-from graphene_django import DjangoListField
 
 from apps.dcis.models import Document
 from apps.dcis.schema.types import DocumentType, StatusType

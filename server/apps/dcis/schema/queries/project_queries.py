@@ -1,12 +1,12 @@
 from typing import Any
 
 import graphene
-from graphql import ResolveInfo
-from graphene_django_filter import AdvancedDjangoFilterConnectionField
-from devind_helpers.orm_utils import get_object_or_404
-from graphql_relay import from_global_id
 from devind_helpers.decorators import permission_classes
+from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
+from graphene_django_filter import AdvancedDjangoFilterConnectionField
+from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.dcis.models import Project, Period
 from ..types import ProjectType, PeriodType

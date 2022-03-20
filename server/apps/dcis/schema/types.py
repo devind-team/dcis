@@ -1,5 +1,3 @@
-from typing import Any
-
 import graphene
 from devind_core.schema.types import FileType, ContentTypeType
 from devind_helpers.optimized import OptimizedDjangoObjectType
@@ -10,6 +8,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
+from ..filters import ProjectFilter
 from ..models import (
     Project, Period, Division,
     Privilege, PeriodGroup, PeriodPrivilege,
@@ -18,7 +17,6 @@ from ..models import (
     RowDimension, Cell, Limitation, MergedCell,
     Value
 )
-from ..filters import ProjectFilter
 
 
 class ProjectType(OptimizedDjangoObjectType):
