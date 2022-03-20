@@ -4,8 +4,8 @@ from os.path import join
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
-from openpyxl.utils import get_column_letter
 from openpyxl.styles.colors import WHITE
+from openpyxl.utils import get_column_letter
 
 from apps.dcis.models import Cell, Document
 from devind import settings

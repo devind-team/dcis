@@ -6,8 +6,8 @@ from openpyexcel.styles.colors import COLOR_INDEX, WHITE
 from openpyexcel.utils.cell import column_index_from_string
 from openpyexcel.worksheet.dimensions import DimensionHolder
 from openpyexcel.worksheet.merge import MergeCell
-from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 
+from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Period, Sheet, Cell, MergedCell, RowDimension, ColumnDimension
 
 
