@@ -35,13 +35,18 @@ export default defineComponent({
         permOr: true
       }
     ]))
-    const { data: period, loading, update } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
+    const {
+      data: period,
+      loading, update,
+      changeUpdate
+    } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
       document: periodQuery,
       variables: () => ({
         periodId: route.params.periodId
       })
     })
     provide('periodUpdate', update)
+    provide('periodChangeUpdate', changeUpdate)
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs
