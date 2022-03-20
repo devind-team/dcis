@@ -9,6 +9,7 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
+from django.db import transaction
 
 from apps.dcis.models import Document, RowDimension, Sheet, Cell
 from apps.dcis.schema.types import RowDimensionType, CellType, MergedCellType
@@ -42,14 +43,10 @@ class AddRowDimensionMutation(BaseMutation):
         row: RowDimension = get_object_or_404(RowDimension, pk=row_id)
         insert_index = row.index if position == 'before' else row.index + 1
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
-        # Нужно будет добавить ограничение по документу
         sheet.rowdimension_set.filter(index__gte=insert_index).update(index=F('index') + 1)
-        # Обновляем объединенные ячейки
-        sheet.mergedcell_set\
-            .filter(min_row__gte=insert_index)\
-            .update(min_row=F('min_row') + 1, max_row=F('max_row') + 1)
         row_dimension = RowDimension.objects.create(sheet=sheet, index=insert_index, document=document)
         cells = [Cell.objects.create(row=row_dimension, column=column) for column in sheet.columndimension_set.all()]
+        sheet.move_merged_cells(insert_index, 1, position)
         return AddRowDimensionMutation(
             row_dimension=row_dimension,
             cells=cells,
@@ -74,9 +71,7 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         row.delete()
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
-        sheet.mergedcell_set\
-            .filter(min_row__gt=row.index)\
-            .update(min_row=F('min_row') - 1, max_row=F('max_row') - 1)
+        sheet.move_merged_cells(row.index, -1)
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 

@@ -18,7 +18,7 @@ class Status(models.Model):
 
 
 class Sheet(models.Model):
-    """Модель листа для вывода"""
+    """Модель листа для вывода."""
 
     name = models.CharField(max_length=250, help_text='Наименование')
     position = models.PositiveIntegerField(default=0, help_text='Позиция')
@@ -34,6 +34,24 @@ class Sheet(models.Model):
         indexes = [
             models.Index(fields=['period', 'position'])
         ]
+
+    def move_merged_cells(self, idx: int, offset: int, position: str = 'after'):
+        """Двигаем объединенные строки в зависимости от добавления или удаления.
+
+        В будущем метод нужно сделать универсальным (и для колонок).
+        """
+        for merge_cells in self.mergedcell_set.all():
+            if merge_cells.min_row <= idx <= merge_cells.max_row:
+                merge_cells.max_row += offset
+                if position == 'before' and merge_cells.min_row == idx:
+                    merge_cells.min_row += offset
+            elif merge_cells.min_row > idx:
+                merge_cells.min_row += offset
+                merge_cells.max_row += offset
+            if merge_cells.min_row > merge_cells.max_row or len(merge_cells.cells) == 1:
+                merge_cells.delete()
+            else:
+                merge_cells.save(update_fields=('min_row', 'max_row',))
 
 
 class Document(models.Model):

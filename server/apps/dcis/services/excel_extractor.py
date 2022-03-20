@@ -1,12 +1,13 @@
 from pathlib import PosixPath
 from typing import List, Iterator, Tuple, Dict
 
-from openpyexcel import load_workbook
-from openpyexcel.styles.colors import COLOR_INDEX
+from openpyexcel import load_workbook, Workbook
+from openpyexcel.styles.colors import COLOR_INDEX, WHITE
 from openpyexcel.utils.cell import column_index_from_string
 from openpyexcel.worksheet.dimensions import DimensionHolder
 from openpyexcel.worksheet.merge import MergeCell
 
+from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Period, Sheet, Cell, MergedCell, RowDimension, ColumnDimension
 
 
@@ -81,7 +82,7 @@ class ExcelExtractor:
             name: str = sheet.title
             columns_dimension: Dict[int, object] = self._parse_columns_dimension(sheet.column_dimensions)
             rows_dimension: Dict[int, object] = self._parse_rows_dimension(sheet.row_dimensions)
-            cells = self._parse_cells(sheet.rows)
+            cells = self._parse_cells(self.work_book, sheet.rows)
             merged_cells = self._parse_merged_cells(sheet.merged_cells.ranges)
 
             sheets.append({
@@ -111,8 +112,7 @@ class ExcelExtractor:
                     'strike': column.font.strike,
                     'underline': column.font.u,
                     'color': f'#{column.font.color.value[2:]}'
-                    if column.font.color.type == 'rgb'
-                    else COLOR_INDEX[column.font.color.index],
+                    if column.font.color and column.font.color.type == 'rgb' else '#000000',
                     'background': '#FFFFFF'
                     if column.fill.patternType is None
                     else f'#{column.fill.fgColor.value[2:]}',
@@ -142,8 +142,7 @@ class ExcelExtractor:
                     'strike': row.font.strike,
                     'underline': row.font.u,
                     'color': f'#{row.font.color.value[2:]}'
-                    if row.font.color.type == 'rgb'
-                    else COLOR_INDEX[row.font.color.index],
+                    if row.font.color and row.font.color.type == 'rgb' else '#000000',
                     'background': '#FFFFFF'
                     if row.fill.patternType is None
                     else f'#{row.fill.fgColor.value[2:]}',
@@ -159,7 +158,7 @@ class ExcelExtractor:
         }
 
     @staticmethod
-    def _parse_cells(rows: Iterator[Tuple[Cell]]) -> List[Dict]:
+    def _parse_cells(wb: Workbook, rows: Iterator[Tuple[Cell]]) -> List[Dict]:
         """Парсинг ячеек.
 
         Переданный параметр rows представляет собой матрицу.
@@ -173,13 +172,10 @@ class ExcelExtractor:
                 left_color = cell.border.left.color
                 right_color = cell.border.right.color
                 diagonal_color = cell.border.diagonal.color
-                colors = [
-                    top_color,
-                    bottom_color,
-                    left_color,
-                    right_color,
-                    diagonal_color
-                ]
+                fill_color = cell.fill.fgColor
+                font_color = cell.font.color
+                colors = [top_color, bottom_color, left_color, right_color, diagonal_color, fill_color, font_color]
+
                 for color in colors:
                     if color and color.type == 'indexed':
                         if color.index == 64 or color.index == 65:
@@ -187,15 +183,15 @@ class ExcelExtractor:
                         else:
                             color.type = 'rgb'
                             color.value = COLOR_INDEX[color.index]
-
+                    if color and color.type == 'theme':
+                        color.type = 'rgb'
+                        color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
                 # Временная заглушка
-                if cell.font.color.index == 1 and cell.fill.patternType is None:
-                    cell.font.color.type = 'rgb'
-                    cell.font.color.value = '00000000'
+                if (font_color and font_color.index == 1 and cell.fill.patternType is None) or \
+                        (font_color and font_color.index == 1 and fill_color.value == WHITE):
+                    font_color.type = 'rgb'
+                    font_color.value = '00000000'
 
-                if cell.fill.patternType is None:
-                    cell.fill.fgColor.value = 'FFFFFFFF'
-                print(cell.fill.fgColor)
                 rows_result.append({
                     'column_id': cell.col_idx,
                     'row_id': cell.row,
@@ -212,18 +208,19 @@ class ExcelExtractor:
                     'italic': cell.font.i,
                     'strike': cell.font.strike,
                     'underline': cell.font.u,
-                    'color': f'#{cell.font.color.value[2:]}'
-                    if cell.font.color.type == 'rgb'
-                    else f'#{COLOR_INDEX[cell.font.color.index][2:]}',
-                    'background': f'#{cell.fill.fgColor.value[2:]}'
-                    if cell.fill.fgColor.type == 'rgb'
-                    else f'#{COLOR_INDEX[cell.fill.fgColor.index][2:]}',
+                    'color': f'#{font_color.value[2:]}'
+                    if font_color and font_color.type == 'rgb' else '#000000',
+                    'background': '#FFFFFF'
+                    if cell.fill.patternType is None
+                    else f'#{cell.fill.fgColor.value[2:]}',
                     'border_style': {
                         'top': cell.border.top.style,
                         'bottom': cell.border.bottom.style,
                         'left': cell.border.left.style,
                         'right': cell.border.right.style,
-                        'diagonal': cell.border.diagonal.style
+                        'diagonal': cell.border.diagonal.style,
+                        'diagonalDown': cell.border.diagonalDown,
+                        'diagonalUp': cell.border.diagonalUp
                     },
                     'border_color': {
                         'top': f'#{top_color.value[2:]}'
