@@ -4,6 +4,7 @@ fragment ProjectFields on ProjectType {
   short
   description
   visibility
+  archive
   createdAt
   __typename
 }

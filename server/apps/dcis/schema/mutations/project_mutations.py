@@ -1,43 +1,59 @@
 from typing import Any
 
 import graphene
+from graphene_django_cud.mutations import DjangoCreateMutation, DjangoUpdateMutation, DjangoDeleteMutation
 from graphql import ResolveInfo
 from graphene_file_upload.scalars import Upload
 from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from devind_helpers.decorators import permission_classes
 from devind_helpers.permissions import IsAuthenticated
-from devind_helpers.schema.types import ErrorFieldType
 from graphql_relay import from_global_id
 from devind_helpers.orm_utils import get_object_or_404
 from devind_core.models import File
 
+from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project, Period
 from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
-from apps.dcis.permissions import AddProject, AddPeriod
+from apps.dcis.permissions import AddProject, AddPeriod, ChangeProject, DeleteProject
 from apps.dcis.validators import ProjectValidator
 
 
-class AddProjectMutation(BaseMutation):
+class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
     """Мутация для добавления проекта."""
 
-    class Input:
-        name = graphene.String(required=True, description='Название проекта')
-        short = graphene.String(required=True, description='Название проекта')
-        description = graphene.String(required=True, description='Описание проекта')
-        visibility = graphene.Boolean(default_value=True, required=True, description='Видимость проекта')
+    class Meta:
+        model = Project
+        permissions = (IsAuthenticated, AddProject,)
 
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
-    @staticmethod
-    @permission_classes((IsAuthenticated, AddProject,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, *args, **kwargs):
-        validator: ProjectValidator = ProjectValidator(kwargs)
+    @classmethod
+    def validate(cls, root: Any, info: ResolveInfo, input, *args, **kwargs):
+        validator: ProjectValidator = ProjectValidator(input)
         if validator.validate():
-            project: Project = Project.objects.create(user=info.context.user, **kwargs)
-            return AddProjectMutation(project=project)
-        return AddProjectMutation(success=False, errors=ErrorFieldType.from_validator(validator.get_message()))
+            super().validate(root, info, input)
+        else:
+            raise ValueError(validator.validate_message_plain)
+
+
+class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
+    """Мутация изменения настроек проекта."""
+
+    class Meta:
+        model = Project
+        permissions = (IsAuthenticated, ChangeProject,)
+
+    project = graphene.Field(ProjectType, description='Измененный проект')
+
+
+class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+    """Мутация на удаление проекта."""
+
+    class Meta:
+        model = Project
+        permissions = (IsAuthenticated, DeleteProject,)
 
 
 class AddPeriodMutation(BaseMutation):
@@ -73,5 +89,7 @@ class AddPeriodMutation(BaseMutation):
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
-    add_project = AddProjectMutation.Field(required=True)
+    add_project = AddProjectMutationPayload.Field(required=True)
+    change_project = ChangeProjectMutationPayload.Field(required=True)
+    delete_project = DeleteProjectMutationPayload.Field(required=True)
     add_period = AddPeriodMutation.Field(required=True)

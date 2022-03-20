@@ -1,0 +1,13 @@
+mutation DeleteProject($id: ID!) {
+  deleteProject(id: $id) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    found
+    deletedId
+    __typename
+  }
+}

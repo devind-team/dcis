@@ -1,0 +1,29 @@
+#import "../../fragments/project_fields.graphql"
+
+mutation ChangeProject(
+  $id: ID!,
+  $name: String!,
+  $short: String!,
+  $description: String!,
+  $visibility: Boolean!,
+  $archive: Boolean!
+) {
+  changeProject(id: $id, input: {
+    name: $name,
+    short: $short,
+    description: $description,
+    visibility: $visibility,
+    archive: $archive
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    project {
+      ...ProjectFields
+    }
+    __typename
+  }
+}

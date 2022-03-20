@@ -30,7 +30,7 @@ class ProjectType(OptimizedDjangoObjectType):
     class Meta:
         model = Project
         interfaces = (graphene.relay.Node,)
-        fields = ('id', 'name', 'short', 'description', 'visibility', 'created_at', 'updated_at', 'user',)
+        fields = ('id', 'name', 'short', 'description', 'visibility', 'archive', 'created_at', 'updated_at', 'user',)
         filterset_class = ProjectFilter
         connection_class = CountableConnection
 

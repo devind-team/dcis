@@ -3,19 +3,9 @@
     v-card
       v-card-title Периоды
         v-spacer
-        v-dialog(v-model="active" width="600")
+        add-period(:update="addPeriodUpdate" :project="project")
           template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") Добавить новый сбор
-          v-card
-            v-card-title Добавить период
-            v-card-subtitle {{ project.name }}
-            v-card-text
-              v-text-field(v-model="name" label="Название")
-              v-file-input(v-model="file" label="Файл с формой сбора")
-            v-card-actions
-              v-btn(@click="active = false") Закрыть
-              v-spacer
-              v-btn(@click="mutate({ name, projectId: $route.params.projectId, file })" color="primary") Добавить период
+            v-btn(v-on="on" color="primary") Добавить сбор
       v-card-subtitle {{ project.name }}
       v-card-text
         v-data-table(:headers="headers" :items="project.periods" disable-pagination hide-default-footer)
@@ -27,19 +17,19 @@
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
+import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { Ref, PropType } from '#app'
 import { defineComponent, inject, ref } from '#app'
 import { useFilters } from '~/composables'
-import { AddPeriodMutation, AddPeriodMutationVariables, ProjectType } from '~/types/graphql'
-import { BreadCrumbsItem } from '~/types/devind'
-import addPeriodMutations from '~/gql/dcis/mutations/project/add_period.graphql'
-import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import { ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
+import { BreadCrumbsItem } from '~/types/devind'
+import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import AddPeriod, { AddPeriodMutationResult } from '~/components/dcis/projects/AddPeriod.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs },
+  components: { AddPeriod, BreadCrumbs },
   middleware: 'auth',
   props: {
     project: { type: Object as PropType<ProjectType>, required: true },
@@ -48,7 +38,6 @@ export default defineComponent({
   setup () {
     const { dateTimeHM } = useFilters()
 
-    const active: Ref<boolean> = ref<boolean>(false)
     const name: Ref<string> = ref<string>('')
     const file: Ref<File | null> = ref<File | null>(null)
 
@@ -60,16 +49,15 @@ export default defineComponent({
     ]
 
     const projectUpdate: any = inject('projectUpdate')
-    const { mutate } = useMutation<AddPeriodMutation, AddPeriodMutationVariables>(addPeriodMutations, {
-      update: (cache, result) => projectUpdate(cache, result, (cacheData, { data: { addPeriod: { success, period } } }) => {
+    const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
+      projectUpdate(cache, result, (cacheData, { data: { addPeriod: { success, period } } }) => {
         if (success) {
-          active.value = false
           cacheData.project.periods = [period, ...cacheData.project.periods]
         }
         return cacheData
       })
-    })
-    return { active, name, file, headers, mutate, dateTimeHM, toGlobalId }
+    }
+    return { name, file, headers, addPeriodUpdate, dateTimeHM, toGlobalId }
   }
 })
 </script>

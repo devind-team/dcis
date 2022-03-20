@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" scrollable)
+  v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="persistent" scrollable)
     template(#activator="{ on }")
       slot(name="activator" :on="on" :close="close")
     mutation-form(
@@ -23,8 +23,7 @@
         v-btn(@click="close" icon)
           v-icon mdi-close
       template(#subheader)
-        slot(name="subheader" :subheader="subheader")
-          span {{ subheader }}
+        slot(name="subheader" :subheader="subheader") {{ subheader }}
       template(#form)
         slot(name="form")
       template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
@@ -57,13 +56,14 @@ export default defineComponent({
     successClose: { type: Boolean, default: true },
     errorsInAlert: { type: Boolean, default: false },
     fullscreen: { type: Boolean, default: false },
+    persistent: { type: Boolean, default: false },
     canMinimize: { type: Boolean, default: false },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
     buttonText: { type: String, default: '' },
     i18nPath: { type: String, default: '' },
     width: { type: [String, Number], default: 600 },
-    hideAlertTimeout: { type: Number, default: 2000 }
+    hideAlertTimeout: { type: Number, default: 5000 }
   },
   setup (props, { emit }) {
     const instance = getCurrentInstance()
