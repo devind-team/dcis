@@ -126,10 +126,26 @@ export function useGrid (sheet: Ref<SheetType>) {
             'text-decoration': cell.underline ? 'underline' : undefined,
             color: cell.color,
             background: cell.background,
-            borderTop: borderStyle.top === 'thin' || borderStyle.top === 'hair' ? 'solid 2px' : borderStyle.top,
-            borderBottom: borderStyle.bottom === 'thin' || borderStyle.bottom === 'hair' ? 'solid 2px' : borderStyle.bottom,
-            borderLeft: borderStyle.left === 'thin' || borderStyle.left === 'hair' ? 'solid 2px' : borderStyle.left,
-            borderRight: borderStyle.right === 'thin' || borderStyle.right === 'hair' ? 'solid 2px' : borderStyle.right,
+            borderTop: borderStyle.top === 'thin' ||
+            borderStyle.top === 'hair' ||
+            borderStyle.top === 'medium'
+              ? 'solid 3px'
+              : borderStyle.top,
+            borderBottom: borderStyle.bottom === 'thin' ||
+            borderStyle.bottom === 'hair' ||
+            borderStyle.bottom === 'medium'
+              ? 'solid 3px'
+              : borderStyle.bottom,
+            borderLeft: borderStyle.left === 'thin' ||
+            borderStyle.left === 'hair' ||
+            borderStyle.left === 'medium'
+              ? 'solid 3px'
+              : borderStyle.left,
+            borderRight: borderStyle.right === 'thin' ||
+            borderStyle.right === 'hair' ||
+            borderStyle.right === 'medium'
+              ? 'solid 3px'
+              : borderStyle.right,
             borderTopColor: borderColor.top,
             borderBottomColor: borderColor.bottom,
             borderLeftColor: borderColor.left,

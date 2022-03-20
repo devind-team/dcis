@@ -14,7 +14,8 @@ def get_default_border():
         'top': None,
         'bottom': None,
         'left': None,
-        'right': None
+        'right': None,
+        'diagonal': None
     }
 
 
