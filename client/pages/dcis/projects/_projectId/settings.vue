@@ -80,7 +80,6 @@
               v-slot="{ on }"
               :itemName="String($t('dcis.projects.changeProject.deleteItemName'))"
               @confirm="mutate"
-              @cancel="active = false"
             )
               v-btn(v-on="on" color="error") {{ $t('dcis.projects.changeProject.delete') }}
 </template>
@@ -88,7 +87,7 @@
 <script lang="ts">
 import { promiseTimeout } from '@vueuse/core'
 import type { ComputedRef, PropType, Ref } from '#app'
-import { computed, defineComponent, toRefs, useRoute, useRouter } from '#app'
+import { computed, defineComponent, toRefs, useRoute, useRouter, ref } from '#app'
 import {
   ChangeProjectMutationPayload,
   DeleteProjectMutationPayload,
@@ -129,7 +128,6 @@ export default defineComponent({
     const visibility: Ref<boolean> = ref<boolean>(props.project.visibility)
     const archive: Ref<boolean> = ref<boolean>(props.project.archive)
     const successUpdate: Ref<boolean> = ref<boolean>(false)
-    const active: Ref<boolean> = ref<boolean>(false)
 
     const changeProjectDone = ({ data: { changeProject: { success, project: updatedProject } } }: ChangeProjectResultMutation) => {
       if (success) {
@@ -153,7 +151,6 @@ export default defineComponent({
       visibility,
       archive,
       successUpdate,
-      active,
       user,
       hasPerm,
       changeProjectDone,

@@ -20,9 +20,9 @@
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
-import { defineComponent, ref, toRef, useNuxt2Meta } from '#app'
+import { defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useCursorPagination, useFilters, useI18n, useQueryRelay } from '~/composables'
+import { useApolloHelpers, useCursorPagination, useFilters, useI18n, useQueryRelay } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/store'
 import projectsQuery from '~/gql/dcis/queries/projects.graphql'
 import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
@@ -37,7 +37,10 @@ export default defineComponent({
   },
   setup () {
     const authStore = useAuthStore()
-    const { t } = useI18n()
+    const router = useRouter()
+    const route = useRoute()
+    const { defaultClient } = useApolloHelpers()
+    const { t, localePath } = useI18n()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: t('dcis.home') as string })
     const active: Ref<boolean> = ref<boolean>(false)
@@ -54,11 +57,19 @@ export default defineComponent({
       data: projects,
       pagination: { count, totalCount },
       loading,
-      addUpdate
+      addUpdate,
+      deleteUpdate
     } = useQueryRelay<ProjectsQuery, ProjectsQueryVariables, ProjectType>({
       document: projectsQuery
     }, {
       pagination: useCursorPagination()
+    })
+
+    onMounted(() => {
+      if (route.query.projectId) {
+        deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.projectId } } })
+        router.push(localePath({ name: 'dcis-projects' }))
+      }
     })
 
     return {
