@@ -25,12 +25,22 @@ class ProjectType(OptimizedDjangoObjectType):
     """Тип модели проектов."""
 
     periods = graphene.List(lambda: PeriodType, description='Периоды')
-    user = graphene.Field(UserType, required=True, description='Пользователь')
+    user = graphene.Field(UserType, description='Пользователь')
 
     class Meta:
         model = Project
         interfaces = (graphene.relay.Node,)
-        fields = ('id', 'name', 'short', 'description', 'visibility', 'archive', 'created_at', 'updated_at', 'user',)
+        fields = (
+            'id',
+            'name',
+            'short',
+            'description',
+            'visibility',
+            'archive',
+            'created_at',
+            'updated_at',
+            'user',
+        )
         filterset_class = ProjectFilter
         connection_class = CountableConnection
 

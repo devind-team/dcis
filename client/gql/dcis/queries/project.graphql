@@ -1,9 +1,13 @@
 #import "../fragments/project_fields.graphql"
 #import "../fragments/period_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
 
 query Project($projectId: ID!) {
   project(projectId: $projectId) {
     ...ProjectFields
+    user {
+      ...UserFields
+    }
     periods {
       ...PeriodFields
     }

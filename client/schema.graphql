@@ -2255,7 +2255,7 @@ type ProjectType implements Node {
   """Дата обновления"""
   updatedAt: DateTime!
   """Пользователь"""
-  user: UserType!
+  user: UserType
   """Видимость проекта"""
   visibility: Boolean!
 }

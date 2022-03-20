@@ -2767,7 +2767,7 @@ export type ProjectType = Node & {
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
   /** Пользователь */
-  user: UserType;
+  user?: Maybe<UserType>;
   /** Видимость проекта */
   visibility: Scalars['Boolean'];
 };
@@ -4082,6 +4082,7 @@ export type AddProjectMutationVariables = Exact<{
   name: Scalars['String'];
   short: Scalars['String'];
   description: Scalars['String'];
+  user: Scalars['ID'];
   visibility?: InputMaybe<Scalars['Boolean']>;
 }>;
 
@@ -4152,7 +4153,7 @@ export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
 
-export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, periods?: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null> | null } };
+export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, periods?: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null> | null } };
 
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;

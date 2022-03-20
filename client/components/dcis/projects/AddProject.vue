@@ -3,7 +3,7 @@
     :header="$t('dcis.projects.addProject.header')"
     :button-text="$t('dcis.projects.addProject.buttonText')"
     :mutation="addProject"
-    :variables="{ name, short, description, visibility }"
+    :variables="{ name, short, description, visibility, user: user.id }"
     :update="addProjectUpdate"
     mutation-name="addProject"
     i18n-path="dcis.projects.addProject"
@@ -25,8 +25,9 @@
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import type { PropType, Ref } from '#app'
-import { defineComponent, ref } from '#app'
-import { AddProjectMutationPayload } from '~/types/graphql'
+import { defineComponent, ref, toRef } from '#app'
+import { useAuthStore } from '~/store'
+import { AddProjectMutationPayload, UserType } from '~/types/graphql'
 import addProject from '~/gql/dcis/mutations/project/add_project.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
@@ -39,6 +40,9 @@ export default defineComponent({
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
+    const authStore = useAuthStore()
+
+    const user: Ref<UserType> = toRef(authStore, 'user')
     const name: Ref<string> = ref<string>('')
     const short: Ref<string> = ref<string>('')
     const description: Ref<string> = ref<string>('')
@@ -58,7 +62,7 @@ export default defineComponent({
       }
     }
 
-    return { name, short, description, visibility, close, addProject, addProjectUpdate }
+    return { user, name, short, description, visibility, close, addProject, addProjectUpdate }
   }
 })
 </script>
