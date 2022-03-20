@@ -1,6 +1,7 @@
 #import "../fragments/project_fields.graphql"
 #import "../fragments/period_fields.graphql"
 #import "../fragments/status_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
 
 query Period($periodId: ID!) {
   period(periodId: $periodId) {
@@ -8,6 +9,9 @@ query Period($periodId: ID!) {
     project {
       ...ProjectFields
       __typename
+    }
+    user {
+      ...UserFields
     }
     documents {
       id

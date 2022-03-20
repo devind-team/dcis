@@ -35,13 +35,14 @@ export default defineComponent({
         permOr: true
       }
     ]))
-    const { data: project, loading, update } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
+    const { data: project, loading, update, changeUpdate } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
       document: projectQuery,
       variables: () => ({
         projectId: route.params.projectId
       })
     })
     provide('projectUpdate', update)
+    provide('changeUpdate', changeUpdate)
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs

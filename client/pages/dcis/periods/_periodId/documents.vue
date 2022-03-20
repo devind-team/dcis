@@ -52,6 +52,7 @@ import { useAuthStore } from '~/store'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   AddDocumentMutation,
+  AddDocumentMutationPayload,
   AddDocumentMutationVariables,
   PeriodType,
   StatusesQuery,
@@ -61,6 +62,8 @@ import {
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+
+type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMutationPayload } }
 
 export default defineComponent({
   components: { BreadCrumbs },
@@ -86,7 +89,7 @@ export default defineComponent({
 
     const periodUpdate: any = inject('periodUpdate')
     const { mutate, loading } = useMutation<AddDocumentMutation, AddDocumentMutationVariables>(addDocumentMutation, {
-      update: (cache, result) => periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }) => {
+      update: (cache, result) => periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }: AddDocumentMutationResultType) => {
         if (success) {
           active.value = false
           dataCache.period.documents = [document, ...dataCache.period.documents]
