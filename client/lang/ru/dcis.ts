@@ -19,7 +19,8 @@ export default {
       archive: 'Архивировать',
       delete: '@:delete',
       save: '@:save',
-      deleteItemName: 'проект'
+      deleteItemName: 'проект',
+      warning: 'Проект нельзя восстановить.'
     }
   },
   periods: {

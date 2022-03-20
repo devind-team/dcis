@@ -8,19 +8,16 @@
       tag
     )
       v-card
-        v-row.align-center
-          v-col(cols="12" md="3")
-            v-card-title {{$t('dcis.projects.changeProject.header')}}
-            v-card-subtitle {{ project.name }}
-          v-col(cols="12" md="8")
-            v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
-            v-alert(type="error" :value="!!error" dismissible) {{$t('mutationBusinessLogicError', { error: error})}}
-        validation-observer(v-slot="{ handleSubmit, invalid }")
+        v-card-title {{ $t('dcis.projects.changeProject.header') }}
+        v-card-subtitle {{ project.name }}
+        validation-observer(v-slot="{ handleSubmit, invalid }" tag="div")
           form(@submit.prevent="handleSubmit(mutate)")
             v-card-text
+              v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
+              v-alert(type="error" :value="!!error" dismissible) {{$t('mutationBusinessLogicError', { error: error})}}
               validation-provider(
                 v-slot="{ errors, valid }"
-                :name="$t('dcis.projects.addProject.name')"
+                :name="String($t('dcis.projects.addProject.name'))"
                 rules="required|min:3|max:250"
               )
                 v-text-field(
@@ -31,7 +28,7 @@
                 )
               validation-provider(
                 v-slot="{ errors, valid }"
-                :name="$t('dcis.projects.addProject.short')"
+                :name="String($t('dcis.projects.addProject.short'))"
                 rules="required|min:3|max:30"
               )
                 v-text-field(
@@ -43,7 +40,7 @@
                 )
               validation-provider(
                 v-slot="{ errors, valid }"
-                :name="$t('dcis.projects.addProject.description')"
+                :name="String($t('dcis.projects.addProject.description'))"
                 rules="required|min:3|max:1023"
               )
                 v-textarea(
@@ -59,36 +56,39 @@
                 v-col(cols="12" md="10")
                   v-checkbox(v-model="archive" :label="$t('dcis.projects.changeProject.archive')")
             v-card-actions
-              v-row
-                v-col
-                  apollo-mutation(
-                    :mutation="require('~/gql/dcis/mutations/project/delete_project.graphql')"
-                    :variables="{ id: project.id}"
-                    @done="deleteProjectDone"
-                  )
-                    template(v-slot="{ mutate }")
-                      delete-menu(
-                        v-if="project.user === user || hasPerm('dcis.delete_project')"
-                        v-slot="{ on }"
-                        :itemName="$t('dcis.projects.changeProject.deleteItemName')"
-                        @confirm="mutate"
-                        @cancel="active = false"
-                      )
-                        v-btn(v-on="on" color="error") {{$t('dcis.projects.changeProject.delete')}}
-                v-col.text-right
-                  v-btn(
-                    v-if="project.user === user || hasPerm('dcis.change_project')"
-                    :disabled="invalid"
-                    :loading="loading"
-                    type="submit"
-                    color="success"
-                  ) {{$t('dcis.projects.changeProject.save')}}
+              v-btn(
+                v-if="project.user && project.user.id === user.id || hasPerm('dcis.change_project')"
+                :disabled="invalid"
+                :loading="loading"
+                type="submit"
+                color="success"
+              ) {{ $t('dcis.projects.changeProject.save') }}
+        v-divider
+        v-card-title Удаление проекта
+        v-card-text
+          v-alert(type="warning") {{ $t('dcis.projects.changeProject.warning') }}
+        v-card-actions
+          apollo-mutation(
+            v-slot="{ mutate }"
+            :mutation="require('~/gql/dcis/mutations/project/delete_project.graphql')"
+            :variables="{ id: project.id}"
+            @done="deleteProjectDone"
+            tag
+          )
+            delete-menu(
+              v-if="project.user && project.user.id === user.id || hasPerm('dcis.delete_project')"
+              v-slot="{ on }"
+              :itemName="String($t('dcis.projects.changeProject.deleteItemName'))"
+              @confirm="mutate"
+              @cancel="active = false"
+            )
+              v-btn(v-on="on" color="error") {{ $t('dcis.projects.changeProject.delete') }}
 </template>
 
 <script lang="ts">
 import { promiseTimeout } from '@vueuse/core'
 import type { ComputedRef, PropType, Ref } from '#app'
-import { computed, defineComponent, toRefs, useRouter } from '#app'
+import { computed, defineComponent, toRefs, useRoute, useRouter } from '#app'
 import {
   ChangeProjectMutationPayload,
   DeleteProjectMutationPayload,
@@ -115,6 +115,7 @@ export default defineComponent({
     const authStore = useAuthStore()
     const { localePath } = useI18n()
     const router = useRouter()
+    const route = useRoute()
     const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
 
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
@@ -140,23 +141,23 @@ export default defineComponent({
 
     const deleteProjectDone = ({ data: { deleteProject: { success } } }: DeleteProjectResultMutation) => {
       if (success) {
-        router.push(localePath({ name: 'dcis-projects' }))
+        router.push(localePath({ name: 'dcis-projects', query: { projectId: route.params.projectId } }))
       }
     }
 
     return {
       bc,
-      changeProjectDone,
       name,
       short,
       description,
       visibility,
       archive,
       successUpdate,
-      hasPerm,
       active,
-      deleteProjectDone,
-      user
+      user,
+      hasPerm,
+      changeProjectDone,
+      deleteProjectDone
     }
   }
 })
