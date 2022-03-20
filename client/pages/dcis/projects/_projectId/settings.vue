@@ -2,9 +2,9 @@
   bread-crumbs(:items="bc")
     apollo-mutation(
       v-slot="{ mutate, loading, error }"
-      @done="changeProjectDone"
       :mutation="require('~/gql/dcis/mutations/project/change_project.graphql')"
       :variables="{ id: project.id, name,  short, description, visibility, archive }"
+      :update="changeProjectUpdate"
       tag
     )
       v-card
@@ -13,8 +13,8 @@
         validation-observer(v-slot="{ handleSubmit, invalid }" tag="div")
           form(@submit.prevent="handleSubmit(mutate)")
             v-card-text
-              v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
-              v-alert(type="error" :value="!!error" dismissible) {{$t('mutationBusinessLogicError', { error: error})}}
+              v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess') }}
+              v-alert(type="error" :value="!!error" dismissible) {{ $t('mutationBusinessLogicError', { error: error }) }}
               validation-provider(
                 v-slot="{ errors, valid }"
                 :name="String($t('dcis.projects.addProject.name'))"
@@ -85,9 +85,10 @@
 </template>
 
 <script lang="ts">
+import { DataProxy } from 'apollo-cache'
 import { promiseTimeout } from '@vueuse/core'
 import type { ComputedRef, PropType, Ref } from '#app'
-import { computed, defineComponent, toRefs, useRoute, useRouter, ref } from '#app'
+import { computed, defineComponent, toRefs, useRoute, useRouter, ref, inject } from '#app'
 import {
   ChangeProjectMutationPayload,
   DeleteProjectMutationPayload,
@@ -97,11 +98,13 @@ import {
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import { useI18n } from '~/composables'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import type { HasPermissionFnType } from '~/store'
+import { useAuthStore } from '~/store'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 type ChangeProjectResultMutation = { data: { changeProject: ChangeProjectMutationPayload } }
 type DeleteProjectResultMutation = { data: { deleteProject: DeleteProjectMutationPayload } }
+type ChangeProjectUpdateType = (cache: DataProxy, result: ChangeProjectResultMutation) => DataProxy
 
 export default defineComponent({
   components: { BreadCrumbs, DeleteMenu },
@@ -117,11 +120,12 @@ export default defineComponent({
     const route = useRoute()
     const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
 
+    const changeUpdate: ChangeProjectUpdateType = inject<ChangeProjectUpdateType>('changeUpdate')
+
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       { text: 'Настройки', to: localePath({ name: 'dcis-projects-projectId-settings' }), exact: true }
     ]))
-    const project: Ref<ProjectType> = ref<ProjectType>(props.project)
     const name: Ref<string> = ref<string>(props.project.name)
     const short: Ref<string> = ref<string>(props.project.short)
     const description: Ref<string> = ref<string>(props.project.description)
@@ -129,11 +133,12 @@ export default defineComponent({
     const archive: Ref<boolean> = ref<boolean>(props.project.archive)
     const successUpdate: Ref<boolean> = ref<boolean>(false)
 
-    const changeProjectDone = ({ data: { changeProject: { success, project: updatedProject } } }: ChangeProjectResultMutation) => {
+    const changeProjectUpdate = (cache: DataProxy, result: ChangeProjectResultMutation) => {
+      const { success } = result.data.changeProject
       if (success) {
-        project.value = Object.assign(project.value, updatedProject)
+        changeUpdate(cache, result)
         successUpdate.value = true
-        promiseTimeout(2000).then(() => (successUpdate.value = false))
+        promiseTimeout(5000).then(() => (successUpdate.value = false))
       }
     }
 
@@ -153,7 +158,7 @@ export default defineComponent({
       successUpdate,
       user,
       hasPerm,
-      changeProjectDone,
+      changeProjectUpdate,
       deleteProjectDone
     }
   }
