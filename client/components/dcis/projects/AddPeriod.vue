@@ -1,8 +1,8 @@
 <template lang="pug">
   mutation-modal-form(
-    :header="$t('dcis.projects.addPeriod.header')"
+    :header="String($t('dcis.periods.addPeriod.header'))"
     :subheader="project.name"
-    :button-text="$t('dcis.projects.addPeriod.buttonText')"
+    :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
     :mutation="addPeriod"
     :variables="{ name, file, projectId: project.id }"
     :update="addPeriodUpdate"
@@ -14,10 +14,10 @@
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
-      validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addPeriod.name')" rules="required|min:3|max:250")
-        v-text-field(v-model="name" :label="$t('dcis.projects.addPeriod.name')" :error-messages="errors" :success="valid")
-      validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addPeriod.file')" rules="required")
-        v-file-input(v-model="file" :label="$t('dcis.projects.addPeriod.file')" :error-messages="errors" :success="valid")
+      validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.name'))" rules="required|min:3|max:250")
+        v-text-field(v-model="name" :label="$t('dcis.periods.addPeriod.name')" :error-messages="errors" :success="valid")
+      validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.file'))" rules="required")
+        v-file-input(v-model="file" :label="$t('dcis.periods.addPeriod.file')" :error-messages="errors" :success="valid")
 </template>
 
 <script lang="ts">
