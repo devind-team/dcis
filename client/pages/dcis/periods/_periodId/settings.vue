@@ -4,7 +4,7 @@
       v-slot="{ mutate, loading, error }"
       :mutation="require('~/gql/dcis/mutations/project/change_period.graphql')"
       :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
-      :update="periodChangePeriodUpdate"
+      :update="changePeriodUpdate"
       tag
     )
       v-card
@@ -134,7 +134,7 @@ export default defineComponent({
 
     useNuxt2Meta({ title: props.period.name })
 
-    const periodChangeUpdate: ChangePeriodUpdateType = inject<ChangePeriodUpdateType>('periodChangeUpdate')
+    const changeUpdate: ChangePeriodUpdateType = inject<ChangePeriodUpdateType>('changeUpdate')
 
     const name: Ref<string> = ref<string>(props.period.name)
     const multiple: Ref<boolean> = ref<boolean>(props.period.multiple)
@@ -158,18 +158,22 @@ export default defineComponent({
       { text: 'Настройки', to: localePath({ name: 'dcis-periods-periodId-settings' }), exact: true }
     ]))
 
-    const periodChangePeriodUpdate = (cache: DataProxy, result: ChangePeriodResultMutation) => {
+    const changePeriodUpdate = (cache: DataProxy, result: ChangePeriodResultMutation) => {
       const { success } = result.data.changePeriod
       if (success) {
-        periodChangeUpdate(cache, result)
+        changeUpdate(cache, result)
         successUpdate.value = true
-        promiseTimeout(3000).then(() => (successUpdate.value = false))
+        promiseTimeout(5000).then(() => (successUpdate.value = false))
       }
     }
 
-    const deletePeriodDone = ({ data: { deletePeriod: { success } } }: DeletePeriodResultMutation) => {
+    const deletePeriodDone = ({ data: { deletePeriod: { success, deletedId } } }: DeletePeriodResultMutation) => {
       if (success) {
-        router.push(localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: props.period.project.id } }))
+        router.push(localePath({
+          name: 'dcis-projects-projectId-periods',
+          params: { projectId: props.period.project.id },
+          query: { periodId: deletedId }
+        }))
       }
     }
 
@@ -186,9 +190,8 @@ export default defineComponent({
       chooseStart,
       chooseExpiration,
       successUpdate,
-      periodChangeUpdate,
       hasPerm,
-      periodChangePeriodUpdate,
+      changePeriodUpdate,
       deletePeriodDone
     }
   }

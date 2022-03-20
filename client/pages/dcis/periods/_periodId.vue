@@ -46,7 +46,7 @@ export default defineComponent({
       })
     })
     provide('periodUpdate', update)
-    provide('periodChangeUpdate', changeUpdate)
+    provide('changeUpdate', changeUpdate)
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs

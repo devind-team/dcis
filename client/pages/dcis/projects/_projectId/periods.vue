@@ -20,9 +20,9 @@
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { Ref, PropType } from '#app'
-import { defineComponent, inject, ref } from '#app'
-import { useFilters } from '~/composables'
-import { ProjectType } from '~/types/graphql'
+import { defineComponent, inject, onMounted, ref, useRoute, useRouter } from '#app'
+import { useApolloHelpers, useFilters, useI18n } from '~/composables'
+import { PeriodType, ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -36,7 +36,11 @@ export default defineComponent({
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
   setup () {
+    const router = useRouter()
+    const route = useRoute()
     const { dateTimeHM } = useFilters()
+    const { localePath } = useI18n()
+    const { defaultClient } = useApolloHelpers()
 
     const name: Ref<string> = ref<string>('')
     const file: Ref<File | null> = ref<File | null>(null)
@@ -57,6 +61,21 @@ export default defineComponent({
         return cacheData
       })
     }
+
+    onMounted(() => {
+      if (route.query.periodId) {
+        projectUpdate(
+          defaultClient.cache,
+          { data: { deletePeriod: { id: route.query.periodId } } },
+          (cacheData, { data: { deletePeriod: { id: periodId } } }) => {
+            cacheData.project.periods = cacheData.project.periods.filter((e: PeriodType) => e.id !== periodId)
+            return cacheData
+          }
+        )
+        router.push(localePath({ name: 'dcis-projects-projectId-periods', params: route.params }))
+      }
+    })
+
     return { name, file, headers, addPeriodUpdate, dateTimeHM, toGlobalId }
   }
 })
