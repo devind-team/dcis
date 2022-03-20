@@ -19,7 +19,23 @@ export default {
       archive: 'Архивировать',
       delete: '@:delete',
       save: '@:save',
-      deleteItemName: 'проект'
+      deleteItemName: 'проект',
+      warning: 'Проект нельзя восстановить.'
+    }
+  },
+  periods: {
+    header: 'Настройки периода',
+    name: 'Наименование периода',
+    status: 'Статус проекта',
+    multiple: 'Множественное заполнение',
+    privately: 'Приватность полей',
+    start: 'Дата начала периода',
+    expiration: 'Дата окончания периода',
+    deleteItemName: 'период',
+    actions: {
+      delete: '@:delete',
+      save: '@:save',
+      deleteItemName: 'период'
     },
     addPeriod: {
       header: 'Добавление периода',

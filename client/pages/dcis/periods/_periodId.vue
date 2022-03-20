@@ -26,7 +26,14 @@ export default defineComponent({
     const drawer: Ref<boolean> = ref<boolean>(false)
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
-      { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' }
+      { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
+      {
+        title: 'Настройки',
+        to: 'dcis-periods-periodId-settings',
+        icon: 'cogs',
+        permissions: ['dcis.change_period', 'dcis.delete_period'],
+        permOr: true
+      }
     ]))
     const { data: period, loading, update } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
       document: periodQuery,

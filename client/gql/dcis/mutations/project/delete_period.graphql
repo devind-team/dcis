@@ -1,0 +1,13 @@
+mutation DeletePeriod($id: ID!) {
+  deletePeriod(id: $id) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    found
+    deletedId
+    __typename
+  }
+}

@@ -36,9 +36,9 @@ class Period(models.Model):
             - только строки пользователя - нет прав и privately = True
     """
 
-    PREPARATION = 0
-    OPEN = 1
-    CLOSE = 2
+    PREPARATION = 'preparation'
+    OPEN = 'open'
+    CLOSE = 'close'
 
     KIND_PERIOD = (
         (PREPARATION, 'preparation'),
@@ -47,12 +47,12 @@ class Period(models.Model):
     )
 
     name = models.CharField(max_length=250, help_text='Наименование периода')
-    status = models.PositiveIntegerField(choices=KIND_PERIOD, default=PREPARATION, help_text='Статус проекта')
+    status = models.CharField(max_length=16, choices=KIND_PERIOD, default=PREPARATION, help_text='Статус проекта')
     multiple = models.BooleanField(default=False, help_text='Множественное заполнение')
     privately = models.BooleanField(default=False, help_text='Приватность полей')
 
-    start = models.DateTimeField(null=True, help_text='Дата начала')
-    expiration = models.DateTimeField(null=True, help_text='Дата окончания')
+    start = models.DateField(null=True, help_text='Дата начала')
+    expiration = models.DateField(null=True, help_text='Дата окончания')
 
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
