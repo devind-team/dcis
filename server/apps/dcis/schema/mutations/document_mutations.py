@@ -12,9 +12,9 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Period, Document, Value, Sheet, Status
+from apps.dcis.permissions import AddDocument
 from apps.dcis.schema.types import DocumentType, ValueType
 from apps.dcis.services.excel_unload import DocumentUnload
-from apps.dcis.permissions import AddDocument
 
 
 class AddDocumentMutation(BaseMutation):

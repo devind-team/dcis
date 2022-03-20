@@ -55,27 +55,27 @@ class DocumentUnload:
                 if cell.border_style:
                     ws.cell(row_position, column_position).border = Border(
                         top=Side(
-                            border_style=cell.border_style['top'],
+                            border_style=cell.border_style.get('top'),
                             color=f'{cell.border_color["top"][1:]}' if cell.border_color['top'] else None
                         ),
                         bottom=Side(
-                            border_style=cell.border_style['bottom'],
+                            border_style=cell.border_style.get('bottom'),
                             color=f'{cell.border_color["bottom"][1:]}' if cell.border_color['bottom'] else None
                         ),
                         left=Side(
-                            border_style=cell.border_style['left'],
+                            border_style=cell.border_style.get('left'),
                             color=f'{cell.border_color["left"][1:]}' if cell.border_color['left'] else None
                         ),
                         right=Side(
-                            border_style=cell.border_style['right'],
+                            border_style=cell.border_style.get('right'),
                             color=f'{cell.border_color["right"][1:]}' if cell.border_color['right'] else None
                         ),
                         diagonal=Side(
-                            border_style=cell.border_style['diagonal'],
+                            border_style=cell.border_style.get('diagonal'),
                             color=f'{cell.border_color["diagonal"][1:]}' if cell.border_color['diagonal'] else None,
                         ),
-                        diagonalDown=cell.border_style['diagonalDown'],
-                        diagonalUp=cell.border_style['diagonalUp']
+                        diagonalDown=cell.border_style.get('diagonalDown'),
+                        diagonalUp=cell.border_style.get('diagonalUp')
                     )
                 # Заливка ячейки
                 if cell.background != '#FFFFFF' and cell.background != '#FFFFFFFF' and cell.background != WHITE:
