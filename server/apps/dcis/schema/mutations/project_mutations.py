@@ -25,7 +25,8 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
 
     class Meta:
         model = Project
-        permissions = (IsAuthenticated, AddProject,)
+        login_required = True
+        permissions = ('dcis.add_project',)
 
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
@@ -43,7 +44,8 @@ class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     class Meta:
         model = Project
-        permissions = (IsAuthenticated, ChangeProject,)
+        login_required = True
+        permissions = ('dcis.change_project',)
 
     project = graphene.Field(ProjectType, description='Измененный проект')
 
@@ -53,7 +55,8 @@ class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
 
     class Meta:
         model = Project
-        permissions = (IsAuthenticated, DeleteProject,)
+        login_required = True
+        permissions = ('dcis.delete_project',)
 
 
 class AddPeriodMutation(BaseMutation):
@@ -93,7 +96,8 @@ class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
         model = Period
         exclude_fields = ('project', 'methodical_support',)
         optional_fields = ('start', 'expiration', 'user',)
-        permissions = (IsAuthenticated, ChangePeriod,)
+        login_required = True
+        permissions = ('dcis.change_period',)
 
     period = graphene.Field(PeriodType, description='Измененный период')
 
@@ -103,7 +107,8 @@ class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
 
     class Meta:
         model = Period
-        permissions = (IsAuthenticated, DeletePeriod,)
+        login_required = True
+        permissions = ('dcis.delete_period',)
 
 
 class ProjectMutations(graphene.ObjectType):
