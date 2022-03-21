@@ -43,7 +43,7 @@ class Sheet(models.Model):
         for merge_cells in self.mergedcell_set.all():
             if merge_cells.min_row <= idx <= merge_cells.max_row:
                 merge_cells.max_row += offset
-                if position == 'before' and merge_cells.min_row == idx:
+                if merge_cells.min_row == idx:
                     merge_cells.min_row += offset
             elif merge_cells.min_row > idx:
                 merge_cells.min_row += offset
