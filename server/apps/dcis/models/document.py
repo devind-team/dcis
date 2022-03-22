@@ -14,7 +14,7 @@ class Status(models.Model):
     comment = models.TextField(null=True, help_text='Комментарий')
 
     class Meta:
-        ordering = ('name', 'id',)
+        ordering = ('id',)
 
 
 class Sheet(models.Model):

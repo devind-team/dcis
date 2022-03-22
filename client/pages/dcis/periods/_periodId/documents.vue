@@ -83,8 +83,11 @@ export default defineComponent({
     const comment: Ref<string> = ref<string>('')
     const status: Ref<StatusType | null> = ref<StatusType | null>(null)
 
-    const { data: statuses } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
+    const { data: statuses, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
       document: statusesQuery
+    })
+    onResult(({ data: { statuses } }) => {
+      status.value = statuses[0]
     })
 
     const periodUpdate: any = inject('periodUpdate')
