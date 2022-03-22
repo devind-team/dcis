@@ -200,7 +200,6 @@ class DocumentType(DjangoObjectType):
     period = graphene.Field(PeriodType, description='Период сбора')
     sheets = DjangoListField(SheetType, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
-    statuses = graphene.List(lambda: DocumentStatusType, description='Статусы документов')
 
     class Meta:
         model = Document
@@ -215,8 +214,7 @@ class DocumentType(DjangoObjectType):
             'sheets',
             'content_type',
             'object_id',
-            'last_status',
-            'statuses'
+            'last_status'
         )
         connection_class = CountableConnection
 
@@ -226,11 +224,6 @@ class DocumentType(DjangoObjectType):
             return document.documentstatus_set.latest('created_at')
         except DocumentStatus.DoesNotExist:
             return None
-
-    @staticmethod
-    @resolver_hints(model_field='documentstatus_set')
-    def resolve_statuses(document: Document, info: ResolveInfo, *args, **kwargs):
-        return document.documentstatus_set.all()
 
 
 class DocumentStatusType(DjangoObjectType):

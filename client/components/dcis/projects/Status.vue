@@ -8,7 +8,7 @@
     :update="addDocumentStatusUpdate"
     mutation-name="addDocumentStatus"
     i18n-path="dcis.documents.status"
-    @done="done"
+    @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
@@ -21,30 +21,25 @@
         item-value="id"
         success
       )
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="$t('dcis.documents.status.comment')"
-        rules="required|min:3|max:250"
+      v-text-field(
+        v-model="comment"
+        :label="$t('dcis.documents.status.comment')"
+        success
       )
-        v-text-field(
-          v-model="comment"
-          :label="$t('dcis.documents.status.comment')"
-          :error-messages="errors"
-          :success="valid"
-        )
       v-list(two-line dense)
-        template(v-for="(status, index) in document.statuses")
-          v-list-item(:key="status.id")
+        v-divider
+        template(v-for="(item, index) in docStatuses")
+          v-list-item(v-if="item.document.id === document.id" :key="item.id")
             v-list-item-content
-              v-list-item-title {{ status.status.name }}
-              v-list-item-subtitle {{ $filters.dateTimeHM(status.createdAt) }}
-              v-list-item-subtitle {{ $getUserName(status.user) }}
+              v-list-item-title {{ item.status.name }}
+              v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
+              v-list-item-subtitle {{ $getUserName(item.user) }}
             v-list-item-content
-              v-list-item-subtitle.font-italic {{ status.comment }}
+              v-list-item-subtitle.font-italic {{ item.comment }}
             v-list-item-action
-              v-btn(@click="mutate" icon)
+              v-btn(v-if="docStatuses.filter(e => e.document.id === document.id).length > 1" @click="deleteStatus(item)" icon)
                 v-icon(color="error") mdi-close-circle
-          v-divider(v-if="index < document.statuses.length - 1" :key="index")
+          v-divider(v-if="item.document.id === document.id" :key="index")
 </template>
 
 <script lang="ts">
@@ -53,12 +48,14 @@ import type { PropType, Ref } from '#app'
 import { defineComponent, ref } from '#app'
 import {
   AddDocumentStatusMutationPayload,
+  DocumentStatusType,
   DocumentType,
   StatusType,
   UserType
 } from '~/types/graphql'
 import addDocumentStatus from '~/gql/dcis/mutations/document/add_status.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
+import { useFilters } from '~/composables'
 
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
 type UpdateFunction = (cache: DataProxy | any, result: AddDocumentStatusMutationPayload | any) => DataProxy | void
@@ -69,9 +66,12 @@ export default defineComponent({
     document: { type: Object as PropType<DocumentType>, required: true },
     user: { type: Object as PropType<UserType>, required: true },
     update: { type: Function as PropType<UpdateFunction>, required: true },
-    statuses: { type: Array as PropType<any>, required: true }
+    statuses: { type: Array as PropType<StatusType[]>, required: true },
+    docStatuses: { type: Array as PropType<DocumentStatusType[]>, default: () => [], required: true },
+    deleteStatus: { type: Function as PropType<Function>, required: true }
   },
   setup (props) {
+    const { dateTimeHM } = useFilters()
     const comment: Ref<string> = ref<string>('')
     const status: Ref<StatusType> = ref<StatusType>(props.document.lastStatus.status)
     const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
@@ -80,7 +80,11 @@ export default defineComponent({
         props.update(cache, result)
       }
     }
-    return { comment, status, addDocumentStatusUpdate, addDocumentStatus }
+    const close = () => {
+      status.value = props.document.lastStatus.status
+      comment.value = ''
+    }
+    return { comment, status, addDocumentStatusUpdate, addDocumentStatus, dateTimeHM, close }
   }
 })
 </script>

@@ -1487,8 +1487,6 @@ type DocumentType implements Node {
   period: PeriodType
   """Листы"""
   sheets: [SheetType!]
-  """Статусы документов"""
-  statuses: [DocumentStatusType]
   """Дата обновления"""
   updatedAt: DateTime!
   """Версия документа"""
