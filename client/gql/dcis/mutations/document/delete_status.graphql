@@ -1,0 +1,13 @@
+mutation DeletedDocumentStatus($id: ID!) {
+  deleteDocumentStatus(id: $id) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    found
+    deletedId
+    __typename
+  }
+}

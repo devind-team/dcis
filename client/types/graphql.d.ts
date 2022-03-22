@@ -112,6 +112,28 @@ export type AddDocumentMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddDocumentStatusMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Комментарий */
+  comment?: InputMaybe<Scalars['String']>;
+  /** Документ */
+  documentId: Scalars['ID'];
+  /** Статус */
+  statusId: Scalars['Int'];
+};
+
+/** Добавление статуса документа. */
+export type AddDocumentStatusMutationPayload = {
+  __typename?: 'AddDocumentStatusMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Документ */
+  document?: Maybe<DocumentType>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddFileMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Загружаемые файлы */
@@ -1106,7 +1128,7 @@ export type ChangeValueMutationInput = {
   documentId: Scalars['ID'];
   /** Идентификатор строки */
   rowId: Scalars['Int'];
-  /** Иднтификатор листа */
+  /** Идентификатор листа */
   sheetId: Scalars['Int'];
   /** Значение */
   value: Scalars['String'];
@@ -1323,6 +1345,19 @@ export type DeleteCategoryMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+/** Удаление статуса документа. */
+export type DeleteDocumentStatusMutationPayload = {
+  __typename?: 'DeleteDocumentStatusMutationPayload';
+  deletedId?: Maybe<Scalars['ID']>;
+  deletedInputId?: Maybe<Scalars['ID']>;
+  deletedRawId?: Maybe<Scalars['ID']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  found?: Maybe<Scalars['Boolean']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -1590,6 +1625,8 @@ export type DocumentType = Node & {
   period?: Maybe<PeriodType>;
   /** Листы */
   sheets?: Maybe<Array<SheetType>>;
+  /** Статусы документов */
+  statuses?: Maybe<Array<Maybe<DocumentStatusType>>>;
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
   /** Версия документа */
@@ -1896,6 +1933,8 @@ export type Mutation = {
   addCategory: AddCategoryMutationPayload;
   /** Добавление документа. */
   addDocument: AddDocumentMutationPayload;
+  /** Добавление статуса документа. */
+  addDocumentStatus: AddDocumentStatusMutationPayload;
   /** Мутация для загрузки файлов */
   addFile: AddFileMutationPayload;
   /** Мутация для добавления группы. */
@@ -1985,6 +2024,8 @@ export type Mutation = {
   confirmEmail: ConfirmEmailMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
+  /** Удаление статуса документа. */
+  deleteDocumentStatus: DeleteDocumentStatusMutationPayload;
   /** Мутация для полного удаления файла */
   deleteFile: DeleteFileMutationPayload;
   /** Мутация для удаления группы. */
@@ -2035,6 +2076,11 @@ export type MutationAddCategoryArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddDocumentArgs = {
   input: AddDocumentMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddDocumentStatusArgs = {
+  input: AddDocumentStatusMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2247,6 +2293,11 @@ export type MutationConfirmEmailArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteCategoryArgs = {
   input: DeleteCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteDocumentStatusArgs = {
+  id: Scalars['ID'];
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2812,6 +2863,8 @@ export type Query = {
   category: CategoryType;
   /** Документ */
   document?: Maybe<DocumentType>;
+  /** Статусы документов */
+  documentStatuses?: Maybe<Array<DocumentStatusType>>;
   files: FileTypeConnection;
   groups: Array<GroupType>;
   /** Установлены ли настройки приложения */
@@ -2854,7 +2907,7 @@ export type Query = {
   sessions: Array<SessionType>;
   /** Настройки приложения */
   settings: Array<SettingType>;
-  /** Статусы документов */
+  /** Статусы */
   statuses?: Maybe<Array<StatusType>>;
   /** Теги */
   tags: TagTypeConnection;
@@ -4054,6 +4107,14 @@ export type AddDocumentMutationVariables = Exact<{
 
 export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
 
+export type AddDocumentStatusMutationVariables = Exact<{
+  comment: Scalars['String'];
+  documentId: Scalars['ID'];
+  statusId: Scalars['Int'];
+}>;
+
+export type AddDocumentStatusMutation = { __typename?: 'Mutation', addDocumentStatus: { __typename: 'AddDocumentStatusMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
+
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['Int'];
@@ -4063,6 +4124,12 @@ export type ChangeValueMutationVariables = Exact<{
 }>;
 
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null } };
+
+export type DeletedDocumentStatusMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeletedDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UnloadDocumentMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -4147,7 +4214,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, statuses?: Array<{ __typename?: 'DocumentStatusType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null> | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];

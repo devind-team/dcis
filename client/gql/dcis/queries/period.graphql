@@ -19,6 +19,17 @@ query Period($periodId: ID!) {
       comment
       createdAt
       __typename
+      statuses {
+        id
+        comment
+        createdAt
+        user {
+          ...UserFields
+        }
+        status {
+          ...StatusFields
+        }
+      }
 
       lastStatus {
         id

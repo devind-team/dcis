@@ -34,7 +34,14 @@
             ) Версия {{ item.version }}
           template(#item.lastStatus="{ item }")
             template(v-if="item.lastStatus")
-              strong {{ item.lastStatus.status.name }}.
+              status(
+                :document="item"
+                :statuses="statuses"
+                :update="addDocumentStatusUpdate"
+                :user="user"
+              )
+                template(#activator="{ on }")
+                  a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
               div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
               .font-italic {{ item.lastStatus.comment }}
             template(v-else) Не установлен.
@@ -45,7 +52,8 @@
 import { useMutation } from '@vue/apollo-composable'
 import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
-import { defineComponent, ref, useNuxt2Meta, inject, useRoute, toRef } from '#app'
+import { defineComponent, ref, useNuxt2Meta, inject, useRoute, toRefs } from '#app'
+import { DataProxy } from 'apollo-cache'
 import { useCommonQuery, useFilters } from '~/composables'
 import type { HasPermissionFnType } from '~/store'
 import { useAuthStore } from '~/store'
@@ -57,16 +65,17 @@ import {
   PeriodType,
   StatusesQuery,
   StatusesQueryVariables,
-  StatusType
+  StatusType, UserType
 } from '~/types/graphql'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import Status, { AddDocumentStatusMutationResult } from '~/components/dcis/projects/Status.vue'
 
 type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMutationPayload } }
 
 export default defineComponent({
-  components: { BreadCrumbs },
+  components: { BreadCrumbs, Status },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -78,7 +87,7 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
 
-    const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
+    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
     const active: Ref<boolean> = ref<boolean>(false)
     const comment: Ref<string> = ref<string>('')
     const status: Ref<StatusType | null> = ref<StatusType | null>(null)
@@ -102,6 +111,16 @@ export default defineComponent({
       mutate({ comment: comment.value, periodId: route.params.periodId, statusId: Number(status.value.id) })
     }
 
+    const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
+      periodUpdate(cache, result, (dataCache, { data: { addDocumentStatus: { success, document } } }) => {
+        if (success) {
+          const dataKey = Object.keys(dataCache)[0]
+          dataCache[dataKey] = Object.assign(dataCache[dataKey], document)
+        }
+        return dataCache
+      })
+    }
+
     const headers: DataTableHeader[] = [
       { text: 'Версия', value: 'version' },
       { text: 'Комментарий', value: 'comment' },
@@ -109,7 +128,7 @@ export default defineComponent({
       { text: 'Статус', value: 'lastStatus' }
     ]
 
-    return { active, comment, status, headers, statuses, addDocument, loading, dateTimeHM, hasPerm }
+    return { active, comment, status, headers, statuses, addDocument, loading, dateTimeHM, hasPerm, user, addDocumentStatusUpdate }
   }
 })
 </script>

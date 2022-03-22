@@ -45,5 +45,13 @@ export default {
     },
     delete: 'Удаление периода',
     deleteWarning: 'Период нельзя восстановить.'
+  },
+  documents: {
+    status: {
+      name: 'Статус документа',
+      header: 'Назначение статуса',
+      buttonText: '@:save',
+      comment: 'Комментарий'
+    }
   }
 }

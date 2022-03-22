@@ -1,0 +1,32 @@
+#import "../../fragments/status_fields.graphql"
+
+mutation AddDocumentStatus($comment: String!, $documentId: ID!, $statusId: Int!) {
+  addDocumentStatus(input: { comment: $comment, documentId: $documentId, statusId: $statusId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    document {
+        id
+        version
+        comment
+        createdAt
+        __typename
+
+        lastStatus {
+          id
+          comment
+          createdAt
+          __typename
+          status {
+            ...StatusFields
+          }
+          __typename
+        }
+        __typename
+    }
+    __typename
+  }
+}
