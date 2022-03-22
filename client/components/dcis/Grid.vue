@@ -1,93 +1,33 @@
 <template lang="pug">
   table.grid__table
-    thead
-      tr
-        td.header-cell
-        td(
-          v-for="buildColumn in columns"
-          :key="buildColumn.dimension.id"
-          :style="buildColumn.style"
-          style="min-width: 50px"
-        ).header-cell {{ buildColumn.positional }}
-    tbody
-      tr(
-        v-for="row in rows"
-        :key="row.dimension.id"
-        :style="row.style"
-      )
-        td.header-cell
-          v-menu(bottom close-on-content-click)
-            template(#activator="{ on, attrs }")
-              div(v-on="on" v-bind="attrs") {{ row.index }}
-            v-list
-              v-list-item(@click="addRowDimension(+row.dimension.id, 'before')")
-                v-list-item-icon
-                  v-icon mdi-table-row-plus-before
-                v-list-item-content Добавить строку выше
-              v-list-item(@click="addRowDimension(+row.dimension.id, 'after')")
-                v-list-item-icon
-                  v-icon mdi-table-row-plus-after
-                v-list-item-content Добавить строку ниже
-              v-list-item(@click="deleteRowDimension(+row.dimension.id)")
-                v-list-item-icon
-                  v-icon(color="error") mdi-delete
-                v-list-item-content(color="error") Удалить строку
-        td(
-          v-for="cell in row.cells"
-          :key="cell.cell.id"
-          :colspan="cell.colspan"
-          :rowspan="cell.rowspan"
-          :class="{marked: active === cell.position}"
-          :style="cell.style"
-          @click="setActive(cell.position)"
-          @dblclick="setActive(cell.position, true)"
-        )
-          input(
-            v-if="active === cell.position"
-            v-focus
-            :value="cell.value"
-            @keyup.esc="setActive(null)"
-            @blur="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
-            @keyup.enter="changeValue(cell.cell.columnId, cell.cell.rowId, $event.target.value)"
-            style="min-width:50px;"
-          )
-          template(v-else) {{ cell.value }}
+    grid-header(:columns="columns")
+    grid-body(:rows="rows" :set-active="setActive" )
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
 import type { PropType, Ref } from '#app'
-import { defineComponent, inject, toRef } from '#app'
+import { defineComponent, provide, toRef } from '#app'
 import {
   AddRowDimensionMutation,
-  AddRowDimensionMutationVariables,
-  ChangeValueMutation,
-  ChangeValueMutationVariables,
-  DeleteRowDimensionMutation, DeleteRowDimensionMutationVariables,
-  DocumentQuery, RowDimensionType,
-  SheetType,
-  ValueType
+  DeleteRowDimensionMutation,
+  SheetType
 } from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
-import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
-import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
-import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
+import GridHeader from '~/components/dcis/grid/GridHeader.vue'
+import GridBody from '~/components/dcis/grid/GridBody.vue'
 
-export type ChangeValueMutationResult = { data: ChangeValueMutation }
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
 export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
 
+type DocumentUpdateTransformType = (dc: any, result: any) => any
+type DocumentUpdateType = (cache: any, result: any, transform: DocumentUpdateTransformType) => any
+
 export default defineComponent({
-  directives: {
-    focus: {
-      inserted (el) {
-        el.focus()
-      }
-    }
-  },
+  components: { GridBody, GridHeader },
   props: {
     documentId: { type: String, required: true },
-    sheet: { type: Object as PropType<SheetType>, required: true }
+    sheet: { type: Object as PropType<SheetType>, required: true },
+    update: { type: Function as PropType<DocumentUpdateType>, required: true }
   },
   setup (props) {
     const sheet: Ref<SheetType> = toRef(props, 'sheet')
@@ -100,114 +40,46 @@ export default defineComponent({
       setActive
     } = useGrid(sheet)
 
-    const documentUpdate: any = inject('documentUpdate')
+    provide('active', active)
+    provide('documentId', props.documentId)
+    provide('documentUpdate', props.update)
 
-    const addRowDimension = (rowId: number, position: 'after' | 'before') => {
-      const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
-        update: (cache, result) => documentUpdate(
-          cache,
-          result,
-          (dataCache: DocumentQuery, { data: { addRowDimension: { success, rowDimension, cells, mergedCells } } }: AddRowDimensionMutationResult) => {
-            if (success) {
-              dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).cells.push(...cells)
-              const rows: RowDimensionType[] = dataCache.document.sheets
-                .find(sh => sh.id === props.sheet.id)
-                .rows
-                .map((r: RowDimensionType | any) => (
-                  r.index >= rowDimension.index ? Object.assign(r, { index: r.index + 1 }) : r)
-                )
-              rows.splice(rowDimension.index - 1, 0, rowDimension as RowDimensionType)
-              dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).rows = rows as any
-              dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).mergedCells = mergedCells
-            }
-            return dataCache
-          }
-        )
-      })
-      mutate({ documentId: props.documentId, rowId, position })
-    }
-
-    const deleteRowDimension = (rowId: number) => {
-      const { mutate } = useMutation<DeleteRowDimensionMutation, DeleteRowDimensionMutationVariables>(
-        deleteRowDimensionMutation, {
-          update: (cache, result) => documentUpdate(
-            cache,
-            result,
-            (dataCache: DocumentQuery, { data: { deleteRowDimension: { success, rowId, index, mergedCells } } }: DeleteRowDimensionMutationResult) => {
-              if (success) {
-                const rows: RowDimensionType[] = dataCache.document.sheets
-                  .find(sheet => sheet.id === props.sheet.id)
-                  .rows
-                  .filter((r: RowDimensionType | any) => Number(r.id) !== rowId)
-                  .map((r: RowDimensionType | any) => (
-                    r.index > index ? Object.assign(r, { index: r.index - 1 }) : r
-                  ))
-                dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).rows = rows as any
-                dataCache.document.sheets.find(sheet => sheet.id === props.sheet.id).mergedCells = mergedCells
-              }
-              return dataCache
-            }
-          )
-        }
-      )
-      mutate({ rowId })
-    }
-
-    const { mutate: changeValueMutate } = useMutation<ChangeValueMutation, ChangeValueMutationVariables>(changeValueMutation, {
-      update: (cache, result) => documentUpdate(
-        cache,
-        result,
-        (dataCache: DocumentQuery, { data: { changeValue: { success, value } } }: ChangeValueMutationResult) => {
-          if (success) {
-            const values: ValueType[] = dataCache.document.sheets!
-              .find(sh => sh.id === props.sheet.id)
-              .values.filter((v: ValueType) => v.id !== value.id)
-            dataCache.document.sheets!.find(sh => sh.id === props.sheet.id)!.values = [...values, value] as any
-            setActive(null)
-          }
-          return dataCache
-        })
-    })
-
-    const changeValue = (columnId: number, rowId: number, value: string) => {
-      changeValueMutate({
-        documentId: props.documentId,
-        sheetId: +props.sheet.id,
-        columnId,
-        rowId,
-        value
-      })
-    }
-    return { columns, rows, mergedCells, mergeCells, active, setActive, addRowDimension, deleteRowDimension, changeValue }
+    return { columns, rows, mergedCells, mergeCells, active, setActive }
   }
 })
 </script>
 
 <style lang="sass">
-.grid__table
-  tr td
-    box-sizing: border-box
-    &.marked
-      border: 2px solid blue
+table.grid__table
   border-collapse: collapse
-  user-select: none
-  .header-cell
+
+  thead tr th, tbody tr td.row_index
+    border: 1px solid silver
     text-align: center
-    background: lightgrey
+    min-width: 25px
     cursor: pointer
-  .active-cell
-    border: 2px solid blue
-  .input
-    width: 100%
-    height: 100%
-    outline: none
-  thead
-    td
-      height: 35px
-      border: 1px solid grey
-  tbody
-    .header-cell
-      width: 30px
-    td
-      border: 1px solid grey
+    &:hover
+      background: lightgray
+  tbody tr td.grid__row-index
+    font-weight: bold
+    border: 1px solid silver
+    text-align: center
+  tbody tr td:not(.grid__row-index)
+    border: 1px solid silver
+    position: relative
+
+    .grid__cell-container-active
+      top: 0
+      left: 0
+      position: absolute
+      width: 100%
+      height: 100%
+      input
+        width: 100%
+        height: 100%
+        &:focus
+          outline: none
+
+  tbody tr:hover
+    background: rgba(0, 0, 0, .1)
 </style>

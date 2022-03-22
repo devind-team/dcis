@@ -1,11 +1,11 @@
 import graphene
 import devind_core.schema
 import devind_notifications.schema
+import devind_dictionaries.schema
 import apps.core.schema
 import apps.dashboard.schema
 import apps.dcis.schema
 import apps.pages.schema
-import apps.dcis.schema
 import apps.notifications.schema
 from graphene_django.debug import DjangoDebug
 
@@ -16,6 +16,7 @@ class Query(
     apps.dashboard.schema.Query,
     apps.dcis.schema.Query,
     apps.pages.schema.Query,
+    devind_dictionaries.schema.Query,
     graphene.ObjectType
 ):
     """Схема запросов данных."""

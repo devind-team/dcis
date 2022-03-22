@@ -1,3 +1,37 @@
+import type { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+
+export type BuildColumnType = {
+  id: string,
+  index: number
+  positional: string
+  style: Record<string, string | undefined>
+  dimension: ColumnDimensionType
+}
+
+export type BuildCellType = {
+  sheetId: string
+  id: string
+  position: string
+  value: string
+  editable: boolean
+  kind: string
+  colspan: number
+  rowspan: number
+  style: Record<string, number | string | undefined> | string,
+  border: Record<string, string | undefined | null> | string
+  cell: CellType
+}
+
+export type BuildRowType = {
+  sheetId: string
+  id: string
+  index: number
+  dynamic: boolean
+  style: Record<string, string | undefined>
+  cells: BuildCellType[],
+  dimension: RowDimensionType
+}
+
 /**
  * Режимы работы таблицы
  *   edit - режим редактирования таблицы
@@ -88,17 +122,6 @@ export type CellOptionsType = {
   borderLeftColor?: string
   borderRightColor?: string
 }
-/**
- * Описание значений ячейки
- */
-export type CellType = {
-  uid: string
-  kind: KindCell
-  options: CellOptionsType
-  formula?: string
-  value?: string
-  info?: string
-}
 
 /**
  * Тип ячейки
@@ -169,73 +192,6 @@ export type StyleCellType = {
 }
 
 export type SheetType = MergeRowType[]
-
-/**
- * Callback функции на события
- *   changeCellValue - изменение значения ячейки
- *   changeCllOption - изменение опции ячейки
- */
-export type CallbacksType = {
-  changeCellValue?: (
-    column: number,
-    row: number,
-    newValue: string,
-    oldValue?: string) => void
-  changeCellOption?: (
-    column: number,
-    row: number,
-    option: string,
-    newValue: CellOptionValueType,
-    oldValue?: CellOptionValueType) => void
-}
-
-/**
- * Описание информации о колонках
- */
-export type ColumnDimensionType = {
-  index: string
-  width: number
-  min: number
-  max: number
-  hidden: boolean
-  collapsed: boolean
-  autoSize: boolean
-  color?: string
-  background?: string
-}
-
-export type ColumnsDimensionType = {
-  [index: string]: ColumnDimensionType
-}
-
-/**
- * Описание информации о строках
- */
-export type RowDimensionType = {
-  index: number
-  height: number
-  hidden: boolean
-  collapse?: boolean
-  color?: string
-}
-
-export type RowsDimensionType = {
-  [index: number]: RowDimensionType
-}
-
-/**
- * Описание типа сетки документа
- */
-export type GridType = {
-  name: string
-  columnsCount: number
-  columnsDimension: ColumnsDimensionType
-  rowsCount: number
-  rowsDimension: RowsDimensionType
-  rows: RowType[]
-  mergedCells: MergeCellsType,
-  mode: GridMode
-}
 
 export type MergedType = {
   merged: boolean

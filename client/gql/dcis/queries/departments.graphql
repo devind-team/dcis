@@ -1,0 +1,7 @@
+#import "../fragments/department_fields.graphql"
+
+query Departments {
+  departments {
+    ...DepartmentField
+  }
+}
