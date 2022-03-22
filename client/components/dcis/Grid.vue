@@ -1,7 +1,9 @@
 <template lang="pug">
-  table.grid__table
-    grid-header(:columns="columns")
-    grid-body(:rows="rows" :set-active="setActive" )
+  div
+    grid-sheet-toolbar(:update="update")
+    table.grid__table
+      grid-header(:columns="columns")
+      grid-body(:rows="rows" :set-active="setActive" )
 </template>
 
 <script lang="ts">
@@ -15,6 +17,7 @@ import {
 import { useGrid } from '~/composables/grid'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
+import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
 export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
@@ -23,7 +26,7 @@ type DocumentUpdateTransformType = (dc: any, result: any) => any
 type DocumentUpdateType = (cache: any, result: any, transform: DocumentUpdateTransformType) => any
 
 export default defineComponent({
-  components: { GridBody, GridHeader },
+  components: { GridSheetToolbar, GridBody, GridHeader },
   props: {
     documentId: { type: String, required: true },
     sheet: { type: Object as PropType<SheetType>, required: true },
@@ -51,6 +54,7 @@ export default defineComponent({
 
 <style lang="sass">
 table.grid__table
+  margin-top: 3px
   border-collapse: collapse
 
   thead tr th, tbody tr td.row_index

@@ -16,6 +16,7 @@ import { ApolloCache, DataProxy } from 'apollo-cache'
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { BuildCellType } from '~/types/grid-types'
+import { cellKinds } from '~/composables/grid'
 import { ChangeValueMutation, ChangeValueMutationVariables, DocumentQuery, ValueType } from '~/types/graphql'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
@@ -40,14 +41,6 @@ export default defineComponent({
     active: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
-    const cellKinds: Record<string, string> = {
-      n: 'Numeric',
-      s: 'String',
-      text: 'Text',
-      money: 'Money',
-      user: 'User',
-      department: 'Department'
-    }
     const cellKind: ComputedRef<string> = computed<string>(() => (
       props.cell.kind in cellKinds ? cellKinds[props.cell.kind] : 'String'
     ))
@@ -70,13 +63,15 @@ export default defineComponent({
     })
 
     const setCellValue = (value: string) => {
-      changeValueMutate({
-        documentId,
-        sheetId: +props.cell.sheetId,
-        columnId: props.cell.cell.columnId,
-        rowId: props.cell.cell.rowId,
-        value
-      })
+      if (props.cell.value !== value) {
+        changeValueMutate({
+          documentId,
+          sheetId: +props.cell.sheetId,
+          columnId: props.cell.cell.columnId,
+          rowId: props.cell.cell.rowId,
+          value
+        })
+      }
       emit('clear-active')
     }
 

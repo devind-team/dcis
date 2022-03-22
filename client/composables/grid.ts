@@ -6,6 +6,14 @@ import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueTyp
 import { getCellBorder, getCellStyle, getCellValue, positionToLetter } from '~/services/grid'
 import { BuildCellType, BuildColumnType, BuildRowType } from '~/types/grid-types'
 
+export const cellKinds: Record<string, string> = {
+  n: 'Numeric',
+  s: 'String',
+  text: 'Text',
+  money: 'Money',
+  department: 'Department'
+}
+
 export function useGrid (sheet: Ref<SheetType>) {
   const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
     sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({

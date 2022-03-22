@@ -1,16 +1,20 @@
 <template lang="pug">
   v-container(fluid :key="$route.fullpath")
     template(v-if="!loading")
-      v-card
-        v-card-title {{ doc.period.name }}. Версия: {{ doc.version }}
-          v-spacer
-          v-tooltip(bottom)
-            template(#activator="{ on }")
-              v-btn(v-on="on" @click="mutate({ documentId: $route.params.documentId })" :loading="unloadLoading" icon)
-                v-icon mdi-download
-            span Скачать документ
+      .title {{ doc.period.name }}. Версия: {{ doc.version }}
       v-tabs.mt-1(v-model="active")
+        v-menu(bottom left)
+          template(#activator="{ on, attrs }")
+            v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
+              v-icon mdi-cog
+          v-list
+            v-list-item(@click="mutate({ documentId: $route.params.documentId })")
+              v-list-item-icon
+                v-icon mdi-download
+              v-list-item-content
+                v-list-item-title Скачать документ
         v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
+      v-tabs-items(v-model="active")
         v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
           grid.mt-1(:document-id="doc.id" :sheet="sheet" :update="update" :key="`grid${sheet.id}`")
     v-progress-circular(v-else color="primary" indeterminate)
