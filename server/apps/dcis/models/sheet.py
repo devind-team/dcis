@@ -203,7 +203,15 @@ class Cell(Style, models.Model):
     DATE = 'd'
 
     # Дополнительный набор
+    TEXT = 'text'
+    MONEY = 'money'
+    BIG_MONEY = 'bigMoney'
     FILE = 'fl'
+
+    # Поля из базы данных
+    USER = 'user'
+    DEPARTMENT = 'department'
+    ORGANIZATION = 'organization'
 
     KIND_VALUE = (
         (NUMERIC, 'n'),
@@ -214,12 +222,18 @@ class Cell(Style, models.Model):
         (ERROR, 'e'),
         (FORMULA_CACHE_STRING, 'str'),
         (DATE, 'd'),
+        (TEXT, 'text'),
+        (MONEY, 'money'),
+        (BIG_MONEY, 'bigMoney'),
         (FILE, 'fl'),
+        (USER, 'user'),
+        (DEPARTMENT, 'department'),
+        (ORGANIZATION, 'organization')
     )
 
     kind = models.CharField(
-        max_length=10,
-        default=NUMERIC,
+        max_length=30,
+        default=STRING,
         choices=KIND_VALUE,
         help_text='Тип значения'
     )

@@ -1397,6 +1397,40 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
+"""Object type for Department."""
+type DepartmentType {
+  """Code of department."""
+  code: Int
+  """Created date"""
+  createdAt: DateTime!
+  id: ID!
+  """Responsible Minister."""
+  minister: UserType!
+  """Department name."""
+  name: String!
+  """Organizations."""
+  organizations: [OrganizationType]
+  """Updated date"""
+  updatedAt: DateTime!
+  """Director of department."""
+  user: UserType!
+  """Department staff."""
+  users: [UserType]
+}
+
+"""Object type for District."""
+type DistrictType {
+  """Created date"""
+  createdAt: DateTime!
+  id: ID!
+  """District name"""
+  name: String!
+  """List of regions."""
+  regions: [RegionType]
+  """Updated date"""
+  updatedAt: DateTime!
+}
+
 """Список участвующих дивизионов в сборе."""
 type DivisionType implements Node {
   """Дивизион: Department, Organizations"""
@@ -2085,6 +2119,209 @@ type NotificationsSubscription {
   notification: NotificationType
 }
 
+input OrganizationAddressFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationDepartmentFilterInputType {
+  """`Exact` lookup"""
+  exact: [ID]
+  """`In` lookup"""
+  in: [String]
+}
+
+input OrganizationFilterInputType {
+  """`Address` field"""
+  address: OrganizationAddressFilterInputType
+  """`And` field"""
+  and: [OrganizationFilterInputType]
+  """`Department` field"""
+  department: OrganizationDepartmentFilterInputType
+  """`Id` field"""
+  id: OrganizationIdFilterInputType
+  """`Inn` field"""
+  inn: OrganizationInnFilterInputType
+  """`Kind` field"""
+  kind: OrganizationKindFilterInputType
+  """`Kodbuhg` field"""
+  kodbuhg: OrganizationKodbuhgFilterInputType
+  """`Kpp` field"""
+  kpp: OrganizationKppFilterInputType
+  """`Mail` field"""
+  mail: OrganizationMailFilterInputType
+  """`Name` field"""
+  name: OrganizationNameFilterInputType
+  """`Not` field"""
+  not: OrganizationFilterInputType
+  """`Okpo` field"""
+  okpo: OrganizationOkpoFilterInputType
+  """`Or` field"""
+  or: [OrganizationFilterInputType]
+  """`Parent` field"""
+  parent: OrganizationParentFilterInputType
+  """`Phone` field"""
+  phone: OrganizationPhoneFilterInputType
+  """`Region` field"""
+  region: OrganizationRegionFilterInputType
+  """`Rubpnubp` field"""
+  rubpnubp: OrganizationRubpnubpFilterInputType
+  """`Site` field"""
+  site: OrganizationSiteFilterInputType
+}
+
+input OrganizationIdFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [String]
+}
+
+input OrganizationInnFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationKindFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationKodbuhgFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationKppFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationMailFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationNameFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationOkpoFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationParentFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`Isnull` lookup"""
+  isnull: Boolean
+}
+
+input OrganizationPhoneFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationRegionFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [ID]
+}
+
+input OrganizationRubpnubpFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input OrganizationSiteFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+"""Optimized type for Organizations."""
+type OrganizationType implements Node {
+  """Address"""
+  address: String
+  """Additional fields"""
+  attributes: JSONString!
+  """Created date"""
+  createdAt: DateTime!
+  """Departments."""
+  departments: [DepartmentType]
+  """The ID of the object."""
+  id: ID!
+  """Individual taxpayer number"""
+  inn: String
+  """Type"""
+  kind: String
+  """Accounting code"""
+  kodbuhg: String
+  """Code of reason"""
+  kpp: String
+  """Email"""
+  mail: String
+  """Name"""
+  name: String!
+  """Russian classifier of enterprises and organizations"""
+  okpo: String
+  """Parent"""
+  parent: OrganizationType
+  """Phone number"""
+  phone: String
+  """Name for view"""
+  presentName: String!
+  """Region"""
+  region: RegionType
+  """Rubpnubp code"""
+  rubpnubp: String
+  """Site url"""
+  site: String
+  """Updated date"""
+  updatedAt: DateTime!
+}
+
+type OrganizationTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [OrganizationTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `OrganizationType` and its cursor."""
+type OrganizationTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: OrganizationType
+}
+
 """The Relay compliant `PageInfo` type, containing data necessary to paginate this connection."""
 type PageInfo {
   """When paginating forwards, the cursor to continue."""
@@ -2339,6 +2576,16 @@ type Query {
   categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
   """Категория"""
   category(categoryId: ID!): CategoryType!
+  department(
+    """Department ID"""
+    departmentId: Int!
+  ): DepartmentType
+  departments: [DepartmentType!]
+  district(
+    """District ID"""
+    districtId: Int!
+  ): DistrictType
+  districts: [DistrictType!]
   """Документ"""
   document(
     """Идентификатор документа"""
@@ -2363,6 +2610,19 @@ type Query {
   ): NotificationType!
   """Уведомления пользователя"""
   notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection!
+  organization(
+    """Organization ID"""
+    organizationId: Int!
+  ): OrganizationType
+  organizations(
+    after: String
+    before: String
+    """Advanced filter field"""
+    filter: OrganizationFilterInputType
+    first: Int
+    last: Int
+    offset: Int
+  ): OrganizationTypeConnection
   """Страница"""
   page(pageId: ID!): PageType!
   """Получение типа страницы"""
@@ -2403,6 +2663,11 @@ type Query {
     last: Int
     offset: Int
   ): ProjectTypeConnection
+  region(
+    """Region ID"""
+    regionId: Int!
+  ): RegionType
+  regions: [RegionType!]
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
   """Сегменты страницы"""
@@ -2439,6 +2704,20 @@ type RecoveryPasswordMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+}
+
+"""Object type for Regions."""
+type RegionType {
+  """Real code of region"""
+  commonId: Int
+  """Created date"""
+  createdAt: DateTime!
+  district: DistrictType
+  id: ID!
+  """Region name"""
+  name: String!
+  """Updated date"""
+  updatedAt: DateTime!
 }
 
 input RegisterMutationInput {

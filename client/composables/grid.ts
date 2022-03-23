@@ -1,58 +1,27 @@
-import type { Ref, ComputedRef } from '#app'
+import type { ComputedRef, Ref } from '#app'
 import { computed, ref } from '#app'
 
-import {
-  SheetType,
-  ColumnDimensionType,
-  RowDimensionType,
-  MergedCellType,
-  CellType,
-  ValueType
-} from '~/types/graphql'
+import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
-import { positionToLetter } from '~/services/grid'
+import { getCellBorder, getCellStyle, getCellValue, positionToLetter, rangeLetterToCells } from '~/services/grid'
+import { BuildCellType, BuildColumnType, BuildRowType } from '~/types/grid-types'
 
-export type BuildCell = {
-  cell: CellType
-  value: ValueType
-}
-
-export type BuildMergedCell = {
-  cell: CellType
-  value: ValueType
-  colspan: number
-  rowspan: number
-  cells: CellType[]
-}
-
-export type Cell = BuildCell | BuildMergedCell
-
-export type EditableCell = {
-  cell: Cell
-  value: ValueType
-  newValue: string
-}
-
-export type BuildColumn = {
-  name: string
-  style: Record<string, string>
-  dimension: ColumnDimensionType
-}
-
-export type BuildRow = {
-  name: string
-  style: Record<string, string>
-  dimension: RowDimensionType
+export const cellKinds: Record<string, string> = {
+  n: 'Numeric',
+  s: 'String',
+  text: 'Text',
+  money: 'Money',
+  department: 'Department'
 }
 
 export function useGrid (sheet: Ref<SheetType>) {
-  const columns: ComputedRef = computed(() => (
+  const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
     sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
       id: columnDimension.id,
       index: columnDimension.index,
       positional: positionToLetter(columnDimension.index),
       style: {
-        width: columnDimension.width ? `${columnDimension.width}em` : undefined
+        width: columnDimension.width ? `${columnDimension.width}px` : '60px'
       },
       dimension: columnDimension
     }))
@@ -86,11 +55,12 @@ export function useGrid (sheet: Ref<SheetType>) {
     return buildValues
   })
 
-  const rows: ComputedRef = computed(() => {
-    const buildRows = []
+  const rows: ComputedRef<BuildRowType[]> = computed<BuildRowType[]>(() => {
+    const buildRows: BuildRowType[] = []
     for (let rowIndex = 0; rowIndex < sheet.value.rows.length; ++rowIndex) {
       const row = sheet.value.rows[rowIndex]
-      const buildRow = {
+      const buildRow: BuildRowType = {
+        sheetId: sheet.value.id,
         id: row.id,
         index: row.index,
         dynamic: row.dynamic,
@@ -107,50 +77,17 @@ export function useGrid (sheet: Ref<SheetType>) {
         const cell: CellType = rowCells[column.id]
         const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
         const position: string = `${positionToLetter(column.index)}${row.index}`
-        // Стили должны формироваться на основе предпочтения cell <- row <- col
-        const borderStyle = JSON.parse(cell.borderStyle)
-        const borderColor = JSON.parse(cell.borderColor)
-        const buildCell = {
+        const buildCell: BuildCellType = {
+          sheetId: sheet.value.id,
+          id: cell.id,
           position,
-          value: value ? value.value : cell.default,
+          value: getCellValue(value, cell),
           editable: cell.editable,
           kind: cell.kind,
           colspan: 1,
           rowspan: 1,
-          style: {
-            'text-align': cell.horizontalAlign,
-            'vertical-align': cell.verticalAlign,
-            'font-size': cell.size,
-            'font-weight': cell.strong ? 'bold' : 'normal',
-            'font-style': cell.italic ? 'italic' : 'normal',
-            'text-decoration': cell.underline ? 'underline' : undefined,
-            color: cell.color,
-            background: cell.background,
-            borderTop: borderStyle.top === 'thin' ||
-            borderStyle.top === 'hair' ||
-            borderStyle.top === 'medium'
-              ? 'solid 3px'
-              : borderStyle.top,
-            borderBottom: borderStyle.bottom === 'thin' ||
-            borderStyle.bottom === 'hair' ||
-            borderStyle.bottom === 'medium'
-              ? 'solid 3px'
-              : borderStyle.bottom,
-            borderLeft: borderStyle.left === 'thin' ||
-            borderStyle.left === 'hair' ||
-            borderStyle.left === 'medium'
-              ? 'solid 3px'
-              : borderStyle.left,
-            borderRight: borderStyle.right === 'thin' ||
-            borderStyle.right === 'hair' ||
-            borderStyle.right === 'medium'
-              ? 'solid 3px'
-              : borderStyle.right,
-            borderTopColor: borderColor.top,
-            borderBottomColor: borderColor.bottom,
-            borderLeftColor: borderColor.left,
-            borderRightColor: borderColor.right
-          },
+          style: getCellStyle(cell),
+          border: getCellBorder(cell),
           cell
         }
         if (position in mergeCells.value) {
@@ -177,13 +114,31 @@ export function useGrid (sheet: Ref<SheetType>) {
    * Блок выделения
    */
   const active: Ref<string | null> = ref<string | null>(null)
-
-  const setActive = (position: string, dbl: boolean = false) => {
-    if (active.value === null && dbl) {
-      active.value = position
-    } else if (active.value !== position) {
-      active.value = null
+  const selection: Ref<string[] | null> = ref<string[]>([])
+  let startCellSelectionPosition: string | null = null
+  /**
+   * Стартуем выделение ячейки по событию MouseDown
+   * @param _ - событие нажатия кнопки
+   * @param position - начальная позиция
+   */
+  const startCellSelection = (_: MouseEvent, position: string): void => {
+    startCellSelectionPosition = position
+  }
+  const enterCellSelection = (_: MouseEvent, position: string): void => {
+    if (startCellSelectionPosition) {
+      selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
     }
+  }
+  const endCellSelection = (_: MouseEvent, position: string): void => {
+    if (position === startCellSelectionPosition) {
+      setActive(position)
+    }
+    selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
+    startCellSelectionPosition = null
+  }
+
+  const setActive = (position: string) => {
+    active.value = position
   }
 
   return {
@@ -195,6 +150,10 @@ export function useGrid (sheet: Ref<SheetType>) {
     mergeCells,
     mergedCells,
     active,
+    selection,
+    startCellSelection,
+    enterCellSelection,
+    endCellSelection,
     setActive
   }
 }

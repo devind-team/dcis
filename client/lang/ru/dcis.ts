@@ -46,6 +46,13 @@ export default {
     delete: 'Удаление периода',
     deleteWarning: 'Период нельзя восстановить.'
   },
+  cellKinds: {
+    n: 'Числовой',
+    s: 'Строковый',
+    text: 'Большая строка',
+    money: 'Деньги',
+    department: 'Департаменты'
+  },
   documents: {
     status: {
       name: 'Статус документа',
