@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, Optional, List
 
 import graphene
 from devind_helpers.decorators import permission_classes
-from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
@@ -72,6 +72,44 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
         sheet.move_merged_cells(row.index, -1)
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
+
+
+class ChangeCellOptionMutation(BaseMutation):
+    """Мутация для изменения свойств ячеек:
+
+        - horizontal_align - ['left', 'center', 'right']
+        - vertical_align - ['top', 'middle', 'bottom']
+        - size - цифра от 10 до 24
+        - strong - true, false
+        - italic - true, false
+        - underline - true, false
+        - kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
+    """
+
+    class Input:
+        cell_id = graphene.Int(required=True, description='Идентификатор ячейки')
+        field = graphene.String(required=True, description='Идентификатор поля')
+        value = graphene.String(required=True, description='Значение поля')
+
+    cell = graphene.Field(CellType)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: int, field: str, value: str):
+        cell: Optional[Cell] = get_object_or_none(Cell, pk=cell_id)
+        if not cell:
+            return ChangeCellOptionMutation(success=False, errors=ErrorFieldType('cell_id', ['Ячейка не найдена']))
+        allow_fields: List[str] = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
+        if field not in allow_fields:
+            return ChangeCellOptionMutation(
+                success=False,
+                errors=ErrorFieldType(
+                    'field',
+                    [f'Параметр не в списке разрешенных: {field}. {", ".join(allow_fields)}']
+                )
+            )
+
+        return ChangeCellOptionMutation(cell=cell)
 
 
 class SheetMutations(graphene.ObjectType):
