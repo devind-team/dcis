@@ -1,5 +1,5 @@
 <template lang="pug">
-  .grid__cell-container(:class="{ 'grid__cell-container-active': activeContainer }" :style="cell.border")
+  .grid__cell-container(:class="containerClasses")
     component(
       v-if="active && cell.editable"
       @set-value="setCellValue"
@@ -45,9 +45,9 @@ export default defineComponent({
       props.cell.kind in cellKinds ? cellKinds[props.cell.kind] : 'String'
     ))
 
-    const activeContainer: ComputedRef<boolean> = computed<boolean>(() => (
-      props.active && ['n', 's', 'money'].includes(props.cell.kind)
-    ))
+    const containerClasses: ComputedRef<Record<string, boolean>> = computed<Record<string, boolean>>(() => ({
+      'grid__cell-container-active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
+    }))
 
     const documentId: string = inject<string>('documentId')
     const documentUpdate: ChangeValueDocumentUpdateType = inject<ChangeValueDocumentUpdateType>('documentUpdate')
@@ -79,7 +79,7 @@ export default defineComponent({
       emit('clear-active')
     }
 
-    return { cellKind, activeContainer, setCellValue }
+    return { cellKind, containerClasses, setCellValue }
   }
 })
 </script>

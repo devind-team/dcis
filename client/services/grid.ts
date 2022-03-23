@@ -122,6 +122,15 @@ const rangePositionToCells = (
   return cells
 }
 /**
+ * Вспомогательная функция превращения диапазона в набор входящих в него ячеек
+ * rangeLetterToCells('A1:B2') -> ['A1', 'A2', 'B1', 'B2']
+ * @param range
+ */
+const rangeLetterToCells = (range: RangeType): string[] => {
+  const { minColumn, minRow, maxColumn, maxRow }: RangePositionsType = rangeToPositions(normalizationRange(range))
+  return rangePositionToCells(minColumn, minRow, maxColumn, maxRow)
+}
+/**
  * Вспомогательная функция для применения действия к диапазону
  * @param rangePosition
  * @param callback
@@ -155,7 +164,7 @@ const rangeSpan = (range: RangeType): RangeSpanType => {
  * normalizationRange('B2:A1') -> 'A1:B2'
  * @param range Диапазон
  */
-const normalizationRange = (range: string): string => {
+const normalizationRange = (range: RangeType): RangeType => {
   const { minColumn, minRow, maxColumn, maxRow } = parseRange(range)
   const minColumnPosition: number = letterToPosition(minColumn)
   const maxColumnPosition: number = letterToPosition(maxColumn)
@@ -261,6 +270,7 @@ export {
   parseRangeWithSheet,
   rangePositionToCells,
   rangeSpan,
+  rangeLetterToCells,
   applyToRange,
   normalizationRange,
   getCellStyle,

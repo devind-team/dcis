@@ -3,7 +3,7 @@ import { computed, ref } from '#app'
 
 import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
-import { getCellBorder, getCellStyle, getCellValue, positionToLetter } from '~/services/grid'
+import { getCellBorder, getCellStyle, getCellValue, positionToLetter, rangeLetterToCells } from '~/services/grid'
 import { BuildCellType, BuildColumnType, BuildRowType } from '~/types/grid-types'
 
 export const cellKinds: Record<string, string> = {
@@ -114,14 +114,31 @@ export function useGrid (sheet: Ref<SheetType>) {
    * Блок выделения
    */
   const active: Ref<string | null> = ref<string | null>(null)
+  const selection: Ref<string[] | null> = ref<string[]>([])
+  let startCellSelectionPosition: string | null = null
+  /**
+   * Стартуем выделение ячейки по событию MouseDown
+   * @param _ - событие нажатия кнопки
+   * @param position - начальная позиция
+   */
+  const startCellSelection = (_: MouseEvent, position: string): void => {
+    startCellSelectionPosition = position
+  }
+  const enterCellSelection = (_: MouseEvent, position: string): void => {
+    if (startCellSelectionPosition) {
+      selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
+    }
+  }
+  const endCellSelection = (_: MouseEvent, position: string): void => {
+    if (position === startCellSelectionPosition) {
+      setActive(position)
+    }
+    selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
+    startCellSelectionPosition = null
+  }
 
-  const setActive = (position: string, dbl: boolean = false) => {
+  const setActive = (position: string) => {
     active.value = position
-    // if (active.value === null && dbl) {
-    //   active.value = position
-    // } else if (active.value !== position) {
-    //   active.value = null
-    // }
   }
 
   return {
@@ -133,6 +150,10 @@ export function useGrid (sheet: Ref<SheetType>) {
     mergeCells,
     mergedCells,
     active,
+    selection,
+    startCellSelection,
+    enterCellSelection,
+    endCellSelection,
     setActive
   }
 }

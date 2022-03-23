@@ -1,6 +1,7 @@
 <template lang="pug">
   v-dialog(v-model="active" width="600px" persistent)
-    template(#activator) {{ value }}
+    template(#activator="{ on }")
+      div(v-on="on") {{ value }}
     v-card
       v-card-title Изменение значения
         v-spacer
