@@ -12,6 +12,7 @@ from graphql_relay import from_global_id
 
 from apps.dcis.models import Document, RowDimension, Sheet, Cell
 from apps.dcis.schema.types import RowDimensionType, CellType, MergedCellType
+from apps.dcis.services.cell import check_cell_options
 
 
 class AddRowDimensionMutation(BaseMutation):
@@ -82,38 +83,35 @@ class ChangeCellOptionMutation(BaseMutation):
         - size - цифра от 10 до 24
         - strong - true, false
         - italic - true, false
-        - underline - true, false
+        - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
         - kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
     """
 
     class Input:
         cell_id = graphene.Int(required=True, description='Идентификатор ячейки')
         field = graphene.String(required=True, description='Идентификатор поля')
-        value = graphene.String(required=True, description='Значение поля')
+        value = graphene.String(description='Значение поля')
 
     cell = graphene.Field(CellType)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: int, field: str, value: str):
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: int, field: str, value: Optional[str] = None):
         cell: Optional[Cell] = get_object_or_none(Cell, pk=cell_id)
         if not cell:
-            return ChangeCellOptionMutation(success=False, errors=ErrorFieldType('cell_id', ['Ячейка не найдена']))
-        allow_fields: List[str] = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
-        if field not in allow_fields:
-            return ChangeCellOptionMutation(
-                success=False,
-                errors=ErrorFieldType(
-                    'field',
-                    [f'Параметр не в списке разрешенных: {field}. {", ".join(allow_fields)}']
-                )
-            )
-
+            return ChangeCellOptionMutation(success=False, errors=[ErrorFieldType('cell_id', ['Ячейка не найдена'])])
+        success, value, errors = check_cell_options(field, value)
+        if not success:
+            return ChangeCellOptionMutation(success=success, errors=errors)
+        setattr(cell, field, value)
+        cell.save(update_fields=(field,))
         return ChangeCellOptionMutation(cell=cell)
 
 
 class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
-    add_row_dimension = AddRowDimensionMutation.Field(required=True)
-    delete_row_dimension = DeleteRowDimensionMutation.Field(required=True)
+    add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
+    delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
+
+    change_cell_option = ChangeCellOptionMutation.Field(required=True, description='Изменения опций ячейки')
