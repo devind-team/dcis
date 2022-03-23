@@ -72,7 +72,7 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         row.delete()
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
-        sheet.move_merged_cells(row.index, -1)
+        sheet.move_merged_cells(row.index, -1, True)
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 
