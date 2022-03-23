@@ -90,8 +90,8 @@ input AddDocumentStatusMutationInput {
 """Добавление статуса документа."""
 type AddDocumentStatusMutationPayload {
   clientMutationId: String
-  """Документ"""
-  document: DocumentType
+  """Статус документа"""
+  documentStatus: DocumentStatusType
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
@@ -1229,14 +1229,21 @@ type DeleteCategoryMutationPayload {
   success: Boolean!
 }
 
+input DeleteDocumentStatusMutationInput {
+  clientMutationId: String
+  """Идентификатор статуса документа"""
+  documentStatusId: ID!
+}
+
 """Удаление статуса документа."""
 type DeleteDocumentStatusMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Документ"""
+  document: DocumentType!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
+  """Статус документа"""
+  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -1860,7 +1867,7 @@ type Mutation {
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление статуса документа."""
-  deleteDocumentStatus(id: ID!): DeleteDocumentStatusMutationPayload!
+  deleteDocumentStatus(input: DeleteDocumentStatusMutationInput!): DeleteDocumentStatusMutationPayload!
   """Мутация для полного удаления файла"""
   deleteFile(input: DeleteFileMutationInput!): DeleteFileMutationPayload!
   """Мутация для удаления группы."""

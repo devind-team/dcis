@@ -8,14 +8,12 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
-from graphene_django_cud.mutations import DjangoDeleteMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentStatus
-from apps.dcis.permissions import AddDocument
-from apps.dcis.schema.types import DocumentType, ValueType
+from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
+from apps.dcis.schema.types import DocumentType, ValueType, DocumentStatusType
 from apps.dcis.services.excel_unload import DocumentUnload
 
 
@@ -34,7 +32,7 @@ class AddDocumentMutation(BaseMutation):
     def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
-        content_type: ContentType = ContentType.objects.get_for_model(Department)    # Временно департаменты
+        content_type: ContentType = ContentType.objects.get_for_model(Department)  # Временно департаменты
         object_id: int = 1  # Служба поддержки
         max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
         document = Document.objects.create(
@@ -61,29 +59,38 @@ class AddDocumentStatusMutation(BaseMutation):
         status_id = graphene.Int(required=True, description='Статус')
         comment = graphene.String(description='Комментарий')
 
-    document = graphene.Field(DocumentType, description='Документ')
+    document_status = graphene.Field(DocumentStatusType, description='Статус документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, AddDocumentStatus,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: int, comment: str):
         document: Document = Document.objects.get(pk=from_global_id(document_id)[1])
         status: Status = Status.objects.get(pk=status_id)
-        DocumentStatus.objects.create(
+        document_status = DocumentStatus.objects.create(
             status=status,
             document=document,
             comment=comment,
             user=info.context.user
         )
-        return AddDocumentStatusMutation(document=document)
+        return AddDocumentStatusMutation(document_status=document_status)
 
 
-class DeleteDocumentStatusMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+class DeleteDocumentStatusMutation(BaseMutation):
     """Удаление статуса документа."""
 
-    class Meta:
-        model = DocumentStatus
-        login_required = True
-        permissions = 'dcis.delete_documentstatus'
+    class Input:
+        document_status_id = graphene.ID(required=True, description='Идентификатор статуса документа')
+
+    id = graphene.ID(required=True, description='Статус документа')
+    document = graphene.Field(DocumentType, required=True, description='Документ')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, DeleteDocumentStatus,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int, *args, **kwargs):
+        document_status: DocumentStatus = DocumentStatus.objects.get(pk=document_status_id)
+        document: Document = Document.objects.get(documentstatus=document_status)
+        document_status.delete()
+        return DeleteDocumentStatusMutation(id=document_status_id, document=document)
 
 
 class UnloadDocumentMutation(BaseMutation):
@@ -118,13 +125,13 @@ class ChangeValueMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
-        root: None,
-        info: ResolveInfo,
-        document_id: str,
-        sheet_id: int,
-        column_id: int,
-        row_id: int,
-        value: str
+            root: None,
+            info: ResolveInfo,
+            document_id: str,
+            sheet_id: int,
+            column_id: int,
+            row_id: int,
+            value: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
@@ -147,7 +154,7 @@ class DocumentMutations(graphene.ObjectType):
 
     add_document = AddDocumentMutation.Field(required=True)
     add_document_status = AddDocumentStatusMutation.Field(required=True)
-    delete_document_status = DeleteDocumentStatusMutationPayload.Field(required=True)
+    delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
 
     change_value = ChangeValueMutation.Field(required=True)

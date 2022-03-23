@@ -34,16 +34,17 @@
             ) Версия {{ item.version }}
           template(#item.lastStatus="{ item }")
             template(v-if="item.lastStatus")
-              status(
+              document-status(
                 :document="item"
                 :statuses="statuses"
                 :doc-statuses="documentStatuses"
-                :delete-status="deleteStatusUpdate"
-                :update="addDocumentStatusUpdate"
                 :user="user"
+                :add-status-update="addDocumentStatusUpdate"
+                :delete-status-update="deleteDocumentStatusUpdate"
               )
                 template(#activator="{ on }")
-                  a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+                  a(v-if="hasPerm('dcis.add_documentstatus')" v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+                  strong(v-else) {{ item.lastStatus.status.name }}.
               div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
               .font-italic {{ item.lastStatus.comment }}
             template(v-else) Не установлен.
@@ -76,14 +77,14 @@ import {
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import Status, { AddDocumentStatusMutationResult } from '~/components/dcis/projects/Status.vue'
+import DocumentStatus, { AddDocumentStatusMutationResult } from '~/components/dcis/documents/DocumentStatus.vue'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteStatus from '~/gql/dcis/mutations/document/delete_status.graphql'
 
 type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMutationPayload } }
 
 export default defineComponent({
-  components: { BreadCrumbs, Status },
+  components: { BreadCrumbs, DocumentStatus },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -107,6 +108,14 @@ export default defineComponent({
       status.value = statuses[0]
     })
 
+    const {
+      data: documentStatuses,
+      deleteUpdate,
+      addUpdate
+    } = useCommonQuery<DocumentStatusesQuery, DocumentStatusesQueryVariables>({
+      document: documentStatusesQuery
+    })
+
     const periodUpdate: any = inject('periodUpdate')
     const { mutate, loading } = useMutation<AddDocumentMutation, AddDocumentMutationVariables>(addDocumentMutation, {
       update: (cache, result) => periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }: AddDocumentMutationResultType) => {
@@ -123,6 +132,7 @@ export default defineComponent({
     }
 
     const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
+      addUpdate(cache, result, 'documentStatus')
       periodUpdate(cache, result, (dataCache, { data: { addDocumentStatus: { success, document } } }) => {
         if (success) {
           const dataKey = Object.keys(dataCache)[0]
@@ -132,26 +142,22 @@ export default defineComponent({
       })
     }
 
-    const {
-      data: documentStatuses,
-      update
-    } = useCommonQuery<DocumentStatusesQuery, DocumentStatusesQueryVariables>({
-      document: documentStatusesQuery
-    })
-
     const { mutate: DeleteDocumentStatusMutate } = useMutation<DeletedDocumentStatusMutation,
       DeletedDocumentStatusMutationVariables>(deleteStatus, {
-        update: (cache, result) => update(cache, result, (dataCache, { data: { deleteDocumentStatus: { success, deletedId } } }: any) => {
-          if (success) {
-            const dataKey = Object.keys(dataCache)[0]
-            dataCache[dataKey] = dataCache[dataKey].filter((e: any) => e.id !== deletedId)
-          }
-          return dataCache
-        })
+        update: (cache, result) => {
+          deleteUpdate(cache, result)
+          periodUpdate(cache, result, (dataCache, { data: { deleteDocumentStatus: { success, document } } }: any) => {
+            if (success) {
+              const dataKey = Object.keys(dataCache)[0]
+              dataCache[dataKey] = Object.assign(dataCache[dataKey], document)
+            }
+            return dataCache
+          })
+        }
       })
 
-    const deleteStatusUpdate = (docStatus: DocumentStatusType): void => {
-      DeleteDocumentStatusMutate({ id: docStatus.id })
+    const deleteDocumentStatusUpdate = (docStatus: DocumentStatusType): void => {
+      DeleteDocumentStatusMutate({ documentStatusId: docStatus.id })
     }
 
     const headers: DataTableHeader[] = [
@@ -174,7 +180,7 @@ export default defineComponent({
       user,
       documentStatuses,
       addDocumentStatusUpdate,
-      deleteStatusUpdate
+      deleteDocumentStatusUpdate
     }
   }
 })

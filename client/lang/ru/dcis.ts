@@ -50,7 +50,7 @@ export default {
     status: {
       name: 'Статус документа',
       header: 'Назначение статуса',
-      buttonText: '@:save',
+      buttonText: '@:add',
       comment: 'Комментарий'
     }
   }
