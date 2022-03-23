@@ -584,6 +584,36 @@ type ChangeCategoryPositionMutationPayload {
   success: Boolean!
 }
 
+input ChangeCellOptionMutationInput {
+  """Идентификатор ячейки"""
+  cellId: Int!
+  clientMutationId: String
+  """Идентификатор поля"""
+  field: String!
+  """Значение поля"""
+  value: String
+}
+
+"""
+Мутация для изменения свойств ячеек:
+
+- horizontal_align - ['left', 'center', 'right']
+- vertical_align - ['top', 'middle', 'bottom']
+- size - цифра от 10 до 24
+- strong - true, false
+- italic - true, false
+- underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
+- kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
+"""
+type ChangeCellOptionMutationPayload {
+  cell: CellType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeFileMutationInput {
   clientMutationId: String
   """Поле файла"""
@@ -1781,12 +1811,7 @@ type Mutation {
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
   addProject(input: CreateProjectInput!): AddProjectMutationPayload!
-  """
-  Вставка строк.
-  
-  После добавления строки бы то не было, строка приобретает новый индекс,
-  соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
-  """
+  """Добавление строки"""
   addRowDimension(input: AddRowDimensionMutationInput!): AddRowDimensionMutationPayload!
   """Добавление секции"""
   addSectionFiles(input: AddSectionFilesMutationInput!): AddSectionFilesMutationPayload!
@@ -1808,6 +1833,8 @@ type Mutation {
   changeCategoryParent(input: ChangeCategoryParentMutationInput!): ChangeCategoryParentMutationPayload!
   """Мутация для изменения порядка следования вывода категорий"""
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
+  """Изменения опций ячейки"""
+  changeCellOption(input: ChangeCellOptionMutationInput!): ChangeCellOptionMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Мутация для изменения имени группы."""
@@ -1872,7 +1899,7 @@ type Mutation {
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
   """Мутация на удаление проекта."""
   deleteProject(id: ID!): DeleteProjectMutationPayload!
-  """Мутация для удаления строки."""
+  """Удаление строки"""
   deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
   """Удаление секции"""
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!

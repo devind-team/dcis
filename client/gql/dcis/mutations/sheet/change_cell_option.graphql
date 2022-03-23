@@ -1,0 +1,15 @@
+#import "../../fragments/cell_fields.graphql"
+
+mutation ChangeCellOption($cellId: Int!, $field: String!, $value: String!) {
+  changeCellOption(input: { cellId: $cellId, field: $field, value: $value }) {
+    success
+    errors {
+      field
+      messages
+    }
+    cell {
+      ...CellFields
+    }
+    __typename
+  }
+}
