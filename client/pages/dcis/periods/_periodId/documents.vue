@@ -34,20 +34,12 @@
             ) Версия {{ item.version }}
           template(#item.lastStatus="{ item }")
             template(v-if="item.lastStatus")
-              document-status(
-                :document="item"
-                :statuses="statuses"
-                :doc-statuses="documentStatuses"
-                :user="user"
-                :add-status-update="addDocumentStatusUpdate"
-                :delete-status-update="deleteDocumentStatusUpdate"
-              )
+              document-status(:document="item" :statuses="statuses" :user="user")
                 template(#activator="{ on }")
                   a(v-if="hasPerm('dcis.add_documentstatus')" v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
                   strong(v-else) {{ item.lastStatus.status.name }}.
               div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
               .font-italic {{ item.lastStatus.comment }}
-            template(v-else) Не установлен.
           template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
@@ -56,7 +48,6 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
 import { defineComponent, ref, useNuxt2Meta, inject, useRoute, toRefs } from '#app'
-import { DataProxy } from 'apollo-cache'
 import { useCommonQuery, useFilters } from '~/composables'
 import { useAuthStore } from '~/store'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -67,19 +58,12 @@ import {
   PeriodType,
   StatusesQuery,
   StatusesQueryVariables,
-  StatusType,
-  DocumentStatusesQuery,
-  DocumentStatusesQueryVariables,
-  DeletedDocumentStatusMutation,
-  DeletedDocumentStatusMutationVariables,
-  DocumentStatusType
+  StatusType
 } from '~/types/graphql'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import DocumentStatus, { AddDocumentStatusMutationResult } from '~/components/dcis/documents/DocumentStatus.vue'
-import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
-import deleteStatus from '~/gql/dcis/mutations/document/delete_status.graphql'
+import DocumentStatus from '~/components/dcis/documents/DocumentStatus.vue'
 
 type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMutationPayload } }
 
@@ -108,14 +92,6 @@ export default defineComponent({
       status.value = statuses[0]
     })
 
-    const {
-      data: documentStatuses,
-      deleteUpdate,
-      addUpdate
-    } = useCommonQuery<DocumentStatusesQuery, DocumentStatusesQueryVariables>({
-      document: documentStatusesQuery
-    })
-
     const periodUpdate: any = inject('periodUpdate')
     const { mutate, loading } = useMutation<AddDocumentMutation, AddDocumentMutationVariables>(addDocumentMutation, {
       update: (cache, result) => periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }: AddDocumentMutationResultType) => {
@@ -129,35 +105,6 @@ export default defineComponent({
 
     const addDocument = () => {
       mutate({ comment: comment.value, periodId: route.params.periodId, statusId: Number(status.value.id) })
-    }
-
-    const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
-      addUpdate(cache, result, 'documentStatus')
-      periodUpdate(cache, result, (dataCache, { data: { addDocumentStatus: { success, document } } }) => {
-        if (success) {
-          const dataKey = Object.keys(dataCache)[0]
-          dataCache[dataKey] = Object.assign(dataCache[dataKey], document)
-        }
-        return dataCache
-      })
-    }
-
-    const { mutate: DeleteDocumentStatusMutate } = useMutation<DeletedDocumentStatusMutation,
-      DeletedDocumentStatusMutationVariables>(deleteStatus, {
-        update: (cache, result) => {
-          deleteUpdate(cache, result)
-          periodUpdate(cache, result, (dataCache, { data: { deleteDocumentStatus: { success, document } } }: any) => {
-            if (success) {
-              const dataKey = Object.keys(dataCache)[0]
-              dataCache[dataKey] = Object.assign(dataCache[dataKey], document)
-            }
-            return dataCache
-          })
-        }
-      })
-
-    const deleteDocumentStatusUpdate = (docStatus: DocumentStatusType): void => {
-      DeleteDocumentStatusMutate({ documentStatusId: docStatus.id })
     }
 
     const headers: DataTableHeader[] = [
@@ -177,10 +124,7 @@ export default defineComponent({
       loading,
       dateTimeHM,
       hasPerm,
-      user,
-      documentStatuses,
-      addDocumentStatusUpdate,
-      deleteDocumentStatusUpdate
+      user
     }
   }
 })

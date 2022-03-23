@@ -1,5 +1,7 @@
 import path from 'path'
 import accounting from 'accounting'
+import {UserType} from "~/types/graphql";
+import {isRef} from "#app";
 
 export function useFilters () {
   const money = (s: string): string => accounting.formatNumber(s, 2, ' ', '.')
@@ -41,6 +43,9 @@ export function useFilters () {
       .replace('-', '')
       .replace('_', '')
   )
+  const getUserName = (user: UserType, showSirName?: boolean): string => {
+    return `${user.lastName} ${user.firstName}${user.sirName && showSirName ? ' ' + user.sirName : ''}`
+  }
 
-  return { money, basename, date, dateTimeHM, timeHM, textLength, snakeToCamel }
+  return { money, basename, date, dateTimeHM, timeHM, textLength, snakeToCamel, getUserName }
 }

@@ -2592,7 +2592,10 @@ type Query {
     documentId: ID
   ): DocumentType
   """Статусы документов"""
-  documentStatuses: [DocumentStatusType!]
+  documentStatuses(
+    """Идентификатор документа"""
+    documentId: ID
+  ): [DocumentStatusType!]
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""

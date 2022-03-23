@@ -1,8 +1,8 @@
 #import "../fragments/status_fields.graphql"
 #import "../../core/fragments/user_fields.graphql"
 
-query DocumentStatuses {
-  documentStatuses {
+query DocumentStatuses($documentId: ID!) {
+  documentStatuses(documentId: $documentId) {
     id
     comment
     createdAt
@@ -12,13 +12,6 @@ query DocumentStatuses {
     }
     status {
       ...StatusFields
-      __typename
-    }
-    document {
-      id
-      version
-      comment
-      createdAt
       __typename
     }
     __typename

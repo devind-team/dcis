@@ -87,8 +87,8 @@ class DeleteDocumentStatusMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, DeleteDocumentStatus,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int, *args, **kwargs):
-        document_status: DocumentStatus = DocumentStatus.objects.get(pk=document_status_id)
-        document: Document = Document.objects.get(documentstatus=document_status)
+        document_status: DocumentStatus = DocumentStatus.objects.get_object_or_404(pk=document_status_id)
+        document: Document = Document.objects.get_object_or_404(documentstatus=document_status)
         document_status.delete()
         return DeleteDocumentStatusMutation(id=document_status_id, document=document)
 

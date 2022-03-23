@@ -1,13 +1,14 @@
 <template lang="pug">
   mutation-modal-form(
-    :header="$t('dcis.documents.status.header')"
+    :header="String($t('dcis.documents.status.header'))"
     :subheader="`Версия ${ document.version }`"
-    :button-text="$t('dcis.documents.status.buttonText')"
+    :button-text="String($t('dcis.documents.status.buttonText'))"
     :mutation="addDocumentStatus"
-    :variables="{ documentId: document.id, userId: user.id, statusId: status.id, comment }"
+    :variables="{ documentId: document.id, userId: user.id, statuId: status.id, comment }"
     :update="addDocumentStatusUpdate"
     mutation-name="addDocumentStatus"
     i18n-path="dcis.documents.status"
+    persistent
     @close="close"
   )
     template(#activator="{ on }")
@@ -28,71 +29,113 @@
       )
       v-list(two-line dense)
         v-divider
-        template(v-for="(item, index) in docStatuses")
-          v-list-item(v-if="item.document.id === document.id" :key="item.id")
+        template(v-for="(item, index) in documentStatuses")
+          v-list-item(:key="item.id")
             v-list-item-content
               v-list-item-title {{ item.status.name }}
               v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
-              v-list-item-subtitle {{ $getUserName(item.user) }}
+              v-list-item-subtitle {{ getUserName(item.user) }}
             v-list-item-content
               v-list-item-subtitle.font-italic {{ item.comment }}
             v-list-item-action(v-if="hasPerm('dcis.delete_documentstatus')" )
               v-btn(
-                v-if="docStatuses.filter(e => e.document.id === document.id).length > 1"
-                @click="deleteStatusUpdate(item)"
+                v-if="documentStatuses.length > 1"
+                @click="deleteDocumentStatusMutate({ documentStatusId: item.id }).then()"
                 icon
               )
                 v-icon(color="error") mdi-close-circle
-          v-divider(v-if="item.document.id === document.id" :key="index")
+          v-divider(:key="index")
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import type { PropType, Ref } from '#app'
-import { defineComponent, ref, toRefs } from '#app'
+import { defineComponent, inject, ref, toRefs } from '#app'
+import { useMutation } from '@vue/apollo-composable'
 import {
   AddDocumentStatusMutationPayload,
-  DocumentStatusType,
+  DeletedDocumentStatusMutation, DeletedDocumentStatusMutationVariables,
+  DocumentStatusesQuery,
+  DocumentStatusesQueryVariables,
   DocumentType,
   StatusType,
   UserType
 } from '~/types/graphql'
 import addDocumentStatus from '~/gql/dcis/mutations/document/add_status.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { useFilters } from '~/composables'
+import { useCommonQuery, useFilters } from '~/composables'
 import { useAuthStore } from '~/store'
+import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
+import deleteStatus from '~/gql/dcis/mutations/document/delete_status.graphql'
 
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
-type UpdateFunction = (cache: DataProxy | any, result: AddDocumentStatusMutationPayload | any) => DataProxy | void
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
     document: { type: Object as PropType<DocumentType>, required: true },
     statuses: { type: Array as PropType<StatusType[]>, default: () => [], required: true },
-    docStatuses: { type: Array as PropType<DocumentStatusType[]>, default: () => [], required: true },
-    user: { type: Object as PropType<UserType>, required: true },
-    addStatusUpdate: { type: Function as PropType<UpdateFunction>, required: true },
-    deleteStatusUpdate: { type: Function as PropType<Function>, required: true }
+    user: { type: Object as PropType<UserType>, required: true }
   },
   setup (props) {
-    const { dateTimeHM } = useFilters()
+    const { dateTimeHM, getUserName } = useFilters()
     const userStore = useAuthStore()
     const { hasPerm } = toRefs(userStore)
     const comment: Ref<string> = ref<string>('')
-    const status: Ref<StatusType> = ref<StatusType>(props.document.lastStatus.status)
+    const status: Ref<StatusType | null> = ref<StatusType | null>(null)
+
+    const {
+      data: documentStatuses,
+      deleteUpdate,
+      addUpdate
+    } = useCommonQuery<DocumentStatusesQuery, DocumentStatusesQueryVariables>({
+      document: documentStatusesQuery,
+      variables: { documentId: props.document.id }
+    })
+
+    const periodUpdate: any = inject('periodUpdate')
 
     const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
-      const { success } = result.data.addDocumentStatus
-      if (success) {
-        props.addStatusUpdate(cache, result)
-      }
+      addUpdate(cache, result, 'documentStatus')
+      periodUpdate(cache, result, (dataCache, { data: { addDocumentStatus: { success, document } } }) => {
+        if (success) {
+          const dataKey = Object.keys(dataCache)[0]
+          dataCache[dataKey] = Object.assign(dataCache[dataKey], document)
+        }
+        return dataCache
+      })
     }
+
+    const { mutate: deleteDocumentStatusMutate } = useMutation<DeletedDocumentStatusMutation,
+      DeletedDocumentStatusMutationVariables>(deleteStatus, {
+        update: (cache, result) => {
+          deleteUpdate(cache, result)
+          periodUpdate(cache, result, (dataCache, { data: { deleteDocumentStatus: { success, document } } }: any) => {
+            if (success) {
+              const dataKey = Object.keys(dataCache)[0]
+              dataCache[dataKey] = Object.assign(dataCache[dataKey], document)
+            }
+            return dataCache
+          })
+        }
+      })
+
     const close = () => {
-      status.value = props.document.lastStatus.status
+      status.value = null
       comment.value = ''
     }
-    return { comment, status, addDocumentStatusUpdate, addDocumentStatus, dateTimeHM, close, hasPerm }
+    return {
+      comment,
+      status,
+      addDocumentStatusUpdate,
+      addDocumentStatus,
+      dateTimeHM,
+      close,
+      hasPerm,
+      getUserName,
+      documentStatuses,
+      deleteDocumentStatusMutate
+    }
   }
 })
 </script>

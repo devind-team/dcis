@@ -1,7 +1,9 @@
 import graphene
+from django.db.models import QuerySet
 from graphene_django import DjangoListField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from devind_helpers.orm_utils import get_object_or_404
 
 from apps.dcis.models import Document, DocumentStatus
 from apps.dcis.schema.types import DocumentType, StatusType, DocumentStatusType
@@ -17,12 +19,17 @@ class DocumentQueries(graphene.ObjectType):
     )
 
     statuses = DjangoListField(StatusType, description='Статусы')
-    document_statuses = DjangoListField(DocumentStatusType, description='Статусы документов')
+    document_statuses = DjangoListField(
+        DocumentStatusType,
+        document_id=graphene.ID(description='Идентификатор документа'),
+        description='Статусы документов'
+    )
 
     @staticmethod
     def resolve_document(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> None:
         return Document.objects.get(pk=from_global_id(document_id)[1])
 
     @staticmethod
-    def resolve_document_statuses(root, info: ResolveInfo, *args, **kwargs) -> None:
-        return DocumentStatus.objects.all()
+    def resolve_document_statuses(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> QuerySet:
+        document: Document = Document.objects.get_object_or_404(pk=from_global_id(document_id)[1])
+        return DocumentStatus.objects.filter(document=document)

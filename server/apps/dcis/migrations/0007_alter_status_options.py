@@ -22,4 +22,13 @@ class Migration(migrations.Migration):
             model_name='documentstatus',
             index=models.Index(fields=['document', 'status'], name='dcis_docume_documen_00c5bd_idx'),
         ),
+        migrations.AlterField(
+            model_name='cell',
+            name='kind',
+            field=models.CharField(
+                choices=[('n', 'n'), ('s', 's'), ('f', 'f'), ('b', 'b'), ('inlineStr', 'inlineStr'), ('e', 'e'),
+                         ('str', 'str'), ('d', 'd'), ('text', 'text'), ('money', 'money'), ('bigMoney', 'bigMoney'),
+                         ('fl', 'fl'), ('user', 'user'), ('department', 'department'),
+                         ('organization', 'organization')], default='s', help_text='Тип значения', max_length=30),
+        ),
     ]
