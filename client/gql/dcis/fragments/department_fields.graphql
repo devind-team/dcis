@@ -1,0 +1,6 @@
+fragment DepartmentField on DepartmentType {
+  id
+  name
+  code
+  __typename
+}

@@ -1,11 +1,5 @@
-import {
-  AlignText,
-  CellOptionsType,
-  CellType, KindCell,
-  RangePositionsType,
-  RangeSpanType,
-  RangeType
-} from '~/types/grid-types'
+import type { CellType, ValueType } from '~/types/graphql'
+import type { RangePositionsType, RangeSpanType, RangeType } from '~/types/grid-types'
 
 const coordinateExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
 const rangeExp = /[$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<minRow>\d+)?(:[$]?(?<maxColumn>[A-Za-z]{1,3})?[$]?(?<maxRow>\d+))?/
@@ -15,16 +9,6 @@ const sheetExp = /(?<sheet>([^'^!])*)?![$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<mi
 const __CACHE_COLUMN_PL: { [position: number]: string } = {}
 // Кеш преобразования A -> 1
 const __CACHE_COLUMN_LP: { [letter: string]: number } = {}
-
-const getDefaultCell = (): CellType => {
-  return {
-    uid: '',
-    kind: KindCell.STRING,
-    options: { bold: false, align: AlignText.JUSTIFY, italic: false },
-    value: null,
-    info: null
-  }
-}
 
 /**
  * Разбираем координату на составляющие
@@ -183,51 +167,6 @@ const normalizationRange = (range: string): string => {
 }
 
 /**
- * Возвращение свойство ячейки в формате style=""
- * @param cellOptions
- */
-const styleCell = (cellOptions: CellOptionsType): string => {
-  const styles = [`text-align: ${cellOptions.align}`]
-  if (cellOptions.bold) {
-    styles.push('font-weight: bold')
-  }
-  if (cellOptions.italic) {
-    styles.push('font-style: italic')
-  }
-  if (cellOptions.color) {
-    styles.push(`color: ${cellOptions.color}`)
-  }
-  if (cellOptions.background) {
-    styles.push(`background: ${cellOptions.background}`)
-  }
-  if (cellOptions.borderTop) {
-    styles.push(`border-top-style: ${cellOptions.borderTop}`)
-  }
-  if (cellOptions.borderBottom) {
-    styles.push(`border-bottom-style: ${cellOptions.borderBottom}`)
-  }
-  if (cellOptions.borderLeft) {
-    styles.push(`border-left-style: ${cellOptions.borderLeft}`)
-  }
-  if (cellOptions.borderRight) {
-    styles.push(`border-right-style: ${cellOptions.borderRight}`)
-  }
-  if (cellOptions.borderTopColor) {
-    styles.push(`border-top-color: ${cellOptions.borderTopColor}`)
-  }
-  if (cellOptions.borderBottomColor) {
-    styles.push(`border-bottom-color: ${cellOptions.borderBottomColor}`)
-  }
-  if (cellOptions.borderLeftColor) {
-    styles.push(`border-left-color: ${cellOptions.borderLeftColor}`)
-  }
-  if (cellOptions.borderRightColor) {
-    styles.push(`border-right-color: ${cellOptions.borderRightColor}`)
-  }
-  return styles.join('; ')
-}
-
-/**
  * Функция преобразования строки в число
  * letterToPosition('A') === 1
  * letterToPosition('Z') === 26
@@ -275,12 +214,44 @@ const positionToLetter = (position: number): string => {
   return result
 }
 
-const getCellValueFormat = (cell: CellType): string => {
-  return cell.value
+/**
+ * Функция построения основных стилей
+ * @param cell
+ */
+const getCellStyle = (cell: CellType): string => {
+  const styles: string[] = []
+  if (cell.verticalAlign) { styles.push(`text-align: ${cell.verticalAlign}`) }
+  if (cell.horizontalAlign) { styles.push(`vertical-align: ${cell.verticalAlign}`) }
+  if (cell.size) { styles.push(`font-size: ${cell.size}px`) }
+  if (cell.strong) { styles.push('font-weight: bold') }
+  if (cell.italic) { styles.push('font-style: italic') }
+  if (cell.underline) { styles.push('text-decoration: underline') }
+  return styles.join(';')
+}
+
+/**
+ * Функция построения стилей для границ
+ * @param cell
+ */
+const getCellBorder = (cell: CellType): string => {
+  const borders: string[] = []
+  try {
+    const borderStyle: Record<string, string | null> = JSON.parse(cell.borderStyle)
+    const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
+    for (const position of ['top', 'right', 'bottom', 'left']) {
+      if (borderStyle[position] && ['thin', 'hair', 'medium'].includes(borderStyle[position])) {
+        borders.push(`border-${position}: 1px solid ${borderColor[position] || ''}`.trimEnd())
+      }
+    }
+  } catch { }
+  return borders.join(';')
+}
+
+const getCellValue = (value: ValueType | undefined, cell: CellType): string => {
+  return value ? value.value : cell.default
 }
 
 export {
-  getDefaultCell,
   letterToPosition,
   positionToLetter,
   parseCoordinate,
@@ -292,6 +263,7 @@ export {
   rangeSpan,
   applyToRange,
   normalizationRange,
-  getCellValueFormat,
-  styleCell
+  getCellStyle,
+  getCellBorder,
+  getCellValue
 }
