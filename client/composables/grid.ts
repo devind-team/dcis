@@ -147,7 +147,7 @@ export function useGrid (sheet: Ref<SheetType>) {
   const selectionCells: ComputedRef<any[]> = computed<any[]>(() => (
     selection.value
       .map(parseCoordinate)
-      .map(cord => ({ rowId: sheet.value.rows[cord.row - 1].id, columnId: sheet.value.columns[letterToPosition(cord.column) - 1]}))
+      .map(cord => ({ rowId: sheet.value.rows[cord.row - 1].id, columnId: sheet.value.columns[letterToPosition(cord.column) - 1].id }))
       .map(position => (cells.value[position.rowId][position.columnId]))
   ))
 
