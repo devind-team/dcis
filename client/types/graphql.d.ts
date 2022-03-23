@@ -651,9 +651,9 @@ export type ChangeCategoryPositionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-export type ChangeCellOptionMutationInput = {
+export type ChangeCellsOptionMutationInput = {
   /** Идентификатор ячейки */
-  cellId: Scalars['Int'];
+  cellsId: Array<Scalars['Int']>;
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор поля */
   field: Scalars['String'];
@@ -672,9 +672,10 @@ export type ChangeCellOptionMutationInput = {
  * - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
  * - kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
  */
-export type ChangeCellOptionMutationPayload = {
-  __typename?: 'ChangeCellOptionMutationPayload';
-  cell?: Maybe<CellType>;
+export type ChangeCellsOptionMutationPayload = {
+  __typename?: 'ChangeCellsOptionMutationPayload';
+  /** Измененные ячейки */
+  cells?: Maybe<Array<Maybe<CellType>>>;
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -1998,7 +1999,7 @@ export type Mutation = {
   /** Мутация для изменения порядка следования вывода категорий */
   changeCategoryPosition: ChangeCategoryPositionMutationPayload;
   /** Изменения опций ячейки */
-  changeCellOption: ChangeCellOptionMutationPayload;
+  changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
   /** Мутация для изменения имени группы. */
@@ -2187,8 +2188,8 @@ export type MutationChangeCategoryPositionArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationChangeCellOptionArgs = {
-  input: ChangeCellOptionMutationInput;
+export type MutationChangeCellsOptionArgs = {
+  input: ChangeCellsOptionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4461,13 +4462,13 @@ export type AddRowDimensionMutationVariables = Exact<{
 
 export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
 
-export type ChangeCellOptionMutationVariables = Exact<{
-  cellId: Scalars['Int'];
+export type ChangeCellsOptionMutationVariables = Exact<{
+  cellsId: Array<Scalars['Int']> | Scalars['Int'];
   field: Scalars['String'];
   value: Scalars['String'];
 }>;
 
-export type ChangeCellOptionMutation = { __typename?: 'Mutation', changeCellOption: { __typename: 'ChangeCellOptionMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, cell?: { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null } };
+export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowId: Scalars['Int'];

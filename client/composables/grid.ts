@@ -3,7 +3,14 @@ import { computed, ref } from '#app'
 
 import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
-import { getCellBorder, getCellStyle, getCellValue, positionToLetter, rangeLetterToCells } from '~/services/grid'
+import {
+  getCellBorder,
+  getCellStyle,
+  getCellValue, letterToPosition,
+  parseCoordinate,
+  positionToLetter,
+  rangeLetterToCells
+} from '~/services/grid'
 import { BuildCellType, BuildColumnType, BuildRowType } from '~/types/grid-types'
 
 export const cellKinds: Record<string, string> = {
@@ -30,7 +37,7 @@ export function useGrid (sheet: Ref<SheetType>) {
   /**
    * Собираем структуру для быстрого поиска
    */
-  const cells: ComputedRef = computed(() => {
+  const cells = computed<Record<number, Record<number, CellType>>>(() => {
     const buildCells = {}
     for (const cell of sheet.value.cells) {
       if (!(cell.rowId in buildCells)) {
@@ -137,6 +144,13 @@ export function useGrid (sheet: Ref<SheetType>) {
     startCellSelectionPosition = null
   }
 
+  const selectionCells: ComputedRef<any[]> = computed<any[]>(() => (
+    selection.value
+      .map(parseCoordinate)
+      .map(cord => ({ rowId: sheet.value.rows[cord.row - 1].id, columnId: sheet.value.columns[letterToPosition(cord.column) - 1]}))
+      .map(position => (cells.value[position.rowId][position.columnId]))
+  ))
+
   const setActive = (position: string) => {
     active.value = position
   }
@@ -151,6 +165,7 @@ export function useGrid (sheet: Ref<SheetType>) {
     mergedCells,
     active,
     selection,
+    selectionCells,
     startCellSelection,
     enterCellSelection,
     endCellSelection,

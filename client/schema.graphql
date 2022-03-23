@@ -584,9 +584,9 @@ type ChangeCategoryPositionMutationPayload {
   success: Boolean!
 }
 
-input ChangeCellOptionMutationInput {
+input ChangeCellsOptionMutationInput {
   """Идентификатор ячейки"""
-  cellId: Int!
+  cellsId: [Int!]!
   clientMutationId: String
   """Идентификатор поля"""
   field: String!
@@ -605,8 +605,9 @@ input ChangeCellOptionMutationInput {
 - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
 - kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
 """
-type ChangeCellOptionMutationPayload {
-  cell: CellType
+type ChangeCellsOptionMutationPayload {
+  """Измененные ячейки"""
+  cells: [CellType]
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1834,7 +1835,7 @@ type Mutation {
   """Мутация для изменения порядка следования вывода категорий"""
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
   """Изменения опций ячейки"""
-  changeCellOption(input: ChangeCellOptionMutationInput!): ChangeCellOptionMutationPayload!
+  changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Мутация для изменения имени группы."""

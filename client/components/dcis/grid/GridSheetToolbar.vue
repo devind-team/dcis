@@ -27,7 +27,9 @@ export default defineComponent({
   },
   setup () {
     const { t } = useI18n()
-    const kinds: ComputedRef = computed(() => (Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`), value: k }))))
+    const kinds: ComputedRef = computed(() => (
+      Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`), value: k })))
+    )
     return { kinds }
   }
 })

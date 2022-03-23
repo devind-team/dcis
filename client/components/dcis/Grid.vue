@@ -11,6 +11,7 @@
         :end-selection="endCellSelection"
         :set-active="setActive"
       )
+    pre {{ selectionCells }}
 </template>
 
 <script lang="ts">
@@ -48,6 +49,7 @@ export default defineComponent({
       mergedCells,
       active,
       selection,
+      selectionCells,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
@@ -65,6 +67,7 @@ export default defineComponent({
       mergeCells,
       active,
       selection,
+      selectionCells,
       startCellSelection,
       enterCellSelection,
       endCellSelection,

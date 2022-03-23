@@ -9,6 +9,7 @@ from devind_helpers.schema.types import ErrorFieldType
 from django.db.models import F
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from django.db import transaction
 
 from apps.dcis.models import Document, RowDimension, Sheet, Cell
 from apps.dcis.schema.types import RowDimensionType, CellType, MergedCellType
@@ -75,7 +76,7 @@ class DeleteRowDimensionMutation(BaseMutation):
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 
-class ChangeCellOptionMutation(BaseMutation):
+class ChangeCellsOptionMutation(BaseMutation):
     """Мутация для изменения свойств ячеек:
 
         - horizontal_align - ['left', 'center', 'right']
@@ -88,24 +89,30 @@ class ChangeCellOptionMutation(BaseMutation):
     """
 
     class Input:
-        cell_id = graphene.Int(required=True, description='Идентификатор ячейки')
+        cells_id = graphene.List(graphene.NonNull(graphene.Int), required=True, description='Идентификатор ячейки')
         field = graphene.String(required=True, description='Идентификатор поля')
         value = graphene.String(description='Значение поля')
 
-    cell = graphene.Field(CellType)
+    cells = graphene.List(CellType, description='Измененные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: int, field: str, value: Optional[str] = None):
-        cell: Optional[Cell] = get_object_or_none(Cell, pk=cell_id)
-        if not cell:
-            return ChangeCellOptionMutation(success=False, errors=[ErrorFieldType('cell_id', ['Ячейка не найдена'])])
+    def mutate_and_get_payload(
+            root: Any,
+            info: ResolveInfo,
+            cells_id: List[int],
+            field: str,
+            value: Optional[str] = None
+    ):
         success, value, errors = check_cell_options(field, value)
         if not success:
-            return ChangeCellOptionMutation(success=success, errors=errors)
-        setattr(cell, field, value)
-        cell.save(update_fields=(field,))
-        return ChangeCellOptionMutation(cell=cell)
+            return ChangeCellsOptionMutation(success=success, errors=errors)
+        cells: List[Cell] = Cell.objects.filter(pk__in=cells_id).all()
+        with transaction.atomic():
+            for cell in cells:
+                setattr(cell, field, value)
+                cell.save(update_fields=(field,))
+        return ChangeCellsOptionMutation(cells=cells)
 
 
 class SheetMutations(graphene.ObjectType):
@@ -114,4 +121,4 @@ class SheetMutations(graphene.ObjectType):
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
 
-    change_cell_option = ChangeCellOptionMutation.Field(required=True, description='Изменения опций ячейки')
+    change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
