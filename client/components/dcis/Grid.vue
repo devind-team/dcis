@@ -3,7 +3,14 @@
     grid-sheet-toolbar(:update="update")
     table.grid__table
       grid-header(:columns="columns")
-      grid-body(:rows="rows" :set-active="setActive" )
+      grid-body(
+        :rows="rows"
+        :selection="selection"
+        :start-selection="startCellSelection"
+        :enter-selection="enterCellSelection"
+        :end-selection="endCellSelection"
+        :set-active="setActive"
+      )
 </template>
 
 <script lang="ts">
@@ -40,6 +47,10 @@ export default defineComponent({
       mergeCells,
       mergedCells,
       active,
+      selection,
+      startCellSelection,
+      enterCellSelection,
+      endCellSelection,
       setActive
     } = useGrid(sheet)
 
@@ -47,13 +58,26 @@ export default defineComponent({
     provide('documentId', props.documentId)
     provide('documentUpdate', props.update)
 
-    return { columns, rows, mergedCells, mergeCells, active, setActive }
+    return {
+      columns,
+      rows,
+      mergedCells,
+      mergeCells,
+      active,
+      selection,
+      startCellSelection,
+      enterCellSelection,
+      endCellSelection,
+      setActive
+    }
   }
 })
 </script>
 
 <style lang="sass">
 table.grid__table
+  user-select: none
+
   margin-top: 3px
   border-collapse: collapse
 
@@ -71,6 +95,10 @@ table.grid__table
   tbody tr td:not(.grid__row-index)
     border: 1px solid silver
     position: relative
+    cursor: cell
+
+    &.grid__cell-container-selected
+      border: 1.2px blue solid !important
 
     .grid__cell-container-active
       top: 0
