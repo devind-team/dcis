@@ -1,7 +1,6 @@
 import path from 'path'
 import accounting from 'accounting'
-import {UserType} from "~/types/graphql";
-import {isRef} from "#app";
+import { UserType } from '~/types/graphql'
 
 export function useFilters () {
   const money = (s: string): string => accounting.formatNumber(s, 2, ' ', '.')

@@ -31,5 +31,4 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     def resolve_document_statuses(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> QuerySet:
-        document: Document = Document.objects.get_object_or_404(pk=from_global_id(document_id)[1])
-        return DocumentStatus.objects.filter(document=document)
+        return DocumentStatus.objects.filter(document_id=from_global_id(document_id)[1])

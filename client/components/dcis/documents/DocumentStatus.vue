@@ -4,7 +4,7 @@
     :subheader="`Версия ${ document.version }`"
     :button-text="String($t('dcis.documents.status.buttonText'))"
     :mutation="addDocumentStatus"
-    :variables="{ documentId: document.id, userId: user.id, statuId: status.id, comment }"
+    :variables="{ documentId: document.id, userId: user.id, statusId: status.id, comment }"
     :update="addDocumentStatusUpdate"
     mutation-name="addDocumentStatus"
     i18n-path="dcis.documents.status"
@@ -29,7 +29,7 @@
       )
       v-list(two-line dense)
         v-divider
-        template(v-for="(item, index) in documentStatuses")
+        template(v-for="item in documentStatuses")
           v-list-item(:key="item.id")
             v-list-item-content
               v-list-item-title {{ item.status.name }}
@@ -44,7 +44,7 @@
                 icon
               )
                 v-icon(color="error") mdi-close-circle
-          v-divider(:key="index")
+          v-divider
 </template>
 
 <script lang="ts">
