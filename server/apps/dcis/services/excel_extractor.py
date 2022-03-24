@@ -81,6 +81,7 @@ class ExcelExtractor:
         for sheet in self.work_book.worksheets:
             name: str = sheet.title
             columns_dimension: Dict[int, object] = self._parse_columns_dimension(sheet.column_dimensions)
+            print(columns_dimension)
             rows_dimension: Dict[int, object] = self._parse_rows_dimension(sheet.row_dimensions)
             cells = self._parse_cells(self.work_book, sheet.rows)
             merged_cells = self._parse_merged_cells(sheet.merged_cells.ranges)
@@ -97,9 +98,10 @@ class ExcelExtractor:
     @staticmethod
     def _parse_columns_dimension(holder: DimensionHolder) -> Dict:
         """Парсинг имеющихся колонок."""
+        print(holder.items())
         return {
             column_index_from_string(col_letter): {
-                'width': column.width,
+                'width': column.width * 7,
                 'fixed': False,
                 'hidden': column.hidden,
                 'auto_size': column.auto_size,
@@ -130,6 +132,7 @@ class ExcelExtractor:
     @staticmethod
     def _parse_rows_dimension(holder: DimensionHolder) -> Dict:
         """Парсинг имеющихся строк."""
+        print(holder.items())
         return {
             row.index: {
                 'height': row.height,
