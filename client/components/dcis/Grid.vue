@@ -1,6 +1,11 @@
 <template lang="pug">
   div
-    grid-sheet-toolbar(:update="update")
+    grid-sheet-toolbar(
+      :sheet-id="sheet.id"
+      :selection-cells="selectionCells"
+      :selection-cells-options="selectionCellsOptions"
+      :update="update"
+    )
     table.grid__table
       grid-header(:columns="columns")
       grid-body(
@@ -11,7 +16,6 @@
         :end-selection="endCellSelection"
         :set-active="setActive"
       )
-    pre {{ selectionCells }}
 </template>
 
 <script lang="ts">
@@ -50,6 +54,7 @@ export default defineComponent({
       active,
       selection,
       selectionCells,
+      selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
@@ -68,6 +73,7 @@ export default defineComponent({
       active,
       selection,
       selectionCells,
+      selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,

@@ -13,7 +13,7 @@
       slot(name="activator" :on="on")
     template(#form)
       validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addProject.name')" rules="required|min:3|max:250")
-        v-text-field(v-model="name" :label="$t('dcis.projects.addProject.name')" :error-messages="errors" :success="valid")
+        v-text-field(v-model="name" :label="$t('dcis.projects.addProject.name')" :error-messages="errors" :success="valid" autofocus)
       validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addProject.short')" rules="required|min:3|max:30")
         v-text-field(v-model="short" :label="$t('dcis.projects.addProject.short')" :error-messages="errors" :success="valid" counter)
       validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addProject.description')" rules="required|min:3|max:1023")

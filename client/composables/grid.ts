@@ -6,12 +6,14 @@ import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueTyp
 import {
   getCellBorder,
   getCellStyle,
-  getCellValue, letterToPosition,
+  getCellValue,
+  letterToPosition,
   parseCoordinate,
   positionToLetter,
-  rangeLetterToCells
+  rangeLetterToCells,
+  unionValues
 } from '~/services/grid'
-import { BuildCellType, BuildColumnType, BuildRowType } from '~/types/grid-types'
+import { BuildCellType, BuildColumnType, BuildRowType, CellOptionsType } from '~/types/grid-types'
 
 export const cellKinds: Record<string, string> = {
   n: 'Numeric',
@@ -143,13 +145,34 @@ export function useGrid (sheet: Ref<SheetType>) {
     selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
     startCellSelectionPosition = null
   }
-
-  const selectionCells: ComputedRef<any[]> = computed<any[]>(() => (
+  /**
+   * Вычислений выделенный ячеек
+   */
+  const selectionCells: ComputedRef<CellType[]> = computed<CellType[]>(() => (
     selection.value
       .map(parseCoordinate)
       .map(cord => ({ rowId: sheet.value.rows[cord.row - 1].id, columnId: sheet.value.columns[letterToPosition(cord.column) - 1].id }))
       .map(position => (cells.value[position.rowId][position.columnId]))
   ))
+  const selectionCellsOptions: ComputedRef<CellOptionsType> = computed<CellOptionsType>(() => {
+    const allowOptions: string[] = ['kind', 'horizontalAlign', 'verticalAlign', 'size', 'strong', 'italic', 'underline']
+    const aggregateOptions: Record<string, any> = selectionCells.value
+      .map((cell: CellType) => Object.fromEntries<string | boolean | null>(
+        Object.entries(cell).filter(([k, _]) => allowOptions.includes(k)))
+      )
+      .reduce(
+        (a, c) => {
+          for (const k in c) {
+            a[k].push(c[k])
+          }
+          return a
+        },
+        Object.fromEntries(allowOptions.map(e => ([e, []])))
+      )
+    return Object.fromEntries(
+      Object.entries(aggregateOptions).map(([option, values]) => [option, unionValues(values)])
+    ) as CellOptionsType
+  })
 
   const setActive = (position: string) => {
     active.value = position
@@ -166,6 +189,7 @@ export function useGrid (sheet: Ref<SheetType>) {
     active,
     selection,
     selectionCells,
+    selectionCellsOptions,
     startCellSelection,
     enterCellSelection,
     endCellSelection,

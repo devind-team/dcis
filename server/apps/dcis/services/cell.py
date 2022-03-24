@@ -1,3 +1,4 @@
+from argparse import ArgumentTypeError
 from typing import Tuple, List, Optional, Union
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import convert_str_to_int, convert_str_to_bool
@@ -40,7 +41,7 @@ def check_cell_options(field: str, value: str) -> Tuple[
                 'value',
                 [f'Разрешены только цифры.']
             )]
-        if 10 <= value <= 24:
+        if not (6 <= value <= 24):
             return False, None, [ErrorFieldType(
                 'value',
                 [f'Разрешенный диапазон: 10 <= {value} <= 24.']
@@ -55,14 +56,14 @@ def check_cell_options(field: str, value: str) -> Tuple[
             )]
         return True, value, None
     if field in ['strong', 'italic', 'underline']:
-        value: Optional[bool] = convert_str_to_bool(value)
-        if not value:
+        try:
+            value: Optional[bool] = convert_str_to_bool(value)
+            return True, value if field != 'underline' else 'single', None
+        except ArgumentTypeError:
             return False, None, [ErrorFieldType(
                 'value',
                 [f'Разрешены значения: "yes", "true", "t", "y", "1", "no", "false", "f", "n", "0".']
             )]
-        return True, value, None
-
     if field == 'kind':
         allow_kinds = [kind[0] for kind in Cell.KIND_VALUE]
         if value not in allow_kinds:

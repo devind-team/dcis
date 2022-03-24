@@ -108,19 +108,13 @@ export type RangePositionsType = {
 export type CellOptionValueType = string | boolean | null
 
 export type CellOptionsType = {
-  align: AlignText
-  bold: boolean
-  italic: boolean
-  color?: string
-  background?: string
-  borderTop?: string
-  borderBottom?: string
-  borderLeft?: string
-  borderRight?: string
-  borderTopColor?: string
-  borderBottomColor?: string
-  borderLeftColor?: string
-  borderRightColor?: string
+  kind: string | null,
+  horizontalAlign: 'left' | 'center' | 'right' | null
+  verticalAlign: 'top' | 'middle' | 'bottom' | null
+  size: number | null
+  strong: boolean | null
+  italic: boolean | null
+  underline: boolean | null
 }
 
 /**
