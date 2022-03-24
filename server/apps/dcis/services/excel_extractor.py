@@ -99,7 +99,7 @@ class ExcelExtractor:
         """Парсинг имеющихся колонок."""
         return {
             column_index_from_string(col_letter): {
-                'width': column.width,
+                'width': column.width * 7,
                 'fixed': False,
                 'hidden': column.hidden,
                 'auto_size': column.auto_size,

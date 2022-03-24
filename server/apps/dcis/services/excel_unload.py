@@ -87,7 +87,7 @@ class DocumentUnload:
             # Ширина и высота для колонок и строк соответственно
             for column in columns:
                 if column.width:
-                    ws.column_dimensions[get_column_letter(column.index)].width = column.width
+                    ws.column_dimensions[get_column_letter(column.index)].width = column.width // 7
             for row in rows:
                 if row.height:
                     ws.row_dimensions[row.index].height = row.height

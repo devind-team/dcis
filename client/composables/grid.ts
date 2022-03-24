@@ -21,7 +21,7 @@ export function useGrid (sheet: Ref<SheetType>) {
       index: columnDimension.index,
       positional: positionToLetter(columnDimension.index),
       style: {
-        width: columnDimension.width ? `${columnDimension.width}px` : '60px'
+        width: columnDimension.width ? `${columnDimension.width}px` : '64px'
       },
       dimension: columnDimension
     }))
