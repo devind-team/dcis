@@ -262,6 +262,19 @@ const getCellValue = (value: ValueType | undefined, cell: CellType): string => {
   return value ? value.value : cell.default
 }
 
+const unionValues = <T>(values: T[]): T | null => {
+  if (values.length === 0) {
+    return null
+  }
+  const value: T = values.shift()
+  for (const val of values) {
+    if (value !== val) {
+      return null
+    }
+  }
+  return value
+}
+
 export {
   letterToPosition,
   positionToLetter,
@@ -277,5 +290,6 @@ export {
   normalizationRange,
   getCellStyle,
   getCellBorder,
-  getCellValue
+  getCellValue,
+  unionValues
 }

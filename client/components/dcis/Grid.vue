@@ -1,6 +1,11 @@
 <template lang="pug">
   div
-    grid-sheet-toolbar(:update="update")
+    grid-sheet-toolbar(
+      :sheet-id="sheet.id"
+      :selection-cells="selectionCells"
+      :selection-cells-options="selectionCellsOptions"
+      :update="update"
+    )
     table.grid__table
       grid-header(:columns="columns")
       grid-body(
@@ -48,6 +53,8 @@ export default defineComponent({
       mergedCells,
       active,
       selection,
+      selectionCells,
+      selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
@@ -65,6 +72,8 @@ export default defineComponent({
       mergeCells,
       active,
       selection,
+      selectionCells,
+      selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
