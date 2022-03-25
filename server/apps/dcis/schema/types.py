@@ -355,6 +355,7 @@ class RowDimensionType(DjangoObjectType):
             'user',
             'content_type',
             'object_id',
+            'updated_at',
             'cells',
         )
         convert_choices_to_enum = False

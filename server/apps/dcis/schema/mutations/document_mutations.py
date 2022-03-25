@@ -11,7 +11,7 @@ from django.db.models import Max
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Period, Document, Value, Sheet, Status
+from apps.dcis.models import Period, Document, Value, Sheet, Status, RowDimension
 from apps.dcis.permissions import AddDocument
 from apps.dcis.schema.types import DocumentType, ValueType
 from apps.dcis.services.excel_unload import DocumentUnload
@@ -104,6 +104,8 @@ class ChangeValueMutation(BaseMutation):
                 'value': value
             }
         )
+        row: RowDimension = get_object_or_404(RowDimension, pk=row_id)
+        row.save(update_fields=('updated_at',))
         return ChangeValueMutation(value=val)
 
 

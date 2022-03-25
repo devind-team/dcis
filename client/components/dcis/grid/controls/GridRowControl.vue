@@ -1,7 +1,10 @@
 <template lang="pug">
   v-menu(bottom close-on-content-click)
     template(#activator="{ on, attrs }")
-      div(v-on="on" v-bind="attrs") {{ row.index }}
+      v-tooltip(right open-delay="1000" )
+        template(#activator="{ on: onTooltip, attrs }")
+          div(v-on="{ ...on, ...onTooltip }" v-bind="attrs") {{ row.index }}
+        span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")
         v-list-item-icon
@@ -31,6 +34,7 @@ import {
 } from '~/types/graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
+import { useFilters } from '~/composables'
 
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
 export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
@@ -46,6 +50,7 @@ export default defineComponent({
     row: { type: Object as PropType<BuildRowType>, required: true }
   },
   setup (props) {
+    const { dateTimeHM } = useFilters()
     const documentId: string = inject<string>('documentId')
     const documentUpdate: DocumentUpdateType<any> = inject<DocumentUpdateType<any>>('documentUpdate')
     const addRowDimension = (rowId: number, position: 'before' | 'after') => {
@@ -98,8 +103,7 @@ export default defineComponent({
       )
       mutate({ rowId })
     }
-
-    return { addRowDimension, deleteRowDimension }
+    return { addRowDimension, deleteRowDimension, dateTimeHM }
   }
 })
 </script>

@@ -185,6 +185,8 @@ class RowDimension(SheetDivision, models.Model):
         help_text='Документ, для динамических строк'
     )
 
+    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+
     class Meta:
         ordering = ('index', 'id',)
 
