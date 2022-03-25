@@ -1,7 +1,7 @@
 <template lang="pug">
   thead
     tr
-      th
+      th(style="width: 30px")
       th(
         v-for="column in columns"
         :key="column.id"
