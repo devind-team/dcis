@@ -33,7 +33,6 @@ import type {
 import { useCommonQuery } from '~/composables'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import unloadDocument from '~/gql/dcis/mutations/document/unload_document.graphql'
-import DefaultLayout from '~/layouts/default.vue'
 import Grid from '~/components/dcis/Grid.vue'
 
 export type UnloadDocumentMutationResult = { data: UnloadDocumentMutation }
