@@ -57,10 +57,10 @@ export default defineComponent({
       }
     })
 
-    const layoutInstance = inject<DefaultLayout>('layoutInstance')
-    layoutInstance.setFooter(false)
+    const setFooter = inject<(state: boolean) => void>('setFooter')
+    setFooter(false)
     onUnmounted(() => {
-      layoutInstance.setFooter(true)
+      setFooter(true)
     })
 
     return { active, doc, loading, mutate, unloadLoading, update }
