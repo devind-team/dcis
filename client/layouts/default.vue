@@ -8,60 +8,61 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Provide } from 'vue-property-decorator'
-import { mapGetters } from 'vuex'
+import type { Ref, ComputedRef } from '#app'
+import { defineComponent, provide, ref, toRefs, watchEffect } from '#app'
+import { useAuthStore } from '~/store'
+import { useCursorPagination, useQueryRelay, useVuetify } from '~/composables'
+import { NotificationsQuery, NotificationsQueryVariables, NotificationType, UserType } from '~/types/graphql'
+import notificationsSubscription from '~/gql/notifications/subscriptions/notifications.graphql'
 import notificationsQuery from '~/gql/notifications/queries/notifications.graphql'
-import { NotificationsQuery, NotificationType, NotificationTypeEdge, PageInfo, UserType } from '~/types/graphql'
 import Navigation from '~/components/global/Navigation.vue'
 import AppBar from '~/components/global/AppBar.vue'
 import FooterComponent from '~/components/global/FooterComponent.vue'
-import { updateQueryNotifications } from '~/components/global/Notification.vue'
+import { updateQueryNotifications } from '~/services/notifications'
 
-@Component<DefaultLayout>({
+export default defineComponent({
   components: { AppBar, Navigation, FooterComponent },
-  computed: mapGetters({ user: 'auth/user', loginIn: 'auth/loginIn' }),
-  watch: {
-    '$colorMode.value': {
-      handler () {
-        this.$vuetify.theme.dark = this.$colorMode.value === 'dark'
-      },
-      immediate: true
-    }
-  },
-  apollo: {
-    notifications: {
-      query: notificationsQuery,
-      variables () { return { userId: this.user.id, first: this.notificationPageSize } },
-      update ({ notifications }: NotificationsQuery | any): NotificationType[] {
-        this.notificationPageInfo = notifications.pageInfo
-        return notifications.edges.map((e: NotificationTypeEdge) => e.node) as NotificationType[]
-      },
-      subscribeToMore: {
-        document: require('~/gql/notifications/subscriptions/notifications.graphql'),
-        updateQuery: updateQueryNotifications
-      },
-      loadingKey: 'notificationLoading',
-      skip () {
-        return !this.loginIn
+  setup () {
+    const authStore = useAuthStore()
+    const { vuetify, isDark } = useVuetify()
+
+    const { user, loginIn } = toRefs<{ user: UserType, loginIn: boolean }>(authStore)
+
+    const drawer: Ref<boolean> = ref<boolean>(false)
+    const footer: Ref<boolean> = ref<boolean>(true)
+
+    const {
+      data: notifications,
+      loading: notificationLoading,
+      subscribeToMore
+    } = useQueryRelay<NotificationsQuery, NotificationsQueryVariables, NotificationType>({
+      document: notificationsQuery,
+      variables: () => ({ userId: user.value.id }),
+      options: () => ({
+        enabled: loginIn.value
+      })
+    }, {
+      pagination: useCursorPagination()
+    })
+
+    subscribeToMore({
+      document: notificationsSubscription,
+      updateQuery: updateQueryNotifications,
+      onError () {
+        typeof window !== 'undefined' && window.location.reload()
       }
+    })
+
+    watchEffect(() => { vuetify.theme.dark = isDark })
+
+    const setFooter = (state: boolean = true): void => {
+      footer.value = state
     }
+
+    provide<ComputedRef<NotificationType[]>>('notifications', notifications)
+    provide<Ref<boolean>>('notificationLoading', notificationLoading)
+    provide<(state: boolean) => void>('setFooter', setFooter)
+    return { drawer, footer }
   }
 })
-export default class DefaultLayout extends Vue {
-  @Provide() layoutInstance: DefaultLayout = this
-  readonly loginIn!: boolean
-  readonly user!: UserType
-  readonly notifications!: NotificationType[] | undefined
-
-  public footer: boolean = true
-  drawer: boolean = false
-
-  notificationLoading: boolean = false
-  notificationPageSize: number = 25
-  notificationPageInfo: PageInfo = { hasNextPage: true, hasPreviousPage: true }
-
-  setFooter (state: boolean = true) {
-    this.footer = state
-  }
-}
 </script>

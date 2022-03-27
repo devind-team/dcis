@@ -6,16 +6,15 @@
 </template>
 
 <script lang="ts">
-import Vue, { AsyncComponent, PropType } from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
-import { PageType } from '~/types/graphql'
+import type { PropType } from '#app'
+import { defineComponent } from '#app'
+import { PageType, UserType } from '~/types/graphql'
+import PageSections from '~/components/pages/PageSections.vue'
 
-const PageSections: AsyncComponent = () => import('~/components/pages/PageSections.vue')
-
-@Component<NotificationPageView>({
-  components: { PageSections }
+export default defineComponent({
+  components: { PageSections },
+  props: {
+    page: { type: Object as PropType<PageType & { user: UserType }>, required: true }
+  }
 })
-export default class NotificationPageView extends Vue {
-  @Prop({ type: Object as PropType<PageType>, required: true }) page!: PageType
-}
 </script>
