@@ -3512,6 +3512,8 @@ export type RowDimensionType = {
   parent?: Maybe<RowDimensionType>;
   /** Лист */
   sheet: SheetType;
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
   /** Пользователь */
   user?: Maybe<Array<Maybe<UserType>>>;
 };
@@ -4361,7 +4363,7 @@ export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name:
 
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any };
 
-export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean };
+export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any };
 
 export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any };
 
@@ -4460,7 +4462,7 @@ export type AddRowDimensionMutationVariables = Exact<{
   position: Scalars['String'];
 }>;
 
-export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
+export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
 
 export type ChangeCellsOptionMutationVariables = Exact<{
   cellsId: Array<Scalars['Int']> | Scalars['Int'];
@@ -4468,7 +4470,7 @@ export type ChangeCellsOptionMutationVariables = Exact<{
   value: Scalars['String'];
 }>;
 
-export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null } };
+export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowId: Scalars['Int'];
@@ -4484,7 +4486,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
 
 export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];

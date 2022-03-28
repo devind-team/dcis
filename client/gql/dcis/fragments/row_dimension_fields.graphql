@@ -3,5 +3,6 @@ fragment RowDimensionFields on RowDimensionType {
   index
   height
   dynamic
+  updatedAt
   __typename
 }

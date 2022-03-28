@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 import graphene
@@ -8,10 +9,11 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
+from django.utils.timezone import make_aware
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Period, Document, Value, Sheet, Status
+from apps.dcis.models import Period, Document, Value, Sheet, Status, RowDimension
 from apps.dcis.permissions import AddDocument
 from apps.dcis.schema.types import DocumentType, ValueType
 from apps.dcis.services.excel_unload import DocumentUnload
@@ -104,6 +106,7 @@ class ChangeValueMutation(BaseMutation):
                 'value': value
             }
         )
+        RowDimension.objects.filter(pk=row_id).update(updated_at=make_aware(datetime.now()))
         return ChangeValueMutation(value=val)
 
 

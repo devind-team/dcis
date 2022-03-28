@@ -2814,6 +2814,8 @@ type RowDimensionType {
   parent: RowDimensionType
   """Лист"""
   sheet: SheetType!
+  """Дата обновления"""
+  updatedAt: DateTime!
   """Пользователь"""
   user: [UserType]
 }
