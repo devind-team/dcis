@@ -14,7 +14,7 @@
         v-list-item(@click="mutate")
           v-list-item-icon
             v-icon mdi-check
-          v-list-item-content {{ t(`${notification.read ? 'markAsUnread' : 'markAsRead'}`) }}
+          v-list-item-content {{ $t(`notifications.${notification.read ? 'markAsUnread' : 'markAsRead'}`) }}
       apollo-mutation(
         v-slot="{ mutate }"
         :mutation="require('~/gql/notifications/mutations/change_notification.graphql')"
@@ -25,7 +25,7 @@
         v-list-item(@click="mutate")
           v-list-item-icon
             v-icon mdi-close-circle-outline
-          v-list-item-content {{ t(`${notification.hide ? 'restore' : 'delete'}`) }}
+          v-list-item-content {{ $t(`notifications.${notification.hide ? 'restore' : 'delete'}`) }}
       apollo-mutation(
         v-slot="{ mutate }"
         :mutation="require('~/gql/notifications/mutations/delete_notice.graphql')"
@@ -36,34 +36,25 @@
         v-list-item(v-if="hasPerm('notifications.delete_notice')" @click="mutate")
           v-list-item-icon
             v-icon mdi-close-circle-multiple-outline
-          v-list-item-content {{ t('deleteAllForEveryone') }}
+          v-list-item-content {{ $t('notifications.deleteAllForEveryone') }}
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { Component, Prop, Inject } from 'vue-property-decorator'
 import { ApolloError } from 'apollo-client'
-import { mapGetters } from 'vuex'
+import type { PropType, Ref } from '#app'
+import { defineComponent, inject, toRef } from '#app'
 import { NotificationType } from '~/types/graphql'
+import { HasPermissionFnType, useAuthStore } from '~/store'
 
-@Component<NotificationMenu>({
-  computed: mapGetters({ hasPerm: 'auth/hasPerm' })
-})
-export default class NotificationMenu extends Vue {
-  @Inject() setAlertApolloError!: (error: ApolloError) => void
-
-  @Prop({ type: Object as PropType<NotificationType>, required: true }) notification!: NotificationType
-
-  readonly hasPerm!: (permissions: string | string[], or?: boolean) => boolean
-
-  /**
-   * Получение перевода относильно локального пути
-   * @param path
-   * @param values
-   * @return
-   */
-  t (path: string, values: any = undefined): string {
-    return this.$t(`notifications.${path}`, values) as string
+export default defineComponent({
+  props: {
+    notification: { type: Object as PropType<NotificationType>, required: true }
+  },
+  setup () {
+    const authStore = useAuthStore()
+    const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
+    const setAlertApolloError: (error: ApolloError) => void = inject('setAlertApolloError')
+    return { setAlertApolloError, hasPerm }
   }
-}
+})
 </script>

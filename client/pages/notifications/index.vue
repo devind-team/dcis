@@ -3,60 +3,45 @@
     v-row
       v-col.mx-auto(md="8")
         v-card
-          v-card-title {{ t('name') }}
+          v-card-title {{ $t('notifications.name') }}
             v-spacer
-            notifications-menu(:notifications="layoutInstance.notifications")
+            notifications-menu(:notifications="notifications")
           v-card-text
             mutation-result-alert(ref="mutationResultAlert")
-            notifications-view(:notifications="layoutInstance.notifications")
+            notifications-view(:notifications="notifications")
 </template>
 
 <script lang="ts">
-import { AsyncComponent, PropType } from 'vue'
-import { defineComponent } from '#app'
-import { mapGetters } from 'vuex'
-import { MetaInfo } from 'vue-meta'
 import { ApolloError } from 'apollo-client'
+import type { ComputedRef, PropType } from '#app'
+import { defineComponent, inject, provide, ref, useNuxt2Meta } from '#app'
+import { useI18n } from '~/composables'
+import { NotificationType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import MutationResultAlert from '~/components/common/MutationResultAlert.vue'
-const NotificationsMenu: AsyncComponent = () => import('~/components/notifications/NotificationsMenu.vue')
-const NotificationsView: AsyncComponent = () => import('~/components/notifications/NotificationsView.vue')
+import NotificationsMenu from '~/components/notifications/NotificationsMenu.vue'
+import NotificationsView from '~/components/notifications/NotificationsView.vue'
 
 export default defineComponent({
   components: { BreadCrumbs, MutationResultAlert, NotificationsMenu, NotificationsView },
-  inject: ['layoutInstance'],
-  provide () {
-    return {
-      setAlertApolloError: this.setApolloError,
-    }
-  },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
-  computed: mapGetters({ user: 'auth/user' }),
-  methods: {
-    /**
-     * Получение перевода относильно локального пути
-     * @param path
-     * @param values
-     * @return
-     */
-    t (path: string, values: any = undefined): string {
-      return this.$t(`notifications.${path}`, values) as string
-    },
-    /**
-     * Установка ошибки Apollo
-     * @param error
-     */
-    setApolloError (error: ApolloError): void {
-      this.$refs.mutationResultAlert.setApolloError(error)
+  setup () {
+    const { t } = useI18n()
+    useNuxt2Meta({ title: t('notifications.name') as string })
+
+    const mutationResultAlert = ref<InstanceType<typeof MutationResultAlert> | null>(null)
+
+    const setApolloError = (error: ApolloError): void => {
+      mutationResultAlert.value.setApolloError(error)
     }
-  },
-  head (): MetaInfo {
-    return { title: this.t('name') } as MetaInfo
+
+    provide<(error: ApolloError) => void>('setAlertApolloError', setApolloError)
+    const notifications: ComputedRef<NotificationType[]> = inject<ComputedRef<NotificationType[]>>('notifications')
+
+    return { notifications, mutationResultAlert }
   }
 })
-
-
 </script>
