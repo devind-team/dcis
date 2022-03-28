@@ -1,9 +1,9 @@
 <template lang="pug">
   v-menu(bottom close-on-content-click)
-    template(#activator="{ on, attrs }")
-      v-tooltip(right open-delay="1000" )
+    template(#activator="{ on: onMenu }")
+      v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          div(v-on="{ ...on, ...onTooltip }" v-bind="attrs") {{ row.index }}
+          div(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs") {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")

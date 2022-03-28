@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 import graphene
@@ -8,6 +9,7 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
+from django.utils.timezone import make_aware
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -104,8 +106,7 @@ class ChangeValueMutation(BaseMutation):
                 'value': value
             }
         )
-        row: RowDimension = get_object_or_404(RowDimension, pk=row_id)
-        row.save(update_fields=('updated_at',))
+        RowDimension.objects.filter(pk=row_id).update(updated_at=make_aware(datetime.now()))
         return ChangeValueMutation(value=val)
 
 
