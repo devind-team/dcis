@@ -37,7 +37,7 @@ export default defineComponent({
       subscribeToMore
     } = useQueryRelay<NotificationsQuery, NotificationsQueryVariables, NotificationType>({
       document: notificationsQuery,
-      variables: () => ({ userId: user.value.id }),
+      variables: () => ({ userId: user.value?.id }),
       options: () => ({
         enabled: loginIn.value
       })
