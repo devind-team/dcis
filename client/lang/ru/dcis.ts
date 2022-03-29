@@ -49,7 +49,7 @@ export default {
   cellKinds: {
     n: 'Числовой',
     s: 'Строковый',
-    text: 'Большая строка',
+    text: 'Текст',
     money: 'Деньги',
     department: 'Департаменты'
   },

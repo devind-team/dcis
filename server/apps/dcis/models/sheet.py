@@ -185,6 +185,8 @@ class RowDimension(SheetDivision, models.Model):
         help_text='Документ, для динамических строк'
     )
 
+    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+
     class Meta:
         ordering = ('index', 'id',)
 
@@ -297,7 +299,7 @@ class MergedCell(models.Model):
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 
     class Meta:
-        unique_together = [['min_col', 'min_row', 'sheet']]
+        ordering = ('min_col', 'min_row',)
 
     def __str__(self) -> str:
         return f'{get_column_letter(self.min_col)}{self.min_row}:' \

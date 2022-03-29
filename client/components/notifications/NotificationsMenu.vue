@@ -16,7 +16,7 @@
           v-list-item-icon
             v-icon mdi-check
           v-list-item-content
-            v-list-item-title {{ t('markAsReadAll') }}
+            v-list-item-title {{ $t('notifications.markAsReadAll') }}
       apollo-mutation(
         v-if="notifications.length"
         v-slot="{ mutate }"
@@ -29,34 +29,27 @@
           v-list-item-icon
             v-icon mdi-close-circle-multiple-outline
           v-list-item-content
-            v-list-item-title {{ t('deleteAll') }}
+            v-list-item-title {{ $t('notifications.deleteAll') }}
       v-list-item(:to="localePath('profile-settings')")
         v-list-item-icon
           v-icon mdi-cog
         v-list-item-content
-          v-list-item-title {{ t('settings') }}
+          v-list-item-title {{ $t('notifications.settings') }}
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { Component, Inject, Prop } from 'vue-property-decorator'
 import { ApolloError } from 'apollo-client'
+import type { PropType } from '#app'
+import { defineComponent, inject } from '#app'
 import { NotificationType } from '~/types/graphql'
 
-@Component<NotificationsMenu>({})
-export default class NotificationsMenu extends Vue {
-  @Inject() setAlertApolloError!: (error: ApolloError) => void
-
-  @Prop({ type: Array as PropType<NotificationType[]>, required: true }) notifications!: NotificationType[]
-
-  /**
-   * Получение перевода относильно локального пути
-   * @param path
-   * @param values
-   * @return
-   */
-  t (path: string, values: any = undefined): string {
-    return this.$t(`notifications.${path}`, values) as string
+export default defineComponent({
+  props: {
+    notifications: { type: Array as PropType<NotificationType[]>, required: true }
+  },
+  setup () {
+    const setAlertApolloError: (error: ApolloError) => void = inject('setAlertApolloError')
+    return { setAlertApolloError }
   }
-}
+})
 </script>

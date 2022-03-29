@@ -1,16 +1,22 @@
 <template lang="pug">
   div
-    grid-sheet-toolbar(:update="update")
-    table.grid__table
-      grid-header(:columns="columns")
-      grid-body(
-        :rows="rows"
-        :selection="selection"
-        :start-selection="startCellSelection"
-        :enter-selection="enterCellSelection"
-        :end-selection="endCellSelection"
-        :set-active="setActive"
-      )
+    grid-sheet-toolbar(
+      :sheet-id="sheet.id"
+      :selection-cells="selectionCells"
+      :selection-cells-options="selectionCellsOptions"
+      :update="update"
+    )
+    div.grid__container
+      table.grid__table
+        grid-header(:columns="columns")
+        grid-body(
+          :rows="rows"
+          :selection="selection"
+          :start-selection="startCellSelection"
+          :enter-selection="enterCellSelection"
+          :end-selection="endCellSelection"
+          :set-active="setActive"
+        )
 </template>
 
 <script lang="ts">
@@ -48,6 +54,8 @@ export default defineComponent({
       mergedCells,
       active,
       selection,
+      selectionCells,
+      selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
@@ -65,6 +73,8 @@ export default defineComponent({
       mergeCells,
       active,
       selection,
+      selectionCells,
+      selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
@@ -75,43 +85,62 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-table.grid__table
-  user-select: none
+div.grid__container
+  overflow: auto
+  height: calc(100vh - 230px)
+  position: relative
 
-  margin-top: 3px
-  border-collapse: collapse
+  table.grid__table
+    user-select: none
+    table-layout: fixed
+    width: 100%
 
-  thead tr th, tbody tr td.row_index
-    border: 1px solid silver
-    text-align: center
-    min-width: 25px
-    cursor: pointer
-    &:hover
-      background: lightgray
-  tbody tr td.grid__row-index
-    font-weight: bold
-    border: 1px solid silver
-    text-align: center
-  tbody tr td:not(.grid__row-index)
-    border: 1px solid silver
-    position: relative
-    cursor: cell
+    margin-top: 3px
+    border-collapse: collapse
 
-    &.grid__cell-container-selected
-      border: 1.2px blue solid !important
+    thead
+      background: white
+      position: sticky
+      top: -1px
+      z-index: 2
 
-    .grid__cell-container-active
-      top: 0
-      left: 0
-      position: absolute
-      width: 100%
-      height: 100%
-      input
+    thead tr th, tbody tr td.row_index
+      border: 1px solid silver
+      text-align: center
+      cursor: pointer
+      &:hover
+        background: lightgray
+    tbody tr td.grid__row-index
+      font-weight: bold
+      border: 1px solid silver
+      text-align: center
+      min-width: 25px
+
+      position: sticky
+      left: -1px
+      z-index: 1
+      background: white
+
+    tbody tr td:not(.grid__row-index)
+      border: 1px solid silver
+      position: relative
+      cursor: cell
+
+      &.grid__cell-container-selected
+        border: 1.2px blue solid !important
+
+      .grid__cell-container-active
+        top: 0
+        left: 0
+        position: absolute
         width: 100%
         height: 100%
-        &:focus
-          outline: none
+        input
+          width: 100%
+          height: 100%
+          &:focus
+            outline: none
 
-  tbody tr:hover
-    background: rgba(0, 0, 0, .1)
+    tbody tr:hover
+      background: rgba(0, 0, 0, .1)
 </style>

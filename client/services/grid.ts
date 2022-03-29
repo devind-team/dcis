@@ -229,12 +229,14 @@ const positionToLetter = (position: number): string => {
  */
 const getCellStyle = (cell: CellType): string => {
   const styles: string[] = []
-  if (cell.verticalAlign) { styles.push(`text-align: ${cell.verticalAlign}`) }
-  if (cell.horizontalAlign) { styles.push(`vertical-align: ${cell.verticalAlign}`) }
+  if (cell.verticalAlign) { styles.push(`vertical-align: ${cell.verticalAlign}`) }
+  if (cell.horizontalAlign) { styles.push(`text-align: ${cell.horizontalAlign}`) }
   if (cell.size) { styles.push(`font-size: ${cell.size}px`) }
   if (cell.strong) { styles.push('font-weight: bold') }
   if (cell.italic) { styles.push('font-style: italic') }
   if (cell.underline) { styles.push('text-decoration: underline') }
+  if (cell.color) { styles.push(`font-color: ${cell.color}`) }
+  if (cell.background) { styles.push(`background-color: ${cell.background}`) }
   return styles.join(';')
 }
 
@@ -260,6 +262,19 @@ const getCellValue = (value: ValueType | undefined, cell: CellType): string => {
   return value ? value.value : cell.default
 }
 
+const unionValues = <T>(values: T[]): T | null => {
+  if (values.length === 0) {
+    return null
+  }
+  const value: T = values.shift()
+  for (const val of values) {
+    if (value !== val) {
+      return null
+    }
+  }
+  return value
+}
+
 export {
   letterToPosition,
   positionToLetter,
@@ -275,5 +290,6 @@ export {
   normalizationRange,
   getCellStyle,
   getCellBorder,
-  getCellValue
+  getCellValue,
+  unionValues
 }

@@ -26,8 +26,9 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import type { Ref, ComputedRef, PropType } from '#app'
-import { computed, defineComponent, ref, useNuxtApp } from '#app'
+import type { Ref, PropType } from '#app'
+import { defineComponent, ref, toRefs } from '#app'
+import { useAuthStore } from '~/store'
 import { SectionInterface, UserType } from '~/types/graphql'
 import { HasPermissionFnType } from '~/store/auth'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
@@ -37,14 +38,13 @@ export default defineComponent({
   props: {
     section: { type: Object as PropType<SectionInterface>, required: true },
     editSection: { type: Boolean, default: false },
-    updateDeleteSection: { type: Function as PropType<(store: DataProxy, result: any) => void>, required: true}
+    updateDeleteSection: { type: Function as PropType<(store: DataProxy, result: any) => void>, required: true }
   },
   setup () {
-    const { $store } = useNuxtApp()
+    const autStore = useAuthStore()
 
     const active: Ref<boolean> = ref<boolean>(false)
-    const user: ComputedRef<UserType> = computed<UserType>(() => $store.getters['auth/user'])
-    const hasPerm: ComputedRef<HasPermissionFnType> = computed<HasPermissionFnType>(() => $store.getters['auth/hasPerm'])
+    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(autStore)
 
     return { active, user, hasPerm }
   }

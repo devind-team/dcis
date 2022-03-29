@@ -5,7 +5,7 @@
         template(v-slot:activator="{ on: onTooltip }")
           v-btn(v-on="{...onMenu, ...onTooltip}" @click.prevent="" icon)
             v-icon {{ icon }}
-        span {{ t('settings') }}
+        span {{ $t('pages.components.categoryAction.settings') }}
     v-list
       //- Добавление категории
       add-category(v-if="add && hasPerm('pages.add_category')"
@@ -16,14 +16,14 @@
           v-list-item(v-on="on")
             v-list-item-icon
               v-icon mdi-briefcase-plus-outline
-            v-list-item-content {{ t('addSubcategory') }}
+            v-list-item-content {{ $t('pages.components.categoryAction.addSubcategory') }}
       //- Мутация на изменение аватара
       choose-avatar-dialog(@input="changeCategoryAvatar($event)")
         template(#default="{ on }")
           v-list-item(v-on="on")
             v-list-item-icon
               v-icon mdi-image
-            v-list-item-content {{ t('changeAvatar') }}
+            v-list-item-content {{ $t('pages.components.categoryAction.changeAvatar') }}
       //- Изменение названия
       edit-category(
         v-if="hasPerm('pages.change_category') || category.user.id === user.id"
@@ -34,7 +34,7 @@
           v-list-item(v-on="on")
             v-list-item-icon
               v-icon mdi-briefcase-edit-outline
-            v-list-item-content {{ t('changeName') }}
+            v-list-item-content {{ $t('pages.components.categoryAction.changeName') }}
       //- Удаление категории
       apollo-mutation(
         :mutation="require('~/gql/pages/mutations/category/delete_category.graphql')"
@@ -45,73 +45,71 @@
           delete-menu(
             v-if="hasPerm('pages.delete_category') || category.user.id === user.id"
             @confirm="mutate"
-            :itemName="t('category')"
-            )
+            :itemName="String($t('pages.components.categoryAction.category'))"
+          )
             template(v-slot:default="{ on }")
               v-list-item(v-on="on")
                 v-list-item-icon
                   v-icon mdi-briefcase-remove-outline
-                v-list-item-content {{ t('delete') }}
+                v-list-item-content {{ $t('pages.components.categoryAction.delete') }}
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { mapGetters } from 'vuex'
+import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
-import { CategoryType, UserType } from '~/types/graphql'
+import type { PropType, Ref } from '#app'
+import { defineComponent, ref, toRefs } from '#app'
+import { HasPermissionFnType, useAuthStore } from '~/store'
+import {
+  CategoryType,
+  ChangeCategoryAvatarMutation,
+  ChangeCategoryAvatarMutationVariables,
+  UserType
+} from '~/types/graphql'
+import changeCategoryAvatarMutation from '~/gql/pages/mutations/category/change_category_avatar.graphql'
+import {
+  AddCategoryMutationResult,
+  ChangeCategoryMutationResult,
+  DeleteCategoryMutationResult
+} from '~/pages/categories/index.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import AddCategory from '~/components/pages/AddCategory.vue'
 import EditCategory from '~/components/pages/EditCategory.vue'
 import ChooseAvatarDialog from '~/components/common/dialogs/ChooseAvatarDialog.vue'
 
-@Component<CategoryAction>({
+export default defineComponent({
   components: { ChooseAvatarDialog, EditCategory, AddCategory, DeleteMenu },
-  computed: {
-    ...mapGetters({ user: 'auth/user', hasPerm: 'auth/hasPerm' })
+  props: {
+    addCategoryUpdate: {
+      type: Function as PropType<(cache: DataProxy, result: AddCategoryMutationResult) => void>,
+      default: null
+    },
+    changeCategoryUpdate: {
+      type: Function as PropType<(cache: DataProxy, result: ChangeCategoryMutationResult) => void>,
+      required: true
+    },
+    deleteCategoryUpdate: {
+      type: Function as PropType<(cache: DataProxy, result: DeleteCategoryMutationResult, category: CategoryType) => void>,
+      required: true
+    },
+    category: { type: Object as PropType<CategoryType>, required: true },
+    add: { type: Boolean, default: false },
+    icon: { type: String, default: 'mdi-cog' }
+  },
+  setup (props) {
+    const authStore = useAuthStore()
+
+    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
+    const drawer: Ref<boolean> = ref<boolean>(false)
+
+    const changeCategoryAvatar = (avatar: File | null) => {
+      const { mutate } = useMutation<ChangeCategoryAvatarMutation, ChangeCategoryAvatarMutationVariables>(changeCategoryAvatarMutation, {
+        update: (cache, result) => props.changeCategoryUpdate(cache as any, { data: { changeCategory: result.data as any } })
+      })
+      mutate({ categoryId: props.category.id, avatar }).then(() => (drawer.value = false))
+    }
+
+    return { drawer, user, hasPerm, changeCategoryAvatar }
   }
 })
-export default class CategoryAction extends Vue {
-  @Prop({ default: false, type: Boolean }) add!: boolean
-  @Prop({ default: 'mdi-cog' }) icon!: string
-  @Prop() category!: CategoryType
-
-  drawer: boolean = false
-
-  user!: UserType
-  hasPerm!: (permissions: string | string[], or?: boolean) => boolean
-
-  // Callback методы для обновления cache
-  @Prop() addCategoryUpdate!: (store: DataProxy, result: any) => void
-  @Prop({ required: true }) changeCategoryUpdate!: (store: DataProxy, result: any) => void
-  @Prop({ required: true }) deleteCategoryUpdate!: (
-    store: DataProxy,
-    result: any,
-    category: CategoryType
-  ) => void
-
-  /**
-   * Получение перевода относильно локального пути
-   * @param path
-   * @param values
-   * @return
-   */
-  t (path: string, values: any = undefined): string {
-    return this.$t(`pages.components.categoryAction.${path}`, values) as string
-  }
-
-  changeCategoryAvatar (avatar: File | null) {
-    this.$apollo.mutate({
-      mutation: require('~/gql/pages/mutations/category/change_category_avatar.graphql'),
-      variables: { categoryId: this.category.id, avatar },
-      update: (
-        store: DataProxy,
-        { data: { changeCategoryAvatar } }
-      ) => this.changeCategoryUpdate(
-        store,
-        { data: { changeCategory: changeCategoryAvatar } }
-      )
-    })
-    this.drawer = false
-  }
-}
 </script>

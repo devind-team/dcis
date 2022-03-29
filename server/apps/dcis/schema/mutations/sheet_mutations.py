@@ -1,17 +1,19 @@
-from typing import Any
+from typing import Any, Optional, List
 
 import graphene
 from devind_helpers.decorators import permission_classes
-from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
 from django.db.models import F
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from django.db import transaction
 
 from apps.dcis.models import Document, RowDimension, Sheet, Cell
 from apps.dcis.schema.types import RowDimensionType, CellType, MergedCellType
+from apps.dcis.services.cell import check_cell_options
 
 
 class AddRowDimensionMutation(BaseMutation):
@@ -45,7 +47,7 @@ class AddRowDimensionMutation(BaseMutation):
         sheet.rowdimension_set.filter(index__gte=insert_index).update(index=F('index') + 1)
         row_dimension = RowDimension.objects.create(sheet=sheet, index=insert_index, document=document)
         cells = [Cell.objects.create(row=row_dimension, column=column) for column in sheet.columndimension_set.all()]
-        sheet.move_merged_cells(insert_index, 1, position)
+        sheet.move_merged_cells(insert_index, 1)
         return AddRowDimensionMutation(
             row_dimension=row_dimension,
             cells=cells,
@@ -70,12 +72,53 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         row.delete()
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
-        sheet.move_merged_cells(row.index, -1)
+        sheet.move_merged_cells(row.index, -1, True)
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
+
+
+class ChangeCellsOptionMutation(BaseMutation):
+    """Мутация для изменения свойств ячеек:
+
+        - horizontal_align - ['left', 'center', 'right']
+        - vertical_align - ['top', 'middle', 'bottom']
+        - size - цифра от 10 до 24
+        - strong - true, false
+        - italic - true, false
+        - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
+        - kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
+    """
+
+    class Input:
+        cells_id = graphene.List(graphene.NonNull(graphene.Int), required=True, description='Идентификатор ячейки')
+        field = graphene.String(required=True, description='Идентификатор поля')
+        value = graphene.String(description='Значение поля')
+
+    cells = graphene.List(CellType, description='Измененные ячейки')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+            root: Any,
+            info: ResolveInfo,
+            cells_id: List[int],
+            field: str,
+            value: Optional[str] = None
+    ):
+        success, value, errors = check_cell_options(field, value)
+        if not success:
+            return ChangeCellsOptionMutation(success=success, errors=errors)
+        cells: List[Cell] = Cell.objects.filter(pk__in=cells_id).all()
+        with transaction.atomic():
+            for cell in cells:
+                setattr(cell, field, value)
+                cell.save(update_fields=(field,))
+        return ChangeCellsOptionMutation(cells=cells)
 
 
 class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
-    add_row_dimension = AddRowDimensionMutation.Field(required=True)
-    delete_row_dimension = DeleteRowDimensionMutation.Field(required=True)
+    add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
+    delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
+
+    change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
