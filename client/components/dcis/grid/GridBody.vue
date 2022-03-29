@@ -9,7 +9,7 @@
         :colspan="cell.colspan"
         :rowspan="cell.rowspan"
         :class="getCellClasses(cell)"
-        :style="`${cell.style};${cell.border}`"
+        :style="`${cell.style}`"
         @mousedown="startSelection($event, cell.position)"
         @mouseenter="enterSelection($event, cell.position)"
         @mouseup="endSelection($event, cell.position)"
