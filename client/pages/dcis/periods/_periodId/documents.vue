@@ -16,10 +16,10 @@
             ) Версия {{ item.version }}
           template(#item.lastStatus="{ item }")
             template(v-if="item.lastStatus")
-              // document-status(:documentItem="item")
-              //  template(#activator="{ on }")
-              //    a(v-if="hasPerm('dcis.add_documentstatus')" v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-              //    strong(v-else) {{ item.lastStatus.status.name }}.
+              document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="periodUpdate" :document="item")
+                template(#activator="{ on }")
+                  a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+              strong(v-else) {{ item.lastStatus.status.name }}.
               div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
               .font-italic {{ item.lastStatus.comment }}
           template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
@@ -35,11 +35,11 @@ import { useFilters } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodType } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import DocumentStatus from '~/components/dcis/documents/DocumentStatus.vue'
+import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 
 export default defineComponent({
-  components: { AddDocument, BreadCrumbs, DocumentStatus },
+  components: { AddDocument, BreadCrumbs, DocumentStatuses },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -71,8 +71,9 @@ export default defineComponent({
 
     return {
       headers,
-      addDocumentUpdate,
       hasPerm,
+      periodUpdate,
+      addDocumentUpdate,
       dateTimeHM
     }
   }

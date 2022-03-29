@@ -1269,11 +1269,9 @@ input DeleteDocumentStatusMutationInput {
 """Удаление статуса документа."""
 type DeleteDocumentStatusMutationPayload {
   clientMutationId: String
-  """Документ"""
-  document: DocumentType!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Статус документа"""
+  """Идентификатор статуса документа"""
   id: ID!
   """Успех мутации"""
   success: Boolean!

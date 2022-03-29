@@ -37,7 +37,8 @@ export default defineComponent({
     ]))
     const {
       data: period,
-      loading, update,
+      loading,
+      update,
       changeUpdate
     } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
       document: periodQuery,
