@@ -52,5 +52,18 @@ export default {
     text: 'Текст',
     money: 'Деньги',
     department: 'Департаменты'
+  },
+  documents: {
+    add: {
+      header: 'Создать новый документ',
+      comment: 'Комментарий',
+      status: 'Статус'
+    },
+    status: {
+      name: 'Статус документа',
+      header: 'Назначение статуса',
+      buttonText: '@:add',
+      comment: 'Комментарий'
+    }
   }
 }

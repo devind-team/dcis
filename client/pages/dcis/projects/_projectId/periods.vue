@@ -2,10 +2,11 @@
   bread-crumbs(:items="breadCrumbs")
     v-card
       v-card-title Периоды
-        v-spacer
-        add-period(:update="addPeriodUpdate" :project="project")
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") Добавить сбор
+        template(v-if="hasPerm('dcis.add_period')")
+          v-spacer
+          add-period(:update="addPeriodUpdate" :project="project")
+            template(#activator="{ on }")
+              v-btn(v-on="on" color="primary") Добавить сбор
       v-card-subtitle {{ project.name }}
       v-card-text
         v-data-table(:headers="headers" :items="project.periods" disable-pagination hide-default-footer)
@@ -20,8 +21,9 @@
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { Ref, PropType } from '#app'
-import { defineComponent, inject, onMounted, ref, useRoute, useRouter } from '#app'
+import { defineComponent, inject, onMounted, ref, useRoute, useRouter, toRef } from '#app'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
+import { HasPermissionFnType, useAuthStore } from '~/store'
 import { PeriodType, ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -36,12 +38,14 @@ export default defineComponent({
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
   setup () {
+    const authStore = useAuthStore()
     const router = useRouter()
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     const { localePath } = useI18n()
     const { defaultClient } = useApolloHelpers()
 
+    const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
     const name: Ref<string> = ref<string>('')
     const file: Ref<File | null> = ref<File | null>(null)
 
@@ -76,7 +80,7 @@ export default defineComponent({
       }
     })
 
-    return { name, file, headers, addPeriodUpdate, dateTimeHM, toGlobalId }
+    return { name, file, headers, hasPerm, addPeriodUpdate, dateTimeHM, toGlobalId }
   }
 })
 </script>

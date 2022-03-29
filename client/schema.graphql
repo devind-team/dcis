@@ -77,6 +77,27 @@ type AddDocumentMutationPayload {
   success: Boolean!
 }
 
+input AddDocumentStatusMutationInput {
+  clientMutationId: String
+  """Комментарий"""
+  comment: String
+  """Документ"""
+  documentId: ID!
+  """Статус"""
+  statusId: Int!
+}
+
+"""Добавление статуса документа."""
+type AddDocumentStatusMutationPayload {
+  clientMutationId: String
+  """Статус документа"""
+  documentStatus: DocumentStatusType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddFileMutationInput {
   clientMutationId: String
   """Загружаемые файлы"""
@@ -1048,7 +1069,7 @@ input ChangeValueMutationInput {
   documentId: ID!
   """Идентификатор строки"""
   rowId: Int!
-  """Иднтификатор листа"""
+  """Идентификатор листа"""
   sheetId: Int!
   """Значение"""
   value: String!
@@ -1235,6 +1256,25 @@ type DeleteCategoryMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteDocumentStatusMutationInput {
+  clientMutationId: String
+  """Идентификатор статуса документа"""
+  documentStatusId: ID!
+}
+
+"""Удаление статуса документа."""
+type DeleteDocumentStatusMutationPayload {
+  clientMutationId: String
+  """Документ"""
+  document: DocumentType!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Статус документа"""
+  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -1800,6 +1840,8 @@ type Mutation {
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
+  """Добавление статуса документа."""
+  addDocumentStatus(input: AddDocumentStatusMutationInput!): AddDocumentStatusMutationPayload!
   """Мутация для загрузки файлов"""
   addFile(input: AddFileMutationInput!): AddFileMutationPayload!
   """Мутация для добавления группы."""
@@ -1886,6 +1928,8 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
+  """Удаление статуса документа."""
+  deleteDocumentStatus(input: DeleteDocumentStatusMutationInput!): DeleteDocumentStatusMutationPayload!
   """Мутация для полного удаления файла"""
   deleteFile(input: DeleteFileMutationInput!): DeleteFileMutationPayload!
   """Мутация для удаления группы."""
@@ -2575,6 +2619,11 @@ type Query {
     """Идентификатор документа"""
     documentId: ID
   ): DocumentType
+  """Статусы документов"""
+  documentStatuses(
+    """Идентификатор документа"""
+    documentId: ID
+  ): [DocumentStatusType!]
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
@@ -2658,7 +2707,7 @@ type Query {
   sessions(userId: ID): [SessionType!]!
   """Настройки приложения"""
   settings: [SettingType!]!
-  """Статусы документов"""
+  """Статусы"""
   statuses: [StatusType!]
   """Теги"""
   tags(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): TagTypeConnection!

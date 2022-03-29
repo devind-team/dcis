@@ -15,5 +15,10 @@ export function useConvertors () {
     return `${u.lastName} ${u.firstName}${u.sirName && showSirName ? ' ' + u.sirName : ''}`
   }
 
-  return { snakeToCamel, getUserFullName }
+  const getUserName = (user: UserType | Ref<UserType>) => {
+    const u: UserType = isRef(user) ? user.value : user
+    return `${u.lastName} ${u.firstName[0]}.${u.sirName[0]}`
+  }
+
+  return { snakeToCamel, getUserFullName, getUserName }
 }

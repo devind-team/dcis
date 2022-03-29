@@ -99,27 +99,26 @@ div.grid__container
     border-collapse: collapse
 
     thead
-      background: white
       position: sticky
-      top: -1px
+      top: 0
       z-index: 2
 
-    thead tr th, tbody tr td.row_index
-      border: 1px solid silver
-      text-align: center
-      cursor: pointer
-      &:hover
-        background: lightgray
+      tr th
+        background: white
+        box-shadow: 1px 1px silver, -1px -1px silver
+
+    tbody tr:hover
+      background: rgba(0, 0, 0, 0.1) !important
+
     tbody tr td.grid__row-index
       font-weight: bold
       border: 1px solid silver
       text-align: center
-      min-width: 25px
+      width: 30px
 
       position: sticky
       left: -1px
       z-index: 1
-      background: white
 
     tbody tr td:not(.grid__row-index)
       border: 1px solid silver
@@ -140,7 +139,4 @@ div.grid__container
           height: 100%
           &:focus
             outline: none
-
-    tbody tr:hover
-      background: rgba(0, 0, 0, .1)
 </style>

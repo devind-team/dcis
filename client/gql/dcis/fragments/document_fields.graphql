@@ -1,0 +1,8 @@
+fragment DocumentFields on DocumentType {
+  id
+  createdAt
+  updatedAt
+  comment
+  version
+  __typename
+}

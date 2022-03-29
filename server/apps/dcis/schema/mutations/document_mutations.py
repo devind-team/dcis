@@ -13,9 +13,9 @@ from django.utils.timezone import make_aware
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Period, Document, Value, Sheet, Status, RowDimension
-from apps.dcis.permissions import AddDocument
-from apps.dcis.schema.types import DocumentType, ValueType
+from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentStatus, RowDimension
+from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
+from apps.dcis.schema.types import DocumentType, ValueType, DocumentStatusType
 from apps.dcis.services.excel_unload import DocumentUnload
 
 
@@ -34,7 +34,7 @@ class AddDocumentMutation(BaseMutation):
     def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
-        content_type: ContentType = ContentType.objects.get_for_model(Department)    # Временно департаменты
+        content_type: ContentType = ContentType.objects.get_for_model(Department)  # Временно департаменты
         object_id: int = 1  # Служба поддержки
         max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
         document = Document.objects.create(
@@ -51,6 +51,48 @@ class AddDocumentMutation(BaseMutation):
         )
         document.sheets.add(*period.sheet_set.all())
         return AddDocumentMutation(document=document)
+
+
+class AddDocumentStatusMutation(BaseMutation):
+    """Добавление статуса документа."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Документ')
+        status_id = graphene.Int(required=True, description='Статус')
+        comment = graphene.String(description='Комментарий')
+
+    document_status = graphene.Field(DocumentStatusType, description='Статус документа')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, AddDocumentStatus,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: int, comment: str):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        status: Status = get_object_or_404(Status, pk=status_id)
+        document_status = DocumentStatus.objects.create(
+            status=status,
+            document=document,
+            comment=comment,
+            user=info.context.user
+        )
+        return AddDocumentStatusMutation(document_status=document_status)
+
+
+class DeleteDocumentStatusMutation(BaseMutation):
+    """Удаление статуса документа."""
+
+    class Input:
+        document_status_id = graphene.ID(required=True, description='Идентификатор статуса документа')
+
+    id = graphene.ID(required=True, description='Статус документа')
+    document = graphene.Field(DocumentType, required=True, description='Документ')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, DeleteDocumentStatus,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int, *args, **kwargs):
+        document_status: DocumentStatus = get_object_or_404(DocumentStatus, pk=document_status_id)
+        document: Document = get_object_or_404(Document, documentstatus=document_status)
+        document_status.delete()
+        return DeleteDocumentStatusMutation(id=document_status_id, document=document)
 
 
 class UnloadDocumentMutation(BaseMutation):
@@ -75,7 +117,7 @@ class ChangeValueMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.Int(required=True, description='Иднтификатор листа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
         column_id = graphene.Int(required=True, description='Идентификатор колонки')
         row_id = graphene.Int(required=True, description='Идентификатор строки')
         value = graphene.String(required=True, description='Значение')
@@ -114,6 +156,8 @@ class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
     add_document = AddDocumentMutation.Field(required=True)
+    add_document_status = AddDocumentStatusMutation.Field(required=True)
+    delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
 
     change_value = ChangeValueMutation.Field(required=True)

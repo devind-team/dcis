@@ -4,27 +4,9 @@
       v-card-title {{ period.name }}
         template(v-if="hasPerm('dcis.add_document')")
           v-spacer
-          v-dialog(v-model="active" width="600")
+          add-document(:period-id="$route.params.periodId" :update="addDocumentUpdate")
             template(#activator="{ on }")
               v-btn(v-on="on" color="primary") Создать новый документ
-            validation-observer(v-slot="{ handleSubmit, invalid }")
-              form(@submit.prevent="handleSubmit(addDocument)")
-                v-card
-                  v-card-title Создать новый документ
-                  v-card-text
-                    validation-provider(name="Комментарий" rules="required" v-slot="{ errors, valid }")
-                      v-text-field(v-model="comment" :error-messages="errors" :success="valid" label="Комментарий")
-                    validation-provider(name="Статус" rules="required" v-slot="{ errors, valid }")
-                      v-combobox(v-model="status" :items="statuses" label="Статус" item-text="name" item-value="id")
-                  v-card-actions
-                    v-btn(@click="active = false") Закрыть
-                    v-spacer
-                    v-btn(
-                      :loading="loading"
-                      :disabled="invalid"
-                      type="submit"
-                      color="primary"
-                    ) Создать
       v-card-subtitle {{ period.project.name }}
       v-card-text
         v-data-table(:headers="headers" :items="period.documents" disable-pagination hide-default-footer)
@@ -34,75 +16,50 @@
             ) Версия {{ item.version }}
           template(#item.lastStatus="{ item }")
             template(v-if="item.lastStatus")
-              strong {{ item.lastStatus.status.name }}.
+              // document-status(:documentItem="item")
+              //  template(#activator="{ on }")
+              //    a(v-if="hasPerm('dcis.add_documentstatus')" v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+              //    strong(v-else) {{ item.lastStatus.status.name }}.
               div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
               .font-italic {{ item.lastStatus.comment }}
-            template(v-else) Не установлен.
           template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
+import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
-import type { PropType, Ref } from '#app'
-import { defineComponent, ref, useNuxt2Meta, inject, useRoute, toRef } from '#app'
-import { useCommonQuery, useFilters } from '~/composables'
-import type { HasPermissionFnType } from '~/store'
+import type { PropType } from '#app'
+import { defineComponent, useNuxt2Meta, inject, toRef } from '#app'
 import { useAuthStore } from '~/store'
+import { useFilters } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import {
-  AddDocumentMutation,
-  AddDocumentMutationPayload,
-  AddDocumentMutationVariables,
-  PeriodType,
-  StatusesQuery,
-  StatusesQueryVariables,
-  StatusType
-} from '~/types/graphql'
-import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
-import addDocumentMutation from '~/gql/dcis/mutations/document/add_document.graphql'
+import { PeriodType } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-
-type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMutationPayload } }
+import DocumentStatus from '~/components/dcis/documents/DocumentStatus.vue'
+import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs },
+  components: { AddDocument, BreadCrumbs, DocumentStatus },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const authStore = useAuthStore()
-    const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
 
-    const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
-    const active: Ref<boolean> = ref<boolean>(false)
-    const comment: Ref<string> = ref<string>('')
-    const status: Ref<StatusType | null> = ref<StatusType | null>(null)
-
-    const { data: statuses, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
-      document: statusesQuery
-    })
-    onResult(({ data: { statuses } }) => {
-      status.value = statuses[0]
-    })
+    const userStore = useAuthStore()
+    const hasPerm = toRef(userStore, 'hasPerm')
 
     const periodUpdate: any = inject('periodUpdate')
-    const { mutate, loading } = useMutation<AddDocumentMutation, AddDocumentMutationVariables>(addDocumentMutation, {
-      update: (cache, result) => periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }: AddDocumentMutationResultType) => {
+    const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
+      periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }: AddDocumentMutationResultType) => {
         if (success) {
-          active.value = false
           dataCache.period.documents = [document, ...dataCache.period.documents]
         }
         return dataCache
       })
-    })
-
-    const addDocument = () => {
-      mutate({ comment: comment.value, periodId: route.params.periodId, statusId: Number(status.value.id) })
     }
 
     const headers: DataTableHeader[] = [
@@ -112,7 +69,12 @@ export default defineComponent({
       { text: 'Статус', value: 'lastStatus' }
     ]
 
-    return { active, comment, status, headers, statuses, addDocument, loading, dateTimeHM, hasPerm }
+    return {
+      headers,
+      addDocumentUpdate,
+      hasPerm,
+      dateTimeHM
+    }
   }
 })
 </script>

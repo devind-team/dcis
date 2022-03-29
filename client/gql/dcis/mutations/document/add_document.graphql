@@ -1,7 +1,8 @@
 #import "../../fragments/status_fields.graphql"
+#import "../../fragments/document_fields.graphql"
 
 mutation AddDocument($comment: String!, $periodId: ID!, $statusId: Int!) {
-  addDocument(input: {comment: $comment, periodId: $periodId, statusId: $statusId }) {
+  addDocument(input: { comment: $comment, periodId: $periodId, statusId: $statusId }) {
     success
     errors {
       field
@@ -9,12 +10,7 @@ mutation AddDocument($comment: String!, $periodId: ID!, $statusId: Int!) {
       __typename
     }
     document {
-      id
-      version
-      comment
-      createdAt
-      __typename
-
+      ...DocumentFields
       lastStatus {
         id
         comment

@@ -1,0 +1,19 @@
+#import "../fragments/status_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
+
+query DocumentStatuses($documentId: ID!) {
+  documentStatuses(documentId: $documentId) {
+    id
+    comment
+    createdAt
+    user {
+      ...UserFields
+      __typename
+    }
+    status {
+      ...StatusFields
+      __typename
+    }
+    __typename
+  }
+}

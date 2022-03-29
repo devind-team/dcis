@@ -101,8 +101,8 @@ class DocumentStatus(models.Model):
 
     class Meta:
         ordering = ('-created_at',)
-        unique_together = (('document', 'status',),)
         indexes = [
+            models.Index(fields=['document', 'status']),
             models.Index(fields=['document', 'status', 'user'])
         ]
 
