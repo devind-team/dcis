@@ -8,11 +8,9 @@ query DocumentStatuses($documentId: ID!) {
     createdAt
     user {
       ...UserFields
-      __typename
     }
     status {
       ...StatusFields
-      __typename
     }
     __typename
   }

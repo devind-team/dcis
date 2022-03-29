@@ -1,27 +1,8 @@
-#import "../../fragments/document_fields.graphql"
-#import "../../fragments/status_fields.graphql"
 
 mutation DeleteDocumentStatus($documentStatusId: ID!) {
   deleteDocumentStatus(input: { documentStatusId: $documentStatusId }) {
     success
-    errors {
-      field
-      messages
-      __typename
-    }
-    __typename
     id
-    document {
-      ...DocumentFields
-      lastStatus {
-        id
-          comment
-          createdAt
-          status {
-            ...StatusFields
-          }
-          __typename
-      }
-    }
+    __typename
   }
 }

@@ -1,3 +1,4 @@
+from typing import List
 import graphene
 from django.db.models import QuerySet
 from graphene_django import DjangoListField
@@ -26,9 +27,9 @@ class DocumentQueries(graphene.ObjectType):
     )
 
     @staticmethod
-    def resolve_document(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> None:
-        return Document.objects.get(pk=from_global_id(document_id)[1])
+    def resolve_document(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> Document:
+        return get_object_or_404(Document, pk=from_global_id(document_id)[1])
 
     @staticmethod
     def resolve_document_statuses(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> QuerySet:
-        return DocumentStatus.objects.filter(document_id=from_global_id(document_id)[1])
+        return DocumentStatus.objects.filter(document_id=from_global_id(document_id)[1]).all()

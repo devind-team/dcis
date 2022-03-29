@@ -19,7 +19,6 @@ query Period($periodId: ID!) {
       comment
       createdAt
       __typename
-
       lastStatus {
         id
         comment

@@ -13,7 +13,7 @@
       slot(name="activator" :on="on")
     template(#form)
       validation-provider(:name="String($t('dcis.documents.add.comment'))" rules="required" v-slot="{ errors, valid }")
-        v-text-field(v-model="comment" :error-messages="errors" :success="valid" :label="$t('dcis.documents.add.comment')")
+        v-text-field(v-model="comment" :error-messages="errors" :success="valid" :label="$t('dcis.documents.add.comment')" autofocus)
       validation-provider(name="String($t('dcis.documents.add.status'))" rules="required" v-slot="{ errors, valid }")
         v-combobox(v-model="status" :items="statuses" :label="$t('dcis.documents.add.status')" item-text="name" item-value="id")
 </template>
