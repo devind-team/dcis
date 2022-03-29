@@ -4470,11 +4470,11 @@ export type ChangeValueMutationVariables = Exact<{
 
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null } };
 
-export type DeletedDocumentStatusMutationVariables = Exact<{
+export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];
 }>;
 
-export type DeletedDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', success: boolean, id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } } };
+export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', success: boolean, id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } } };
 
 export type UnloadDocumentMutationVariables = Exact<{
   documentId: Scalars['ID'];

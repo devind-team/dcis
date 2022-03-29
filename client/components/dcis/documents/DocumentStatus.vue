@@ -49,40 +49,49 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
+import { useMutation } from '@vue/apollo-composable'
 import type { PropType, Ref } from '#app'
 import { defineComponent, inject, ref, toRefs } from '#app'
-import { useMutation } from '@vue/apollo-composable'
 import {
   AddDocumentStatusMutationPayload,
-  DeletedDocumentStatusMutation, DeletedDocumentStatusMutationVariables,
+  DeleteDocumentStatusMutation,
+  DeleteDocumentStatusMutationVariables,
   DocumentStatusesQuery,
   DocumentStatusesQueryVariables,
-  DocumentType,
+  DocumentType, StatusesQuery, StatusesQueryVariables,
   StatusType,
   UserType
 } from '~/types/graphql'
-import addDocumentStatus from '~/gql/dcis/mutations/document/add_status.graphql'
-import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { useCommonQuery, useFilters } from '~/composables'
+import { useCommonQuery, useConvertors, useFilters } from '~/composables'
 import { useAuthStore } from '~/store'
+import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
-import deleteStatus from '~/gql/dcis/mutations/document/delete_status.graphql'
+import addDocumentStatusMutation from '~/gql/dcis/mutations/document/add_status.graphql'
+import deleteStatus from '~/gql/dcis/mutations/document/delete_document_status.graphql'
+import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
-    document: { type: Object as PropType<DocumentType>, required: true },
-    statuses: { type: Array as PropType<StatusType[]>, default: () => [], required: true },
+    documentItem: { type: Object as PropType<DocumentType>, required: true },
     user: { type: Object as PropType<UserType>, required: true }
   },
   setup (props) {
-    const { dateTimeHM, getUserName } = useFilters()
+    const { dateTimeHM } = useFilters()
+    const { getUserName } = useConvertors()
     const userStore = useAuthStore()
     const { hasPerm } = toRefs(userStore)
     const comment: Ref<string> = ref<string>('')
     const status: Ref<StatusType | null> = ref<StatusType | null>(null)
+
+    const { data: statuses, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
+      document: statusesQuery
+    })
+    onResult(({ data: { statuses } }) => {
+      status.value = statuses[0]
+    })
 
     const {
       data: documentStatuses,
@@ -106,8 +115,9 @@ export default defineComponent({
       })
     }
 
-    const { mutate: deleteDocumentStatusMutate } = useMutation<DeletedDocumentStatusMutation,
-      DeletedDocumentStatusMutationVariables>(deleteStatus, {
+    const { mutate: deleteDocumentStatusMutate } = useMutation<DeleteDocumentStatusMutation, DeleteDocumentStatusMutationVariables>(
+      deleteStatus,
+      {
         update: (cache, result) => {
           deleteUpdate(cache, result)
           periodUpdate(cache, result, (dataCache, { data: { deleteDocumentStatus: { success, document } } }: any) => {
@@ -127,8 +137,9 @@ export default defineComponent({
     return {
       comment,
       status,
+      statuses,
       addDocumentStatusUpdate,
-      addDocumentStatus,
+      addDocumentStatusMutation,
       dateTimeHM,
       close,
       hasPerm,

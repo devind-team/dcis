@@ -42,9 +42,6 @@ export function useFilters () {
       .replace('-', '')
       .replace('_', '')
   )
-  const getUserName = (user: UserType, showSirName?: boolean): string => {
-    return `${user.lastName} ${user.firstName}${user.sirName && showSirName ? ' ' + user.sirName : ''}`
-  }
 
-  return { money, basename, date, dateTimeHM, timeHM, textLength, snakeToCamel, getUserName }
+  return { money, basename, date, dateTimeHM, timeHM, textLength, snakeToCamel }
 }
