@@ -8,7 +8,9 @@
       tag
     )
       v-card
-        v-card-title {{ $t('dcis.periods.header') }}
+        v-card-title
+          v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
+          | {{ $t('dcis.periods.header') }}
         v-card-subtitle {{ period.name }}
         validation-observer(v-slot="{ handleSubmit, invalid }")
           form(@submit.prevent="handleSubmit(mutate)")

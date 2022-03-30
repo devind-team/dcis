@@ -8,7 +8,9 @@
       tag
     )
       v-card
-        v-card-title {{ $t('dcis.projects.changeProject.header') }}
+        v-card-title
+          v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
+          | {{ $t('dcis.projects.changeProject.header') }}
         v-card-subtitle {{ project.name }}
         validation-observer(v-slot="{ handleSubmit, invalid }" tag="div")
           form(@submit.prevent="handleSubmit(mutate)")

@@ -1,20 +1,17 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    v-card
-      v-card-title Периоды
-        template(v-if="hasPerm('dcis.add_period')")
-          v-spacer
-          add-period(:update="addPeriodUpdate" :project="project")
-            template(#activator="{ on }")
-              v-btn(v-on="on" color="primary") Добавить сбор
-      v-card-subtitle {{ project.name }}
-      v-card-text
-        v-data-table(:headers="headers" :items="project.periods" disable-pagination hide-default-footer)
-          template(#item.name="{ item }")
-            nuxt-link(
-              :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
-            ) {{ item.name }}
-          template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+    template(#header) Периоды
+      template(v-if="hasPerm('dcis.add_period')")
+        v-spacer
+        add-period(:update="addPeriodUpdate" :project="project")
+          template(#activator="{ on }")
+            v-btn(v-on="on" color="primary") Добавить сбор
+    v-data-table(:headers="headers" :items="project.periods" disable-pagination hide-default-footer)
+      template(#item.name="{ item }")
+        nuxt-link(
+          :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
+        ) {{ item.name }}
+      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">
@@ -27,11 +24,11 @@ import { HasPermissionFnType, useAuthStore } from '~/store'
 import { PeriodType, ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
-import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddPeriod, { AddPeriodMutationResult } from '~/components/dcis/projects/AddPeriod.vue'
+import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 export default defineComponent({
-  components: { AddPeriod, BreadCrumbs },
+  components: { LeftNavigatorContainer, AddPeriod },
   middleware: 'auth',
   props: {
     project: { type: Object as PropType<ProjectType>, required: true },

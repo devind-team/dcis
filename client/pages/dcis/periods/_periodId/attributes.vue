@@ -1,8 +1,7 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    v-card
-      v-card-title {{ period.name }}
-      v-card-text Ворк
+  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+    template(#header) {{ period.name }}
+    div Ворк
 </template>
 
 <script lang="ts">
@@ -11,10 +10,10 @@ import { computed, defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodType } from '~/types/graphql'
-import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs },
+  components: { LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
