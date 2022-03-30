@@ -32,6 +32,7 @@ apollo-mutation(
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { Vue, Component, Prop, Ref } from 'vue-property-decorator'
 import { ValidationObserver } from 'vee-validate'
 import { DataProxy } from 'apollo-cache'
@@ -104,7 +105,7 @@ export default class AddSectionGallery extends Vue {
     } else {
       this.addSection.setErrors(errors.reduce(
         (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.$t(`pages.section.names.${this.$snakeToCamel(c.field)}`) as string]: c.messages }
+          return { ...a, [this.$t(`pages.section.names.${camelCase(c.field)}`) as string]: c.messages }
         }, {}))
     }
   }

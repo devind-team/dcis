@@ -167,6 +167,7 @@
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { Vue, Component } from 'vue-property-decorator'
 import { MetaInfo } from 'vue-meta'
 import { ValidationObserver } from 'vee-validate'
@@ -214,7 +215,7 @@ export default class AuthRegistration extends Vue {
     } else {
       this.$refs.registerForm.setErrors(register.errors.reduce(
         (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.$t(`auth.registration.${this.$snakeToCamel(c.field)}`) as string]: c.messages }
+          return { ...a, [this.$t(`auth.registration.${camelCase(c.field)}`) as string]: c.messages }
         }, {}))
     }
   }

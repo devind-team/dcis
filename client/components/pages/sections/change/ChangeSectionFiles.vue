@@ -10,7 +10,7 @@ apollo-mutation(
       v-card-text
         v-alert(:value="success" type="success" dismissible) {{$t('mutationSuccess')}}
         v-alert(:value="!!error" type="error" dismissible) {{ error }}
-        validation-provider(:name="$t('pages.section.names.text')" rules="min:5" v-slot="{ errors }" tag="div")
+        validation-provider(:name="String($t('pages.section.names.text'))" rules="min:5" v-slot="{ errors }" tag="div")
          v-text-field(v-model="section.text" :label="$t('pages.section.names.text')" :error-messages="errors")
         drop-file-upload(@files-selected="onFilesSelected")
         v-simple-table(v-show="files.length || oldFiles.length")
@@ -38,6 +38,7 @@ apollo-mutation(
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { Vue, Component, Prop, Ref } from 'vue-property-decorator'
 import { ValidationObserver } from 'vee-validate'
 import { DataProxy } from 'apollo-cache'
@@ -95,7 +96,7 @@ export default class ChangeSectionFiles extends Vue {
     } else {
       this.changeSection.setErrors(errors.reduce(
         (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.$t(`pages.section.names.${this.$snakeToCamel(c.field)}`) as string]: c.messages }
+          return { ...a, [this.$t(`pages.section.names.${camelCase(c.field)}`) as string]: c.messages }
         }, {}))
     }
   }

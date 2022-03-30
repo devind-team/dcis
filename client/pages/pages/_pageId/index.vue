@@ -1,8 +1,8 @@
 <template lang="pug">
-  page-container(:bread-crumbs="bc" :category="page && page.category" :loading="loading")
+  page-container(v-if="!loading" :bread-crumbs="bc" :category="page && page.category")
     template(#header)
-      .text-h4.text-md-h2 {{ page.title }}
-    category-pages(v-if="!$apollo.queries.page.loading" :category="page.category")
+      .text-h4.text-md-h2 {{ loading ? $t('loading') : page.title }}
+    category-pages(v-if="!loading" :category="page.category")
       v-card.pa-3
         page-sections(:page="page")
           template(#actions)
@@ -10,14 +10,16 @@
               v-if="hasPerm(['pages.add_section', 'pages.change_page', 'pages.delete_page'], true)"
               :page="page"
             )
+  v-row(v-else)
+    v-col.text-center #[v-progress-circular(color="primary" indeterminate)]
 </template>
 
 <script lang="ts">
 import { ApolloQueryResult } from '@apollo/client'
 import type { ComputedRef } from '#app'
-import { computed, defineComponent, onUnmounted, useRoute } from '#app'
+import { Ref, computed, defineComponent, onUnmounted, toRef, useNuxt2Meta, useRoute } from '#app'
 import { useCommonQuery, useI18n, usePage } from '~/composables'
-import { useAuthStore, usePageStore } from '~/store'
+import { HasPermissionFnType, useAuthStore, usePageStore } from '~/store'
 import { PageQuery, PageQueryVariables } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import pageQuery from '~/gql/pages/queries/page.graphql'
@@ -31,9 +33,11 @@ export default defineComponent({
   setup () {
     const route = useRoute()
     const { t, localePath } = useI18n()
-    const { hasPerm } = useAuthStore()
+    const authStore = useAuthStore()
     const { setActiveCategories } = usePageStore()
     const { flatCategories } = usePage()
+
+    const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
 
     const { data: page, loading, onResult } = useCommonQuery<PageQuery, PageQueryVariables>({
       document: pageQuery,
@@ -47,9 +51,12 @@ export default defineComponent({
         setActiveCategories(flatCategories.value, activeCategories)
       }
     })
+
+    useNuxt2Meta(() => ({ title: loading.value ? t('loading') as string : page.value.title }))
+
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => {
       const breadCrumbs: BreadCrumbsItem[] = []
-      if (!loading) {
+      if (!loading.value) {
         if (page.value.category && page.value.category.parent) {
           breadCrumbs.push({
             text: page.value.category.parent.text,

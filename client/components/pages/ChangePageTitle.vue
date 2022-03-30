@@ -39,6 +39,7 @@
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator'
 import { ValidationObserver } from 'vee-validate'
 import { ChangePageTitleMutation, ErrorFieldType, PageType } from '~/types/graphql'
@@ -64,7 +65,7 @@ export default class ChangePageTitle extends Vue {
     } else {
       this.changePageTitle.setErrors(errors.reduce(
         (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.$t(`pages.page.changeTitle.${this.$snakeToCamel(c.field)}`) as string]: c.messages }
+          return { ...a, [this.$t(`pages.page.changeTitle.${camelCase(c.field)}`) as string]: c.messages }
         }, {}))
     }
   }

@@ -12,12 +12,6 @@ import { cursor, toGlobalId, fromGlobalId } from '~/services/graphql-relay'
 export default <Plugin> async function ({ $config, app: { apolloProvider } }: Context, inject: Inject) {
   const apolloDefaultClient: ApolloClient<any> = apolloProvider?.defaultClient
   const { data: { settings } } = await apolloDefaultClient.query({ query: settingsQuery })
-  inject('snakeToCamel', (str: string) => str.replace(
-    /([-_][a-z])/g,
-    (group: string) => group.toUpperCase()
-      .replace('-', '')
-      .replace('_', '')
-  ))
   inject('getNowDate', () => {
     const nowDate = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)
     return nowDate.toISOString().substr(0, 10)

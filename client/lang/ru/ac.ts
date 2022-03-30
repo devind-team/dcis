@@ -526,6 +526,10 @@ export default {
       },
       sendNotification: {
         sendNotification: 'Отправить уведомление'
+      },
+      unloadUsersMenu: {
+        uploadToExcel: 'Выгрузить в xlsx файл',
+        uploadToCsv: 'Выгрузить в csv файл'
       }
     }
   },

@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import type { Ref, SetupContext } from '#app'
-import { defineComponent, toRef, ref } from '#app'
+import { defineComponent, ref } from '#app'
 
 export default defineComponent({
   props: {

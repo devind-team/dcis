@@ -28,7 +28,7 @@
 import { ApolloError } from 'apollo-client'
 import type { PropType } from '#app'
 import { defineComponent, inject, useRouter } from '#app'
-import { useConvertors, useFilters, useI18n } from '~/composables'
+import { useFilters, useI18n } from '~/composables'
 import { NotificationType } from '~/types/graphql'
 import { notificationKinkView } from '~/services/notifications'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
@@ -42,8 +42,7 @@ export default defineComponent({
   setup (_, { emit }) {
     const router = useRouter()
     const { t, localePath } = useI18n()
-    const { dateTimeHM } = useFilters()
-    const { getUserFullName } = useConvertors()
+    const { dateTimeHM, getUserFullName } = useFilters()
 
     const setAlertApolloError: (error: ApolloError) => void = inject('setAlertApolloError')
 

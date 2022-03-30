@@ -10,7 +10,6 @@ declare module 'vue/types' {
 declare module 'vue/types/vue' {
   // this.$myInjectedFunction inside Vue components
   interface Vue {
-    $snakeToCamel(str: string): string
     $getNowDate(): string
     $fromGlobalId(globalId: string): { type: string, id: string }
     $getSettingValue(key: string): string | null
@@ -33,7 +32,6 @@ declare module 'vue/types/vue' {
 declare module 'vuex/types/index' {
   // this.$myInjectedFunction inside Vuex stores
   interface Store<S> {
-    $snakeToCamel(str: string): string
     $getNowDate(): string
     $fromGlobalId(globalId: string): { type: string, id: string }
     $getSettingValue(key: string): string | null
@@ -62,7 +60,6 @@ declare module 'vue/types/options' {
 declare module '@nuxt/types' {
   // nuxtContext.app.$myInjectedFunction inside asyncData, fetch, plugins, middleware, nuxtServerInit
   interface NuxtAppOptions {
-    $snakeToCamel(str: string): string
     $getNowDate(): string
     $fromGlobalId(globalId: string): { type: string, id: string }
     $getSettingValue(key: string): string | null
@@ -81,7 +78,6 @@ declare module '@nuxt/types' {
   }
   // nuxtContext.$myInjectedFunction
   interface Context {
-    $snakeToCamel(str: string): string
     $getNowDate(): string
     $getSettingValue(key: string): string | null
     $cursor(n: number): string

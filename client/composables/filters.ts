@@ -1,5 +1,6 @@
 import path from 'path'
 import accounting from 'accounting'
+import { isRef, Ref } from '#app'
 import { UserType } from '~/types/graphql'
 
 export function useFilters () {
@@ -36,12 +37,15 @@ export function useFilters () {
     return formatter.format(new Date(rd))
   }
 
-  const snakeToCamel = (value: string): string => value.replace(
-    /([-_][a-z])/g,
-    (group: string) => group.toUpperCase()
-      .replace('-', '')
-      .replace('_', '')
-  )
+  const getUserFullName = (user: UserType | Ref<UserType>, showSirName: boolean = true) => {
+    const u: UserType = isRef(user) ? user.value : user
+    return `${u.lastName} ${u.firstName}${u.sirName && showSirName ? ' ' + u.sirName : ''}`
+  }
 
-  return { money, basename, date, dateTimeHM, timeHM, textLength, snakeToCamel }
+  const getUserName = (user: UserType | Ref<UserType>) => {
+    const u: UserType = isRef(user) ? user.value : user
+    return `${u.lastName} ${u.firstName[0]}.${u.sirName[0]}`
+  }
+
+  return { money, basename, date, dateTimeHM, timeHM, textLength, getUserFullName, getUserName }
 }
