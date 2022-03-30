@@ -1,10 +1,7 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    v-card
-      v-card-title Настройки пользователя
-      v-card-subtitle {{ project.name }}
-      v-card-text
-        pre {{ project }}
+  left-navigator-container(:bread-crumbs="bc"  @update-drawer="$emit('update-drawer')")
+    template(#header) Настройки пользователя
+    pre {{ project }}
 </template>
 
 <script lang="ts">
@@ -12,11 +9,11 @@ import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent } from '#app'
 import { ProjectType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import { useI18n } from '~/composables'
+import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs },
+  components: { LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     project: { type: Object as PropType<ProjectType>, required: true },

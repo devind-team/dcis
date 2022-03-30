@@ -1,28 +1,25 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    v-card
-      v-card-title {{ period.name }}
-        template(v-if="hasPerm('dcis.add_document')")
-          v-spacer
-          add-document(:period-id="$route.params.periodId" :update="addDocumentUpdate")
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+    template(#header) {{ period.name }}
+      template(v-if="hasPerm('dcis.add_document')")
+        v-spacer
+        add-document(:period-id="$route.params.periodId" :update="addDocumentUpdate")
+          template(#activator="{ on }")
+            v-btn(v-on="on" color="primary") Создать новый документ
+    v-data-table(:headers="headers" :items="period.documents" disable-pagination hide-default-footer)
+      template(#item.version="{ item }")
+        nuxt-link(
+          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+        ) Версия {{ item.version }}
+      template(#item.lastStatus="{ item }")
+        template(v-if="item.lastStatus")
+          document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="periodUpdate" :document="item")
             template(#activator="{ on }")
-              v-btn(v-on="on" color="primary") Создать новый документ
-      v-card-subtitle {{ period.project.name }}
-      v-card-text
-        v-data-table(:headers="headers" :items="period.documents" disable-pagination hide-default-footer)
-          template(#item.version="{ item }")
-            nuxt-link(
-              :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-            ) Версия {{ item.version }}
-          template(#item.lastStatus="{ item }")
-            template(v-if="item.lastStatus")
-              document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="periodUpdate" :document="item")
-                template(#activator="{ on }")
-                  a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-              strong(v-else) {{ item.lastStatus.status.name }}.
-              div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
-              .font-italic {{ item.lastStatus.comment }}
-          template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+              a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+          strong(v-else) {{ item.lastStatus.status.name }}.
+          div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
+          .font-italic {{ item.lastStatus.comment }}
+      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">
@@ -34,12 +31,12 @@ import { useAuthStore } from '~/store'
 import { useFilters } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodType } from '~/types/graphql'
-import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 export default defineComponent({
-  components: { AddDocument, BreadCrumbs, DocumentStatuses },
+  components: { LeftNavigatorContainer, AddDocument, DocumentStatuses },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
