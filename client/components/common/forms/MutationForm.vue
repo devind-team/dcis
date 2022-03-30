@@ -35,12 +35,13 @@
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { VueConstructor } from 'vue'
 import { ApolloError } from 'apollo-client'
 import { ValidationObserver } from 'vee-validate'
 import type { Ref, ComputedRef } from '#app'
 import { defineComponent, computed, getCurrentInstance, ref, nextTick } from '#app'
-import { useFilters, useI18n } from '~/composables'
+import { useI18n } from '~/composables'
 import { ErrorFieldType } from '~/types/graphql'
 import { ErrorType } from '~/types/devind'
 import MutationResultAlert, { TableErrors } from '~/components/common/MutationResultAlert.vue'
@@ -63,7 +64,6 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { t } = useI18n()
-    const { snakeToCamel } = useFilters()
 
     const instance = getCurrentInstance()
     const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
@@ -96,7 +96,7 @@ export default defineComponent({
           (a: { [key: string]: string[] }, c: ErrorFieldType) => {
             return {
               ...a,
-              [t(`${props.i18nPath}.${snakeToCamel(c.field)}`) as string]: c.messages
+              [t(`${props.i18nPath}.${camelCase(c.field)}`) as string]: c.messages
             }
           }, {}))
       }

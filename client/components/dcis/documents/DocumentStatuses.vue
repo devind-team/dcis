@@ -54,7 +54,7 @@ import {
   StatusesQueryVariables,
   StatusType
 } from '~/types/graphql'
-import { useCommonQuery, useConvertors, useFilters } from '~/composables'
+import { useCommonQuery, useFilters } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/store'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
@@ -78,8 +78,7 @@ export default defineComponent({
   },
   setup (props) {
     const userStore = useAuthStore()
-    const { dateTimeHM } = useFilters()
-    const { getUserName } = useConvertors()
+    const { dateTimeHM, getUserName } = useFilters()
     const hasPerm: Ref<HasPermissionFnType> = toRef(userStore, 'hasPerm')
     const comment: Ref<string> = ref<string>('')
     const status: Ref<StatusType | null> = ref<StatusType | null>(null)

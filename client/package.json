@@ -29,6 +29,7 @@
     "moment": "^2.29.1",
     "nuxt-edge": "latest",
     "pinia": "^2.0.12",
+    "scule": "^0.2.1",
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
     "vue-apexcharts": "^1.6.2",

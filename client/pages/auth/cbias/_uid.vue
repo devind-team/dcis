@@ -24,7 +24,7 @@ import {
 } from '#app'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { useAuthStore } from '~/store'
-import {AuthCbiasMutation, AuthCbiasMutationVariables, UserType} from '~/types/graphql'
+import { AuthCbiasMutation, AuthCbiasMutationVariables, UserType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import authCbiasMutation from '~/gql/dcis/mutations/auth_cbias.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -51,7 +51,7 @@ export default defineComponent({
     onMounted(() => {
       mutate({ uid: route.params.uid, clientId: CLIENT_ID, clientSecret: CLIENT_SECRET })
     })
-    onDone(({ data: { authCbias: { success, token, user } }}: AuthMutationResult) => {
+    onDone(({ data: { authCbias: { success, token, user } } }: AuthMutationResult) => {
       result.value = success
       if (success) {
         onLogin(token.accessToken, defaultClient, { maxAge: token.expiresIn, path: '/' }, true)

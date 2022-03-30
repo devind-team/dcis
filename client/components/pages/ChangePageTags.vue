@@ -55,6 +55,7 @@
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator'
 import { ValidationObserver } from 'vee-validate'
 import { Subject } from 'rxjs'
@@ -205,7 +206,7 @@ export default class ChangePageTags extends Vue {
     } else {
       this.changePageTags.setErrors(errors.reduce(
         (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.$t(`pages.page.changeTags.${this.$snakeToCamel(c.field)}`) as string]: c.messages }
+          return { ...a, [this.$t(`pages.page.changeTags.${camelCase(c.field)}`) as string]: c.messages }
         }, {}))
     }
   }

@@ -25,6 +25,7 @@
 </template>
 
 <script lang="ts">
+import { camelCase } from 'scule'
 import { Vue, Component } from 'vue-property-decorator'
 import { MetaInfo } from 'vue-meta'
 import { ValidationObserver } from 'vee-validate'
@@ -63,7 +64,7 @@ export default class AuthRecovery extends Vue {
     if (!success) {
       this.$refs.recoveryForm.setErrors(errors.reduce(
         (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.t(this.$snakeToCamel(c.field)) as string]: c.messages }
+          return { ...a, [this.t(camelCase(c.field)) as string]: c.messages }
         }, {}))
     }
   }
