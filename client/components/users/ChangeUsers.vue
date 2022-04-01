@@ -28,13 +28,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import { Subject } from 'rxjs'
 import { debounceTime, filter, pluck, startWith } from 'rxjs/operators'
 import { UserType } from '~/types/graphql'
+import searchUsersQuery from '~/gql/eleden/queries/core/search_users.graphql'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { AvatarDialog },
   props: {
     initUsers: { type: Array, required: true },
@@ -70,7 +70,7 @@ export default Vue.extend<any, any, any, any>({
   },
   apollo: {
     users: {
-      query: require('~/gql/eleden/queries/core/search_users.graphql'),
+      query: searchUsersQuery,
       variables () { return { first: this.searchUsers$ ? undefined : 10, search: this.searchUsers$ } },
       update ({ users }) {
         return [...this.initUsers, ...users.edges.map((e: { node?: UserType }) => e.node)]
