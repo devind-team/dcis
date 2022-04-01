@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts">
+import { useMutation } from '@vue/apollo-composable'
 import type { Ref } from '#app'
 import { defineComponent, toRef, useNuxtApp } from '#app'
-import { useMutation } from '@vue/apollo-composable'
 import { useSelectFiles } from '~/composables'
 import { useAuthStore } from '~/store'
 import {

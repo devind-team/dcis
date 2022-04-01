@@ -31,9 +31,9 @@
 </template>
 
 <script lang="ts">
+import { DataTableHeader } from 'vuetify'
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent } from '#app'
-import { DataTableHeader } from 'vuetify'
 import { useI18n } from '~/composables'
 import { UserType } from '~/types/graphql'
 

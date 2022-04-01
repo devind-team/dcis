@@ -46,10 +46,10 @@
 </template>
 
 <script lang="ts">
-import type { ComputedRef, PropType } from '#app'
-import { computed, defineComponent, useNuxt2Meta } from '#app'
 import { DataTableHeader } from 'vuetify/types'
 import { DataProxy } from 'apollo-cache'
+import type { ComputedRef, PropType } from '#app'
+import { computed, defineComponent, useNuxt2Meta } from '#app'
 import {
   UserType,
   UsersQueryVariables,
