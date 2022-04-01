@@ -63,7 +63,7 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
    * Переменные запроса
    */
   const queryVariables: ComputedRef<TVariables> = computed<TVariables>(() => {
-    return { ...getValue<TVariables>(variables), ...pagination.variables.value }
+    return { ...pagination.variables.value, ...getValue<TVariables>(variables) }
   })
 
   /**
