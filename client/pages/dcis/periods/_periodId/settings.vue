@@ -96,10 +96,10 @@
 </template>
 
 <script lang="ts">
+import { promiseTimeout } from '@vueuse/core'
 import { DataProxy } from 'apollo-cache'
 import type { Ref, ComputedRef, PropType } from '#app'
 import { computed, defineComponent, ref, toRefs, useNuxt2Meta, useRouter, inject } from '#app'
-import { promiseTimeout } from '@vueuse/core'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   ChangePeriodMutationPayload,
@@ -107,9 +107,9 @@ import {
   PeriodType,
   UserType
 } from '~/types/graphql'
-import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import { HasPermissionFnType, useAuthStore } from '~/store'
 import { useI18n } from '~/composables'
+import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 type ChangePeriodResultMutation = { data: { changePeriod: ChangePeriodMutationPayload } }

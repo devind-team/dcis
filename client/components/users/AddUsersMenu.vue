@@ -36,10 +36,9 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ErrorValidateDialog from '~/components/common/dialogs/ErrorValidateDialog.vue'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { ErrorValidateDialog },
   props: {
     update: { type: Function, required: true }

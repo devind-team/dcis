@@ -7,10 +7,10 @@
 </template>
 
 <script lang="ts">
-import type { ComputedRef, PropType } from '#app'
-import { computed, defineComponent, useNuxt2Meta, useRoute } from '#app'
 import { Context } from '@nuxt/types'
 import { DataProxy } from 'apollo-cache'
+import type { ComputedRef, PropType } from '#app'
+import { computed, defineComponent, useNuxt2Meta, useRoute } from '#app'
 import {
   PageQuery,
   PageQueryVariables,

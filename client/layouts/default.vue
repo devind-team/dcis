@@ -9,16 +9,15 @@
 
 <script lang="ts">
 import type { Ref, ComputedRef } from '#app'
-import { defineComponent, provide, ref, toRefs, watchEffect } from '#app'
 import { useAuthStore } from '~/store'
 import { useCursorPagination, useQueryRelay, useVuetify } from '~/composables'
 import { NotificationsQuery, NotificationsQueryVariables, NotificationType, UserType } from '~/types/graphql'
 import notificationsSubscription from '~/gql/notifications/subscriptions/notifications.graphql'
 import notificationsQuery from '~/gql/notifications/queries/notifications.graphql'
+import { updateQueryNotifications } from '~/services/notifications'
 import Navigation from '~/components/global/Navigation.vue'
 import AppBar from '~/components/global/AppBar.vue'
 import FooterComponent from '~/components/global/FooterComponent.vue'
-import { updateQueryNotifications } from '~/services/notifications'
 
 export default defineComponent({
   components: { AppBar, Navigation, FooterComponent },
@@ -28,8 +27,8 @@ export default defineComponent({
 
     const { user, loginIn } = toRefs<{ user: UserType, loginIn: boolean }>(authStore)
 
-    const drawer: Ref<boolean> = ref<boolean>(false)
-    const footer: Ref<boolean> = ref<boolean>(true)
+    const drawer = ref<boolean>(false)
+    const footer = ref<boolean>(true)
 
     const {
       data: notifications,
