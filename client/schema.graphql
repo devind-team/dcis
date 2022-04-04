@@ -1197,23 +1197,25 @@ enum ConsumerActionType {
 type ContentTypeType {
   appLabel: String!
   columndimensionSet: [ColumnDimensionType!]!
-  divisionSet(after: String, before: String, first: Int, last: Int, offset: Int): DivisionTypeConnection!
   documentSet(after: String, before: String, first: Int, last: Int, offset: Int): DocumentTypeConnection!
   id: ID!
   """Модель, связанная с действием"""
   logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
   model: String!
   permissionSet: [PermissionType!]!
+  projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
   rowdimensionSet: [RowDimensionType!]!
 }
 
 input CreateProjectInput {
   """Архив"""
   archive: Boolean
+  contentType: String!
   """Описание проекта"""
   description: String!
   """Наименование проекта"""
   name: String!
+  objectId: Int
   periodSet: [ID]
   """Сокращенное наименование проекта"""
   short: String!
@@ -1458,34 +1460,6 @@ type DistrictType {
   regions: [RegionType]
   """Updated date"""
   updatedAt: DateTime!
-}
-
-"""Список участвующих дивизионов в сборе."""
-type DivisionType implements Node {
-  """Дивизион: Department, Organizations"""
-  contentType: ContentTypeType!
-  """The ID of the object."""
-  id: ID!
-  objectId: Int!
-  """Период"""
-  period: PeriodType!
-}
-
-type DivisionTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DivisionTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DivisionType` and its cursor."""
-type DivisionTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DivisionType
 }
 
 """Debugging information for the current query."""
@@ -2547,6 +2521,7 @@ input ProjectNameFilterInputType {
 type ProjectType implements Node {
   """Архив"""
   archive: Boolean!
+  contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
   """Описание проекта"""

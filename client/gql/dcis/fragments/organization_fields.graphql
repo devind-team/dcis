@@ -1,0 +1,6 @@
+fragment OrganizationField on OrganizationType {
+  id
+  name
+  createdAt
+  __typename
+}

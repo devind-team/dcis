@@ -2,5 +2,6 @@ fragment DepartmentField on DepartmentType {
   id
   name
   code
+  createdAt
   __typename
 }

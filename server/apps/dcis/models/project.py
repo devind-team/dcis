@@ -20,9 +20,16 @@ class Project(models.Model):
 
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Организатор сборов')
 
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(null=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
     class Meta:
         """Мета класс описания параметров проекта сборов."""
         ordering = ('-created_at',)
+        indexes = [
+            models.Index(fields=['content_type', 'object_id'])
+        ]
 
 
 class Period(models.Model):
@@ -77,11 +84,4 @@ class Division(models.Model):
     """
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['content_type', 'object_id'])
-        ]

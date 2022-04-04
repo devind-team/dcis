@@ -37,6 +37,7 @@ class ProjectType(OptimizedDjangoObjectType):
             'archive',
             'created_at',
             'updated_at',
+            'content_type',
             'user',
         )
         filterset_class = ProjectFilter
