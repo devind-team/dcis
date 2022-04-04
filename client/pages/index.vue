@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, useNuxt2Meta } from '#app'
+import { useNuxt2Meta } from '#app'
 import { SegmentsQuery, SegmentsQueryVariables } from '~/types/graphql'
 import { useCommonQuery, useI18n } from '~/composables'
 import segmentsQuery from '~/gql/pages/queries/segments.graphql'
