@@ -1198,7 +1198,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
 name = "paramiko"
-version = "2.10.2"
+version = "2.10.3"
 description = "SSH2 protocol library"
 category = "main"
 optional = false
@@ -1452,13 +1452,14 @@ six = ">=1.15.0"
 
 [[package]]
 name = "redis"
-version = "4.1.4"
+version = "4.2.1"
 description = "Python client for Redis database and key-value store"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
+async-timeout = ">=4.0.2"
 deprecated = ">=1.2.3"
 packaging = ">=20.4"
 
@@ -2510,8 +2511,8 @@ packaging = [
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
 paramiko = [
-    {file = "paramiko-2.10.2-py2.py3-none-any.whl", hash = "sha256:abf71533ea9332079db7cbcc039066c3d7575eed2df10766fa03496c3bf78cf1"},
-    {file = "paramiko-2.10.2.tar.gz", hash = "sha256:ff47cc35dd4c4af507d2bdc9d7def9f7fa89977212b4f926e14ac486e930f03a"},
+    {file = "paramiko-2.10.3-py2.py3-none-any.whl", hash = "sha256:ac6593479f2b47a9422eca076b22cff9f795495e6733a64723efc75dd8c92101"},
+    {file = "paramiko-2.10.3.tar.gz", hash = "sha256:ddb1977853aef82804b35d72a0e597b244fa326c404c350bd00c5b01dbfee71a"},
 ]
 pep8-naming = [
     {file = "pep8-naming-0.12.1.tar.gz", hash = "sha256:bb2455947757d162aa4cad55dba4ce029005cd1692f2899a21d51d8630ca7841"},
@@ -2713,8 +2714,8 @@ pywebpush = [
     {file = "pywebpush-1.14.0.tar.gz", hash = "sha256:6c36e1679268219e693ba940db2bf254c240ca02664de102b7269afc3c545731"},
 ]
 redis = [
-    {file = "redis-4.1.4-py3-none-any.whl", hash = "sha256:04629f8e42be942c4f7d1812f2094568f04c612865ad19ad3ace3005da70631a"},
-    {file = "redis-4.1.4.tar.gz", hash = "sha256:1d9a0cdf89fdd93f84261733e24f55a7bbd413a9b219fdaf56e3e728ca9a2306"},
+    {file = "redis-4.2.1-py3-none-any.whl", hash = "sha256:69d05fac17bf3f43937afbb775c536eb516bd21355a4f17d59a966f4a531ce71"},
+    {file = "redis-4.2.1.tar.gz", hash = "sha256:fe45513881229dbee610620b9e0817b1f48c47ba635870320fd44a712204bbdd"},
 ]
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
