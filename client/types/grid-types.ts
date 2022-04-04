@@ -191,3 +191,10 @@ export type MergedType = {
   merged: boolean
   unmerged: boolean
 }
+
+export type ColumnResizeType = {
+  index: number
+  width: number
+  clientX: number
+  state: 'hover' | 'resizing'
+}

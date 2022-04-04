@@ -13,7 +13,7 @@ import {
   rangeLetterToCells,
   unionValues
 } from '~/services/grid'
-import { BuildCellType, BuildColumnType, BuildRowType, CellOptionsType } from '~/types/grid-types'
+import { BuildCellType, BuildColumnType, BuildRowType, CellOptionsType, ColumnResizeType } from '~/types/grid-types'
 
 export const cellKinds: Record<string, string> = {
   n: 'Numeric',
@@ -24,16 +24,23 @@ export const cellKinds: Record<string, string> = {
 }
 
 export function useGrid (sheet: Ref<SheetType>) {
+  const defaultColumnWidth = 64
   const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
-    sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
-      id: columnDimension.id,
-      index: columnDimension.index,
-      positional: positionToLetter(columnDimension.index),
-      style: {
-        width: columnDimension.width ? `${columnDimension.width}px` : '64px'
-      },
-      dimension: columnDimension
-    }))
+    sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
+      let width = ''
+      if (resizingColumn.value && resizingColumn.value.index === columnDimension.index) {
+        width = `${resizingColumn.value.width}px`
+      } else {
+        width = columnDimension.width ? `${columnDimension.width}px` : `${defaultColumnWidth}px`
+      }
+      return {
+        id: columnDimension.id,
+        index: columnDimension.index,
+        positional: positionToLetter(columnDimension.index),
+        style: { width },
+        dimension: columnDimension
+      }
+    })
   ))
 
   /**
@@ -173,9 +180,56 @@ export function useGrid (sheet: Ref<SheetType>) {
       Object.entries(aggregateOptions).map(([option, values]) => [option, unionValues(values)])
     ) as CellOptionsType
   })
-
   const setActive = (position: string) => {
     active.value = position
+  }
+
+  /**
+   * Блок изменения ширины столбца
+   */
+  const borderGag = 10
+  const resizingColumn = ref<ColumnResizeType | null>(null)
+  const cursor = computed<string>(() => resizingColumn.value ? 'col-resize' : 'auto')
+  const moveColumnHeader = (event: MouseEvent, index: number) => {
+    const cell = event.target as HTMLTableCellElement
+    const arrayIndex = index - 1
+    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
+      resizingColumn.value.width += event.clientX - resizingColumn.value.clientX
+      resizingColumn.value.clientX = event.clientX
+    } else if (cell.offsetWidth - event.offsetX < borderGag) {
+      resizingColumn.value = {
+        index,
+        width: sheet.value.columns[arrayIndex].width ?? defaultColumnWidth,
+        state: 'hover',
+        clientX: event.clientX
+      }
+    } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag) {
+      if (index - 1 > 0) {
+        resizingColumn.value = {
+          index: index - 1,
+          width: sheet.value.columns[arrayIndex - 1].width ?? defaultColumnWidth,
+          state: 'hover',
+          clientX: event.clientX
+        }
+      }
+    } else {
+      resizingColumn.value = null
+    }
+  }
+  const leaveColumnHeader = () => {
+    if (resizingColumn.value && resizingColumn.value.state === 'hover') {
+      resizingColumn.value = null
+    }
+  }
+  const startColumnResizing = () => {
+    if (resizingColumn.value) {
+      resizingColumn.value.state = 'resizing'
+    }
+  }
+  const endColumnResizing = () => {
+    if (resizingColumn.value) {
+      resizingColumn.value.state = 'hover'
+    }
   }
 
   return {
@@ -193,6 +247,12 @@ export function useGrid (sheet: Ref<SheetType>) {
     startCellSelection,
     enterCellSelection,
     endCellSelection,
-    setActive
+    setActive,
+    resizingColumn,
+    cursor,
+    moveColumnHeader,
+    leaveColumnHeader,
+    startColumnResizing,
+    endColumnResizing
   }
 }

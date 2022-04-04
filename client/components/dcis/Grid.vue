@@ -8,7 +8,14 @@
     )
     div.grid__container
       table.grid__table
-        grid-header(:columns="columns")
+        grid-header(
+          :columns="columns"
+          :move-column-header="moveColumnHeader"
+          :leave-column-header="leaveColumnHeader"
+          :start-column-resizing="startColumnResizing"
+          :end-column-resizing="endColumnResizing"
+          :style="{ cursor }"
+        )
         grid-body(
           :rows="rows"
           :selection="selection"
@@ -59,7 +66,12 @@ export default defineComponent({
       startCellSelection,
       enterCellSelection,
       endCellSelection,
-      setActive
+      setActive,
+      cursor,
+      moveColumnHeader,
+      leaveColumnHeader,
+      startColumnResizing,
+      endColumnResizing
     } = useGrid(sheet)
 
     provide('active', active)
@@ -78,7 +90,12 @@ export default defineComponent({
       startCellSelection,
       enterCellSelection,
       endCellSelection,
-      setActive
+      setActive,
+      cursor,
+      moveColumnHeader,
+      leaveColumnHeader,
+      startColumnResizing,
+      endColumnResizing
     }
   }
 })
@@ -93,7 +110,6 @@ div.grid__container
   table.grid__table
     user-select: none
     table-layout: fixed
-    width: 100%
 
     margin-top: 3px
     border-collapse: collapse
