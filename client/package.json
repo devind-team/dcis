@@ -26,7 +26,7 @@
     "apexcharts": "^3.35.0",
     "cookie-universal-nuxt": "^2.1.5",
     "graphql-tag": "^2.12.6",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "nuxt-edge": "latest",
     "pinia": "^2.0.13",
     "scule": "^0.2.1",
