@@ -1,3 +1,4 @@
+from typing import List
 import posixpath
 from datetime import datetime
 from os.path import join
@@ -6,19 +7,20 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.styles.colors import WHITE
 from openpyxl.utils import get_column_letter
+from django.conf import settings
 
 from apps.dcis.models import Cell, Document
-from devind import settings
 
 
 class DocumentUnload:
     """Выгрузка документа в формате эксель."""
 
-    def __init__(self, document: Document, host: str):
+    def __init__(self, document: Document, host: str, additional: List[str]):
         """Генерация."""
-        self.document = document
+        self.document: Document = document
         self.sheets = document.sheets.all()
-        self.host = host
+        self.host: str = host
+        self.additional: List[str] = additional
         self.path: str = join(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
 
     def xlsx(self):
@@ -39,7 +41,7 @@ class DocumentUnload:
                 row_position = cell.row.index
                 column_position = cell.column.index
                 value = build_values.get(f'{cell.column_id}:{cell.row_id}', cell.default or '')
-                ws.cell(row_position, column_position, f'{value}').alignment = Alignment(
+                ws.cell(row_position, column_position, value).alignment = Alignment(
                     vertical=cell.vertical_align,
                     horizontal=cell.horizontal_align,
                     wrap_text=True
@@ -54,7 +56,10 @@ class DocumentUnload:
                     color=f'{cell.color[1:]}'
                 )
                 if cell.border_style:
-                    border_styles = {position: self._get_border_side(cell, position) for position in ['top', 'bottom', 'left', 'right', 'diagonal']}
+                    border_styles = {
+                        position: self._get_border_side(cell, position)
+                        for position in ['top', 'bottom', 'left', 'right', 'diagonal']
+                    }
                     ws.cell(row_position, column_position).border = Border(
                         diagonalDown=cell.border_style.get('diagonalDown'),
                         diagonalUp=cell.border_style.get('diagonalUp'),

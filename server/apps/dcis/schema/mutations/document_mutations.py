@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 import graphene
 from devind_dictionaries.models import Department
@@ -10,8 +10,10 @@ from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
 from django.utils.timezone import make_aware
+from django.db import reset_queries, connection
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+
 
 from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentStatus, RowDimension
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
@@ -98,14 +100,20 @@ class UnloadDocumentMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Документ')
+        additional = graphene.List(
+            graphene.NonNull(graphene.String, required=True),
+            description='Дополнительные параметры'
+        )
 
     src = graphene.String(description='Ссылка на сгенерированный файл')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: Optional[List[str]] = None):
+        if not additional:
+            additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])
-        document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host())
+        document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
         src: str = document_unload.xlsx()
         return UnloadDocumentMutation(src=src)
 

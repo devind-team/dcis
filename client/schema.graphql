@@ -1305,6 +1305,8 @@ type DeleteGroupMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Идентификатор группы"""
+  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -1799,11 +1801,11 @@ type MailingType {
   """Адрес отправки"""
   address: String!
   """Массив прикрепленных файлов"""
-  attachments: [String!]
+  attachments: JSONString
   """Дата добавления"""
   createdAt: DateTime!
   """Средства отправки"""
-  dispatchers: [String!]!
+  dispatchers: JSONString!
   """Заголовок сообщения"""
   header: String!
   id: ID!
@@ -2145,144 +2147,144 @@ type NotificationsSubscription {
   notification: NotificationType
 }
 
-input OrganizationAddressFilterInputType {
+input OrganizationOrganizationFilterAddressFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationDepartmentFilterInputType {
+input OrganizationOrganizationFilterDepartmentFilterInputType {
   """`Exact` lookup"""
   exact: [ID]
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationFilterInputType {
+input OrganizationOrganizationFilterFilterInputType {
   """`Address` field"""
-  address: OrganizationAddressFilterInputType
+  address: OrganizationOrganizationFilterAddressFilterInputType
   """`And` field"""
-  and: [OrganizationFilterInputType]
+  and: [OrganizationOrganizationFilterFilterInputType]
   """`Department` field"""
-  department: OrganizationDepartmentFilterInputType
+  department: OrganizationOrganizationFilterDepartmentFilterInputType
   """`Id` field"""
-  id: OrganizationIdFilterInputType
+  id: OrganizationOrganizationFilterIdFilterInputType
   """`Inn` field"""
-  inn: OrganizationInnFilterInputType
+  inn: OrganizationOrganizationFilterInnFilterInputType
   """`Kind` field"""
-  kind: OrganizationKindFilterInputType
+  kind: OrganizationOrganizationFilterKindFilterInputType
   """`Kodbuhg` field"""
-  kodbuhg: OrganizationKodbuhgFilterInputType
+  kodbuhg: OrganizationOrganizationFilterKodbuhgFilterInputType
   """`Kpp` field"""
-  kpp: OrganizationKppFilterInputType
+  kpp: OrganizationOrganizationFilterKppFilterInputType
   """`Mail` field"""
-  mail: OrganizationMailFilterInputType
+  mail: OrganizationOrganizationFilterMailFilterInputType
   """`Name` field"""
-  name: OrganizationNameFilterInputType
+  name: OrganizationOrganizationFilterNameFilterInputType
   """`Not` field"""
-  not: OrganizationFilterInputType
+  not: OrganizationOrganizationFilterFilterInputType
   """`Okpo` field"""
-  okpo: OrganizationOkpoFilterInputType
+  okpo: OrganizationOrganizationFilterOkpoFilterInputType
   """`Or` field"""
-  or: [OrganizationFilterInputType]
+  or: [OrganizationOrganizationFilterFilterInputType]
   """`Parent` field"""
-  parent: OrganizationParentFilterInputType
+  parent: OrganizationOrganizationFilterParentFilterInputType
   """`Phone` field"""
-  phone: OrganizationPhoneFilterInputType
+  phone: OrganizationOrganizationFilterPhoneFilterInputType
   """`Region` field"""
-  region: OrganizationRegionFilterInputType
+  region: OrganizationOrganizationFilterRegionFilterInputType
   """`Rubpnubp` field"""
-  rubpnubp: OrganizationRubpnubpFilterInputType
+  rubpnubp: OrganizationOrganizationFilterRubpnubpFilterInputType
   """`Site` field"""
-  site: OrganizationSiteFilterInputType
+  site: OrganizationOrganizationFilterSiteFilterInputType
 }
 
-input OrganizationIdFilterInputType {
+input OrganizationOrganizationFilterIdFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationInnFilterInputType {
+input OrganizationOrganizationFilterInnFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKindFilterInputType {
+input OrganizationOrganizationFilterKindFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKodbuhgFilterInputType {
+input OrganizationOrganizationFilterKodbuhgFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKppFilterInputType {
+input OrganizationOrganizationFilterKppFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationMailFilterInputType {
+input OrganizationOrganizationFilterMailFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationNameFilterInputType {
+input OrganizationOrganizationFilterNameFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOkpoFilterInputType {
+input OrganizationOrganizationFilterOkpoFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationParentFilterInputType {
+input OrganizationOrganizationFilterParentFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`Isnull` lookup"""
   isnull: Boolean
 }
 
-input OrganizationPhoneFilterInputType {
+input OrganizationOrganizationFilterPhoneFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationRegionFilterInputType {
+input OrganizationOrganizationFilterRegionFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [ID]
 }
 
-input OrganizationRubpnubpFilterInputType {
+input OrganizationOrganizationFilterRubpnubpFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationSiteFilterInputType {
+input OrganizationOrganizationFilterSiteFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
@@ -2525,22 +2527,29 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-input ProjectFilterInputType {
+input ProjectProjectFilterFilterInputType {
   """`And` field"""
-  and: [ProjectFilterInputType]
+  and: [ProjectProjectFilterFilterInputType]
   """`Name` field"""
-  name: ProjectNameFilterInputType
+  name: ProjectProjectFilterNameFilterInputType
   """`Not` field"""
-  not: ProjectFilterInputType
+  not: ProjectProjectFilterFilterInputType
   """`Or` field"""
-  or: [ProjectFilterInputType]
+  or: [ProjectProjectFilterFilterInputType]
   """`User` field"""
-  user: ProjectUserFilterInputType
+  user: ProjectProjectFilterUserFilterInputType
 }
 
-input ProjectNameFilterInputType {
+input ProjectProjectFilterNameFilterInputType {
   """`Icontains` lookup"""
   icontains: String
+}
+
+input ProjectProjectFilterUserFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [ID]
 }
 
 """Тип модели проектов."""
@@ -2582,13 +2591,6 @@ type ProjectTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: ProjectType
-}
-
-input ProjectUserFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Схема запросов данных."""
@@ -2647,7 +2649,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: OrganizationFilterInputType
+    filter: OrganizationOrganizationFilterFilterInputType
     first: Int
     last: Int
     offset: Int
@@ -2687,7 +2689,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: ProjectFilterInputType
+    filter: ProjectProjectFilterFilterInputType
     first: Int
     last: Int
     offset: Int
@@ -3218,6 +3220,8 @@ type TagTypeEdge {
 }
 
 input UnloadDocumentMutationInput {
+  """Дополнительные параметры"""
+  additional: [String!]
   clientMutationId: String
   """Документ"""
   documentId: ID!

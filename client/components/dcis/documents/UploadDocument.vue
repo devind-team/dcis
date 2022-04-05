@@ -11,7 +11,7 @@
       v-card-text
         v-checkbox(
           v-for="param in params"
-          v-model="selectParams"
+          v-model="additional"
           :key="param"
           :label="$t(`dcis.documents.unloading.${param}`)"
           :value="param"
@@ -19,7 +19,7 @@
         )
       v-card-actions
         v-spacer
-        v-btn(@click="mutate({ documentId })" :loading="loading" color="primary") {{ $t('dcis.documents.unloading.unload') }}
+        v-btn(@click="mutate({ documentId, additional })" :loading="loading" color="primary") {{ $t('dcis.documents.unloading.unload') }}
 </template>
 
 <script lang="ts">
@@ -37,7 +37,7 @@ export default defineComponent({
   setup (_, { emit }) {
     const active = ref<boolean>(false)
     const params: string[] = ['rowAddDate', 'rowUpdateDate', 'divisionName', 'divisionHeader', 'user']
-    const selectParams = ref<string[]>(params)
+    const additional = ref<string[]>(params)
     const { mutate, loading, onDone } = useMutation<UnloadDocumentMutation, UnloadDocumentMutationVariables>(unloadDocument)
     onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
       if (success) {
@@ -49,7 +49,7 @@ export default defineComponent({
       active.value = false
       emit('close')
     }
-    return { active, mutate, loading, params, selectParams, close }
+    return { active, mutate, loading, params, additional, close }
   }
 })
 </script>
