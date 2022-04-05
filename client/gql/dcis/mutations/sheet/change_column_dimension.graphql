@@ -1,0 +1,26 @@
+#import "../../fragments/column_dimension_fields.graphql"
+
+mutation ChangeColumnDimension(
+  $id: ID!,
+  $width: Int,
+  $fixed: Boolean!,
+  $hidden: Boolean!
+  $autoSize: Boolean!
+) {
+  changeColumnDimension(id: $id, input: {
+    width: $width,
+    fixed: $fixed
+    hidden: $hidden
+    autoSize: $autoSize
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    columnDimension {
+      ...ColumnDimensionFields
+    }
+  }
+}

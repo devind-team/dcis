@@ -310,6 +310,8 @@ class ColumnDimensionType(DjangoObjectType):
             'index',
             'width',
             'fixed',
+            'hidden',
+            'auto_size',
             'sheet',
             'user',
             'content_type',

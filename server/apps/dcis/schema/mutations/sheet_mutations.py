@@ -9,10 +9,12 @@ from devind_helpers.schema.types import ErrorFieldType
 from django.db.models import F
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from graphene_django_cud.mutations import DjangoUpdateMutation
 from django.db import transaction
 
-from apps.dcis.models import Document, RowDimension, Sheet, Cell
-from apps.dcis.schema.types import RowDimensionType, CellType, MergedCellType
+from apps.dcis.helpers import DjangoCudBaseMutation
+from apps.dcis.models import Document, RowDimension, Sheet, ColumnDimension, Cell
+from apps.dcis.schema.types import ColumnDimensionType, RowDimensionType, CellType, MergedCellType
 from apps.dcis.services.cell import check_cell_options
 
 
@@ -76,6 +78,19 @@ class DeleteRowDimensionMutation(BaseMutation):
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 
+class ChangeColumnDimensionMutation(DjangoCudBaseMutation, DjangoUpdateMutation):
+    """Мутация для изменения стилей колонки таблицы."""
+
+    class Meta:
+        model = ColumnDimension
+        only_fields = ('width', 'fixed', 'hidden', 'auto_size',)
+        required_fields = ('fixed', 'hidden', 'auto_size')
+        login_required = True
+        permissions = ('dcis.change_columndimension',)
+
+    column_dimension = graphene.Field(ColumnDimensionType, description='Измененные стили колонки таблицы')
+
+
 class ChangeCellsOptionMutation(BaseMutation):
     """Мутация для изменения свойств ячеек:
 
@@ -120,5 +135,10 @@ class SheetMutations(graphene.ObjectType):
 
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
+
+    change_column_dimension = ChangeColumnDimensionMutation.Field(
+        required=True,
+        description='Изменение стилей колонки таблицы'
+    )
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
