@@ -12,6 +12,7 @@ from devind import settings
 
 
 class DocumentUnload:
+    """Выгрузка документа в формате эксель."""
 
     def __init__(self, document: Document, host: str):
         """Генерация."""
@@ -53,29 +54,11 @@ class DocumentUnload:
                     color=f'{cell.color[1:]}'
                 )
                 if cell.border_style:
+                    border_styles = {position: self._get_border_side(cell, position) for position in ['top', 'bottom', 'left', 'right', 'diagonal']}
                     ws.cell(row_position, column_position).border = Border(
-                        top=Side(
-                            border_style=cell.border_style.get('top'),
-                            color=f'{cell.border_color["top"][1:]}' if cell.border_color['top'] else None
-                        ),
-                        bottom=Side(
-                            border_style=cell.border_style.get('bottom'),
-                            color=f'{cell.border_color["bottom"][1:]}' if cell.border_color['bottom'] else None
-                        ),
-                        left=Side(
-                            border_style=cell.border_style.get('left'),
-                            color=f'{cell.border_color["left"][1:]}' if cell.border_color['left'] else None
-                        ),
-                        right=Side(
-                            border_style=cell.border_style.get('right'),
-                            color=f'{cell.border_color["right"][1:]}' if cell.border_color['right'] else None
-                        ),
-                        diagonal=Side(
-                            border_style=cell.border_style.get('diagonal'),
-                            color=f'{cell.border_color["diagonal"][1:]}' if cell.border_color['diagonal'] else None,
-                        ),
                         diagonalDown=cell.border_style.get('diagonalDown'),
-                        diagonalUp=cell.border_style.get('diagonalUp')
+                        diagonalUp=cell.border_style.get('diagonalUp'),
+                        **border_styles
                     )
                 # Заливка ячейки
                 if cell.background != '#FFFFFF' and cell.background != '#FFFFFFFF' and cell.background != WHITE:
@@ -102,3 +85,10 @@ class DocumentUnload:
                 )
         workbook.save(self.path)
         return posixpath.relpath(self.path, settings.BASE_DIR)
+
+    @staticmethod
+    def _get_border_side(cell: Cell, position: str) -> Side:
+        return Side(
+            border_style=cell.border_style.get(position),
+            color=f'{cell.border_color[position][1:]}' if cell.border_color[position] else None
+        )
