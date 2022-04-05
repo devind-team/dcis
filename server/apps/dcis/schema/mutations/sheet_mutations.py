@@ -78,7 +78,7 @@ class DeleteRowDimensionMutation(BaseMutation):
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 
-class ChangeColumnDimensionMutation(DjangoCudBaseMutation, DjangoUpdateMutation):
+class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
     """Мутация для изменения стилей колонки таблицы."""
 
     class Meta:
@@ -136,7 +136,7 @@ class SheetMutations(graphene.ObjectType):
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
 
-    change_column_dimension = ChangeColumnDimensionMutation.Field(
+    change_column_dimension = ChangeColumnDimensionPayload.Field(
         required=True,
         description='Изменение стилей колонки таблицы'
     )

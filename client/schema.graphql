@@ -637,7 +637,7 @@ type ChangeCellsOptionMutationPayload {
 }
 
 """Мутация для изменения стилей колонки таблицы."""
-type ChangeColumnDimensionMutation {
+type ChangeColumnDimensionPayload {
   """Измененные стили колонки таблицы"""
   columnDimension: ColumnDimensionType
   """Ошибки мутации"""
@@ -1893,7 +1893,7 @@ type Mutation {
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение стилей колонки таблицы"""
-  changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionMutation!
+  changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Мутация для изменения имени группы."""

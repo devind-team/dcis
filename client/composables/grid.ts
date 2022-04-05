@@ -1,7 +1,6 @@
 import type { ComputedRef, Ref } from '#app'
 import { computed, ref } from '#app'
 
-import { useGridMutations } from '~/composables/grid-mutations'
 import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
 import {
@@ -14,7 +13,13 @@ import {
   rangeLetterToCells,
   unionValues
 } from '~/services/grid'
-import { BuildCellType, BuildColumnType, BuildRowType, CellOptionsType, ColumnResizeType } from '~/types/grid-types'
+import {
+  BuildCellType,
+  BuildColumnType,
+  ResizingBuildColumnType,
+  BuildRowType,
+  CellOptionsType
+} from '~/types/grid-types'
 
 export const cellKinds: Record<string, string> = {
   n: 'Numeric',
@@ -26,13 +31,14 @@ export const cellKinds: Record<string, string> = {
 export const defaultColumnWidth = 64
 export const borderGag = 10
 
-export function useGrid (sheet: Ref<SheetType>) {
-  const { changeColumnWidth } = useGridMutations()
-
+export function useGrid (
+  sheet: Ref<SheetType>,
+  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
+) {
   const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
     sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
       let width = ''
-      if (resizingColumn.value && resizingColumn.value.column.id === columnDimension.id) {
+      if (resizingColumn.value && resizingColumn.value.dimension.id === columnDimension.id) {
         width = `${resizingColumn.value.width}px`
       } else {
         width = columnDimension.width ? `${columnDimension.width}px` : `${defaultColumnWidth}px`
@@ -40,7 +46,7 @@ export function useGrid (sheet: Ref<SheetType>) {
       return {
         id: columnDimension.id,
         index: columnDimension.index,
-        positional: positionToLetter(columnDimension.index),
+        position: positionToLetter(columnDimension.index),
         style: { width },
         dimension: columnDimension
       }
@@ -191,29 +197,28 @@ export function useGrid (sheet: Ref<SheetType>) {
   /**
    * Блок изменения ширины столбца
    */
-  const resizingColumn = ref<ColumnResizeType | null>(null)
+  const resizingColumn = ref<ResizingBuildColumnType | null>(null)
   const cursor = computed<string>(() => resizingColumn.value ? 'col-resize' : 'auto')
   const moveColumnHeader = (event: MouseEvent, index: number) => {
+    const mouse = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
     const arrayIndex = index - 1
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
-      resizingColumn.value.width += event.clientX - resizingColumn.value.clientX
-      resizingColumn.value.clientX = event.clientX
+      resizingColumn.value.width += mouse.x - resizingColumn.value.mouse.x
+      resizingColumn.value.mouse = mouse
     } else if (cell.offsetWidth - event.offsetX < borderGag) {
       resizingColumn.value = {
-        column: sheet.value.columns[arrayIndex],
+        ...columns.value[arrayIndex],
         width: sheet.value.columns[arrayIndex].width ?? defaultColumnWidth,
-        clientX: event.clientX,
+        mouse,
         state: 'hover'
       }
-    } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag) {
-      if (index - 1 > 0) {
-        resizingColumn.value = {
-          column: sheet.value.columns[arrayIndex - 1],
-          width: sheet.value.columns[arrayIndex - 1].width ?? defaultColumnWidth,
-          clientX: event.clientX,
-          state: 'hover'
-        }
+    } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag && index - 1 > 0) {
+      resizingColumn.value = {
+        ...columns.value[arrayIndex - 1],
+        width: sheet.value.columns[arrayIndex - 1].width ?? defaultColumnWidth,
+        mouse,
+        state: 'hover'
       }
     } else {
       resizingColumn.value = null
@@ -232,7 +237,7 @@ export function useGrid (sheet: Ref<SheetType>) {
   const endColumnResizing = () => {
     if (resizingColumn.value) {
       resizingColumn.value.state = 'hover'
-      changeColumnWidth(resizingColumn.value.column, resizingColumn.value.width)
+      changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
     }
   }
 

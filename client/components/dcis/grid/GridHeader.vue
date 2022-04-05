@@ -10,7 +10,7 @@
         @mouseleave="leaveColumnHeader"
         @mousedown="startColumnResizing"
         @mouseup="endColumnResizing"
-      ) {{ column.positional }}
+      ) {{ column.position }}
 </template>
 
 <script lang="ts">

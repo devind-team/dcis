@@ -706,8 +706,8 @@ export type ChangeCellsOptionMutationPayload = {
 };
 
 /** Мутация для изменения стилей колонки таблицы. */
-export type ChangeColumnDimensionMutation = {
-  __typename?: 'ChangeColumnDimensionMutation';
+export type ChangeColumnDimensionPayload = {
+  __typename?: 'ChangeColumnDimensionPayload';
   /** Измененные стили колонки таблицы */
   columnDimension?: Maybe<ColumnDimensionType>;
   /** Ошибки мутации */
@@ -2060,7 +2060,7 @@ export type Mutation = {
   /** Изменения опций ячейки */
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение стилей колонки таблицы */
-  changeColumnDimension: ChangeColumnDimensionMutation;
+  changeColumnDimension: ChangeColumnDimensionPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
   /** Мутация для изменения имени группы. */
@@ -4593,7 +4593,7 @@ export type ChangeColumnDimensionMutationVariables = Exact<{
   autoSize: Scalars['Boolean'];
 }>;
 
-export type ChangeColumnDimensionMutation = { __typename?: 'Mutation', changeColumnDimension: { __typename?: 'ChangeColumnDimensionMutation', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, columnDimension?: { __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, hidden: boolean, autoSize: boolean } | null } };
+export type ChangeColumnDimensionMutation = { __typename?: 'Mutation', changeColumnDimension: { __typename?: 'ChangeColumnDimensionPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, columnDimension?: { __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, hidden: boolean, autoSize: boolean } | null } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowId: Scalars['Int'];

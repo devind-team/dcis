@@ -1,12 +1,18 @@
 import type { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 
 export type BuildColumnType = {
-  id: string,
+  id: string
   index: number
-  positional: string
+  position: string
   style: Record<string, string | undefined>
   dimension: ColumnDimensionType
 }
+
+export type ResizingBuildColumnType = {
+  width: number
+  mouse: { x: number, y: number }
+  state: 'hover' | 'resizing'
+} & BuildColumnType
 
 export type BuildCellType = {
   sheetId: string
@@ -95,9 +101,9 @@ export type CellPositionType = string
 export type RangeType = string
 
 export type RangePositionsType = {
-  minColumn: number,
-  minRow: number,
-  maxColumn: number,
+  minColumn: number
+  minRow: number
+  maxColumn: number
   maxRow: number
 }
 
@@ -190,11 +196,4 @@ export type SheetType = MergeRowType[]
 export type MergedType = {
   merged: boolean
   unmerged: boolean
-}
-
-export type ColumnResizeType = {
-  column: ColumnDimensionType
-  width: number
-  clientX: number
-  state: 'hover' | 'resizing'
 }
