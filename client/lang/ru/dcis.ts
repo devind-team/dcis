@@ -12,6 +12,8 @@ export default {
       short: 'Сокращенное название проекта',
       description: 'Описание проекта',
       visibility: 'Видимость',
+      department: 'Департаменты',
+      organization: 'Организации',
       buttonText: 'Добавить проект'
     },
     changeProject: {

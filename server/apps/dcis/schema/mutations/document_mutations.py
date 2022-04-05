@@ -10,7 +10,6 @@ from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
 from django.utils.timezone import make_aware
-from django.db import reset_queries, connection
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, Union, Type
 
 import graphene
 from devind_core.models import File
@@ -45,9 +45,11 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
 
     @classmethod
     def handle_content_type(cls, root: Any, info: ResolveInfo, value, *args, **kwargs):
-        return ContentType.objects.get_for_model(Department) \
-            if value == 'department'\
-            else ContentType.objects.get_for_model(Organization)
+        divisions: Dict[str, Type[Union[Department, Organization]]] = {
+            'department': Department,
+            'organization': Organization
+        }
+        return ContentType.objects.get_for_model(divisions.get(value, 'department'))
 
 
 class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
