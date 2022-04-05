@@ -29,30 +29,38 @@ export const cellKinds: Record<string, string> = {
   money: 'Money',
   department: 'Department'
 }
-export const defaultColumnWidth = 64
-export const borderGag = 10
 
 export function useGrid (
   sheet: Ref<SheetType>,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
 ) {
+  const zeroColumnWidth = ref<number>(30)
+  const defaultColumnWidth = ref<number>(64)
+  const borderGag = ref<number>(10)
+
   const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
     sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
-      let width = ''
+      let width = 0
       if (resizingColumn.value && resizingColumn.value.dimension.id === columnDimension.id) {
-        width = `${resizingColumn.value.width}px`
+        width = resizingColumn.value.width
       } else {
-        width = columnDimension.width ? `${columnDimension.width}px` : `${defaultColumnWidth}px`
+        width = columnDimension.width ? columnDimension.width : defaultColumnWidth.value
       }
       return {
         id: columnDimension.id,
         index: columnDimension.index,
         position: positionToLetter(columnDimension.index),
-        style: { width },
+        width,
+        style: { width: `${width}px` },
         dimension: columnDimension
       }
     })
   ))
+
+  const width = computed<number>(
+    () => zeroColumnWidth.value +
+      columns.value.reduce((sum, column) => sum + column.width, 0)
+  )
 
   /**
    * Собираем структуру для быстрого поиска
@@ -211,17 +219,17 @@ export function useGrid (
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
       resizingColumn.value.width += mousePosition.x - resizingColumn.value.mousePosition.x
       resizingColumn.value.mousePosition = mousePosition
-    } else if (cell.offsetWidth - event.offsetX < borderGag) {
+    } else if (cell.offsetWidth - event.offsetX < borderGag.value) {
       resizingColumn.value = {
         ...column,
-        width: column.dimension.width ?? defaultColumnWidth,
+        width: column.dimension.width ?? defaultColumnWidth.value,
         mousePosition,
         state: 'hover'
       }
-    } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag && column.index - 1 > 0) {
+    } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag.value && column.index - 1 > 0) {
       resizingColumn.value = {
         ...columns.value[column.index - 2],
-        width: columns.value[column.index - 2].dimension.width ?? defaultColumnWidth,
+        width: columns.value[column.index - 2].dimension.width ?? defaultColumnWidth.value,
         mousePosition,
         state: 'hover'
       }
@@ -301,7 +309,11 @@ export function useGrid (
   })
 
   return {
+    zeroColumnWidth,
+    defaultColumnWidth,
+    borderGag,
     sheet,
+    width,
     cells,
     columns,
     rows,

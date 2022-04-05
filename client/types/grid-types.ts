@@ -9,6 +9,7 @@ export type BuildColumnType = {
   id: string
   index: number
   position: string
+  width: number
   style: Record<string, string | undefined>
   dimension: ColumnDimensionType
 }

@@ -7,8 +7,9 @@
       :update="update"
     )
     div.grid__container
-      table.grid__table
+      table.grid__table(:style="{ width: `${width}px` }")
         grid-header(
+          :zero-column-width="zeroColumnWidth"
           :columns="columns"
           :move-column-header="moveColumnHeader"
           :leave-column-header="leaveColumnHeader"
@@ -85,6 +86,8 @@ export default defineComponent({
 
     const sheet: Ref<SheetType> = toRef(props, 'sheet')
     const {
+      zeroColumnWidth,
+      width,
       columns,
       rows,
       mergeCells,
@@ -108,6 +111,8 @@ export default defineComponent({
     provide('documentUpdate', props.update)
 
     return {
+      zeroColumnWidth,
+      width,
       columns,
       rows,
       mergedCells,

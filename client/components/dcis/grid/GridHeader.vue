@@ -1,7 +1,7 @@
 <template lang="pug">
   thead
     tr
-      th(style="width: 30px")
+      th(:style="{ width: `${zeroColumnWidth}px` }")
       th(
         v-for="column in columns"
         :key="column.id"
@@ -20,6 +20,7 @@ import { BuildColumnType } from '~/types/grid-types'
 
 export default defineComponent({
   props: {
+    zeroColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     moveColumnHeader: { type: Function as PropType<(e: MouseEvent, column: BuildColumnType) => void>, required: true },
     leaveColumnHeader: { type: Function as PropType<() => void>, required: true },
