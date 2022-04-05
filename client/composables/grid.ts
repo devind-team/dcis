@@ -1,6 +1,7 @@
 import type { ComputedRef, Ref } from '#app'
 import { computed, ref } from '#app'
 
+import { useGridMutations } from '~/composables/grid-mutations'
 import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
 import {
@@ -22,13 +23,16 @@ export const cellKinds: Record<string, string> = {
   money: 'Money',
   department: 'Department'
 }
+export const defaultColumnWidth = 64
+export const borderGag = 10
 
 export function useGrid (sheet: Ref<SheetType>) {
-  const defaultColumnWidth = 64
+  const { changeColumnWidth } = useGridMutations()
+
   const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
     sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
       let width = ''
-      if (resizingColumn.value && resizingColumn.value.index === columnDimension.index) {
+      if (resizingColumn.value && resizingColumn.value.column.id === columnDimension.id) {
         width = `${resizingColumn.value.width}px`
       } else {
         width = columnDimension.width ? `${columnDimension.width}px` : `${defaultColumnWidth}px`
@@ -187,7 +191,6 @@ export function useGrid (sheet: Ref<SheetType>) {
   /**
    * Блок изменения ширины столбца
    */
-  const borderGag = 10
   const resizingColumn = ref<ColumnResizeType | null>(null)
   const cursor = computed<string>(() => resizingColumn.value ? 'col-resize' : 'auto')
   const moveColumnHeader = (event: MouseEvent, index: number) => {
@@ -198,18 +201,18 @@ export function useGrid (sheet: Ref<SheetType>) {
       resizingColumn.value.clientX = event.clientX
     } else if (cell.offsetWidth - event.offsetX < borderGag) {
       resizingColumn.value = {
-        index,
+        column: sheet.value.columns[arrayIndex],
         width: sheet.value.columns[arrayIndex].width ?? defaultColumnWidth,
-        state: 'hover',
-        clientX: event.clientX
+        clientX: event.clientX,
+        state: 'hover'
       }
     } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag) {
       if (index - 1 > 0) {
         resizingColumn.value = {
-          index: index - 1,
+          column: sheet.value.columns[arrayIndex - 1],
           width: sheet.value.columns[arrayIndex - 1].width ?? defaultColumnWidth,
-          state: 'hover',
-          clientX: event.clientX
+          clientX: event.clientX,
+          state: 'hover'
         }
       }
     } else {
@@ -229,6 +232,7 @@ export function useGrid (sheet: Ref<SheetType>) {
   const endColumnResizing = () => {
     if (resizingColumn.value) {
       resizingColumn.value.state = 'hover'
+      changeColumnWidth(resizingColumn.value.column, resizingColumn.value.width)
     }
   }
 
