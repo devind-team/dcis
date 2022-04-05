@@ -10,9 +10,9 @@
         :rowspan="cell.rowspan"
         :class="getCellClasses(cell)"
         :style="`${cell.style}`"
-        @mousedown="startSelection($event, cell.position)"
-        @mouseenter="enterSelection($event, cell.position)"
-        @mouseup="endSelection($event, cell.position)"
+        @mousedown="startSelection(cell.position)"
+        @mouseenter="enterSelection(cell.position)"
+        @mouseup="endSelection(cell.position)"
       )
         grid-cell(
           @clear-active="setActive(null)"
@@ -34,9 +34,9 @@ export default defineComponent({
     rows: { type: Array as PropType<BuildRowType[]>, required: true },
     selection: { type: Array as PropType<RangeType[]>, default: () => ([]) },
     setActive: { type: Function as PropType<(position: string) => void>, required: true },
-    startSelection: { type: Function as PropType<(e: MouseEvent, position: string) => void>, required: true },
-    enterSelection: { type: Function as PropType<(e: MouseEvent, position: string) => void>, required: true },
-    endSelection: { type: Function as PropType<(e: MouseEvent, position: string) => void>, required: true }
+    startSelection: { type: Function as PropType<(position: string) => void>, required: true },
+    enterSelection: { type: Function as PropType<(position: string) => void>, required: true },
+    endSelection: { type: Function as PropType<(position: string) => void>, required: true }
   },
   setup (props) {
     const active: Ref<string> = inject<Ref<string>>('active')
