@@ -3,7 +3,7 @@
     :header="$t('dcis.projects.addProject.header')"
     :button-text="$t('dcis.projects.addProject.buttonText')"
     :mutation="addProject"
-    :variables="{ name, short, description, visibility, user: user.id }"
+    :variables="{ name, short, description, visibility, user: user.id, contentType: division }"
     :update="addProjectUpdate"
     mutation-name="addProject"
     i18n-path="dcis.projects.addProject"
@@ -18,6 +18,9 @@
         v-text-field(v-model="short" :label="$t('dcis.projects.addProject.short')" :error-messages="errors" :success="valid" counter)
       validation-provider(v-slot="{ errors, valid }" :name="$t('dcis.projects.addProject.description')" rules="required|min:3|max:1023")
         v-textarea(v-model="description" :label="$t('dcis.projects.addProject.description')" :error-messages="errors" :success="valid")
+      v-radio-group(v-model="division" row)
+        v-radio(label="Департаменты" value='department')
+        v-radio(label="Организации" value='organization')
       v-checkbox(v-model="visibility" :label="$t('dcis.projects.addProject.visibility')")
 </template>
 
@@ -46,6 +49,7 @@ export default defineComponent({
     const short: Ref<string> = ref<string>('')
     const description: Ref<string> = ref<string>('')
     const visibility: Ref<boolean> = ref<boolean>(true)
+    const division: Ref<string> = ref<string>('department')
 
     const close = () => {
       name.value = ''
@@ -61,7 +65,7 @@ export default defineComponent({
       }
     }
 
-    return { user, name, short, description, visibility, close, addProject, addProjectUpdate }
+    return { user, name, short, description, visibility, close, addProject, addProjectUpdate, division }
   }
 })
 </script>
