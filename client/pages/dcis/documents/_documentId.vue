@@ -3,16 +3,10 @@
     template(v-if="!loading")
       .title {{ doc.period.name }}. Версия: {{ doc.version }}
       v-tabs.mt-1(v-model="active")
-        v-menu(bottom left)
+        settings-document(:document-id="$route.params.documentId")
           template(#activator="{ on, attrs }")
             v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
               v-icon mdi-cog
-          v-list
-            v-list-item(@click="mutate({ documentId: $route.params.documentId })")
-              v-list-item-icon
-                v-icon mdi-download
-              v-list-item-content
-                v-list-item-title Скачать документ
         v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
       v-tabs-items(v-model="active")
         v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
@@ -34,11 +28,12 @@ import { useCommonQuery } from '~/composables'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import unloadDocument from '~/gql/dcis/mutations/document/unload_document.graphql'
 import Grid from '~/components/dcis/Grid.vue'
+import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 
 export type UnloadDocumentMutationResult = { data: UnloadDocumentMutation }
 
 export default defineComponent({
-  components: { Grid },
+  components: { SettingsDocument, Grid },
   setup () {
     const route = useRoute()
     const active: Ref<number> = ref<number>(0)

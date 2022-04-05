@@ -64,6 +64,16 @@ export default {
       header: 'Назначение статуса',
       buttonText: '@:add',
       comment: 'Комментарий'
+    },
+    unloading: {
+      name: 'Выгрузить документ',
+      rowAddDate: 'Дата добавления строки',
+      rowUpdateDate: 'Дата последних изменений в строке',
+      divisionName: 'Название дивизиона',
+      divisionHeader: 'Начальник дивизиона',
+      user: 'Пользователь, добавивший строку',
+      additional: 'Дополнительные колонки',
+      unload: 'Выгрузить'
     }
   }
 }
