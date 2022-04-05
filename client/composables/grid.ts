@@ -1,6 +1,6 @@
 import { useEventListener } from '@vueuse/core'
 import type { ComputedRef, Ref } from '#app'
-import { computed, ref } from '#app'
+import { computed, ref, watch, onBeforeUnmount } from '#app'
 
 import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
@@ -140,33 +140,33 @@ export function useGrid (
   /**
    * Блок выделения
    */
-  const active: Ref<string | null> = ref<string | null>(null)
-  const selection: Ref<string[] | null> = ref<string[]>([])
-  let startCellSelectionPosition: string | null = null
+  const active = ref<string | null>(null)
+  const selection = ref<string[]>([])
+  const startCellSelectionPosition = ref<string | null>(null)
   /**
    * Начало выделения ячейки по событию MouseDown на ячейке
    */
   const startCellSelection = (position: string): void => {
-    startCellSelectionPosition = position
+    startCellSelectionPosition.value = position
   }
   /**
    * Продолжение выделения ячейки по событию MouseMove на ячейке
    */
   const enterCellSelection = (position: string): void => {
-    if (startCellSelectionPosition) {
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
+    if (startCellSelectionPosition.value) {
+      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
     }
   }
   /**
    * Завершение выделения ячейки по событию MouseUp на ячейке
    */
   const endCellSelection = (position: string): void => {
-    if (startCellSelectionPosition) {
-      if (position === startCellSelectionPosition) {
+    if (startCellSelectionPosition.value) {
+      if (position === startCellSelectionPosition.value) {
         setActive(position)
       }
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
-      startCellSelectionPosition = null
+      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+      startCellSelectionPosition.value = null
     }
   }
   /**
@@ -205,7 +205,6 @@ export function useGrid (
    * Блок изменения ширины столбца
    */
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
-  const cursor = computed<string>(() => resizingColumn.value ? 'col-resize' : 'auto')
   const moveColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
@@ -247,9 +246,45 @@ export function useGrid (
     }
   }
 
+  /**
+   * Класс курсора на странице
+   */
+  const cursorClass = computed<'grid__cursor_cell' | 'grid__cursor_col-resize' | null>(() => {
+    if (startCellSelectionPosition.value) {
+      return 'grid__cursor_cell'
+    }
+    if (resizingColumn.value) {
+      return 'grid__cursor_col-resize'
+    }
+    return null
+  })
+  /**
+   * Очистка курсора
+   */
+  const clearCursor = () => {
+    document.body.classList.remove('grid__cursor_cell')
+    document.body.classList.remove('grid__cursor_col-resize')
+  }
+  /**
+   * Добавляем класс курсора на всю страницу
+   */
+  watch(cursorClass, (newValue) => {
+    if (newValue) {
+      document.body.classList.add(newValue)
+    } else {
+      clearCursor()
+    }
+  })
+  /**
+   * Очищаем курсор после перед размонтированием компонента
+   */
+  onBeforeUnmount(() => {
+    clearCursor()
+  })
+
   useEventListener('mouseup', () => {
-    if (startCellSelectionPosition) {
-      startCellSelectionPosition = null
+    if (startCellSelectionPosition.value) {
+      startCellSelectionPosition.value = null
     }
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
       changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
@@ -282,7 +317,6 @@ export function useGrid (
     endCellSelection,
     setActive,
     resizingColumn,
-    cursor,
     moveColumnHeader,
     leaveColumnHeader,
     startColumnResizing,

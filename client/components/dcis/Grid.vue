@@ -14,7 +14,6 @@
           :leave-column-header="leaveColumnHeader"
           :start-column-resizing="startColumnResizing"
           :end-column-resizing="endColumnResizing"
-          :style="{ cursor }"
         )
         grid-body(
           :rows="rows"
@@ -98,7 +97,6 @@ export default defineComponent({
       enterCellSelection,
       endCellSelection,
       setActive,
-      cursor,
       moveColumnHeader,
       leaveColumnHeader,
       startColumnResizing,
@@ -122,7 +120,6 @@ export default defineComponent({
       enterCellSelection,
       endCellSelection,
       setActive,
-      cursor,
       moveColumnHeader,
       leaveColumnHeader,
       startColumnResizing,
@@ -133,6 +130,10 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
+.grid__cursor_cell *
+  cursor: cell !important
+.grid__cursor_col-resize *
+  cursor: col-resize !important
 div.grid__container
   overflow: auto
   height: calc(100vh - 230px)
