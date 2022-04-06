@@ -156,6 +156,9 @@ div.grid__container
     margin-top: 3px
     border-collapse: collapse
 
+    td, th
+      overflow: hidden
+
     thead
       position: sticky
       top: 0
