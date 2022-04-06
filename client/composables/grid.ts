@@ -225,7 +225,9 @@ export function useGrid (
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
-      resizingColumn.value.width += mousePosition.x - resizingColumn.value.mousePosition.x
+      resizingColumn.value.width = Math.max(
+        resizingColumn.value.width + mousePosition.x - resizingColumn.value.mousePosition.x, 0
+      )
       resizingColumn.value.mousePosition = mousePosition
     } else if (cell.offsetWidth - event.offsetX < borderGag.value) {
       resizingColumn.value = {
@@ -313,7 +315,9 @@ export function useGrid (
   useEventListener('mousemove', (event: MouseEvent) => {
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
       const mousePosition = { x: event.clientX, y: event.clientY }
-      resizingColumn.value.width += event.x - resizingColumn.value.mousePosition.x
+      resizingColumn.value.width = Math.max(
+        resizingColumn.value.width + mousePosition.x - resizingColumn.value.mousePosition.x, 0
+      )
       resizingColumn.value.mousePosition = mousePosition
     }
   })
