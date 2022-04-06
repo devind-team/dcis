@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import posixpath
 from datetime import datetime
 from os.path import join
@@ -42,7 +42,7 @@ class DocumentUnload:
                 column_position = cell.column.index
                 value = build_values.get(f'{cell.column_id}:{cell.row_id}', cell.default or '')
                 ws.cell(row_position, column_position, value).alignment = Alignment(
-                    vertical=cell.vertical_align,
+                    vertical=cell.vertical_align if cell.vertical_align != 'middle' else 'center',
                     horizontal=cell.horizontal_align,
                     wrap_text=True
                 )
