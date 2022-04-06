@@ -210,7 +210,7 @@ python-versions = "*"
 
 [[package]]
 name = "celery"
-version = "5.2.5"
+version = "5.2.6"
 description = "Distributed Task Queue."
 category = "main"
 optional = false
@@ -1764,7 +1764,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "f25b4818d97816d901591e3b0dfb8630869eebf2d45df476041ce9145fd4c35a"
+content-hash = "010967c850cc9700f0f3b5466dc9094e15d50adda7de4b4bfa4f696383c44500"
 
 [metadata.files]
 aiohttp = [
@@ -1908,8 +1908,8 @@ billiard = [
     {file = "billiard-3.6.4.0.tar.gz", hash = "sha256:299de5a8da28a783d51b197d496bef4f1595dd023a93a4f59dde1886ae905547"},
 ]
 celery = [
-    {file = "celery-5.2.5-py3-none-any.whl", hash = "sha256:1f31c196e61dde344e322f9c0d33d1bb88c0dbaccbab5019fbb519a43d44706d"},
-    {file = "celery-5.2.5.tar.gz", hash = "sha256:19247ba189b72f82cf387fe5130f8d972f1c41255f87002f3198452849bf3a97"},
+    {file = "celery-5.2.6-py3-none-any.whl", hash = "sha256:da31f8eae7607b1582e5ee2d3f2d6f58450585afd23379491e3d9229d08102d0"},
+    {file = "celery-5.2.6.tar.gz", hash = "sha256:d1398cadf30f576266b34370e28e880306ec55f7a4b6307549b0ae9c15663481"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
