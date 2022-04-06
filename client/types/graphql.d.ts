@@ -1183,14 +1183,11 @@ export type ColumnDimensionType = {
   __typename?: 'ColumnDimensionType';
   /** Ячейки */
   cells?: Maybe<Array<Maybe<CellType>>>;
-  /** Дивизион */
-  contentType?: Maybe<ContentTypeType>;
   /** Фиксация колонки */
   fixed: Scalars['Boolean'];
   id: Scalars['ID'];
   /** Индекс колонки */
   index: Scalars['Int'];
-  objectId?: Maybe<Scalars['Int']>;
   /** Листы */
   sheet?: Maybe<SheetType>;
   /** Пользователь */
@@ -1295,33 +1292,12 @@ export type ConsumerActionType =
 export type ContentTypeType = {
   __typename?: 'ContentTypeType';
   appLabel: Scalars['String'];
-  columndimensionSet: Array<ColumnDimensionType>;
-  divisionSet: DivisionTypeConnection;
-  documentSet: DocumentTypeConnection;
   id: Scalars['ID'];
   /** Модель, связанная с действием */
   logentrySet: LogEntryTypeConnection;
   model: Scalars['String'];
   permissionSet: Array<PermissionType>;
-  rowdimensionSet: Array<RowDimensionType>;
-};
-
-/** Тип модели Django. */
-export type ContentTypeTypeDivisionSetArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-};
-
-/** Тип модели Django. */
-export type ContentTypeTypeDocumentSetArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
+  projectSet: ProjectTypeConnection;
 };
 
 /** Тип модели Django. */
@@ -1340,9 +1316,22 @@ export type ContentTypeTypeLogentrySetArgs = {
   offset?: InputMaybe<Scalars['Int']>;
 };
 
+/** Тип модели Django. */
+export type ContentTypeTypeProjectSetArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  user?: InputMaybe<Scalars['ID']>;
+  user_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+};
+
 export type CreateProjectInput = {
   /** Архив */
   archive?: InputMaybe<Scalars['Boolean']>;
+  contentType: Scalars['String'];
   /** Описание проекта */
   description: Scalars['String'];
   /** Наименование проекта */
@@ -1429,6 +1418,8 @@ export type DeleteGroupMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Идентификатор группы */
+  id: Scalars['ID'];
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -1597,32 +1588,12 @@ export type DistrictType = {
 /** Список участвующих дивизионов в сборе. */
 export type DivisionType = Node & {
   __typename?: 'DivisionType';
-  /** Дивизион: Department, Organizations */
-  contentType: ContentTypeType;
   /** The ID of the object. */
   id: Scalars['ID'];
+  /** Идентификатор дивизиона */
   objectId: Scalars['Int'];
   /** Период */
   period: PeriodType;
-};
-
-export type DivisionTypeConnection = {
-  __typename?: 'DivisionTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<DivisionTypeEdge>>;
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `DivisionType` and its cursor. */
-export type DivisionTypeEdge = {
-  __typename?: 'DivisionTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<DivisionType>;
 };
 
 /** Debugging information for the current query. */
@@ -1686,14 +1657,14 @@ export type DocumentType = Node & {
   __typename?: 'DocumentType';
   /** Комментарий */
   comment: Scalars['String'];
-  contentType: ContentTypeType;
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** The ID of the object. */
   id: Scalars['ID'];
   /** Последний статус документа */
   lastStatus?: Maybe<DocumentStatusType>;
-  objectId: Scalars['Int'];
+  /** Идентификатор дивизиона */
+  objectId?: Maybe<Scalars['Int']>;
   /** Период сбора */
   period?: Maybe<PeriodType>;
   /** Листы */
@@ -1702,25 +1673,6 @@ export type DocumentType = Node & {
   updatedAt: Scalars['DateTime'];
   /** Версия документа */
   version: Scalars['Int'];
-};
-
-export type DocumentTypeConnection = {
-  __typename?: 'DocumentTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<DocumentTypeEdge>>;
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `DocumentType` and its cursor. */
-export type DocumentTypeEdge = {
-  __typename?: 'DocumentTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<DocumentType>;
 };
 
 /** Ошибка в поле формы */
@@ -1963,11 +1915,11 @@ export type MailingType = {
   /** Адрес отправки */
   address: Scalars['String'];
   /** Массив прикрепленных файлов */
-  attachments?: Maybe<Array<Scalars['String']>>;
+  attachments?: Maybe<Scalars['JSONString']>;
   /** Дата добавления */
   createdAt: Scalars['DateTime'];
   /** Средства отправки */
-  dispatchers: Array<Scalars['String']>;
+  dispatchers: Scalars['JSONString'];
   /** Заголовок сообщения */
   header: Scalars['String'];
   id: Scalars['ID'];
@@ -2657,144 +2609,144 @@ export type NotificationsSubscription = {
   notification?: Maybe<NotificationType>;
 };
 
-export type OrganizationAddressFilterInputType = {
+export type OrganizationOrganizationFilterAddressFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationDepartmentFilterInputType = {
+export type OrganizationOrganizationFilterDepartmentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
-export type OrganizationFilterInputType = {
+export type OrganizationOrganizationFilterFilterInputType = {
   /** `Address` field */
-  address?: InputMaybe<OrganizationAddressFilterInputType>;
+  address?: InputMaybe<OrganizationOrganizationFilterAddressFilterInputType>;
   /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
+  and?: InputMaybe<Array<InputMaybe<OrganizationOrganizationFilterFilterInputType>>>;
   /** `Department` field */
-  department?: InputMaybe<OrganizationDepartmentFilterInputType>;
+  department?: InputMaybe<OrganizationOrganizationFilterDepartmentFilterInputType>;
   /** `Id` field */
-  id?: InputMaybe<OrganizationIdFilterInputType>;
+  id?: InputMaybe<OrganizationOrganizationFilterIdFilterInputType>;
   /** `Inn` field */
-  inn?: InputMaybe<OrganizationInnFilterInputType>;
+  inn?: InputMaybe<OrganizationOrganizationFilterInnFilterInputType>;
   /** `Kind` field */
-  kind?: InputMaybe<OrganizationKindFilterInputType>;
+  kind?: InputMaybe<OrganizationOrganizationFilterKindFilterInputType>;
   /** `Kodbuhg` field */
-  kodbuhg?: InputMaybe<OrganizationKodbuhgFilterInputType>;
+  kodbuhg?: InputMaybe<OrganizationOrganizationFilterKodbuhgFilterInputType>;
   /** `Kpp` field */
-  kpp?: InputMaybe<OrganizationKppFilterInputType>;
+  kpp?: InputMaybe<OrganizationOrganizationFilterKppFilterInputType>;
   /** `Mail` field */
-  mail?: InputMaybe<OrganizationMailFilterInputType>;
+  mail?: InputMaybe<OrganizationOrganizationFilterMailFilterInputType>;
   /** `Name` field */
-  name?: InputMaybe<OrganizationNameFilterInputType>;
+  name?: InputMaybe<OrganizationOrganizationFilterNameFilterInputType>;
   /** `Not` field */
-  not?: InputMaybe<OrganizationFilterInputType>;
+  not?: InputMaybe<OrganizationOrganizationFilterFilterInputType>;
   /** `Okpo` field */
-  okpo?: InputMaybe<OrganizationOkpoFilterInputType>;
+  okpo?: InputMaybe<OrganizationOrganizationFilterOkpoFilterInputType>;
   /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
+  or?: InputMaybe<Array<InputMaybe<OrganizationOrganizationFilterFilterInputType>>>;
   /** `Parent` field */
-  parent?: InputMaybe<OrganizationParentFilterInputType>;
+  parent?: InputMaybe<OrganizationOrganizationFilterParentFilterInputType>;
   /** `Phone` field */
-  phone?: InputMaybe<OrganizationPhoneFilterInputType>;
+  phone?: InputMaybe<OrganizationOrganizationFilterPhoneFilterInputType>;
   /** `Region` field */
-  region?: InputMaybe<OrganizationRegionFilterInputType>;
+  region?: InputMaybe<OrganizationOrganizationFilterRegionFilterInputType>;
   /** `Rubpnubp` field */
-  rubpnubp?: InputMaybe<OrganizationRubpnubpFilterInputType>;
+  rubpnubp?: InputMaybe<OrganizationOrganizationFilterRubpnubpFilterInputType>;
   /** `Site` field */
-  site?: InputMaybe<OrganizationSiteFilterInputType>;
+  site?: InputMaybe<OrganizationOrganizationFilterSiteFilterInputType>;
 };
 
-export type OrganizationIdFilterInputType = {
+export type OrganizationOrganizationFilterIdFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
-export type OrganizationInnFilterInputType = {
+export type OrganizationOrganizationFilterInnFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationKindFilterInputType = {
+export type OrganizationOrganizationFilterKindFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationKodbuhgFilterInputType = {
+export type OrganizationOrganizationFilterKodbuhgFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationKppFilterInputType = {
+export type OrganizationOrganizationFilterKppFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationMailFilterInputType = {
+export type OrganizationOrganizationFilterMailFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationNameFilterInputType = {
+export type OrganizationOrganizationFilterNameFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOkpoFilterInputType = {
+export type OrganizationOrganizationFilterOkpoFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationParentFilterInputType = {
+export type OrganizationOrganizationFilterParentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `Isnull` lookup */
   isnull?: InputMaybe<Scalars['Boolean']>;
 };
 
-export type OrganizationPhoneFilterInputType = {
+export type OrganizationOrganizationFilterPhoneFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationRegionFilterInputType = {
+export type OrganizationOrganizationFilterRegionFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
-export type OrganizationRubpnubpFilterInputType = {
+export type OrganizationOrganizationFilterRubpnubpFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationSiteFilterInputType = {
+export type OrganizationOrganizationFilterSiteFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
@@ -2963,7 +2915,9 @@ export type PeriodType = {
   __typename?: 'PeriodType';
   /** Дата создания */
   createdAt: Scalars['DateTime'];
-  /** Собираемые документв */
+  /** Участвующие дивизионы */
+  divisions?: Maybe<Array<Maybe<DivisionType>>>;
+  /** Собираемые документов */
   documents?: Maybe<Array<Maybe<DocumentType>>>;
   /** Дата окончания */
   expiration?: Maybe<Scalars['Date']>;
@@ -3082,6 +3036,8 @@ export type ProjectType = Node & {
   __typename?: 'ProjectType';
   /** Архив */
   archive: Scalars['Boolean'];
+  /** Дивизион: Department, Organizations */
+  contentType: ContentTypeType;
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** Описание проекта */
@@ -3322,7 +3278,7 @@ export type QueryOrganizationArgs = {
 export type QueryOrganizationsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<OrganizationFilterInputType>;
+  filter?: InputMaybe<OrganizationOrganizationFilterFilterInputType>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -3557,8 +3513,8 @@ export type RowDimensionType = {
   cells?: Maybe<Array<Maybe<CellType>>>;
   /** Дочерние строки */
   children?: Maybe<Array<Maybe<RowDimensionType>>>;
-  /** Дивизион */
-  contentType?: Maybe<ContentTypeType>;
+  /** Дата добавления */
+  createdAt: Scalars['DateTime'];
   /** Документ, для динамических строк */
   document?: Maybe<DocumentType>;
   /** Динамическая ли строка */
@@ -3569,8 +3525,10 @@ export type RowDimensionType = {
   /** Индекс строки */
   index: Scalars['Int'];
   objectId?: Maybe<Scalars['Int']>;
-  /** Родительские строки */
+  /** Родительское правило */
   parent?: Maybe<RowDimensionType>;
+  /** Идентификатор родителя */
+  parentId?: Maybe<Scalars['Int']>;
   /** Лист */
   sheet: SheetType;
   /** Дата обновления */
@@ -3946,6 +3904,8 @@ export type TagTypeEdge = {
 };
 
 export type UnloadDocumentMutationInput = {
+  /** Дополнительные параметры */
+  additional?: InputMaybe<Array<Scalars['String']>>;
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Документ */
   documentId: Scalars['ID'];
@@ -4416,17 +4376,19 @@ export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: str
 
 export type ColumnDimensionFieldsFragment = { __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean };
 
-export type DepartmentFieldFragment = { __typename: 'DepartmentType', id: string, name: string, code?: number | null };
+export type DepartmentFieldFragment = { __typename: 'DepartmentType', id: string, name: string, code?: number | null, createdAt: any };
 
 export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number };
 
 export type MergedCellsFieldsFragment = { __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null };
 
+export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
+
 export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null };
 
-export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any };
+export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } };
 
-export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any };
+export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, createdAt: any, updatedAt: any, parentId?: number | null };
 
 export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any };
 
@@ -4476,6 +4438,7 @@ export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocu
 
 export type UnloadDocumentMutationVariables = Exact<{
   documentId: Scalars['ID'];
+  additional?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
 }>;
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
@@ -4492,11 +4455,11 @@ export type AddProjectMutationVariables = Exact<{
   name: Scalars['String'];
   short: Scalars['String'];
   description: Scalars['String'];
-  user: Scalars['ID'];
   visibility?: InputMaybe<Scalars['Boolean']>;
+  contentType: Scalars['String'];
 }>;
 
-export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null } };
+export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } };
 
 export type ChangePeriodMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -4508,7 +4471,7 @@ export type ChangePeriodMutationVariables = Exact<{
   expiration?: InputMaybe<Scalars['Date']>;
 }>;
 
-export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
+export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
 
 export type ChangeProjectMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -4519,7 +4482,7 @@ export type ChangeProjectMutationVariables = Exact<{
   archive: Scalars['Boolean'];
 }>;
 
-export type ChangeProjectMutation = { __typename?: 'Mutation', changeProject: { __typename: 'ChangeProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null } };
+export type ChangeProjectMutation = { __typename?: 'Mutation', changeProject: { __typename: 'ChangeProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } };
 
 export type DeletePeriodMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -4539,7 +4502,7 @@ export type AddRowDimensionMutationVariables = Exact<{
   position: Scalars['String'];
 }>;
 
-export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
+export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, createdAt: any, updatedAt: any, parentId?: number | null }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
 
 export type ChangeCellsOptionMutationVariables = Exact<{
   cellsId: Array<Scalars['Int']> | Scalars['Int'];
@@ -4557,13 +4520,13 @@ export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDim
 
 export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type DepartmentsQuery = { __typename?: 'Query', departments?: Array<{ __typename: 'DepartmentType', id: string, name: string, code?: number | null }> | null };
+export type DepartmentsQuery = { __typename?: 'Query', departments?: Array<{ __typename: 'DepartmentType', id: string, name: string, code?: number | null, createdAt: any }> | null };
 
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, createdAt: any, updatedAt: any, parentId?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
 
 export type DocumentStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
@@ -4571,30 +4534,34 @@ export type DocumentStatusesQueryVariables = Exact<{
 
 export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: Array<{ __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } }> | null };
 
+export type OrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+export type OrganizationsQuery = { __typename?: 'Query', organizations?: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+
 export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
 
-export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, periods?: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null> | null } };
+export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, periods?: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null> | null, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } };
 
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
 }>;
 
-export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any } | null } | null> } | null };
+export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } | null> } | null };
 
 export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
 
-export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any };
+export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 
 export type NoticeFieldsFragment = { __typename: 'NoticeType', id: string, kind: NoticeKind, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null };
 
@@ -4634,7 +4601,7 @@ export type NotificationQueryVariables = Exact<{
   notificationId: Scalars['ID'];
 }>;
 
-export type NotificationQuery = { __typename?: 'Query', notification: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, mailing?: { __typename: 'MailingType', id: string, dispatchers: Array<string>, address: string, header: string, text: string, attachments?: Array<string> | null, createdAt: any } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticePageType', id: string, kind: number, payload: string, objectId: string, createdAt: any, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, sections: Array<{ __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionTextType', text: string, id: number, kind: number, position: number, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionUsersType', id: number, kind: number, position: number, users: Array<{ __typename: 'UserType', id: string, avatar?: string | null, lastName: string, firstName: string, sirName?: string | null } | null>, user: { __typename?: 'UserType', id: string } } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null> } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } };
+export type NotificationQuery = { __typename?: 'Query', notification: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, mailing?: { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticePageType', id: string, kind: number, payload: string, objectId: string, createdAt: any, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, sections: Array<{ __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionTextType', text: string, id: number, kind: number, position: number, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionUsersType', id: number, kind: number, position: number, users: Array<{ __typename: 'UserType', id: string, avatar?: string | null, lastName: string, firstName: string, sirName?: string | null } | null>, user: { __typename?: 'UserType', id: string } } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null> } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } };
 
 export type NotificationsQueryVariables = Exact<{
   userId: Scalars['ID'];

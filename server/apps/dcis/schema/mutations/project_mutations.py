@@ -6,6 +6,7 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_django_cud.mutations import DjangoCreateMutation, DjangoUpdateMutation, DjangoDeleteMutation
 from graphene_file_upload.scalars import Upload
@@ -14,7 +15,7 @@ from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project, Period
-from apps.dcis.permissions import AddProject, AddPeriod, ChangeProject, DeleteProject, ChangePeriod, DeletePeriod
+from apps.dcis.permissions import AddPeriod
 from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
@@ -26,6 +27,9 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
     class Meta:
         model = Project
         login_required = True
+        field_types = {
+            'content_type': graphene.String(required=True)
+        }
         permissions = ('dcis.add_project',)
 
     project = graphene.Field(ProjectType, description='Добавленный проект')
@@ -38,6 +42,10 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
         else:
             raise ValueError(validator.validate_message_plain)
 
+    @classmethod
+    def handle_content_type(cls, root: Any, info: ResolveInfo, value, *args, **kwargs):
+        return ContentType.objects.get_for_model(Project.DIVISION_KIND.get(value, 'department'))
+
 
 class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
     """Мутация изменения настроек проекта."""
@@ -45,6 +53,7 @@ class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
     class Meta:
         model = Project
         login_required = True
+        exclude_fields = ('content_type', 'object_id',)
         permissions = ('dcis.change_project',)
 
     project = graphene.Field(ProjectType, description='Измененный проект')
@@ -94,9 +103,9 @@ class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     class Meta:
         model = Period
+        login_required = True
         exclude_fields = ('project', 'methodical_support',)
         optional_fields = ('start', 'expiration', 'user',)
-        login_required = True
         permissions = ('dcis.change_period',)
 
     period = graphene.Field(PeriodType, description='Измененный период')

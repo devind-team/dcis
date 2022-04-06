@@ -1090,14 +1090,11 @@ type ChangeValueMutationPayload {
 type ColumnDimensionType {
   """Ячейки"""
   cells: [CellType]
-  """Дивизион"""
-  contentType: ContentTypeType
   """Фиксация колонки"""
   fixed: Boolean!
   id: ID!
   """Индекс колонки"""
   index: Int!
-  objectId: Int
   """Листы"""
   sheet: SheetType
   """Пользователь"""
@@ -1196,20 +1193,18 @@ enum ConsumerActionType {
 """Тип модели Django."""
 type ContentTypeType {
   appLabel: String!
-  columndimensionSet: [ColumnDimensionType!]!
-  divisionSet(after: String, before: String, first: Int, last: Int, offset: Int): DivisionTypeConnection!
-  documentSet(after: String, before: String, first: Int, last: Int, offset: Int): DocumentTypeConnection!
   id: ID!
   """Модель, связанная с действием"""
   logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
   model: String!
   permissionSet: [PermissionType!]!
-  rowdimensionSet: [RowDimensionType!]!
+  projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
 }
 
 input CreateProjectInput {
   """Архив"""
   archive: Boolean
+  contentType: String!
   """Описание проекта"""
   description: String!
   """Наименование проекта"""
@@ -1305,6 +1300,8 @@ type DeleteGroupMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Идентификатор группы"""
+  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -1462,30 +1459,12 @@ type DistrictType {
 
 """Список участвующих дивизионов в сборе."""
 type DivisionType implements Node {
-  """Дивизион: Department, Organizations"""
-  contentType: ContentTypeType!
   """The ID of the object."""
   id: ID!
+  """Идентификатор дивизиона"""
   objectId: Int!
   """Период"""
   period: PeriodType!
-}
-
-type DivisionTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DivisionTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DivisionType` and its cursor."""
-type DivisionTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DivisionType
 }
 
 """Debugging information for the current query."""
@@ -1545,14 +1524,14 @@ type DocumentStatusType {
 type DocumentType implements Node {
   """Комментарий"""
   comment: String!
-  contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
   """The ID of the object."""
   id: ID!
   """Последний статус документа"""
   lastStatus: DocumentStatusType
-  objectId: Int!
+  """Идентификатор дивизиона"""
+  objectId: Int
   """Период сбора"""
   period: PeriodType
   """Листы"""
@@ -1561,23 +1540,6 @@ type DocumentType implements Node {
   updatedAt: DateTime!
   """Версия документа"""
   version: Int!
-}
-
-type DocumentTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DocumentTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DocumentType` and its cursor."""
-type DocumentTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DocumentType
 }
 
 """Ошибка в поле формы"""
@@ -1799,11 +1761,11 @@ type MailingType {
   """Адрес отправки"""
   address: String!
   """Массив прикрепленных файлов"""
-  attachments: [String!]
+  attachments: JSONString
   """Дата добавления"""
   createdAt: DateTime!
   """Средства отправки"""
-  dispatchers: [String!]!
+  dispatchers: JSONString!
   """Заголовок сообщения"""
   header: String!
   id: ID!
@@ -2145,144 +2107,144 @@ type NotificationsSubscription {
   notification: NotificationType
 }
 
-input OrganizationAddressFilterInputType {
+input OrganizationOrganizationFilterAddressFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationDepartmentFilterInputType {
+input OrganizationOrganizationFilterDepartmentFilterInputType {
   """`Exact` lookup"""
   exact: [ID]
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationFilterInputType {
+input OrganizationOrganizationFilterFilterInputType {
   """`Address` field"""
-  address: OrganizationAddressFilterInputType
+  address: OrganizationOrganizationFilterAddressFilterInputType
   """`And` field"""
-  and: [OrganizationFilterInputType]
+  and: [OrganizationOrganizationFilterFilterInputType]
   """`Department` field"""
-  department: OrganizationDepartmentFilterInputType
+  department: OrganizationOrganizationFilterDepartmentFilterInputType
   """`Id` field"""
-  id: OrganizationIdFilterInputType
+  id: OrganizationOrganizationFilterIdFilterInputType
   """`Inn` field"""
-  inn: OrganizationInnFilterInputType
+  inn: OrganizationOrganizationFilterInnFilterInputType
   """`Kind` field"""
-  kind: OrganizationKindFilterInputType
+  kind: OrganizationOrganizationFilterKindFilterInputType
   """`Kodbuhg` field"""
-  kodbuhg: OrganizationKodbuhgFilterInputType
+  kodbuhg: OrganizationOrganizationFilterKodbuhgFilterInputType
   """`Kpp` field"""
-  kpp: OrganizationKppFilterInputType
+  kpp: OrganizationOrganizationFilterKppFilterInputType
   """`Mail` field"""
-  mail: OrganizationMailFilterInputType
+  mail: OrganizationOrganizationFilterMailFilterInputType
   """`Name` field"""
-  name: OrganizationNameFilterInputType
+  name: OrganizationOrganizationFilterNameFilterInputType
   """`Not` field"""
-  not: OrganizationFilterInputType
+  not: OrganizationOrganizationFilterFilterInputType
   """`Okpo` field"""
-  okpo: OrganizationOkpoFilterInputType
+  okpo: OrganizationOrganizationFilterOkpoFilterInputType
   """`Or` field"""
-  or: [OrganizationFilterInputType]
+  or: [OrganizationOrganizationFilterFilterInputType]
   """`Parent` field"""
-  parent: OrganizationParentFilterInputType
+  parent: OrganizationOrganizationFilterParentFilterInputType
   """`Phone` field"""
-  phone: OrganizationPhoneFilterInputType
+  phone: OrganizationOrganizationFilterPhoneFilterInputType
   """`Region` field"""
-  region: OrganizationRegionFilterInputType
+  region: OrganizationOrganizationFilterRegionFilterInputType
   """`Rubpnubp` field"""
-  rubpnubp: OrganizationRubpnubpFilterInputType
+  rubpnubp: OrganizationOrganizationFilterRubpnubpFilterInputType
   """`Site` field"""
-  site: OrganizationSiteFilterInputType
+  site: OrganizationOrganizationFilterSiteFilterInputType
 }
 
-input OrganizationIdFilterInputType {
+input OrganizationOrganizationFilterIdFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationInnFilterInputType {
+input OrganizationOrganizationFilterInnFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKindFilterInputType {
+input OrganizationOrganizationFilterKindFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKodbuhgFilterInputType {
+input OrganizationOrganizationFilterKodbuhgFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKppFilterInputType {
+input OrganizationOrganizationFilterKppFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationMailFilterInputType {
+input OrganizationOrganizationFilterMailFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationNameFilterInputType {
+input OrganizationOrganizationFilterNameFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOkpoFilterInputType {
+input OrganizationOrganizationFilterOkpoFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationParentFilterInputType {
+input OrganizationOrganizationFilterParentFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`Isnull` lookup"""
   isnull: Boolean
 }
 
-input OrganizationPhoneFilterInputType {
+input OrganizationOrganizationFilterPhoneFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationRegionFilterInputType {
+input OrganizationOrganizationFilterRegionFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [ID]
 }
 
-input OrganizationRubpnubpFilterInputType {
+input OrganizationOrganizationFilterRubpnubpFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationSiteFilterInputType {
+input OrganizationOrganizationFilterSiteFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
@@ -2432,7 +2394,9 @@ type PageTypeEdge {
 type PeriodType {
   """Дата создания"""
   createdAt: DateTime!
-  """Собираемые документв"""
+  """Участвующие дивизионы"""
+  divisions: [DivisionType]
+  """Собираемые документов"""
   documents: [DocumentType]
   """Дата окончания"""
   expiration: Date
@@ -2547,6 +2511,8 @@ input ProjectNameFilterInputType {
 type ProjectType implements Node {
   """Архив"""
   archive: Boolean!
+  """Дивизион: Department, Organizations"""
+  contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
   """Описание проекта"""
@@ -2647,7 +2613,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: OrganizationFilterInputType
+    filter: OrganizationOrganizationFilterFilterInputType
     first: Int
     last: Int
     offset: Int
@@ -2845,8 +2811,8 @@ type RowDimensionType {
   cells: [CellType]
   """Дочерние строки"""
   children: [RowDimensionType]
-  """Дивизион"""
-  contentType: ContentTypeType
+  """Дата добавления"""
+  createdAt: DateTime!
   """Документ, для динамических строк"""
   document: DocumentType
   """Динамическая ли строка"""
@@ -2857,8 +2823,10 @@ type RowDimensionType {
   """Индекс строки"""
   index: Int!
   objectId: Int
-  """Родительские строки"""
+  """Родительское правило"""
   parent: RowDimensionType
+  """Идентификатор родителя"""
+  parentId: Int
   """Лист"""
   sheet: SheetType!
   """Дата обновления"""
@@ -3218,6 +3186,8 @@ type TagTypeEdge {
 }
 
 input UnloadDocumentMutationInput {
+  """Дополнительные параметры"""
+  additional: [String!]
   clientMutationId: String
   """Документ"""
   documentId: ID!

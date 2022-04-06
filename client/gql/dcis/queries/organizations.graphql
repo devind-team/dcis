@@ -1,0 +1,21 @@
+#import "../fragments/organization_fields.graphql"
+
+query Organizations {
+  organizations {
+    edges {
+      node {
+        ...OrganizationField
+        __typename
+      }
+      __typename
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    totalCount
+  }
+}

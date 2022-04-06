@@ -27,6 +27,7 @@ export default defineComponent({
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
       { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
+      { title: 'Дивизионы', to: 'dcis-periods-periodId-divisions', icon: 'briefcase-outline' },
       {
         title: 'Настройки',
         to: 'dcis-periods-periodId-settings',

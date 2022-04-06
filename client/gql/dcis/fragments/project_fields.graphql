@@ -6,5 +6,9 @@ fragment ProjectFields on ProjectType {
   visibility
   archive
   createdAt
+  contentType {
+    id
+    model
+  }
   __typename
 }
