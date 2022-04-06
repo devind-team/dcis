@@ -1,4 +1,3 @@
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.core.models import User
@@ -75,7 +74,7 @@ class Document(models.Model):
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     sheets = models.ManyToManyField(Sheet)
 
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
 
     class Meta:
         ordering = ('-version', '-created_at',)

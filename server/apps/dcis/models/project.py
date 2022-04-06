@@ -27,8 +27,9 @@ class Project(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Организатор сборов')
     content_type = models.ForeignKey(
         ContentType,
-        default=ContentType.objects.get_by_natural_key('devind_dictionaries', 'department'),
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        default=ContentType.objects.get_by_natural_key('devind_dictionaries', 'department').id,
+        help_text='Тип дивизиона'
     )
 
     class Meta:
