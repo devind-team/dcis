@@ -8,7 +8,6 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
-from ..filters import ProjectFilter
 from ..models import (
     Project, Period, Division,
     Privilege, PeriodGroup, PeriodPrivilege,
@@ -41,7 +40,10 @@ class ProjectType(OptimizedDjangoObjectType):
             'content_type',
             'user',
         )
-        filterset_class = ProjectFilter
+        filter_fields = {
+            'name': ['icontains'],
+            'user': ['exact', 'in']
+        }
         connection_class = CountableConnection
 
     @staticmethod
