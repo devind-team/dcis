@@ -17,7 +17,7 @@ class Privilege(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
 
     class Meta:
-        ordering = ('key', 'id',)
+        ordering = ('name', 'id',)
 
 
 class PeriodGroup(models.Model):

@@ -210,7 +210,7 @@ python-versions = "*"
 
 [[package]]
 name = "celery"
-version = "5.2.5"
+version = "5.2.6"
 description = "Distributed Task Queue."
 category = "main"
 optional = false
@@ -439,7 +439,7 @@ dev = ["tox", "bump2version (<1)", "sphinx (<2)", "importlib-metadata (<3)", "im
 
 [[package]]
 name = "devind-core"
-version = "0.3.0"
+version = "0.5.1"
 description = "Devind core."
 category = "main"
 optional = false
@@ -459,7 +459,7 @@ user-agents = ">=2.2.0,<3.0.0"
 
 [[package]]
 name = "devind-dictionaries"
-version = "0.2.1"
+version = "0.2.3"
 description = "Common dictionaries for devind applications."
 category = "main"
 optional = false
@@ -467,11 +467,11 @@ python-versions = ">=3.9,<4.0"
 
 [package.dependencies]
 beautifulsoup4 = ">=4.10.0,<5.0.0"
-celery = ">=5.2.3,<6.0.0"
-devind-helpers = ">=0.3.0,<0.4.0"
+celery = ">=5.2.5,<6.0.0"
+devind-helpers = ">=0,<1"
 Django = ">=3.2.12,<5.0.0"
 graphene-django = ">=2.15.0,<3.0.0"
-graphene-django-filter = ">=0.6.2,<0.7.0"
+graphene-django-filter = ">=0.6.4,<0.7.0"
 requests = ">=2.27.1,<3.0.0"
 
 [[package]]
@@ -493,16 +493,16 @@ redis = ">=4.1.4,<5.0.0"
 
 [[package]]
 name = "devind-notifications"
-version = "0.3.0"
+version = "0.4.1"
 description = "Devind django app for notifications."
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 
 [package.dependencies]
-celery = ">=5.2.3,<6.0.0"
-devind-core = ">=0.3.0,<0.4.0"
-devind-helpers = ">=0.3,<0.4"
+celery = ">=5.2.5,<6.0.0"
+devind-core = ">=0.5,<0.6"
+devind-helpers = ">=0,<1"
 Django = ">=3,<4"
 graphene-django = ">=2.15.0,<3.0.0"
 
@@ -681,7 +681,7 @@ pytz = "*"
 
 [[package]]
 name = "eradicate"
-version = "2.0.0"
+version = "2.1.0"
 description = "Removes commented-out code."
 category = "dev"
 optional = false
@@ -1264,7 +1264,7 @@ test = ["pytest (>=2.7.3)", "pytest-cov", "coveralls", "futures", "pytest-benchm
 
 [[package]]
 name = "prompt-toolkit"
-version = "3.0.28"
+version = "3.0.29"
 description = "Library for building powerful interactive command lines in Python"
 category = "main"
 optional = false
@@ -1908,8 +1908,8 @@ billiard = [
     {file = "billiard-3.6.4.0.tar.gz", hash = "sha256:299de5a8da28a783d51b197d496bef4f1595dd023a93a4f59dde1886ae905547"},
 ]
 celery = [
-    {file = "celery-5.2.5-py3-none-any.whl", hash = "sha256:1f31c196e61dde344e322f9c0d33d1bb88c0dbaccbab5019fbb519a43d44706d"},
-    {file = "celery-5.2.5.tar.gz", hash = "sha256:19247ba189b72f82cf387fe5130f8d972f1c41255f87002f3198452849bf3a97"},
+    {file = "celery-5.2.6-py3-none-any.whl", hash = "sha256:da31f8eae7607b1582e5ee2d3f2d6f58450585afd23379491e3d9229d08102d0"},
+    {file = "celery-5.2.6.tar.gz", hash = "sha256:d1398cadf30f576266b34370e28e880306ec55f7a4b6307549b0ae9c15663481"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
@@ -2034,20 +2034,20 @@ deprecated = [
     {file = "Deprecated-1.2.13.tar.gz", hash = "sha256:43ac5335da90c31c24ba028af536a91d41d53f9e6901ddb021bcc572ce44e38d"},
 ]
 devind-core = [
-    {file = "devind_core-0.3.0-py3-none-any.whl", hash = "sha256:8f9982e12e9c1fc440e366861c8da4f896e9e9a689896555d9783c653c6bbf27"},
-    {file = "devind_core-0.3.0.tar.gz", hash = "sha256:e64b0fbbe4f4d25a719e38538a3b53a02a6415e391ff85a20e30a57e74fd7df0"},
+    {file = "devind_core-0.5.1-py3-none-any.whl", hash = "sha256:3c37b8e2348339b28681ce03130563f612a5604847f16f0abfb74d7806dc7912"},
+    {file = "devind_core-0.5.1.tar.gz", hash = "sha256:246c53ec26d5909fa6f9dba021c522184a509df10f4d58179167d20e3f9616a5"},
 ]
 devind-dictionaries = [
-    {file = "devind_dictionaries-0.2.1-py3-none-any.whl", hash = "sha256:e086eadc2a7d535b979b7b0447857b5e77bf01b5d72d448a5cfac02a28c8d815"},
-    {file = "devind_dictionaries-0.2.1.tar.gz", hash = "sha256:28bbb49f337dc5f0b7a5abe81290e892d887cb100e5e54a26676d80d91968931"},
+    {file = "devind_dictionaries-0.2.3-py3-none-any.whl", hash = "sha256:f27a9f2950980197c34388043a9126069eb1211b0afbe9bf4437410fbc3c7a11"},
+    {file = "devind_dictionaries-0.2.3.tar.gz", hash = "sha256:f1345cc731ea8da41fa386aa3564c875e624ff003a8884811a0044d02fbadb7c"},
 ]
 devind-helpers = [
     {file = "devind_helpers-0.3.0-py3-none-any.whl", hash = "sha256:3a0d838dac430223a289f65dab1d45ba61a974d227c2954b74246fe070d75b50"},
     {file = "devind_helpers-0.3.0.tar.gz", hash = "sha256:0a33263a8b25fdf6864ce01b67ee4f1fe10b06d2b4f76562769691584330a61f"},
 ]
 devind-notifications = [
-    {file = "devind_notifications-0.3.0-py3-none-any.whl", hash = "sha256:eb26399c9ff4ec954c69bdb390516825105572d44313179d87209594f9cb2235"},
-    {file = "devind_notifications-0.3.0.tar.gz", hash = "sha256:86284b24f929bfe35f80209004b541364ffe8360bffdd0ac096c9d23a51eba4a"},
+    {file = "devind_notifications-0.4.1-py3-none-any.whl", hash = "sha256:11fdaa52f918fa6ab407419fcc79d7091a15a82c562ab8ff1a88e22058b48a75"},
+    {file = "devind_notifications-0.4.1.tar.gz", hash = "sha256:c3ff33bf0c2fadb1107ba20a9869ed490a290787f7168ca7ac94fc0cc03be7d9"},
 ]
 django = [
     {file = "Django-3.2.12-py3-none-any.whl", hash = "sha256:9b06c289f9ba3a8abea16c9c9505f25107809fb933676f6c891ded270039d965"},
@@ -2101,7 +2101,8 @@ djangorestframework = [
     {file = "djangorestframework-3.13.1.tar.gz", hash = "sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee"},
 ]
 eradicate = [
-    {file = "eradicate-2.0.0.tar.gz", hash = "sha256:27434596f2c5314cc9b31410c93d8f7e8885747399773cd088d3adea647a60c8"},
+    {file = "eradicate-2.1.0-py3-none-any.whl", hash = "sha256:8bfaca181db9227dc88bdbce4d051a9627604c2243e7d85324f6d6ce0fd08bb2"},
+    {file = "eradicate-2.1.0.tar.gz", hash = "sha256:aac7384ab25b1bf21c4c012de9b4bf8398945a14c98c911545b2ea50ab558014"},
 ]
 et-xmlfile = [
     {file = "et_xmlfile-1.1.0-py3-none-any.whl", hash = "sha256:a2ba85d1d6a74ef63837eed693bcb89c3f752169b0e3e7ae5b16ca5e1b3deada"},
@@ -2565,8 +2566,8 @@ promise = [
     {file = "promise-2.3.tar.gz", hash = "sha256:dfd18337c523ba4b6a58801c164c1904a9d4d1b1747c7d5dbf45b693a49d93d0"},
 ]
 prompt-toolkit = [
-    {file = "prompt_toolkit-3.0.28-py3-none-any.whl", hash = "sha256:30129d870dcb0b3b6a53efdc9d0a83ea96162ffd28ffe077e94215b233dc670c"},
-    {file = "prompt_toolkit-3.0.28.tar.gz", hash = "sha256:9f1cd16b1e86c2968f2519d7fb31dd9d669916f515612c269d14e9ed52b51650"},
+    {file = "prompt_toolkit-3.0.29-py3-none-any.whl", hash = "sha256:62291dad495e665fca0bda814e342c69952086afb0f4094d0893d357e5c78752"},
+    {file = "prompt_toolkit-3.0.29.tar.gz", hash = "sha256:bd640f60e8cecd74f0dc249713d433ace2ddc62b65ee07f96d358e0b152b6ea7"},
 ]
 psycopg2-binary = [
     {file = "psycopg2-binary-2.9.3.tar.gz", hash = "sha256:761df5313dc15da1502b21453642d7599d26be88bff659382f8f9747c7ebea4e"},

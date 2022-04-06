@@ -1,8 +1,7 @@
-from typing import Any, Dict, Union, Type
+from typing import Any
 
 import graphene
 from devind_core.models import File
-from devind_dictionaries.models import Department, Organization
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -45,11 +44,7 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
 
     @classmethod
     def handle_content_type(cls, root: Any, info: ResolveInfo, value, *args, **kwargs):
-        divisions: Dict[str, Type[Union[Department, Organization]]] = {
-            'department': Department,
-            'organization': Organization
-        }
-        return ContentType.objects.get_for_model(divisions.get(value, 'department'))
+        return ContentType.objects.get_for_model(Project.DIVISION_KIND.get(value, 'department'))
 
 
 class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):

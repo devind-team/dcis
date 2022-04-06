@@ -1090,14 +1090,11 @@ type ChangeValueMutationPayload {
 type ColumnDimensionType {
   """Ячейки"""
   cells: [CellType]
-  """Дивизион"""
-  contentType: ContentTypeType
   """Фиксация колонки"""
   fixed: Boolean!
   id: ID!
   """Индекс колонки"""
   index: Int!
-  objectId: Int
   """Листы"""
   sheet: SheetType
   """Пользователь"""
@@ -1196,15 +1193,12 @@ enum ConsumerActionType {
 """Тип модели Django."""
 type ContentTypeType {
   appLabel: String!
-  columndimensionSet: [ColumnDimensionType!]!
-  documentSet(after: String, before: String, first: Int, last: Int, offset: Int): DocumentTypeConnection!
   id: ID!
   """Модель, связанная с действием"""
   logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
   model: String!
   permissionSet: [PermissionType!]!
   projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
-  rowdimensionSet: [RowDimensionType!]!
 }
 
 input CreateProjectInput {
@@ -1215,7 +1209,6 @@ input CreateProjectInput {
   description: String!
   """Наименование проекта"""
   name: String!
-  objectId: Int
   periodSet: [ID]
   """Сокращенное наименование проекта"""
   short: String!
@@ -1464,6 +1457,16 @@ type DistrictType {
   updatedAt: DateTime!
 }
 
+"""Список участвующих дивизионов в сборе."""
+type DivisionType implements Node {
+  """The ID of the object."""
+  id: ID!
+  """Идентификатор дивизиона"""
+  objectId: Int!
+  """Период"""
+  period: PeriodType!
+}
+
 """Debugging information for the current query."""
 type DjangoDebug {
   """Executed SQL queries for this API query."""
@@ -1521,14 +1524,14 @@ type DocumentStatusType {
 type DocumentType implements Node {
   """Комментарий"""
   comment: String!
-  contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
   """The ID of the object."""
   id: ID!
   """Последний статус документа"""
   lastStatus: DocumentStatusType
-  objectId: Int!
+  """Идентификатор дивизиона"""
+  objectId: Int
   """Период сбора"""
   period: PeriodType
   """Листы"""
@@ -1537,23 +1540,6 @@ type DocumentType implements Node {
   updatedAt: DateTime!
   """Версия документа"""
   version: Int!
-}
-
-type DocumentTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DocumentTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DocumentType` and its cursor."""
-type DocumentTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DocumentType
 }
 
 """Ошибка в поле формы"""
@@ -2408,7 +2394,9 @@ type PageTypeEdge {
 type PeriodType {
   """Дата создания"""
   createdAt: DateTime!
-  """Собираемые документв"""
+  """Участвующие дивизионы"""
+  divisions: [DivisionType]
+  """Собираемые документов"""
   documents: [DocumentType]
   """Дата окончания"""
   expiration: Date
@@ -2501,35 +2489,29 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-input ProjectProjectFilterFilterInputType {
+input ProjectFilterInputType {
   """`And` field"""
-  and: [ProjectProjectFilterFilterInputType]
+  and: [ProjectFilterInputType]
   """`Name` field"""
-  name: ProjectProjectFilterNameFilterInputType
+  name: ProjectNameFilterInputType
   """`Not` field"""
-  not: ProjectProjectFilterFilterInputType
+  not: ProjectFilterInputType
   """`Or` field"""
-  or: [ProjectProjectFilterFilterInputType]
+  or: [ProjectFilterInputType]
   """`User` field"""
-  user: ProjectProjectFilterUserFilterInputType
+  user: ProjectUserFilterInputType
 }
 
-input ProjectProjectFilterNameFilterInputType {
+input ProjectNameFilterInputType {
   """`Icontains` lookup"""
   icontains: String
-}
-
-input ProjectProjectFilterUserFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Тип модели проектов."""
 type ProjectType implements Node {
   """Архив"""
   archive: Boolean!
+  """Дивизион: Department, Organizations"""
   contentType: ContentTypeType!
   """Дата создания"""
   createdAt: DateTime!
@@ -2566,6 +2548,13 @@ type ProjectTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: ProjectType
+}
+
+input ProjectUserFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [ID]
 }
 
 """Схема запросов данных."""
@@ -2664,7 +2653,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: ProjectProjectFilterFilterInputType
+    filter: ProjectFilterInputType
     first: Int
     last: Int
     offset: Int
@@ -2822,8 +2811,8 @@ type RowDimensionType {
   cells: [CellType]
   """Дочерние строки"""
   children: [RowDimensionType]
-  """Дивизион"""
-  contentType: ContentTypeType
+  """Дата добавления"""
+  createdAt: DateTime!
   """Документ, для динамических строк"""
   document: DocumentType
   """Динамическая ли строка"""
@@ -2834,8 +2823,10 @@ type RowDimensionType {
   """Индекс строки"""
   index: Int!
   objectId: Int
-  """Родительские строки"""
+  """Родительское правило"""
   parent: RowDimensionType
+  """Идентификатор родителя"""
+  parentId: Int
   """Лист"""
   sheet: SheetType!
   """Дата обновления"""
