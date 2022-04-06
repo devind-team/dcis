@@ -158,46 +158,51 @@ div.grid__container
 
     td, th
       overflow: hidden
+      background-clip: padding-box
 
     thead
       position: sticky
       top: 0
       z-index: 2
 
-      tr th
+      th
         background: white
         box-shadow: 1px 1px silver, -1px -1px silver
 
-    tbody tr:hover
-      background: rgba(0, 0, 0, 0.1) !important
+    tbody
+      tr:hover
+        background: rgba(0, 0, 0, 0.1) !important
 
-    tbody tr td.grid__row-index
-      font-weight: bold
-      border: 1px solid silver
-      text-align: center
-      width: 30px
+      td
+        border: 1px solid silver
 
-      position: sticky
-      left: -1px
-      z-index: 1
+      td.grid__row-index
+        position: sticky
+        left: -1px
+        z-index: 1
 
-    tbody tr td:not(.grid__row-index)
-      border: 1px solid silver
-      position: relative
-      cursor: cell
+        font-weight: bold
+        text-align: center
+        width: 30px
 
-      &.grid__cell-container-selected
-        border: 1.2px blue solid !important
+      td:not(.grid__row-index)
+        position: relative
+        cursor: cell
 
-      .grid__cell-container-active
-        top: 0
-        left: 0
-        position: absolute
-        width: 100%
-        height: 100%
-        input
+        &.grid__cell-container-selected
+          border: 1.2px blue solid
+
+        .grid__cell-container-active
+          position: absolute
           width: 100%
           height: 100%
-          &:focus
-            outline: none
+          top: 0
+          left: 0
+
+          input
+            width: 100%
+            height: 100%
+
+            &:focus
+              outline: none
 </style>
