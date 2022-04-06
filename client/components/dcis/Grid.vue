@@ -24,6 +24,7 @@
           :end-selection="endCellSelection"
           :set-active="setActive"
         )
+      grid-column-width(:visible="columnWidth.visible" :position="columnWidth.position" :width="columnWidth.width")
 </template>
 
 <script lang="ts">
@@ -42,6 +43,7 @@ import { useGrid } from '~/composables/grid'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
+import GridColumnWidth from '~/components/dcis/grid/GridColumnWidth.vue'
 import changeColumnDimension from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
@@ -51,7 +53,7 @@ type DocumentUpdateTransformType = (dc: any, result: any) => any
 type DocumentUpdateType = (cache: any, result: any, transform: DocumentUpdateTransformType) => any
 
 export default defineComponent({
-  components: { GridSheetToolbar, GridBody, GridHeader },
+  components: { GridSheetToolbar, GridBody, GridHeader, GridColumnWidth },
   props: {
     documentId: { type: String, required: true },
     sheet: { type: Object as PropType<SheetType>, required: true },
@@ -100,6 +102,7 @@ export default defineComponent({
       enterCellSelection,
       endCellSelection,
       setActive,
+      columnWidth,
       moveColumnHeader,
       leaveColumnHeader,
       startColumnResizing,
@@ -125,6 +128,7 @@ export default defineComponent({
       enterCellSelection,
       endCellSelection,
       setActive,
+      columnWidth,
       moveColumnHeader,
       leaveColumnHeader,
       startColumnResizing,
@@ -139,10 +143,11 @@ export default defineComponent({
   cursor: cell !important
 .grid__cursor_col-resize *
   cursor: col-resize !important
+
 div.grid__container
-  overflow: auto
-  height: calc(100vh - 230px)
   position: relative
+  height: calc(100vh - 230px)
+  overflow: auto
 
   table.grid__table
     user-select: none

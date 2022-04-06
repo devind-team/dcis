@@ -1,6 +1,6 @@
 import type { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 
-export type MousePositionType = {
+export type PositionType = {
   x: number
   y: number
 }
@@ -16,9 +16,15 @@ export type BuildColumnType = {
 
 export type ResizingBuildColumnType = {
   width: number
-  mousePosition: MousePositionType
+  mousePosition: PositionType
   state: 'hover' | 'resizing'
 } & BuildColumnType
+
+export type ColumnWidthType = {
+  visible: boolean
+  position: PositionType
+  width: number
+}
 
 export type BuildCellType = {
   sheetId: string

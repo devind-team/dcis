@@ -22,9 +22,12 @@ export default defineComponent({
   props: {
     zeroColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
-    moveColumnHeader: { type: Function as PropType<(e: MouseEvent, column: BuildColumnType) => void>, required: true },
+    moveColumnHeader: {
+      type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
+      required: true
+    },
     leaveColumnHeader: { type: Function as PropType<() => void>, required: true },
-    startColumnResizing: { type: Function as PropType<() => void>, required: true },
+    startColumnResizing: { type: Function as PropType<(event: MouseEvent) => void>, required: true },
     endColumnResizing: { type: Function as PropType<() => void>, required: true }
   }
 })

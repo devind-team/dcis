@@ -15,9 +15,11 @@ import {
   unionValues
 } from '~/services/grid'
 import {
+  PositionType,
   BuildCellType,
   BuildColumnType,
   ResizingBuildColumnType,
+  ColumnWidthType,
   BuildRowType,
   CellOptionsType
 } from '~/types/grid-types'
@@ -213,6 +215,12 @@ export function useGrid (
    * Блок изменения ширины столбца
    */
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
+  const columnWidthPosition = ref<PositionType>({ x: 0, y: 0 })
+  const columnWidth = computed<ColumnWidthType>(() => ({
+    visible: !!resizingColumn.value && resizingColumn.value.state === 'resizing',
+    position: columnWidthPosition.value,
+    width: resizingColumn.value?.width ?? 0
+  }))
   const moveColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
@@ -242,8 +250,10 @@ export function useGrid (
       resizingColumn.value = null
     }
   }
-  const startColumnResizing = () => {
+  const startColumnResizing = (event: MouseEvent) => {
     if (resizingColumn.value) {
+      const cell = event.target as HTMLTableCellElement
+      columnWidthPosition.value = { x: cell.offsetLeft + event.offsetX, y: cell.offsetTop + event.offsetY }
       resizingColumn.value.state = 'resizing'
     }
   }
@@ -328,7 +338,7 @@ export function useGrid (
     enterCellSelection,
     endCellSelection,
     setActive,
-    resizingColumn,
+    columnWidth,
     moveColumnHeader,
     leaveColumnHeader,
     startColumnResizing,
