@@ -35,13 +35,12 @@ class AddDocumentMutation(BaseMutation):
     def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
-        content_type: ContentType = ContentType.objects.get_for_model(Department)  # Временно департаменты
-        object_id: int = 1  # Служба поддержки
+        # Служба поддержки
+        object_id: int = 1
         max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
         document = Document.objects.create(
             version=max_version + 1 if max_version is not None else 1,
             comment=comment,
-            content_type=content_type,
             object_id=object_id,
             period=period
         )
