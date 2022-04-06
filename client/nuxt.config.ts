@@ -11,7 +11,6 @@ export default defineNuxtConfig({
   alias: {
     tslib: 'tslib/tslib.es6.js'
   },
-  buildDir: 'nuxt-dist',
   /*
   ** Nuxt rendering mode
   ** See https://nuxtjs.org/api/configuration-mode

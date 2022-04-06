@@ -26,7 +26,6 @@ export default defineComponent({
     const drawer: Ref<boolean> = ref<boolean>(false)
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: 'Периоды', to: 'dcis-projects-projectId-periods', icon: 'file-table-box-multiple-outline' },
-      { title: 'Пользователи', to: 'dcis-projects-projectId-accounts', icon: 'account-wrench', permissions: 'core.view_experimental' },
       {
         title: 'Настройки',
         to: 'dcis-projects-projectId-settings',

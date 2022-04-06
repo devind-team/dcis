@@ -1,5 +1,3 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.core.models import User
@@ -62,9 +60,9 @@ class Document(models.Model):
 
     sheet - список листов в собираемом документе.
 
-    content_type - Department, Organization.
+    content_type - Department, Organization - выбирается из проекта.
     object_id - идентификатор Department, Organization.
-    content_object - привязка к Department, Organization.
+        None в случае если для всех дивизионов один сбор.
     """
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')
@@ -76,16 +74,11 @@ class Document(models.Model):
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     sheets = models.ManyToManyField(Sheet)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
 
     class Meta:
         ordering = ('-version', '-created_at',)
-        unique_together = (('period', 'version', 'content_type', 'object_id',),)
-        indexes = [
-            models.Index(fields=['content_type', 'object_id'])
-        ]
+        unique_together = (('period', 'version', 'object_id',),)
 
 
 class DocumentStatus(models.Model):

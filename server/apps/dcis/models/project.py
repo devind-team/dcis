@@ -1,13 +1,19 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
+from typing import Dict, Type, Union
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from apps.core.models import User
 
 from devind_core.models import File
+from devind_dictionaries.models import Department, Organization
 
 
 class Project(models.Model):
     """Проект сборов."""
+
+    DIVISION_KIND: Dict[str, Type[Union[Department, Organization]]] = {
+        'department': Department,
+        'organization': Organization
+    }
 
     name = models.CharField(max_length=250, help_text='Наименование проекта')
     short = models.CharField(max_length=30, help_text='Сокращенное наименование проекта')
@@ -19,6 +25,12 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
 
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Организатор сборов')
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        default=ContentType.objects.get_by_natural_key('devind_dictionaries', 'department').id,
+        help_text='Тип дивизиона'
+    )
 
     class Meta:
         """Мета класс описания параметров проекта сборов."""
@@ -77,11 +89,4 @@ class Division(models.Model):
     """
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['content_type', 'object_id'])
-        ]
+    object_id = models.PositiveIntegerField(help_text='Идентификатор дивизиона')
