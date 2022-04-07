@@ -6,25 +6,26 @@
       :selection-cells-options="selectionCellsOptions"
       :update="update"
     )
-    div.grid__container(@scroll="scroll")
-      table.grid__table(:style="{ width: `${width}px` }")
-        grid-header(
-          :row-index-column-width="rowIndexColumnWidth"
-          :columns="columns"
-          :move-column-header="moveColumnHeader"
-          :leave-column-header="leaveColumnHeader"
-          :start-column-resizing="startColumnResizing"
-          :end-column-resizing="endColumnResizing"
-          :scroll-top="scrollTop"
-        )
-        grid-body(
-          :rows="rows"
-          :selection="selection"
-          :start-selection="startCellSelection"
-          :enter-selection="enterCellSelection"
-          :end-selection="endCellSelection"
-          :set-active="setActive"
-        )
+    .grid__body
+      div.grid__container(@scroll="scroll")
+        table.grid__table(:style="{ width: `${width}px` }")
+          grid-header(
+            :row-index-column-width="rowIndexColumnWidth"
+            :columns="columns"
+            :move-column-header="moveColumnHeader"
+            :leave-column-header="leaveColumnHeader"
+            :start-column-resizing="startColumnResizing"
+            :end-column-resizing="endColumnResizing"
+            :scroll-top="scrollTop"
+          )
+          grid-body(
+            :rows="rows"
+            :selection="selection"
+            :start-selection="startCellSelection"
+            :enter-selection="enterCellSelection"
+            :end-selection="endCellSelection"
+            :set-active="setActive"
+          )
       grid-column-width(:visible="columnWidth.visible" :position="columnWidth.position" :width="columnWidth.width")
 </template>
 
@@ -149,82 +150,85 @@ export default defineComponent({
 .grid__cursor_col-resize *
   cursor: col-resize !important
 
-div.grid__container
+div.grid__body
   position: relative
-  height: calc(100vh - 230px)
-  overflow: auto
 
-  table.grid__table
-    user-select: none
-    table-layout: fixed
+  .grid__container
+    position: relative
+    height: calc(100vh - 230px)
+    overflow: auto
 
-    margin-top: 3px
-    border-collapse: collapse
+    table.grid__table
+      user-select: none
+      table-layout: fixed
 
-    td, th
-      background-clip: padding-box
+      margin-top: 3px
+      border-collapse: collapse
 
-    thead
-      position: sticky
-      top: 0
-      z-index: 2
+      td, th
+        background-clip: padding-box
 
-      th
-        background: white
-        height: 25px
-
-        .grid__header-content
-          position: relative
-          left: 0.5px
-          width: 100%
-          height: 100%
-          overflow: hidden
-          border-top: 1px solid silver
-          border-right: 1px solid silver
-
-        .grid__row-index-header-content
-          left: 0
-          width: calc(100% + 0.5px)
-          border-left: 1px solid silver
-
-        .grid__header-content_bottom-border
-          border-bottom: 1px solid silver
-
-    tbody
-      tr:hover
-        background: rgba(0, 0, 0, 0.1) !important
-
-      td
-        overflow: hidden
-        border: 1px solid silver
-
-      td.grid__row-index
+      thead
         position: sticky
-        left: -1px
-        z-index: 1
+        top: 0
+        z-index: 2
 
-        font-weight: bold
-        text-align: center
-        width: 30px
+        th
+          background: white
+          height: 25px
 
-      td:not(.grid__row-index)
-        position: relative
-        cursor: cell
-
-        &.grid__cell-container-selected
-          border: 1.2px blue solid
-
-        .grid__cell-container-active
-          position: absolute
-          width: 100%
-          height: 100%
-          top: 0
-          left: 0
-
-          input
+          .grid__header-content
+            position: relative
+            left: 0.5px
             width: 100%
             height: 100%
+            overflow: hidden
+            border-top: 1px solid silver
+            border-right: 1px solid silver
 
-            &:focus
-              outline: none
+          .grid__row-index-header-content
+            left: 0
+            width: calc(100% + 0.5px)
+            border-left: 1px solid silver
+
+          .grid__header-content_bottom-border
+            border-bottom: 1px solid silver
+
+      tbody
+        tr:hover
+          background: rgba(0, 0, 0, 0.1) !important
+
+        td
+          overflow: hidden
+          border: 1px solid silver
+
+        td.grid__row-index
+          position: sticky
+          left: -1px
+          z-index: 1
+
+          font-weight: bold
+          text-align: center
+          width: 30px
+
+        td:not(.grid__row-index)
+          position: relative
+          cursor: cell
+
+          &.grid__cell-container-selected
+            border: 1.2px blue solid
+
+          .grid__cell-container-active
+            position: absolute
+            width: 100%
+            height: 100%
+            top: 0
+            left: 0
+
+            input
+              width: 100%
+              height: 100%
+
+              &:focus
+                outline: none
 </style>

@@ -220,7 +220,7 @@ export function useGrid (
    * Блок изменения ширины столбца
    */
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
-  const columnWidthPosition = ref<PositionType>({ x: 0, y: 0 })
+  const columnWidthPosition = ref<PositionType>({ left: null, right: null, top: null, bottom: null })
   const columnWidth = computed<ColumnWidthType>(() => ({
     visible: !!resizingColumn.value && resizingColumn.value.state === 'resizing',
     position: columnWidthPosition.value,
@@ -260,7 +260,21 @@ export function useGrid (
   const startColumnResizing = (event: MouseEvent) => {
     if (resizingColumn.value) {
       const cell = event.target as HTMLTableCellElement
-      columnWidthPosition.value = { x: cell.offsetLeft + event.offsetX, y: cell.offsetTop + event.offsetY }
+      if (cell.offsetLeft + event.offsetX < document.body.offsetWidth - 150) {
+        columnWidthPosition.value = {
+          left: cell.offsetLeft + event.offsetX,
+          right: null,
+          top: cell.offsetTop + event.offsetY - 25,
+          bottom: null
+        }
+      } else {
+        columnWidthPosition.value = {
+          left: null,
+          right: 25,
+          top: cell.offsetTop + event.offsetY - 25,
+          bottom: null
+        }
+      }
       resizingColumn.value.state = 'resizing'
     }
   }

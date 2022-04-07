@@ -1,7 +1,7 @@
 <template lang="pug">
   v-alert.grid-column-width.font-weight-medium.px-1.py-0(
     v-show="visible",
-    :style="{ left: `${position.x}px`, top: `${position.y}px` }"
+    :style="style"
     dense
     outlined
   )
@@ -18,6 +18,16 @@ export default defineComponent({
     visible: { type: Boolean, required: true },
     position: { type: Object as PropType<PositionType>, required: true },
     width: { type: Number, required: true }
+  },
+  setup (props) {
+    const style = computed<Record<string, string>>(() =>
+      Object.entries(props.position)
+        .filter(([_, v]) => v !== null)
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: `${v}px` }), {})
+    )
+    return {
+      style
+    }
   }
 })
 </script>
