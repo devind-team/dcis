@@ -459,7 +459,7 @@ user-agents = ">=2.2.0,<3.0.0"
 
 [[package]]
 name = "devind-dictionaries"
-version = "0.2.3"
+version = "0.2.4"
 description = "Common dictionaries for devind applications."
 category = "main"
 optional = false
@@ -1577,7 +1577,7 @@ python-versions = "*"
 
 [[package]]
 name = "soupsieve"
-version = "2.3.1"
+version = "2.3.2"
 description = "A modern CSS selector implementation for Beautiful Soup."
 category = "main"
 optional = false
@@ -1764,7 +1764,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "f25b4818d97816d901591e3b0dfb8630869eebf2d45df476041ce9145fd4c35a"
+content-hash = "010967c850cc9700f0f3b5466dc9094e15d50adda7de4b4bfa4f696383c44500"
 
 [metadata.files]
 aiohttp = [
@@ -2038,8 +2038,8 @@ devind-core = [
     {file = "devind_core-0.5.1.tar.gz", hash = "sha256:246c53ec26d5909fa6f9dba021c522184a509df10f4d58179167d20e3f9616a5"},
 ]
 devind-dictionaries = [
-    {file = "devind_dictionaries-0.2.3-py3-none-any.whl", hash = "sha256:f27a9f2950980197c34388043a9126069eb1211b0afbe9bf4437410fbc3c7a11"},
-    {file = "devind_dictionaries-0.2.3.tar.gz", hash = "sha256:f1345cc731ea8da41fa386aa3564c875e624ff003a8884811a0044d02fbadb7c"},
+    {file = "devind_dictionaries-0.2.4-py3-none-any.whl", hash = "sha256:4d215cae767b039b122a15bd30edbd35b60f42834422e0053c619377a6b54f37"},
+    {file = "devind_dictionaries-0.2.4.tar.gz", hash = "sha256:92f4cc60a14e782bcd25af0f1a32f48b3ec81429b56c6926f7db5d27d75e39a1"},
 ]
 devind-helpers = [
     {file = "devind_helpers-0.3.0-py3-none-any.whl", hash = "sha256:3a0d838dac430223a289f65dab1d45ba61a974d227c2954b74246fe070d75b50"},
@@ -2747,8 +2747,8 @@ snowballstemmer = [
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
 ]
 soupsieve = [
-    {file = "soupsieve-2.3.1-py3-none-any.whl", hash = "sha256:1a3cca2617c6b38c0343ed661b1fa5de5637f257d4fe22bd9f1338010a1efefb"},
-    {file = "soupsieve-2.3.1.tar.gz", hash = "sha256:b8d49b1cd4f037c7082a9683dfa1801aa2597fb11c3a1155b7a5b94829b4f1f9"},
+    {file = "soupsieve-2.3.2-py3-none-any.whl", hash = "sha256:a714129d3021ec17ce5be346b1007300558b378332c289a1a20e7d4de6ff18a5"},
+    {file = "soupsieve-2.3.2.tar.gz", hash = "sha256:0bcc6d7432153063e3df09c3ac9442af3eba488715bfcad6a4c38ccb2a523124"},
 ]
 sqlparse = [
     {file = "sqlparse-0.4.2-py3-none-any.whl", hash = "sha256:48719e356bb8b42991bdbb1e8b83223757b93789c00910a616a071910ca4a64d"},
