@@ -171,6 +171,10 @@ class RowDimension(models.Model):
 
     class Meta:
         ordering = ('index', 'id',)
+        # indexes = [
+        #     models.Index(fields=['document', 'parent']),
+        #     models.Index(fields=['document', 'parent', 'object_id'])
+        # ]
 
 
 class Cell(Style, models.Model):
