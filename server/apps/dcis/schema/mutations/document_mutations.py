@@ -17,7 +17,7 @@ from graphql_relay import from_global_id
 from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentStatus, RowDimension
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentType, ValueType, DocumentStatusType
-from apps.dcis.services.excel_unload import DocumentUnload
+from apps.dcis.services.document_unload import DocumentUnload
 
 
 class AddDocumentMutation(BaseMutation):

@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Type
 import posixpath
 from dataclasses import dataclass
 from datetime import datetime
@@ -16,13 +16,20 @@ from apps.dcis.models import Project, Period, Cell, Document, ColumnDimension, R
 
 @dataclass
 class BuildRow:
-    pk: int
+    """Дата класс содержащий строку и основную информацию о строке."""
     row: RowDimension
+    row_add_date: str
+    row_update_date: str
+    division_name: str
+    division_header: str
+    user: str
 
 
 @dataclass
 class BuildCell:
+    """Дата класс содержащий собираемую информацию о ячейки."""
     cell: Cell
+    value: str
     alignment: Alignment
     font: Font
     border: Border
@@ -32,8 +39,16 @@ class BuildCell:
 class DocumentUnload:
     """Выгрузка документа в формате эксель."""
 
+    ALLOW_ADDITIONAL: List[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_header', 'user']
+
     def __init__(self, document: Document, host: str, additional: List[str], divisions_id=None):
-        """Генерация."""
+        """Инициализация
+
+            document - выгружаемый документ
+            host - текущий хост
+            additional - дополнительные параметры
+            divisions_id - выгружаемые дивизионы в запросе
+        """
         if divisions_id is None:
             divisions_id = []
         self.document: Document = document
@@ -71,14 +86,21 @@ class DocumentUnload:
             for build_row in build_rows:
                 column_index: int = 1
                 for column in columns:
-                    cell: BuildCell = build_cells.get(f'{column.pk}:{build_row.pk}')
+                    cell: BuildCell = build_cells.get(f'{column.pk}:{build_row.row.pk}')
 
                     column_index += 1
 
                 # Дополнительные строки
                 for additionalColumn in self.additional:
                     pass
+
+                if build_row.row.height:
+                    work_sheet.row_dimensions[row_index].height = build_row.row.height
                 row_index += 1
+
+            for column in columns:
+                if column.width:
+                    work_sheet.column_dimensions[get_column_letter(column.index)].width = column.width // 7
 
             # При расчете нужно учитывать на сколько добавлено дочерних строк
             # column_offset: int = 0
@@ -93,19 +115,43 @@ class DocumentUnload:
         workbook.save(self.path)
         return posixpath.relpath(self.path, settings.BASE_DIR)
 
-    @staticmethod
-    def _build_rows(rows: List[RowDimension], parent_id: Optional[int] = None) -> List[BuildRow]:
-        return []
+    def _build_rows(self, rows: List[RowDimension], parent_id: Optional[Type[int]] = None) -> List[BuildRow]:
+        """Функция собирает все строки, включая дочерние в плоский массив."""
+        build_rows: List[BuildRow] = []
+        current_rows: List[RowDimension] = [row for row in rows if row.parent_id == parent_id]
+        for current_row in current_rows:
+            date_format = '%H:%M %d.%m.%Y'
+            build_row =BuildRow(
+                current_row,
+                current_row.created_at.strftime(date_format),
+                current_row.updated_at.strftime(date_format),
+                '',
+                '',
+                current_row.user.get_full_name if current_row.user is not None else ''
+            )
+            build_rows = [*build_rows, build_row, *self._build_rows(rows, current_row.parent_id)]
+        return build_rows
 
-    @staticmethod
-    def _build_cells(cells: List[Cell], values: List[Value]) -> Dict[str, BuildCell]:
-        return {}
+    def _build_cells(self, cells: List[Cell], values: List[Value]) -> Dict[str, BuildCell]:
+        """Собираем ячейки в хеш таблицу для индексации."""
+        build_values: Dict[str, Value] = {f'{value.column_id}:{value.row_id}': value for value in values}
+        return {
+            f'{cell.column_id}:{cell.row_id}': BuildCell(
+                cell,
+                build_values.get(f'{cell.column_id}:{cell.row_id}', cell.default),
+                self._cell_alignment(cell),
+                self._cell_font(cell),
+                self._cell_border(cell),
+                self._cell_pattern_fill(cell)
+            )
+            for cell in cells
+        }
 
     def xlsx_old(self):
         """Генерация выгрузки."""
         workbook: Workbook = Workbook()
         for sheet in self.sheets:
-            ws = workbook.create_sheet(sheet.name, -1)
+            ws = workbook.create_sheet(sheet.name)
             columns = sheet.columndimension_set.all()
             rows = sheet.rowdimension_set.all()
             cells = Cell.objects.filter(column__in=columns).prefetch_related('row', 'column').all()

@@ -3,7 +3,7 @@
     template(#activator="{ on, attrs }")
       slot(name="activator" :on="on" :attrs="attrs")
     v-list
-      upload-document(@close="close" :document-id="documentId")
+      document-unload(@close="close" :document-id="documentId")
         template(#activator="{ on, attrs }")
           v-list-item(v-on="on" v-bind="attrs")
             v-list-item-icon
@@ -13,10 +13,10 @@
 
 <script lang="ts">
 import { defineComponent, ref } from '#app'
-import UploadDocument from '~/components/dcis/documents/UploadDocument.vue'
+import DocumentUnload from '~/components/dcis/documents/DocumentUnload.vue'
 
 export default defineComponent({
-  components: { UploadDocument },
+  components: { DocumentUnload },
   props: {
     documentId: { type: String, required: true }
   },
