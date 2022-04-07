@@ -6,15 +6,16 @@
       :selection-cells-options="selectionCellsOptions"
       :update="update"
     )
-    div.grid__container
+    div.grid__container(@scroll="scroll")
       table.grid__table(:style="{ width: `${width}px` }")
         grid-header(
-          :zero-column-width="zeroColumnWidth"
+          :row-index-column-width="rowIndexColumnWidth"
           :columns="columns"
           :move-column-header="moveColumnHeader"
           :leave-column-header="leaveColumnHeader"
           :start-column-resizing="startColumnResizing"
           :end-column-resizing="endColumnResizing"
+          :scroll-top="scrollTop"
         )
         grid-body(
           :rows="rows"
@@ -88,12 +89,14 @@ export default defineComponent({
 
     const sheet: Ref<SheetType> = toRef(props, 'sheet')
     const {
-      zeroColumnWidth,
+      rowIndexColumnWidth,
       width,
       columns,
       rows,
       mergeCells,
       mergedCells,
+      scroll,
+      scrollTop,
       active,
       selection,
       selectionCells,
@@ -114,12 +117,14 @@ export default defineComponent({
     provide('documentUpdate', props.update)
 
     return {
-      zeroColumnWidth,
+      rowIndexColumnWidth,
       width,
       columns,
       rows,
       mergedCells,
       mergeCells,
+      scroll,
+      scrollTop,
       active,
       selection,
       selectionCells,
@@ -157,7 +162,6 @@ div.grid__container
     border-collapse: collapse
 
     td, th
-      overflow: hidden
       background-clip: padding-box
 
     thead
@@ -167,13 +171,31 @@ div.grid__container
 
       th
         background: white
-        box-shadow: 1px 1px silver, -1px -1px silver
+        height: 25px
+
+        .grid__header-content
+          position: relative
+          left: 0.5px
+          width: 100%
+          height: 100%
+          overflow: hidden
+          border-top: 1px solid silver
+          border-right: 1px solid silver
+
+        .grid__row-index-header-content
+          left: 0
+          width: calc(100% + 0.5px)
+          border-left: 1px solid silver
+
+        .grid__header-content_bottom-border
+          border-bottom: 1px solid silver
 
     tbody
       tr:hover
         background: rgba(0, 0, 0, 0.1) !important
 
       td
+        overflow: hidden
         border: 1px solid silver
 
       td.grid__row-index

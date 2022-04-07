@@ -1,7 +1,8 @@
 <template lang="pug">
   thead
     tr
-      th(:style="{ width: `${zeroColumnWidth}px` }")
+      th(:style="{ width: `${rowIndexColumnWidth}px` }")
+        .grid__header-content.grid__row-index-header-content(:class="contentClass")
       th(
         v-for="column in columns"
         :key="column.id"
@@ -10,7 +11,8 @@
         @mouseleave="leaveColumnHeader"
         @mousedown="startColumnResizing"
         @mouseup="endColumnResizing"
-      ) {{ column.position }}
+      )
+        .grid__header-content(:class="contentClass") {{ column.position }}
 </template>
 
 <script lang="ts">
@@ -20,7 +22,7 @@ import { BuildColumnType } from '~/types/grid-types'
 
 export default defineComponent({
   props: {
-    zeroColumnWidth: { type: Number, required: true },
+    rowIndexColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     moveColumnHeader: {
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
@@ -28,7 +30,16 @@ export default defineComponent({
     },
     leaveColumnHeader: { type: Function as PropType<() => void>, required: true },
     startColumnResizing: { type: Function as PropType<(event: MouseEvent) => void>, required: true },
-    endColumnResizing: { type: Function as PropType<() => void>, required: true }
+    endColumnResizing: { type: Function as PropType<() => void>, required: true },
+    scrollTop: { type: Number, required: true }
+  },
+  setup (props) {
+    const contentClass = computed(() => ({
+      'grid__header-content_bottom-border': props.scrollTop > 0
+    }))
+    return {
+      contentClass
+    }
   }
 })
 </script>

@@ -36,7 +36,7 @@ export function useGrid (
   sheet: Ref<SheetType>,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
 ) {
-  const zeroColumnWidth = ref<number>(30)
+  const rowIndexColumnWidth = ref<number>(30)
   const defaultColumnWidth = ref<number>(64)
   const borderGag = ref<number>(10)
 
@@ -60,7 +60,7 @@ export function useGrid (
   ))
 
   const width = computed<number>(
-    () => zeroColumnWidth.value +
+    () => rowIndexColumnWidth.value +
       columns.value.reduce((sum, column) => sum + column.width, 0)
   )
 
@@ -146,6 +146,11 @@ export function useGrid (
     return Object.values<MergedCellType>(sheet.value.mergedCells)
       .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
   })
+
+  const scrollTop = ref<number>(0)
+  const scroll = (event: Event) => {
+    scrollTop.value = (event.target as HTMLDivElement).scrollTop
+  }
 
   /**
    * Блок выделения
@@ -323,7 +328,7 @@ export function useGrid (
   })
 
   return {
-    zeroColumnWidth,
+    rowIndexColumnWidth,
     defaultColumnWidth,
     borderGag,
     sheet,
@@ -334,6 +339,8 @@ export function useGrid (
     values,
     mergeCells,
     mergedCells,
+    scrollTop,
+    scroll,
     active,
     selection,
     selectionCells,
