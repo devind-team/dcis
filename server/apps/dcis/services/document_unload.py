@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional, Type
+from collections import defaultdict
+from typing import List, Dict, Optional, Type, Tuple
 import posixpath
 from dataclasses import dataclass
 from datetime import datetime
@@ -11,7 +12,8 @@ from openpyxl.utils import get_column_letter
 from django.conf import settings
 from django.db.models import Q
 
-from apps.dcis.models import Project, Period, Cell, Document, ColumnDimension, RowDimension, Value
+from apps.core.models import User
+from apps.dcis.models import Project, Period, Cell, Document, ColumnDimension, RowDimension, Value, MergedCell
 
 
 @dataclass
@@ -21,7 +23,7 @@ class BuildRow:
     row_add_date: str
     row_update_date: str
     division_name: str
-    division_header: str
+    division_head: str
     user: str
 
 
@@ -39,7 +41,8 @@ class BuildCell:
 class DocumentUnload:
     """Выгрузка документа в формате эксель."""
 
-    ALLOW_ADDITIONAL: List[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_header', 'user']
+    ALLOW_ADDITIONAL: List[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_head', 'user']
+    DIVISION_INFO_CACHE: Dict[int, Tuple[str, str]] = {}
 
     def __init__(self, document: Document, host: str, additional: List[str], divisions_id=None):
         """Инициализация
@@ -60,7 +63,7 @@ class DocumentUnload:
             .prefetch_related('columndimension_set', 'mergedcell_set')\
             .all()
         self.host: str = host
-        self.additional: List[str] = additional
+        self.additional: List[str] = [field for field in additional if field in self.ALLOW_ADDITIONAL]
         self.divisions_id: List[int] = divisions_id
         self.path: str = join(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
 
@@ -71,7 +74,7 @@ class DocumentUnload:
             work_sheet = workbook.create_sheet(sheet.name)
             columns: List[ColumnDimension] = sheet.columndimension_set.all()
             rows: List[RowDimension] = sheet.rowdimension_set.filter(
-                Q(parent__isnull=True, document__isnull=True) | Q(
+                Q(parent__isnull=True) | Q(
                     document=self.document, parent_id__isnull=False, object_id__in=self.divisions_id
                 )
             )
@@ -80,61 +83,107 @@ class DocumentUnload:
             values: List[Value] = Value.objects.filter(document=self.document, row_id__in=rows_id).all()
             build_rows: List[BuildRow] = self._build_rows(rows)
             build_cells: Dict[str, BuildCell] = self._build_cells(cells, values)
+            build_merged_cells: Dict[int, List[MergedCell]] = self._build_merge_cells(sheet.mergedcell_set.all())
 
             # Собираем xlsx файл
             row_index: int = 1
+            offset_row: int = 0
             for build_row in build_rows:
                 column_index: int = 1
                 for column in columns:
-                    cell: BuildCell = build_cells.get(f'{column.pk}:{build_row.row.pk}')
-
+                    cell: Optional[BuildCell] = build_cells.get(f'{column.pk}:{build_row.row.pk}')
+                    if cell:
+                        work_sheet.cell(row_index, column_index, cell.value)
+                        work_sheet.cell(row_index, column_index).alignment = cell.alignment
+                        work_sheet.cell(row_index, column_index).font = cell.font
+                        # Временно отключено
+                        # work_sheet.cell(row_index, column_index).border = cell.border
+                        # work_sheet.cell(row_index, column_index).fill = cell.pattern_fill
                     column_index += 1
+                # Дополнительные колонки
+                for ac in self.additional:
+                    work_sheet.cell(row_index, column_index, getattr(build_row, ac))
+                    column_index += 1
+                # Пропускаем объединение, если строка дочерняя
+                if build_row.row.parent_id is not None:
+                    offset_row += 1
 
-                # Дополнительные строки
-                for additionalColumn in self.additional:
-                    pass
-
+                # Высота строки, если она задана
                 if build_row.row.height:
                     work_sheet.row_dimensions[row_index].height = build_row.row.height
+
+                # Объединяем ячейки
+                if row_index - offset_row in build_merged_cells:
+                    for merge_cell in build_merged_cells[row_index - offset_row]:
+                        work_sheet.merge_cells(
+                            start_column=merge_cell.min_col,
+                            start_row=merge_cell.min_row + offset_row,
+                            end_column=merge_cell.max_col,
+                            end_row=merge_cell.max_row + offset_row
+                        )
+
                 row_index += 1
 
             for column in columns:
                 if column.width:
                     work_sheet.column_dimensions[get_column_letter(column.index)].width = column.width // 7
+            for ci in range(len(columns) + 1, len(columns) + len(self.additional) + 1):
+                work_sheet.column_dimensions[get_column_letter(ci)].width = 20
 
-            # При расчете нужно учитывать на сколько добавлено дочерних строк
-            # column_offset: int = 0
-            # row_offset: int = 0
-            # for merge_cell in sheet.mergedcell_set.all():
-            #     work_sheet.merge_cells(
-            #         start_column=merge_cell.min_col + column_offset,
-            #         start_row=merge_cell.min_row + row_offset,
-            #         end_column=merge_cell.max_col + column_offset,
-            #         end_row=merge_cell.max_row + row_offset
-            #     )
         workbook.save(self.path)
         return posixpath.relpath(self.path, settings.BASE_DIR)
 
     def _build_rows(self, rows: List[RowDimension], parent_id: Optional[Type[int]] = None) -> List[BuildRow]:
         """Функция собирает все строки, включая дочерние в плоский массив."""
+        date_format: str = '%H:%M %d.%m.%Y'
         build_rows: List[BuildRow] = []
         current_rows: List[RowDimension] = [row for row in rows if row.parent_id == parent_id]
         for current_row in current_rows:
-            date_format = '%H:%M %d.%m.%Y'
-            build_row =BuildRow(
+            division_name, division_head = self._division_info(current_row.user)
+            build_row = BuildRow(
                 current_row,
                 current_row.created_at.strftime(date_format),
                 current_row.updated_at.strftime(date_format),
-                '',
-                '',
+                division_name,
+                division_head,
                 current_row.user.get_full_name if current_row.user is not None else ''
             )
-            build_rows = [*build_rows, build_row, *self._build_rows(rows, current_row.parent_id)]
+            build_rows = [*build_rows, build_row, *self._build_rows(rows, current_row.pk)]
         return build_rows
+
+    @staticmethod
+    def _build_merge_cells(merged_cells: MergedCell) -> Dict[int, List[MergedCell]]:
+        build_mc: Dict[int, List[MergedCell]] = defaultdict(list)
+        for merge_cell in merged_cells:
+            build_mc[merge_cell.max_row].append(merge_cell)
+        return build_mc
+
+    def _division_info(self, user: Optional[User]) -> Tuple[str, str]:
+        """Функция возвращает название дивизиона и начальника этого дивизиона.
+
+        Возвращать информацию можно только из моделей для которых указаны поля:
+            - user - начальник дивизиона
+            - users - список сотрудников дивизиона
+        Модель должна содержать:
+            - name - название дивизиона
+            - code - код дивизиона
+         related_name для пользователя должно подчиняться протоколу
+            getattr(user, project.content_type.model) -> получаем дивизион, где пользователь начальник
+            getattr(user, f'{project.content_type.model}s') -> получаем мой список дивизионов
+        """
+        if user is None or self.project.content_type.model not in ['department']:
+            return '', ''
+        if user.id in self.DIVISION_INFO_CACHE:
+            return self.DIVISION_INFO_CACHE[user.id]
+        divisions = getattr(user, f'{self.project.content_type.model}s').all()
+        division_name = ', '.join([f'{division.name} ({division.code})' for division in divisions])
+        division_head = ', '.join([division.user.get_full_name for division in divisions if division.user is not None])
+        self.DIVISION_INFO_CACHE[user.id] = division_name, division_head,
+        return division_name, division_head
 
     def _build_cells(self, cells: List[Cell], values: List[Value]) -> Dict[str, BuildCell]:
         """Собираем ячейки в хеш таблицу для индексации."""
-        build_values: Dict[str, Value] = {f'{value.column_id}:{value.row_id}': value for value in values}
+        build_values: Dict[str, Value] = {f'{value.column_id}:{value.row_id}': value.value for value in values}
         return {
             f'{cell.column_id}:{cell.row_id}': BuildCell(
                 cell,
@@ -146,51 +195,6 @@ class DocumentUnload:
             )
             for cell in cells
         }
-
-    def xlsx_old(self):
-        """Генерация выгрузки."""
-        workbook: Workbook = Workbook()
-        for sheet in self.sheets:
-            ws = workbook.create_sheet(sheet.name)
-            columns = sheet.columndimension_set.all()
-            rows = sheet.rowdimension_set.all()
-            cells = Cell.objects.filter(column__in=columns).prefetch_related('row', 'column').all()
-            values = sheet.value_set.filter(document=self.document).all()
-            build_values = {}
-            for build_value in values:
-                key = f'{build_value.column_id}:{build_value.row_id}'
-                build_values[key] = build_value.value
-            # Вписываем значения в ячейки
-            for cell in cells:
-                row_position = cell.row.index
-                column_position = cell.column.index
-                value = build_values.get(f'{cell.column_id}:{cell.row_id}', cell.default or '')
-                ws.cell(row_position, column_position, value).alignment = self._cell_alignment(cell)
-                # Стили шрифта ячеек
-                ws.cell(row_position, column_position).font = self._cell_font(cell)
-                if cell.border_style:
-                    ws.cell(row_position, column_position).border = self._cell_border(cell)
-                # Заливка ячейки
-                if cell.background != '#FFFFFF' and cell.background != '#FFFFFFFF' and cell.background != WHITE:
-                    ws.cell(row_position, column_position).fill = self._cell_pattern_fill(cell)
-            # Ширина и высота для колонок и строк соответственно
-            for column in columns:
-                if column.width:
-                    ws.column_dimensions[get_column_letter(column.index)].width = column.width // 7
-            for row in rows:
-                if row.height:
-                    ws.row_dimensions[row.index].height = row.height
-
-            # Объединение ячеек
-            for mc in sheet.mergedcell_set.all():
-                ws.merge_cells(
-                    start_row=mc.min_row,
-                    start_column=mc.min_col,
-                    end_row=mc.max_row,
-                    end_column=mc.max_col
-                )
-        workbook.save(self.path)
-        return posixpath.relpath(self.path, settings.BASE_DIR)
 
     @staticmethod
     def _cell_alignment(cell: Cell) -> Alignment:

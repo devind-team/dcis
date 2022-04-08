@@ -36,7 +36,7 @@ export default defineComponent({
   },
   setup (_, { emit }) {
     const active = ref<boolean>(false)
-    const params: string[] = ['row_add_date', 'row_update_date', 'division_name', 'division_header', 'user']
+    const params: string[] = ['row_add_date', 'row_update_date', 'division_name', 'division_head', 'user']
     const additional = ref<string[]>(params)
     const { mutate, loading, onDone } = useMutation<UnloadDocumentMutation, UnloadDocumentMutationVariables>(unloadDocument)
     onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
