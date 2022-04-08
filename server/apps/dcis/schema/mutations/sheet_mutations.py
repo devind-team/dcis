@@ -45,7 +45,12 @@ class AddRowDimensionMutation(BaseMutation):
         insert_index = row.index if position == 'before' else row.index + 1
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         sheet.rowdimension_set.filter(index__gte=insert_index).update(index=F('index') + 1)
-        row_dimension = RowDimension.objects.create(sheet=sheet, index=insert_index, document=document)
+        row_dimension = RowDimension.objects.create(
+            sheet=sheet,
+            index=insert_index,
+            document=document,
+            user=info.context.user
+        )
         cells = [Cell.objects.create(row=row_dimension, column=column) for column in sheet.columndimension_set.all()]
         sheet.move_merged_cells(insert_index, 1)
         return AddRowDimensionMutation(
