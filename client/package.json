@@ -39,9 +39,9 @@
     "vuetify": "^2.6.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.8",
+    "@babel/core": "^7.17.9",
     "@babel/eslint-parser": "^7.17.0",
-    "@babel/plugin-proposal-decorators": "^7.17.8",
+    "@babel/plugin-proposal-decorators": "^7.17.9",
     "@babel/plugin-proposal-optional-chaining": "^7.16.7",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/schema-ast": "^2.4.1",
