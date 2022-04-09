@@ -1,11 +1,36 @@
 import type { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 
+export type MousePositionType = {
+  x: number
+  y: number
+}
+
+export type PositionType = {
+  left: number | null
+  right: number | null
+  top: number | null
+  bottom: number | null
+}
+
 export type BuildColumnType = {
-  id: string,
+  id: string
   index: number
-  positional: string
+  position: string
+  width: number
   style: Record<string, string | undefined>
   dimension: ColumnDimensionType
+}
+
+export type ResizingBuildColumnType = {
+  width: number
+  mousePosition: MousePositionType
+  state: 'hover' | 'resizing'
+} & BuildColumnType
+
+export type ColumnWidthType = {
+  visible: boolean
+  position: PositionType
+  width: number
 }
 
 export type BuildCellType = {
@@ -95,9 +120,9 @@ export type CellPositionType = string
 export type RangeType = string
 
 export type RangePositionsType = {
-  minColumn: number,
-  minRow: number,
-  maxColumn: number,
+  minColumn: number
+  minRow: number
+  maxColumn: number
   maxRow: number
 }
 

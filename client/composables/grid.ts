@@ -1,5 +1,6 @@
+import { useEventListener } from '@vueuse/core'
 import type { ComputedRef, Ref } from '#app'
-import { computed, ref } from '#app'
+import { computed, ref, watch, onBeforeUnmount } from '#app'
 
 import type { CellType, ColumnDimensionType, MergedCellType, SheetType, ValueType } from '~/types/graphql'
 
@@ -13,7 +14,15 @@ import {
   rangeLetterToCells,
   unionValues
 } from '~/services/grid'
-import { BuildCellType, BuildColumnType, BuildRowType, CellOptionsType } from '~/types/grid-types'
+import {
+  PositionType,
+  BuildCellType,
+  BuildColumnType,
+  ResizingBuildColumnType,
+  ColumnWidthType,
+  BuildRowType,
+  CellOptionsType
+} from '~/types/grid-types'
 
 export const cellKinds: Record<string, string> = {
   n: 'Numeric',
@@ -23,18 +32,37 @@ export const cellKinds: Record<string, string> = {
   department: 'Department'
 }
 
-export function useGrid (sheet: Ref<SheetType>) {
+export function useGrid (
+  sheet: Ref<SheetType>,
+  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
+) {
+  const rowIndexColumnWidth = ref<number>(30)
+  const defaultColumnWidth = ref<number>(64)
+  const borderGag = ref<number>(10)
+
   const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
-    sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
-      id: columnDimension.id,
-      index: columnDimension.index,
-      positional: positionToLetter(columnDimension.index),
-      style: {
-        width: columnDimension.width ? `${columnDimension.width}px` : '64px'
-      },
-      dimension: columnDimension
-    }))
+    sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
+      let width = 0
+      if (resizingColumn.value && resizingColumn.value.dimension.id === columnDimension.id) {
+        width = resizingColumn.value.width
+      } else {
+        width = columnDimension.width ? columnDimension.width : defaultColumnWidth.value
+      }
+      return {
+        id: columnDimension.id,
+        index: columnDimension.index,
+        position: positionToLetter(columnDimension.index),
+        width,
+        style: { width: `${width}px` },
+        dimension: columnDimension
+      }
+    })
   ))
+
+  const width = computed<number>(
+    () => rowIndexColumnWidth.value +
+      columns.value.reduce((sum, column) => sum + column.width, 0)
+  )
 
   /**
    * Собираем структуру для быстрого поиска
@@ -119,34 +147,45 @@ export function useGrid (sheet: Ref<SheetType>) {
       .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
   })
 
+  const scrollTop = ref<number>(0)
+  const scroll = (event: Event) => {
+    scrollTop.value = (event.target as HTMLDivElement).scrollTop
+  }
+
   /**
    * Блок выделения
    */
-  const active: Ref<string | null> = ref<string | null>(null)
-  const selection: Ref<string[] | null> = ref<string[]>([])
-  let startCellSelectionPosition: string | null = null
+  const active = ref<string | null>(null)
+  const selection = ref<string[]>([])
+  const startCellSelectionPosition = ref<string | null>(null)
   /**
-   * Стартуем выделение ячейки по событию MouseDown
-   * @param _ - событие нажатия кнопки
-   * @param position - начальная позиция
+   * Начало выделения ячейки по событию MouseDown на ячейке
    */
-  const startCellSelection = (_: MouseEvent, position: string): void => {
-    startCellSelectionPosition = position
-  }
-  const enterCellSelection = (_: MouseEvent, position: string): void => {
-    if (startCellSelectionPosition) {
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
-    }
-  }
-  const endCellSelection = (_: MouseEvent, position: string): void => {
-    if (position === startCellSelectionPosition) {
-      setActive(position)
-    }
-    selection.value = rangeLetterToCells(`${startCellSelectionPosition}:${position}`)
-    startCellSelectionPosition = null
+  const startCellSelection = (position: string): void => {
+    startCellSelectionPosition.value = position
   }
   /**
-   * Вычислений выделенный ячеек
+   * Продолжение выделения ячейки по событию MouseMove на ячейке
+   */
+  const enterCellSelection = (position: string): void => {
+    if (startCellSelectionPosition.value) {
+      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+    }
+  }
+  /**
+   * Завершение выделения ячейки по событию MouseUp на ячейке
+   */
+  const endCellSelection = (position: string): void => {
+    if (startCellSelectionPosition.value) {
+      if (position === startCellSelectionPosition.value) {
+        setActive(position)
+      }
+      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+      startCellSelectionPosition.value = null
+    }
+  }
+  /**
+   * Вычисление выделенных ячеек
    */
   const selectionCells: ComputedRef<CellType[]> = computed<CellType[]>(() => (
     selection.value
@@ -173,19 +212,149 @@ export function useGrid (sheet: Ref<SheetType>) {
       Object.entries(aggregateOptions).map(([option, values]) => [option, unionValues(values)])
     ) as CellOptionsType
   })
-
   const setActive = (position: string) => {
     active.value = position
   }
 
+  /**
+   * Блок изменения ширины столбца
+   */
+  const resizingColumn = ref<ResizingBuildColumnType | null>(null)
+  const columnWidthPosition = ref<PositionType>({ left: null, right: null, top: null, bottom: null })
+  const columnWidth = computed<ColumnWidthType>(() => ({
+    visible: !!resizingColumn.value && resizingColumn.value.state === 'resizing',
+    position: columnWidthPosition.value,
+    width: resizingColumn.value?.width ?? 0
+  }))
+  const moveColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
+    const mousePosition = { x: event.clientX, y: event.clientY }
+    const cell = event.target as HTMLTableCellElement
+    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
+      resizingColumn.value.width = Math.max(
+        resizingColumn.value.width + mousePosition.x - resizingColumn.value.mousePosition.x, 0
+      )
+      resizingColumn.value.mousePosition = mousePosition
+    } else if (cell.offsetWidth - event.offsetX < borderGag.value) {
+      resizingColumn.value = {
+        ...column,
+        width: column.dimension.width ?? defaultColumnWidth.value,
+        mousePosition,
+        state: 'hover'
+      }
+    } else if (cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag.value && column.index - 1 > 0) {
+      resizingColumn.value = {
+        ...columns.value[column.index - 2],
+        width: columns.value[column.index - 2].dimension.width ?? defaultColumnWidth.value,
+        mousePosition,
+        state: 'hover'
+      }
+    } else {
+      resizingColumn.value = null
+    }
+  }
+  const leaveColumnHeader = () => {
+    if (resizingColumn.value && resizingColumn.value.state === 'hover') {
+      resizingColumn.value = null
+    }
+  }
+  const startColumnResizing = (event: MouseEvent) => {
+    if (resizingColumn.value) {
+      const cell = event.target as HTMLTableCellElement
+      if (cell.offsetLeft + event.offsetX < document.body.offsetWidth - 150) {
+        columnWidthPosition.value = {
+          left: cell.offsetLeft + event.offsetX,
+          right: null,
+          top: cell.offsetTop + event.offsetY - 25,
+          bottom: null
+        }
+      } else {
+        columnWidthPosition.value = {
+          left: null,
+          right: 25,
+          top: cell.offsetTop + event.offsetY - 25,
+          bottom: null
+        }
+      }
+      resizingColumn.value.state = 'resizing'
+    }
+  }
+  const endColumnResizing = () => {
+    if (resizingColumn.value) {
+      changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
+      resizingColumn.value.state = 'hover'
+    }
+  }
+
+  /**
+   * Класс курсора на странице
+   */
+  const cursorClass = computed<'grid__cursor_cell' | 'grid__cursor_col-resize' | null>(() => {
+    if (startCellSelectionPosition.value) {
+      return 'grid__cursor_cell'
+    }
+    if (resizingColumn.value) {
+      return 'grid__cursor_col-resize'
+    }
+    return null
+  })
+  /**
+   * Очистка курсора
+   */
+  const clearCursor = () => {
+    document.body.classList.remove('grid__cursor_cell')
+    document.body.classList.remove('grid__cursor_col-resize')
+  }
+  /**
+   * Добавляем класс курсора на всю страницу
+   */
+  watch(cursorClass, (newValue) => {
+    if (newValue) {
+      document.body.classList.add(newValue)
+    } else {
+      clearCursor()
+    }
+  })
+  /**
+   * Очищаем курсор после перед размонтированием компонента
+   */
+  onBeforeUnmount(() => {
+    clearCursor()
+  })
+
+  useEventListener('mouseup', () => {
+    if (startCellSelectionPosition.value) {
+      startCellSelectionPosition.value = null
+    }
+    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
+      changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
+      resizingColumn.value = null
+    }
+  })
+
+  useEventListener('mousemove', (event: MouseEvent) => {
+    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
+      const mousePosition = { x: event.clientX, y: event.clientY }
+      resizingColumn.value.width = Math.max(
+        resizingColumn.value.width + mousePosition.x - resizingColumn.value.mousePosition.x, 0
+      )
+      resizingColumn.value.mousePosition = mousePosition
+    }
+  })
+
   return {
+    rowIndexColumnWidth,
+    defaultColumnWidth,
+    borderGag,
     sheet,
+    width,
     cells,
     columns,
     rows,
     values,
     mergeCells,
     mergedCells,
+    scrollTop,
+    scroll,
     active,
     selection,
     selectionCells,
@@ -193,6 +362,11 @@ export function useGrid (sheet: Ref<SheetType>) {
     startCellSelection,
     enterCellSelection,
     endCellSelection,
-    setActive
+    setActive,
+    columnWidth,
+    moveColumnHeader,
+    leaveColumnHeader,
+    startColumnResizing,
+    endColumnResizing
   }
 }

@@ -636,6 +636,16 @@ type ChangeCellsOptionMutationPayload {
   success: Boolean!
 }
 
+"""Мутация для изменения стилей колонки таблицы."""
+type ChangeColumnDimensionPayload {
+  """Измененные стили колонки таблицы"""
+  columnDimension: ColumnDimensionType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeFileMutationInput {
   clientMutationId: String
   """Поле файла"""
@@ -1088,10 +1098,14 @@ type ChangeValueMutationPayload {
 
 """Тип колонок."""
 type ColumnDimensionType {
+  """Автоматическая ширина"""
+  autoSize: Boolean!
   """Ячейки"""
   cells: [CellType]
   """Фиксация колонки"""
   fixed: Boolean!
+  """Скрытое поле"""
+  hidden: Boolean!
   id: ID!
   """Индекс колонки"""
   index: Int!
@@ -1838,6 +1852,8 @@ type Mutation {
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
+  """Изменение стилей колонки таблицы"""
+  changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Мутация для изменения имени группы."""
@@ -2489,22 +2505,29 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-input ProjectFilterInputType {
+input ProjectProjectFilterFilterInputType {
   """`And` field"""
-  and: [ProjectFilterInputType]
+  and: [ProjectProjectFilterFilterInputType]
   """`Name` field"""
-  name: ProjectNameFilterInputType
+  name: ProjectProjectFilterNameFilterInputType
   """`Not` field"""
-  not: ProjectFilterInputType
+  not: ProjectProjectFilterFilterInputType
   """`Or` field"""
-  or: [ProjectFilterInputType]
+  or: [ProjectProjectFilterFilterInputType]
   """`User` field"""
-  user: ProjectUserFilterInputType
+  user: ProjectProjectFilterUserFilterInputType
 }
 
-input ProjectNameFilterInputType {
+input ProjectProjectFilterNameFilterInputType {
   """`Icontains` lookup"""
   icontains: String
+}
+
+input ProjectProjectFilterUserFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [ID]
 }
 
 """Тип модели проектов."""
@@ -2548,13 +2571,6 @@ type ProjectTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: ProjectType
-}
-
-input ProjectUserFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Схема запросов данных."""
@@ -2653,7 +2669,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: ProjectFilterInputType
+    filter: ProjectProjectFilterFilterInputType
     first: Int
     last: Int
     offset: Int
@@ -3202,6 +3218,17 @@ type UnloadDocumentMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
+}
+
+input UpdateColumnDimensionInput {
+  """Автоматическая ширина"""
+  autoSize: Boolean!
+  """Фиксация колонки"""
+  fixed: Boolean!
+  """Скрытое поле"""
+  hidden: Boolean!
+  """Ширина колонки"""
+  width: Int
 }
 
 input UpdatePeriodInput {

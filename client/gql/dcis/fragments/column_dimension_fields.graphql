@@ -3,5 +3,7 @@ fragment ColumnDimensionFields on ColumnDimensionType {
   index
   width
   fixed
+  hidden
+  autoSize
   __typename
 }
