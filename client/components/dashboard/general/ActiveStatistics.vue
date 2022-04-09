@@ -7,7 +7,6 @@
 
 <script lang="ts">
 import type { ComputedRef } from '#app'
-import { computed, defineComponent } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import { ActiveStatisticsQuery, ActiveStatisticsQueryVariables } from '~/types/graphql'
 import activeStatisticsQuery from '~/gql/dashboard/queries/active_statistics.graphql'

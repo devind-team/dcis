@@ -8,7 +8,6 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
-from ..filters import ProjectFilter
 from ..models import (
     Project, Period, Division,
     Privilege, PeriodGroup, PeriodPrivilege,
@@ -24,6 +23,7 @@ class ProjectType(OptimizedDjangoObjectType):
 
     periods = graphene.List(lambda: PeriodType, description='Периоды')
     user = graphene.Field(UserType, description='Пользователь')
+    content_type = graphene.Field(ContentTypeType, required=True, description='Дивизион: Department, Organizations')
 
     class Meta:
         model = Project
@@ -37,9 +37,13 @@ class ProjectType(OptimizedDjangoObjectType):
             'archive',
             'created_at',
             'updated_at',
+            'content_type',
             'user',
         )
-        filterset_class = ProjectFilter
+        filter_fields = {
+            'name': ['icontains'],
+            'user': ['exact', 'in']
+        }
         connection_class = CountableConnection
 
     @staticmethod
@@ -55,7 +59,10 @@ class PeriodType(DjangoObjectType):
     project = graphene.Field(ProjectType, description='Проект')
     methodical_support = DjangoListField(FileType)
     # Нужно будет отфильтровать в зависимости от прав пользователя
-    documents = graphene.List(lambda: DocumentType, description='Собираемые документв')
+    documents = graphene.List(lambda: DocumentType, description='Собираемые документов')
+
+    # Нужно вывести все дивизионы специальным образом
+    divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
 
     class Meta:
         model = Period
@@ -77,21 +84,25 @@ class PeriodType(DjangoObjectType):
         convert_choices_to_enum = False
 
     @staticmethod
-    @resolver_hints(model_field='')
+    @resolver_hints(model_field='document_set')
     def resolve_documents(period: Period, info: ResolveInfo, *args, **kwargs):
         return period.document_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='')
+    def resolve_divisions(period: Period, info: ResolveInfo, *args, **kwargs):
+        return period.division_set.all()
 
 
 class DivisionType(OptimizedDjangoObjectType):
     """Список участвующих дивизионов в сборе."""
 
     period = graphene.Field(PeriodType, required=True, description='Период')
-    content_type = graphene.Field(ContentTypeType, required=True, description='Дивизион: Department, Organizations')
 
     class Meta:
         model = Division
         interfaces = (graphene.relay.Node,)
-        fields = ('id', 'period', 'content_type', 'object_id',)
+        fields = ('id', 'period', 'object_id',)
         connection_class = CountableConnection
 
 
@@ -212,7 +223,6 @@ class DocumentType(DjangoObjectType):
             'updated_at',
             'period',
             'sheets',
-            'content_type',
             'object_id',
             'last_status'
         )
@@ -295,7 +305,6 @@ class ColumnDimensionType(DjangoObjectType):
 
     sheet = graphene.Field(SheetType, description='Листы')
     user = graphene.List(UserType, description='Пользователь')
-    content_type = graphene.Field(ContentTypeType, description='Дивизион')
     cells = graphene.List(lambda: CellType, description='Ячейки')
     values = graphene.List(
         lambda: ValueType,
@@ -314,8 +323,6 @@ class ColumnDimensionType(DjangoObjectType):
             'auto_size',
             'sheet',
             'user',
-            'content_type',
-            'object_id',
             'cells',
             'values',
         )
@@ -336,10 +343,9 @@ class ColumnDimensionType(DjangoObjectType):
 class RowDimensionType(DjangoObjectType):
     """Тип строк."""
 
-    parent = graphene.Field(lambda: RowDimensionType, description='Родительские строки')
+    parent_id = graphene.Int(description='Идентификатор родителя')
     children = graphene.List(lambda: RowDimensionType, description='Дочерние строки')
     user = graphene.List(UserType, description='Пользователь')
-    content_type = graphene.Field(ContentTypeType, description='Дивизион')
     cells = graphene.List(lambda: CellType, description='Ячейки')
 
     class Meta:
@@ -351,13 +357,14 @@ class RowDimensionType(DjangoObjectType):
             'sheet',
             'dynamic',
             'aggregation',
+            'object_id',
+            'created_at',
+            'updated_at',
             'parent',
+            'parent_id',
             'document',
             'children',
             'user',
-            'content_type',
-            'object_id',
-            'updated_at',
             'cells',
         )
         convert_choices_to_enum = False

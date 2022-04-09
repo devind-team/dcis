@@ -1,7 +1,5 @@
 from typing import List
 from openpyexcel.utils.cell import get_column_letter
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from apps.core.models import User
@@ -88,27 +86,7 @@ class Style(models.Model):
         abstract = True
 
 
-class SheetDivision(models.Model):
-    """Описание обобщенных полей для связи с дивизионом строк и столбцов.
-
-    - user - пользователь, который добавил колонку.
-    - content_type - дивизион Department, Organization.
-    - object_id - идентификатор дивизиона Department, Organization.
-    - content_object - генерация связи к дивизиону.
-
-    При первоначальном заполнении таблицы все поля устанавливаются по умолчанию.
-    """
-
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.SET_NULL)
-    object_id = models.PositiveIntegerField(null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    class Meta:
-        abstract = True
-
-
-class ColumnDimension(SheetDivision, models.Model):
+class ColumnDimension(models.Model):
     """Модель стилей для колонки таблицы.
 
     Ссылка на оригинальный класс из openpyxl:
@@ -124,13 +102,14 @@ class ColumnDimension(SheetDivision, models.Model):
     auto_size = models.BooleanField(default=False, help_text='Автоматическая ширина')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
 
     class Meta:
         ordering = ('index', 'id',)
         unique_together = [['index', 'sheet']]
 
 
-class RowDimension(SheetDivision, models.Model):
+class RowDimension(models.Model):
     """Модель стилей для строки таблицы.
 
     Кроме того, что таблица плоская, могут быть еще промежуточные агрегаций,
@@ -144,7 +123,6 @@ class RowDimension(SheetDivision, models.Model):
         добавлять динамические строки, которые не относятся к определенному документу,
         однако, должны участвовать при заполнении финальной версии документа.
     """
-
     SUM = 'SUM'
     MIN = 'MIN'
     MAX = 'MAX'
@@ -160,9 +138,8 @@ class RowDimension(SheetDivision, models.Model):
     index = models.PositiveIntegerField(help_text='Индекс строки')
     height = models.PositiveIntegerField(null=True, help_text='Высота колонки')
 
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
-
     dynamic = models.BooleanField(default=False, help_text='Динамическая ли строка')
+    object_id = models.PositiveIntegerField(null=True)
     aggregation = models.CharField(
         max_length=3,
         null=True,
@@ -170,6 +147,12 @@ class RowDimension(SheetDivision, models.Model):
         choices=KIND_AGGREGATION,
         help_text='Агрегирование перечисление (мин, макс) для динамических строк'
     )
+
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Дата добавления')
+    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
+
     parent = models.ForeignKey(
         'self',
         default=None,
@@ -184,8 +167,7 @@ class RowDimension(SheetDivision, models.Model):
         on_delete=models.CASCADE,
         help_text='Документ, для динамических строк'
     )
-
-    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
 
     class Meta:
         ordering = ('index', 'id',)

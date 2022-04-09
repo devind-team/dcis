@@ -1,5 +1,5 @@
-mutation UnloadDocument($documentId: ID!) {
-  unloadDocument(input: { documentId: $documentId }) {
+mutation UnloadDocument($documentId: ID!, $additional: [String!] = []) {
+  unloadDocument(input: { documentId: $documentId, additional: $additional}) {
     success
     errors {
       field

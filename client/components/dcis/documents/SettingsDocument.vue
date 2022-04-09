@@ -1,0 +1,33 @@
+<template lang="pug">
+  v-menu(v-model="active" bottom left)
+    template(#activator="{ on, attrs }")
+      slot(name="activator" :on="on" :attrs="attrs")
+    v-list
+      upload-document(@close="close" :document-id="documentId")
+        template(#activator="{ on, attrs }")
+          v-list-item(v-on="on" v-bind="attrs")
+            v-list-item-icon
+              v-icon mdi-download
+            v-list-item-content {{ $t('dcis.documents.unloading.name') }}
+</template>
+
+<script lang="ts">
+import { defineComponent, ref } from '#app'
+import UploadDocument from '~/components/dcis/documents/UploadDocument.vue'
+
+export default defineComponent({
+  components: { UploadDocument },
+  props: {
+    documentId: { type: String, required: true }
+  },
+  setup (_, { emit }) {
+    const active = ref<boolean>(false)
+
+    const close = () => {
+      active.value = false
+      emit('close')
+    }
+    return { active, close }
+  }
+})
+</script>
