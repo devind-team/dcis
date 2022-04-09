@@ -1312,6 +1312,7 @@ export type ContentTypeType = {
   logentrySet: LogEntryTypeConnection;
   model: Scalars['String'];
   permissionSet: Array<PermissionType>;
+  /** Тип дивизиона */
   projectSet: ProjectTypeConnection;
 };
 
@@ -2632,144 +2633,144 @@ export type NotificationsSubscription = {
   notification?: Maybe<NotificationType>;
 };
 
-export type OrganizationOrganizationFilterAddressFilterInputType = {
+export type OrganizationAddressFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterDepartmentFilterInputType = {
+export type OrganizationDepartmentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
-export type OrganizationOrganizationFilterFilterInputType = {
+export type OrganizationFilterInputType = {
   /** `Address` field */
-  address?: InputMaybe<OrganizationOrganizationFilterAddressFilterInputType>;
+  address?: InputMaybe<OrganizationAddressFilterInputType>;
   /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<OrganizationOrganizationFilterFilterInputType>>>;
+  and?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
   /** `Department` field */
-  department?: InputMaybe<OrganizationOrganizationFilterDepartmentFilterInputType>;
+  department?: InputMaybe<OrganizationDepartmentFilterInputType>;
   /** `Id` field */
-  id?: InputMaybe<OrganizationOrganizationFilterIdFilterInputType>;
+  id?: InputMaybe<OrganizationIdFilterInputType>;
   /** `Inn` field */
-  inn?: InputMaybe<OrganizationOrganizationFilterInnFilterInputType>;
+  inn?: InputMaybe<OrganizationInnFilterInputType>;
   /** `Kind` field */
-  kind?: InputMaybe<OrganizationOrganizationFilterKindFilterInputType>;
+  kind?: InputMaybe<OrganizationKindFilterInputType>;
   /** `Kodbuhg` field */
-  kodbuhg?: InputMaybe<OrganizationOrganizationFilterKodbuhgFilterInputType>;
+  kodbuhg?: InputMaybe<OrganizationKodbuhgFilterInputType>;
   /** `Kpp` field */
-  kpp?: InputMaybe<OrganizationOrganizationFilterKppFilterInputType>;
+  kpp?: InputMaybe<OrganizationKppFilterInputType>;
   /** `Mail` field */
-  mail?: InputMaybe<OrganizationOrganizationFilterMailFilterInputType>;
+  mail?: InputMaybe<OrganizationMailFilterInputType>;
   /** `Name` field */
-  name?: InputMaybe<OrganizationOrganizationFilterNameFilterInputType>;
+  name?: InputMaybe<OrganizationNameFilterInputType>;
   /** `Not` field */
-  not?: InputMaybe<OrganizationOrganizationFilterFilterInputType>;
+  not?: InputMaybe<OrganizationFilterInputType>;
   /** `Okpo` field */
-  okpo?: InputMaybe<OrganizationOrganizationFilterOkpoFilterInputType>;
+  okpo?: InputMaybe<OrganizationOkpoFilterInputType>;
   /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<OrganizationOrganizationFilterFilterInputType>>>;
+  or?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
   /** `Parent` field */
-  parent?: InputMaybe<OrganizationOrganizationFilterParentFilterInputType>;
+  parent?: InputMaybe<OrganizationParentFilterInputType>;
   /** `Phone` field */
-  phone?: InputMaybe<OrganizationOrganizationFilterPhoneFilterInputType>;
+  phone?: InputMaybe<OrganizationPhoneFilterInputType>;
   /** `Region` field */
-  region?: InputMaybe<OrganizationOrganizationFilterRegionFilterInputType>;
+  region?: InputMaybe<OrganizationRegionFilterInputType>;
   /** `Rubpnubp` field */
-  rubpnubp?: InputMaybe<OrganizationOrganizationFilterRubpnubpFilterInputType>;
+  rubpnubp?: InputMaybe<OrganizationRubpnubpFilterInputType>;
   /** `Site` field */
-  site?: InputMaybe<OrganizationOrganizationFilterSiteFilterInputType>;
+  site?: InputMaybe<OrganizationSiteFilterInputType>;
 };
 
-export type OrganizationOrganizationFilterIdFilterInputType = {
+export type OrganizationIdFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
-export type OrganizationOrganizationFilterInnFilterInputType = {
+export type OrganizationInnFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterKindFilterInputType = {
+export type OrganizationKindFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterKodbuhgFilterInputType = {
+export type OrganizationKodbuhgFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterKppFilterInputType = {
+export type OrganizationKppFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterMailFilterInputType = {
+export type OrganizationMailFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterNameFilterInputType = {
+export type OrganizationNameFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterOkpoFilterInputType = {
+export type OrganizationOkpoFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterParentFilterInputType = {
+export type OrganizationParentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `Isnull` lookup */
   isnull?: InputMaybe<Scalars['Boolean']>;
 };
 
-export type OrganizationOrganizationFilterPhoneFilterInputType = {
+export type OrganizationPhoneFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterRegionFilterInputType = {
+export type OrganizationRegionFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
-export type OrganizationOrganizationFilterRubpnubpFilterInputType = {
+export type OrganizationRubpnubpFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOrganizationFilterSiteFilterInputType = {
+export type OrganizationSiteFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
@@ -3036,29 +3037,22 @@ export type ProfileValueType = {
   visibility: Scalars['Boolean'];
 };
 
-export type ProjectProjectFilterFilterInputType = {
+export type ProjectFilterInputType = {
   /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<ProjectProjectFilterFilterInputType>>>;
+  and?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
   /** `Name` field */
-  name?: InputMaybe<ProjectProjectFilterNameFilterInputType>;
+  name?: InputMaybe<ProjectNameFilterInputType>;
   /** `Not` field */
-  not?: InputMaybe<ProjectProjectFilterFilterInputType>;
+  not?: InputMaybe<ProjectFilterInputType>;
   /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<ProjectProjectFilterFilterInputType>>>;
+  or?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
   /** `User` field */
-  user?: InputMaybe<ProjectProjectFilterUserFilterInputType>;
+  user?: InputMaybe<ProjectUserFilterInputType>;
 };
 
-export type ProjectProjectFilterNameFilterInputType = {
+export type ProjectNameFilterInputType = {
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type ProjectProjectFilterUserFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Тип модели проектов. */
@@ -3105,6 +3099,13 @@ export type ProjectTypeEdge = {
   cursor: Scalars['String'];
   /** The item at the end of the edge */
   node?: Maybe<ProjectType>;
+};
+
+export type ProjectUserFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['ID']>;
+  /** `In` lookup */
+  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Схема запросов данных. */
@@ -3301,7 +3302,7 @@ export type QueryOrganizationArgs = {
 export type QueryOrganizationsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<OrganizationOrganizationFilterFilterInputType>;
+  filter?: InputMaybe<OrganizationFilterInputType>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -3353,7 +3354,7 @@ export type QueryProjectArgs = {
 export type QueryProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<ProjectProjectFilterFilterInputType>;
+  filter?: InputMaybe<ProjectFilterInputType>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -4570,7 +4571,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, hidden: boolean, autoSize: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, updatedAt: any } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets?: Array<{ __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, hidden: boolean, autoSize: boolean } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, height?: number | null, dynamic: boolean, createdAt: any, updatedAt: any, parentId?: number | null } | null> | null, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike?: boolean | null, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, mergedCells?: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null }> | null } | null };
 
 export type DocumentStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
