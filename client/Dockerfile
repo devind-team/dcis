@@ -9,7 +9,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY package.json /usr/src/app
-RUN yarn 2> >(grep -v warning 1>&2)
+RUN yarn
 
 COPY . /usr/src/app
 # COPY .env.production .env
