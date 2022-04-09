@@ -12,6 +12,7 @@ from graphene_django_cud.mutations import DjangoCreateMutation, DjangoUpdateMuta
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from devind_dictionaries.models import Department
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project, Period
@@ -43,8 +44,8 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
             raise ValueError(validator.validate_message_plain)
 
     @classmethod
-    def handle_content_type(cls, root: Any, info: ResolveInfo, value, *args, **kwargs):
-        return ContentType.objects.get_for_model(Project.DIVISION_KIND.get(value, 'department'))
+    def handle_content_type(cls, value: str, field: str, info: ResolveInfo, *args, **kwargs):
+        return ContentType.objects.get_for_model(Project.DIVISION_KIND.get(value, Department))
 
 
 class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
