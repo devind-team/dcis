@@ -69,10 +69,10 @@ export default {
     },
     unloading: {
       name: 'Выгрузить документ',
-      rowAddDate: 'Дата добавления строки',
-      rowUpdateDate: 'Дата последних изменений в строке',
-      divisionName: 'Название дивизиона',
-      divisionHeader: 'Начальник дивизиона',
+      row_add_date: 'Дата добавления строки',
+      row_update_date: 'Дата последних изменений в строке',
+      division_name: 'Название дивизиона',
+      division_head: 'Начальник дивизиона',
       user: 'Пользователь, добавивший строку',
       additional: 'Дополнительные колонки',
       unload: 'Выгрузить'

@@ -9,6 +9,7 @@
 
 <script lang="ts">
 import type { Ref, ComputedRef } from '#app'
+import { defineComponent, watchEffect, provide, ref } from '#app'
 import { useAuthStore } from '~/store'
 import { useCursorPagination, useQueryRelay, useVuetify } from '~/composables'
 import { NotificationsQuery, NotificationsQueryVariables, NotificationType, UserType } from '~/types/graphql'
@@ -52,7 +53,9 @@ export default defineComponent({
       }
     })
 
-    watchEffect(() => { vuetify.theme.dark = isDark })
+    watchEffect(() => {
+      vuetify.theme.dark = isDark.value
+    })
 
     const setFooter = (state: boolean = true): void => {
       footer.value = state
