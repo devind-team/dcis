@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Dict, Optional, Type, Tuple
+from typing import Optional, Type, Tuple
 import posixpath
 from dataclasses import dataclass
 from datetime import datetime
@@ -7,7 +7,6 @@ from os.path import join
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
-from openpyxl.styles.colors import WHITE
 from openpyxl.utils import get_column_letter
 from django.conf import settings
 from django.db.models import Q
@@ -41,10 +40,10 @@ class BuildCell:
 class DocumentUnload:
     """Выгрузка документа в формате эксель."""
 
-    ALLOW_ADDITIONAL: List[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_head', 'user']
-    DIVISION_INFO_CACHE: Dict[int, Tuple[str, str]] = {}
+    ALLOW_ADDITIONAL: list[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_head', 'user']
+    DIVISION_INFO_CACHE: dict[int, Tuple[str, str]] = {}
 
-    def __init__(self, document: Document, host: str, additional: List[str], divisions_id=None):
+    def __init__(self, document: Document, host: str, additional: list[str], divisions_id=None):
         """Инициализация
 
             document - выгружаемый документ
@@ -63,8 +62,8 @@ class DocumentUnload:
             .prefetch_related('columndimension_set', 'mergedcell_set')\
             .all()
         self.host: str = host
-        self.additional: List[str] = [field for field in additional if field in self.ALLOW_ADDITIONAL]
-        self.divisions_id: List[int] = divisions_id
+        self.additional: list[str] = [field for field in additional if field in self.ALLOW_ADDITIONAL]
+        self.divisions_id: list[int] = divisions_id
         self.path: str = join(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
 
     def xlsx(self):
@@ -72,18 +71,18 @@ class DocumentUnload:
         workbook.remove(workbook.active)
         for sheet in self.sheets:
             work_sheet = workbook.create_sheet(sheet.name)
-            columns: List[ColumnDimension] = sheet.columndimension_set.all()
-            rows: List[RowDimension] = sheet.rowdimension_set.filter(
+            columns: list[ColumnDimension] = sheet.columndimension_set.all()
+            rows: list[RowDimension] = sheet.rowdimension_set.filter(
                 Q(parent__isnull=True) | Q(
                     document=self.document, parent_id__isnull=False, object_id__in=self.divisions_id
                 )
             )
-            rows_id: List[int] = [row.id for row in rows]
-            cells: List[Cell] = Cell.objects.filter(row_id__in=rows_id).all()
-            values: List[Value] = Value.objects.filter(document=self.document, row_id__in=rows_id).all()
-            build_rows: List[BuildRow] = self._build_rows(rows)
-            build_cells: Dict[str, BuildCell] = self._build_cells(cells, values)
-            build_merged_cells: Dict[int, List[MergedCell]] = self._build_merge_cells(sheet.mergedcell_set.all())
+            rows_id: list[int] = [row.id for row in rows]
+            cells: list[Cell] = Cell.objects.filter(row_id__in=rows_id).all()
+            values: list[Value] = Value.objects.filter(document=self.document, row_id__in=rows_id).all()
+            build_rows: list[BuildRow] = self._build_rows(rows)
+            build_cells: dict[str, BuildCell] = self._build_cells(cells, values)
+            build_merged_cells: dict[int, list[MergedCell]] = self._build_merge_cells(sheet.mergedcell_set.all())
 
             # Собираем xlsx файл
             row_index: int = 1
@@ -133,11 +132,11 @@ class DocumentUnload:
         workbook.save(self.path)
         return posixpath.relpath(self.path, settings.BASE_DIR)
 
-    def _build_rows(self, rows: List[RowDimension], parent_id: Optional[Type[int]] = None) -> List[BuildRow]:
+    def _build_rows(self, rows: list[RowDimension], parent_id: Optional[Type[int]] = None) -> list[BuildRow]:
         """Функция собирает все строки, включая дочерние в плоский массив."""
         date_format: str = '%H:%M %d.%m.%Y'
-        build_rows: List[BuildRow] = []
-        current_rows: List[RowDimension] = [row for row in rows if row.parent_id == parent_id]
+        build_rows: list[BuildRow] = []
+        current_rows: list[RowDimension] = [row for row in rows if row.parent_id == parent_id]
         for current_row in current_rows:
             division_name, division_head = self._division_info(current_row.user)
             build_row = BuildRow(
@@ -152,8 +151,8 @@ class DocumentUnload:
         return build_rows
 
     @staticmethod
-    def _build_merge_cells(merged_cells: MergedCell) -> Dict[int, List[MergedCell]]:
-        build_mc: Dict[int, List[MergedCell]] = defaultdict(list)
+    def _build_merge_cells(merged_cells: list[MergedCell]) -> dict[int, list[MergedCell]]:
+        build_mc: dict[int, list[MergedCell]] = defaultdict(list)
         for merge_cell in merged_cells:
             build_mc[merge_cell.max_row].append(merge_cell)
         return build_mc
@@ -181,9 +180,9 @@ class DocumentUnload:
         self.DIVISION_INFO_CACHE[user.id] = division_name, division_head,
         return division_name, division_head
 
-    def _build_cells(self, cells: List[Cell], values: List[Value]) -> Dict[str, BuildCell]:
+    def _build_cells(self, cells: list[Cell], values: list[Value]) -> dict[str, BuildCell]:
         """Собираем ячейки в хеш таблицу для индексации."""
-        build_values: Dict[str, Value] = {f'{value.column_id}:{value.row_id}': value.value for value in values}
+        build_values: dict[str, Value] = {f'{value.column_id}:{value.row_id}': value.value for value in values}
         return {
             f'{cell.column_id}:{cell.row_id}': BuildCell(
                 cell,
