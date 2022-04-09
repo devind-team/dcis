@@ -4,5 +4,4 @@ node_modules/
 .env
 .env.example
 README.md
-yarn.lock
 nuxt-dist/
