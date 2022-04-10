@@ -96,6 +96,7 @@ class AddSectionGalleryMutation(AddSectionMutation):
         else:
             return AddSectionGalleryMutation(success=False, errors=ErrorFieldType.from_validator(validator.get_message()))
 
+
 class AddSectionFilesMutation(AddSectionMutation):
     """Добавление секции"""
 
@@ -129,6 +130,7 @@ class AddSectionFilesMutation(AddSectionMutation):
                                              errors=ErrorFieldType.from_validator(validator.get_message()))
 
 # ---------- Изменение секции ----------
+
 
 class ChangeSectionMutation(BaseMutation):
     """Базовая мутация для изменения секций"""
