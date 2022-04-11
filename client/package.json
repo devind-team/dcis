@@ -15,10 +15,8 @@
   "dependencies": {
     "@nuxtjs/apollo": "^4.0.1-rc.5",
     "@nuxtjs/i18n": "^7.2.1",
-    "@nuxtjs/tailwindcss": "^5.0.2",
     "@nuxtjs/vuetify": "^1.12.3",
     "@pinia/nuxt": "^0.1.8",
-    "@tailwindcss/typography": "^0.5.2",
     "@vue/apollo-composable": "^4.0.0-alpha.16",
     "@vueuse/core": "^8.2.5",
     "@vueuse/integrations": "^8.2.5",
@@ -33,9 +31,6 @@
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
     "vue-apexcharts": "^1.6.2",
-    "vue-rx": "^6.2.0",
-    "vue-server-renderer": "^2.6.14",
-    "vue-template-compiler": "^2.6.14",
     "vuetify": "^2.6.4"
   },
   "devDependencies": {
@@ -52,9 +47,7 @@
     "@nuxt/bridge": "npm:@nuxt/bridge-edge",
     "@nuxt/types": "^2.15.8",
     "@nuxtjs/color-mode": "^3.0.2",
-    "@nuxtjs/eslint-config": "^9.0.0",
     "@nuxtjs/eslint-config-typescript": "^9.0.0",
-    "@nuxtjs/eslint-module": "^3.1.0",
     "@tiptap/core": "^2.0.0-beta.174",
     "@tiptap/extension-bold": "^2.0.0-beta.26",
     "@tiptap/extension-bullet-list": "^2.0.0-beta.26",
@@ -93,9 +86,6 @@
     "eslint-plugin-nuxt": "^3.1.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
-    "rxjs": "^7.4.0",
-    "typescript": "^4.6.3",
-    "vue-class-component": "^7.2.6",
-    "vue-property-decorator": "^9.1.2"
+    "typescript": "^4.6.3"
   }
 }

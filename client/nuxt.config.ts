@@ -55,24 +55,20 @@ export default defineNuxtConfig({
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
     '~/plugins/vue-i18n',
-    { src: '~/plugins/rx', ssr: false },
     { src: '~/plugins/apex-chart', ssr: false }
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: false,
 
-  buildModules: [
-    '@nuxt/bridge',
-    '@nuxtjs/vuetify',
-    '@nuxtjs/i18n'
-  ],
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
-    ['@pinia/nuxt', { disableVuex: false }],
     '@nuxtjs/color-mode',
     '@nuxtjs/apollo',
-    'cookie-universal-nuxt'
+    'cookie-universal-nuxt',
+    '@nuxtjs/i18n',
+    '@nuxtjs/vuetify',
+    ['@pinia/nuxt', { disableVuex: false }]
   ],
   apollo: {
     includeNodeModules: true,
@@ -89,34 +85,6 @@ export default defineNuxtConfig({
       { code: 'ru', file: 'ru.ts' },
       { code: 'en', file: 'en.ts' }
     ]
-  },
-  typescript: {
-    tsConfig: {
-      compilerOptions: {
-        experimentalDecorators: true,
-        types: [
-          '@types/node',
-          '@nuxt/types',
-          '@nuxtjs/color-mode',
-          '@nuxtjs/i18n',
-          'types',
-          '@nuxt/content',
-          '@nuxtjs/apollo/types',
-          '@pinia/nuxt',
-          'vuetify',
-          'vue-apollo/types',
-          'cookie-universal-nuxt',
-          'vee-validate',
-          '@nuxtjs/vuetify'
-        ]
-      }
-    },
-    // @ts-ignore
-    typeCheck: {
-      eslint: {
-        files: './**/*.{ts,js,vue}'
-      }
-    }
   },
   router: {
     middleware: ['check-auth']
