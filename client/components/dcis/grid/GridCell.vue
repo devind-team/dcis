@@ -46,7 +46,7 @@ export default defineComponent({
     ))
 
     const containerClasses: ComputedRef<Record<string, boolean>> = computed<Record<string, boolean>>(() => ({
-      'grid__cell-container-active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
+      'grid__cell-container_active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
     }))
 
     const documentId: string = inject<string>('documentId')

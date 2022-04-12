@@ -147,14 +147,6 @@ export function useGrid (
       .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
   })
 
-  const scrollTop = ref<number>(0)
-  const scrollLeft = ref<number>(0)
-  const scroll = (event: Event) => {
-    const target = event.target as HTMLDivElement
-    scrollTop.value = target.scrollTop
-    scrollLeft.value = target.scrollLeft
-  }
-
   /**
    * Блок выделения
    */
@@ -356,9 +348,6 @@ export function useGrid (
     values,
     mergeCells,
     mergedCells,
-    scrollTop,
-    scrollLeft,
-    scroll,
     active,
     selection,
     selectionCells,

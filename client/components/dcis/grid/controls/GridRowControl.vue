@@ -3,11 +3,7 @@
     template(#activator="{ on: onMenu }")
       v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          .grid__row-index-content(
-            v-bind="attrs"
-            v-on="{ ...onMenu, ...onTooltip }"
-            :class="rowIndexContentClass"
-          ) {{ row.index }}
+          .grid__row-index-content(v-bind="attrs" v-on="{ ...onMenu, ...onTooltip }") {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")
@@ -53,14 +49,9 @@ type DocumentUpdateType<T> = (
 
 export default defineComponent({
   props: {
-    row: { type: Object as PropType<BuildRowType>, required: true },
-    scrollLeft: { type: Number, required: true }
+    row: { type: Object as PropType<BuildRowType>, required: true }
   },
   setup (props) {
-    const rowIndexContentClass = computed(() => ({
-      'grid__row-index-content_right-border': props.scrollLeft > 0
-    }))
-
     const { dateTimeHM } = useFilters()
     const documentId: string = inject<string>('documentId')
     const documentUpdate: DocumentUpdateType<any> = inject<DocumentUpdateType<any>>('documentUpdate')
@@ -114,7 +105,7 @@ export default defineComponent({
       )
       mutate({ rowId })
     }
-    return { rowIndexContentClass, addRowDimension, deleteRowDimension, dateTimeHM }
+    return { addRowDimension, deleteRowDimension, dateTimeHM }
   }
 })
 </script>

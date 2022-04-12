@@ -1,8 +1,8 @@
 <template lang="pug">
   tbody
     tr(v-for="row in rows" :key="row.id" :style="row.style")
-      td.grid__row-index
-        grid-row-control(:row="row" :scroll-left="scrollLeft")
+      td.grid__row-index(:class="rowIndexClass")
+        grid-row-control(:row="row")
       td(
         v-for="cell in row.cells"
         :key="cell.id"
@@ -22,6 +22,7 @@
         )
 </template>
 <script lang="ts">
+import { detect } from 'detect-browser'
 import type { PropType, Ref } from '#app'
 import { defineComponent, inject } from '#app'
 import { BuildCellType, BuildRowType, RangeType } from '~/types/grid-types'
@@ -36,17 +37,25 @@ export default defineComponent({
     setActive: { type: Function as PropType<(position: string) => void>, required: true },
     startSelection: { type: Function as PropType<(position: string) => void>, required: true },
     enterSelection: { type: Function as PropType<(position: string) => void>, required: true },
-    endSelection: { type: Function as PropType<(position: string) => void>, required: true },
-    scrollLeft: { type: Number, required: true }
+    endSelection: { type: Function as PropType<(position: string) => void>, required: true }
   },
   setup (props) {
     const active: Ref<string> = inject<Ref<string>>('active')
+
+    const rowIndexClass = ref<string>('grid__cell_default')
+
+    onMounted(() => {
+      const browser = detect()
+      if (browser && browser.name === 'firefox') {
+        rowIndexClass.value = 'grid__cell_firefox'
+      }
+    })
 
     const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
       'grid__cell-container-selected': props.selection.includes(cell.position)
     })
 
-    return { active, getCellClasses }
+    return { active, rowIndexClass, getCellClasses }
   }
 })
 </script>

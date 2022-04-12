@@ -25,6 +25,7 @@
     "accounting": "^0.4.1",
     "apexcharts": "^3.35.0",
     "cookie-universal-nuxt": "^2.1.5",
+    "detect-browser": "^5.3.0",
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.2",
     "nuxt-edge": "latest",

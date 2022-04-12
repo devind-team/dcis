@@ -7,7 +7,7 @@
       :update="update"
     )
     .grid__body
-      div.grid__container(@scroll="scroll")
+      div.grid__container
         table.grid__table(:style="{ width: `${width}px` }")
           grid-header(
             :row-index-column-width="rowIndexColumnWidth"
@@ -16,7 +16,6 @@
             :leave-column-header="leaveColumnHeader"
             :start-column-resizing="startColumnResizing"
             :end-column-resizing="endColumnResizing"
-            :scroll-top="scrollTop"
           )
           grid-body(
             :rows="rows"
@@ -25,7 +24,6 @@
             :enter-selection="enterCellSelection"
             :end-selection="endCellSelection"
             :set-active="setActive"
-            :scroll-left="scrollLeft"
           )
       grid-column-width(:visible="columnWidth.visible" :position="columnWidth.position" :width="columnWidth.width")
 </template>
@@ -97,9 +95,6 @@ export default defineComponent({
       rows,
       mergeCells,
       mergedCells,
-      scroll,
-      scrollLeft,
-      scrollTop,
       active,
       selection,
       selectionCells,
@@ -126,9 +121,6 @@ export default defineComponent({
       rows,
       mergedCells,
       mergeCells,
-      scroll,
-      scrollLeft,
-      scrollTop,
       active,
       selection,
       selectionCells,
@@ -170,7 +162,6 @@ div.grid__body
       border-collapse: collapse
 
       td, th
-        background: white
         background-clip: padding-box
 
       thead
@@ -179,7 +170,6 @@ div.grid__body
         z-index: 2
 
         th
-          background: white
           height: 25px
 
           .grid__header-content
@@ -189,9 +179,8 @@ div.grid__body
             overflow: hidden
             border-top: 1px solid silver
             border-right: 1px solid silver
-
-          .grid__header-content_bottom-border
             border-bottom: 1px solid silver
+            background: white
 
         th:first-child
           position: sticky
@@ -204,15 +193,26 @@ div.grid__body
             border-left: 1px solid silver
 
       tbody
-        tr:last-child
+        tr:first-child
 
-          td.grid__row-index
+          .grid__row-index-content
+            top: 0 !important
+            height: calc(100% + 0.5px) !important
 
-            .grid__row-index-content
-              border-bottom: 1px solid silver
+          td:not(.grid__row-index)
+            border-top: none
+
+        td.grid__cell_default
+          height: 1px !important
+
+        td.grid__cell_firefox
+          height: 100% !important
 
         td
           overflow: hidden
+
+        td:nth-child(2)
+          border-left: none !important
 
         td.grid__row-index
           position: sticky
@@ -227,24 +227,23 @@ div.grid__body
 
           .grid__row-index-content
             position: relative
-            top: -0.5px
+            top: 0.5px
+            width: calc(100% + 0.5px)
             height: 100%
-            border-top: 1px solid silver
-            border-left: 1px solid silver
-
-          .grid__row-index-content_right-border
             border-right: 1px solid silver
-            width: calc(100% + 1px)
+            border-bottom: 1px solid silver
+            border-left: 1px solid silver
+            background: white
 
         td:not(.grid__row-index)
           position: relative
           border: 1px solid silver
           cursor: cell
 
-          &.grid__cell-container-selected
+          &.grid__cell-container_selected
             border: 1.2px blue solid
 
-          .grid__cell-container-active
+          .grid__cell-container_active
             position: absolute
             width: 100%
             height: 100%

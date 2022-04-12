@@ -2,7 +2,7 @@
   thead
     tr
       th(:style="{ width: `${rowIndexColumnWidth}px` }")
-        .grid__header-content(:class="contentClass")
+        .grid__header-content
       th(
         v-for="column in columns"
         :key="column.id"
@@ -12,7 +12,7 @@
         @mousedown="startColumnResizing"
         @mouseup="endColumnResizing"
       )
-        .grid__header-content(:class="contentClass") {{ column.position }}
+        .grid__header-content {{ column.position }}
 </template>
 
 <script lang="ts">
@@ -30,16 +30,7 @@ export default defineComponent({
     },
     leaveColumnHeader: { type: Function as PropType<() => void>, required: true },
     startColumnResizing: { type: Function as PropType<(event: MouseEvent) => void>, required: true },
-    endColumnResizing: { type: Function as PropType<() => void>, required: true },
-    scrollTop: { type: Number, required: true }
-  },
-  setup (props) {
-    const contentClass = computed(() => ({
-      'grid__header-content_bottom-border': props.scrollTop > 0
-    }))
-    return {
-      contentClass
-    }
+    endColumnResizing: { type: Function as PropType<() => void>, required: true }
   }
 })
 </script>
