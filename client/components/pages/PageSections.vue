@@ -32,31 +32,31 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import type { PropType } from '#app'
+import { defineComponent } from '#app'
 import { UserType, PageType } from '~/types/graphql'
 import { PageKindChoices } from '~/types/devind'
 import SectionText from '~/components/pages/sections/views/SectionText.vue'
 import SectionGallery from '~/components/pages/sections/views/SectionGallery.vue'
 import SectionFiles from '~/components/pages/sections/views/SectionFiles.vue'
 
-@Component<PageSections>({
+export default defineComponent({
   components: { SectionFiles, SectionText, SectionGallery },
-  computed: {
-    sectionKind (): PageKindChoices {
-      return {
-        TEXT: 0,
-        GALLERY: 1,
-        FILES: 2,
-        PROFILES: 3,
-        SLIDERS: 4,
-        FORM: 5,
-        JUPYTER: 6,
-        DATASET: 7
-      }
+  props: {
+    page: { type: Object as PropType<PageType & { user: UserType }>, required: true }
+  },
+  setup () {
+    const sectionKind: PageKindChoices = {
+      TEXT: 0,
+      GALLERY: 1,
+      FILES: 2,
+      PROFILES: 3,
+      SLIDERS: 4,
+      FORM: 5,
+      JUPYTER: 6,
+      DATASET: 7
     }
+    return { sectionKind }
   }
 })
-export default class PageSections extends Vue {
-  @Prop() page!: PageType & { user: UserType }
-}
 </script>

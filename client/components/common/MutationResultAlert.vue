@@ -17,7 +17,6 @@
 
 <script lang="ts">
 import { ApolloError } from 'apollo-client'
-import type { Ref } from '#app'
 import { defineComponent, ref } from '#app'
 import { ErrorType, WithTimer } from '~/types/devind'
 import { ErrorFieldType, TableType } from '~/types/graphql'
@@ -40,9 +39,9 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const success: Ref<WithTimer<boolean> | null> = ref<WithTimer<boolean> | null>(null)
-    const error: Ref = ref<WithTimer<{ message: string, type: ErrorType }>>(null)
-    const tableErrors: Ref<TableErrors | null> = ref<TableErrors | null>(null)
+    const success = ref<WithTimer<boolean> | null>(null)
+    const error = ref<WithTimer<{ message: string, type: ErrorType }>>(null)
+    const tableErrors = ref<TableErrors | null>(null)
 
     const setApolloError = (error: ApolloError): void => {
       if (error.networkError) {

@@ -89,6 +89,34 @@ export default defineNuxtConfig({
   router: {
     middleware: ['check-auth']
   },
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        experimentalDecorators: true,
+        types: [
+          '@types/node',
+          '@nuxt/types',
+          '@nuxtjs/color-mode',
+          '@nuxtjs/i18n',
+          'types',
+          '@nuxt/content',
+          '@nuxtjs/apollo/types',
+          '@pinia/nuxt',
+          'vuetify',
+          'vue-apollo/types',
+          'cookie-universal-nuxt',
+          'vee-validate',
+          '@nuxtjs/vuetify'
+        ]
+      }
+    },
+    // @ts-ignore
+    typeCheck: {
+      eslint: {
+        files: './**/*.{ts,js,vue}'
+      }
+    }
+  },
   /*
   ** vuetify module configuration
   ** https://github.com/nuxt-community/vuetify-module

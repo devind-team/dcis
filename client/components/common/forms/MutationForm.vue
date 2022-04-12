@@ -39,7 +39,6 @@ import { camelCase } from 'scule'
 import { VueConstructor } from 'vue'
 import { ApolloError } from 'apollo-client'
 import { ValidationObserver } from 'vee-validate'
-import type { Ref, ComputedRef } from '#app'
 import { defineComponent, computed, getCurrentInstance, ref, nextTick } from '#app'
 import { useI18n } from '~/composables'
 import { ErrorFieldType } from '~/types/graphql'
@@ -67,9 +66,9 @@ export default defineComponent({
 
     const instance = getCurrentInstance()
     const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
-    const validationObserver: Ref<ValidationObserverType> = ref<ValidationObserverType>(null)
+    const validationObserver = ref<ValidationObserverType>(null)
     // @ts-ignore: TS2322
-    const mutationResultAlert: Ref<MutationResultAlertType> = ref<MutationResultAlertType>(null)
+    const mutationResultAlert = ref<MutationResultAlertType>(null)
 
     const setApolloError = (error: ApolloError): void => {
       mutationResultAlert.value.setApolloError(error)
@@ -112,7 +111,7 @@ export default defineComponent({
       }
     }
 
-    const mutationListeners: ComputedRef = computed(() => (Object.assign({}, vm.$listeners, {
+    const mutationListeners = computed(() => (Object.assign({}, vm.$listeners, {
       error (error: ApolloError): void {
         setApolloError(error)
         emit('error', error)

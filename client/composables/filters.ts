@@ -1,6 +1,6 @@
 import path from 'path'
 import accounting from 'accounting'
-import { isRef, Ref } from '#app'
+import { Ref, unref } from '#app'
 import { UserType } from '~/types/graphql'
 
 export function useFilters () {
@@ -38,12 +38,12 @@ export function useFilters () {
   }
 
   const getUserFullName = (user: UserType | Ref<UserType>, showSirName: boolean = true) => {
-    const u: UserType = isRef(user) ? user.value : user
+    const u = unref<UserType>(user)
     return `${u.lastName} ${u.firstName}${u.sirName && showSirName ? ' ' + u.sirName : ''}`
   }
 
   const getUserName = (user: UserType | Ref<UserType>) => {
-    const u: UserType = isRef(user) ? user.value : user
+    const u = unref<UserType>(user)
     return `${u.lastName} ${u.firstName[0]}.${u.sirName[0]}`
   }
 

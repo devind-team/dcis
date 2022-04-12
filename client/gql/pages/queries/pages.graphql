@@ -2,13 +2,19 @@
 #import "../fragments/tag_fields.graphql"
 #import "../fragments/category_fields.graphql"
 
-query Pages($first: Int, $offset: Int, $categoryId: ID, $kindId: ID, $search: String, $includePreview: Boolean = false) {
+query Pages($first: Int, $offset: Int, $categoryId: ID, $kindId: ID, $search: String) {
   pages(first: $first, offset: $offset, category_Id: $categoryId, kind_Id: $kindId, title_Icontains: $search) {
     totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+      __typename
+    }
     edges {
       node {
         ...PageFields
-        preview @include(if: $includePreview)
       }
       __typename
     }
