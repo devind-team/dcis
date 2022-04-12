@@ -148,8 +148,11 @@ export function useGrid (
   })
 
   const scrollTop = ref<number>(0)
+  const scrollLeft = ref<number>(0)
   const scroll = (event: Event) => {
-    scrollTop.value = (event.target as HTMLDivElement).scrollTop
+    const target = event.target as HTMLDivElement
+    scrollTop.value = target.scrollTop
+    scrollLeft.value = target.scrollLeft
   }
 
   /**
@@ -354,6 +357,7 @@ export function useGrid (
     mergeCells,
     mergedCells,
     scrollTop,
+    scrollLeft,
     scroll,
     active,
     selection,

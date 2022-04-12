@@ -2,7 +2,7 @@
   thead
     tr
       th(:style="{ width: `${rowIndexColumnWidth}px` }")
-        .grid__header-content.grid__row-index-header-content(:class="contentClass")
+        .grid__header-content(:class="contentClass")
       th(
         v-for="column in columns"
         :key="column.id"

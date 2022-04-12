@@ -25,6 +25,7 @@
             :enter-selection="enterCellSelection"
             :end-selection="endCellSelection"
             :set-active="setActive"
+            :scroll-left="scrollLeft"
           )
       grid-column-width(:visible="columnWidth.visible" :position="columnWidth.position" :width="columnWidth.width")
 </template>
@@ -97,6 +98,7 @@ export default defineComponent({
       mergeCells,
       mergedCells,
       scroll,
+      scrollLeft,
       scrollTop,
       active,
       selection,
@@ -125,6 +127,7 @@ export default defineComponent({
       mergedCells,
       mergeCells,
       scroll,
+      scrollLeft,
       scrollTop,
       active,
       selection,
@@ -159,6 +162,7 @@ div.grid__body
     overflow: auto
 
     table.grid__table
+      height: 1px
       user-select: none
       table-layout: fixed
 
@@ -166,6 +170,7 @@ div.grid__body
       border-collapse: collapse
 
       td, th
+        background: white
         background-clip: padding-box
 
       thead
@@ -180,39 +185,60 @@ div.grid__body
           .grid__header-content
             position: relative
             left: 0.5px
-            width: 100%
             height: 100%
             overflow: hidden
             border-top: 1px solid silver
             border-right: 1px solid silver
 
-          .grid__row-index-header-content
+          .grid__header-content_bottom-border
+            border-bottom: 1px solid silver
+
+        th:first-child
+          position: sticky
+          left: 0
+          z-index: 2
+
+          .grid__header-content
             left: 0
             width: calc(100% + 0.5px)
             border-left: 1px solid silver
 
-          .grid__header-content_bottom-border
-            border-bottom: 1px solid silver
-
       tbody
-        tr:hover
-          background: rgba(0, 0, 0, 0.1) !important
+        tr:last-child
+
+          td.grid__row-index
+
+            .grid__row-index-content
+              border-bottom: 1px solid silver
 
         td
           overflow: hidden
-          border: 1px solid silver
 
         td.grid__row-index
           position: sticky
-          left: -1px
+          height: 100%
+          left: 0
           z-index: 1
+          overflow: visible
 
           font-weight: bold
           text-align: center
           width: 30px
 
+          .grid__row-index-content
+            position: relative
+            top: -0.5px
+            height: 100%
+            border-top: 1px solid silver
+            border-left: 1px solid silver
+
+          .grid__row-index-content_right-border
+            border-right: 1px solid silver
+            width: calc(100% + 1px)
+
         td:not(.grid__row-index)
           position: relative
+          border: 1px solid silver
           cursor: cell
 
           &.grid__cell-container-selected

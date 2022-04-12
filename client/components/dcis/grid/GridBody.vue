@@ -2,7 +2,7 @@
   tbody
     tr(v-for="row in rows" :key="row.id" :style="row.style")
       td.grid__row-index
-        grid-row-control(:row="row")
+        grid-row-control(:row="row" :scroll-left="scrollLeft")
       td(
         v-for="cell in row.cells"
         :key="cell.id"
@@ -36,7 +36,8 @@ export default defineComponent({
     setActive: { type: Function as PropType<(position: string) => void>, required: true },
     startSelection: { type: Function as PropType<(position: string) => void>, required: true },
     enterSelection: { type: Function as PropType<(position: string) => void>, required: true },
-    endSelection: { type: Function as PropType<(position: string) => void>, required: true }
+    endSelection: { type: Function as PropType<(position: string) => void>, required: true },
+    scrollLeft: { type: Number, required: true }
   },
   setup (props) {
     const active: Ref<string> = inject<Ref<string>>('active')

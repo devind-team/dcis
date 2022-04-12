@@ -3,7 +3,11 @@
     template(#activator="{ on: onMenu }")
       v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          div(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs") {{ row.index }}
+          .grid__row-index-content(
+            v-bind="attrs"
+            v-on="{ ...onMenu, ...onTooltip }"
+            :class="rowIndexContentClass"
+          ) {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")
@@ -27,10 +31,12 @@ import type { PropType } from '#app'
 import { defineComponent, inject } from '#app'
 import { BuildRowType } from '~/types/grid-types'
 import {
+  RowDimensionType,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
-  DeleteRowDimensionMutation, DeleteRowDimensionMutationVariables,
-  DocumentQuery, RowDimensionType
+  DeleteRowDimensionMutation,
+  DeleteRowDimensionMutationVariables,
+  DocumentQuery
 } from '~/types/graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
@@ -47,9 +53,14 @@ type DocumentUpdateType<T> = (
 
 export default defineComponent({
   props: {
-    row: { type: Object as PropType<BuildRowType>, required: true }
+    row: { type: Object as PropType<BuildRowType>, required: true },
+    scrollLeft: { type: Number, required: true }
   },
   setup (props) {
+    const rowIndexContentClass = computed(() => ({
+      'grid__row-index-content_right-border': props.scrollLeft > 0
+    }))
+
     const { dateTimeHM } = useFilters()
     const documentId: string = inject<string>('documentId')
     const documentUpdate: DocumentUpdateType<any> = inject<DocumentUpdateType<any>>('documentUpdate')
@@ -103,7 +114,7 @@ export default defineComponent({
       )
       mutate({ rowId })
     }
-    return { addRowDimension, deleteRowDimension, dateTimeHM }
+    return { rowIndexContentClass, addRowDimension, deleteRowDimension, dateTimeHM }
   }
 })
 </script>
