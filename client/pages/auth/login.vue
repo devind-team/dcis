@@ -3,12 +3,12 @@
     v-row
       v-col.mx-auto(cols="12" sm="4" md="4")
         mutation-form(
+          @done="tokenDone"
           :mutation="require('~/gql/core/mutations/user/get_token.graphql')"
           :variables="variables"
           :header="String($t('auth.login.signIn'))"
           i18n-path="auth.login"
           mutation-name="getToken"
-          @done="tokenDone"
         )
           template(#form)
             validation-provider(
