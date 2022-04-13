@@ -211,9 +211,6 @@ div.grid__body
         td
           overflow: hidden
 
-        td:nth-child(2)
-          border-left: none !important
-
         td.grid__row-index
           position: sticky
           height: 100%
@@ -242,6 +239,9 @@ div.grid__body
 
           &.grid__cell-container_selected
             border: 1.2px blue solid
+
+          &.grid__cell-container_boundary
+            border-left: none !important
 
           .grid__cell-container_active
             position: absolute

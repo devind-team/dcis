@@ -51,8 +51,20 @@ export default defineComponent({
       }
     })
 
+    const boundaryCells = computed<BuildCellType[]>(() => {
+      const result: BuildCellType[] = []
+      let i = 0
+      while (i < props.rows.length) {
+        const cell = props.rows[i].cells[0]
+        result.push(cell)
+        i += cell.rowspan
+      }
+      return result
+    })
+
     const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
-      'grid__cell-container-selected': props.selection.includes(cell.position)
+      'grid__cell-container_selected': props.selection.includes(cell.position),
+      'grid__cell-container_boundary': !!boundaryCells.value.find(boundaryCell => boundaryCell.id === cell.id)
     })
 
     return { active, rowIndexClass, getCellClasses }
