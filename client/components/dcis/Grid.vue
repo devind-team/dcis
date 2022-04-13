@@ -195,23 +195,23 @@ div.grid__body
       tbody
         tr:first-child
 
-          .grid__row-index-content
+          .grid__cell-content_row-index
             top: 0 !important
             height: calc(100% + 0.5px) !important
 
-          td:not(.grid__row-index)
+          td:not(.grid__cell_row-index)
             border-top: none
-
-        td.grid__cell_default
-          height: 1px !important
-
-        td.grid__cell_firefox
-          height: 100% !important
 
         td
           overflow: hidden
 
-        td.grid__row-index
+        td.grid__cell_fixed-default
+          height: 1px !important
+
+        td.grid__cell_fixed-firefox
+          height: 100% !important
+
+        td.grid__cell_row-index
           position: sticky
           height: 100%
           left: 0
@@ -222,7 +222,7 @@ div.grid__body
           text-align: center
           width: 30px
 
-          .grid__row-index-content
+          .grid__cell-content_row-index
             position: relative
             top: 0.5px
             width: calc(100% + 0.5px)
@@ -232,18 +232,18 @@ div.grid__body
             border-left: 1px solid silver
             background: white
 
-        td:not(.grid__row-index)
+        td:not(.grid__cell_row-index)
           position: relative
           border: 1px solid silver
           cursor: cell
 
-          &.grid__cell-container_selected
+          &.grid__cell_selected
             border: 1.2px blue solid
 
-          &.grid__cell-container_boundary
+          &.grid__cell_boundary
             border-left: none !important
 
-          .grid__cell-container_active
+          .grid__cell-content_active
             position: absolute
             width: 100%
             height: 100%

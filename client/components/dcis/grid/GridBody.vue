@@ -1,7 +1,7 @@
 <template lang="pug">
   tbody
     tr(v-for="row in rows" :key="row.id" :style="row.style")
-      td.grid__row-index(:class="rowIndexClass")
+      td.grid__cell_row-index(:class="rowIndexClass")
         grid-row-control(:row="row")
       td(
         v-for="cell in row.cells"
@@ -42,12 +42,12 @@ export default defineComponent({
   setup (props) {
     const active: Ref<string> = inject<Ref<string>>('active')
 
-    const rowIndexClass = ref<string>('grid__cell_default')
+    const rowIndexClass = ref<string>('grid__cell_fixed-default')
 
     onMounted(() => {
       const browser = detect()
       if (browser && browser.name === 'firefox') {
-        rowIndexClass.value = 'grid__cell_firefox'
+        rowIndexClass.value = 'grid__cell_fixed-firefox'
       }
     })
 
@@ -63,8 +63,8 @@ export default defineComponent({
     })
 
     const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
-      'grid__cell-container_selected': props.selection.includes(cell.position),
-      'grid__cell-container_boundary': !!boundaryCells.value.find(boundaryCell => boundaryCell.id === cell.id)
+      grid__cell_selected: props.selection.includes(cell.position),
+      grid__cell_boundary: !!boundaryCells.value.find(boundaryCell => boundaryCell.id === cell.id)
     })
 
     return { active, rowIndexClass, getCellClasses }

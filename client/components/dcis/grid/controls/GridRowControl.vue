@@ -3,7 +3,7 @@
     template(#activator="{ on: onMenu }")
       v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          .grid__row-index-content(v-bind="attrs" v-on="{ ...onMenu, ...onTooltip }") {{ row.index }}
+          .grid__cell-content_row-index(v-bind="attrs" v-on="{ ...onMenu, ...onTooltip }") {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")
