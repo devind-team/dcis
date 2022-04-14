@@ -2,7 +2,7 @@
   tbody
     tr(v-for="row in rows" :key="row.id" :style="row.style")
       td.grid__cell_row-index(:class="rowIndexClass")
-        grid-row-control(:row="row")
+        grid-row-control(:row="row" :content-class="getRowIndexCellContentClasses(row)")
       td(
         v-for="cell in row.cells"
         :key="cell.id"
@@ -34,6 +34,7 @@ export default defineComponent({
   props: {
     rows: { type: Array as PropType<BuildRowType[]>, required: true },
     selection: { type: Array as PropType<RangeType[]>, default: () => ([]) },
+    selectionRows: { type: Array as PropType<number[]>, default: () => ([]) },
     setActive: { type: Function as PropType<(position: string) => void>, required: true },
     startSelection: { type: Function as PropType<(position: string) => void>, required: true },
     enterSelection: { type: Function as PropType<(position: string) => void>, required: true },
@@ -67,7 +68,14 @@ export default defineComponent({
       grid__cell_boundary: !!boundaryCells.value.find(boundaryCell => boundaryCell.id === cell.id)
     })
 
-    return { active, rowIndexClass, getCellClasses }
+    const getRowIndexCellContentClasses = (row: BuildRowType): (string | Record<string, boolean>)[] => {
+      return [
+        'grid__cell-content_row-index',
+        { 'grid__cell-content_row-index-selected': props.selectionRows.includes(row.index) }
+      ]
+    }
+
+    return { active, rowIndexClass, getCellClasses, getRowIndexCellContentClasses }
   }
 })
 </script>

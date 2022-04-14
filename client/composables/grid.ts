@@ -138,7 +138,7 @@ export function useGrid (
     return buildRows
   })
 
-  const mergeCells: ComputedRef = computed(() => (
+  const mergeCells = computed<Record<string, MergedCellType>>(() => (
     sheet.value.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
   ))
 
@@ -188,6 +188,32 @@ export function useGrid (
       .map(cord => ({ rowId: sheet.value.rows[cord.row - 1].id, columnId: sheet.value.columns[letterToPosition(cord.column) - 1].id }))
       .map(position => (cells.value[position.rowId][position.columnId]))
   ))
+  /**
+   * Вычисление выделенных столбцов
+   */
+  const selectionColumns = computed<number[]>(() =>
+    [...new Set(selectionCells.value.reduce((acc, cell) => {
+      const row = sheet.value.rows.find(row => row.id === String(cell.rowId))
+      const column = sheet.value.columns.find(column => column.id === String(cell.columnId))
+      const position = `${positionToLetter(column.index)}${row.index}`
+      const colspan = mergeCells.value[position]?.colspan ?? 1
+      const columns: number[] = Array.from({ length: colspan }).map((_, index) => column.index + index)
+      return [...acc, ...columns]
+    }, []))]
+  )
+  /**
+   * Вычисление выделенных строк
+   */
+  const selectionRows = computed<number[]>(() =>
+    [...new Set(selectionCells.value.reduce((acc, cell) => {
+      const row = sheet.value.rows.find(row => row.id === String(cell.rowId))
+      const column = sheet.value.columns.find(column => column.id === String(cell.columnId))
+      const position = `${positionToLetter(column.index)}${row.index}`
+      const rowspan = mergeCells.value[position]?.rowspan ?? 1
+      const rows: number[] = Array.from({ length: rowspan }).map((_, index) => row.index + index)
+      return [...acc, ...rows]
+    }, []))]
+  )
   const selectionCellsOptions: ComputedRef<CellOptionsType> = computed<CellOptionsType>(() => {
     const allowOptions: string[] = ['kind', 'horizontalAlign', 'verticalAlign', 'size', 'strong', 'italic', 'underline']
     const aggregateOptions: Record<string, any> = selectionCells.value
@@ -351,6 +377,8 @@ export function useGrid (
     active,
     selection,
     selectionCells,
+    selectionColumns,
+    selectionRows,
     selectionCellsOptions,
     startCellSelection,
     enterCellSelection,

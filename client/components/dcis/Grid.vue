@@ -12,6 +12,7 @@
           grid-header(
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
+            :selection-columns="selectionColumns"
             :move-column-header="moveColumnHeader"
             :leave-column-header="leaveColumnHeader"
             :start-column-resizing="startColumnResizing"
@@ -20,6 +21,7 @@
           grid-body(
             :rows="rows"
             :selection="selection"
+            :selection-rows="selectionRows"
             :start-selection="startCellSelection"
             :enter-selection="enterCellSelection"
             :end-selection="endCellSelection"
@@ -98,6 +100,8 @@ export default defineComponent({
       active,
       selection,
       selectionCells,
+      selectionColumns,
+      selectionRows,
       selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
@@ -124,6 +128,8 @@ export default defineComponent({
       active,
       selection,
       selectionCells,
+      selectionColumns,
+      selectionRows,
       selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
@@ -182,6 +188,9 @@ div.grid__body
             border-bottom: 1px solid silver
             background: white
 
+            &.grid__header-content_selected
+              background: #EEEEEE
+
         th:first-child
           position: sticky
           left: 0
@@ -232,13 +241,16 @@ div.grid__body
             border-left: 1px solid silver
             background: white
 
+            &.grid__cell-content_row-index-selected
+              background: #EEEEEE
+
         td:not(.grid__cell_row-index)
           position: relative
           border: 1px solid silver
           cursor: cell
 
           &.grid__cell_selected
-            border: 1.2px blue solid
+            border: 1.2px solid blue
 
           &.grid__cell_boundary
             border-left: none !important

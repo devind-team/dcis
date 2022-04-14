@@ -3,7 +3,11 @@
     template(#activator="{ on: onMenu }")
       v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          .grid__cell-content_row-index(v-bind="attrs" v-on="{ ...onMenu, ...onTooltip }") {{ row.index }}
+          div(
+            v-bind="attrs"
+            v-on="{ ...onMenu, ...onTooltip }"
+            :class="contentClass"
+          ) {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")
@@ -49,7 +53,8 @@ type DocumentUpdateType<T> = (
 
 export default defineComponent({
   props: {
-    row: { type: Object as PropType<BuildRowType>, required: true }
+    row: { type: Object as PropType<BuildRowType>, required: true },
+    contentClass: { type: Array as PropType<(string | Record<string, boolean>)[]>, required: true }
   },
   setup (props) {
     const { dateTimeHM } = useFilters()
