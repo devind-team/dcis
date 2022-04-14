@@ -24,7 +24,7 @@ export default defineComponent({
   props: {
     rowIndexColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
-    selectionColumns: { type: Array as PropType<string[]>, required: true },
+    selectionColumns: { type: Array as PropType<number[]>, required: true },
     moveColumnHeader: {
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
       required: true

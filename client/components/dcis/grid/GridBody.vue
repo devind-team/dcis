@@ -1,7 +1,7 @@
 <template lang="pug">
   tbody
     tr(v-for="row in rows" :key="row.id" :style="row.style")
-      td.grid__cell_row-index(:class="rowIndexClass")
+      td.grid__cell_row-index
         grid-row-control(:row="row" :content-class="getRowIndexCellContentClasses(row)")
       td(
         v-for="cell in row.cells"
@@ -22,9 +22,7 @@
         )
 </template>
 <script lang="ts">
-import { detect } from 'detect-browser'
 import type { PropType, Ref } from '#app'
-import { defineComponent, inject } from '#app'
 import { BuildCellType, BuildRowType, RangeType } from '~/types/grid-types'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
@@ -42,15 +40,6 @@ export default defineComponent({
   },
   setup (props) {
     const active: Ref<string> = inject<Ref<string>>('active')
-
-    const rowIndexClass = ref<string>('grid__cell_fixed-default')
-
-    onMounted(() => {
-      const browser = detect()
-      if (browser && browser.name === 'firefox') {
-        rowIndexClass.value = 'grid__cell_fixed-firefox'
-      }
-    })
 
     const boundaryCells = computed<BuildCellType[]>(() => {
       const result: BuildCellType[] = []
@@ -75,7 +64,7 @@ export default defineComponent({
       ]
     }
 
-    return { active, rowIndexClass, getCellClasses, getRowIndexCellContentClasses }
+    return { active, getCellClasses, getRowIndexCellContentClasses }
   }
 })
 </script>

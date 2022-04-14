@@ -204,21 +204,14 @@ div.grid__body
       tbody
         tr:first-child
 
+          td:not(.grid__cell_row-index)
+            border-top: none !important
+
           .grid__cell-content_row-index
             top: 0 !important
-            height: calc(100% + 0.5px) !important
-
-          td:not(.grid__cell_row-index)
-            border-top: none
 
         td
           overflow: hidden
-
-        td.grid__cell_fixed-default
-          height: 1px !important
-
-        td.grid__cell_fixed-firefox
-          height: 100% !important
 
         td.grid__cell_row-index
           position: sticky
@@ -249,9 +242,6 @@ div.grid__body
           border: 1px solid silver
           cursor: cell
 
-          &.grid__cell_selected
-            border: 1.2px solid blue
-
           &.grid__cell_boundary
             border-left: none !important
 
@@ -268,4 +258,38 @@ div.grid__body
 
               &:focus
                 outline: none
+
+.browser-default
+
+  table.grid__table
+
+    tr:first-child
+
+      .grid__cell-content_row-index
+        height: calc(100% + 1px) !important
+
+    td.grid__cell_row-index
+      height: 1px !important
+
+    td:not(.grid__cell_row-index)
+
+      &.grid__cell_selected
+        border: 1.2px solid blue !important
+
+.browser-firefox
+
+  table.grid__table
+
+    tr:first-child
+
+      .grid__cell-content_row-index
+        height: calc(100% + 0.5px) !important
+
+    td.grid__cell_row-index
+      height: 100% !important
+
+    td:not(.grid__cell_row-index)
+
+      &.grid__cell_selected
+        border: 2px solid blue !important
 </style>
