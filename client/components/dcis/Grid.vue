@@ -8,7 +8,7 @@
     )
     .grid__body
       div.grid__container(ref="gridContainer")
-        table.grid__table(:style="{ width: `${width}px` }")
+        table.grid__table(:style="{ width: `${gridWidth}px` }")
           grid-header(
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
@@ -95,7 +95,7 @@ export default defineComponent({
     const sheet: Ref<SheetType> = toRef(props, 'sheet')
     const {
       rowIndexColumnWidth,
-      width,
+      gridWidth,
       columns,
       rows,
       mergeCells,
@@ -127,7 +127,7 @@ export default defineComponent({
 
     return {
       rowIndexColumnWidth,
-      width,
+      gridWidth,
       columns,
       rows,
       mergedCells,

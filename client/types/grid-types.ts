@@ -44,6 +44,8 @@ export type BuildCellType = {
   rowspan: number
   style: Record<string, number | string | undefined> | string,
   border: Record<string, string | undefined | null> | string
+  column: ColumnDimensionType
+  row: RowDimensionType
   cell: CellType
 }
 
@@ -79,7 +81,6 @@ export type BoundaryRowCell = {
  *   write - режим заполнения таблицы
  *   readonly - режим просмотра таблицы
  */
-
 export enum GridMode {
   EDIT,
   WRITE,
@@ -145,7 +146,6 @@ export type RangePositionsType = {
 /**
  * Опции ячейки
  */
-
 export type CellOptionValueType = string | boolean | null
 
 export type CellOptionsType = {

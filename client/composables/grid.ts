@@ -42,7 +42,15 @@ export function useGrid (
   const defaultColumnWidth = ref<number>(64)
   const borderGag = ref<number>(10)
 
-  const columns: ComputedRef<BuildColumnType[]> = computed<BuildColumnType[]>(() => (
+  /**
+   * Ширина таблицы
+   */
+  const gridWidth = computed<number>(
+    () => rowIndexColumnWidth.value +
+      columns.value.reduce((sum, column) => sum + column.width, 0)
+  )
+
+  const columns = computed<BuildColumnType[]>(() => (
     sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
       let width = 0
       if (resizingColumn.value && resizingColumn.value.dimension.id === columnDimension.id) {
@@ -61,29 +69,10 @@ export function useGrid (
     })
   ))
 
-  const width = computed<number>(
-    () => rowIndexColumnWidth.value +
-      columns.value.reduce((sum, column) => sum + column.width, 0)
-  )
-
   /**
-   * Собираем структуру для быстрого поиска
+   * Собираем структуру для быстрого поиска значений
    */
-  const cells = computed<Record<number, Record<number, CellType>>>(() => {
-    const buildCells = {}
-    for (const cell of sheet.value.cells) {
-      if (!(cell.rowId in buildCells)) {
-        buildCells[cell.rowId] = {}
-      }
-      buildCells[cell.rowId][cell.columnId] = cell
-    }
-    return buildCells
-  })
-
-  /**
-   * Формируем значения
-   */
-  const values: ComputedRef = computed(() => {
+  const values = computed<Record<number, Record<number, ValueType>>>(() => {
     const buildValues = {}
     for (const value of sheet.value.values) {
       if (!(value.rowId in buildValues)) {
@@ -94,10 +83,60 @@ export function useGrid (
     return buildValues
   })
 
-  const rows: ComputedRef<BuildRowType[]> = computed<BuildRowType[]>(() => {
+  /**
+   * Собираем структуру для быстрого поиска объединенных ячеек
+   */
+  const mergeCells = computed<Record<string, MergedCellType>>(() => (
+    sheet.value.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
+  ))
+
+  /**
+   * Объединенные ячейки
+   */
+  const mergedCells = computed<string[]>(() => {
+    return Object.values<MergedCellType>(sheet.value.mergedCells)
+      .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
+  })
+
+  /**
+   * Собираем структуру для быстрого поиска ячеек
+   */
+  const cells = computed<Record<number, Record<number, BuildCellType>>>(() => {
+    const buildCells = {}
+    for (const cell of sheet.value.cells) {
+      if (!(cell.rowId in buildCells)) {
+        buildCells[cell.rowId] = {}
+      }
+      const row = sheet.value.rows.find(row => row.id === String(cell.rowId))
+      const column = sheet.value.columns.find(column => column.id === String(cell.columnId))
+      const position = `${positionToLetter(column.index)}${row.index}`
+      const valueCells: Record<number, ValueType> | null = row.id in values.value ? values.value[row.id] : null
+      const buildCell: BuildCellType = {
+        sheetId: sheet.value.id,
+        id: cell.id,
+        position,
+        value: getCellValue(valueCells && column.id in valueCells ? valueCells[column.id] : null, cell),
+        editable: cell.editable,
+        kind: cell.kind,
+        colspan: 1,
+        rowspan: 1,
+        style: getCellStyle(cell),
+        border: getCellBorder(cell),
+        column,
+        row,
+        cell
+      }
+      if (position in mergeCells.value) {
+        Object.assign(buildCell, mergeCells.value[position])
+      }
+      buildCells[cell.rowId][cell.columnId] = buildCell
+    }
+    return buildCells
+  })
+
+  const rows = computed<BuildRowType[]>(() => {
     const buildRows: BuildRowType[] = []
-    for (let rowIndex = 0; rowIndex < sheet.value.rows.length; ++rowIndex) {
-      const row = sheet.value.rows[rowIndex]
+    for (const row of sheet.value.rows) {
       const buildRow: BuildRowType = {
         sheetId: sheet.value.id,
         id: row.id,
@@ -109,44 +148,17 @@ export function useGrid (
         cells: [],
         dimension: row
       }
-      const rowCells = cells.value[row.id]
-      const valueCells = row.id in values.value ? values.value[row.id] : null
-      for (let columnIndex = 0; columnIndex < sheet.value.columns.length; ++columnIndex) {
-        const column: ColumnDimensionType = sheet.value.columns[columnIndex]
-        const cell: CellType = rowCells[column.id]
-        const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
-        const position: string = `${positionToLetter(column.index)}${row.index}`
-        const buildCell: BuildCellType = {
-          sheetId: sheet.value.id,
-          id: cell.id,
-          position,
-          value: getCellValue(value, cell),
-          editable: cell.editable,
-          kind: cell.kind,
-          colspan: 1,
-          rowspan: 1,
-          style: getCellStyle(cell),
-          border: getCellBorder(cell),
-          cell
-        }
-        if (position in mergeCells.value) {
-          buildRow.cells.push(Object.assign(buildCell, mergeCells.value[position]))
-        } else if (!mergedCells.value.includes(position)) {
+      const rowCells: Record<number, CellType> = cells.value[row.id]
+      for (const column of sheet.value.columns) {
+        const buildCell: BuildCellType = rowCells[column.id]
+        const position = `${positionToLetter(column.index)}${row.index}`
+        if (position in mergeCells.value || !mergedCells.value.includes(position)) {
           buildRow.cells.push(buildCell)
         }
       }
       buildRows.push(buildRow)
     }
     return buildRows
-  })
-
-  const mergeCells = computed<Record<string, MergedCellType>>(() => (
-    sheet.value.mergedCells.reduce((a, c: MergedCellType) => ({ ...a, [c.target]: c }), {})
-  ))
-
-  const mergedCells: ComputedRef<string[]> = computed(() => {
-    return Object.values<MergedCellType>(sheet.value.mergedCells)
-      .reduce<string[]>((a: string[], c: MergedCellType) => ([...a, ...c.cells]), [])
   })
 
   /**
@@ -184,10 +196,13 @@ export function useGrid (
   /**
    * Вычисление выделенных ячеек
    */
-  const selectionCells: ComputedRef<CellType[]> = computed<CellType[]>(() => (
+  const selectionCells = computed<BuildCellType[]>(() => (
     selection.value
       .map(parseCoordinate)
-      .map(cord => ({ rowId: sheet.value.rows[cord.row - 1].id, columnId: sheet.value.columns[letterToPosition(cord.column) - 1].id }))
+      .map(cord => ({
+        rowId: sheet.value.rows[cord.row - 1].id,
+        columnId: sheet.value.columns[letterToPosition(cord.column) - 1].id
+      }))
       .map(position => (cells.value[position.rowId][position.columnId]))
   ))
   /**
@@ -195,11 +210,8 @@ export function useGrid (
    */
   const selectionColumns = computed<number[]>(() =>
     [...new Set(selectionCells.value.reduce((acc, cell) => {
-      const row = sheet.value.rows.find(row => row.id === String(cell.rowId))
-      const column = sheet.value.columns.find(column => column.id === String(cell.columnId))
-      const position = `${positionToLetter(column.index)}${row.index}`
-      const colspan = mergeCells.value[position]?.colspan ?? 1
-      const columns: number[] = Array.from({ length: colspan }).map((_, index) => column.index + index)
+      const columns: number[] =
+        Array.from({ length: cell.colspan }).map((_, index) => cell.column.index + index)
       return [...acc, ...columns]
     }, []))]
   )
@@ -208,11 +220,8 @@ export function useGrid (
    */
   const selectionRows = computed<number[]>(() =>
     [...new Set(selectionCells.value.reduce((acc, cell) => {
-      const row = sheet.value.rows.find(row => row.id === String(cell.rowId))
-      const column = sheet.value.columns.find(column => column.id === String(cell.columnId))
-      const position = `${positionToLetter(column.index)}${row.index}`
-      const rowspan = mergeCells.value[position]?.rowspan ?? 1
-      const rows: number[] = Array.from({ length: rowspan }).map((_, index) => row.index + index)
+      const rows: number[] =
+        Array.from({ length: cell.rowspan }).map((_, index) => cell.row.index + index)
       return [...acc, ...rows]
     }, []))]
   )
@@ -248,14 +257,17 @@ export function useGrid (
     }
     return result
   })
+  /**
+   * Вычисление выделенных ячеек граничных к крайней фиксированной строке
+   */
   const selectedBoundaryRowCells = computed<BoundaryRowCell[]>(() =>
     boundaryRowCells.value.filter(boundaryCell => selection.value.includes(boundaryCell.cell.position))
   )
   const selectionCellsOptions: ComputedRef<CellOptionsType> = computed<CellOptionsType>(() => {
     const allowOptions: string[] = ['kind', 'horizontalAlign', 'verticalAlign', 'size', 'strong', 'italic', 'underline']
     const aggregateOptions: Record<string, any> = selectionCells.value
-      .map((cell: CellType) => Object.fromEntries<string | boolean | null>(
-        Object.entries(cell).filter(([k, _]) => allowOptions.includes(k)))
+      .map((buildCell: BuildCellType) => Object.fromEntries<string | boolean | null>(
+        Object.entries(buildCell.cell).filter(([k, _]) => allowOptions.includes(k)))
       )
       .reduce(
         (a, c) => {
@@ -374,7 +386,7 @@ export function useGrid (
     }
   })
   /**
-   * Очищаем курсор после перед размонтированием компонента
+   * Очищаем курсор перед размонтированием компонента
    */
   onBeforeUnmount(() => {
     clearCursor()
@@ -405,7 +417,7 @@ export function useGrid (
     defaultColumnWidth,
     borderGag,
     sheet,
-    width,
+    gridWidth,
     cells,
     columns,
     rows,
