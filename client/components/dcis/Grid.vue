@@ -162,6 +162,8 @@ export default defineComponent({
 .grid__cursor_col-resize *
   cursor: col-resize !important
 
+$border: 1px solid silver
+
 div.grid__body
   position: relative
 
@@ -194,9 +196,9 @@ div.grid__body
             left: 0.5px
             height: 100%
             overflow: hidden
-            border-top: 1px solid silver
-            border-right: 1px solid silver
-            border-bottom: 1px solid silver
+            border-top: $border
+            border-right: $border
+            border-bottom: $border
             background: white
 
             &.grid__header-content_selected
@@ -210,7 +212,7 @@ div.grid__body
           .grid__header-content
             left: 0
             width: calc(100% + 0.5px)
-            border-left: 1px solid silver
+            border-left: $border
 
       tbody
         tr:first-child
@@ -240,9 +242,9 @@ div.grid__body
             top: 0.5px
             width: calc(100% + 0.5px)
             height: 100%
-            border-right: 1px solid silver
-            border-bottom: 1px solid silver
-            border-left: 1px solid silver
+            border-right: $border
+            border-bottom: $border
+            border-left: $border
             background: white
 
             &.grid__cell-content_row-index-selected
@@ -250,7 +252,7 @@ div.grid__body
 
         td:not(.grid__cell_row-index)
           position: relative
-          border: 1px solid silver
+          border: $border
           cursor: cell
 
           &.grid__cell_boundary
@@ -270,61 +272,36 @@ div.grid__body
               &:focus
                 outline: none
 
-.browser-default
+@mixin grid__browser-specific($browser, $border-width, $first-row-index-height, $row-index-height)
+  .browser-#{$browser}
 
-  table.grid__table
+    table.grid__table
 
-    th
+      th
 
-      .grid__header-content
+        .grid__header-content
 
-        &.grid__header-content_neighbor-selected
-          border-bottom: 1.2px solid blue !important
+          &.grid__header-content_neighbor-selected
+            border-bottom: #{$border-width} solid blue !important
 
-    tr:first-child
+      tr:first-child
 
-      .grid__cell-content_row-index
-        height: calc(100% + 1px) !important
+        .grid__cell-content_row-index
+          height: #{$first-row-index-height} !important
 
-    td.grid__cell_row-index
-      height: 1px !important
+      td.grid__cell_row-index
+        height: #{$row-index-height} !important
 
-      .grid__cell-content_row-index
+        .grid__cell-content_row-index
 
-        &.grid__cell-content_row-index-neighbor-selected
-          border-right: 1.2px solid blue !important
+          &.grid__cell-content_row-index-neighbor-selected
+            border-right: #{$border-width} solid blue !important
 
-    td:not(.grid__cell_row-index)
+      td:not(.grid__cell_row-index)
 
-      &.grid__cell_selected
-        border: 1.2px solid blue !important
+        &.grid__cell_selected
+          border: #{$border-width} solid blue !important
 
-.browser-firefox
-
-  table.grid__table
-
-    th
-
-      .grid__header-content
-
-        &.grid__header-content_neighbor-selected
-          border-bottom: 1.2px solid blue !important
-
-    tr:first-child
-
-      .grid__cell-content_row-index
-        height: calc(100% + 0.5px) !important
-
-    td.grid__cell_row-index
-      height: 100% !important
-
-      .grid__cell-content_row-index
-
-        &.grid__cell-content_row-index-neighbor-selected
-          border-right: 2px solid blue !important
-
-    td:not(.grid__cell_row-index)
-
-      &.grid__cell_selected
-        border: 2px solid blue !important
+@include grid__browser-specific('default', 1.2px, calc(100% + 1px), 1px)
+@include grid__browser-specific('firefox', 2px, calc(100% + 0.5px), 100%)
 </style>
