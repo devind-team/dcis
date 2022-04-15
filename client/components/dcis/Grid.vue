@@ -7,7 +7,7 @@
       :update="update"
     )
     .grid__body
-      div.grid__container
+      div.grid__container(ref="gridContainer")
         table.grid__table(:style="{ width: `${width}px` }")
           grid-header(
             :row-index-column-width="rowIndexColumnWidth"
@@ -113,6 +113,7 @@ export default defineComponent({
       enterCellSelection,
       endCellSelection,
       setActive,
+      gridContainer,
       columnWidth,
       moveColumnHeader,
       leaveColumnHeader,
@@ -144,6 +145,7 @@ export default defineComponent({
       enterCellSelection,
       endCellSelection,
       setActive,
+      gridContainer,
       columnWidth,
       moveColumnHeader,
       leaveColumnHeader,

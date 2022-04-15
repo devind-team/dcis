@@ -277,6 +277,7 @@ export function useGrid (
   /**
    * Блок изменения ширины столбца
    */
+  const gridContainer = ref<HTMLDivElement | null>(null)
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
   const columnWidthPosition = ref<PositionType>({ left: null, right: null, top: null, bottom: null })
   const columnWidth = computed<ColumnWidthType>(() => ({
@@ -318,9 +319,9 @@ export function useGrid (
   const startColumnResizing = (event: MouseEvent) => {
     if (resizingColumn.value) {
       const cell = event.target as HTMLTableCellElement
-      if (cell.offsetLeft + event.offsetX < document.body.offsetWidth - 150) {
+      if (cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX < document.body.offsetWidth - 150) {
         columnWidthPosition.value = {
-          left: cell.offsetLeft + event.offsetX,
+          left: cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX,
           right: null,
           top: cell.offsetTop + event.offsetY - 25,
           bottom: null
@@ -425,6 +426,7 @@ export function useGrid (
     enterCellSelection,
     endCellSelection,
     setActive,
+    gridContainer,
     columnWidth,
     moveColumnHeader,
     leaveColumnHeader,
