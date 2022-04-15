@@ -439,21 +439,22 @@ dev = ["tox", "bump2version (<1)", "sphinx (<2)", "importlib-metadata (<3)", "im
 
 [[package]]
 name = "devind-core"
-version = "0.5.1"
+version = "0.6.1"
 description = "Devind core."
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 
 [package.dependencies]
-celery = ">=5.2.3,<6.0.0"
+celery = ">=5.2.6,<6.0.0"
 channels = ">=3.0.4,<4.0.0"
-channels-redis = ">=3.3.1,<4.0.0"
+channels-redis = ">=3.4.0,<4.0.0"
 devind_helpers = ">=0.3,<0.4"
-Django = ">=3.2.12,<5.0.0"
+Django = ">=3,<4"
 django-channels-graphql-ws = ">=0.9.1,<0.10.0"
-django-oauth-toolkit = ">=1.7.0,<2.0.0"
+django-oauth-toolkit = ">=1.7.1,<2.0.0"
 graphene-django = ">=2.15.0,<3.0.0"
+graphene-file-upload = ">=1.3.0,<2.0.0"
 openpyxl = ">=3.0.9,<4.0.0"
 user-agents = ">=2.2.0,<3.0.0"
 
@@ -2035,8 +2036,8 @@ deprecated = [
     {file = "Deprecated-1.2.13.tar.gz", hash = "sha256:43ac5335da90c31c24ba028af536a91d41d53f9e6901ddb021bcc572ce44e38d"},
 ]
 devind-core = [
-    {file = "devind_core-0.5.1-py3-none-any.whl", hash = "sha256:3c37b8e2348339b28681ce03130563f612a5604847f16f0abfb74d7806dc7912"},
-    {file = "devind_core-0.5.1.tar.gz", hash = "sha256:246c53ec26d5909fa6f9dba021c522184a509df10f4d58179167d20e3f9616a5"},
+    {file = "devind_core-0.6.1-py3-none-any.whl", hash = "sha256:7e950cc98a4c8024aa64d2273d9975ceb43d58a58f5c377d6d552bac1adca1e0"},
+    {file = "devind_core-0.6.1.tar.gz", hash = "sha256:8179fed433c79abebd23d595f0e5b6a892524aa4c4ef2f8c990aca9a6ed7edb3"},
 ]
 devind-dictionaries = [
     {file = "devind_dictionaries-0.2.4-py3-none-any.whl", hash = "sha256:4d215cae767b039b122a15bd30edbd35b60f42834422e0053c619377a6b54f37"},
