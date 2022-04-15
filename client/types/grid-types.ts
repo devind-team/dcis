@@ -58,6 +58,22 @@ export type BuildRowType = {
 }
 
 /**
+ * Ячейка граничная к крайнему фиксированному столбцу
+ */
+export type BoundaryColumnCell = {
+  cell: BuildCellType,
+  rows: BuildRowType[],
+}
+
+/**
+ * Ячейка граничная к крайней фиксированной строке
+ */
+export type BoundaryRowCell = {
+  cell: BuildCellType
+  columns: BuildColumnType[]
+}
+
+/**
  * Режимы работы таблицы
  *   edit - режим редактирования таблицы
  *   write - режим заполнения таблицы

@@ -23,7 +23,7 @@
 </template>
 <script lang="ts">
 import type { PropType, Ref } from '#app'
-import { BuildCellType, BuildRowType, RangeType } from '~/types/grid-types'
+import { BuildCellType, BuildRowType, BoundaryColumnCell, RangeType } from '~/types/grid-types'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 
@@ -33,6 +33,8 @@ export default defineComponent({
     rows: { type: Array as PropType<BuildRowType[]>, required: true },
     selection: { type: Array as PropType<RangeType[]>, default: () => ([]) },
     selectionRows: { type: Array as PropType<number[]>, default: () => ([]) },
+    boundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
+    selectedBoundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
     setActive: { type: Function as PropType<(position: string) => void>, required: true },
     startSelection: { type: Function as PropType<(position: string) => void>, required: true },
     enterSelection: { type: Function as PropType<(position: string) => void>, required: true },
@@ -41,26 +43,20 @@ export default defineComponent({
   setup (props) {
     const active: Ref<string> = inject<Ref<string>>('active')
 
-    const boundaryCells = computed<BuildCellType[]>(() => {
-      const result: BuildCellType[] = []
-      let i = 0
-      while (i < props.rows.length) {
-        const cell = props.rows[i].cells[0]
-        result.push(cell)
-        i += cell.rowspan
-      }
-      return result
-    })
-
     const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
       grid__cell_selected: props.selection.includes(cell.position),
-      grid__cell_boundary: !!boundaryCells.value.find(boundaryCell => boundaryCell.id === cell.id)
+      grid__cell_boundary: !!props.boundaryColumnCells.find(boundaryCell => boundaryCell.cell.id === cell.id)
     })
 
     const getRowIndexCellContentClasses = (row: BuildRowType): (string | Record<string, boolean>)[] => {
       return [
         'grid__cell-content_row-index',
-        { 'grid__cell-content_row-index-selected': props.selectionRows.includes(row.index) }
+        { 'grid__cell-content_row-index-selected': props.selectionRows.includes(row.index) },
+        {
+          'grid__cell-content_row-index-neighbor-selected':
+            !!props.selectedBoundaryColumnCells.find(boundaryCell =>
+              boundaryCell.rows.find(boundaryColumnCell => boundaryColumnCell.id === row.id))
+        }
       ]
     }
 

@@ -21,6 +21,8 @@ import {
   ResizingBuildColumnType,
   ColumnWidthType,
   BuildRowType,
+  BoundaryColumnCell,
+  BoundaryRowCell,
   CellOptionsType
 } from '~/types/grid-types'
 
@@ -214,6 +216,41 @@ export function useGrid (
       return [...acc, ...rows]
     }, []))]
   )
+  /**
+   * Вычисление ячеек граничных к крайнему фиксированному столбцу
+   */
+  const boundaryColumnCells = computed<BoundaryColumnCell[]>(() => {
+    const result: BoundaryColumnCell[] = []
+    let i = 0
+    while (i < rows.value.length) {
+      const cell = rows.value[i].cells[0]
+      result.push({ cell, rows: rows.value.slice(i, i + cell.rowspan) })
+      i += cell.rowspan
+    }
+    return result
+  })
+  /**
+   * Вычисление выделенных ячеек граничных к крайнему фиксированному столбцу
+   */
+  const selectedBoundaryColumnCells = computed<BoundaryColumnCell[]>(() =>
+    boundaryColumnCells.value.filter(boundaryCell => selection.value.includes(boundaryCell.cell.position))
+  )
+  /**
+   * Вычисление ячеек граничных к крайней фиксированной строке
+   */
+  const boundaryRowCells = computed<BoundaryRowCell[]>(() => {
+    const result: BoundaryRowCell[] = []
+    let i = 0
+    while (i < columns.value.length) {
+      const cell = rows.value[0].cells[i]
+      result.push({ cell, columns: columns.value.slice(i, i + cell.colspan) })
+      i += cell.colspan
+    }
+    return result
+  })
+  const selectedBoundaryRowCells = computed<BoundaryRowCell[]>(() =>
+    boundaryRowCells.value.filter(boundaryCell => selection.value.includes(boundaryCell.cell.position))
+  )
   const selectionCellsOptions: ComputedRef<CellOptionsType> = computed<CellOptionsType>(() => {
     const allowOptions: string[] = ['kind', 'horizontalAlign', 'verticalAlign', 'size', 'strong', 'italic', 'underline']
     const aggregateOptions: Record<string, any> = selectionCells.value
@@ -379,6 +416,10 @@ export function useGrid (
     selectionCells,
     selectionColumns,
     selectionRows,
+    boundaryColumnCells,
+    selectedBoundaryColumnCells,
+    boundaryRowCells,
+    selectedBoundaryRowCells,
     selectionCellsOptions,
     startCellSelection,
     enterCellSelection,

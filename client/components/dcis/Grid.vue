@@ -13,6 +13,7 @@
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
             :selection-columns="selectionColumns"
+            :selected-boundary-row-cells="selectedBoundaryRowCells"
             :move-column-header="moveColumnHeader"
             :leave-column-header="leaveColumnHeader"
             :start-column-resizing="startColumnResizing"
@@ -22,6 +23,8 @@
             :rows="rows"
             :selection="selection"
             :selection-rows="selectionRows"
+            :boundary-column-cells="boundaryColumnCells"
+            :selected-boundary-column-cells="selectedBoundaryColumnCells"
             :start-selection="startCellSelection"
             :enter-selection="enterCellSelection"
             :end-selection="endCellSelection"
@@ -102,6 +105,9 @@ export default defineComponent({
       selectionCells,
       selectionColumns,
       selectionRows,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      selectedBoundaryRowCells,
       selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
@@ -130,6 +136,9 @@ export default defineComponent({
       selectionCells,
       selectionColumns,
       selectionRows,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      selectedBoundaryRowCells,
       selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
@@ -146,6 +155,8 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
+@import '~vuetify/src/styles/styles.sass'
+
 .grid__cursor_cell *
   cursor: cell !important
 .grid__cursor_col-resize *
@@ -189,7 +200,7 @@ div.grid__body
             background: white
 
             &.grid__header-content_selected
-              background: #EEEEEE
+              background: map-get($grey, 'lighten-3')
 
         th:first-child
           position: sticky
@@ -235,7 +246,7 @@ div.grid__body
             background: white
 
             &.grid__cell-content_row-index-selected
-              background: #EEEEEE
+              background: map-get($grey, 'lighten-3')
 
         td:not(.grid__cell_row-index)
           position: relative
@@ -263,6 +274,13 @@ div.grid__body
 
   table.grid__table
 
+    th
+
+      .grid__header-content
+
+        &.grid__header-content_neighbor-selected
+          border-bottom: 1.2px solid blue !important
+
     tr:first-child
 
       .grid__cell-content_row-index
@@ -270,6 +288,11 @@ div.grid__body
 
     td.grid__cell_row-index
       height: 1px !important
+
+      .grid__cell-content_row-index
+
+        &.grid__cell-content_row-index-neighbor-selected
+          border-right: 1.2px solid blue !important
 
     td:not(.grid__cell_row-index)
 
@@ -280,6 +303,13 @@ div.grid__body
 
   table.grid__table
 
+    th
+
+      .grid__header-content
+
+        &.grid__header-content_neighbor-selected
+          border-bottom: 1.2px solid blue !important
+
     tr:first-child
 
       .grid__cell-content_row-index
@@ -287,6 +317,11 @@ div.grid__body
 
     td.grid__cell_row-index
       height: 100% !important
+
+      .grid__cell-content_row-index
+
+        &.grid__cell-content_row-index-neighbor-selected
+          border-right: 2px solid blue !important
 
     td:not(.grid__cell_row-index)
 

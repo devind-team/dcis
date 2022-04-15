@@ -18,13 +18,14 @@
 <script lang="ts">
 import type { PropType } from '#app'
 import { defineComponent } from '#app'
-import { BuildColumnType } from '~/types/grid-types'
+import { BuildColumnType, BoundaryRowCell } from '~/types/grid-types'
 
 export default defineComponent({
   props: {
     rowIndexColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     selectionColumns: { type: Array as PropType<number[]>, required: true },
+    selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
     moveColumnHeader: {
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
       required: true
@@ -37,7 +38,12 @@ export default defineComponent({
     const getHeaderContentClasses = (column: BuildColumnType): (string | Record<string, boolean>)[] => {
       return [
         'grid__header-content',
-        { 'grid__header-content_selected': props.selectionColumns.includes(column.index) }
+        { 'grid__header-content_selected': props.selectionColumns.includes(column.index) },
+        {
+          'grid__header-content_neighbor-selected':
+            !!props.selectedBoundaryRowCells.find(boundaryCell =>
+              boundaryCell.columns.find(boundaryRowCell => boundaryRowCell.id === column.id))
+        }
       ]
     }
     return {
