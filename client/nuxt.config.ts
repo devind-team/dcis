@@ -11,6 +11,7 @@ export default defineNuxtConfig({
   alias: {
     tslib: 'tslib/tslib.es6.js'
   },
+  buildDir: 'nuxt-dist',
   /*
   ** Nuxt rendering mode
   ** See https://nuxtjs.org/api/configuration-mode
@@ -55,6 +56,7 @@ export default defineNuxtConfig({
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
     '~/plugins/vue-i18n',
+    { src: '~/plugins/detect-browser', ssr: false },
     { src: '~/plugins/rx', ssr: false },
     { src: '~/plugins/apex-chart', ssr: false }
   ],

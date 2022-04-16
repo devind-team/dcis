@@ -44,6 +44,8 @@ export type BuildCellType = {
   rowspan: number
   style: Record<string, number | string | undefined> | string,
   border: Record<string, string | undefined | null> | string
+  column: ColumnDimensionType
+  row: RowDimensionType
   cell: CellType
 }
 
@@ -58,12 +60,27 @@ export type BuildRowType = {
 }
 
 /**
+ * Ячейка граничная к крайнему фиксированному столбцу
+ */
+export type BoundaryColumnCell = {
+  cell: BuildCellType,
+  rows: BuildRowType[],
+}
+
+/**
+ * Ячейка граничная к крайней фиксированной строке
+ */
+export type BoundaryRowCell = {
+  cell: BuildCellType
+  columns: BuildColumnType[]
+}
+
+/**
  * Режимы работы таблицы
  *   edit - режим редактирования таблицы
  *   write - режим заполнения таблицы
  *   readonly - режим просмотра таблицы
  */
-
 export enum GridMode {
   EDIT,
   WRITE,
@@ -129,7 +146,6 @@ export type RangePositionsType = {
 /**
  * Опции ячейки
  */
-
 export type CellOptionValueType = string | boolean | null
 
 export type CellOptionsType = {

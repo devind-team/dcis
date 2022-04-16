@@ -3,7 +3,11 @@
     template(#activator="{ on: onMenu }")
       v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          div(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs") {{ row.index }}
+          div(
+            v-bind="attrs"
+            v-on="{ ...onMenu, ...onTooltip }"
+            :class="contentClass"
+          ) {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
     v-list
       v-list-item(@click="addRowDimension(+row.id, 'before')")
@@ -27,10 +31,12 @@ import type { PropType } from '#app'
 import { defineComponent, inject } from '#app'
 import { BuildRowType } from '~/types/grid-types'
 import {
+  RowDimensionType,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
-  DeleteRowDimensionMutation, DeleteRowDimensionMutationVariables,
-  DocumentQuery, RowDimensionType
+  DeleteRowDimensionMutation,
+  DeleteRowDimensionMutationVariables,
+  DocumentQuery
 } from '~/types/graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
@@ -47,7 +53,8 @@ type DocumentUpdateType<T> = (
 
 export default defineComponent({
   props: {
-    row: { type: Object as PropType<BuildRowType>, required: true }
+    row: { type: Object as PropType<BuildRowType>, required: true },
+    contentClass: { type: Array as PropType<(string | Record<string, boolean>)[]>, required: true }
   },
   setup (props) {
     const { dateTimeHM } = useFilters()
