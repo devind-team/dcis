@@ -287,7 +287,7 @@ export function useGrid (
   }
 
   /**
-   * Блок изменения ширины столбца
+   * Блок изменения ширины столбца и массового выделения строк
    */
   const gridContainer = ref<HTMLDivElement | null>(null)
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
@@ -297,7 +297,17 @@ export function useGrid (
     position: columnWidthPosition.value,
     width: resizingColumn.value?.width ?? 0
   }))
-  const moveColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
+
+  const startColumnSelectionPosition = ref<string | null>(null)
+
+  const mouseenterColumnHeader = (column: BuildColumnType) => {
+    if (startColumnSelectionPosition.value) {
+      selection.value = rangeLetterToCells(
+        `${startColumnSelectionPosition.value}1:${column.position}${rows.value.at(-1).index}`
+      )
+    }
+  }
+  const mousemoveColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
@@ -323,12 +333,12 @@ export function useGrid (
       resizingColumn.value = null
     }
   }
-  const leaveColumnHeader = () => {
+  const mouseleaveColumnHeader = () => {
     if (resizingColumn.value && resizingColumn.value.state === 'hover') {
       resizingColumn.value = null
     }
   }
-  const startColumnResizing = (event: MouseEvent) => {
+  const mousedownColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
     if (resizingColumn.value) {
       const cell = event.target as HTMLTableCellElement
       if (cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX < document.body.offsetWidth - 150) {
@@ -347,12 +357,18 @@ export function useGrid (
         }
       }
       resizingColumn.value.state = 'resizing'
+    } else {
+      startColumnSelectionPosition.value = column.position
+      selection.value = rangeLetterToCells(`${column.position}1:${column.position}${rows.value.at(-1).index}`)
     }
   }
-  const endColumnResizing = () => {
+  const mouseupColumnHeader = () => {
     if (resizingColumn.value) {
       changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
       resizingColumn.value.state = 'hover'
+    }
+    if (startColumnSelectionPosition.value) {
+      startColumnSelectionPosition.value = null
     }
   }
 
@@ -360,7 +376,7 @@ export function useGrid (
    * Класс курсора на странице
    */
   const cursorClass = computed<'grid__cursor_cell' | 'grid__cursor_col-resize' | null>(() => {
-    if (startCellSelectionPosition.value) {
+    if (startCellSelectionPosition.value || startColumnSelectionPosition.value) {
       return 'grid__cursor_cell'
     }
     if (resizingColumn.value) {
@@ -399,6 +415,9 @@ export function useGrid (
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
       changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
       resizingColumn.value = null
+    }
+    if (startColumnSelectionPosition.value) {
+      startColumnSelectionPosition.value = null
     }
   })
 
@@ -440,9 +459,10 @@ export function useGrid (
     setActive,
     gridContainer,
     columnWidth,
-    moveColumnHeader,
-    leaveColumnHeader,
-    startColumnResizing,
-    endColumnResizing
+    mouseenterColumnHeader,
+    mousemoveColumnHeader,
+    mouseleaveColumnHeader,
+    mousedownColumnHeader,
+    mouseupColumnHeader
   }
 }

@@ -14,10 +14,11 @@
             :columns="columns"
             :selection-columns="selectionColumns"
             :selected-boundary-row-cells="selectedBoundaryRowCells"
-            :move-column-header="moveColumnHeader"
-            :leave-column-header="leaveColumnHeader"
-            :start-column-resizing="startColumnResizing"
-            :end-column-resizing="endColumnResizing"
+            :mouseenter-column-header="mouseenterColumnHeader"
+            :mousemove-column-header="mousemoveColumnHeader"
+            :mouseleave-column-header="mouseleaveColumnHeader"
+            :mousedown-column-header="mousedownColumnHeader"
+            :mouseup-column-header="mouseupColumnHeader"
           )
           grid-body(
             :rows="rows"
@@ -115,10 +116,11 @@ export default defineComponent({
       setActive,
       gridContainer,
       columnWidth,
-      moveColumnHeader,
-      leaveColumnHeader,
-      startColumnResizing,
-      endColumnResizing
+      mouseenterColumnHeader,
+      mousemoveColumnHeader,
+      mouseleaveColumnHeader,
+      mousedownColumnHeader,
+      mouseupColumnHeader
     } = useGrid(sheet, changeColumnWidth)
 
     provide('active', active)
@@ -147,10 +149,11 @@ export default defineComponent({
       setActive,
       gridContainer,
       columnWidth,
-      moveColumnHeader,
-      leaveColumnHeader,
-      startColumnResizing,
-      endColumnResizing
+      mouseenterColumnHeader,
+      mousemoveColumnHeader,
+      mouseleaveColumnHeader,
+      mousedownColumnHeader,
+      mouseupColumnHeader
     }
   }
 })
@@ -192,6 +195,7 @@ div.grid__body
 
         th
           height: 25px
+          cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
           .grid__header-content
             position: relative
@@ -205,6 +209,9 @@ div.grid__body
 
             &.grid__header-content_selected
               background: map-get($grey, 'lighten-3')
+
+            &:hover
+               background: map-get($grey, 'lighten-2') !important
 
         th:first-child
           position: sticky
