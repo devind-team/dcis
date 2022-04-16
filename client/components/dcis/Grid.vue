@@ -7,20 +7,24 @@
       :update="update"
     )
     .grid__body
-      div.grid__container(@scroll="scroll")
-        table.grid__table(:style="{ width: `${width}px` }")
+      div.grid__container(ref="gridContainer")
+        table.grid__table(:style="{ width: `${gridWidth}px` }")
           grid-header(
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
+            :selection-columns="selectionColumns"
+            :selected-boundary-row-cells="selectedBoundaryRowCells"
             :move-column-header="moveColumnHeader"
             :leave-column-header="leaveColumnHeader"
             :start-column-resizing="startColumnResizing"
             :end-column-resizing="endColumnResizing"
-            :scroll-top="scrollTop"
           )
           grid-body(
             :rows="rows"
             :selection="selection"
+            :selection-rows="selectionRows"
+            :boundary-column-cells="boundaryColumnCells"
+            :selected-boundary-column-cells="selectedBoundaryColumnCells"
             :start-selection="startCellSelection"
             :enter-selection="enterCellSelection"
             :end-selection="endCellSelection"
@@ -91,21 +95,25 @@ export default defineComponent({
     const sheet: Ref<SheetType> = toRef(props, 'sheet')
     const {
       rowIndexColumnWidth,
-      width,
+      gridWidth,
       columns,
       rows,
       mergeCells,
       mergedCells,
-      scroll,
-      scrollTop,
       active,
       selection,
       selectionCells,
+      selectionColumns,
+      selectionRows,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      selectedBoundaryRowCells,
       selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
       setActive,
+      gridContainer,
       columnWidth,
       moveColumnHeader,
       leaveColumnHeader,
@@ -119,21 +127,25 @@ export default defineComponent({
 
     return {
       rowIndexColumnWidth,
-      width,
+      gridWidth,
       columns,
       rows,
       mergedCells,
       mergeCells,
-      scroll,
-      scrollTop,
       active,
       selection,
       selectionCells,
+      selectionColumns,
+      selectionRows,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      selectedBoundaryRowCells,
       selectionCellsOptions,
       startCellSelection,
       enterCellSelection,
       endCellSelection,
       setActive,
+      gridContainer,
       columnWidth,
       moveColumnHeader,
       leaveColumnHeader,
@@ -145,10 +157,14 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
+@import '~vuetify/src/styles/styles.sass'
+
 .grid__cursor_cell *
   cursor: cell !important
 .grid__cursor_col-resize *
   cursor: col-resize !important
+
+$border: 1px solid silver
 
 div.grid__body
   position: relative
@@ -159,6 +175,7 @@ div.grid__body
     overflow: auto
 
     table.grid__table
+      height: 1px
       user-select: none
       table-layout: fixed
 
@@ -174,51 +191,76 @@ div.grid__body
         z-index: 2
 
         th
-          background: white
           height: 25px
 
           .grid__header-content
             position: relative
             left: 0.5px
-            width: 100%
             height: 100%
             overflow: hidden
-            border-top: 1px solid silver
-            border-right: 1px solid silver
+            border-top: $border
+            border-right: $border
+            border-bottom: $border
+            background: white
 
-          .grid__row-index-header-content
+            &.grid__header-content_selected
+              background: map-get($grey, 'lighten-3')
+
+        th:first-child
+          position: sticky
+          left: 0
+          z-index: 2
+
+          .grid__header-content
             left: 0
             width: calc(100% + 0.5px)
-            border-left: 1px solid silver
-
-          .grid__header-content_bottom-border
-            border-bottom: 1px solid silver
+            border-left: $border
 
       tbody
-        tr:hover
-          background: rgba(0, 0, 0, 0.1) !important
+        tr:first-child
+
+          td:not(.grid__cell_row-index)
+            border-top: none !important
+
+          .grid__cell-content_row-index
+            top: 0 !important
 
         td
           overflow: hidden
-          border: 1px solid silver
 
-        td.grid__row-index
+        td.grid__cell_row-index
           position: sticky
-          left: -1px
+          height: 100%
+          left: 0
           z-index: 1
+          overflow: visible
 
           font-weight: bold
           text-align: center
           width: 30px
 
-        td:not(.grid__row-index)
+          .grid__cell-content_row-index
+            position: relative
+            top: 0.5px
+            width: calc(100% + 0.5px)
+            height: 100%
+            border-right: $border
+            border-bottom: $border
+            border-left: $border
+            background: white
+
+            &.grid__cell-content_row-index-selected
+              background: map-get($grey, 'lighten-3')
+
+        td:not(.grid__cell_row-index)
           position: relative
+          border: $border
           cursor: cell
 
-          &.grid__cell-container-selected
-            border: 1.2px blue solid
+          &.grid__cell_boundary
+            border-left: none !important
 
-          .grid__cell-container-active
+          .grid__cell-content_active
             position: absolute
             width: 100%
             height: 100%
@@ -231,4 +273,37 @@ div.grid__body
 
               &:focus
                 outline: none
+
+@mixin grid__browser-specific($browser, $border-width, $first-row-index-height, $row-index-height)
+  .browser-#{$browser}
+
+    table.grid__table
+
+      th
+
+        .grid__header-content
+
+          &.grid__header-content_neighbor-selected
+            border-bottom: #{$border-width} solid blue !important
+
+      tr:first-child
+
+        .grid__cell-content_row-index
+          height: #{$first-row-index-height} !important
+
+      td.grid__cell_row-index
+        height: #{$row-index-height} !important
+
+        .grid__cell-content_row-index
+
+          &.grid__cell-content_row-index-neighbor-selected
+            border-right: #{$border-width} solid blue !important
+
+      td:not(.grid__cell_row-index)
+
+        &.grid__cell_selected
+          border: #{$border-width} solid blue !important
+
+@include grid__browser-specific('default', 1.2px, calc(100% + 1px), 1px)
+@include grid__browser-specific('firefox', 2px, calc(100% + 0.5px), 100%)
 </style>

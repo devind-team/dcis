@@ -12,10 +12,10 @@ const __CACHE_COLUMN_LP: { [letter: string]: number } = {}
 
 /**
  * Разбираем координату на составляющие
- * parseCoordinate('A1') -> { column: 'A', row: '1' }
- * parseCoordinate('$A1') -> { column: 'A', row: '1' }
- * parseCoordinate('A$1') -> { column: 'A', row: '1' }
- * parseCoordinate('$A$1') -> { column: 'A', row: '1' }
+ * parseCoordinate('A1') -> { column: 'A', row: 1 }
+ * parseCoordinate('$A1') -> { column: 'A', row: 1 }
+ * parseCoordinate('A$1') -> { column: 'A', row: 1 }
+ * parseCoordinate('$A$1') -> { column: 'A', row: 1 }
  * @param coordinate
  */
 const parseCoordinate = (coordinate: string): { column: string, row: number } => {
@@ -24,7 +24,7 @@ const parseCoordinate = (coordinate: string): { column: string, row: number } =>
     throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
   }
   const column: string = coordinateParse[1]
-  const row: number = coordinateParse[2]
+  const row: number = +coordinateParse[2]
   return { column, row }
 }
 

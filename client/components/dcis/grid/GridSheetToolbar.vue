@@ -25,7 +25,7 @@ import type { ComputedRef, PropType, WritableComputedRef } from '#app'
 import { computed, defineComponent } from '#app'
 import { useI18n } from '~/composables'
 import { cellKinds } from '~/composables/grid'
-import { CellOptionsType } from '~/types/grid-types'
+import { BuildCellType, CellOptionsType } from '~/types/grid-types'
 import {
   CellType,
   ChangeCellsOptionMutation,
@@ -40,7 +40,7 @@ type DocumentUpdateType = (cache: any, result: any, transform: (dc: any, result:
 export default defineComponent({
   props: {
     sheetId: { type: String, required: true },
-    selectionCells: { type: Array as PropType<CellType[]>, required: true },
+    selectionCells: { type: Array as PropType<BuildCellType[]>, required: true },
     selectionCellsOptions: { type: Object as PropType<CellOptionsType>, required: true },
     update: { type: Function as PropType<DocumentUpdateType>, required: true }
   },
