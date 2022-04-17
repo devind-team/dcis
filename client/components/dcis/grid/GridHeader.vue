@@ -7,11 +7,11 @@
         v-for="column in columns"
         :key="column.id"
         :style="column.style"
-        @mouseenter="mouseenterColumnHeader(column)"
-        @mousemove="mousemoveColumnHeader($event, column)"
-        @mouseleave="mouseleaveColumnHeader"
-        @mousedown="mousedownColumnHeader($event, column)"
-        @mouseup="mouseupColumnHeader"
+        @mouseenter="mouseenterColumnIndex(column)"
+        @mousemove="mousemoveColumnIndex($event, column)"
+        @mouseleave="mouseleaveColumnIndex"
+        @mousedown="mousedownColumnIndex($event, column)"
+        @mouseup="mouseupColumnIndex"
       )
         div(:class="getHeaderContentClasses(column)") {{ column.position }}
 </template>
@@ -27,20 +27,20 @@ export default defineComponent({
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     selectionColumns: { type: Array as PropType<number[]>, required: true },
     selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
-    mouseenterColumnHeader: {
+    mouseenterColumnIndex: {
       type: Function as PropType<(column: BuildColumnType) => void>,
       required: true
     },
-    mousemoveColumnHeader: {
+    mousemoveColumnIndex: {
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
       required: true
     },
-    mouseleaveColumnHeader: { type: Function as PropType<() => void>, required: true },
-    mousedownColumnHeader: {
+    mouseleaveColumnIndex: { type: Function as PropType<() => void>, required: true },
+    mousedownColumnIndex: {
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
       required: true
     },
-    mouseupColumnHeader: { type: Function as PropType<() => void>, required: true }
+    mouseupColumnIndex: { type: Function as PropType<() => void>, required: true }
   },
   setup (props) {
     const getHeaderContentClasses = (column: BuildColumnType): (string | Record<string, boolean>)[] => {

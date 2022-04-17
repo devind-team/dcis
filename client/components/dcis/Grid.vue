@@ -14,11 +14,11 @@
             :columns="columns"
             :selection-columns="selectionColumns"
             :selected-boundary-row-cells="selectedBoundaryRowCells"
-            :mouseenter-column-header="mouseenterColumnHeader"
-            :mousemove-column-header="mousemoveColumnHeader"
-            :mouseleave-column-header="mouseleaveColumnHeader"
-            :mousedown-column-header="mousedownColumnHeader"
-            :mouseup-column-header="mouseupColumnHeader"
+            :mouseenter-column-index="mouseenterColumnIndex"
+            :mousemove-column-index="mousemoveColumnIndex"
+            :mouseleave-column-index="mouseleaveColumnIndex"
+            :mousedown-column-index="mousedownColumnIndex"
+            :mouseup-column-index="mouseupColumnIndex"
           )
           grid-body(
             :rows="rows"
@@ -26,6 +26,8 @@
             :selection-rows="selectionRows"
             :boundary-column-cells="boundaryColumnCells"
             :selected-boundary-column-cells="selectedBoundaryColumnCells"
+            :mouseenter-row-index="mouseenterRowIndex"
+            :mousedown-row-index="mousedownRowIndex"
             :start-selection="startCellSelection"
             :enter-selection="enterCellSelection"
             :end-selection="endCellSelection"
@@ -116,11 +118,13 @@ export default defineComponent({
       setActive,
       gridContainer,
       columnWidth,
-      mouseenterColumnHeader,
-      mousemoveColumnHeader,
-      mouseleaveColumnHeader,
-      mousedownColumnHeader,
-      mouseupColumnHeader
+      mouseenterColumnIndex,
+      mousemoveColumnIndex,
+      mouseleaveColumnIndex,
+      mousedownColumnIndex,
+      mouseupColumnIndex,
+      mouseenterRowIndex,
+      mousedownRowIndex
     } = useGrid(sheet, changeColumnWidth)
 
     provide('active', active)
@@ -149,11 +153,13 @@ export default defineComponent({
       setActive,
       gridContainer,
       columnWidth,
-      mouseenterColumnHeader,
-      mousemoveColumnHeader,
-      mouseleaveColumnHeader,
-      mousedownColumnHeader,
-      mouseupColumnHeader
+      mouseenterColumnIndex,
+      mousemoveColumnIndex,
+      mouseleaveColumnIndex,
+      mousedownColumnIndex,
+      mouseupColumnIndex,
+      mouseenterRowIndex,
+      mousedownRowIndex
     }
   }
 })
@@ -231,6 +237,9 @@ div.grid__body
 
           .grid__cell-content_row-index
             top: 0 !important
+
+        td:first-child
+          cursor: url("/cursors/arrow-right.svg") 8 8, pointer
 
         td
           overflow: hidden
