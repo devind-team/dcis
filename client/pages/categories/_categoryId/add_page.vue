@@ -1,11 +1,8 @@
 <template lang="pug">
   page-container(:bread-crumbs="breadCrumbs" :category="category")
     template(#header)
-      .text-h4.text-md-h2 {{ $t('pages.page.add.header') }}
-    template(#default)
-      v-row
-        v-col
-          add-page(:category="category")
+      .text-h4.text-md-h2.mb-2 {{ $t('pages.page.add.header') }}
+    add-page(:category="category")
 </template>
 
 <script lang="ts">
@@ -19,6 +16,7 @@ import PageContainer from '~/components/pages/PageContainer.vue'
 
 export default defineComponent({
   components: { AddPage, PageContainer, CategoryPages },
+  middleware: 'auth',
   props: {
     category: { type: Object as PropType<CategoryType>, required: true },
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
