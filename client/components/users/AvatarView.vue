@@ -7,7 +7,6 @@
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import type { Ref } from '#app'
-import { defineComponent, toRef, useNuxtApp } from '#app'
 import { useSelectFiles } from '~/composables'
 import { useAuthStore } from '~/store'
 import {
@@ -22,16 +21,13 @@ export type ChangeAvatarMutationResult = { data: { changeAvatar: ChangeAvatarMut
 export default defineComponent({
   components: { AvatarDialog },
   setup () {
-    const userStore = useAuthStore()
-    const { $store } = useNuxtApp()
-    const user: Ref<UserType> = toRef(userStore, 'user')
+    const authStore = useAuthStore()
+    const user: Ref<UserType> = toRef(authStore, 'user')
     const { mutate: changeAvatarMutation, onDone } = useMutation<ChangeAvatarMutation, ChangeAvatarMutationVariables>(changeAvatar)
 
-    onDone(({ data: { changeAvatar: { success, avatar } } }: ChangeAvatarMutationResult) => {
-      if (success) {
+    onDone(({ data: { changeAvatar: { errors, avatar } } }: ChangeAvatarMutationResult) => {
+      if (!errors.length) {
         user.value.avatar = avatar
-        // TODO: Убрать после полного перехода на pinia
-        $store.dispatch('auth/changeUserAvatar', avatar)
       }
     })
 

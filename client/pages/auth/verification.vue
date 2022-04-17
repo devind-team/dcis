@@ -2,153 +2,112 @@
   bread-crumbs(:items="breadCrumbs")
     v-row(justify="center")
       v-col(cols="12" sm="10" md="8" lg="6")
-        .text-h4.mb-2 {{ t('title') }}
+        .text-h4.mb-2 {{ $t('user.verification.title') }}
         v-stepper(v-model="step" vertical)
-          v-stepper-step(:complete="step > 1" step="1") {{ t('email') }}
+          v-stepper-step(:complete="step > 1" step="1") {{ $t('user.verification.email') }}
           v-stepper-content(step="1")
-            apollo-mutation(
-              v-slot="{ mutate, loading, error }"
+            mutation-form(
+              @done="requestCodeDone"
               :mutation="require('~/gql/core/mutations/user/request_code.graphql')"
               :variables="{ email }"
-              @done="doneRequestCode"
-              tag
+              mutation-name="requestCode"
+              i18n-path="user.verification"
+              button-text="Отправить код"
             )
-              validation-observer(v-slot="{ handleSubmit, invalid }" ref="requestCodeForm" tag="div")
-                form(@submit.prevent="handleSubmit(mutate)")
-                  v-card
-                    v-card-text
-                      v-alert(type="error" :value="!!error" dismissible) {{ error }}
-                      validation-provider(v-slot="{ errors, valid }" :name="t('email')" rules="required|email")
-                        v-text-field(
-                          v-model="email"
-                          :label="t('email')"
-                          :error-messages="errors"
-                          :success="valid"
-                          clearable
-                        )
-                    v-card-actions
-                      v-btn(:disabled="invalid" :loading="loading" type="submit" color="success") Отправить код
-          v-stepper-step(:complete="step > 2" step="2") {{ t('code') }}
+              template(#form)
+                validation-provider(v-slot="{ errors, valid }" :name="String($t('user.verification.email'))" rules="required|email")
+                  v-text-field(
+                    v-model="email"
+                    :label="$t('user.verification.email')"
+                    :error-messages="errors"
+                    :success="valid"
+                    clearable
+                  )
+          v-stepper-step(:complete="step > 2" step="2") {{ $t('user.verification.code') }}
           v-stepper-content(step="2")
-            apollo-mutation(
-              v-slot="{ mutate, loading, error }"
+            mutation-form(
+              @done="confirmEmailDone"
               :mutation="require('~/gql/core/mutations/user/confirm_email.graphql')"
               :variables="{ email, code }"
-              @done="doneConfirmEmail"
-              tag
+              mutation-name="confirmEmail"
+              i18n-path="user.verification"
             )
-              validation-observer(v-slot="{ handleSubmit, invalid }" ref="confirmEmailForm" tag="div")
-                form(@submit.prevent="handleSubmit(mutate)")
-                  v-card
-                    v-card-text
-                      v-alert(type="error" :value="!!error" dismissible) {{ error }}
-                      validation-provider(v-slot="{ errors, valid }" :name="t('code')" rules="required")
-                        v-text-field(v-model="code" :label="t('code')" :error-messages="errors" :success="valid" clearable)
-                    v-card-actions
-                      v-btn(type="submit" :disabled="invalid" :loading="loading" color="success") {{ t('confirm') }}
-                      v-spacer
-                      a(@click="reRequestCode") {{ time > 0 ? t('reRequestCodeTimer', { time }) : t('reRequestCode') }}
-          v-stepper-step(:complete="step > 3" step="3") {{ t('confirmSuccess') }}
+              template(#form)
+                validation-provider(v-slot="{ errors, valid }" :name="String($t('user.verification.code'))" rules="required")
+                  v-text-field(v-model="code" :label="$t('user.verification.code')" :error-messages="errors" :success="valid" clearable)
+              template(#actions="{ invalid, loading }")
+                v-btn(type="submit" :disabled="invalid" :loading="loading" color="success") {{ $t('user.verification.confirm') }}
+                v-spacer
+                a(@click="reRequestCode") {{ time > 0 ? $t('user.verification.reRequestCodeTimer', { time }) : $t('user.verification.reRequestCode') }}
+          v-stepper-step(:complete="step > 3" step="3") {{ $t('user.verification.confirmSuccess') }}
           v-stepper-content(step="3")
             v-card
               v-card-text
-                v-alert(type="success") {{ t('confirmText', { email }) }}
+                v-alert(type="success") {{ $t('user.verification.confirmText', { email }) }}
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import { MetaInfo } from 'vue-meta'
-import { ValidationObserver } from 'vee-validate'
+import { useNuxt2Meta } from '#app'
+import { useAuthStore } from '~/store'
+import { ConfirmEmailMutation, RequestCodeMutation } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { ConfirmEmailMutation, ErrorFieldType, RequestCodeMutation } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import MutationForm from '~/components/common/forms/MutationForm.vue'
 
-@Component<Verification>({
-  components: { BreadCrumbs },
-  computed: {
-    breadCrumbs (): BreadCrumbsItem [] {
-      return [
-        { text: this.t('title'), to: this.localePath({ name: 'auth-verification' }), exact: true }
-      ]
+export const REQUEST_TIME = 60
+
+export default defineComponent({
+  components: { BreadCrumbs, MutationForm },
+  setup () {
+    const router = useRouter()
+    const { t, localePath } = useI18n()
+    const authStore = useAuthStore()
+
+    useNuxt2Meta({ title: t('user.verification.title') as string })
+
+    const breadCrumbs = computed<BreadCrumbsItem[]>(() => ([
+      { text: t('user.verification.title') as string, to: localePath({ name: 'auth-verification' }), exact: true }
+    ]))
+
+    const time = ref<number>(REQUEST_TIME)
+    const timer = ref<any | null>(null)
+    const step = ref<number>(1)
+    const email = ref<string>('')
+    const code = ref<string>('')
+
+    const reRequestCode = () => {
+      if (time.value > 0) { return }
+      step.value = 1
+      time.value = REQUEST_TIME
+      resetRequestCode()
     }
-  },
-  head (): MetaInfo {
-    return { title: this.t('title') } as MetaInfo
+
+    const resetRequestCode = () => {
+      if (timer.value) {
+        clearInterval(timer.value)
+      }
+    }
+    onDeactivated(resetRequestCode)
+
+    const requestCodeDone = ({ data: { requestCode: { errors } } }: { data: RequestCodeMutation }) => {
+      if (!errors.length) {
+        step.value = 2
+        timer.value = setInterval(() => { --time.value }, 1000)
+        time.value = REQUEST_TIME
+      }
+    }
+
+    const confirmEmailDone = ({ data: { confirmEmail: { errors, user } } } : { data: ConfirmEmailMutation }) => {
+      if (!errors.length) {
+        authStore.user = Object.assign(authStore.user, user)
+        step.value = 3
+        setTimeout(() => {
+          router.push(localePath({ name: 'index' }))
+        }, 2000)
+      }
+    }
+
+    return { time, step, email, code, breadCrumbs, reRequestCode, requestCodeDone, confirmEmailDone }
   }
 })
-export default class Verification extends Vue {
-  readonly breadCrumbs!: BreadCrumbsItem[]
-  $refs!: {
-    requestCodeForm: InstanceType<typeof ValidationObserver>,
-    confirmEmailForm: InstanceType<typeof ValidationObserver>
-  }
-
-  timer: any = null
-  time: number = 60
-  step: number = 1
-  email: string = ''
-  code: string = ''
-
-  async doneRequestCode (
-    { data: { requestCode: { success, errors } } }: { data: RequestCodeMutation }
-  ): Promise<void> {
-    if (success) {
-      this.step = 2
-      this.timer = setInterval(() => { --this.time }, 1000)
-      this.time = 60
-    } else {
-      await this.$refs.requestCodeForm.setErrors(errors.reduce(
-        (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.t(c.field)]: c.messages }
-        }, {}))
-    }
-  }
-
-  async doneConfirmEmail (
-    { data: { confirmEmail: { success, errors, user } } } : { data: ConfirmEmailMutation }
-  ): Promise<void> {
-    if (success) {
-      await this.$store.dispatch('auth/changeVerification', user)
-      this.step = 3
-      setTimeout(() => {
-        this.$router.push(this.localePath({ name: 'index' }))
-      }, 2000)
-    } else {
-      await this.$refs.confirmEmailForm.setErrors(errors.reduce(
-        (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-          return { ...a, [this.t(c.field)]: c.messages }
-        }, {}))
-    }
-  }
-
-  reRequestCode () {
-    if (this.time > 0) {
-      return
-    }
-    this.step = 1
-    this.time = 60
-    this.resetRequestCode()
-  }
-
-  resetRequestCode () {
-    if (this.timer !== null) {
-      clearInterval(this.timer)
-      this.timer = null
-    }
-  }
-
-  beforeDestroy () {
-    this.resetRequestCode()
-  }
-
-  /**
-   * Получение перевода относильно локального пути
-   * @param path
-   * @param values
-   * @return
-   */
-  t (path: string, values: any = undefined): string {
-    return this.$t(`user.verification.${path}`, values) as string
-  }
-}
 </script>

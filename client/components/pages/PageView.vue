@@ -30,7 +30,6 @@
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { defineComponent, ref, unref } from '#app'
 import { CategoryType, PagesQuery, PagesQueryVariables, PageType } from '~/types/graphql'
 import { useCursorPagination, useDebounceSearch, useQueryRelay } from '~/composables'
 import pagesQuery from '~/gql/pages/queries/pages.graphql'

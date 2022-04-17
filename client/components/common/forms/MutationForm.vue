@@ -7,7 +7,7 @@
   )
     validation-observer(v-slot="{ handleSubmit, invalid }" ref="validationObserver" slim)
       form(@submit.prevent="handleSubmit(mutate)")
-        v-card
+        v-card(:flat="flat")
           v-card-title
             slot(name="header" :header="header") {{ header }}
           v-card-subtitle
@@ -59,7 +59,8 @@ export default defineComponent({
     buttonText: { type: String, default: '' },
     i18nPath: { type: String, default: '' },
     hideAlertTimeout: { type: Number, default: 20000 },
-    successMessage: { type: String, default: '' }
+    successMessage: { type: String, default: '' },
+    flat: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
     const { t } = useI18n()
