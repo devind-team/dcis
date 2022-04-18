@@ -9,8 +9,8 @@
 <script lang="ts">
 import { Context } from '@nuxt/types'
 import { DataProxy } from 'apollo-cache'
-import type { ComputedRef, PropType } from '#app'
-import { defineComponent, useNuxt2Meta, computed, useRoute } from '#app'
+import type { PropType } from '#app'
+import { useNuxt2Meta } from '#app'
 import {
   PageQuery,
   PageQueryVariables,
@@ -49,11 +49,11 @@ export default defineComponent({
     const route = useRoute()
     useNuxt2Meta({ title: t('pages.section.change') as string })
 
-    const section: ComputedRef<SectionInterface> = computed<SectionInterface>(() => ({
+    const section = computed<SectionInterface>(() => ({
       ...props.page.sections.find((e: any) => e.id === Number(route.params.sectionId))
     }))
 
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
         text: t('pages.section.editSection') as string,

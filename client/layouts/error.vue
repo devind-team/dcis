@@ -15,20 +15,18 @@
 </template>
 
 <script lang="ts">
-import Vue, { AsyncComponent } from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
-import { MetaInfo } from 'vue-meta'
-const Error403: AsyncComponent = () => import('~/components/errors/Error403.vue')
-const Error404: AsyncComponent = () => import('~/components/errors/Error404.vue')
-const Error500: AsyncComponent = () => import('~/components/errors/Error500.vue')
+import { defineComponent, useNuxt2Meta } from '#app'
+import Error403 from '~/components/errors/Error403.vue'
+import Error404 from '~/components/errors/Error404.vue'
+import Error500 from '~/components/errors/Error500.vue'
 
-@Component<ErrorLayout>({
+export default defineComponent({
   components: { Error403, Error404, Error500 },
-  head (): MetaInfo {
-    return { title: 'Что-то пошло не так' } as MetaInfo
+  props: {
+    error: { type: Object, required: true }
+  },
+  setup () {
+    useNuxt2Meta({ title: 'Что-то пошло не так' })
   }
 })
-export default class ErrorLayout extends Vue {
-  @Prop({ default: null }) error: any
-}
 </script>

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import graphene
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -50,7 +50,7 @@ class AddPageMutation(BaseMutation):
 
     @staticmethod
     @permission_classes([IsAuthenticated, AddPage])
-    def mutate_and_get_payload(root, info: ResolveInfo, text: str or None, *args, **kwargs):
+    def mutate_and_get_payload(root, info: ResolveInfo, text: Optional[str], *args, **kwargs):
         data = Page.resolve_global({**kwargs, 'user_id': info.context.user.pk})
         validator: PageValidator = PageValidator(data)
         if validator.validate():

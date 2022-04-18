@@ -4,6 +4,7 @@ import { SettingType, UserType } from '~/types/graphql'
 declare module 'vue/types' {
   interface VueConstructor<V extends Vue = Vue> {
     options: ComponentOptions<V>
+    permissions: string[]
   }
 }
 

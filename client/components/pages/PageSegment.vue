@@ -22,34 +22,31 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
-import { SegmentType, SegmentAlign, SegmentView } from '~/types/graphql'
-import PageSegmentElement from '~/components/pages/PageSegmentElement.vue'
-import PageGrid from '~/components/pages/views/PageGrid.vue'
-import PageCard from '~/components/pages/views/PageCard.vue'
-import PageList from '~/components/pages/views/PageList.vue'
-import PageSlider from '~/components/pages/views/PageSlider.vue'
 
-@Component<PageSegment>({
+import { defineComponent, PropType } from '#app'
+import { SegmentAlign, SegmentType, SegmentView } from '~/types/graphql'
+import PageSegmentElement from '~/components/pages/PageSegmentElement.vue'
+import PageSlider from '~/components/pages/views/PageSlider.vue'
+import PageList from '~/components/pages/views/PageList.vue'
+import PageCard from '~/components/pages/views/PageCard.vue'
+import PageGrid from '~/components/pages/views/PageGrid.vue'
+
+export default defineComponent({
   components: { PageSegmentElement, PageSlider, PageList, PageCard, PageGrid },
-  computed: {
-    align () : { [K in SegmentAlign]: string } {
-      return {
-        A_0: 'left',
-        A_1: 'center',
-        A_2: 'right'
-      }
-    },
-    view (): { [K in SegmentView]: string } {
-      return {
-        A_0: 'empty',
-        A_1: 'card'
-      }
+  props: {
+    segment: { type: Object as PropType<SegmentType>, required: true }
+  },
+  setup () {
+    const align: Record<SegmentAlign, string> = {
+      A_0: 'left',
+      A_1: 'center',
+      A_2: 'right'
     }
+    const view: Record<SegmentView, string> = {
+      A_0: 'empty',
+      A_1: 'card'
+    }
+    return { align, view }
   }
 })
-export default class PageSegment extends Vue {
-  @Prop({ required: true, type: Object as PropType<SegmentType> }) segment!: SegmentType
-}
 </script>

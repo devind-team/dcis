@@ -8,7 +8,7 @@
     tag
   )
     items-data-filter(
-      v-model="selectedValue"
+      v-model="sv"
       :items="data || []"
       :item-key="itemKey"
       :modal="modal"
@@ -46,7 +46,7 @@
         )
           v-card-text.flex-shrink-0(v-if="searchType")
             v-text-field(
-              v-stream:input="searchStream$"
+              v-stream:input="search"
               v-on="on"
               :label="searchLabel"
               :loading="loading"
@@ -63,76 +63,59 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, VModel } from 'vue-property-decorator'
-import { PropType } from 'vue'
-import { Subject } from 'rxjs'
-import { debounceTime, distinctUntilChanged, pluck, startWith } from 'rxjs/operators'
+import { useVModel } from '@vueuse/core'
+import type { PropType } from '#app'
+import { computed, defineComponent } from '#app'
 import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, Variables } from '~/types/filters'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+import { useDebounceSearch } from '~/composables'
 
-@Component<QueryDataFilter>({
-  inheritAttrs: false,
+export default defineComponent({
   components: { ItemsDataFilter },
-  computed: {
-    queryVariables (): Variables | null | undefined {
-      const variables: Variables = { ...this.variables } || {}
-      if (this.searchType !== 'server') {
+  inheritAttrs: false,
+  model: { prop: 'selectedValue', event: 'update:selectedValue' },
+  props: {
+    selectedValue: { type: [Object, Array] as PropType<Item | Item[]>, required: true },
+    searchLabel: { type: String, required: true },
+    searchFunction: { type: Function as PropType<SearchFunction>, default: null },
+    searchType: { type: String as PropType<'server' | 'client' | null>, default: null },
+    searchKey: { type: [String, Array] as PropType<string | string[]>, default: 'search' },
+
+    itemKey: { type: String, default: null },
+    modal: { type: Boolean, default: null },
+    multiple: { type: Boolean, default: null },
+    hasSelectAll: { type: Boolean, default: null },
+    messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null },
+    title: { type: String, default: null },
+    maxWidth: { type: [String, Number], default: null },
+    maxHeight: { type: [String, Number], default: null },
+    noFiltrationMessage: { type: String, default: null },
+    multipleMessageFunction: { type: Function as PropType<MultipleMessageFunction>, default: null },
+    getName: { type: Function as PropType<GetName>, default: null },
+    variables: { type: Object as PropType<Variables>, default: null },
+    first: { type: Number, default: 10 }
+  },
+  setup (props, { emit }) {
+    const { search, debounceSearch } = useDebounceSearch()
+    const queryVariables = computed(() => {
+      const variables: Variables = props.variables ? { ...props.variables } : {}
+      if (props.searchType !== 'server') {
         return variables
       }
-      if (typeof this.searchKey === 'string') {
-        variables[this.searchKey] = this.search$
+      if (typeof props.searchKey === 'string') {
+        variables[props.searchKey] = debounceSearch.value
       } else {
-        this.searchKey.forEach((key: string) => {
-          variables[key] = this.search$
-        })
+        for (const key of props.searchKey) {
+          variables[key] = debounceSearch.value
+        }
       }
-      if (!this.search$ || this.search$ === '') {
-        variables.first = this.first
+      if (!debounceSearch.value || debounceSearch.value === '') {
+        variables.first = props.first
       }
       return variables
-    }
-  },
-  domStreams: ['searchStream$'],
-  subscriptions () {
-    const search$ = this.searchStream$.pipe(
-      pluck('event', 'msg'),
-      debounceTime(700),
-      distinctUntilChanged(),
-      startWith(null)
-    )
-    return { search$ }
+    })
+    const sv = useVModel(props, 'selectedValue', emit)
+    return { search, queryVariables, sv }
   }
 })
-export default class QueryDataFilter extends Vue {
-  @Prop({ type: String }) readonly itemKey?: string
-  @Prop({ type: Boolean }) readonly modal?: boolean
-  @Prop({ type: Boolean }) readonly multiple?: boolean
-  @Prop({ type: Boolean }) readonly hasSelectAll?: boolean
-  @Prop({ type: [String, Array, Object] as PropType<Class> }) readonly messageContainerClass?: Class
-  @Prop({ type: String }) readonly title?: string
-  @Prop({ type: [String, Number] }) readonly maxWidth?: string | number
-  @Prop({ type: [String, Number] }) readonly maxHeight?: string | number
-  @Prop({ type: String }) readonly noFiltrationMessage?: string
-
-  @Prop({ type: Function as PropType<MultipleMessageFunction> })
-  readonly multipleMessageFunction?: MultipleMessageFunction
-
-  @Prop({ type: String }) readonly searchLabel!: string
-  @Prop({ type: Function as PropType<SearchFunction> }) readonly searchFunction?: SearchFunction
-  @Prop({ type: String }) readonly searchType?: 'server' | 'client' | null
-  @Prop({ type: [String, Array], default: 'search' }) readonly searchKey!: string | string[]
-
-  @Prop({ type: Function as PropType<GetName> }) readonly getName?: GetName
-
-  @Prop({ type: Object as PropType<Variables> }) readonly variables?: Variables | null
-  @Prop({ type: Number, default: 10 }) readonly first!: number
-
-  @VModel({ type: [Object, Array] as PropType<Item | Item[]> })
-  readonly selectedValue!: Item | Item[] | null | undefined
-
-  readonly queryVariables!: object
-
-  search$: string | null = null
-  searchStream$: Subject<any> = new Subject<any>()
-}
 </script>

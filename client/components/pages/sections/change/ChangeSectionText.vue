@@ -5,6 +5,7 @@
     :update="addSectionUpdate"
     :button-text="String($t('pages.section.change'))"
     mutation-name="changeSectionText"
+    i18n-path="pages.section.names"
   )
     template(#form)
       validation-provider(:name="String($t('pages.section.names.text'))" rules="required|min:10" v-slot="{ errors }" tag="div")
@@ -15,7 +16,7 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { defineComponent, PropType, ref, useRouter } from '#app'
+import { PropType } from '#app'
 import { useI18n } from '~/composables'
 import { ChangeSectionTextMutationPayload, SectionTextType } from '~/types/graphql'
 import RichTextEditor from '~/components/common/editor/RichTextEditor.vue'
@@ -34,8 +35,8 @@ export default defineComponent({
     const text = ref<string>(props.section.text)
     const toPage = ref<boolean>(true)
 
-    const addSectionUpdate = (cache: DataProxy, { data: { changeSectionText: { success, section } } }: ChangeSectionTextMutationResult) => {
-      if (success) {
+    const addSectionUpdate = (cache: DataProxy, { data: { changeSectionText: { errors, section } } }: ChangeSectionTextMutationResult) => {
+      if (!errors.length) {
         emit('done', cache, section)
         if (toPage.value) {
           router.push(localePath({ name: 'pages-pageId' }))

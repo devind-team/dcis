@@ -1,24 +1,24 @@
 <template lang="pug">
-viewer(:images="images" :options="options")
-  template(#default="scope")
-    div.row
-      div.column(v-for="(chunk, i) in getChunks(scope.images)" :key="i")
-        img(v-for="(image, j) in chunk" :src="image" :key="j")
+  viewer(:images="images" :options="options")
+    template(#default="scope")
+      div.row
+        div.column(v-for="(chunk, i) in getChunks(scope.images)" :key="i")
+          img(v-for="(image, j) in chunk" :src="image" :key="j")
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import type { PropType } from '#app'
+import { defineComponent } from '#app'
 import { component as Viewer } from 'v-viewer'
 import 'viewerjs/dist/viewer.css'
 
-@Component({
-  components: { Viewer }
-})
-export default class ImageGallery extends Vue {
-  @Prop({ type: Array, required: true }) images!: string[]
-
-  get options () {
-    return {
+export default defineComponent({
+  components: { Viewer },
+  props: {
+    images: { type: Array as PropType<string[]>, required: true }
+  },
+  setup () {
+    const options: Record<string, boolean> = {
       inline: false,
       button: true,
       navbar: true,
@@ -33,25 +33,27 @@ export default class ImageGallery extends Vue {
       fullscreen: false,
       keyboard: false
     }
-  }
 
-  getChunks (arr: string[]) {
-    if (arr.length === 0) {
-      return []
+    const getChunks = (arr: string[]) => {
+      if (arr.length === 0) {
+        return []
+      }
+      const perChunk = 3
+      const newArray: string[][] = []
+      for (let c = 0; c < perChunk; c++) {
+        newArray.push([])
+      }
+      for (let i = 0; i < arr.length; i++) {
+        const mod = i % perChunk
+        newArray[mod].push(arr[i])
+      }
+      return newArray
     }
-    const perChunk = 3
-    const newArray: string[][] = []
-    for (let c = 0; c < perChunk; c++) {
-      newArray.push([])
-    }
-    for (let i = 0; i < arr.length; i++) {
-      const mod = i % perChunk
-      newArray[mod].push(arr[i])
-    }
-    return newArray
+    return { options, getChunks }
   }
-}
+})
 </script>
+
 <style lang="sass">
 .row
   display: flex

@@ -34,47 +34,43 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { PageType, PageKindType, ChangePageKindMutation } from '~/types/graphql'
+import type { PropType } from '#app'
+import { computed, defineComponent, ref } from '#app'
+import { useCommonQuery, useI18n } from '~/composables'
+import { PageType, ChangePageKindMutation, PageKindsQueryVariables, PageKindsQuery } from '~/types/graphql'
+import pageKindsQuery from '~/gql/pages/queries/page_kinds.graphql'
 
-@Component<ChangePageKind>({
-  computed: {
-    pageKindList () {
-      return [
-        { id: null, name: this.$t('pages.components.addPage.common') },
-        ...this.pageKinds
-      ]
-    }
+export default defineComponent({
+  props: {
+    page: { type: Object as PropType<PageType>, required: true }
   },
-  apollo: {
-    pageKinds: require('~/gql/pages/queries/page_kinds.graphql')
+  setup (props, { emit }) {
+    const { t } = useI18n()
+    const drawer = ref<boolean>(false)
+    const pageKindId = ref<string | null>(props.page.kind?.id)
+
+    const { data: pageKinds } = useCommonQuery<PageKindsQuery, PageKindsQueryVariables>({
+      document: pageKindsQuery
+    })
+
+    const pageKindList = computed(() => ([
+      { id: null, name: t('pages.components.addPage.common') },
+      ...pageKinds.value
+    ]))
+
+    const changePageKindDone = ({ data: { changePageKind: { success } } }: { data: ChangePageKindMutation }) => {
+      if (success) {
+        close()
+      }
+    }
+
+    const close = () => {
+      drawer.value = false
+      pageKindId.value = props.page.kind?.id
+      emit('close')
+    }
+
+    return { drawer, pageKindId, pageKinds, pageKindList, close, changePageKindDone }
   }
 })
-export default class ChangePageKind extends Vue {
-  @Prop({ required: true, type: Object }) readonly page!: PageType
-
-  drawer: boolean = false
-
-  pageKindId!: string | null
-  pageKinds!: PageKindType[]
-  pageKindList!: PageKindType[]
-
-  changePageKindDone ({ data: { changePageKind: { success } } }: { data: ChangePageKindMutation }) {
-    if (success) {
-      this.close()
-    }
-  }
-
-  data () {
-    return {
-      pageKindId: this.page.kind != null ? this.page.kind.id : null
-    }
-  }
-
-  close () {
-    this.drawer = false
-    this.pageKindId = this.page.kind != null ? this.page.kind.id : null
-    this.$emit('close')
-  }
-}
 </script>

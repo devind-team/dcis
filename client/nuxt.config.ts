@@ -57,24 +57,19 @@ export default defineNuxtConfig({
     '~/plugins/vee-validate',
     '~/plugins/vue-i18n',
     { src: '~/plugins/detect-browser', ssr: false },
-    { src: '~/plugins/rx', ssr: false },
     { src: '~/plugins/apex-chart', ssr: false }
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: false,
 
-  buildModules: [
-    '@nuxt/bridge',
-    '@nuxtjs/vuetify',
-    '@nuxtjs/i18n'
-  ],
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
-    ['@pinia/nuxt', { disableVuex: false }],
     '@nuxtjs/color-mode',
     '@nuxtjs/apollo',
-    'cookie-universal-nuxt'
+    '@nuxtjs/i18n',
+    '@nuxtjs/vuetify',
+    ['@pinia/nuxt', { disableVuex: false }]
   ],
   apollo: {
     includeNodeModules: true,
@@ -92,6 +87,9 @@ export default defineNuxtConfig({
       { code: 'en', file: 'en.ts' }
     ]
   },
+  router: {
+    middleware: ['check-auth']
+  },
   typescript: {
     tsConfig: {
       compilerOptions: {
@@ -107,7 +105,6 @@ export default defineNuxtConfig({
           '@pinia/nuxt',
           'vuetify',
           'vue-apollo/types',
-          'cookie-universal-nuxt',
           'vee-validate',
           '@nuxtjs/vuetify'
         ]
@@ -119,9 +116,6 @@ export default defineNuxtConfig({
         files: './**/*.{ts,js,vue}'
       }
     }
-  },
-  router: {
-    middleware: ['check-auth']
   },
   /*
   ** vuetify module configuration
@@ -155,7 +149,6 @@ export default defineNuxtConfig({
       'vee-validate/dist/rules',
       'subscriptions-transport-ws',
       'cross-fetch/polyfill',
-      'cookie-universal-nuxt',
       'universal-cookie',
       'pinia'
     ]

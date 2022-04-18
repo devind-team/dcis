@@ -7,8 +7,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, useNuxt2Meta, useNuxtApp, useRouter } from '#app'
-import { useApolloHelpers, useI18n } from '~/composables'
+import { useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/store/auth-store'
 
 export default defineComponent({

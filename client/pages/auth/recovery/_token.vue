@@ -3,103 +3,81 @@
     v-row
       v-col.mx-auto(lg="4" md="6" cols="12")
         v-alert(v-if="success" type="success" v-html="$t('auth.recovery.passwordChanged')")
-        apollo-mutation(
+        mutation-form(
           v-else
-          v-slot="{ mutate, loading, error }"
+          @done="restorePasswordDone"
           :mutation="require('~/gql/core/mutations/user/restore_password.graphql')"
           :variables="{ token: $route.params.token, password }"
-          @done="restorePasswordDone"
-          tag
+          :header="String($t('auth.recovery.setNewPasswordForAccount'))"
+          :button-text="String($t('auth.recovery.setNewPassword'))"
+          mutation-name="restorePassword"
+          i18n-path="auth.recovery"
         )
-          validation-observer(v-slot="{ handleSubmit, invalid }")
-            v-form(@submit.prevent="handleSubmit(mutate)")
-              v-card
-                v-card-title {{ t('setNewPasswordForAccount') }}
-                v-card-text
-                  v-alert(v-if="error" type="error" dismissible) {{ error }}
-                  v-alert(v-if="errors" type="error") {{ errors }}
-                  validation-provider(
-                    v-slot="{ errors, valid }"
-                    :name="t('password')"
-                    rules="required|min:4"
-                    vid="password"
-                  )
-                    v-text-field(
-                      v-model="password"
-                      @click:append-outer="hiddenPassword = !hiddenPassword"
-                      :label="t('password')"
-                      :error-messages="errors"
-                      :success="valid"
-                      :append-outer-icon="hiddenPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                      :type="hiddenPassword ? 'password' : 'text'"
-                      autocomplete="off"
-                      clearable
-                    )
-                  validation-provider(
-                    v-slot="{ errors, valid }"
-                    :name="t('passwordConfirmation')"
-                    rules="required|min:4|confirmed:password"
-                  )
-                    v-text-field(
-                      v-model="passwordConfirm"
-                      :label="t('passwordConfirmation')"
-                      :error-messages="errors"
-                      :success="valid"
-                      type="password"
-                      autocomplete="off"
-                      clearable
-                    )
-                v-card-actions
-                  v-spacer
-                  v-btn(type="submit" :disabled="invalid" :loading="loading" color="success") {{ t('setNewPassword') }}
+          template(#form)
+            validation-provider(
+              v-slot="{ errors, valid }"
+              :name="String($t('auth.recovery.password'))"
+              rules="required|min:4"
+              vid="password"
+            )
+              v-text-field(
+                v-model="password"
+                @click:append-outer="hiddenPassword = !hiddenPassword"
+                :label="$t('auth.recovery.password')"
+                :error-messages="errors"
+                :success="valid"
+                :append-outer-icon="hiddenPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                :type="hiddenPassword ? 'password' : 'text'"
+                autocomplete="off"
+                autofocus
+                clearable
+              )
+            validation-provider(
+              v-slot="{ errors, valid }"
+              :name="String($t('auth.recovery.passwordConfirmation'))"
+              rules="required|min:4|confirmed:password"
+            )
+              v-text-field(
+                v-model="passwordConfirm"
+                :label="$t('auth.recovery.passwordConfirmation')"
+                :error-messages="errors"
+                :success="valid"
+                type="password"
+                autocomplete="off"
+                clearable
+              )
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import { MetaInfo } from 'vue-meta'
-import { RestorePasswordMutation } from '~/types/graphql'
+import { useNuxt2Meta } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
+import { RestorePasswordMutation } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import MutationForm from '~/components/common/forms/MutationForm.vue'
 
-@Component<RecoveryToken>({
+export default defineComponent({
+  components: { MutationForm, BreadCrumbs },
   middleware: 'guest',
-  components: { BreadCrumbs },
-  computed: {
-    breadCrumbs (): BreadCrumbsItem [] {
-      return [
-        { text: this.t('signIn'), to: this.localePath({ name: 'auth-login' }), exact: true },
-        { text: this.t('changePassword'), to: this.localePath({ name: 'auth-recovery-token' }), exact: true }
-      ]
+  setup () {
+    const { t, localePath } = useI18n()
+
+    useNuxt2Meta({ title: t('auth.recovery.changePassword') as string })
+
+    const breadCrumbs = computed<BreadCrumbsItem[]>(() => ([
+      { text: t('auth.recovery.signIn') as string, to: localePath({ name: 'auth-login' }), exact: true },
+      { text: t('auth.recovery.changePassword') as string, to: localePath({ name: 'auth-recovery-token' }), exact: true }
+    ]))
+
+    const success = ref<boolean>(false)
+    const password = ref<string>('')
+    const passwordConfirm = ref<string>('')
+    const hiddenPassword = ref<boolean>(true)
+
+    const restorePasswordDone = ({ data: { restorePassword: { errors } } }: { data: RestorePasswordMutation }) => {
+      success.value = !errors.length
     }
-  },
-  head (): MetaInfo {
-    return { title: this.t('changePassword') } as MetaInfo
+
+    return { breadCrumbs, success, password, passwordConfirm, hiddenPassword, restorePasswordDone }
   }
 })
-export default class RecoveryToken extends Vue {
-  private success: boolean = false
-  private errors: string = ''
-  private password: string = ''
-  private passwordConfirm: string = ''
-  hiddenPassword: boolean = true
-
-  restorePasswordDone (
-    { data: { restorePassword: { success, errors } } }: { data: RestorePasswordMutation }
-  ): void {
-    this.success = success
-    if (!success) {
-      this.errors = errors.reduce<string>((a, c) => (`${a} ${c!.messages}.`), '')!.trim()
-    }
-  }
-
-  /**
-   * Получение перевода относильно локального пути
-   * @param path
-   * @param values
-   * @return
-   */
-  t (path: string, values: any = undefined): string {
-    return this.$t(`auth.recovery.${path}`, values) as string
-  }
-}
 </script>

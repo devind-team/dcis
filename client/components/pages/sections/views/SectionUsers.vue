@@ -11,11 +11,13 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import type { PropType } from '#app'
+import { defineComponent } from '#app'
 import { SectionUsersType } from '~/types/graphql'
 
-@Component<SectionUsers>({})
-export default class SectionUsers extends Vue {
-  @Prop() section!: SectionUsersType
-}
+export default defineComponent({
+  props: {
+    section: { type: Object as PropType<SectionUsersType>, required: true }
+  }
+})
 </script>

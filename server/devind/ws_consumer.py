@@ -1,4 +1,3 @@
-from time import time
 from channels_graphql_ws import GraphqlWsConsumer as GQLWsConsumer
 from .schema import schema
 
@@ -9,7 +8,7 @@ class GraphqlWsConsumer(GQLWsConsumer):
     group_name_prefix = ''
 
     async def on_connect(self, payload):
-        self.scope['time'] = time()
+        self.scope['payload'] = payload
 
     async def disconnect(self, code):
         await super().disconnect(code)
