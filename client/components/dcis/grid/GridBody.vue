@@ -1,7 +1,10 @@
 <template lang="pug">
   tbody
     tr(v-for="row in rows" :key="row.id" :style="row.style")
-      td.grid__cell_row-index
+      td.grid__cell_row-index(
+        @mouseenter="mouseenterRowIndex(row)"
+        @mousedown="mousedownRowIndex(row)"
+      )
         grid-row-control(:row="row" :content-class="getRowIndexCellContentClasses(row)")
       td(
         v-for="cell in row.cells"
@@ -35,6 +38,8 @@ export default defineComponent({
     selectionRows: { type: Array as PropType<number[]>, default: () => ([]) },
     boundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
     selectedBoundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
+    mouseenterRowIndex: { type: Function as PropType<(row: BuildRowType) => void>, required: true },
+    mousedownRowIndex: { type: Function as PropType<(row: BuildRowType) => void>, required: true },
     setActive: { type: Function as PropType<(position: string) => void>, required: true },
     startSelection: { type: Function as PropType<(position: string) => void>, required: true },
     enterSelection: { type: Function as PropType<(position: string) => void>, required: true },

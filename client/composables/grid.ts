@@ -165,7 +165,8 @@ export function useGrid (
    * Блок выделения
    */
   const active = ref<string | null>(null)
-  const selection = ref<string[]>([])
+  const selectionRange = ref<string | null>(null)
+  const selection = computed<string[]>(() => selectionRange.value ? rangeLetterToCells(selectionRange.value) : [])
   const startCellSelectionPosition = ref<string | null>(null)
   /**
    * Начало выделения ячейки по событию MouseDown на ячейке
@@ -178,7 +179,7 @@ export function useGrid (
    */
   const enterCellSelection = (position: string): void => {
     if (startCellSelectionPosition.value) {
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+      selectionRange.value = `${startCellSelectionPosition.value}:${position}`
     }
   }
   /**
@@ -189,7 +190,7 @@ export function useGrid (
       if (position === startCellSelectionPosition.value) {
         setActive(position)
       }
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+      selectionRange.value = `${startCellSelectionPosition.value}:${position}`
       startCellSelectionPosition.value = null
     }
   }
@@ -224,6 +225,12 @@ export function useGrid (
         Array.from({ length: cell.rowspan }).map((_, index) => cell.row.index + index)
       return [...acc, ...rows]
     }, []))]
+  )
+  /**
+   * Выделены ли все ячейки
+   */
+  const allSelected = computed<boolean>(() => selectionRange.value ===
+    `A1:${columns.value.at(-1).position}${rows.value.at(-1).index}`
   )
   /**
    * Вычисление ячеек граничных к крайнему фиксированному столбцу
@@ -287,7 +294,7 @@ export function useGrid (
   }
 
   /**
-   * Блок изменения ширины столбца
+   * Блок изменения ширины столбца и массового выделения
    */
   const gridContainer = ref<HTMLDivElement | null>(null)
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
@@ -297,7 +304,16 @@ export function useGrid (
     position: columnWidthPosition.value,
     width: resizingColumn.value?.width ?? 0
   }))
-  const moveColumnHeader = (event: MouseEvent, column: BuildColumnType) => {
+
+  const startColumnSelectionPosition = ref<string | null>(null)
+  const startRowSelectionPosition = ref<number | null>(null)
+
+  const mouseenterColumnIndex = (column: BuildColumnType) => {
+    if (startColumnSelectionPosition.value) {
+      selectionRange.value = `${startColumnSelectionPosition.value}1:${column.position}${rows.value.at(-1).index}`
+    }
+  }
+  const mousemoveColumnIndex = (event: MouseEvent, column: BuildColumnType) => {
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
     if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
@@ -323,12 +339,12 @@ export function useGrid (
       resizingColumn.value = null
     }
   }
-  const leaveColumnHeader = () => {
+  const mouseleaveColumnIndex = () => {
     if (resizingColumn.value && resizingColumn.value.state === 'hover') {
       resizingColumn.value = null
     }
   }
-  const startColumnResizing = (event: MouseEvent) => {
+  const mousedownColumnIndex = (event: MouseEvent, column: BuildColumnType) => {
     if (resizingColumn.value) {
       const cell = event.target as HTMLTableCellElement
       if (cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX < document.body.offsetWidth - 150) {
@@ -347,20 +363,35 @@ export function useGrid (
         }
       }
       resizingColumn.value.state = 'resizing'
+    } else {
+      startColumnSelectionPosition.value = column.position
+      selectionRange.value = `${column.position}1:${column.position}${rows.value.at(-1).index}`
     }
   }
-  const endColumnResizing = () => {
+  const mouseupColumnIndex = () => {
     if (resizingColumn.value) {
       changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
       resizingColumn.value.state = 'hover'
     }
+  }
+  const mouseenterRowIndex = (row: BuildRowType) => {
+    if (startRowSelectionPosition.value) {
+      selectionRange.value = `A${startRowSelectionPosition.value}:${columns.value.at(-1).position}${row.index}`
+    }
+  }
+  const mousedownRowIndex = (row: BuildRowType) => {
+    startRowSelectionPosition.value = row.index
+    selectionRange.value = `A${row.index}:${columns.value.at(-1).position}${row.index}`
+  }
+  const selectAll = () => {
+    selectionRange.value = `A1:${columns.value.at(-1).position}${rows.value.at(-1).index}`
   }
 
   /**
    * Класс курсора на странице
    */
   const cursorClass = computed<'grid__cursor_cell' | 'grid__cursor_col-resize' | null>(() => {
-    if (startCellSelectionPosition.value) {
+    if (startCellSelectionPosition.value || startColumnSelectionPosition.value || startRowSelectionPosition.value) {
       return 'grid__cursor_cell'
     }
     if (resizingColumn.value) {
@@ -400,6 +431,12 @@ export function useGrid (
       changeColumnWidth(resizingColumn.value.dimension, resizingColumn.value.width)
       resizingColumn.value = null
     }
+    if (startColumnSelectionPosition.value) {
+      startColumnSelectionPosition.value = null
+    }
+    if (startRowSelectionPosition.value) {
+      startRowSelectionPosition.value = null
+    }
   })
 
   useEventListener('mousemove', (event: MouseEvent) => {
@@ -425,10 +462,12 @@ export function useGrid (
     mergeCells,
     mergedCells,
     active,
+    selectionRange,
     selection,
     selectionCells,
     selectionColumns,
     selectionRows,
+    allSelected,
     boundaryColumnCells,
     selectedBoundaryColumnCells,
     boundaryRowCells,
@@ -440,9 +479,13 @@ export function useGrid (
     setActive,
     gridContainer,
     columnWidth,
-    moveColumnHeader,
-    leaveColumnHeader,
-    startColumnResizing,
-    endColumnResizing
+    mouseenterColumnIndex,
+    mousemoveColumnIndex,
+    mouseleaveColumnIndex,
+    mousedownColumnIndex,
+    mouseupColumnIndex,
+    mouseenterRowIndex,
+    mousedownRowIndex,
+    selectAll
   }
 }

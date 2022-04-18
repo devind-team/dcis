@@ -1,16 +1,18 @@
 <template lang="pug">
   thead
     tr
-      th(:style="{ width: `${rowIndexColumnWidth}px` }")
+      th(:style="{ width: `${rowIndexColumnWidth}px` }" @click="selectAll")
         .grid__header-content
+          .grid__select-all(:class="{ 'grid__select-all_selected': allSelected }")
       th(
         v-for="column in columns"
         :key="column.id"
         :style="column.style"
-        @mousemove="moveColumnHeader($event, column)"
-        @mouseleave="leaveColumnHeader"
-        @mousedown="startColumnResizing"
-        @mouseup="endColumnResizing"
+        @mouseenter="mouseenterColumnIndex(column)"
+        @mousemove="mousemoveColumnIndex($event, column)"
+        @mouseleave="mouseleaveColumnIndex"
+        @mousedown="mousedownColumnIndex($event, column)"
+        @mouseup="mouseupColumnIndex"
       )
         div(:class="getHeaderContentClasses(column)") {{ column.position }}
 </template>
@@ -26,13 +28,22 @@ export default defineComponent({
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     selectionColumns: { type: Array as PropType<number[]>, required: true },
     selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
-    moveColumnHeader: {
+    allSelected: { type: Boolean, required: true },
+    mouseenterColumnIndex: {
+      type: Function as PropType<(column: BuildColumnType) => void>,
+      required: true
+    },
+    mousemoveColumnIndex: {
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
       required: true
     },
-    leaveColumnHeader: { type: Function as PropType<() => void>, required: true },
-    startColumnResizing: { type: Function as PropType<(event: MouseEvent) => void>, required: true },
-    endColumnResizing: { type: Function as PropType<() => void>, required: true }
+    mouseleaveColumnIndex: { type: Function as PropType<() => void>, required: true },
+    mousedownColumnIndex: {
+      type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
+      required: true
+    },
+    mouseupColumnIndex: { type: Function as PropType<() => void>, required: true },
+    selectAll: { type: Function as PropType<() => void>, required: true }
   },
   setup (props) {
     const getHeaderContentClasses = (column: BuildColumnType): (string | Record<string, boolean>)[] => {

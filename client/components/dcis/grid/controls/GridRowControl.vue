@@ -5,7 +5,8 @@
         template(#activator="{ on: onTooltip, attrs }")
           div(
             v-bind="attrs"
-            v-on="{ ...onMenu, ...onTooltip }"
+            v-on="onTooltip"
+            @contextmenu.prevent="onMenu.click"
             :class="contentClass"
           ) {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
