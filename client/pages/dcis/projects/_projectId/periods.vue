@@ -11,8 +11,7 @@
         nuxt-link(
           :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
         ) {{ item.name }}
-      template(#item.status="{ item }")
-        div(v-for="status in statuses" :key="status.text") {{ status.text === item.status ? status.value :  ''}}
+      template(#item.status="{ item }") {{ statuses[item.status] }}
       template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
@@ -48,12 +47,9 @@ export default defineComponent({
     const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
     const name: Ref<string> = ref<string>('')
     const file: Ref<File | null> = ref<File | null>(null)
-
-    const statuses = [
-      { text: 'preparation', value: t('dcis.periods.statuses.preparation') as string },
-      { text: 'open', value: t('dcis.periods.statuses.open') as string },
-      { text: 'close', value: t('dcis.periods.statuses.close') as string }
-    ]
+    const statuses = Object.fromEntries(
+      ['preparation', 'open', 'close'].map(e => ([e, t(`dcis.periods.statuses.${e}`) as string]))
+    )
     const headers: DataTableHeader[] = [
       { text: '#', value: 'id' },
       { text: 'Название', value: 'name' },
