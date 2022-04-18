@@ -716,6 +716,11 @@ export type ChangeColumnDimensionPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeDocumentCommentMutationPayload = {
+  __typename?: 'ChangeDocumentCommentMutationPayload';
+  document?: Maybe<DocumentType>;
+};
+
 export type ChangeFileMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Поле файла */
@@ -2012,6 +2017,7 @@ export type Mutation = {
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение стилей колонки таблицы */
   changeColumnDimension: ChangeColumnDimensionPayload;
+  changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
   /** Мутация для изменения имени группы. */
@@ -2215,6 +2221,12 @@ export type MutationChangeCellsOptionArgs = {
 export type MutationChangeColumnDimensionArgs = {
   id: Scalars['ID'];
   input: UpdateColumnDimensionInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeDocumentCommentArgs = {
+  id: Scalars['ID'];
+  input: UpdateDocumentInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3958,6 +3970,11 @@ export type UpdateColumnDimensionInput = {
   width?: InputMaybe<Scalars['Int']>;
 };
 
+export type UpdateDocumentInput = {
+  /** Комментарий */
+  comment: Scalars['String'];
+};
+
 export type UpdatePeriodInput = {
   attributeSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   divisionSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
@@ -4455,6 +4472,13 @@ export type AddDocumentStatusMutationVariables = Exact<{
 
 export type AddDocumentStatusMutation = { __typename?: 'Mutation', addDocumentStatus: { __typename: 'AddDocumentStatusMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } } | null } };
 
+export type ChangeDocumentCommentMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  comment: Scalars['String'];
+}>;
+
+export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename?: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number } | null } };
+
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['Int'];
@@ -4871,10 +4895,9 @@ export type PagesQueryVariables = Exact<{
   categoryId?: InputMaybe<Scalars['ID']>;
   kindId?: InputMaybe<Scalars['ID']>;
   search?: InputMaybe<Scalars['String']>;
-  includePreview?: InputMaybe<Scalars['Boolean']>;
 }>;
 
-export type PagesQuery = { __typename?: 'Query', pages: { __typename: 'PageTypeConnection', totalCount: number, edges: Array<{ __typename: 'PageTypeEdge', node?: { __typename: 'PageType', preview?: string | null, id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } | null> } };
+export type PagesQuery = { __typename?: 'Query', pages: { __typename: 'PageTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename: 'PageTypeEdge', node?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } | null> } };
 
 export type SegmentsQueryVariables = Exact<{ [key: string]: never; }>;
 
