@@ -5,7 +5,7 @@
         template(#activator="{ on: onTooltip, attrs }")
           div(
             v-bind="attrs"
-            v-on="{ ...onTooltip }"
+            v-on="onTooltip"
             @contextmenu.prevent="onMenu.click"
             :class="contentClass"
           ) {{ row.index }}
