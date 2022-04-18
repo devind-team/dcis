@@ -7,6 +7,10 @@ from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
 
 
+def default_content_type(instance):
+    return ContentType.objects.get_by_natural_key('devind_dictionaries', 'department').id
+
+
 class Project(models.Model):
     """Проект сборов."""
 
@@ -28,7 +32,7 @@ class Project(models.Model):
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        default=ContentType.objects.get_by_natural_key('devind_dictionaries', 'department').id,
+        default=default_content_type,
         help_text='Тип дивизиона'
     )
 
