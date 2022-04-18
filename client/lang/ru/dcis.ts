@@ -45,6 +45,11 @@ export default {
       file: 'Файл с формой сбора',
       buttonText: 'Добавить период'
     },
+    statuses: {
+      open: 'Открыто',
+      close: 'Закрыто',
+      preparation: 'Подготовка'
+    },
     delete: 'Удаление периода',
     deleteWarning: 'Период нельзя восстановить.'
   },
