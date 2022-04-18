@@ -4218,16 +4218,8 @@
   version "3.2.31"
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.31.tgz#c90de7126d833dcd3a4c7534d534be2fb41faa4e"
   integrity sha512-ymN2pj6zEjiKJZbrf98UM2pfDd6F2H7ksKw7NDt/ZZ1fh5Ei39X5tABugtT03ZRlWd9imccoK0hE8hpjpU7irQ==
-"@vueuse/core@8.2.6", "@vueuse/core@^8.2.5":
-  version "8.2.6"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.2.6.tgz#baf674acadd678b0429c60477213c6dab08ea9e0"
-  integrity sha512-fzlpM3B5oVe+UhCT1mXlhG1Zxdq2lq1Z2AvddSB8+RxrsSFzII7DKfsQEz8Vop7Lzc++4m8drTNbhPovYoFqHw==
-  dependencies:
-    "@vueuse/metadata" "8.2.6"
-    "@vueuse/shared" "8.2.6"
-    vue-demi "*"
 
-"@vueuse/core@^8.2.6":
+"@vueuse/core@8.2.6", "@vueuse/core@^8.2.6":
   version "8.2.6"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.2.6.tgz#baf674acadd678b0429c60477213c6dab08ea9e0"
   integrity sha512-fzlpM3B5oVe+UhCT1mXlhG1Zxdq2lq1Z2AvddSB8+RxrsSFzII7DKfsQEz8Vop7Lzc++4m8drTNbhPovYoFqHw==
@@ -4254,13 +4246,6 @@
   version "8.2.6"
   resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-8.2.6.tgz#0e649ff5c784ac73d35f44f9758fac33f62e3e3f"
   integrity sha512-OBKtafCt+4RcEJlYDCjp1vl65pBCL2g4TmipEtdZ8/qphKlW6nakJbkY7XRN5grPmjqU99/ahJGtyGk5NHS2hw==
-
-"@vueuse/shared@8.2.6":
-  version "8.2.6"
-  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-8.2.6.tgz#7cbf2bdd576f86d888014272982a7c84b7015d21"
-  integrity sha512-J/W4CMfdL8TahELuSOgtfVO4eQXTjhigp7dVWIBsLUVFCeY9d49gvHUcQN3y5xYLZ6iNP57TjTQjMMT/zhklkw=
-  dependencies:
-    vue-demi "*"
 
 "@vueuse/shared@8.2.6":
   version "8.2.6"
@@ -7352,6 +7337,11 @@ destroy@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"
   integrity sha1-l4hXRCxEdJ5CBmE+N5RiBYJqvYA=
+
+detect-browser@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/detect-browser/-/detect-browser-5.3.0.tgz#9705ef2bddf46072d0f7265a1fe300e36fe7ceca"
+  integrity sha512-53rsFbGdwMwlF7qvCt0ypLM5V5/Mbl0szB7GPN8y9NCcbknYOeVVXdrXEq+90IwAfrrzt6Hd+u2E2ntakICU8w==
 
 detect-indent@^5.0.0:
   version "5.0.0"
@@ -11553,10 +11543,10 @@ moment@2.29.1:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
   integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
 
-moment@^2.22.1, moment@^2.29.2:
-  version "2.29.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
-  integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
+moment@^2.22.1, moment@^2.29.3:
+  version "2.29.3"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.3.tgz#edd47411c322413999f7a5940d526de183c031f3"
+  integrity sha512-c6YRvhEo//6T2Jz/vVtYzqBzwvPT95JBQ+smCytzf7c50oMZRsR/a4w88aD34I+/QVSfnoAnSBFPJHItlOMJVw==
 
 move-concurrently@^1.0.1:
   version "1.0.1"
