@@ -13,12 +13,14 @@
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
             :selection-columns="selectionColumns"
+            :all-selected="allSelected"
             :selected-boundary-row-cells="selectedBoundaryRowCells"
             :mouseenter-column-index="mouseenterColumnIndex"
             :mousemove-column-index="mousemoveColumnIndex"
             :mouseleave-column-index="mouseleaveColumnIndex"
             :mousedown-column-index="mousedownColumnIndex"
             :mouseup-column-index="mouseupColumnIndex"
+            :select-all="selectAll"
           )
           grid-body(
             :rows="rows"
@@ -108,6 +110,7 @@ export default defineComponent({
       selectionCells,
       selectionColumns,
       selectionRows,
+      allSelected,
       boundaryColumnCells,
       selectedBoundaryColumnCells,
       selectedBoundaryRowCells,
@@ -124,7 +127,8 @@ export default defineComponent({
       mousedownColumnIndex,
       mouseupColumnIndex,
       mouseenterRowIndex,
-      mousedownRowIndex
+      mousedownRowIndex,
+      selectAll
     } = useGrid(sheet, changeColumnWidth)
 
     provide('active', active)
@@ -143,6 +147,7 @@ export default defineComponent({
       selectionCells,
       selectionColumns,
       selectionRows,
+      allSelected,
       boundaryColumnCells,
       selectedBoundaryColumnCells,
       selectedBoundaryRowCells,
@@ -159,7 +164,8 @@ export default defineComponent({
       mousedownColumnIndex,
       mouseupColumnIndex,
       mouseenterRowIndex,
-      mousedownRowIndex
+      mousedownRowIndex,
+      selectAll
     }
   }
 })
@@ -174,6 +180,8 @@ export default defineComponent({
   cursor: col-resize !important
 
 $border: 1px solid silver
+$index-light: map-get($grey, 'lighten-3')
+$index-dark: map-get($grey, 'lighten-2')
 
 div.grid__body
   position: relative
@@ -201,7 +209,6 @@ div.grid__body
 
         th
           height: 25px
-          cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
           .grid__header-content
             position: relative
@@ -214,20 +221,46 @@ div.grid__body
             background: white
 
             &.grid__header-content_selected
-              background: map-get($grey, 'lighten-3')
-
-            &:hover
-               background: map-get($grey, 'lighten-2') !important
+              background: $index-light
 
         th:first-child
           position: sticky
           left: 0
           z-index: 2
 
+          cursor: cell
+
           .grid__header-content
             left: 0
             width: calc(100% + 0.5px)
             border-left: $border
+
+            .grid__select-all
+              position: absolute
+              right: 1px
+              top: 1px
+
+              width: 0
+              height: 0
+              border-style: solid
+              border-width: 0 0 22px 22px
+              border-color: transparent transparent transparent transparent
+
+            .grid__select-all_selected
+              border-color: transparent transparent $index-light transparent
+
+          &:hover
+
+            .grid__header-content
+
+              .grid__select-all
+                border-color: transparent transparent $index-dark transparent
+
+        th:not(:first-child)
+          cursor: url("/cursors/arrow-down.svg") 8 8, pointer
+
+          .grid__header-content:hover
+            background: $index-dark !important
 
       tbody
         tr:first-child
@@ -266,7 +299,10 @@ div.grid__body
             background: white
 
             &.grid__cell-content_row-index-selected
-              background: map-get($grey, 'lighten-3')
+              background: $index-light
+
+            &:hover
+              background: $index-dark !important
 
         td:not(.grid__cell_row-index)
           position: relative

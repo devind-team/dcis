@@ -1,8 +1,9 @@
 <template lang="pug">
   thead
     tr
-      th(:style="{ width: `${rowIndexColumnWidth}px` }")
+      th(:style="{ width: `${rowIndexColumnWidth}px` }" @click="selectAll")
         .grid__header-content
+          .grid__select-all(:class="{ 'grid__select-all_selected': allSelected }")
       th(
         v-for="column in columns"
         :key="column.id"
@@ -27,6 +28,7 @@ export default defineComponent({
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     selectionColumns: { type: Array as PropType<number[]>, required: true },
     selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
+    allSelected: { type: Boolean, required: true },
     mouseenterColumnIndex: {
       type: Function as PropType<(column: BuildColumnType) => void>,
       required: true
@@ -40,7 +42,8 @@ export default defineComponent({
       type: Function as PropType<(event: MouseEvent, column: BuildColumnType) => void>,
       required: true
     },
-    mouseupColumnIndex: { type: Function as PropType<() => void>, required: true }
+    mouseupColumnIndex: { type: Function as PropType<() => void>, required: true },
+    selectAll: { type: Function as PropType<() => void>, required: true }
   },
   setup (props) {
     const getHeaderContentClasses = (column: BuildColumnType): (string | Record<string, boolean>)[] => {

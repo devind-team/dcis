@@ -165,7 +165,8 @@ export function useGrid (
    * Блок выделения
    */
   const active = ref<string | null>(null)
-  const selection = ref<string[]>([])
+  const selectionRange = ref<string | null>(null)
+  const selection = computed<string[]>(() => selectionRange.value ? rangeLetterToCells(selectionRange.value) : [])
   const startCellSelectionPosition = ref<string | null>(null)
   /**
    * Начало выделения ячейки по событию MouseDown на ячейке
@@ -178,7 +179,7 @@ export function useGrid (
    */
   const enterCellSelection = (position: string): void => {
     if (startCellSelectionPosition.value) {
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+      selectionRange.value = `${startCellSelectionPosition.value}:${position}`
     }
   }
   /**
@@ -189,7 +190,7 @@ export function useGrid (
       if (position === startCellSelectionPosition.value) {
         setActive(position)
       }
-      selection.value = rangeLetterToCells(`${startCellSelectionPosition.value}:${position}`)
+      selectionRange.value = `${startCellSelectionPosition.value}:${position}`
       startCellSelectionPosition.value = null
     }
   }
@@ -224,6 +225,12 @@ export function useGrid (
         Array.from({ length: cell.rowspan }).map((_, index) => cell.row.index + index)
       return [...acc, ...rows]
     }, []))]
+  )
+  /**
+   * Выделены ли все ячейки
+   */
+  const allSelected = computed<boolean>(() => selectionRange.value ===
+    `A1:${columns.value.at(-1).position}${rows.value.at(-1).index}`
   )
   /**
    * Вычисление ячеек граничных к крайнему фиксированному столбцу
@@ -303,9 +310,7 @@ export function useGrid (
 
   const mouseenterColumnIndex = (column: BuildColumnType) => {
     if (startColumnSelectionPosition.value) {
-      selection.value = rangeLetterToCells(
-        `${startColumnSelectionPosition.value}1:${column.position}${rows.value.at(-1).index}`
-      )
+      selectionRange.value = `${startColumnSelectionPosition.value}1:${column.position}${rows.value.at(-1).index}`
     }
   }
   const mousemoveColumnIndex = (event: MouseEvent, column: BuildColumnType) => {
@@ -360,7 +365,7 @@ export function useGrid (
       resizingColumn.value.state = 'resizing'
     } else {
       startColumnSelectionPosition.value = column.position
-      selection.value = rangeLetterToCells(`${column.position}1:${column.position}${rows.value.at(-1).index}`)
+      selectionRange.value = `${column.position}1:${column.position}${rows.value.at(-1).index}`
     }
   }
   const mouseupColumnIndex = () => {
@@ -371,14 +376,15 @@ export function useGrid (
   }
   const mouseenterRowIndex = (row: BuildRowType) => {
     if (startRowSelectionPosition.value) {
-      selection.value = rangeLetterToCells(
-        `A${startRowSelectionPosition.value}:${columns.value.at(-1).position}${row.index}`
-      )
+      selectionRange.value = `A${startRowSelectionPosition.value}:${columns.value.at(-1).position}${row.index}`
     }
   }
   const mousedownRowIndex = (row: BuildRowType) => {
     startRowSelectionPosition.value = row.index
-    selection.value = rangeLetterToCells(`A${row.index}:${columns.value.at(-1).position}${row.index}`)
+    selectionRange.value = `A${row.index}:${columns.value.at(-1).position}${row.index}`
+  }
+  const selectAll = () => {
+    selectionRange.value = `A1:${columns.value.at(-1).position}${rows.value.at(-1).index}`
   }
 
   /**
@@ -456,10 +462,12 @@ export function useGrid (
     mergeCells,
     mergedCells,
     active,
+    selectionRange,
     selection,
     selectionCells,
     selectionColumns,
     selectionRows,
+    allSelected,
     boundaryColumnCells,
     selectedBoundaryColumnCells,
     boundaryRowCells,
@@ -477,6 +485,7 @@ export function useGrid (
     mousedownColumnIndex,
     mouseupColumnIndex,
     mouseenterRowIndex,
-    mousedownRowIndex
+    mousedownRowIndex,
+    selectAll
   }
 }
