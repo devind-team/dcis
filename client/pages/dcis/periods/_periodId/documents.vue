@@ -89,8 +89,7 @@ export default defineComponent({
           cache, result, (dataCache, { data: { changeDocumentComment: { document: doc } } }:
             ChangeDocumentCommentMutationResult) => {
             if (doc) {
-              const dataKey = Object.keys(dataCache)[0]
-              dataCache[dataKey] = Object.assign(dataCache[dataKey], doc)
+              dataCache.period.documents = Object.assign(dataCache.period.documents, doc)
             }
             return dataCache
           })

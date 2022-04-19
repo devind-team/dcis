@@ -716,6 +716,7 @@ export type ChangeColumnDimensionPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Изменение комментария версии документа */
 export type ChangeDocumentCommentMutationPayload = {
   __typename?: 'ChangeDocumentCommentMutationPayload';
   document?: Maybe<DocumentType>;
@@ -2017,6 +2018,7 @@ export type Mutation = {
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение стилей колонки таблицы */
   changeColumnDimension: ChangeColumnDimensionPayload;
+  /** Изменение комментария версии документа */
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
@@ -4477,7 +4479,7 @@ export type ChangeDocumentCommentMutationVariables = Exact<{
   comment: Scalars['String'];
 }>;
 
-export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename?: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number } | null } };
+export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number } | null } };
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
