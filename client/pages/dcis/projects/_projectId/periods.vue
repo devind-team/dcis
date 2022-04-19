@@ -11,6 +11,7 @@
         nuxt-link(
           :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
         ) {{ item.name }}
+      template(#item.status="{ item }") {{ statuses[item.status] }}
       template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
@@ -35,6 +36,7 @@ export default defineComponent({
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
   setup () {
+    const { t } = useI18n()
     const authStore = useAuthStore()
     const router = useRouter()
     const route = useRoute()
@@ -45,14 +47,15 @@ export default defineComponent({
     const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
     const name: Ref<string> = ref<string>('')
     const file: Ref<File | null> = ref<File | null>(null)
-
+    const statuses = Object.fromEntries(
+      ['preparation', 'open', 'close'].map(e => ([e, t(`dcis.periods.statuses.${e}`) as string]))
+    )
     const headers: DataTableHeader[] = [
       { text: '#', value: 'id' },
       { text: 'Название', value: 'name' },
       { text: 'Статус', value: 'status' },
       { text: 'Дата добавления', value: 'createdAt' }
     ]
-
     const projectUpdate: any = inject('projectUpdate')
     const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
       projectUpdate(cache, result, (cacheData, { data: { addPeriod: { success, period } } }) => {
@@ -77,7 +80,7 @@ export default defineComponent({
       }
     })
 
-    return { name, file, headers, hasPerm, addPeriodUpdate, dateTimeHM, toGlobalId }
+    return { name, file, headers, hasPerm, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>
