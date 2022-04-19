@@ -5,6 +5,7 @@ mutation ChangeDocumentComment($documentId: ID!, $comment: String!) {
     document {
       ...DocumentFields
     }
+    __typename
   }
 
 }

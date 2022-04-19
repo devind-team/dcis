@@ -52,9 +52,13 @@ class AddDocumentMutation(BaseMutation):
 
 
 class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
+    """Изменение комментария версии документа"""
+
     class Meta:
         model = Document
+        login_required = True
         only_fields = ('comment',)
+        permissions = ('dcis.change_period', 'dcis.change_document',)
 
 
 class AddDocumentStatusMutation(BaseMutation):

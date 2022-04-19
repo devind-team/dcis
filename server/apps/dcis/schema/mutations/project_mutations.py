@@ -2,6 +2,7 @@ from typing import Any
 
 import graphene
 from devind_core.models import File
+from devind_dictionaries.models import Department
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -12,7 +13,6 @@ from graphene_django_cud.mutations import DjangoCreateMutation, DjangoUpdateMuta
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
-from devind_dictionaries.models import Department
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project, Period
