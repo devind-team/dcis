@@ -11,6 +11,18 @@
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
         ) Версия {{ item.version }}
+      template(#item.comment="{ item }")
+        template(v-if="item.comment")
+          text-menu(
+            :value="item.comment"
+            @update="changeDocumentComment(item, $event)"
+            multiline
+          )
+            template(v-slot:default="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  a(v-on="{...onMenu, ...onTooltip }") {{ item.comment }}
+                span {{ $t('change') }}
       template(#item.lastStatus="{ item }")
         template(v-if="item.lastStatus")
           document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="periodUpdate" :document="item")
@@ -23,20 +35,31 @@
 </template>
 
 <script lang="ts">
+import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, useNuxt2Meta, inject, toRef } from '#app'
+import { defineComponent, inject, toRef, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/store'
 import { useFilters } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType } from '~/types/graphql'
+import {
+  ChangeDocumentCommentMutation,
+  ChangeDocumentCommentMutationPayload,
+  ChangeDocumentCommentMutationVariables,
+  DocumentType,
+  PeriodType
+} from '~/types/graphql'
+import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
+import TextMenu from '~/components/common/menu/TextMenu.vue'
+
+type ChangeDocumentCommentMutationResult = { data: { changeDocumentComment: ChangeDocumentCommentMutationPayload } }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AddDocument, DocumentStatuses },
+  components: { LeftNavigatorContainer, AddDocument, DocumentStatuses, TextMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -59,6 +82,23 @@ export default defineComponent({
       })
     }
 
+    const { mutate: ChangeDocumentCommentMutate } = useMutation<ChangeDocumentCommentMutation, ChangeDocumentCommentMutationVariables>(
+      changeDocumentCommentMutation,
+      {
+        update: (cache, result) => periodUpdate(
+          cache, result, (dataCache, { data: { changeDocumentComment: { document: doc } } }:
+            ChangeDocumentCommentMutationResult) => {
+            if (doc) {
+              dataCache.period.documents = Object.assign(dataCache.period.documents, doc)
+            }
+            return dataCache
+          })
+      }
+    )
+
+    const changeDocumentComment = (document: DocumentType, comment: string): void => {
+      ChangeDocumentCommentMutate({ documentId: document.id, comment })
+    }
     const headers: DataTableHeader[] = [
       { text: 'Версия', value: 'version' },
       { text: 'Комментарий', value: 'comment' },
@@ -71,7 +111,8 @@ export default defineComponent({
       hasPerm,
       periodUpdate,
       addDocumentUpdate,
-      dateTimeHM
+      dateTimeHM,
+      changeDocumentComment
     }
   }
 })

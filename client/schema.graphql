@@ -646,6 +646,11 @@ type ChangeColumnDimensionPayload {
   success: Boolean!
 }
 
+"""Изменение комментария версии документа"""
+type ChangeDocumentCommentMutationPayload {
+  document: DocumentType
+}
+
 input ChangeFileMutationInput {
   clientMutationId: String
   """Поле файла"""
@@ -1855,6 +1860,8 @@ type Mutation {
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение стилей колонки таблицы"""
   changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionPayload!
+  """Изменение комментария версии документа"""
+  changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Мутация для изменения имени группы."""
@@ -3230,6 +3237,11 @@ input UpdateColumnDimensionInput {
   hidden: Boolean!
   """Ширина колонки"""
   width: Int
+}
+
+input UpdateDocumentInput {
+  """Комментарий"""
+  comment: String!
 }
 
 input UpdatePeriodInput {
