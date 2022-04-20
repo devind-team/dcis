@@ -57,6 +57,7 @@ export default {
     n: 'Числовой',
     s: 'Строковый',
     text: 'Текст',
+    fl: 'Файл',
     money: 'Деньги',
     department: 'Департаменты'
   },
@@ -81,6 +82,15 @@ export default {
       user: 'Пользователь, добавивший строку',
       additional: 'Дополнительные колонки',
       unload: 'Выгрузить'
+    }
+  },
+  cells: {
+    gridCellText: {
+      title: 'Изменение текста'
+    },
+    gridCellFile: {
+      title: 'Изменение файла',
+      label: 'Файл'
     }
   }
 }

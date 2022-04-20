@@ -19,11 +19,12 @@ import { BuildCellType } from '~/types/grid-types'
 import { cellKinds } from '~/composables/grid'
 import { ChangeValueMutation, ChangeValueMutationVariables, DocumentQuery, ValueType } from '~/types/graphql'
 import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
-import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
-import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellNumeric from '~/components/dcis/grid/cells/GridCellNumeric.vue'
 import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
 import GridCellText from '~/components/dcis/grid/cells/GridCellText.vue'
+import GridCellFile from '~/components/dcis/grid/cells/GridCellFile.vue'
+import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
+import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
 import GridCellUser from '~/components/dcis/grid/cells/GridCellUser.vue'
 
 export type ChangeValueMutationResult = { data: ChangeValueMutation }
@@ -35,7 +36,15 @@ type ChangeValueDocumentUpdateType = (
 ) => DataProxy
 
 export default defineComponent({
-  components: { GridCellUser, GridCellText, GridCellString, GridCellNumeric, GridCellMoney, GridCellDepartment },
+  components: {
+    GridCellNumeric,
+    GridCellString,
+    GridCellText,
+    GridCellFile,
+    GridCellMoney,
+    GridCellDepartment,
+    GridCellUser
+  },
   props: {
     cell: { type: Object as PropType<BuildCellType>, required: true },
     active: { type: Boolean, default: false }
