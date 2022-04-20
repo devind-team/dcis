@@ -2,20 +2,25 @@
   left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
     template(#header) {{ period.name }}
     v-row
-      v-col(cols="4")
+      v-col(cols="12" md="4" sm="4")
         v-list
           v-list-item-group(v-model="selectGroup" color="primary")
             v-row(no-gutters align="center")
-              v-col(cols="12" md="4" sm="2").caption
+              v-col(cols="12" md="4" sm="2")
                 v-subheader Группы
               v-col.text-right(cols="12" md="8" sm="10")
                 v-btn(class="align-self-center mr-4" color="primary" icon text)
                   v-icon(large) mdi-plus-circle
-            v-list-item(v-for="(item, index) in period.groups" :key="index" :value="item.id" @click="selectedGroup = item")
+            v-list-item(
+              v-for="(item, index) in period.groups"
+              :key="index"
+              :value="item.id"
+              @click="selectedGroup = item"
+            )
               v-list-item-title {{ item.name }}
       v-divider(vertical)
-      v-col(cols="8")
-        period-group-users(:value="selectedGroup" :period="period")
+      v-col(cols="12" md="8" sm="8")
+        period-group-users(:period-group="selectedGroup" :period="period")
 </template>
 
 <script lang="ts">

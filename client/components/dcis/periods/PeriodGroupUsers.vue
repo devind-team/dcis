@@ -1,8 +1,8 @@
 <template lang="pug">
-  v-card(flat)
+  v-card(v-if="periodGroup" flat)
     v-navigation-drawer(
       v-model="active"
-      width="30vw"
+      width="35vw"
       app
       right
       bottom
@@ -11,7 +11,7 @@
       v-card.ma-2.transparent(v-if="selectUser" flat)
         v-card-subtitle.text-h6.text-center Привилегии пользователя {{ getUserFullName(selectUser) }}
         v-divider
-        v-card-text(v-if="selectUser")
+        v-card-text
           v-data-table.transparent(
             :headers="additionalHeaders"
             :items="privileges"
@@ -25,11 +25,10 @@
       v-spacer
       v-btn(class="align-self-center" icon text)
         v-icon mdi-cog
-    v-card-text(v-if="value")
+    v-card-text
       v-data-table(
         :headers="headers"
-        :items="value.users"
-        :loading="loading"
+        :items="periodGroup.users"
         disable-pagination
         hide-default-footer
       )
@@ -43,16 +42,16 @@
 import { computed, defineComponent, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { PeriodGroupType, PeriodPrivilegesQuery, PeriodPrivilegesQueryVariables, PeriodType, UserType } from '~/types/graphql'
-import AvatarDialog from '~/components/users/AvatarDialog.vue'
 import { useFilters, useI18n, useCommonQuery } from '~/composables'
 import periodPrivilegesQuery from '~/gql/dcis/queries/period_privileges.graphql'
+import AvatarDialog from '~/components/users/AvatarDialog.vue'
 
 export default defineComponent({
   components: { AvatarDialog },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
-    value: {
+    periodGroup: {
       type: Object as PropType<PeriodGroupType>,
       default: null
     }
@@ -75,7 +74,7 @@ export default defineComponent({
     })
     const selectedUser = (id: string): void => {
       variables.value = { userId: id, periodId: props.period.id }
-      selectUser.value = props.value.users.find(user => user.id === id)
+      selectUser.value = props.periodGroup.users.find(user => user.id === id)
     }
     const additionalHeaders = computed<DataTableHeader[]>(() => ([
       { text: t('dcis.periods.groups.name') as string, value: 'privilege.name' },
