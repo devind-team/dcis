@@ -45,6 +45,11 @@ export default {
       file: 'Файл с формой сбора',
       buttonText: 'Добавить период'
     },
+    groups: {
+      name: 'Название привилегии',
+      key: 'Ключ',
+      createdAt: 'Дата создания'
+    },
     statuses: {
       open: 'Открыто',
       close: 'Закрыто',

@@ -2414,6 +2414,30 @@ type PageTypeEdge {
   node: PageType
 }
 
+"""Группы с содержанием привилегий."""
+type PeriodGroupType {
+  """Дата создания"""
+  createdAt: DateTime!
+  id: ID!
+  """Наименование группы периода привилегии"""
+  name: String!
+  """Период сбора"""
+  period: PeriodType!
+  privileges: [PrivilegeType!]
+  users: [UserType!]
+}
+
+"""Тип для отдельных привилегий пользователей."""
+type PeriodPrivilegeType {
+  id: ID!
+  """Период"""
+  period: PeriodType!
+  """Привилегия"""
+  privilege: PrivilegeType!
+  """Пользователь"""
+  user: UserType!
+}
+
 """Тип периода."""
 type PeriodType {
   """Дата создания"""
@@ -2424,6 +2448,8 @@ type PeriodType {
   documents: [DocumentType]
   """Дата окончания"""
   expiration: Date
+  """Группы пользователей назначенных в сборе"""
+  groups: [PeriodGroupType]
   id: ID!
   methodicalSupport: [FileType!]
   """Множественное заполнение"""
@@ -2461,6 +2487,21 @@ type PointStatisticsType {
   name: String!
   """Текущее значение"""
   value: Int!
+}
+
+"""Список сквозных привилегий."""
+type PrivilegeType {
+  """Дата создания"""
+  createdAt: DateTime!
+  id: ID!
+  """Ключ привилегии"""
+  key: String!
+  """Наименование привилегии"""
+  name: String!
+  """Период группы привилегии"""
+  periodgroupSet: [PeriodGroupType!]!
+  """Привилегия"""
+  periodprivilegeSet: [PeriodPrivilegeType!]!
 }
 
 """An enumeration."""
@@ -2655,6 +2696,13 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
+  """Привилегии назначенных пользователей периодов"""
+  periodPrivileges(
+    """Идентификатор периода"""
+    periodId: ID!
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): [PeriodPrivilegeType!]
   permissions: [PermissionType!]!
   """Доступные значения профиля пользователя"""
   profileInformation(

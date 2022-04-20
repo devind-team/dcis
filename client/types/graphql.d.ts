@@ -2948,6 +2948,32 @@ export type PageTypeEdge = {
   node?: Maybe<PageType>;
 };
 
+/** Группы с содержанием привилегий. */
+export type PeriodGroupType = {
+  __typename?: 'PeriodGroupType';
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  id: Scalars['ID'];
+  /** Наименование группы периода привилегии */
+  name: Scalars['String'];
+  /** Период сбора */
+  period: PeriodType;
+  privileges?: Maybe<Array<PrivilegeType>>;
+  users?: Maybe<Array<UserType>>;
+};
+
+/** Тип для отдельных привилегий пользователей. */
+export type PeriodPrivilegeType = {
+  __typename?: 'PeriodPrivilegeType';
+  id: Scalars['ID'];
+  /** Период */
+  period: PeriodType;
+  /** Привилегия */
+  privilege: PrivilegeType;
+  /** Пользователь */
+  user: UserType;
+};
+
 /** Тип периода. */
 export type PeriodType = {
   __typename?: 'PeriodType';
@@ -2959,6 +2985,8 @@ export type PeriodType = {
   documents?: Maybe<Array<Maybe<DocumentType>>>;
   /** Дата окончания */
   expiration?: Maybe<Scalars['Date']>;
+  /** Группы пользователей назначенных в сборе */
+  groups?: Maybe<Array<Maybe<PeriodGroupType>>>;
   id: Scalars['ID'];
   methodicalSupport?: Maybe<Array<FileType>>;
   /** Множественное заполнение */
@@ -2998,6 +3026,22 @@ export type PointStatisticsType = {
   name: Scalars['String'];
   /** Текущее значение */
   value: Scalars['Int'];
+};
+
+/** Список сквозных привилегий. */
+export type PrivilegeType = {
+  __typename?: 'PrivilegeType';
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  id: Scalars['ID'];
+  /** Ключ привилегии */
+  key: Scalars['String'];
+  /** Наименование привилегии */
+  name: Scalars['String'];
+  /** Период группы привилегии */
+  periodgroupSet: Array<PeriodGroupType>;
+  /** Привилегия */
+  periodprivilegeSet: Array<PeriodPrivilegeType>;
 };
 
 /** An enumeration. */
@@ -3168,6 +3212,8 @@ export type Query = {
   pages: PageTypeConnection;
   /** Информация по периоду */
   period: PeriodType;
+  /** Привилегии назначенных пользователей периодов */
+  periodPrivileges?: Maybe<Array<PeriodPrivilegeType>>;
   permissions: Array<PermissionType>;
   /** Доступные значения профиля пользователя */
   profileInformation: Array<ProfileType>;
@@ -3347,6 +3393,12 @@ export type QueryPagesArgs = {
 /** Схема запросов данных. */
 export type QueryPeriodArgs = {
   periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryPeriodPrivilegesArgs = {
+  periodId: Scalars['ID'];
+  userId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -4613,7 +4665,14 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, groups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+
+export type PeriodPrivilegesQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+export type PeriodPrivilegesQuery = { __typename?: 'Query', periodPrivileges?: Array<{ __typename: 'PeriodPrivilegeType', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, privilege: { __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } }> | null };
 
 export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];

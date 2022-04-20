@@ -26,6 +26,7 @@ export default defineComponent({
     const drawer: Ref<boolean> = ref<boolean>(false)
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
+      { title: 'Пользователи', to: 'dcis-periods-periodId-users', icon: 'account-multiple' },
       { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
       { title: 'Дивизионы', to: 'dcis-periods-periodId-divisions', icon: 'briefcase-outline' },
       {

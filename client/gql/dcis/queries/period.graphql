@@ -29,5 +29,14 @@ query Period($periodId: ID!) {
         }
       }
     }
+    groups {
+      id
+      name
+      createdAt
+      users {
+        ...UserFields
+      }
+      __typename
+    }
   }
 }
