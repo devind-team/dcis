@@ -7,7 +7,7 @@ from graphene_django import DjangoListField
 from graphql import ResolveInfo
 
 from apps.dcis.schema.types import Value
-from apps.dcis.services.cell import get_file_value_files, get_file_value_archive_url
+from apps.dcis.services.value import get_file_value_files, get_file_value_archive_url
 
 
 class SheetQueries(graphene.ObjectType):
