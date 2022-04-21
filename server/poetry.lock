@@ -460,7 +460,7 @@ user-agents = ">=2.2.0,<3.0.0"
 
 [[package]]
 name = "devind-dictionaries"
-version = "0.2.4"
+version = "0.3.0"
 description = "Common dictionaries for devind applications."
 category = "main"
 optional = false
@@ -698,7 +698,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "faker"
-version = "13.3.4"
+version = "13.3.5"
 description = "Faker is a Python package that generates fake data for you."
 category = "main"
 optional = false
@@ -2040,8 +2040,8 @@ devind-core = [
     {file = "devind_core-0.6.1.tar.gz", hash = "sha256:8179fed433c79abebd23d595f0e5b6a892524aa4c4ef2f8c990aca9a6ed7edb3"},
 ]
 devind-dictionaries = [
-    {file = "devind_dictionaries-0.2.4-py3-none-any.whl", hash = "sha256:4d215cae767b039b122a15bd30edbd35b60f42834422e0053c619377a6b54f37"},
-    {file = "devind_dictionaries-0.2.4.tar.gz", hash = "sha256:92f4cc60a14e782bcd25af0f1a32f48b3ec81429b56c6926f7db5d27d75e39a1"},
+    {file = "devind_dictionaries-0.3.0-py3-none-any.whl", hash = "sha256:f23893ad523ee869ef8e9ff2f5580f3dc23a8e1183c99917ee09ffef13c5b4bd"},
+    {file = "devind_dictionaries-0.3.0.tar.gz", hash = "sha256:cd1146f30e85c53bd40fd09cc303e1c465a86432a0979b2e78e04f90b229752e"},
 ]
 devind-helpers = [
     {file = "devind_helpers-0.3.0-py3-none-any.whl", hash = "sha256:3a0d838dac430223a289f65dab1d45ba61a974d227c2954b74246fe070d75b50"},
@@ -2111,8 +2111,8 @@ et-xmlfile = [
     {file = "et_xmlfile-1.1.0.tar.gz", hash = "sha256:8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c"},
 ]
 faker = [
-    {file = "Faker-13.3.4-py3-none-any.whl", hash = "sha256:7758ece2593ce603db117db3d27393c31f4af03f783e176f3f0e14839a4f3426"},
-    {file = "Faker-13.3.4.tar.gz", hash = "sha256:188961065fb5c78ea639f42176f55100f72c90c3a3179ac6c955c4bd712b0511"},
+    {file = "Faker-13.3.5-py3-none-any.whl", hash = "sha256:9b7d5875b3081cd7782f290ae0e067c1c71cb2c47ac789155423ca88f73ae129"},
+    {file = "Faker-13.3.5.tar.gz", hash = "sha256:5cefb998adcc2030f569710aa5fdcc220df33de293a7394c1a8cbc71a4be007f"},
 ]
 flake8 = [
     {file = "flake8-4.0.1-py2.py3-none-any.whl", hash = "sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d"},
