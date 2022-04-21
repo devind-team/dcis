@@ -1,4 +1,4 @@
-from typing import Any, Optional, List
+from typing import Any, Optional
 
 import graphene
 from devind_helpers.decorators import permission_classes
@@ -118,16 +118,16 @@ class ChangeCellsOptionMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
-            root: Any,
-            info: ResolveInfo,
-            cells_id: List[int],
-            field: str,
-            value: Optional[str] = None
+        root: Any,
+        info: ResolveInfo,
+        cells_id: list[int],
+        field: str,
+        value: Optional[str] = None
     ):
         success, value, errors = check_cell_options(field, value)
         if not success:
             return ChangeCellsOptionMutation(success=success, errors=errors)
-        cells: List[Cell] = Cell.objects.filter(pk__in=cells_id).all()
+        cells = Cell.objects.filter(pk__in=cells_id).all()
         with transaction.atomic():
             for cell in cells:
                 setattr(cell, field, value)

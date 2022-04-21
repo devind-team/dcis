@@ -1,12 +1,61 @@
+from datetime import datetime
 from os import path
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 from zipfile import ZipFile
 
 from devind_core.models import File
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils.timezone import make_aware
 
-from apps.dcis.models import Value
+from apps.core.models import User
+from apps.dcis.models import Document, RowDimension, Sheet, Value
+
+
+def update_or_create_value(
+    document: Document,
+    sheet: Sheet,
+    column_id: int,
+    row_id: int,
+    value: str,
+    payload: Any = None
+) -> tuple[Value, bool]:
+    """Создание или обновление значения."""
+    val, created = Value.objects.update_or_create(
+        column_id=column_id,
+        row_id=row_id,
+        document=document,
+        sheet=sheet,
+        defaults={
+            'value': value,
+            'payload': payload
+        }
+    )
+    RowDimension.objects.filter(pk=row_id).update(updated_at=make_aware(datetime.now()))
+    return val, created
+
+
+def update_or_create_file_value(
+    user: User,
+    document: Document,
+    sheet: Sheet,
+    column_id: int,
+    row_id: int,
+    value: str,
+    remaining_files: list[int],
+    new_files: list[InMemoryUploadedFile],
+) -> tuple[Value, bool]:
+    """Изменение файлов значения ячейки типа `Файл`."""
+    payload = [*remaining_files]
+    for new_file in new_files:
+        payload.append(File.objects.create(
+            name=new_file.name,
+            src=new_file,
+            deleted=True,
+            user=user
+        ).pk)
+    return update_or_create_value(document, sheet, column_id, row_id, value, payload)
 
 
 def get_file_value_payload(value: Value) -> list[int]:
