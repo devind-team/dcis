@@ -1,0 +1,3 @@
+query ValueArchiveUrl($valueId: ID!) {
+  valueArchiveUrl(valueId: $valueId)
+}

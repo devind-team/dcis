@@ -646,7 +646,7 @@ type ChangeColumnDimensionPayload {
   success: Boolean!
 }
 
-"""Изменение комментария версии документа"""
+"""Изменение комментария версии документа."""
 type ChangeDocumentCommentMutationPayload {
   document: DocumentType
 }
@@ -670,6 +670,35 @@ type ChangeFileMutationPayload {
   file: FileType
   """Успех мутации"""
   success: Boolean!
+}
+
+input ChangeFileValueMutationInput {
+  clientMutationId: String
+  """Идентификатор колонки"""
+  columnId: Int!
+  """Идентификатор документа"""
+  documentId: ID!
+  """Новые файлы"""
+  newFiles: [Upload!]!
+  """Оставшиеся файлы"""
+  remainingFiles: [Int!]!
+  """Идентификатор строки"""
+  rowId: Int!
+  """Идентификатор листа"""
+  sheetId: Int!
+  """Значение"""
+  value: String!
+}
+
+"""Изменение значения ячейки типа `Файл`."""
+type ChangeFileValueMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененное значение"""
+  value: ValueType
 }
 
 input ChangeGroupNameMutationInput {
@@ -1860,10 +1889,12 @@ type Mutation {
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение стилей колонки таблицы"""
   changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionPayload!
-  """Изменение комментария версии документа"""
+  """Изменение комментария версии документа."""
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
+  """Изменение значения ячейки типа `Файл`."""
+  changeFileValue(input: ChangeFileValueMutationInput!): ChangeFileValueMutationPayload!
   """Мутация для изменения имени группы."""
   changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
   """Мутация для изменения привилегий группы."""
@@ -2131,144 +2162,144 @@ type NotificationsSubscription {
   notification: NotificationType
 }
 
-input OrganizationAddressFilterInputType {
+input OrganizationOrganizationFilterAddressFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationDepartmentFilterInputType {
+input OrganizationOrganizationFilterDepartmentFilterInputType {
   """`Exact` lookup"""
   exact: [ID]
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationFilterInputType {
+input OrganizationOrganizationFilterFilterInputType {
   """`Address` field"""
-  address: OrganizationAddressFilterInputType
+  address: OrganizationOrganizationFilterAddressFilterInputType
   """`And` field"""
-  and: [OrganizationFilterInputType]
+  and: [OrganizationOrganizationFilterFilterInputType]
   """`Department` field"""
-  department: OrganizationDepartmentFilterInputType
+  department: OrganizationOrganizationFilterDepartmentFilterInputType
   """`Id` field"""
-  id: OrganizationIdFilterInputType
+  id: OrganizationOrganizationFilterIdFilterInputType
   """`Inn` field"""
-  inn: OrganizationInnFilterInputType
+  inn: OrganizationOrganizationFilterInnFilterInputType
   """`Kind` field"""
-  kind: OrganizationKindFilterInputType
+  kind: OrganizationOrganizationFilterKindFilterInputType
   """`Kodbuhg` field"""
-  kodbuhg: OrganizationKodbuhgFilterInputType
+  kodbuhg: OrganizationOrganizationFilterKodbuhgFilterInputType
   """`Kpp` field"""
-  kpp: OrganizationKppFilterInputType
+  kpp: OrganizationOrganizationFilterKppFilterInputType
   """`Mail` field"""
-  mail: OrganizationMailFilterInputType
+  mail: OrganizationOrganizationFilterMailFilterInputType
   """`Name` field"""
-  name: OrganizationNameFilterInputType
+  name: OrganizationOrganizationFilterNameFilterInputType
   """`Not` field"""
-  not: OrganizationFilterInputType
+  not: OrganizationOrganizationFilterFilterInputType
   """`Okpo` field"""
-  okpo: OrganizationOkpoFilterInputType
+  okpo: OrganizationOrganizationFilterOkpoFilterInputType
   """`Or` field"""
-  or: [OrganizationFilterInputType]
+  or: [OrganizationOrganizationFilterFilterInputType]
   """`Parent` field"""
-  parent: OrganizationParentFilterInputType
+  parent: OrganizationOrganizationFilterParentFilterInputType
   """`Phone` field"""
-  phone: OrganizationPhoneFilterInputType
+  phone: OrganizationOrganizationFilterPhoneFilterInputType
   """`Region` field"""
-  region: OrganizationRegionFilterInputType
+  region: OrganizationOrganizationFilterRegionFilterInputType
   """`Rubpnubp` field"""
-  rubpnubp: OrganizationRubpnubpFilterInputType
+  rubpnubp: OrganizationOrganizationFilterRubpnubpFilterInputType
   """`Site` field"""
-  site: OrganizationSiteFilterInputType
+  site: OrganizationOrganizationFilterSiteFilterInputType
 }
 
-input OrganizationIdFilterInputType {
+input OrganizationOrganizationFilterIdFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationInnFilterInputType {
+input OrganizationOrganizationFilterInnFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKindFilterInputType {
+input OrganizationOrganizationFilterKindFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKodbuhgFilterInputType {
+input OrganizationOrganizationFilterKodbuhgFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationKppFilterInputType {
+input OrganizationOrganizationFilterKppFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationMailFilterInputType {
+input OrganizationOrganizationFilterMailFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationNameFilterInputType {
+input OrganizationOrganizationFilterNameFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOkpoFilterInputType {
+input OrganizationOrganizationFilterOkpoFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationParentFilterInputType {
+input OrganizationOrganizationFilterParentFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`Isnull` lookup"""
   isnull: Boolean
 }
 
-input OrganizationPhoneFilterInputType {
+input OrganizationOrganizationFilterPhoneFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationRegionFilterInputType {
+input OrganizationOrganizationFilterRegionFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [ID]
 }
 
-input OrganizationRubpnubpFilterInputType {
+input OrganizationOrganizationFilterRubpnubpFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationSiteFilterInputType {
+input OrganizationOrganizationFilterSiteFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
@@ -2637,7 +2668,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: OrganizationFilterInputType
+    filter: OrganizationOrganizationFilterFilterInputType
     first: Int
     last: Int
     offset: Int
@@ -2708,6 +2739,16 @@ type Query {
   ): UserType
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+  """url архива значения ячейки типа `Файл`"""
+  valueArchiveUrl(
+    """Идентификатор значения ячейки"""
+    valueId: ID!
+  ): String
+  """Файлы значения ячейки типа `Файл`"""
+  valueFiles(
+    """Идентификатор значения ячейки"""
+    valueId: ID!
+  ): [FileType!]
 }
 
 input RecoveryPasswordMutationInput {

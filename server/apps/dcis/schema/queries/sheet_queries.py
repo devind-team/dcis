@@ -14,16 +14,19 @@ from apps.dcis.services.value import get_file_value_archive_url, get_file_value_
 class SheetQueries(graphene.ObjectType):
     """Запросы записей, связанных с листами для вывода."""
 
-    value_archive_file = graphene.String()
+    value_archive_url = graphene.String(
+        description='url архива значения ячейки типа `Файл`',
+        value_id=graphene.ID(required=True, description='Идентификатор значения ячейки')
+    )
     value_files = DjangoListField(
         FileType,
-        description='Файлы значения ячейки',
-        value_id=graphene.ID(description='Идентификатор значения ячейки')
+        description='Файлы значения ячейки типа `Файл`',
+        value_id=graphene.ID(required=True, description='Идентификатор значения ячейки')
     )
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_value_archive_file(root, info: ResolveInfo, value_id) -> str:
+    def resolve_value_archive_url(root, info: ResolveInfo, value_id: str) -> str:
         return get_file_value_archive_url(get_object_or_404(Value, pk=value_id))
 
     @staticmethod

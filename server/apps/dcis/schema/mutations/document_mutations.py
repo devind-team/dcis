@@ -171,6 +171,8 @@ class ChangeFileValueMutation(BaseMutation):
         remaining_files = graphene.List(graphene.NonNull(graphene.Int), required=True, description='Оставшиеся файлы')
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
 
+    value = graphene.Field(ValueType, description='Измененное значение')
+
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
