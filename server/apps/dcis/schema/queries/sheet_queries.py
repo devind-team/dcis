@@ -1,17 +1,19 @@
-from typing import cast
-
 import graphene
 from devind_core.models import File
 from devind_core.schema.types import FileType
+from devind_helpers.decorators import permission_classes
+from devind_helpers.permissions import IsAuthenticated
 from graphene_django import DjangoListField
 from graphql import ResolveInfo
 
 from apps.dcis.schema.types import Value
+from apps.dcis.services.cell import get_file_value_files
 
 
 class SheetQueries(graphene.ObjectType):
     """Запросы записей, связанных с листами для вывода."""
 
+    value_archive_file = graphene.String()
     value_files = DjangoListField(
         FileType,
         description='Файлы значения ячейки',
@@ -19,10 +21,6 @@ class SheetQueries(graphene.ObjectType):
     )
 
     @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_value_files(root, info: ResolveInfo, value_id: str) -> list[File]:
-        value = Value.objects.get(pk=value_id)
-        if value.payload is None:
-            return []
-        payload = cast(list[int], value.payload)
-        files = File.objects.filter(pk__id=payload)
-        return sorted(files, key=lambda file: payload.index(file.pk))
+        return get_file_value_files(Value.objects.get(pk=value_id))

@@ -1,25 +1,26 @@
 from argparse import ArgumentTypeError
-from typing import Tuple, List, Optional, Union
+from typing import Optional, Union, cast
 from devind_helpers.schema.types import ErrorFieldType
+from devind_core.models import File
 from devind_helpers.utils import convert_str_to_int, convert_str_to_bool
 
-from apps.dcis.models import Cell
+from apps.dcis.models import Cell, Value
 
 
-def check_cell_options(field: str, value: str) -> Tuple[
+def check_cell_options(field: str, value: str) -> tuple[
     bool,
     Optional[Union[str, int, bool]],
-    Optional[List[ErrorFieldType]]
+    Optional[list[ErrorFieldType]]
 ]:
     """Проверяем возможность изменения значений ячеек."""
-    allow_fields: List[str] = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
+    allow_fields: list[str] = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
     if field not in allow_fields:
         return False, None, [ErrorFieldType(
             'field',
             [f'Параметр не в списке разрешенных: {field}. {", ".join(allow_fields)}']
         )]
     if field == 'horizontal_align':
-        allow_horizontal_align: List[str] = ['left', 'center', 'right']
+        allow_horizontal_align: list[str] = ['left', 'center', 'right']
         if value not in allow_horizontal_align:
             return False, None, [ErrorFieldType(
                 'value',
@@ -27,7 +28,7 @@ def check_cell_options(field: str, value: str) -> Tuple[
             )]
         return True, value, None
     if field == 'vertical_align':
-        allow_vertical_align: List[str] = ['top', 'middle', 'bottom']
+        allow_vertical_align: list[str] = ['top', 'middle', 'bottom']
         if value not in allow_vertical_align:
             return False, None, [ErrorFieldType(
                 'value',
@@ -48,7 +49,7 @@ def check_cell_options(field: str, value: str) -> Tuple[
             )]
         return True, value, None
     if field == 'underline':
-        allow_underline: List[str] = ['single', 'double', 'single_accounting', 'double_accounting']
+        allow_underline: list[str] = ['single', 'double', 'single_accounting', 'double_accounting']
         if value not in [None, *allow_underline]:
             return False, None, [ErrorFieldType(
                 'value',
@@ -72,3 +73,17 @@ def check_cell_options(field: str, value: str) -> Tuple[
                 [f'Разрешенные типы: {", ".join(allow_kinds)}']
             )]
         return True, value, None
+
+
+def get_file_value_files(value: Value) -> list[int]:
+    """Получение дополнительных данных значения ячейки типа `Файл`."""
+    if value.payload is None:
+        return []
+    return cast(list[int], value.payload)
+
+
+def get_file_value_files(value: Value) -> list[File]:
+    """Получение файлов значения ячейки типа `Файл`."""
+    payload = get_file_value_files(value)
+    files = File.objects.filter(pk__id=payload)
+    return sorted(files, key=lambda file: payload.index(file.pk))
