@@ -22,7 +22,7 @@ import changeValueMutation from '~/gql/dcis/mutations/document/change_value.grap
 import GridCellNumeric from '~/components/dcis/grid/cells/GridCellNumeric.vue'
 import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
 import GridCellText from '~/components/dcis/grid/cells/GridCellText.vue'
-import GridCellFile from '~/components/dcis/grid/cells/GridCellFile.vue'
+import GridCellFiles from '~/components/dcis/grid/cells/GridCellFiles.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
 import GridCellUser from '~/components/dcis/grid/cells/GridCellUser.vue'
@@ -40,7 +40,7 @@ export default defineComponent({
     GridCellNumeric,
     GridCellString,
     GridCellText,
-    GridCellFile,
+    GridCellFiles,
     GridCellMoney,
     GridCellDepartment,
     GridCellUser

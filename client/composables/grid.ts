@@ -30,7 +30,7 @@ export const cellKinds: Record<string, string> = {
   n: 'Numeric',
   s: 'String',
   text: 'Text',
-  fl: 'File',
+  fl: 'Files',
   money: 'Money',
   department: 'Department'
 }

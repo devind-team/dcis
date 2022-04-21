@@ -193,7 +193,7 @@ class Cell(Style, models.Model):
     TEXT = 'text'
     MONEY = 'money'
     BIG_MONEY = 'bigMoney'
-    FILE = 'fl'
+    FILES = 'fl'
 
     # Поля из базы данных
     USER = 'user'
@@ -212,7 +212,7 @@ class Cell(Style, models.Model):
         (TEXT, 'text'),
         (MONEY, 'money'),
         (BIG_MONEY, 'bigMoney'),
-        (FILE, 'fl'),
+        (FILES, 'fl'),
         (USER, 'user'),
         (DEPARTMENT, 'department'),
         (ORGANIZATION, 'organization')
