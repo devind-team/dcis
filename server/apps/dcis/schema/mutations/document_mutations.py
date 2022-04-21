@@ -6,7 +6,6 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
-from django.db.models import Max
 from django.utils.timezone import make_aware
 from graphene_django_cud.mutations import DjangoUpdateMutation
 from graphql import ResolveInfo
@@ -16,6 +15,7 @@ from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentSta
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentType, ValueType, DocumentStatusType
 from apps.dcis.services.document_unload import DocumentUnload
+from apps.dcis.services.document_services import create_new_document
 
 
 class AddDocumentMutation(BaseMutation):
@@ -25,29 +25,35 @@ class AddDocumentMutation(BaseMutation):
         comment = graphene.String(required=True, description='Комментарий')
         period_id = graphene.ID(required=True, description='Идентификатор периода')
         status_id = graphene.Int(required=True, description='Начальный статус документа')
+        document_id = graphene.ID(description='Идентификатор документа')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
     @permission_classes((IsAuthenticated, AddDocument,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
+    def mutate_and_get_payload(
+            root: None,
+            info: ResolveInfo,
+            comment: str,
+            period_id: str,
+            status_id: int,
+            document_id: Optional[str]
+    ) -> 'AddDocumentMutation':
+        """Мутация для создания документа."""
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
-        status: Status = get_object_or_404(Status, pk=status_id)
+        # divisions = period.project.division.objects.filter(Q(user=u) | Q(users=u)).all()
+        document_id = from_global_id(document_id)[1]
         # Служба поддержки
         object_id: int = 1
-        max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
-        document = Document.objects.create(
-            version=max_version + 1 if max_version is not None else 1,
-            comment=comment,
-            object_id=object_id,
-            period=period
+
+        document = create_new_document(
+            info.context.user,
+            period,
+            document_id,
+            status_id,
+            comment,
+            object_id
         )
-        document.documentstatus_set.create(
-            comment='Создание документа.',
-            user=info.context.user,
-            status=status
-        )
-        document.sheets.add(*period.sheet_set.all())
         return AddDocumentMutation(document=document)
 
 

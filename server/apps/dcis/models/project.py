@@ -40,6 +40,10 @@ class Project(models.Model):
         """Мета класс описания параметров проекта сборов."""
         ordering = ('-created_at',)
 
+    @property
+    def division(self) -> Type[Union[Department, Organization]]:
+        return self.DIVISION_KIND.get(self.content_type.model, Department)
+
 
 class Period(models.Model):
     """Модель периода проекта.
