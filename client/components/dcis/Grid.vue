@@ -98,75 +98,13 @@ export default defineComponent({
     }
 
     const sheet: Ref<SheetType> = toRef(props, 'sheet')
-    const {
-      rowIndexColumnWidth,
-      gridWidth,
-      columns,
-      rows,
-      mergeCells,
-      mergedCells,
-      active,
-      selection,
-      selectionCells,
-      selectionColumns,
-      selectionRows,
-      allSelected,
-      boundaryColumnCells,
-      selectedBoundaryColumnCells,
-      selectedBoundaryRowCells,
-      selectionCellsOptions,
-      startCellSelection,
-      enterCellSelection,
-      endCellSelection,
-      setActive,
-      gridContainer,
-      columnWidth,
-      mouseenterColumnIndex,
-      mousemoveColumnIndex,
-      mouseleaveColumnIndex,
-      mousedownColumnIndex,
-      mouseupColumnIndex,
-      mouseenterRowIndex,
-      mousedownRowIndex,
-      selectAll
-    } = useGrid(sheet, changeColumnWidth)
+    const grid = useGrid(sheet, changeColumnWidth)
 
-    provide('active', active)
+    provide('active', grid.active)
     provide('documentId', props.documentId)
     provide('documentUpdate', props.update)
 
-    return {
-      rowIndexColumnWidth,
-      gridWidth,
-      columns,
-      rows,
-      mergedCells,
-      mergeCells,
-      active,
-      selection,
-      selectionCells,
-      selectionColumns,
-      selectionRows,
-      allSelected,
-      boundaryColumnCells,
-      selectedBoundaryColumnCells,
-      selectedBoundaryRowCells,
-      selectionCellsOptions,
-      startCellSelection,
-      enterCellSelection,
-      endCellSelection,
-      setActive,
-      gridContainer,
-      columnWidth,
-      mouseenterColumnIndex,
-      mousemoveColumnIndex,
-      mouseleaveColumnIndex,
-      mousedownColumnIndex,
-      mouseupColumnIndex,
-      mouseenterRowIndex,
-      mousedownRowIndex,
-      selectAll
-    }
+    return grid
   }
 })
 </script>
