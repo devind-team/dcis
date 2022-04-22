@@ -1,10 +1,9 @@
-from typing import List
 import graphene
+from devind_helpers.orm_utils import get_object_or_404
 from django.db.models import QuerySet
 from graphene_django import DjangoListField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
-from devind_helpers.orm_utils import get_object_or_404
 
 from apps.dcis.models import Document, DocumentStatus
 from apps.dcis.schema.types import DocumentType, StatusType, DocumentStatusType

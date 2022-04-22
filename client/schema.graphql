@@ -27,6 +27,33 @@ enum ActionRelationShip {
   DELETE
 }
 
+input ActiveBudgetClassificationCodeFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input ActiveBudgetClassificationFilterInputType {
+  """`And` field"""
+  and: [ActiveBudgetClassificationFilterInputType]
+  """`Code` field"""
+  code: ActiveBudgetClassificationCodeFilterInputType
+  """`Id` field"""
+  id: ActiveBudgetClassificationIdFilterInputType
+  """`Not` field"""
+  not: ActiveBudgetClassificationFilterInputType
+  """`Or` field"""
+  or: [ActiveBudgetClassificationFilterInputType]
+}
+
+input ActiveBudgetClassificationIdFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [String]
+}
+
 """Информация активности пользователей и времени ответа браузеров."""
 type ActiveStatisticsType {
   """Запросы"""
@@ -60,6 +87,10 @@ input AddDocumentMutationInput {
   clientMutationId: String
   """Комментарий"""
   comment: String!
+  """Идентификатор дивизиона"""
+  divisionId: Int
+  """Идентификатор документа"""
+  documentId: ID
   """Идентификатор периода"""
   periodId: ID!
   """Начальный статус документа"""
@@ -418,6 +449,70 @@ type AuthTokenInfoType {
   scope: String
   """Тип токена"""
   tokenType: String
+}
+
+input BudgetClassificationCodeFilterInputType {
+  """`Exact` lookup"""
+  exact: String
+  """`Icontains` lookup"""
+  icontains: String
+}
+
+input BudgetClassificationFilterInputType {
+  """`And` field"""
+  and: [BudgetClassificationFilterInputType]
+  """`Code` field"""
+  code: BudgetClassificationCodeFilterInputType
+  """`Id` field"""
+  id: BudgetClassificationIdFilterInputType
+  """`Not` field"""
+  not: BudgetClassificationFilterInputType
+  """`Or` field"""
+  or: [BudgetClassificationFilterInputType]
+}
+
+input BudgetClassificationIdFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [String]
+}
+
+"""Graphene object type for budget classification codes."""
+type BudgetClassificationType implements Node {
+  """Active"""
+  active: Boolean!
+  """Code"""
+  code: String!
+  """Created date"""
+  createdAt: DateTime!
+  """Date of end activity"""
+  end: DateTime
+  """The ID of the object."""
+  id: ID!
+  """Name"""
+  name: String!
+  """Date of start activity"""
+  start: DateTime!
+  """Updated date"""
+  updatedAt: DateTime!
+}
+
+type BudgetClassificationTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [BudgetClassificationTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `BudgetClassificationType` and its cursor."""
+type BudgetClassificationTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: BudgetClassificationType
 }
 
 """Категория"""
@@ -1443,16 +1538,16 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
-"""Object type for Department."""
+"""Graphene object type for Department."""
 type DepartmentType {
-  """Code of department."""
+  """Code of department"""
   code: Int
   """Created date"""
   createdAt: DateTime!
   id: ID!
   """Responsible Minister."""
   minister: UserType!
-  """Department name."""
+  """Department name"""
   name: String!
   """Organizations."""
   organizations: [OrganizationType]
@@ -1464,7 +1559,7 @@ type DepartmentType {
   users: [UserType]
 }
 
-"""Object type for District."""
+"""Graphene object type for District."""
 type DistrictType {
   """Created date"""
   createdAt: DateTime!
@@ -1477,6 +1572,50 @@ type DistrictType {
   updatedAt: DateTime!
 }
 
+input DivisionFilterInputType {
+  """`And` field"""
+  and: [DivisionFilterInputType]
+  """`Id` field"""
+  id: DivisionIdFilterInputType
+  """`Not` field"""
+  not: DivisionFilterInputType
+  """`ObjectId` field"""
+  objectId: DivisionObjectIdFilterInputType
+  """`Or` field"""
+  or: [DivisionFilterInputType]
+  """`Period` field"""
+  period: DivisionPeriodFilterInputType
+}
+
+input DivisionIdFilterInputType {
+  """`Exact` lookup"""
+  exact: Float
+}
+
+"""Описание обобщенного типа дивизиона."""
+type DivisionModelType {
+  """Идентификатор модели дивизиона"""
+  id: Int!
+  """Модель дивизиона: department, organization"""
+  model: String!
+  """Название дивизиона"""
+  name: String!
+}
+
+input DivisionObjectIdFilterInputType {
+  """`Exact` lookup"""
+  exact: Int
+  """`In` lookup"""
+  in: [Int]
+}
+
+input DivisionPeriodFilterInputType {
+  """`Exact` lookup"""
+  exact: ID
+  """`In` lookup"""
+  in: [ID]
+}
+
 """Список участвующих дивизионов в сборе."""
 type DivisionType implements Node {
   """The ID of the object."""
@@ -1485,6 +1624,23 @@ type DivisionType implements Node {
   objectId: Int!
   """Период"""
   period: PeriodType!
+}
+
+type DivisionTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DivisionTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DivisionType` and its cursor."""
+type DivisionTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DivisionType
 }
 
 """Debugging information for the current query."""
@@ -2584,10 +2740,28 @@ input ProjectUserFilterInputType {
 """Схема запросов данных."""
 type Query {
   _debug: DjangoDebug
+  activeBudgetClassification(
+    after: String
+    before: String
+    """Advanced filter field"""
+    filter: ActiveBudgetClassificationFilterInputType
+    first: Int
+    last: Int
+    offset: Int
+  ): BudgetClassificationTypeConnection
   """Статистика активности"""
   activeStatistics: ActiveStatisticsType!
   """Приложения"""
   applications: [ApplicationType!]!
+  budgetClassifications(
+    after: String
+    before: String
+    """Advanced filter field"""
+    filter: BudgetClassificationFilterInputType
+    first: Int
+    last: Int
+    offset: Int
+  ): BudgetClassificationTypeConnection
   """Категории"""
   categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
   """Категория"""
@@ -2655,6 +2829,16 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
+  """Получение дивизионов"""
+  periodDivisions(
+    after: String
+    before: String
+    """Advanced filter field"""
+    filter: DivisionFilterInputType
+    first: Int
+    last: Int
+    offset: Int
+  ): DivisionTypeConnection
   permissions: [PermissionType!]!
   """Доступные значения профиля пользователя"""
   profileInformation(
@@ -2701,6 +2885,13 @@ type Query {
   tags(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): TagTypeConnection!
   """Информация о указанном пользователе"""
   user(userId: ID!): UserType
+  """Дивизионы пользователя"""
+  userDivisions(
+    """Идентификатор проекта"""
+    projectId: ID
+    """Пользователь"""
+    userId: ID
+  ): [DivisionModelType]!
   """Доступная информация о пользователе"""
   userInformation(
     """Идентификатор пользователя"""
@@ -2725,7 +2916,7 @@ type RecoveryPasswordMutationPayload {
   success: Boolean!
 }
 
-"""Object type for Regions."""
+"""Graphene object type for Regions."""
 type RegionType {
   """Real code of region"""
   commonId: Int

@@ -59,6 +59,33 @@ export type ActionRelationShip =
   | 'ADD'
   | 'DELETE';
 
+export type ActiveBudgetClassificationCodeFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['String']>;
+  /** `Icontains` lookup */
+  icontains?: InputMaybe<Scalars['String']>;
+};
+
+export type ActiveBudgetClassificationFilterInputType = {
+  /** `And` field */
+  and?: InputMaybe<Array<InputMaybe<ActiveBudgetClassificationFilterInputType>>>;
+  /** `Code` field */
+  code?: InputMaybe<ActiveBudgetClassificationCodeFilterInputType>;
+  /** `Id` field */
+  id?: InputMaybe<ActiveBudgetClassificationIdFilterInputType>;
+  /** `Not` field */
+  not?: InputMaybe<ActiveBudgetClassificationFilterInputType>;
+  /** `Or` field */
+  or?: InputMaybe<Array<InputMaybe<ActiveBudgetClassificationFilterInputType>>>;
+};
+
+export type ActiveBudgetClassificationIdFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['ID']>;
+  /** `In` lookup */
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
 /** Информация активности пользователей и времени ответа браузеров. */
 export type ActiveStatisticsType = {
   __typename?: 'ActiveStatisticsType';
@@ -94,6 +121,10 @@ export type AddDocumentMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Комментарий */
   comment: Scalars['String'];
+  /** Идентификатор дивизиона */
+  divisionId?: InputMaybe<Scalars['Int']>;
+  /** Идентификатор документа */
+  documentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор периода */
   periodId: Scalars['ID'];
   /** Начальный статус документа */
@@ -465,6 +496,73 @@ export type AuthTokenInfoType = {
   scope?: Maybe<Scalars['String']>;
   /** Тип токена */
   tokenType?: Maybe<Scalars['String']>;
+};
+
+export type BudgetClassificationCodeFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['String']>;
+  /** `Icontains` lookup */
+  icontains?: InputMaybe<Scalars['String']>;
+};
+
+export type BudgetClassificationFilterInputType = {
+  /** `And` field */
+  and?: InputMaybe<Array<InputMaybe<BudgetClassificationFilterInputType>>>;
+  /** `Code` field */
+  code?: InputMaybe<BudgetClassificationCodeFilterInputType>;
+  /** `Id` field */
+  id?: InputMaybe<BudgetClassificationIdFilterInputType>;
+  /** `Not` field */
+  not?: InputMaybe<BudgetClassificationFilterInputType>;
+  /** `Or` field */
+  or?: InputMaybe<Array<InputMaybe<BudgetClassificationFilterInputType>>>;
+};
+
+export type BudgetClassificationIdFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['ID']>;
+  /** `In` lookup */
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
+/** Graphene object type for budget classification codes. */
+export type BudgetClassificationType = Node & {
+  __typename?: 'BudgetClassificationType';
+  /** Active */
+  active: Scalars['Boolean'];
+  /** Code */
+  code: Scalars['String'];
+  /** Created date */
+  createdAt: Scalars['DateTime'];
+  /** Date of end activity */
+  end?: Maybe<Scalars['DateTime']>;
+  /** The ID of the object. */
+  id: Scalars['ID'];
+  /** Name */
+  name: Scalars['String'];
+  /** Date of start activity */
+  start: Scalars['DateTime'];
+  /** Updated date */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type BudgetClassificationTypeConnection = {
+  __typename?: 'BudgetClassificationTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<BudgetClassificationTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `BudgetClassificationType` and its cursor. */
+export type BudgetClassificationTypeEdge = {
+  __typename?: 'BudgetClassificationTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<BudgetClassificationType>;
 };
 
 /** Категория */
@@ -1571,17 +1669,17 @@ export type DeleteSessionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Object type for Department. */
+/** Graphene object type for Department. */
 export type DepartmentType = {
   __typename?: 'DepartmentType';
-  /** Code of department. */
+  /** Code of department */
   code?: Maybe<Scalars['Int']>;
   /** Created date */
   createdAt: Scalars['DateTime'];
   id: Scalars['ID'];
   /** Responsible Minister. */
   minister: UserType;
-  /** Department name. */
+  /** Department name */
   name: Scalars['String'];
   /** Organizations. */
   organizations?: Maybe<Array<Maybe<OrganizationType>>>;
@@ -1593,7 +1691,7 @@ export type DepartmentType = {
   users?: Maybe<Array<Maybe<UserType>>>;
 };
 
-/** Object type for District. */
+/** Graphene object type for District. */
 export type DistrictType = {
   __typename?: 'DistrictType';
   /** Created date */
@@ -1607,6 +1705,51 @@ export type DistrictType = {
   updatedAt: Scalars['DateTime'];
 };
 
+export type DivisionFilterInputType = {
+  /** `And` field */
+  and?: InputMaybe<Array<InputMaybe<DivisionFilterInputType>>>;
+  /** `Id` field */
+  id?: InputMaybe<DivisionIdFilterInputType>;
+  /** `Not` field */
+  not?: InputMaybe<DivisionFilterInputType>;
+  /** `ObjectId` field */
+  objectId?: InputMaybe<DivisionObjectIdFilterInputType>;
+  /** `Or` field */
+  or?: InputMaybe<Array<InputMaybe<DivisionFilterInputType>>>;
+  /** `Period` field */
+  period?: InputMaybe<DivisionPeriodFilterInputType>;
+};
+
+export type DivisionIdFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['Float']>;
+};
+
+/** Описание обобщенного типа дивизиона. */
+export type DivisionModelType = {
+  __typename?: 'DivisionModelType';
+  /** Идентификатор модели дивизиона */
+  id: Scalars['Int'];
+  /** Модель дивизиона: department, organization */
+  model: Scalars['String'];
+  /** Название дивизиона */
+  name: Scalars['String'];
+};
+
+export type DivisionObjectIdFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['Int']>;
+  /** `In` lookup */
+  in?: InputMaybe<Array<InputMaybe<Scalars['Int']>>>;
+};
+
+export type DivisionPeriodFilterInputType = {
+  /** `Exact` lookup */
+  exact?: InputMaybe<Scalars['ID']>;
+  /** `In` lookup */
+  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+};
+
 /** Список участвующих дивизионов в сборе. */
 export type DivisionType = Node & {
   __typename?: 'DivisionType';
@@ -1616,6 +1759,25 @@ export type DivisionType = Node & {
   objectId: Scalars['Int'];
   /** Период */
   period: PeriodType;
+};
+
+export type DivisionTypeConnection = {
+  __typename?: 'DivisionTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<DivisionTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `DivisionType` and its cursor. */
+export type DivisionTypeEdge = {
+  __typename?: 'DivisionTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<DivisionType>;
 };
 
 /** Debugging information for the current query. */
@@ -3126,10 +3288,12 @@ export type ProjectUserFilterInputType = {
 export type Query = {
   __typename?: 'Query';
   _debug?: Maybe<DjangoDebug>;
+  activeBudgetClassification?: Maybe<BudgetClassificationTypeConnection>;
   /** Статистика активности */
   activeStatistics: ActiveStatisticsType;
   /** Приложения */
   applications: Array<ApplicationType>;
+  budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Категории */
   categories: CategoryTypeConnection;
   /** Категория */
@@ -3168,6 +3332,8 @@ export type Query = {
   pages: PageTypeConnection;
   /** Информация по периоду */
   period: PeriodType;
+  /** Получение дивизионов */
+  periodDivisions?: Maybe<DivisionTypeConnection>;
   permissions: Array<PermissionType>;
   /** Доступные значения профиля пользователя */
   profileInformation: Array<ProfileType>;
@@ -3194,10 +3360,32 @@ export type Query = {
   tags: TagTypeConnection;
   /** Информация о указанном пользователе */
   user?: Maybe<UserType>;
+  /** Дивизионы пользователя */
+  userDivisions: Array<Maybe<DivisionModelType>>;
   /** Доступная информация о пользователе */
   userInformation?: Maybe<UserType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
+};
+
+/** Схема запросов данных. */
+export type QueryActiveBudgetClassificationArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<ActiveBudgetClassificationFilterInputType>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryBudgetClassificationsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<BudgetClassificationFilterInputType>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Схема запросов данных. */
@@ -3350,6 +3538,16 @@ export type QueryPeriodArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryPeriodDivisionsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<DivisionFilterInputType>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
 export type QueryProfileInformationArgs = {
   userId: Scalars['ID'];
 };
@@ -3400,6 +3598,12 @@ export type QueryUserArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryUserDivisionsArgs = {
+  projectId?: InputMaybe<Scalars['ID']>;
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Схема запросов данных. */
 export type QueryUserInformationArgs = {
   userId: Scalars['ID'];
 };
@@ -3434,7 +3638,7 @@ export type RecoveryPasswordMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Object type for Regions. */
+/** Graphene object type for Regions. */
 export type RegionType = {
   __typename?: 'RegionType';
   /** Real code of region */

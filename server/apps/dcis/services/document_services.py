@@ -11,9 +11,9 @@ from apps.dcis.models import Period, Document, Cell, Limitation, Value, Sheet, S
 def create_new_document(
         user: User,
         period: Period,
-        document_id: int,
         status_id: int,
         comment: str,
+        document_id: Optional[Union[str, int]] = None,
         object_id: Optional[int] = None
 ) -> Document:
     """Создание нового документа.

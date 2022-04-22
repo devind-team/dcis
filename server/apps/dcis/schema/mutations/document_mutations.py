@@ -11,6 +11,7 @@ from graphene_django_cud.mutations import DjangoUpdateMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
+from apps.core.models import User
 from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentStatus, RowDimension
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentType, ValueType, DocumentStatusType
@@ -22,9 +23,18 @@ class AddDocumentMutation(BaseMutation):
     """Добавление документа."""
 
     class Input:
+        """Входные параметры мутации.
+
+            comment - комментарий к документу
+            period_id - идентификатор периода
+            status_id - идентификатор устанавливаемого статуса
+            division_id - идентификатор дивизиона
+            document_id - документ от которого создавать копию
+        """
         comment = graphene.String(required=True, description='Комментарий')
         period_id = graphene.ID(required=True, description='Идентификатор периода')
         status_id = graphene.Int(required=True, description='Начальный статус документа')
+        division_id = graphene.Int(description='Идентификатор дивизиона')
         document_id = graphene.ID(description='Идентификатор документа')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
@@ -37,22 +47,19 @@ class AddDocumentMutation(BaseMutation):
             comment: str,
             period_id: str,
             status_id: int,
-            document_id: Optional[str]
+            division_id: Optional[str] = None,
+            document_id: Optional[int] = None
     ) -> 'AddDocumentMutation':
         """Мутация для создания документа."""
+        user: User = info.context.user
         period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
-        # divisions = period.project.division.objects.filter(Q(user=u) | Q(users=u)).all()
-        document_id = from_global_id(document_id)[1]
-        # Служба поддержки
-        object_id: int = 1
-
         document = create_new_document(
-            info.context.user,
+            user,
             period,
-            document_id,
             status_id,
             comment,
-            object_id
+            document_id,
+            division_id
         )
         return AddDocumentMutation(document=document)
 

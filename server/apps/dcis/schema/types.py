@@ -103,7 +103,20 @@ class DivisionType(OptimizedDjangoObjectType):
         model = Division
         interfaces = (graphene.relay.Node,)
         fields = ('id', 'period', 'object_id',)
+        filter_fields = {
+            'id': ('exact',),
+            'period': ('in', 'exact',),
+            'object_id': ('in', 'exact',)
+        }
         connection_class = CountableConnection
+
+
+class DivisionModelType(graphene.ObjectType):
+    """Описание обобщенного типа дивизиона."""
+
+    id = graphene.Int(required=True, description='Идентификатор модели дивизиона')
+    model = graphene.String(required=True, description='Модель дивизиона: department, organization')
+    name = graphene.String(required=True, description='Название дивизиона')
 
 
 class PrivilegeType(DjangoObjectType):
