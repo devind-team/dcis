@@ -34,8 +34,8 @@ class ProjectQueries(graphene.ObjectType):
     period_divisions = AdvancedDjangoFilterConnectionField(DivisionType, description='Получение дивизионов')
     user_divisions = graphene.List(
         DivisionModelType,
-        user_id=graphene.ID(description='Пользователь', default_value=None),
-        project_id=graphene.ID(description='Идентификатор проекта', default_value=None),
+        user_id=graphene.ID(description='Пользователь'),
+        project_id=graphene.ID(description='Идентификатор проекта'),
         required=True,
         description='Дивизионы пользователя'
     )
@@ -52,11 +52,18 @@ class ProjectQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_user_divisions(root: Any, info: ResolveInfo, user_id: Optional[str], project_id: Optional[str]) -> list:
+    def resolve_user_divisions(
+        root: Any,
+        info: ResolveInfo,
+        user_id: Optional[str] = None,
+        project_id: Optional[str] = None
+    ) -> list:
         user: User = info.context.user \
             if user_id is None \
             else get_object_or_404(User, pk=from_global_id(user_id)[1])
         project: Optional[Project] = None \
             if project_id is None \
             else get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        return user.divisions(project)
+        divisions = user.divisions(project)
+        print(divisions)
+        return divisions
