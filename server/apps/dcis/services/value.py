@@ -72,8 +72,11 @@ def get_file_value_files(value: Value) -> list[File]:
     return sorted(files, key=lambda file: payload.index(file.pk))
 
 
-def get_file_value_archive_url(value: Value) -> str:
-    """Получение url архива значения ячейки типа `Файл`."""
+def get_file_value_files_url(value: Value) -> str:
+    """Получение URL файла или архива значения ячейки типа `Файл`."""
+    files = get_file_value_files(value)
+    if len(files) == 0:
+        return files[0].src.url
     archive_path = path.join(settings.TEMP_FILES_DIR, value.value)
     with ZipFile(archive_path, 'w') as zip_file:
         for file in get_file_value_files(value):

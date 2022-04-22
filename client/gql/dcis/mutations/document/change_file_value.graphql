@@ -6,7 +6,7 @@ mutation ChangeFileValue(
   $columnId: Int!,
   $rowId: Int!,
   $value: String!,
-  $remainingFiles: [Int!]!,
+  $remainingFiles: [ID!]!,
   $newFiles: [Upload!]!
 ) {
   changeFileValue(input: {

@@ -168,7 +168,7 @@ class ChangeFileValueMutation(BaseMutation):
         column_id = graphene.Int(required=True, description='Идентификатор колонки')
         row_id = graphene.Int(required=True, description='Идентификатор строки')
         value = graphene.String(required=True, description='Значение')
-        remaining_files = graphene.List(graphene.NonNull(graphene.Int), required=True, description='Оставшиеся файлы')
+        remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
 
     value = graphene.Field(ValueType, description='Измененное значение')
@@ -195,7 +195,7 @@ class ChangeFileValueMutation(BaseMutation):
             column_id=column_id,
             row_id=row_id,
             value=value,
-            remaining_files=remaining_files,
+            remaining_files=[from_global_id(global_id)[1] for global_id in remaining_files],
             new_files=new_files
         )
         return ChangeFileValueMutation(value=val)

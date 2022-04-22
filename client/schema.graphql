@@ -681,7 +681,7 @@ input ChangeFileValueMutationInput {
   """Новые файлы"""
   newFiles: [Upload!]!
   """Оставшиеся файлы"""
-  remainingFiles: [Int!]!
+  remainingFiles: [ID!]!
   """Идентификатор строки"""
   rowId: Int!
   """Идентификатор листа"""
@@ -2739,16 +2739,16 @@ type Query {
   ): UserType
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
-  """url архива значения ячейки типа `Файл`"""
-  valueArchiveUrl(
-    """Идентификатор значения ячейки"""
-    valueId: ID!
-  ): String
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор значения ячейки"""
     valueId: ID!
   ): [FileType!]
+  """URL файла или архива значения ячейки типа `Файл`"""
+  valueFilesUrl(
+    """Идентификатор значения ячейки"""
+    valueId: ID!
+  ): String
 }
 
 input RecoveryPasswordMutationInput {

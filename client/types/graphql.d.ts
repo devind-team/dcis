@@ -753,7 +753,7 @@ export type ChangeFileValueMutationInput = {
   /** Новые файлы */
   newFiles: Array<Scalars['Upload']>;
   /** Оставшиеся файлы */
-  remainingFiles: Array<Scalars['Int']>;
+  remainingFiles: Array<Scalars['ID']>;
   /** Идентификатор строки */
   rowId: Scalars['Int'];
   /** Идентификатор листа */
@@ -3235,10 +3235,10 @@ export type Query = {
   userInformation?: Maybe<UserType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
-  /** url архива значения ячейки типа `Файл` */
-  valueArchiveUrl?: Maybe<Scalars['String']>;
   /** Файлы значения ячейки типа `Файл` */
   valueFiles?: Maybe<Array<FileType>>;
+  /** URL файла или архива значения ячейки типа `Файл` */
+  valueFilesUrl?: Maybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -3460,12 +3460,12 @@ export type QueryUsersArgs = {
 };
 
 /** Схема запросов данных. */
-export type QueryValueArchiveUrlArgs = {
+export type QueryValueFilesArgs = {
   valueId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
-export type QueryValueFilesArgs = {
+export type QueryValueFilesUrlArgs = {
   valueId: Scalars['ID'];
 };
 
@@ -4538,7 +4538,7 @@ export type ChangeFileValueMutationVariables = Exact<{
   columnId: Scalars['Int'];
   rowId: Scalars['Int'];
   value: Scalars['String'];
-  remainingFiles: Array<Scalars['Int']> | Scalars['Int'];
+  remainingFiles: Array<Scalars['ID']> | Scalars['ID'];
   newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
 }>;
 
@@ -4695,17 +4695,17 @@ export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
 
-export type ValueArchiveUrlQueryVariables = Exact<{
-  valueId: Scalars['ID'];
-}>;
-
-export type ValueArchiveUrlQuery = { __typename?: 'Query', valueArchiveUrl?: string | null };
-
 export type ValueFilesQueryVariables = Exact<{
   valueId: Scalars['ID'];
 }>;
 
 export type ValueFilesQuery = { __typename?: 'Query', valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any }> | null };
+
+export type ValueFilesUrlQueryVariables = Exact<{
+  valueId: Scalars['ID'];
+}>;
+
+export type ValueFilesUrlQuery = { __typename?: 'Query', valueFilesUrl?: string | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 
