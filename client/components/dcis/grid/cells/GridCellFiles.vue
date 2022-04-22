@@ -2,8 +2,8 @@
   v-dialog(v-model="active" width="600px" persistent)
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
-    validation-observer(v-slot="{ handleSubmit, invalid }" slim)
-      form(@submit.prevent="handleSubmit(setValue)")
+    validation-observer(v-slot="{ invalid }" slim)
+      form
         v-card
           v-card-title {{ t('dcis.cells.gridCellFiles.title') }}
             v-spacer
@@ -28,12 +28,34 @@
               :detect-input="false"
               rules="required"
             )
-              file-field(
-                v-for="(file, i) in localValueFiles"
-                :key="file.id"
-                :lable="t('dcis.cells.gridCellFiles.file', { number: i + 1})"
-                :existing-file="{ name: file.name, src: file.src }"
-              )
+              v-list(v-if="localValueFiles.length" dense)
+                v-list-item.px-0(
+                   v-for="localFile in localValueFiles"
+                   :key="localFile.file.id"
+                   dense
+                )
+                  v-list-item-action
+                    v-tooltip(bottom)
+                      template(#activator="{ on, attrs }")
+                        v-btn(
+                          v-bind="attrs"
+                          v-on="on"
+                          color="red"
+                          small
+                          icon
+                          role="checkbox"
+                          :aria-checked="localFile.deleted"
+                          @click="localFile.deleted = !localFile.deleted"
+                        )
+                          v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
+                      span {{ localFile.deleted ? t('cancelDeletion') : t('delete') }}
+                  v-list-item-content
+                    v-list-item-title
+                      nuxt-link(
+                        :to="`/${localFile.file.src}`"
+                        :class="{'text-decoration-line-through': localFile.deleted}"
+                        target="_blank"
+                      ) {{ localFile.file.name }}
               v-file-input(
                 v-model="newFiles"
                 :label="t('dcis.cells.gridCellFiles.newFiles')"
@@ -44,15 +66,22 @@
                 multiple
               )
           v-card-actions
+            v-btn(color="error" @click="clearValue") {{ t('clear') }}
             v-spacer
-            v-btn(:disabled="invalid" type="submit" color="primary") {{ t('save') }}
+            v-btn(:disabled="invalid" type="submit" color="primary" @click="setValue") {{ t('save') }}
 </template>
 
 <script lang="ts">
 import { ValidationProvider } from 'vee-validate'
 import { defineComponent, onMounted, ref, computed, watch } from '#app'
+import type { PropType } from '#app'
 import { useI18n, useCommonQuery } from '~/composables'
-import { FileType, ValueFilesQuery, ValueFilesQueryVariables } from '~/types/graphql'
+import {
+  FileType,
+  ValueType,
+  ValueFilesQuery,
+  ValueFilesQueryVariables
+} from '~/types/graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 import FileField from '~/components/common/FileField.vue'
 
@@ -64,6 +93,7 @@ type ValueFile = {
 export default defineComponent({
   components: { FileField },
   props: {
+    valueType: { type: Object as PropType<ValueType>, default: null },
     value: { type: String, default: null }
   },
   setup (props, { emit }) {
@@ -80,23 +110,25 @@ export default defineComponent({
     const { data: valueFiles } = useCommonQuery<ValueFilesQuery, ValueFilesQueryVariables, 'valueFiles'>({
       document: valueFilesQuery,
       variables: {
-        valueId: props.value
+        valueId: props.valueType.id
       },
       options: {
-        enabled: active.value
+        enabled: !!props.valueType
       }
     })
 
     const localValueFiles = ref<ValueFile[]>([])
     watch(valueFiles, (value) => {
-      localValueFiles.value = value.map((file: FileType) => ({ file, deleted: false }))
-    })
+      if (value) {
+        localValueFiles.value = value.map((file: FileType) => ({ file, deleted: false }))
+      }
+    }, { immediate: true })
 
     const remainingExistFiles = computed<string[]>(
       () => localValueFiles.value.filter(valueFile => !valueFile.deleted).map(valueFile => valueFile.file.id)
     )
 
-    const newValue = ref<string>(null)
+    const newValue = ref<string>(props.value)
     const newFiles = ref<File[]>([])
 
     const remainingFiles = computed<(string | File)[]>(() => [...remainingExistFiles.value, ...newFiles.value])
@@ -109,9 +141,20 @@ export default defineComponent({
       emit('cancel')
     }
 
+    const clearValue = () => {
+      active.value = false
+      emit('set-value', '', {
+        remainingFiles: [],
+        newFiles: []
+      })
+    }
+
     const setValue = () => {
       active.value = false
-      emit('set-value', newValue.value)
+      emit('set-value', newValue.value, {
+        remainingFiles: remainingExistFiles.value,
+        newFiles: newFiles.value
+      })
     }
 
     return {
@@ -122,6 +165,7 @@ export default defineComponent({
       newValue,
       newFiles,
       cancel,
+      clearValue,
       setValue
     }
   }

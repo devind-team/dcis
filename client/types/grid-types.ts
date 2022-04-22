@@ -1,4 +1,4 @@
-import type { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import type { ColumnDimensionType, RowDimensionType, CellType, ValueType } from '~/types/graphql'
 
 export type MousePositionType = {
   x: number
@@ -47,6 +47,7 @@ export type BuildCellType = {
   column: ColumnDimensionType
   row: RowDimensionType
   cell: CellType
+  valueType: ValueType | null
 }
 
 export type BuildRowType = {

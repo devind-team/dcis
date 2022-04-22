@@ -68,7 +68,7 @@ def get_file_value_payload(value: Value) -> list[int]:
 def get_file_value_files(value: Value) -> list[File]:
     """Получение файлов значения ячейки типа `Файл`."""
     payload = get_file_value_payload(value)
-    files = File.objects.filter(pk__id=payload)
+    files = File.objects.filter(pk__in=payload)
     return sorted(files, key=lambda file: payload.index(file.pk))
 
 
