@@ -699,6 +699,8 @@ type ChangeFileValueMutationPayload {
   success: Boolean!
   """Измененное значение"""
   value: ValueType
+  """Измененные файлы"""
+  valueFiles: [FileType]
 }
 
 input ChangeGroupNameMutationInput {

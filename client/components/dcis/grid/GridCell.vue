@@ -12,8 +12,9 @@
 </template>
 
 <script lang="ts">
+import { FetchResult } from '@apollo/client/link/core'
 import { useMutation } from '@vue/apollo-composable'
-import { ApolloCache, DataProxy } from 'apollo-cache'
+import { DataProxy } from 'apollo-cache'
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { BuildCellType } from '~/types/grid-types'
@@ -40,7 +41,7 @@ export type ChangeValueMutationResult = { data: ChangeValueMutation }
 export type ChangeFileValueMutationResult = { data: ChangeFileValueMutation }
 
 type ChangeValueDocumentUpdateType = (
-  cache: ApolloCache<DocumentQuery>,
+  cache: DataProxy,
   result: ChangeValueMutationResult | ChangeFileValueMutationResult,
   transform: (dc: DocumentQuery, r: ChangeValueMutationResult | ChangeFileValueMutationResult) => DocumentQuery
 ) => DataProxy
@@ -80,33 +81,20 @@ export default defineComponent({
     const { mutate: changeValueMutate } = useMutation<
       ChangeValueMutation,
       ChangeValueMutationVariables
-    >(changeValueMutation, {
-      update: (cache, result) => documentUpdate(
-        cache as unknown as ApolloCache<DocumentQuery>,
-        result as ChangeValueMutationResult,
-        (
-          dataCache: DocumentQuery,
-          { data: { changeValue: { success, value } } }: ChangeValueMutationResult
-        ) => {
-          return success ? updateValue(dataCache, value) : dataCache
-        })
-    })
+    >(changeValueMutation)
     const { mutate: changeFileValueMutate } = useMutation<
       ChangeFileValueMutation,
       ChangeFileValueMutationVariables
-    >(changeFileValueMutation, {
-      update: (cache, result) => documentUpdate(
-        cache as unknown as ApolloCache<DocumentQuery>,
-        result as ChangeFileValueMutationResult,
-        (
-          dataCache: DocumentQuery,
-          { data: { changeFileValue: { success, value } } }: ChangeFileValueMutationResult
-        ) => {
-          return success ? updateValue(dataCache, value) : dataCache
-        })
-    })
+    >(changeFileValueMutation)
 
-    const setCellValue = (value: string, args: any) => {
+    const setCellValue = (
+      value: string,
+      args: any,
+      additionalUpdate: <TResultMutation>(
+        cache: DataProxy,
+        result: Omit<FetchResult<TResultMutation>, 'context'>
+      ) => void | null = null
+    ) => {
       if (props.cell.kind === 'fl') {
         changeFileValueMutate({
           documentId,
@@ -115,6 +103,21 @@ export default defineComponent({
           rowId: props.cell.cell.rowId,
           value,
           ...args
+        }, {
+          update: (cache, result) => {
+            const dataProxy = cache as unknown as DataProxy
+            documentUpdate(
+              dataProxy,
+              result as ChangeFileValueMutationResult,
+              (
+                dataCache: DocumentQuery,
+                { data: { changeFileValue: { success, value } } }: ChangeFileValueMutationResult
+              ) => {
+                return success ? updateValue(dataCache, value) : dataCache
+              }
+            )
+            additionalUpdate!(dataProxy, result)
+          }
         })
       } else if (props.cell.value !== value) {
         changeValueMutate({
@@ -123,6 +126,17 @@ export default defineComponent({
           columnId: props.cell.cell.columnId,
           rowId: props.cell.cell.rowId,
           value
+        }, {
+          update: (cache, result) => documentUpdate(
+            cache as unknown as DataProxy,
+            result as ChangeValueMutationResult,
+            (
+              dataCache: DocumentQuery,
+              { data: { changeValue: { success, value } } }: ChangeValueMutationResult
+            ) => {
+              return success ? updateValue(dataCache, value) : dataCache
+            }
+          )
         })
       }
       emit('clear-active')

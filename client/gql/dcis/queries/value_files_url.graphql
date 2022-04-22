@@ -1,0 +1,3 @@
+query ValueFilesUrl($valueId: ID!) {
+  valueFilesUrl(valueId: $valueId)
+}

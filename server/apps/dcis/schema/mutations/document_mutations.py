@@ -1,6 +1,7 @@
 from typing import Optional
 
 import graphene
+from devind_core.schema.types import FileType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -16,7 +17,7 @@ from apps.dcis.models import Document, DocumentStatus, Period, Sheet, Status
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, ValueType
 from apps.dcis.services.document_unload import DocumentUnload
-from apps.dcis.services.value import update_or_create_file_value, update_or_create_value
+from apps.dcis.services.value import get_file_value_files, update_or_create_file_value, update_or_create_value
 
 
 class AddDocumentMutation(BaseMutation):
@@ -172,6 +173,7 @@ class ChangeFileValueMutation(BaseMutation):
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
 
     value = graphene.Field(ValueType, description='Измененное значение')
+    value_files = graphene.List(FileType, description='Измененные файлы')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -195,10 +197,10 @@ class ChangeFileValueMutation(BaseMutation):
             column_id=column_id,
             row_id=row_id,
             value=value,
-            remaining_files=[from_global_id(global_id)[1] for global_id in remaining_files],
+            remaining_files=[int(from_global_id(global_id)[1]) for global_id in remaining_files],
             new_files=new_files
         )
-        return ChangeFileValueMutation(value=val)
+        return ChangeFileValueMutation(value=val, value_files=get_file_value_files(val))
 
 
 class DocumentMutations(graphene.ObjectType):

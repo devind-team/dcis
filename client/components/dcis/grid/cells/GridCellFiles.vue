@@ -72,6 +72,7 @@
 </template>
 
 <script lang="ts">
+import { DataProxy } from '@apollo/client'
 import { ValidationProvider } from 'vee-validate'
 import { defineComponent, onMounted, ref, computed, watch } from '#app'
 import type { PropType } from '#app'
@@ -84,6 +85,7 @@ import {
 } from '~/types/graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 import FileField from '~/components/common/FileField.vue'
+import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/GridCell.vue'
 
 type ValueFile = {
   file: FileType
@@ -107,7 +109,10 @@ export default defineComponent({
       filesValidationProvider.value.setFlags({ invalid: true })
     })
 
-    const { data: valueFiles } = useCommonQuery<ValueFilesQuery, ValueFilesQueryVariables, 'valueFiles'>({
+    const {
+      data: valueFiles,
+      update: valueFilesUpdate
+    } = useCommonQuery<ValueFilesQuery, ValueFilesQueryVariables, 'valueFiles'>({
       document: valueFilesQuery,
       variables: {
         valueId: props.valueType.id
@@ -116,6 +121,18 @@ export default defineComponent({
         enabled: !!props.valueType
       }
     })
+
+    const updateValueFiles = (
+      cache: DataProxy,
+      result: ChangeFileValueMutationResult
+    ) => {
+      valueFilesUpdate(cache, result, (dataCache) => {
+        const mutationResult = result.data.changeFileValue
+        const dataKey = Object.keys(dataCache)[0]
+        dataCache[dataKey] = mutationResult[dataKey]
+        return dataCache
+      })
+    }
 
     const localValueFiles = ref<ValueFile[]>([])
     watch(valueFiles, (value) => {
@@ -146,7 +163,7 @@ export default defineComponent({
       emit('set-value', '', {
         remainingFiles: [],
         newFiles: []
-      })
+      }, updateValueFiles)
     }
 
     const setValue = () => {
@@ -154,7 +171,7 @@ export default defineComponent({
       emit('set-value', newValue.value, {
         remainingFiles: remainingExistFiles.value,
         newFiles: newFiles.value
-      })
+      }, updateValueFiles)
     }
 
     return {

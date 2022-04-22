@@ -772,6 +772,8 @@ export type ChangeFileValueMutationPayload = {
   success: Scalars['Boolean'];
   /** Измененное значение */
   value?: Maybe<ValueType>;
+  /** Измененные файлы */
+  valueFiles?: Maybe<Array<Maybe<FileType>>>;
 };
 
 export type ChangeGroupNameMutationInput = {
@@ -4542,7 +4544,7 @@ export type ChangeFileValueMutationVariables = Exact<{
   newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
 }>;
 
-export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null } };
+export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null, valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> | null } };
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
