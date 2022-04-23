@@ -237,8 +237,9 @@ class DocumentType(DjangoObjectType):
             'period',
             'sheets',
             'object_id',
-            'last_status'
+            'last_status',
         )
+        filter_fields = {}
         connection_class = CountableConnection
 
     @staticmethod

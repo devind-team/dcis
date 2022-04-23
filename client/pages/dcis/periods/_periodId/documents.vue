@@ -1,31 +1,26 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  left-navigator-container(@update-drawer="$emit('update-drawer')" :bread-crumbs="breadCrumbs")
     template(#header) {{ period.name }}
       template(v-if="hasPerm('dcis.add_document')")
         v-spacer
         add-document(:period-id="$route.params.periodId" :update="addDocumentUpdate")
           template(#activator="{ on }")
             v-btn(v-on="on" color="primary") Создать новый документ
-    v-data-table(:headers="headers" :items="period.documents" disable-pagination hide-default-footer)
+    v-row
+      v-col(cols="12" sm="9")
+      v-col.text-right(cols="12" sm="3") {{ $t('shownOf', { totalCount, count }) }}
+    v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
       template(#item.version="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
         ) Версия {{ item.version }}
       template(#item.comment="{ item }")
         template(v-if="item.comment")
-          text-menu(
-            :value="item.comment"
-            @update="changeDocumentComment(item, $event)"
-            multiline
-          )
-            template(v-slot:default="{ on: onMenu }")
-              v-tooltip(bottom)
-                template(#activator="{ on: onTooltip }")
-                  a(v-on="{...onMenu, ...onTooltip }") {{ item.comment }}
-                span {{ $t('change') }}
+          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+            a(v-on="on") {{ item.comment }}
       template(#item.lastStatus="{ item }")
         template(v-if="item.lastStatus")
-          document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="periodUpdate" :document="item")
+          document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="update" :document="item")
             template(#activator="{ on }")
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
           strong(v-else) {{ item.lastStatus.status.name }}.
@@ -39,24 +34,24 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, inject, toRef, useNuxt2Meta } from '#app'
+import { defineComponent, toRef, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/store'
 import { useFilters } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   ChangeDocumentCommentMutation,
-  ChangeDocumentCommentMutationPayload,
   ChangeDocumentCommentMutationVariables,
+  DocumentsQuery,
+  DocumentsQueryVariables,
   DocumentType,
   PeriodType
 } from '~/types/graphql'
+import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
-
-type ChangeDocumentCommentMutationResult = { data: { changeDocumentComment: ChangeDocumentCommentMutationPayload } }
 
 export default defineComponent({
   components: { LeftNavigatorContainer, AddDocument, DocumentStatuses, TextMenu },
@@ -66,33 +61,39 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
+    const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
 
     const userStore = useAuthStore()
     const hasPerm = toRef(userStore, 'hasPerm')
 
-    const periodUpdate: any = inject('periodUpdate')
+    const {
+      data: documents,
+      loading,
+      pagination: { count, totalCount },
+      update,
+      addUpdate,
+      changeUpdate
+    } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
+      document: documentsQuery,
+      variables: () => ({ periodId: route.params.periodId, divisionsId: [] })
+    })
+
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
-      periodUpdate(cache, result, (dataCache, { data: { addDocument: { success, document } } }: AddDocumentMutationResultType) => {
-        if (success) {
-          dataCache.period.documents = [document, ...dataCache.period.documents]
-        }
-        return dataCache
-      })
+      if (!result.data.addDocument.errors.length) {
+        addUpdate(cache, result, 'document')
+      }
     }
 
     const { mutate: ChangeDocumentCommentMutate } = useMutation<ChangeDocumentCommentMutation, ChangeDocumentCommentMutationVariables>(
       changeDocumentCommentMutation,
       {
-        update: (cache, result) => periodUpdate(
-          cache, result, (dataCache, { data: { changeDocumentComment: { document: doc } } }:
-            ChangeDocumentCommentMutationResult) => {
-            if (doc) {
-              dataCache.period.documents = Object.assign(dataCache.period.documents, doc)
-            }
-            return dataCache
-          })
+        update: (cache, result) => {
+          if (!result.errors) {
+            changeUpdate(cache, result, 'document')
+          }
+        }
       }
     )
 
@@ -107,9 +108,13 @@ export default defineComponent({
     ]
 
     return {
+      documents,
+      loading,
       headers,
       hasPerm,
-      periodUpdate,
+      count,
+      totalCount,
+      update,
       addDocumentUpdate,
       dateTimeHM,
       changeDocumentComment

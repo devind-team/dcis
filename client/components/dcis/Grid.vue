@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
-import type { PropType, Ref } from '#app'
+import type { PropType } from '#app'
 import { defineComponent, provide, toRef } from '#app'
 import {
   SheetType,
@@ -97,14 +97,76 @@ export default defineComponent({
       })
     }
 
-    const sheet: Ref<SheetType> = toRef(props, 'sheet')
-    const grid = useGrid(sheet, changeColumnWidth)
+    const sheet = toRef(props, 'sheet')
+    const {
+      rowIndexColumnWidth,
+      gridWidth,
+      columns,
+      rows,
+      mergeCells,
+      mergedCells,
+      active,
+      selection,
+      selectionCells,
+      selectionColumns,
+      selectionRows,
+      allSelected,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      selectedBoundaryRowCells,
+      selectionCellsOptions,
+      startCellSelection,
+      enterCellSelection,
+      endCellSelection,
+      setActive,
+      gridContainer,
+      columnWidth,
+      mouseenterColumnIndex,
+      mousemoveColumnIndex,
+      mouseleaveColumnIndex,
+      mousedownColumnIndex,
+      mouseupColumnIndex,
+      mouseenterRowIndex,
+      mousedownRowIndex,
+      selectAll
+    } = useGrid(sheet, changeColumnWidth)
 
-    provide('active', grid.active)
+    provide('active', active)
     provide('documentId', props.documentId)
     provide('documentUpdate', props.update)
 
-    return grid
+    return {
+      rowIndexColumnWidth,
+      gridWidth,
+      columns,
+      rows,
+      mergedCells,
+      mergeCells,
+      active,
+      selection,
+      selectionCells,
+      selectionColumns,
+      selectionRows,
+      allSelected,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      selectedBoundaryRowCells,
+      selectionCellsOptions,
+      startCellSelection,
+      enterCellSelection,
+      endCellSelection,
+      setActive,
+      gridContainer,
+      columnWidth,
+      mouseenterColumnIndex,
+      mousemoveColumnIndex,
+      mouseleaveColumnIndex,
+      mousedownColumnIndex,
+      mouseupColumnIndex,
+      mouseenterRowIndex,
+      mousedownRowIndex,
+      selectAll
+    }
   }
 })
 </script>

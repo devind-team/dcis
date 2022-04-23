@@ -1859,6 +1859,25 @@ export type DocumentType = Node & {
   version: Scalars['Int'];
 };
 
+export type DocumentTypeConnection = {
+  __typename?: 'DocumentTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<DocumentTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `DocumentType` and its cursor. */
+export type DocumentTypeEdge = {
+  __typename?: 'DocumentTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<DocumentType>;
+};
+
 /** Ошибка в поле формы */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
@@ -3306,6 +3325,8 @@ export type Query = {
   document?: Maybe<DocumentType>;
   /** Статусы документов */
   documentStatuses?: Maybe<Array<DocumentStatusType>>;
+  /** Документы */
+  documents: DocumentTypeConnection;
   files: FileTypeConnection;
   groups: Array<GroupType>;
   /** Установлены ли настройки приложения */
@@ -3423,6 +3444,17 @@ export type QueryDocumentArgs = {
 /** Схема запросов данных. */
 export type QueryDocumentStatusesArgs = {
   documentId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Схема запросов данных. */
+export type QueryDocumentsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  divisionsId?: InputMaybe<Array<Scalars['Int']>>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -4636,7 +4668,9 @@ export type ColumnDimensionFieldsFragment = { __typename: 'ColumnDimensionType',
 
 export type DepartmentFieldFragment = { __typename: 'DepartmentType', id: string, name: string, code?: number | null, createdAt: any };
 
-export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number };
+export type DivisionModelFieldsFragment = { __typename: 'DivisionModelType', id: number, model: string, name: string };
+
+export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any };
 
 export type MergedCellsFieldsFragment = { __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null };
 
@@ -4670,7 +4704,7 @@ export type AddDocumentMutationVariables = Exact<{
   divisionId?: InputMaybe<Scalars['Int']>;
 }>;
 
-export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
+export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
 
 export type AddDocumentStatusMutationVariables = Exact<{
   comment: Scalars['String'];
@@ -4685,7 +4719,7 @@ export type ChangeDocumentCommentMutationVariables = Exact<{
   comment: Scalars['String'];
 }>;
 
-export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, createdAt: any, updatedAt: any, comment: string, version: number } | null } };
+export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any } | null } };
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -4811,6 +4845,13 @@ export type DocumentStatusesQueryVariables = Exact<{
 
 export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: Array<{ __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } }> | null };
 
+export type DocumentsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+  divisionsId?: InputMaybe<Array<Scalars['Int']> | Scalars['Int']>;
+}>;
+
+export type DocumentsQuery = { __typename?: 'Query', documents: { __typename?: 'DocumentTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'DocumentTypeEdge', node?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } | null> } };
+
 export type OrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OrganizationsQuery = { __typename?: 'Query', organizations?: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
@@ -4837,6 +4878,13 @@ export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'Pr
 export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
+
+export type UserDivisionsQueryVariables = Exact<{
+  userId?: InputMaybe<Scalars['ID']>;
+  projectId?: InputMaybe<Scalars['ID']>;
+}>;
+
+export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 

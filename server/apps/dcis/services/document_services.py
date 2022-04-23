@@ -8,13 +8,19 @@ from apps.core.models import User
 from apps.dcis.models import Period, Document, Cell, Limitation, Value, Sheet, Status, RowDimension
 
 
+def get_documents(user: User, period_id: int, divisions_id):
+    """Получение документов в зависимости от прав."""
+    period: Period = get_object_or_404(Period, pk=period_id)
+    return Document.objects.filter(period=period)
+
+
 def create_new_document(
         user: User,
         period: Period,
         status_id: int,
         comment: str,
-        document_id: Optional[Union[str, int]] = None,
-        object_id: Optional[int] = None
+        document_id: Optional[int] = None,
+        division_id: Optional[int] = None
 ) -> Document:
     """Создание нового документа.
 
@@ -27,13 +33,13 @@ def create_new_document(
     latest_document: Optional[Document] = get_object_or_none(Document, pk=document_id)
     max_version: Optional[int] = Document.objects.filter(
         period=period,
-        object_id=object_id
+        object_id=division_id
     ).aggregate(version=Max('version'))['version']
 
     document: Document = Document.objects.create(
         version=max_version + 1 if max_version is not None else 1,
         comment=comment,
-        object_id=object_id,
+        object_id=division_id,
         period=period
     )
     document.documentstatus_set.create(

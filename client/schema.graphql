@@ -1718,6 +1718,23 @@ type DocumentType implements Node {
   version: Int!
 }
 
+type DocumentTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DocumentTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DocumentType` and its cursor."""
+type DocumentTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DocumentType
+}
+
 """Ошибка в поле формы"""
 type ErrorFieldType {
   """Поле формы"""
@@ -2786,6 +2803,18 @@ type Query {
     """Идентификатор документа"""
     documentId: ID
   ): [DocumentStatusType!]
+  """Документы"""
+  documents(
+    after: String
+    before: String
+    """Идентификаторы дивизионов"""
+    divisionsId: [Int!]
+    first: Int
+    last: Int
+    offset: Int
+    """Идентификатор периода"""
+    periodId: ID!
+  ): DocumentTypeConnection!
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""

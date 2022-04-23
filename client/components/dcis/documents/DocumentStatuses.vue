@@ -104,7 +104,7 @@ export default defineComponent({
       if (success) {
         addUpdate(cache, result, 'documentStatus')
         props.update(cache, result, (dataCache, { data: { addDocumentStatus: { documentStatus } } }: AddDocumentStatusMutationResult) => {
-          dataCache.period.documents.find(d => d.id === props.document.id).lastStatus = documentStatus
+          dataCache.documents.edges.find(d => d.node.id === props.document.id).node.lastStatus = documentStatus
           return dataCache
         })
       }
@@ -118,11 +118,9 @@ export default defineComponent({
           props.update(
             cache as any,
             result as DeleteDocumentStatusMutationResult,
-            (dataCache, { data: { deleteDocumentStatus: { success, id } } }: DeleteDocumentStatusMutationResult) => {
-              if (success) {
-                dataCache.period
-                  .documents.find(d => d.id === props.document.id)
-                  .lastStatus = documentStatuses.value.filter(d => d.id !== id)[0]
+            (dataCache, { data: { deleteDocumentStatus: { errors, id } } }: DeleteDocumentStatusMutationResult) => {
+              if (!errors.length) {
+                dataCache.documents.edges.find(d => d.node.id === props.document.id).node.lastStatus = documentStatuses.value.filter(d => d.id !== id)[0]
               }
               return dataCache
             }
