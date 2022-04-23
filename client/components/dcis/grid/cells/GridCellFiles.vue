@@ -1,7 +1,7 @@
 <template lang="pug">
   v-dialog(v-model="active" width="600px" persistent)
     template(#activator="{ on }")
-      div(v-on="on") {{ value }}
+      grid-cell-file-value(:value-type="valueType" :value="value" @dblclick="on.click")
     validation-observer(v-slot="{ invalid }" slim)
       form
         v-card
@@ -85,6 +85,7 @@ import {
 } from '~/types/graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 import FileField from '~/components/common/FileField.vue'
+import GridCellFileValue from '~/components/dcis/grid/values/GridCellFileValue.vue'
 import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/GridCell.vue'
 
 type ValueFile = {
@@ -93,7 +94,7 @@ type ValueFile = {
 }
 
 export default defineComponent({
-  components: { FileField },
+  components: { FileField, GridCellFileValue },
   props: {
     valueType: { type: Object as PropType<ValueType>, default: null },
     value: { type: String, default: null }

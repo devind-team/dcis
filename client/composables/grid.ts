@@ -190,9 +190,6 @@ export function useGrid (
    */
   const endCellSelection = (position: string): void => {
     if (startCellSelectionPosition.value) {
-      if (position === startCellSelectionPosition.value) {
-        setActive(position)
-      }
       selectionRange.value = `${startCellSelectionPosition.value}:${position}`
       startCellSelectionPosition.value = null
     }

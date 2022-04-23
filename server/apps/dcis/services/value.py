@@ -75,10 +75,10 @@ def get_file_value_files(value: Value) -> list[File]:
 def get_file_value_files_url(value: Value) -> str:
     """Получение URL файла или архива значения ячейки типа `Файл`."""
     files = get_file_value_files(value)
-    if len(files) == 0:
+    if len(files) == 1:
         return files[0].src.url
-    archive_path = path.join(settings.TEMP_FILES_DIR, value.value)
+    archive_path = f'{path.join(settings.TEMP_FILES_DIR, value.value)}.zip'
     with ZipFile(archive_path, 'w') as zip_file:
         for file in get_file_value_files(value):
-            zip_file.write(file.src.path)
+            zip_file.write(file.src.path, path.basename(file.src.path))
     return f'/{Path(path.relpath(archive_path, settings.BASE_DIR)).as_posix()}'
