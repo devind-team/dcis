@@ -1,7 +1,7 @@
 <template lang="pug">
   v-dialog(v-model="active" width="600px" persistent)
     template(#activator="{ on }")
-      grid-cell-file-value(:value-type="valueType" :value="value" @dblclick="on.click")
+      div(v-on="on") {{ value }}
     validation-observer(v-slot="{ invalid }" slim)
       form
         v-card
@@ -11,26 +11,41 @@
               v-icon mdi-close
           v-card-text
             validation-provider(
-              v-slot="{ errors, valid }"
-              :name="String(t('dcis.cells.gridCellFiles.fileLink'))"
-              rules="required"
-            )
-              v-text-field(
-                v-model="newValue"
-                :label="t('dcis.cells.gridCellFiles.fileLink')"
-                :error-messages="errors"
-                :success="valid"
-              )
-            validation-provider(
               ref="filesValidationProvider"
               v-slot="{ errors, valid }"
               :custom-messages="{ required: t('dcis.cells.gridCellFiles.filesError') }"
               :detect-input="false"
               rules="required"
             )
-              v-list(v-if="localValueFiles.length" dense)
+              v-list(v-if="existingFiles.length" dense)
                 v-list-item.px-0(
-                   v-for="localFile in localValueFiles"
+                  v-if="existingFiles.length > 1"
+                  :key="-1"
+                  dense
+                )
+                  v-list-item-action
+                    v-tooltip(bottom)
+                      template(#activator="{ on, attrs }")
+                        v-btn(
+                          v-bind="attrs"
+                          v-on="on"
+                          color="red"
+                          small
+                          icon
+                          role="checkbox"
+                          :aria-checked="allExistingFilesDeleted"
+                          @click="allExistingFilesDeleted = !allExistingFilesDeleted"
+                        )
+                          v-icon(size="22") {{ allExistingFilesDeleted ? 'mdi-delete-off' : 'mdi-delete' }}
+                      span {{ allExistingFilesDeleted ? t('dcis.cells.gridCellFiles.cancelAllDeletion') : t('dcis.cells.gridCellFiles.deleteAll') }}
+                  v-list-item-content
+                    v-list-item-title
+                      a(
+                        :class="{ 'text-decoration-line-through': allExistingFilesDeleted, 'text-decoration-underline': !allExistingFilesDeleted }"
+                        @click="uploadArchive"
+                      ) {{ t('dcis.cells.gridCellFiles.allFiles') }}
+                v-list-item.px-0(
+                   v-for="localFile in existingFiles"
                    :key="localFile.file.id"
                    dense
                 )
@@ -48,7 +63,7 @@
                           @click="localFile.deleted = !localFile.deleted"
                         )
                           v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
-                      span {{ localFile.deleted ? t('cancelDeletion') : t('delete') }}
+                      span {{localFile.deleted ? t('cancelDeletion') : t('delete') }}
                   v-list-item-content
                     v-list-item-title
                       nuxt-link(
@@ -66,27 +81,29 @@
                 multiple
               )
           v-card-actions
-            v-btn(color="error" @click="clearValue") {{ t('clear') }}
             v-spacer
             v-btn(:disabled="invalid" type="submit" color="primary" @click="setValue") {{ t('save') }}
 </template>
 
 <script lang="ts">
+import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from '@apollo/client'
 import { ValidationProvider } from 'vee-validate'
-import { defineComponent, onMounted, ref, computed, watch } from '#app'
+import { defineComponent, ref, computed, watch } from '#app'
 import type { PropType } from '#app'
 import { useI18n, useCommonQuery } from '~/composables'
 import {
   FileType,
   ValueType,
+  UnloadFileValueArchiveMutation,
+  UnloadFileValueArchiveMutationVariables,
   ValueFilesQuery,
   ValueFilesQueryVariables
 } from '~/types/graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 import FileField from '~/components/common/FileField.vue'
-import GridCellFileValue from '~/components/dcis/grid/values/GridCellFileValue.vue'
 import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/GridCell.vue'
+import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/document/unload_file_value_archive.graphql'
 
 type ValueFile = {
   file: FileType
@@ -94,7 +111,7 @@ type ValueFile = {
 }
 
 export default defineComponent({
-  components: { FileField, GridCellFileValue },
+  components: { FileField },
   props: {
     valueType: { type: Object as PropType<ValueType>, default: null },
     value: { type: String, default: null }
@@ -104,11 +121,19 @@ export default defineComponent({
 
     const active = ref<boolean>(true)
 
-    const filesValidationProvider = ref<InstanceType<typeof ValidationProvider> | null>(null)
-
-    onMounted(() => {
-      filesValidationProvider.value.setFlags({ invalid: true })
+    const { mutate: unloadFileValueArchiveMutate } = useMutation<
+      UnloadFileValueArchiveMutation,
+      UnloadFileValueArchiveMutationVariables
+    >(unloadFileValueArchiveMutation, {
+      variables: { valueId: props.valueType.id }
     })
+
+    const uploadArchive = async () => {
+      const { data: { unloadFileValueArchive: { src } } } = await unloadFileValueArchiveMutate()
+      window.open(src, '_blank')
+    }
+
+    const filesValidationProvider = ref<InstanceType<typeof ValidationProvider> | null>(null)
 
     const {
       data: valueFiles,
@@ -135,23 +160,33 @@ export default defineComponent({
       })
     }
 
-    const localValueFiles = ref<ValueFile[]>([])
+    const existingFiles = ref<ValueFile[]>([])
     watch(valueFiles, (value) => {
       if (value) {
-        localValueFiles.value = value.map((file: FileType) => ({ file, deleted: false }))
+        existingFiles.value = value.map((file: FileType) => ({ file, deleted: false }))
       }
     }, { immediate: true })
 
-    const remainingExistFiles = computed<string[]>(
-      () => localValueFiles.value.filter(valueFile => !valueFile.deleted).map(valueFile => valueFile.file.id)
+    const allExistingFilesDeleted = computed<boolean>({
+      get () {
+        return existingFiles.value.every((file) => file.deleted)
+      },
+      set (value) {
+        existingFiles.value.forEach((file) => file.deleted = value)
+      }
+    })
+
+    const remainingExistingFiles = computed<string[]>(
+      () => existingFiles.value.filter(valueFile => !valueFile.deleted).map(valueFile => valueFile.file.id)
     )
 
-    const newValue = ref<string>(props.value)
     const newFiles = ref<File[]>([])
 
-    const remainingFiles = computed<(string | File)[]>(() => [...remainingExistFiles.value, ...newFiles.value])
+    const remainingFiles = computed<(string | File)[]>(() => [...remainingExistingFiles.value, ...newFiles.value])
     watch(remainingFiles, (value) => {
-      filesValidationProvider.value.validate(value)
+      if (filesValidationProvider.value.flags.failed) {
+        filesValidationProvider.value.validate(remainingFiles.value)
+      }
     })
 
     const cancel = () => {
@@ -159,18 +194,14 @@ export default defineComponent({
       emit('cancel')
     }
 
-    const clearValue = () => {
+    const setValue = async () => {
+      const validationResult = await filesValidationProvider.value.validate(remainingFiles.value)
+      if (!validationResult) {
+        return
+      }
       active.value = false
-      emit('set-value', '', {
-        remainingFiles: [],
-        newFiles: []
-      }, updateValueFiles)
-    }
-
-    const setValue = () => {
-      active.value = false
-      emit('set-value', newValue.value, {
-        remainingFiles: remainingExistFiles.value,
+      emit('set-value', 'Да', {
+        remainingFiles: remainingExistingFiles.value,
         newFiles: newFiles.value
       }, updateValueFiles)
     }
@@ -178,12 +209,12 @@ export default defineComponent({
     return {
       t,
       active,
+      uploadArchive,
       filesValidationProvider,
-      localValueFiles,
-      newValue,
+      existingFiles,
+      allExistingFilesDeleted,
       newFiles,
       cancel,
-      clearValue,
       setValue
     }
   }

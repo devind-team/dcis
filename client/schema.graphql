@@ -1985,6 +1985,8 @@ type Mutation {
   supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
   """Выгрузка документа."""
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
+  """Выгрузка архива значения ячейки типа `Файл`."""
+  unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
 }
@@ -2746,11 +2748,6 @@ type Query {
     """Идентификатор значения ячейки"""
     valueId: ID!
   ): [FileType!]
-  """URL файла или архива значения ячейки типа `Файл`"""
-  valueFilesUrl(
-    """Идентификатор значения ячейки"""
-    valueId: ID!
-  ): String
 }
 
 input RecoveryPasswordMutationInput {
@@ -3266,6 +3263,23 @@ type UnloadDocumentMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Ссылка на сгенерированный файл"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UnloadFileValueArchiveMutationInput {
+  clientMutationId: String
+  """Идентификатор значения ячейки"""
+  valueId: ID!
+}
+
+"""Выгрузка архива значения ячейки типа `Файл`."""
+type UnloadFileValueArchiveMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный архив"""
   src: String
   """Успех мутации"""
   success: Boolean!

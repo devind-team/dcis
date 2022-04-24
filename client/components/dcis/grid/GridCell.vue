@@ -8,8 +8,6 @@
       :value="cell.value"
       :is="`GridCell${cellKind}`"
     )
-    template(v-else-if="cell.kind === 'fl'")
-      grid-cell-file-value(:value-type="cell.valueType" :value="cell.value")
     template(v-else) {{ cell.value }}
 </template>
 
@@ -38,7 +36,6 @@ import GridCellFiles from '~/components/dcis/grid/cells/GridCellFiles.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
 import GridCellUser from '~/components/dcis/grid/cells/GridCellUser.vue'
-import GridCellFileValue from '~/components/dcis/grid/values/GridCellFileValue.vue'
 
 export type ChangeValueMutationResult = { data: ChangeValueMutation }
 export type ChangeFileValueMutationResult = { data: ChangeFileValueMutation }
@@ -57,8 +54,7 @@ export default defineComponent({
     GridCellFiles,
     GridCellMoney,
     GridCellDepartment,
-    GridCellUser,
-    GridCellFileValue
+    GridCellUser
   },
   props: {
     cell: { type: Object as PropType<BuildCellType>, required: true },

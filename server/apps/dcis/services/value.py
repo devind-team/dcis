@@ -8,6 +8,7 @@ from devind_core.models import File
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.timezone import make_aware
+from openpyxl.utils import get_column_letter
 
 from apps.core.models import User
 from apps.dcis.models import Document, RowDimension, Sheet, Value
@@ -72,12 +73,10 @@ def get_file_value_files(value: Value) -> list[File]:
     return sorted(files, key=lambda file: payload.index(file.pk))
 
 
-def get_file_value_files_url(value: Value) -> str:
-    """Получение URL файла или архива значения ячейки типа `Файл`."""
-    files = get_file_value_files(value)
-    if len(files) == 1:
-        return files[0].src.url
-    archive_path = f'{path.join(settings.TEMP_FILES_DIR, value.value)}.zip'
+def create_file_value_archive(value: Value) -> str:
+    """Создание архива значения ячейки типа `Файл`."""
+    cell = f'{get_column_letter(value.column.index)}{value.row.index}'
+    archive_path = f'{path.join(settings.TEMP_FILES_DIR, cell)}.zip'
     with ZipFile(archive_path, 'w') as zip_file:
         for file in get_file_value_files(value):
             zip_file.write(file.src.path, path.basename(file.src.path))

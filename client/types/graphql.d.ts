@@ -2144,6 +2144,8 @@ export type Mutation = {
   supportSubmit: SupportSubmitMutationPayload;
   /** Выгрузка документа. */
   unloadDocument: UnloadDocumentMutationPayload;
+  /** Выгрузка архива значения ячейки типа `Файл`. */
+  unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -2495,6 +2497,11 @@ export type MutationSupportSubmitArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUnloadDocumentArgs = {
   input: UnloadDocumentMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUnloadFileValueArchiveArgs = {
+  input: UnloadFileValueArchiveMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3239,8 +3246,6 @@ export type Query = {
   users: UserTypeConnection;
   /** Файлы значения ячейки типа `Файл` */
   valueFiles?: Maybe<Array<FileType>>;
-  /** URL файла или архива значения ячейки типа `Файл` */
-  valueFilesUrl?: Maybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -3463,11 +3468,6 @@ export type QueryUsersArgs = {
 
 /** Схема запросов данных. */
 export type QueryValueFilesArgs = {
-  valueId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryValueFilesUrlArgs = {
   valueId: Scalars['ID'];
 };
 
@@ -4009,6 +4009,24 @@ export type UnloadDocumentMutationPayload = {
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type UnloadFileValueArchiveMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор значения ячейки */
+  valueId: Scalars['ID'];
+};
+
+/** Выгрузка архива значения ячейки типа `Файл`. */
+export type UnloadFileValueArchiveMutationPayload = {
+  __typename?: 'UnloadFileValueArchiveMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный архив */
   src?: Maybe<Scalars['String']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
@@ -4569,6 +4587,12 @@ export type UnloadDocumentMutationVariables = Exact<{
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
+export type UnloadFileValueArchiveMutationVariables = Exact<{
+  valueId: Scalars['ID'];
+}>;
+
+export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
   projectId: Scalars['ID'];
@@ -4702,12 +4726,6 @@ export type ValueFilesQueryVariables = Exact<{
 }>;
 
 export type ValueFilesQuery = { __typename?: 'Query', valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any }> | null };
-
-export type ValueFilesUrlQueryVariables = Exact<{
-  valueId: Scalars['ID'];
-}>;
-
-export type ValueFilesUrlQuery = { __typename?: 'Query', valueFilesUrl?: string | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 

@@ -16,8 +16,6 @@
         @mousedown="startSelection(cell.position)"
         @mouseenter="enterSelection(cell.position)"
         @mouseup="endSelection(cell.position)"
-        @click="clickCell(cell)"
-        @dblclick="dblclickCell(cell)"
       )
         grid-cell(
           @clear-active="setActive(null)"
@@ -68,19 +66,7 @@ export default defineComponent({
       grid__cell_boundary: !!props.boundaryColumnCells.find(boundaryCell => boundaryCell.cell.id === cell.id)
     })
 
-    const clickCell = (cell: BuildCellType) => {
-      if (cell.kind !== 'fl') {
-        props.setActive(cell.position)
-      }
-    }
-
-    const dblclickCell = (cell: BuildCellType) => {
-      if (cell.kind === 'fl') {
-        props.setActive(cell.position)
-      }
-    }
-
-    return { active, getRowIndexCellContentClasses, getCellClasses, clickCell, dblclickCell }
+    return { active, getRowIndexCellContentClasses, getCellClasses }
   }
 })
 </script>

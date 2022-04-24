@@ -13,11 +13,16 @@ from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Document, DocumentStatus, Period, Sheet, Status
+from apps.dcis.models import Document, DocumentStatus, Period, Sheet, Status, Value
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, ValueType
 from apps.dcis.services.document_unload import DocumentUnload
-from apps.dcis.services.value import get_file_value_files, update_or_create_file_value, update_or_create_value
+from apps.dcis.services.value import (
+    create_file_value_archive,
+    get_file_value_files,
+    update_or_create_file_value,
+    update_or_create_value,
+)
 
 
 class AddDocumentMutation(BaseMutation):
@@ -125,6 +130,20 @@ class UnloadDocumentMutation(BaseMutation):
         return UnloadDocumentMutation(src=src)
 
 
+class UnloadFileValueArchiveMutation(BaseMutation):
+    """Выгрузка архива значения ячейки типа `Файл`."""
+
+    class Input:
+        value_id = graphene.ID(required=True, description='Идентификатор значения ячейки')
+
+    src = graphene.String(description='Ссылка на сгенерированный архив')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, value_id: str):
+        return UnloadFileValueArchiveMutation(src=create_file_value_archive(get_object_or_404(Value, pk=value_id)))
+
+
 class ChangeValueMutation(BaseMutation):
     """Изменение значения."""
 
@@ -212,5 +231,6 @@ class DocumentMutations(graphene.ObjectType):
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
 
+    unload_file_value_archive = UnloadFileValueArchiveMutation.Field(required=True)
     change_value = ChangeValueMutation.Field(required=True)
     change_file_value = ChangeFileValueMutation.Field(required=True)
