@@ -53,10 +53,10 @@ def create_new_document(
         if latest_document is not None:
             rows_transform: dict[Union[int, Type[int]], int] = {}
             parent_rows: list[int] = sheet.rowdimension_set \
-                .filter(document=latest_document, parent__isnull=True) \
+                .filter(parent__isnull=True) \
                 .values_list('id', flat=True)
             for parent_row in parent_rows:
-                rows_transform.update(transfer_rows(user, sheet, document, parent_row))
+                rows_transform.update(transfer_rows(user, sheet, latest_document, document, parent_row))
 
             # Копируем свойства ячеек дочерних строк
             cells: list[Cell] = Cell.objects.filter(row_id__in=rows_transform.keys()).all()
@@ -75,7 +75,14 @@ def create_new_document(
     return document
 
 
-def transfer_rows(user: User, sheet: Sheet, document: Document, parent_id: int, parent_ids=None) -> dict[int, int]:
+def transfer_rows(
+        user: User,
+        sheet: Sheet,
+        last_document: Document,
+        document: Document,
+        parent_id: int,
+        parent_ids=None
+) -> dict[int, int]:
     """Переносим дочерние строки.
 
     Рекурсивно проходимся по строкам и создаем новые с трансфером идентификаторов для значений.
@@ -88,7 +95,7 @@ def transfer_rows(user: User, sheet: Sheet, document: Document, parent_id: int, 
         parent_ids = {}
 
     rows_transform: dict[int, int] = {}
-    rows: list[RowDimension] = document.rowdimension_set.filter(parent_id=parent_id).all()
+    rows: list[RowDimension] = last_document.rowdimension_set.filter(parent_id=parent_id).all()
     row: RowDimension
     for row in rows:
         document_row: RowDimension = RowDimension.objects.create(
@@ -103,7 +110,7 @@ def transfer_rows(user: User, sheet: Sheet, document: Document, parent_id: int, 
             parent_id=parent_ids.get(parent_id, parent_id)
         )
         rows_transform[row.id] = document_row.id
-        rows_transform.update(transfer_rows(user, sheet, document, row.id, rows_transform))
+        rows_transform.update(transfer_rows(user, sheet, last_document, document, row.id, rows_transform))
     return rows_transform
 
 
