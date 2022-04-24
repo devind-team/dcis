@@ -1,7 +1,7 @@
 fragment CellFields on CellType {
   id
   kind
-  # editable
+  editable
   # formula
   # comment
   default
