@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
-import type { PropType, Ref } from '#app'
+import type { PropType } from '#app'
 import { defineComponent, provide, toRef } from '#app'
 import {
   SheetType,
@@ -97,7 +97,7 @@ export default defineComponent({
       })
     }
 
-    const sheet: Ref<SheetType> = toRef(props, 'sheet')
+    const sheet = toRef(props, 'sheet')
     const {
       rowIndexColumnWidth,
       gridWidth,

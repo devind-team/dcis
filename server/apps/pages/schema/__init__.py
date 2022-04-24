@@ -1,4 +1,5 @@
 import graphene
+from devind_helpers.orm_utils import get_object_or_none
 from django.db.models import F
 from graphene_django import DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -6,7 +7,6 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.pages.models import Category, Page, PageKind
-from devind_helpers.orm_utils import get_object_or_none
 from .mutations import CategoryMutations, \
     PageMutations, \
     SectionMutations, \
