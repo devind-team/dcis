@@ -1,5 +1,6 @@
 <template lang="pug">
   mutation-modal-form(
+    @close="close"
     :header="String($t('dcis.documents.status.header'))"
     :subheader="`Версия ${ document.version }`"
     :button-text="String($t('dcis.documents.status.buttonText'))"
@@ -9,7 +10,6 @@
     mutation-name="addDocumentStatus"
     i18n-path="dcis.documents.status"
     persistent
-    @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")

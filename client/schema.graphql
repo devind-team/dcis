@@ -92,7 +92,7 @@ input AddDocumentMutationInput {
   """Идентификатор документа"""
   documentId: ID
   """Идентификатор периода"""
-  periodId: ID!
+  periodId: Int!
   """Начальный статус документа"""
   statusId: Int!
 }

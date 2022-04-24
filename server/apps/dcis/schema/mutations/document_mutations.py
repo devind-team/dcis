@@ -32,7 +32,7 @@ class AddDocumentMutation(BaseMutation):
             document_id - документ от которого создавать копию
         """
         comment = graphene.String(required=True, description='Комментарий')
-        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        period_id = graphene.Int(required=True, description='Идентификатор периода')
         status_id = graphene.Int(required=True, description='Начальный статус документа')
         document_id = graphene.ID(description='Идентификатор документа')
         division_id = graphene.Int(description='Идентификатор дивизиона')
@@ -52,9 +52,9 @@ class AddDocumentMutation(BaseMutation):
     ) -> 'AddDocumentMutation':
         """Мутация для создания документа."""
         user: User = info.context.user
-        period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
-        document_id = from_global_id(document_id)[1] if document_id else None
-        document = create_new_document(
+        period: Period = get_object_or_404(Period, pk=period_id)
+        document_id: Optional[int] = from_global_id(document_id)[1] if document_id else None
+        document: Document = create_new_document(
             user,
             period,
             status_id,

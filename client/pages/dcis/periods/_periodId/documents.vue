@@ -3,7 +3,7 @@
     template(#header) {{ period.name }}
       template(v-if="hasPerm('dcis.add_document')")
         v-spacer
-        add-document(:period-id="$route.params.periodId" :update="addDocumentUpdate")
+        add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
           template(#activator="{ on }")
             v-btn(v-on="on" color="primary") Создать новый документ
     v-row

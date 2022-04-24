@@ -126,7 +126,7 @@ export type AddDocumentMutationInput = {
   /** Идентификатор документа */
   documentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор периода */
-  periodId: Scalars['ID'];
+  periodId: Scalars['Int'];
   /** Начальный статус документа */
   statusId: Scalars['Int'];
 };
@@ -4698,7 +4698,7 @@ export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typen
 
 export type AddDocumentMutationVariables = Exact<{
   comment: Scalars['String'];
-  periodId: Scalars['ID'];
+  periodId: Scalars['Int'];
   statusId: Scalars['Int'];
   documentId?: InputMaybe<Scalars['ID']>;
   divisionId?: InputMaybe<Scalars['Int']>;
@@ -4735,7 +4735,7 @@ export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];
 }>;
 
-export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', success: boolean, id: string } };
+export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UnloadDocumentMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -4860,7 +4860,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];
