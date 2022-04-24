@@ -2908,6 +2908,11 @@ type Query {
   sessions(userId: ID): [SessionType!]!
   """Настройки приложения"""
   settings: [SettingType!]!
+  """Выгрузка листа"""
+  sheet(
+    """Идентификатор листа"""
+    sheetId: Int!
+  ): SheetType!
   """Статусы"""
   statuses: [StatusType!]
   """Теги"""
@@ -3304,10 +3309,20 @@ type SettingType {
   value: String!
 }
 
-"""Тип моделей листов."""
+"""
+Тип моделей листов.
+
+rows, cells - могут иметь идентификатор документа, в противном случае
+    выгружается только каркас
+values - могут выгружаться только значения привязанные к строкам
+columns, merged_cells - привязываются к каркасу и от документа не зависят.
+"""
 type SheetType {
   """Мета информация о ячейках"""
-  cells: [CellType]
+  cells(
+    """Идентификатор документа"""
+    documentId: ID
+  ): [CellType]
   """Колонки"""
   columns: [ColumnDimensionType]
   """Комментарий"""
@@ -3324,7 +3339,10 @@ type SheetType {
   """Позиция"""
   position: Int!
   """Строки"""
-  rows: [RowDimensionType]
+  rows(
+    """Идентификатор документа"""
+    documentId: ID
+  ): [RowDimensionType]
   """Дата обновления"""
   updatedAt: DateTime!
   """Значения документа"""
