@@ -1,31 +1,28 @@
 <template lang="pug">
-  v-menu(v-model="active" :close-on-content-click="false" bottom)
+  v-dialog(v-model="active" width="600px" scrollable)
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
-    .v-dialog--scrollable
-      v-card(:loading="loading" style="width: 400px;")
-        v-card-text
-          v-text-field(
-            v-model="search"
-            :label="$t('search')"
-            :hint="$t('shownOf', { count, totalCount })"
-            persistent-hint
-            flat
-            clearable
-          )
-        v-divider
-        v-card-text(style="height: 200px;")
-          v-list
-            v-list-item(v-for="classification in classifications" :key="classification.id" @click="setValue(classification)")
-              v-tooltip(bottom)
-                template(#activator="{ on }")
-                  v-list-item-content(v-on="on")
-                    v-list-item-title {{ classification.code }}
-                span {{ classification.name }}
-        v-divider
-        v-card-actions
-          v-btn(@click="close") {{ $t('cancel') }}
-          v-spacer
+    v-card(:loading="loading")
+      v-card-title Изменение значения
+        v-spacer
+        v-btn(@click="close" icon)
+          v-icon mdi-close
+      v-card-text
+        v-text-field(
+          v-model="search"
+          :label="$t('search')"
+          :hint="$t('shownOf', { count, totalCount })"
+          persistent-hint
+          flat
+          clearable
+        )
+      v-divider
+      v-card-text(style="height: 300px;")
+        v-list
+          v-list-item(v-for="classification in classifications" :key="classification.id" @click="setValue(classification)")
+            v-list-item-content(v-on="on")
+              v-list-item-title {{ classification.code }}
+              .caption {{ classification.name }}
 </template>
 
 <script lang="ts">
@@ -34,7 +31,7 @@ import {
   BudgetClassificationsQueryVariables,
   BudgetClassificationType
 } from '~/types/graphql'
-import budgetClassificationsQuery from '~/gql/dcis/queries/budget_classifications.graphql'
+import activeBudgetClassificationsQuery from '~/gql/dcis/queries/active_budget_classifications.graphql'
 
 export default defineComponent({
   props: {
@@ -42,7 +39,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { search, debounceSearch } = useDebounceSearch()
-    search.value = props.value
+    search.value = debounceSearch.value = props.value
     const active = ref<boolean>(true)
 
     const {
@@ -54,14 +51,15 @@ export default defineComponent({
       BudgetClassificationsQueryVariables,
       BudgetClassificationType
     >({
-      document: budgetClassificationsQuery,
+      document: activeBudgetClassificationsQuery,
       variables: () => ({ code: debounceSearch.value })
     }, {
       pagination: useCursorPagination({ pageSize: 20 })
     })
 
     const setValue = (classification: BudgetClassificationType) => {
-      console.log(classification)
+      active.value = false
+      emit('set-value', classification.code)
     }
 
     const close = () => {

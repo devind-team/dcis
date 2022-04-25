@@ -2794,7 +2794,7 @@ input ProjectUserFilterInputType {
 """Схема запросов данных."""
 type Query {
   _debug: DjangoDebug
-  activeBudgetClassification(
+  activeBudgetClassifications(
     after: String
     before: String
     """Advanced filter field"""

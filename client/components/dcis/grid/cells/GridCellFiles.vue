@@ -51,9 +51,7 @@
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from '@apollo/client'
-import { defineComponent, ref, computed, watch } from '#app'
 import type { PropType } from '#app'
-import { useI18n, useCommonQuery } from '~/composables'
 import {
   FileType,
   ValueType,

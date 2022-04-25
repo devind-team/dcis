@@ -1,0 +1,26 @@
+query ActiveBudgetClassifications($code: String, $first: Int, $after: String) {
+  activeBudgetClassifications(
+    first: $first,
+    after: $after,
+    filter: { code: { icontains: $code } },
+  ) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasPreviousPage
+      hasNextPage
+      __typename
+    }
+    edges {
+      node {
+        id
+        code
+        name
+        __typename
+      }
+      __typename
+    }
+    totalCount
+    __typename
+  }
+}
