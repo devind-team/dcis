@@ -139,9 +139,9 @@ export default defineComponent({
       emit('cancel')
     }
 
-    const setValue = async () => {
+    const setValue = () => {
       active.value = false
-      emit('set-value', 'Да', {
+      emit('set-value', remainingFiles.value.length + newFiles.value.length ? 'Да' : 'Нет', {
         remainingFiles: remainingFiles.value,
         newFiles: newFiles.value
       }, updateValueFiles)

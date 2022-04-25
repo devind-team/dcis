@@ -634,6 +634,8 @@ type ChangeCellsOptionMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+  """Измененные значения"""
+  values: [ValueType]
 }
 
 """Мутация для изменения стилей колонки таблицы."""

@@ -703,6 +703,8 @@ export type ChangeCellsOptionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+  /** Измененные значения */
+  values?: Maybe<Array<Maybe<ValueType>>>;
 };
 
 /** Мутация для изменения стилей колонки таблицы. */
