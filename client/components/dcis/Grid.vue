@@ -51,11 +51,11 @@ import {
   ChangeColumnDimensionMutationVariables
 } from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
+import changeColumnDimension from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridColumnWidth from '~/components/dcis/grid/GridColumnWidth.vue'
-import changeColumnDimension from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
 export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
