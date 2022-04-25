@@ -2,8 +2,8 @@ fragment CellFields on CellType {
   id
   kind
   editable
-  formula
-  comment
+  # formula
+  # comment
   default
   tooltip
   horizontalAlign
@@ -11,8 +11,8 @@ fragment CellFields on CellType {
   size
   strong
   italic
-  strike
-  underline
+  # strike
+  # underline
   color
   background
   borderStyle

@@ -1,4 +1,4 @@
-from typing import Any, Optional, List
+from typing import Any, Optional
 
 import graphene
 from devind_helpers.decorators import permission_classes
@@ -13,9 +13,10 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Document, RowDimension, Sheet, ColumnDimension, Cell
-from apps.dcis.schema.types import ColumnDimensionType, RowDimensionType, CellType, MergedCellType
+from apps.dcis.models import Document, RowDimension, Sheet, ColumnDimension, Cell, Value
+from apps.dcis.schema.types import ColumnDimensionType, RowDimensionType, CellType, MergedCellType, ValueType
 from apps.dcis.services.cell import check_cell_options
+from apps.dcis.services.value import updates_values_by_cell_kind_change
 
 
 class AddRowDimensionMutation(BaseMutation):
@@ -114,25 +115,29 @@ class ChangeCellsOptionMutation(BaseMutation):
         value = graphene.String(description='Значение поля')
 
     cells = graphene.List(CellType, description='Измененные ячейки')
+    values = graphene.List(ValueType, description='Измененные значения')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
-            root: Any,
-            info: ResolveInfo,
-            cells_id: List[int],
-            field: str,
-            value: Optional[str] = None
+        root: Any,
+        info: ResolveInfo,
+        cells_id: list[int],
+        field: str,
+        value: Optional[str] = None
     ):
         success, value, errors = check_cell_options(field, value)
         if not success:
             return ChangeCellsOptionMutation(success=success, errors=errors)
-        cells: List[Cell] = Cell.objects.filter(pk__in=cells_id).all()
+        cells = Cell.objects.filter(pk__in=cells_id).all()
+        values: list[Value] = []
         with transaction.atomic():
             for cell in cells:
                 setattr(cell, field, value)
                 cell.save(update_fields=(field,))
-        return ChangeCellsOptionMutation(cells=cells)
+                if field == 'kind':
+                    values.extend(updates_values_by_cell_kind_change(cell))
+        return ChangeCellsOptionMutation(cells=cells, values=values)
 
 
 class SheetMutations(graphene.ObjectType):

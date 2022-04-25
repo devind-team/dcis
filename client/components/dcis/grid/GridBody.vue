@@ -25,6 +25,7 @@
         )
 </template>
 <script lang="ts">
+import { defineComponent, inject } from '#app'
 import type { PropType, Ref } from '#app'
 import { BuildCellType, BuildRowType, BoundaryColumnCell, RangeType } from '~/types/grid-types'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
@@ -46,12 +47,7 @@ export default defineComponent({
     endSelection: { type: Function as PropType<(position: string) => void>, required: true }
   },
   setup (props) {
-    const active: Ref<string> = inject<Ref<string>>('active')
-
-    const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
-      grid__cell_selected: props.selection.includes(cell.position),
-      grid__cell_boundary: !!props.boundaryColumnCells.find(boundaryCell => boundaryCell.cell.id === cell.id)
-    })
+    const active = inject<Ref<string>>('active')
 
     const getRowIndexCellContentClasses = (row: BuildRowType): (string | Record<string, boolean>)[] => {
       return [
@@ -65,7 +61,12 @@ export default defineComponent({
       ]
     }
 
-    return { active, getCellClasses, getRowIndexCellContentClasses }
+    const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
+      grid__cell_selected: props.selection.includes(cell.position),
+      grid__cell_boundary: !!props.boundaryColumnCells.find(boundaryCell => boundaryCell.cell.id === cell.id)
+    })
+
+    return { active, getRowIndexCellContentClasses, getCellClasses }
   }
 })
 </script>

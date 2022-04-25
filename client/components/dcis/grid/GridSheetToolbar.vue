@@ -64,7 +64,7 @@ export default defineComponent({
         }
       )
     })
-    const cellsId: ComputedRef<number[]> = computed<number[]>(() => props.selectionCells.map(e => parseInt(e.id)))
+    const cellsId: ComputedRef<number[]> = computed<number[]>(() => props.selectionCells.map(e => parseInt(e.cell.id)))
 
     const kinds: ComputedRef<{ text: string, value: string }[]> = computed<{ text: string, value: string }[]>(() => (
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))

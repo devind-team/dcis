@@ -74,7 +74,7 @@ class DocumentUnload:
             columns: list[ColumnDimension] = sheet.columndimension_set.all()
             rows: list[RowDimension] = sheet.rowdimension_set.filter(
                 Q(parent__isnull=True) | Q(
-                    document=self.document, parent_id__isnull=False, object_id__in=self.divisions_id
+                    document=self.document, parent_id__isnull=False
                 )
             )
             rows_id: list[int] = [row.id for row in rows]

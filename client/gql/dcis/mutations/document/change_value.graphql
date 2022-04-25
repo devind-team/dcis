@@ -1,7 +1,13 @@
 #import "../../fragments/value_fields.graphql"
 
 mutation ChangeValue($documentId: ID!, $sheetId: Int!, $columnId: Int!, $rowId: Int!, $value: String!) {
-  changeValue(input: { documentId: $documentId, sheetId: $sheetId, columnId: $columnId, rowId: $rowId, value: $value }) {
+  changeValue(input: {
+    documentId: $documentId,
+    sheetId: $sheetId,
+    columnId: $columnId,
+    rowId: $rowId,
+    value: $value
+  }) {
     success
     value {
       ...ValueFields

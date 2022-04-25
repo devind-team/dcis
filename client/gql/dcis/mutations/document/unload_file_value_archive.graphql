@@ -1,0 +1,12 @@
+mutation UnloadFileValueArchive($valueId: ID!) {
+  unloadFileValueArchive(input: { valueId: $valueId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    src
+    __typename
+  }
+}

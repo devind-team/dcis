@@ -1,58 +1,81 @@
-from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 import graphene
+from devind_core.schema.types import FileType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Max
 from django.utils.timezone import make_aware
 from graphene_django_cud.mutations import DjangoUpdateMutation
+from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Period, Document, Value, Sheet, Status, DocumentStatus, RowDimension
+from apps.core.models import User
+from apps.dcis.models import Period, Document, Value, Sheet, Status, Document, DocumentStatus, RowDimension
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
-from apps.dcis.schema.types import DocumentType, ValueType, DocumentStatusType
+from apps.dcis.schema.types import DocumentStatusType, DocumentType, ValueType
 from apps.dcis.services.document_unload import DocumentUnload
+from apps.dcis.services.value import (
+    create_file_value_archive,
+    get_file_value_files,
+    update_or_create_file_value,
+    update_or_create_value,
+)
+from apps.dcis.services.document_services import create_new_document
 
 
 class AddDocumentMutation(BaseMutation):
     """Добавление документа."""
 
     class Input:
+        """Входные параметры мутации.
+
+            comment - комментарий к документу
+            period_id - идентификатор периода
+            status_id - идентификатор устанавливаемого статуса
+            division_id - идентификатор дивизиона
+            document_id - документ от которого создавать копию
+        """
         comment = graphene.String(required=True, description='Комментарий')
-        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        period_id = graphene.Int(required=True, description='Идентификатор периода')
         status_id = graphene.Int(required=True, description='Начальный статус документа')
+        document_id = graphene.ID(description='Идентификатор документа')
+        division_id = graphene.Int(description='Идентификатор дивизиона')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
     @permission_classes((IsAuthenticated, AddDocument,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
-        period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
-        status: Status = get_object_or_404(Status, pk=status_id)
-        # Служба поддержки
-        object_id: int = 1
-        max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
-        document = Document.objects.create(
-            version=max_version + 1 if max_version is not None else 1,
-            comment=comment,
-            object_id=object_id,
-            period=period
+    def mutate_and_get_payload(
+            root: None,
+            info: ResolveInfo,
+            comment: str,
+            period_id: str,
+            status_id: int,
+            document_id: Optional[int] = None,
+            division_id: Optional[int] = None
+    ) -> 'AddDocumentMutation':
+        """Мутация для создания документа."""
+        user: User = info.context.user
+        period: Period = get_object_or_404(Period, pk=period_id)
+        document_id: Optional[int] = from_global_id(document_id)[1] if document_id else None
+        document: Document = create_new_document(
+            user,
+            period,
+            status_id,
+            comment,
+            document_id,
+            division_id
         )
-        document.documentstatus_set.create(
-            comment='Создание документа.',
-            user=info.context.user,
-            status=status
-        )
-        document.sheets.add(*period.sheet_set.all())
         return AddDocumentMutation(document=document)
 
 
 class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
-    """Изменение комментария версии документа"""
+    """Изменение комментария версии документа."""
 
     class Meta:
         model = Document
@@ -96,7 +119,6 @@ class DeleteDocumentStatusMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, DeleteDocumentStatus,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int, *args, **kwargs):
-        """Мутация удаления статуса документа"""
         delete_count, _ = DocumentStatus.objects.filter(pk=document_status_id).delete()
         return DeleteDocumentStatusMutation(success=delete_count == 1, id=document_status_id)
 
@@ -115,13 +137,27 @@ class UnloadDocumentMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: Optional[List[str]] = None):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: Optional[list[str]] = None):
         if not additional:
             additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])
         document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
         src: str = document_unload.xlsx()
         return UnloadDocumentMutation(src=src)
+
+
+class UnloadFileValueArchiveMutation(BaseMutation):
+    """Выгрузка архива значения ячейки типа `Файл`."""
+
+    class Input:
+        value_id = graphene.ID(required=True, description='Идентификатор значения ячейки')
+
+    src = graphene.String(description='Ссылка на сгенерированный архив')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, value_id: str):
+        return UnloadFileValueArchiveMutation(src=create_file_value_archive(get_object_or_404(Value, pk=value_id)))
 
 
 class ChangeValueMutation(BaseMutation):
@@ -139,29 +175,67 @@ class ChangeValueMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
-            root: None,
-            info: ResolveInfo,
-            document_id: str,
-            sheet_id: int,
-            column_id: int,
-            row_id: int,
-            value: str
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: int,
+        column_id: int,
+        row_id: int,
+        value: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
-        # cell: Cell = Cell.objects.get(column_id=column_id, row_id=row_id)
-        # В зависимости от типа применяем форматирование
-        val, created = Value.objects.update_or_create(
-            column_id=column_id,
-            row_id=row_id,
+        val, _ = update_or_create_value(
             document=document,
             sheet=sheet,
-            defaults={
-                'value': value
-            }
+            column_id=column_id,
+            row_id=row_id,
+            value=value
         )
-        RowDimension.objects.filter(pk=row_id).update(updated_at=make_aware(datetime.now()))
         return ChangeValueMutation(value=val)
+
+
+class ChangeFileValueMutation(BaseMutation):
+    """Изменение значения ячейки типа `Файл`."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+        column_id = graphene.Int(required=True, description='Идентификатор колонки')
+        row_id = graphene.Int(required=True, description='Идентификатор строки')
+        value = graphene.String(required=True, description='Значение')
+        remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
+        new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
+
+    value = graphene.Field(ValueType, description='Измененное значение')
+    value_files = graphene.List(FileType, description='Измененные файлы')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: int,
+        column_id: int,
+        row_id: int,
+        value: str,
+        remaining_files: list[int],
+        new_files: list[InMemoryUploadedFile]
+    ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
+        val, _ = update_or_create_file_value(
+            user=info.context.user,
+            document=document,
+            sheet=sheet,
+            column_id=column_id,
+            row_id=row_id,
+            value=value,
+            remaining_files=[int(from_global_id(global_id)[1]) for global_id in remaining_files],
+            new_files=new_files
+        )
+        return ChangeFileValueMutation(value=val, value_files=get_file_value_files(val))
 
 
 class DocumentMutations(graphene.ObjectType):
@@ -173,4 +247,6 @@ class DocumentMutations(graphene.ObjectType):
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
 
+    unload_file_value_archive = UnloadFileValueArchiveMutation.Field(required=True)
     change_value = ChangeValueMutation.Field(required=True)
+    change_file_value = ChangeFileValueMutation.Field(required=True)

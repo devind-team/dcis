@@ -212,7 +212,10 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
       const mutationResult = getMutationResult(result)
       const node: TNode = mutationResult[key === null ? k : key]
       if (node) {
-        dataCache[k].edges.find((el: { node: TNode }) => el.node.id === node.id).node = node
+        dataCache[k].edges.find((el: { node: TNode }) => el.node.id === node.id).node = Object.assign(
+          dataCache[k].edges.find((el: { node: TNode }) => el.node.id === node.id).node,
+          node
+        )
       }
       return dataCache
     })

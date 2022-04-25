@@ -1,4 +1,4 @@
-from typing import Dict, Type, Union
+from typing import cast, Dict, Type, Union
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from apps.core.models import User
@@ -39,6 +39,10 @@ class Project(models.Model):
     class Meta:
         """Мета класс описания параметров проекта сборов."""
         ordering = ('-created_at',)
+
+    @property
+    def division(self) -> Type[Union[Department, Organization]]:
+        return self.DIVISION_KIND.get(cast(str, self.content_type.model), Department)
 
 
 class Period(models.Model):

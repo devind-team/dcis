@@ -1,4 +1,3 @@
-from typing import List
 from openpyexcel.utils.cell import get_column_letter
 from django.db import models
 
@@ -194,7 +193,7 @@ class Cell(Style, models.Model):
     TEXT = 'text'
     MONEY = 'money'
     BIG_MONEY = 'bigMoney'
-    FILE = 'fl'
+    FILES = 'fl'
 
     # Поля из базы данных
     USER = 'user'
@@ -213,7 +212,7 @@ class Cell(Style, models.Model):
         (TEXT, 'text'),
         (MONEY, 'money'),
         (BIG_MONEY, 'bigMoney'),
-        (FILE, 'fl'),
+        (FILES, 'fl'),
         (USER, 'user'),
         (DEPARTMENT, 'department'),
         (ORGANIZATION, 'organization')
@@ -304,8 +303,8 @@ class MergedCell(models.Model):
         return f'{get_column_letter(self.min_col)}{self.min_row}'
 
     @property
-    def cells(self) -> List[str]:
-        not_cell: List[str] = []
+    def cells(self) -> list[str]:
+        not_cell: list[str] = []
         for col in range(self.min_col, self.max_col + 1):
             for row in range(self.min_row, self.max_row + 1):
                 if col == 1 and row == 1:
@@ -323,6 +322,7 @@ class Value(models.Model):
     """
 
     value = models.TextField(help_text='Значение')
+    payload = models.JSONField(null=True, help_text='Дополнительные данные')
     verified = models.BooleanField(default=True, help_text='Валидно ли поле')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
 
