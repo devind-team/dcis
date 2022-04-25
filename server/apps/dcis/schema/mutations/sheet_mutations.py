@@ -89,8 +89,11 @@ class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     class Meta:
         model = ColumnDimension
-        only_fields = ('width', 'fixed', 'hidden',)
-        required_fields = ('fixed', 'hidden',)
+        only_fields = ('width', 'fixed', 'hidden', 'kind',)
+        required_fields = ('fixed', 'hidden', 'kind',)
+        field_types = {
+            'kind': graphene.String(description='Тип поля')
+        }
         login_required = True
         permissions = ('dcis.change_columndimension',)
 
@@ -106,7 +109,10 @@ class ChangeCellsOptionMutation(BaseMutation):
         - strong - true, false
         - italic - true, false
         - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
-        - kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
+        - kind - [
+            'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money',
+            'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
+        ]
     """
 
     class Input:

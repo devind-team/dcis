@@ -80,7 +80,7 @@ export default defineComponent({
         width,
         fixed: columnDimension.fixed,
         hidden: columnDimension.hidden,
-        autoSize: columnDimension.autoSize
+        kind: columnDimension.kind
       }, {
         optimisticResponse: {
           changeColumnDimension: {
