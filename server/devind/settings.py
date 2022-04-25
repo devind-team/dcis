@@ -76,6 +76,7 @@ MIDDLEWARE = [
     'devind_core.middleware.SessionMiddleware',
     'devind_core.middleware.TimeRequestMiddleware',
     'devind_core.middleware.LangRequestMiddleware',
+    # 'apps.core.middleware.DatabaseRequestsMiddleware',
 ]
 
 # Список шаблонов
