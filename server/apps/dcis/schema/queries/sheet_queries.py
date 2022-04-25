@@ -19,9 +19,9 @@ class SheetQueries(graphene.ObjectType):
 
     value_files = DjangoListField(
         FileType,
-        description='Файлы значения ячейки типа `Файл`',
-        value_id=graphene.ID(required=True, description='Идентификатор значения ячейки')
-
+        value_id=graphene.ID(required=True, description='Идентификатор значения ячейки'),
+        description='Файлы значения ячейки типа `Файл`'
+    )
     sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.Int(required=True, description='Идентификатор листа'),
@@ -34,5 +34,7 @@ class SheetQueries(graphene.ObjectType):
     def resolve_value_files(root, info: ResolveInfo, value_id: str) -> list[File]:
         return get_file_value_files(get_object_or_404(Value, pk=value_id))
 
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_sheet(root: Any, info: ResolveInfo, sheet_id: int):
         return get_object_or_404(Sheet, pk=sheet_id)

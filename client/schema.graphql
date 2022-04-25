@@ -2341,144 +2341,144 @@ type NotificationsSubscription {
   notification: NotificationType
 }
 
-input OrganizationOrganizationFilterAddressFilterInputType {
+input OrganizationAddressFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterDepartmentFilterInputType {
+input OrganizationDepartmentFilterInputType {
   """`Exact` lookup"""
   exact: [ID]
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationOrganizationFilterFilterInputType {
+input OrganizationFilterInputType {
   """`Address` field"""
-  address: OrganizationOrganizationFilterAddressFilterInputType
+  address: OrganizationAddressFilterInputType
   """`And` field"""
-  and: [OrganizationOrganizationFilterFilterInputType]
+  and: [OrganizationFilterInputType]
   """`Department` field"""
-  department: OrganizationOrganizationFilterDepartmentFilterInputType
+  department: OrganizationDepartmentFilterInputType
   """`Id` field"""
-  id: OrganizationOrganizationFilterIdFilterInputType
+  id: OrganizationIdFilterInputType
   """`Inn` field"""
-  inn: OrganizationOrganizationFilterInnFilterInputType
+  inn: OrganizationInnFilterInputType
   """`Kind` field"""
-  kind: OrganizationOrganizationFilterKindFilterInputType
+  kind: OrganizationKindFilterInputType
   """`Kodbuhg` field"""
-  kodbuhg: OrganizationOrganizationFilterKodbuhgFilterInputType
+  kodbuhg: OrganizationKodbuhgFilterInputType
   """`Kpp` field"""
-  kpp: OrganizationOrganizationFilterKppFilterInputType
+  kpp: OrganizationKppFilterInputType
   """`Mail` field"""
-  mail: OrganizationOrganizationFilterMailFilterInputType
+  mail: OrganizationMailFilterInputType
   """`Name` field"""
-  name: OrganizationOrganizationFilterNameFilterInputType
+  name: OrganizationNameFilterInputType
   """`Not` field"""
-  not: OrganizationOrganizationFilterFilterInputType
+  not: OrganizationFilterInputType
   """`Okpo` field"""
-  okpo: OrganizationOrganizationFilterOkpoFilterInputType
+  okpo: OrganizationOkpoFilterInputType
   """`Or` field"""
-  or: [OrganizationOrganizationFilterFilterInputType]
+  or: [OrganizationFilterInputType]
   """`Parent` field"""
-  parent: OrganizationOrganizationFilterParentFilterInputType
+  parent: OrganizationParentFilterInputType
   """`Phone` field"""
-  phone: OrganizationOrganizationFilterPhoneFilterInputType
+  phone: OrganizationPhoneFilterInputType
   """`Region` field"""
-  region: OrganizationOrganizationFilterRegionFilterInputType
+  region: OrganizationRegionFilterInputType
   """`Rubpnubp` field"""
-  rubpnubp: OrganizationOrganizationFilterRubpnubpFilterInputType
+  rubpnubp: OrganizationRubpnubpFilterInputType
   """`Site` field"""
-  site: OrganizationOrganizationFilterSiteFilterInputType
+  site: OrganizationSiteFilterInputType
 }
 
-input OrganizationOrganizationFilterIdFilterInputType {
+input OrganizationIdFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [String]
 }
 
-input OrganizationOrganizationFilterInnFilterInputType {
+input OrganizationInnFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterKindFilterInputType {
+input OrganizationKindFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterKodbuhgFilterInputType {
+input OrganizationKodbuhgFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterKppFilterInputType {
+input OrganizationKppFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterMailFilterInputType {
+input OrganizationMailFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterNameFilterInputType {
+input OrganizationNameFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterOkpoFilterInputType {
+input OrganizationOkpoFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterParentFilterInputType {
+input OrganizationParentFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`Isnull` lookup"""
   isnull: Boolean
 }
 
-input OrganizationOrganizationFilterPhoneFilterInputType {
+input OrganizationPhoneFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterRegionFilterInputType {
+input OrganizationRegionFilterInputType {
   """`Exact` lookup"""
   exact: ID
   """`In` lookup"""
   in: [ID]
 }
 
-input OrganizationOrganizationFilterRubpnubpFilterInputType {
+input OrganizationRubpnubpFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
   icontains: String
 }
 
-input OrganizationOrganizationFilterSiteFilterInputType {
+input OrganizationSiteFilterInputType {
   """`Exact` lookup"""
   exact: String
   """`Icontains` lookup"""
@@ -2877,7 +2877,7 @@ type Query {
     after: String
     before: String
     """Advanced filter field"""
-    filter: OrganizationOrganizationFilterFilterInputType
+    filter: OrganizationFilterInputType
     first: Int
     last: Int
     offset: Int
