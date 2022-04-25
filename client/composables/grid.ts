@@ -61,10 +61,14 @@ export function useGrid (
         width = columnDimension.width ? columnDimension.width : defaultColumnWidth.value
       }
       return {
+        sheetId: sheet.value.id,
         id: columnDimension.id,
         index: columnDimension.index,
         position: positionToLetter(columnDimension.index),
         width,
+        fixed: columnDimension.fixed,
+        hidden: columnDimension.hidden,
+        kind: columnDimension.kind,
         style: { width: `${width}px` },
         dimension: columnDimension
       }
