@@ -170,6 +170,15 @@ type AddPageMutationPayload {
   success: Boolean!
 }
 
+"""Мутация на добавление группы периода."""
+type AddPeriodGroupMutationPayload {
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  periodGroup: PeriodGroupType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddPeriodMutationInput {
   clientMutationId: String
   """Xlsx файл с проектом"""
@@ -884,6 +893,29 @@ type ChangePasswordMutationPayload {
   success: Boolean!
 }
 
+input ChangePeriodGroupMutationInput {
+  clientMutationId: String
+  """Название периода"""
+  name: String
+  """Идентификатор группы периода"""
+  periodGroupId: Int!
+  """Привилегии"""
+  privilegesIds: [ID!]
+  """Пользователи"""
+  usersIds: [ID!]
+}
+
+"""Мутация на добавление пользователей в группу."""
+type ChangePeriodGroupMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененная группа периода"""
+  periodGroup: PeriodGroupType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Мутация на изменение настроек периода."""
 type ChangePeriodMutationPayload {
   """Ошибки мутации"""
@@ -1219,6 +1251,13 @@ type ContentTypeType {
   permissionSet: [PermissionType!]!
   """Тип дивизиона"""
   projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
+}
+
+input CreatePeriodGroupInput {
+  """Наименование группы периода привилегии"""
+  name: String!
+  """Период"""
+  period: ID!
 }
 
 input CreateProjectInput {
@@ -1830,6 +1869,8 @@ type Mutation {
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
   addPeriod(input: AddPeriodMutationInput!): AddPeriodMutationPayload!
+  """Мутация на добавление группы периода."""
+  addPeriodGroup(input: CreatePeriodGroupInput!): AddPeriodGroupMutationPayload!
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
@@ -1888,6 +1929,8 @@ type Mutation {
   changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
   """Мутация на изменение настроек периода."""
   changePeriod(id: ID!, input: UpdatePeriodInput!): ChangePeriodMutationPayload!
+  """Мутация на добавление пользователей в группу."""
+  changePeriodGroup(input: ChangePeriodGroupMutationInput!): ChangePeriodGroupMutationPayload!
   """Мутация на изменение значения профиля."""
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""
@@ -2448,14 +2491,14 @@ type PeriodType {
   documents: [DocumentType]
   """Дата окончания"""
   expiration: Date
-  """Группы пользователей назначенных в сборе"""
-  groups: [PeriodGroupType]
   id: ID!
   methodicalSupport: [FileType!]
   """Множественное заполнение"""
   multiple: Boolean!
   """Наименование периода"""
   name: String!
+  """Группы пользователей назначенных в сборе"""
+  periodGroups: [PeriodGroupType]
   """Приватность полей"""
   privately: Boolean!
   """Проект"""
@@ -2702,8 +2745,10 @@ type Query {
     periodId: ID!
     """Идентификатор пользователя"""
     userId: ID!
-  ): [PeriodPrivilegeType!]
+  ): [PeriodPrivilegeType!]!
   permissions: [PermissionType!]!
+  """Привилегии"""
+  privileges: [PrivilegeType!]!
   """Доступные значения профиля пользователя"""
   profileInformation(
     """Идентификатор пользователя"""

@@ -9,31 +9,35 @@
               v-col(cols="12" md="4" sm="2")
                 v-subheader Группы
               v-col.text-right(cols="12" md="8" sm="10")
-                v-btn(class="align-self-center mr-4" color="primary" icon text)
-                  v-icon(large) mdi-plus-circle
+                add-period-group(:period="period" :update="addPeriodGroupUpdate")
+                  template(#activator="{ on }")
+                    v-btn(v-on="on" class="align-self-center mr-4" color="primary" icon text)
+                      v-icon(large) mdi-plus-circle
             v-list-item(
-              v-for="(item, index) in period.groups"
+              v-for="(item, index) in period.periodGroups"
               :key="index"
-              :value="item.id"
-              @click="selectedGroup = item"
+              :value="item"
             )
               v-list-item-title {{ item.name }}
       v-divider(vertical)
       v-col(cols="12" md="8" sm="8")
-        period-group-users(:period-group="selectedGroup" :period="period")
+        period-group-users(:period-group="selectGroup" :period="period")
 </template>
 
 <script lang="ts">
-import { ComputedRef, PropType, ref } from '#app'
+import { DataProxy } from 'apollo-cache'
+import { ComputedRef, inject, PropType, ref, provide } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodGroupType, PeriodType } from '~/types/graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import PeriodGroupUsers from '~/components/dcis/periods/PeriodGroupUsers.vue'
+import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
+import { ChangePeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, PeriodGroupUsers },
+  components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -47,9 +51,29 @@ export default defineComponent({
       ...props.breadCrumbs,
       { text: 'Пользователи', to: localePath({ name: 'dcis-periods-periodId-users' }), exact: true }
     ]))
-    const selectGroup = ref<number | null | undefined>(null)
-    const selectedGroup = ref<PeriodGroupType>(null)
-    return { bc, selectGroup, selectedGroup }
+    const selectGroup = ref<PeriodGroupType | null | undefined>(null)
+    const periodUpdate: any = inject('periodUpdate')
+
+    const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
+      periodUpdate(cache, result, (dataCache, { data: { addPeriodGroup: { errors, periodGroup } } }: AddPeriodGroupMutationResult) => {
+        if (!errors.length) {
+          dataCache.period.periodGroups = [periodGroup, ...dataCache.period.periodGroups]
+        }
+        return dataCache
+      })
+    }
+    const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupMutationResult) => {
+      periodUpdate(cache, result, (dataCache, { data: { changePeriodGroup: { errors, periodGroup } } }: ChangePeriodGroupMutationResult) => {
+        if (!errors.length) {
+          const index: number = dataCache.period.periodGroups.findIndex((e: any) => e.id === periodGroup.id)
+          dataCache.period.periodGroups.splice(index, 1, periodGroup)
+          selectGroup.value = periodGroup
+        }
+        return dataCache
+      })
+    }
+    provide('periodGroupUpdate', changePeriodGroupUsersUpdate)
+    return { bc, selectGroup, addPeriodGroupUpdate, changePeriodGroupUsersUpdate }
   }
 })
 </script>

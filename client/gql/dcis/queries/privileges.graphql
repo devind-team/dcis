@@ -1,0 +1,9 @@
+query Privileges {
+  privileges {
+    id
+    name
+    key
+    createdAt
+    __typename
+  }
+}

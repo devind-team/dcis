@@ -1,0 +1,74 @@
+<template lang="pug">
+  mutation-modal-form(
+    :header="String($t('dcis.periods.addPeriodGroup.header'))"
+    :subheader="period.name"
+    :button-text="String($t('dcis.periods.addPeriodGroup.buttonText'))"
+    :mutation="addPeriodGroup"
+    :variables="{ name, periodId: period.id }"
+    :update="addPeriodGroupUpdate"
+    mutation-name="addPeriodGroup"
+    errors-in-alert
+    persistent
+  )
+    template(#activator="{ on }")
+      slot(name="activator" :on="on")
+    template(#form)
+      validation-provider(
+        :name="$t('dcis.periods.addPeriodGroup.name')"
+        rules="required|min:2"
+        v-slot="{ errors, valid }"
+        )
+        v-text-field(
+          v-model="name"
+          :label="$t('dcis.periods.addPeriodGroup.name')"
+          :success="valid"
+          :error-messages="errors"
+        )
+      v-select(
+        v-model="selectGroup"
+        :items="period.periodGroups"
+        item-text="name"
+        item-value="id"
+        :label="$t('dcis.periods.addPeriodGroup.groups')"
+        clearable
+      )
+</template>
+
+<script lang="ts">
+import type { PropType } from '#app'
+import { defineComponent, ref } from '#app'
+import { DataProxy } from 'apollo-cache'
+import { AddPeriodGroupMutationPayload, PeriodGroupType, PeriodType } from '~/types/graphql'
+import addPeriodGroup from '~/gql/dcis/mutations/project/add_period_group.graphql'
+import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
+
+export type AddPeriodGroupMutationResult = { data: { addPeriodGroup: AddPeriodGroupMutationPayload } }
+type UpdateFunction = (cache: DataProxy | any, result: AddPeriodGroupMutationPayload | any) => DataProxy | any
+
+export default defineComponent({
+  components: { MutationModalForm },
+  props: {
+    period: { type: Object as PropType<PeriodType>, required: true },
+    update: { type: Function as PropType<UpdateFunction>, required: true }
+  },
+  setup (props) {
+    const name = ref<string>('')
+    const selectGroup = ref<PeriodGroupType | null>(null)
+    const dialog = ref<boolean>(false)
+
+    const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
+      const { success } = result.data.addPeriodGroup
+      if (success) {
+        props.update(cache, result)
+      }
+    }
+    return {
+      name,
+      selectGroup,
+      addPeriodGroup,
+      dialog,
+      addPeriodGroupUpdate
+    }
+  }
+})
+</script>

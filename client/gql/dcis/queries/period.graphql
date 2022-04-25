@@ -29,12 +29,18 @@ query Period($periodId: ID!) {
         }
       }
     }
-    groups {
+    periodGroups {
       id
       name
       createdAt
       users {
         ...UserFields
+      }
+      privileges {
+        id
+        name
+        key
+        __typename
       }
       __typename
     }

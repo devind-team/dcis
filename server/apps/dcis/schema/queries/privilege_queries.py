@@ -5,11 +5,17 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import PeriodPrivilege
-from apps.dcis.schema.types import PeriodPrivilegeType, PeriodGroupType
+from apps.dcis.schema.types import PeriodPrivilegeType, PeriodGroupType, PrivilegeType
 
 
 class PrivilegeQueries(graphene.ObjectType):
     """Запросы записей, связанных с привилегиями."""
+
+    privileges = DjangoListField(
+        PrivilegeType,
+        required=True,
+        description='Привилегии'
+    )
 
     period_privileges = DjangoListField(
         PeriodPrivilegeType,

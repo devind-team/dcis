@@ -45,8 +45,18 @@ export default {
       file: 'Файл с формой сбора',
       buttonText: 'Добавить период'
     },
-    groups: {
-      name: 'Название привилегии',
+    addPeriodGroup: {
+      header: 'Добавление группы периода',
+      name: 'Название группы периода',
+      groups: 'Пользователи и привилегии из другой группы',
+      buttonText: '@:add'
+    },
+    changePeriodUsers: {
+      header: 'Добавление пользователей',
+      buttonText: '@:add'
+    },
+    privileges: {
+      name: 'Описание привилегии',
       key: 'Ключ',
       createdAt: 'Дата создания'
     },
