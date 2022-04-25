@@ -801,6 +801,8 @@ export type ChangeCellsOptionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+  /** Измененные значения */
+  values?: Maybe<Array<Maybe<ValueType>>>;
 };
 
 /** Мутация для изменения стилей колонки таблицы. */
@@ -814,7 +816,7 @@ export type ChangeColumnDimensionPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Изменение комментария версии документа */
+/** Изменение комментария версии документа. */
 export type ChangeDocumentCommentMutationPayload = {
   __typename?: 'ChangeDocumentCommentMutationPayload';
   document?: Maybe<DocumentType>;
@@ -840,6 +842,38 @@ export type ChangeFileMutationPayload = {
   file?: Maybe<FileType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+};
+
+export type ChangeFileValueMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор колонки */
+  columnId: Scalars['Int'];
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Новые файлы */
+  newFiles: Array<Scalars['Upload']>;
+  /** Оставшиеся файлы */
+  remainingFiles: Array<Scalars['ID']>;
+  /** Идентификатор строки */
+  rowId: Scalars['Int'];
+  /** Идентификатор листа */
+  sheetId: Scalars['Int'];
+  /** Значение */
+  value: Scalars['String'];
+};
+
+/** Изменение значения ячейки типа `Файл`. */
+export type ChangeFileValueMutationPayload = {
+  __typename?: 'ChangeFileValueMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Измененное значение */
+  value?: Maybe<ValueType>;
+  /** Измененные файлы */
+  valueFiles?: Maybe<Array<Maybe<FileType>>>;
 };
 
 export type ChangeGroupNameMutationInput = {
@@ -2199,10 +2233,12 @@ export type Mutation = {
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение стилей колонки таблицы */
   changeColumnDimension: ChangeColumnDimensionPayload;
-  /** Изменение комментария версии документа */
+  /** Изменение комментария версии документа. */
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
+  /** Изменение значения ячейки типа `Файл`. */
+  changeFileValue: ChangeFileValueMutationPayload;
   /** Мутация для изменения имени группы. */
   changeGroupName: ChangeGroupNameMutationPayload;
   /** Мутация для изменения привилегий группы. */
@@ -2291,6 +2327,8 @@ export type Mutation = {
   supportSubmit: SupportSubmitMutationPayload;
   /** Выгрузка документа. */
   unloadDocument: UnloadDocumentMutationPayload;
+  /** Выгрузка архива значения ячейки типа `Файл`. */
+  unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -2415,6 +2453,11 @@ export type MutationChangeDocumentCommentArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeFileArgs = {
   input: ChangeFileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeFileValueArgs = {
+  input: ChangeFileValueMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2640,6 +2683,11 @@ export type MutationUnloadDocumentArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationUnloadFileValueArchiveArgs = {
+  input: UnloadFileValueArchiveMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationUploadUsersArgs = {
   input: UploadUsersMutationInput;
 };
@@ -2828,144 +2876,144 @@ export type NotificationsSubscription = {
   notification?: Maybe<NotificationType>;
 };
 
-export type OrganizationAddressFilterInputType = {
+export type OrganizationOrganizationFilterAddressFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationDepartmentFilterInputType = {
+export type OrganizationOrganizationFilterDepartmentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
-export type OrganizationFilterInputType = {
+export type OrganizationOrganizationFilterFilterInputType = {
   /** `Address` field */
-  address?: InputMaybe<OrganizationAddressFilterInputType>;
+  address?: InputMaybe<OrganizationOrganizationFilterAddressFilterInputType>;
   /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
+  and?: InputMaybe<Array<InputMaybe<OrganizationOrganizationFilterFilterInputType>>>;
   /** `Department` field */
-  department?: InputMaybe<OrganizationDepartmentFilterInputType>;
+  department?: InputMaybe<OrganizationOrganizationFilterDepartmentFilterInputType>;
   /** `Id` field */
-  id?: InputMaybe<OrganizationIdFilterInputType>;
+  id?: InputMaybe<OrganizationOrganizationFilterIdFilterInputType>;
   /** `Inn` field */
-  inn?: InputMaybe<OrganizationInnFilterInputType>;
+  inn?: InputMaybe<OrganizationOrganizationFilterInnFilterInputType>;
   /** `Kind` field */
-  kind?: InputMaybe<OrganizationKindFilterInputType>;
+  kind?: InputMaybe<OrganizationOrganizationFilterKindFilterInputType>;
   /** `Kodbuhg` field */
-  kodbuhg?: InputMaybe<OrganizationKodbuhgFilterInputType>;
+  kodbuhg?: InputMaybe<OrganizationOrganizationFilterKodbuhgFilterInputType>;
   /** `Kpp` field */
-  kpp?: InputMaybe<OrganizationKppFilterInputType>;
+  kpp?: InputMaybe<OrganizationOrganizationFilterKppFilterInputType>;
   /** `Mail` field */
-  mail?: InputMaybe<OrganizationMailFilterInputType>;
+  mail?: InputMaybe<OrganizationOrganizationFilterMailFilterInputType>;
   /** `Name` field */
-  name?: InputMaybe<OrganizationNameFilterInputType>;
+  name?: InputMaybe<OrganizationOrganizationFilterNameFilterInputType>;
   /** `Not` field */
-  not?: InputMaybe<OrganizationFilterInputType>;
+  not?: InputMaybe<OrganizationOrganizationFilterFilterInputType>;
   /** `Okpo` field */
-  okpo?: InputMaybe<OrganizationOkpoFilterInputType>;
+  okpo?: InputMaybe<OrganizationOrganizationFilterOkpoFilterInputType>;
   /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
+  or?: InputMaybe<Array<InputMaybe<OrganizationOrganizationFilterFilterInputType>>>;
   /** `Parent` field */
-  parent?: InputMaybe<OrganizationParentFilterInputType>;
+  parent?: InputMaybe<OrganizationOrganizationFilterParentFilterInputType>;
   /** `Phone` field */
-  phone?: InputMaybe<OrganizationPhoneFilterInputType>;
+  phone?: InputMaybe<OrganizationOrganizationFilterPhoneFilterInputType>;
   /** `Region` field */
-  region?: InputMaybe<OrganizationRegionFilterInputType>;
+  region?: InputMaybe<OrganizationOrganizationFilterRegionFilterInputType>;
   /** `Rubpnubp` field */
-  rubpnubp?: InputMaybe<OrganizationRubpnubpFilterInputType>;
+  rubpnubp?: InputMaybe<OrganizationOrganizationFilterRubpnubpFilterInputType>;
   /** `Site` field */
-  site?: InputMaybe<OrganizationSiteFilterInputType>;
+  site?: InputMaybe<OrganizationOrganizationFilterSiteFilterInputType>;
 };
 
-export type OrganizationIdFilterInputType = {
+export type OrganizationOrganizationFilterIdFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
-export type OrganizationInnFilterInputType = {
+export type OrganizationOrganizationFilterInnFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationKindFilterInputType = {
+export type OrganizationOrganizationFilterKindFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationKodbuhgFilterInputType = {
+export type OrganizationOrganizationFilterKodbuhgFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationKppFilterInputType = {
+export type OrganizationOrganizationFilterKppFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationMailFilterInputType = {
+export type OrganizationOrganizationFilterMailFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationNameFilterInputType = {
+export type OrganizationOrganizationFilterNameFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationOkpoFilterInputType = {
+export type OrganizationOrganizationFilterOkpoFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationParentFilterInputType = {
+export type OrganizationOrganizationFilterParentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `Isnull` lookup */
   isnull?: InputMaybe<Scalars['Boolean']>;
 };
 
-export type OrganizationPhoneFilterInputType = {
+export type OrganizationOrganizationFilterPhoneFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationRegionFilterInputType = {
+export type OrganizationOrganizationFilterRegionFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
   /** `In` lookup */
   in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
-export type OrganizationRubpnubpFilterInputType = {
+export type OrganizationOrganizationFilterRubpnubpFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-export type OrganizationSiteFilterInputType = {
+export type OrganizationOrganizationFilterSiteFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
   /** `Icontains` lookup */
@@ -3389,6 +3437,8 @@ export type Query = {
   userInformation?: Maybe<UserType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
+  /** Файлы значения ячейки типа `Файл` */
+  valueFiles?: Maybe<Array<FileType>>;
 };
 
 /** Схема запросов данных. */
@@ -3538,7 +3588,7 @@ export type QueryOrganizationArgs = {
 export type QueryOrganizationsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<OrganizationFilterInputType>;
+  filter?: InputMaybe<OrganizationOrganizationFilterFilterInputType>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -3659,6 +3709,11 @@ export type QueryUsersArgs = {
   offset?: InputMaybe<Scalars['Int']>;
   sirName_Icontains?: InputMaybe<Scalars['String']>;
   username_Icontains?: InputMaybe<Scalars['String']>;
+};
+
+/** Схема запросов данных. */
+export type QueryValueFilesArgs = {
+  valueId: Scalars['ID'];
 };
 
 export type RecoveryPasswordMutationInput = {
@@ -4242,6 +4297,24 @@ export type UnloadDocumentMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UnloadFileValueArchiveMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор значения ячейки */
+  valueId: Scalars['ID'];
+};
+
+/** Выгрузка архива значения ячейки типа `Файл`. */
+export type UnloadFileValueArchiveMutationPayload = {
+  __typename?: 'UnloadFileValueArchiveMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный архив */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UpdateColumnDimensionInput = {
   /** Автоматическая ширина */
   autoSize: Scalars['Boolean'];
@@ -4766,6 +4839,18 @@ export type ChangeDocumentCommentMutationVariables = Exact<{
 
 export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any } | null } };
 
+export type ChangeFileValueMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['Int'];
+  columnId: Scalars['Int'];
+  rowId: Scalars['Int'];
+  value: Scalars['String'];
+  remainingFiles: Array<Scalars['ID']> | Scalars['ID'];
+  newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
+}>;
+
+export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null, valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> | null } };
+
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['Int'];
@@ -4788,6 +4873,12 @@ export type UnloadDocumentMutationVariables = Exact<{
 }>;
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UnloadFileValueArchiveMutationVariables = Exact<{
+  valueId: Scalars['ID'];
+}>;
+
+export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
@@ -4923,6 +5014,11 @@ export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'Pr
 export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
+export type ValueFilesQueryVariables = Exact<{
+  valueId: Scalars['ID'];
+}>;
+
+export type ValueFilesQuery = { __typename?: 'Query', valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any }> | null };
 
 export type UserDivisionsQueryVariables = Exact<{
   userId?: InputMaybe<Scalars['ID']>;
@@ -4930,6 +5026,7 @@ export type UserDivisionsQueryVariables = Exact<{
 }>;
 
 export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
+
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 

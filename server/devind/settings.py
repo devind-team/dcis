@@ -223,6 +223,9 @@ USERS_DIR = os.path.join(BASE_DIR, 'storage', 'user_files')
 DOCUMENTS_DIR = os.path.join(BASE_DIR, 'storage', 'documents')
 if not exists(DOCUMENTS_DIR):
     os.makedirs(DOCUMENTS_DIR)
+TEMP_FILES_DIR = os.path.join(BASE_DIR, 'storage', 'temp_files')
+if not exists(TEMP_FILES_DIR):
+    os.makedirs(TEMP_FILES_DIR)
 
 
 # Количество страниц, выгражемое по умолчанию
