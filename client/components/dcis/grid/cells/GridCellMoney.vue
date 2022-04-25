@@ -12,7 +12,6 @@
 
 <script lang="ts">
 import accounting from 'accounting'
-import { defineComponent } from '#app'
 
 export default defineComponent({
   directives: {

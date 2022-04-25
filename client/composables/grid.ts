@@ -32,7 +32,8 @@ export const cellKinds: Record<string, string> = {
   text: 'Text',
   fl: 'Files',
   money: 'Money',
-  department: 'Department'
+  department: 'Department',
+  classification: 'Classification'
 }
 
 export function useGrid (

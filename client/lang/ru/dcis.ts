@@ -59,7 +59,8 @@ export default {
     text: 'Текст',
     fl: 'Файл',
     money: 'Деньги',
-    department: 'Департаменты'
+    department: 'Департаменты',
+    classification: 'КБК'
   },
   documents: {
     add: {

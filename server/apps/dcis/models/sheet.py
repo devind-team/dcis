@@ -85,7 +85,62 @@ class Style(models.Model):
         abstract = True
 
 
-class ColumnDimension(models.Model):
+class KindCell(models.Model):
+    """Классификация ячеек."""
+
+    # Формат из openpyxl
+    NUMERIC = 'n'
+    STRING = 's'
+    FORMULA = 'f'
+    BOOL = 'b'
+    INLINE = 'inlineStr'
+    ERROR = 'e'
+    FORMULA_CACHE_STRING = 'str'
+    DATE = 'd'
+
+    # Дополнительный набор
+    TEXT = 'text'
+    MONEY = 'money'
+    BIG_MONEY = 'bigMoney'
+    FILES = 'fl'
+
+    # Поля из базы данных
+    USER = 'user'
+    DEPARTMENT = 'department'
+    ORGANIZATION = 'organization'
+    CLASSIFICATION = 'classification'
+
+    KIND_VALUE = (
+        (NUMERIC, 'n'),
+        (STRING, 's'),
+        (FORMULA, 'f'),
+        (BOOL, 'b'),
+        (INLINE, 'inlineStr'),
+        (ERROR, 'e'),
+        (FORMULA_CACHE_STRING, 'str'),
+        (DATE, 'd'),
+        (TEXT, 'text'),
+        (MONEY, 'money'),
+        (BIG_MONEY, 'bigMoney'),
+        (FILES, 'fl'),
+        (USER, 'user'),
+        (DEPARTMENT, 'department'),
+        (ORGANIZATION, 'organization'),
+        (CLASSIFICATION, 'classification')
+    )
+
+    kind = models.CharField(
+        max_length=30,
+        default=STRING,
+        choices=KIND_VALUE,
+        help_text='Тип значения'
+    )
+
+    class Meta:
+        abstract = True
+
+
+class ColumnDimension(KindCell, models.Model):
     """Модель стилей для колонки таблицы.
 
     Ссылка на оригинальный класс из openpyxl:
@@ -176,54 +231,9 @@ class RowDimension(models.Model):
         # ]
 
 
-class Cell(Style, models.Model):
+class Cell(Style, KindCell, models.Model):
     """Модель ячейки."""
 
-    # Формат из openpyxl
-    NUMERIC = 'n'
-    STRING = 's'
-    FORMULA = 'f'
-    BOOL = 'b'
-    INLINE = 'inlineStr'
-    ERROR = 'e'
-    FORMULA_CACHE_STRING = 'str'
-    DATE = 'd'
-
-    # Дополнительный набор
-    TEXT = 'text'
-    MONEY = 'money'
-    BIG_MONEY = 'bigMoney'
-    FILES = 'fl'
-
-    # Поля из базы данных
-    USER = 'user'
-    DEPARTMENT = 'department'
-    ORGANIZATION = 'organization'
-
-    KIND_VALUE = (
-        (NUMERIC, 'n'),
-        (STRING, 's'),
-        (FORMULA, 'f'),
-        (BOOL, 'b'),
-        (INLINE, 'inlineStr'),
-        (ERROR, 'e'),
-        (FORMULA_CACHE_STRING, 'str'),
-        (DATE, 'd'),
-        (TEXT, 'text'),
-        (MONEY, 'money'),
-        (BIG_MONEY, 'bigMoney'),
-        (FILES, 'fl'),
-        (USER, 'user'),
-        (DEPARTMENT, 'department'),
-        (ORGANIZATION, 'organization')
-    )
-
-    kind = models.CharField(
-        max_length=30,
-        default=STRING,
-        choices=KIND_VALUE,
-        help_text='Тип значения'
-    )
     editable = models.BooleanField(default=True, help_text='Редактируемая ячейка')
     formula = models.TextField(null=True, help_text='Формула')
     comment = models.TextField(null=True, help_text='Комментарий')

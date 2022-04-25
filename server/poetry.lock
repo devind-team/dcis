@@ -460,7 +460,7 @@ user-agents = ">=2.2.0,<3.0.0"
 
 [[package]]
 name = "devind-dictionaries"
-version = "0.4.0"
+version = "0.4.2"
 description = "Common dictionaries for devind applications."
 category = "main"
 optional = false
@@ -1199,7 +1199,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
 name = "paramiko"
-version = "2.10.3"
+version = "2.10.4"
 description = "SSH2 protocol library"
 category = "main"
 optional = false
@@ -2040,8 +2040,8 @@ devind-core = [
     {file = "devind_core-0.6.1.tar.gz", hash = "sha256:8179fed433c79abebd23d595f0e5b6a892524aa4c4ef2f8c990aca9a6ed7edb3"},
 ]
 devind-dictionaries = [
-    {file = "devind_dictionaries-0.4.0-py3-none-any.whl", hash = "sha256:8e0c0c252a88ea15373854f1e57ffccd867fca69d0266f626c28d0acdb8fe606"},
-    {file = "devind_dictionaries-0.4.0.tar.gz", hash = "sha256:099a3ee4c2ab5f049e105d0bc4b915ccb27898e780a468715408962cd2c7d340"},
+    {file = "devind_dictionaries-0.4.2-py3-none-any.whl", hash = "sha256:92b96b3cc491874edf98c8611478062c34e29bf7f11333e318f58f17003ef852"},
+    {file = "devind_dictionaries-0.4.2.tar.gz", hash = "sha256:805b9dda3e8af4bf6f05aa9d712f5a8d413305fb2012c3fcc092f380c2d827d5"},
 ]
 devind-helpers = [
     {file = "devind_helpers-0.3.0-py3-none-any.whl", hash = "sha256:3a0d838dac430223a289f65dab1d45ba61a974d227c2954b74246fe070d75b50"},
@@ -2514,8 +2514,8 @@ packaging = [
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
 paramiko = [
-    {file = "paramiko-2.10.3-py2.py3-none-any.whl", hash = "sha256:ac6593479f2b47a9422eca076b22cff9f795495e6733a64723efc75dd8c92101"},
-    {file = "paramiko-2.10.3.tar.gz", hash = "sha256:ddb1977853aef82804b35d72a0e597b244fa326c404c350bd00c5b01dbfee71a"},
+    {file = "paramiko-2.10.4-py2.py3-none-any.whl", hash = "sha256:3c9ed6084f4b671ab66dc3c729092d32d96c3258f1426071301cb33654b09027"},
+    {file = "paramiko-2.10.4.tar.gz", hash = "sha256:3d2e650b6812ce6d160abff701d6ef4434ec97934b13e95cf1ad3da70ffb5c58"},
 ]
 pep8-naming = [
     {file = "pep8-naming-0.12.1.tar.gz", hash = "sha256:bb2455947757d162aa4cad55dba4ce029005cd1692f2899a21d51d8630ca7841"},

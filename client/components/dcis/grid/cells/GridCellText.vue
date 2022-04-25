@@ -15,9 +15,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from '#app'
-import { useI18n } from '~/composables'
-
 export default defineComponent({
   props: {
     value: { type: String, default: null }
