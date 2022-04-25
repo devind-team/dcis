@@ -2,93 +2,56 @@
   v-dialog(v-model="active" width="600px" persistent)
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
-    validation-observer(v-slot="{ invalid }" slim)
-      form
-        v-card
-          v-card-title {{ t('dcis.cells.gridCellFiles.title') }}
-            v-spacer
-            v-btn(@click="cancel" icon)
-              v-icon mdi-close
-          v-card-text
-            validation-provider(
-              ref="filesValidationProvider"
-              v-slot="{ errors, valid }"
-              :custom-messages="{ required: t('dcis.cells.gridCellFiles.filesError') }"
-              :detect-input="false"
-              rules="required"
-            )
-              v-list(v-if="existingFiles.length" dense)
-                v-list-item.px-0(
-                  v-if="existingFiles.length > 1"
-                  :key="-1"
-                  dense
-                )
-                  v-list-item-action
-                    v-tooltip(bottom)
-                      template(#activator="{ on, attrs }")
-                        v-btn(
-                          v-bind="attrs"
-                          v-on="on"
-                          color="red"
-                          small
-                          icon
-                          role="checkbox"
-                          :aria-checked="allExistingFilesDeleted"
-                          @click="allExistingFilesDeleted = !allExistingFilesDeleted"
-                        )
-                          v-icon(size="22") {{ allExistingFilesDeleted ? 'mdi-delete-off' : 'mdi-delete' }}
-                      span {{ allExistingFilesDeleted ? t('dcis.cells.gridCellFiles.cancelAllDeletion') : t('dcis.cells.gridCellFiles.deleteAll') }}
-                  v-list-item-content
-                    v-list-item-title
-                      a(
-                        :class="{ 'text-decoration-line-through': allExistingFilesDeleted, 'text-decoration-underline': !allExistingFilesDeleted }"
-                        @click="uploadArchive"
-                      ) {{ t('dcis.cells.gridCellFiles.allFiles') }}
-                v-list-item.px-0(
-                   v-for="localFile in existingFiles"
-                   :key="localFile.file.id"
-                   dense
-                )
-                  v-list-item-action
-                    v-tooltip(bottom)
-                      template(#activator="{ on, attrs }")
-                        v-btn(
-                          v-bind="attrs"
-                          v-on="on"
-                          color="red"
-                          small
-                          icon
-                          role="checkbox"
-                          :aria-checked="localFile.deleted"
-                          @click="localFile.deleted = !localFile.deleted"
-                        )
-                          v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
-                      span {{localFile.deleted ? t('cancelDeletion') : t('delete') }}
-                  v-list-item-content
-                    v-list-item-title
-                      nuxt-link(
-                        :to="`/${localFile.file.src}`"
-                        :class="{'text-decoration-line-through': localFile.deleted}"
-                        target="_blank"
-                      ) {{ localFile.file.name }}
-              v-file-input(
-                v-model="newFiles"
-                :label="t('dcis.cells.gridCellFiles.newFiles')"
-                :error-messages="errors"
-                :success="valid"
-                chips
-                clearable
-                multiple
-              )
-          v-card-actions
-            v-spacer
-            v-btn(:disabled="invalid" type="submit" color="primary" @click="setValue") {{ t('save') }}
+    form
+      v-card
+        v-card-title {{ t('dcis.cells.gridCellFiles.title') }}
+          v-spacer
+          v-btn(@click="cancel" icon)
+            v-icon mdi-close
+        v-card-text
+          v-list-item.px-0(
+            v-for="localFile in existingFiles"
+            :key="localFile.file.id"
+            dense
+          )
+            v-list-item-action
+              v-tooltip(bottom)
+                template(#activator="{ on, attrs }")
+                  v-btn(
+                    v-bind="attrs"
+                    v-on="on"
+                    color="red"
+                    small
+                    icon
+                    role="checkbox"
+                    :aria-checked="localFile.deleted"
+                    @click="localFile.deleted = !localFile.deleted"
+                  )
+                    v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
+                span {{localFile.deleted ? t('cancelDeletion') : t('delete') }}
+            v-list-item-content
+              v-list-item-title
+                nuxt-link(
+                  :to="`/${localFile.file.src}`"
+                  :class="{'text-decoration-line-through': localFile.deleted}"
+                  target="_blank"
+                ) {{ localFile.file.name }}
+          v-file-input(
+            v-model="newFiles"
+            :label="t('dcis.cells.gridCellFiles.newFiles')"
+            chips
+            clearable
+            multiple
+          )
+        v-card-actions
+          v-btn(color="success" @click="uploadArchive") {{ t('dcis.cells.gridCellFiles.uploadArchive') }}
+          v-spacer
+          v-btn(color="primary" @click="setValue") {{ t('save') }}
 </template>
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from '@apollo/client'
-import { ValidationProvider } from 'vee-validate'
 import { defineComponent, ref, computed, watch } from '#app'
 import type { PropType } from '#app'
 import { useI18n, useCommonQuery } from '~/composables'
@@ -133,8 +96,6 @@ export default defineComponent({
       window.open(src, '_blank')
     }
 
-    const filesValidationProvider = ref<InstanceType<typeof ValidationProvider> | null>(null)
-
     const {
       data: valueFiles,
       update: valueFilesUpdate
@@ -167,27 +128,11 @@ export default defineComponent({
       }
     }, { immediate: true })
 
-    const allExistingFilesDeleted = computed<boolean>({
-      get () {
-        return existingFiles.value.every((file) => file.deleted)
-      },
-      set (value) {
-        existingFiles.value.forEach((file) => file.deleted = value)
-      }
-    })
-
-    const remainingExistingFiles = computed<string[]>(
+    const remainingFiles = computed<string[]>(
       () => existingFiles.value.filter(valueFile => !valueFile.deleted).map(valueFile => valueFile.file.id)
     )
 
     const newFiles = ref<File[]>([])
-
-    const remainingFiles = computed<(string | File)[]>(() => [...remainingExistingFiles.value, ...newFiles.value])
-    watch(remainingFiles, (value) => {
-      if (filesValidationProvider.value.flags.failed) {
-        filesValidationProvider.value.validate(remainingFiles.value)
-      }
-    })
 
     const cancel = () => {
       active.value = false
@@ -195,13 +140,9 @@ export default defineComponent({
     }
 
     const setValue = async () => {
-      const validationResult = await filesValidationProvider.value.validate(remainingFiles.value)
-      if (!validationResult) {
-        return
-      }
       active.value = false
       emit('set-value', 'Да', {
-        remainingFiles: remainingExistingFiles.value,
+        remainingFiles: remainingFiles.value,
         newFiles: newFiles.value
       }, updateValueFiles)
     }
@@ -210,9 +151,7 @@ export default defineComponent({
       t,
       active,
       uploadArchive,
-      filesValidationProvider,
       existingFiles,
-      allExistingFilesDeleted,
       newFiles,
       cancel,
       setValue

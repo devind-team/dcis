@@ -90,12 +90,9 @@ export default {
     },
     gridCellFiles: {
       title: 'Изменение файлов',
-      allFiles: 'Все файлы',
-      deleteAll: 'Удалить все файлы',
-      cancelAllDeletion: 'Отменить удаление всех файлов',
       file: 'Файл №{number}',
       newFiles: 'Новые файлы',
-      filesError: 'Должен быть выбран хотя бы один файл'
+      uploadArchive: 'Скачать архив'
     }
   }
 }
