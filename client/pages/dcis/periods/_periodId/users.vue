@@ -34,7 +34,8 @@ import { PeriodGroupType, PeriodType } from '~/types/graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import PeriodGroupUsers from '~/components/dcis/periods/PeriodGroupUsers.vue'
 import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
-import { ChangePeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
+import { ChangePeriodGroupUsersMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
+import { ChangePeriodGroupPrivilegesMutationResult } from '~~/components/dcis/periods/PeriodGroupPrivileges.vue'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup },
@@ -62,18 +63,26 @@ export default defineComponent({
         return dataCache
       })
     }
-    const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupMutationResult) => {
-      periodUpdate(cache, result, (dataCache, { data: { changePeriodGroup: { errors, periodGroup } } }: ChangePeriodGroupMutationResult) => {
+    const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
+      periodUpdate(cache, result, (dataCache, { data: { changePeriodGroupUsers: { errors, users } } }: ChangePeriodGroupUsersMutationResult) => {
         if (!errors.length) {
-          const index: number = dataCache.period.periodGroups.findIndex((e: any) => e.id === periodGroup.id)
-          dataCache.period.periodGroups.splice(index, 1, periodGroup)
-          selectGroup.value = periodGroup
+          dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id).users = users
         }
         return dataCache
       })
     }
-    provide('periodGroupUpdate', changePeriodGroupUsersUpdate)
-    return { bc, selectGroup, addPeriodGroupUpdate, changePeriodGroupUsersUpdate }
+    const changePeriodGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
+      periodUpdate(cache, result, (dataCache, { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult) => {
+        if (!errors.length) {
+          const periodGroup: any = dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id)
+          periodGroup.privileges = privileges
+        }
+        return dataCache
+      })
+    }
+    provide('periodGroupUsersUpdate', changePeriodGroupUsersUpdate)
+    provide('periodGroupPrivilegesUpdate', changePeriodGroupPrivilegesUpdate)
+    return { bc, selectGroup, addPeriodGroupUpdate, changePeriodGroupUsersUpdate, changePeriodGroupPrivilegesUpdate }
   }
 })
 </script>

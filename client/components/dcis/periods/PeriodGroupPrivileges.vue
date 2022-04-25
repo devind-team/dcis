@@ -4,13 +4,15 @@
       slot(:on="on")
     v-list
       mutation-modal-form(
-        :header="String($t('dcis.periods.changePeriodGroupPrivileges.header'))"
+        :header="String($t('dcis.periods.changePeriodGroupPrivileges.header', { groupName }))"
         :button-text="String($t('dcis.periods.changePeriodGroupPrivileges.buttonText'))"
-        :mutation="changePeriodGroup"
-        :variables="{ periodGroupId: periodGroup.id, privilegesIds: selectedPrivileges.map(e => e.id) }"
-        mutation-name="changePeriodGroup"
+        :mutation="changePeriodGroupPrivileges"
+        :update="changePeriodGroupPrivilegesUpdate"
+        :variables="{ periodGroupId: periodGroup.id, privilegesIds: selectPrivileges.map(e => e.id) }"
+        mutation-name="changePeriodGroupPrivileges"
         errors-in-alert
         persistent
+        @done="done"
       )
         template(#activator="{ on }")
           v-list-item(v-on="on")
@@ -19,42 +21,60 @@
             v-list-item-title Изменить привилегии группы
         template(#form)
           v-data-table(
-            v-model="selectedPrivileges"
+            v-model="selectPrivileges"
             :headers="headers"
             :items="privileges"
+            item-key="id"
             show-select
             hide-default-footer
           )
 </template>
 
 <script lang="ts">
-import type { PropType } from '#app'
+import { DataProxy } from 'apollo-cache'
+import { defineComponent, inject, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
-import { defineComponent, computed } from '#app'
-import { PeriodGroupType, PrivilegesQuery, PrivilegesQueryVariables, PrivilegeType } from '~/types/graphql'
+import {
+  ChangePeriodGroupPrivilegesMutationPayload,
+  PeriodGroupType,
+  PrivilegesQuery,
+  PrivilegesQueryVariables,
+  PrivilegeType
+} from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import { useCommonQuery } from '~/composables'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
-import changePeriodGroup from '~/gql/dcis/mutations/project/change_period_group.graphql'
+import changePeriodGroupPrivileges from '~/gql/dcis/mutations/project/change_period_group_privileges.graphql'
+
+export type ChangePeriodGroupPrivilegesMutationResult = { data: { changePeriodGroupPrivileges: ChangePeriodGroupPrivilegesMutationPayload } }
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
     periodGroup: { type: Object as PropType<PeriodGroupType>, required: true }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
       document: privilegesQuery
     })
-    const selectedPrivileges = computed<PrivilegeType[]>({
-      get: () => (props.periodGroup.privileges),
-      set: (value: PrivilegeType[]) => console.log(privileges.value.filter(item => value.map(e => e.id).includes(item.id)))
-    })
+    const groupName = ref<string>(props.periodGroup.name)
+    const selectPrivileges = ref<PrivilegeType[]>(props.periodGroup.privileges)
     const headers: DataTableHeader[] = [
       { text: 'Описание привилегии', value: 'name' },
       { text: 'Ключ', value: 'key' }
     ]
-    return { headers, privileges, loading, selectedPrivileges, changePeriodGroup }
+    const done = (result: any): void => {
+      emit('input', result.data.changePeriodGroupPrivileges.privileges)
+      nextTick(() => { selectPrivileges.value = props.periodGroup.privileges })
+    }
+    const periodGroupPrivilegesUpdate: any = inject('periodGroupPrivilegesUpdate')
+    const changePeriodGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
+      const { success } = result.data.changePeriodGroupPrivileges
+      if (success) {
+        periodGroupPrivilegesUpdate(cache, result)
+      }
+    }
+    return { headers, privileges, loading, changePeriodGroupPrivileges, groupName, selectPrivileges, done, changePeriodGroupPrivilegesUpdate }
   }
 })
 </script>

@@ -30,6 +30,7 @@
       period-group-privileges(
         v-slot="{ on }"
         :period-group="periodGroup"
+        :key="periodGroup.id"
       )
         v-btn(v-on="on" class="align-self-center" icon text)
           v-icon mdi-cog
@@ -96,7 +97,7 @@ export default defineComponent({
       { text: 'Аватар', value: 'avatar' },
       { text: 'ФИО', value: 'name' },
       { text: 'Должность', value: '' },
-      { text: 'Участие в других сборах', value: '' }
+      { text: 'Департамент', value: '' }
     ]
     return {
       headers,

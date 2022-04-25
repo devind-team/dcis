@@ -1,0 +1,19 @@
+#import "../../../core/fragments/user_fields.graphql"
+
+mutation ChangePeriodGroupUsers($periodGroupId: Int!, $usersIds: [ID!]) {
+  changePeriodGroupUsers( input: {
+    periodGroupId: $periodGroupId,
+    usersIds: $usersIds
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    users {
+      ...UserFields
+      __typename
+    }
+  }
+}

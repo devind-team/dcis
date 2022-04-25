@@ -893,27 +893,42 @@ type ChangePasswordMutationPayload {
   success: Boolean!
 }
 
-input ChangePeriodGroupMutationInput {
+input ChangePeriodGroupPrivilegesMutationInput {
   clientMutationId: String
-  """Название периода"""
-  name: String
   """Идентификатор группы периода"""
   periodGroupId: Int!
   """Привилегии"""
   privilegesIds: [ID!]
+}
+
+"""Мутация на изменение привилегий группы."""
+type ChangePeriodGroupPrivilegesMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Новые привилегии"""
+  privileges: [PrivilegeType]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangePeriodGroupUsersMutationInput {
+  clientMutationId: String
+  """Идентификатор группы периода"""
+  periodGroupId: Int!
   """Пользователи"""
   usersIds: [ID!]
 }
 
 """Мутация на добавление пользователей в группу."""
-type ChangePeriodGroupMutationPayload {
+type ChangePeriodGroupUsersMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Измененная группа периода"""
-  periodGroup: PeriodGroupType
   """Успех мутации"""
   success: Boolean!
+  """Измененная пользователи группы"""
+  users: [UserType]!
 }
 
 """Мутация на изменение настроек периода."""
@@ -1929,8 +1944,10 @@ type Mutation {
   changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
   """Мутация на изменение настроек периода."""
   changePeriod(id: ID!, input: UpdatePeriodInput!): ChangePeriodMutationPayload!
+  """Мутация на изменение привилегий группы."""
+  changePeriodGroupPrivileges(input: ChangePeriodGroupPrivilegesMutationInput!): ChangePeriodGroupPrivilegesMutationPayload!
   """Мутация на добавление пользователей в группу."""
-  changePeriodGroup(input: ChangePeriodGroupMutationInput!): ChangePeriodGroupMutationPayload!
+  changePeriodGroupUsers(input: ChangePeriodGroupUsersMutationInput!): ChangePeriodGroupUsersMutationPayload!
   """Мутация на изменение значения профиля."""
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""

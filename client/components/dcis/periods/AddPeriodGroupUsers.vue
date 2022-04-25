@@ -6,10 +6,10 @@
       mutation-modal-form(
         :header="String($t('dcis.periods.changePeriodUsers.header'))"
         :button-text="String($t('dcis.periods.changePeriodUsers.buttonText'))"
-        :mutation="changePeriodGroup"
+        :mutation="changePeriodGroupUsers"
         :variables="{ periodGroupId: periodGroup.id, usersIds: selectUsers }"
         :update="changePeriodGroupUsersUpdate"
-        mutation-name="changePeriodGroup"
+        mutation-name="changePeriodGroupUsers"
         errors-in-alert
         persistent
         @close="close"
@@ -45,13 +45,13 @@
 import { DataProxy } from 'apollo-cache'
 import { computed, defineComponent, inject, PropType, ref } from '#app'
 import {
-  ChangePeriodGroupMutationPayload,
+  ChangePeriodGroupUsersMutationPayload,
   PeriodGroupType,
   UsersQuery,
   UsersQueryVariables,
   UserType
 } from '~/types/graphql'
-import changePeriodGroup from '~/gql/dcis/mutations/project/change_period_group.graphql'
+import changePeriodGroupUsers from '~/gql/dcis/mutations/project/change_period_group_users.graphql'
 import { useDebounceSearch, useFilters, useQueryRelay } from '~/composables'
 import usersQuery from '~/gql/core/queries/users.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
@@ -62,7 +62,7 @@ export type GroupUser = {
   text: string
 }
 
-export type ChangePeriodGroupMutationResult = { data: { changePeriodGroup: ChangePeriodGroupMutationPayload } }
+export type ChangePeriodGroupUsersMutationResult = { data: { changePeriodGroupUsers: ChangePeriodGroupUsersMutationPayload } }
 
 export default defineComponent({
   components: { MutationModalForm },
@@ -70,9 +70,10 @@ export default defineComponent({
     periodGroup: { type: Object as PropType<PeriodGroupType>, required: true }
   },
   setup (props) {
+    const { search, debounceSearch } = useDebounceSearch()
+    const { dateTimeHM, getUserFullName } = useFilters()
     const active = ref<boolean>(false)
     const selectUsers = ref<UserType[] | null>(null)
-    const { search, debounceSearch } = useDebounceSearch()
     const {
       loading,
       data: users
@@ -82,7 +83,6 @@ export default defineComponent({
         search: debounceSearch.value
       })
     })
-    const { dateTimeHM, getUserFullName } = useFilters()
     const filterUsers = computed<UserType[]>(() => {
       return users
         ? users.value.filter(user => !props.periodGroup.users.find(groupUser => user.id === groupUser.id))
@@ -95,17 +95,28 @@ export default defineComponent({
         text: getUserFullName(user)
       }))
     })
-    const periodUpdate: any = inject('periodGroupUpdate')
-    const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupMutationResult) => {
-      const { success } = result.data.changePeriodGroup
+    const periodGroupUsersUpdate: any = inject('periodGroupUsersUpdate')
+    const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
+      const { success } = result.data.changePeriodGroupUsers
       if (success) {
-        periodUpdate(cache, result)
+        periodGroupUsersUpdate(cache, result)
       }
     }
     const close = (): void => {
       selectUsers.value = null
     }
-    return { active, users, loading, changePeriodGroup, selectUsers, allUsers, search, dateTimeHM, close, changePeriodGroupUsersUpdate }
+    return {
+      active,
+      users,
+      loading,
+      changePeriodGroupUsers,
+      selectUsers,
+      allUsers,
+      search,
+      dateTimeHM,
+      close,
+      changePeriodGroupUsersUpdate
+    }
   }
 })
 </script>

@@ -14,6 +14,14 @@ mutation AddPeriodGroup($name: String!, $periodId: ID!) {
       createdAt
       users {
         ...UserFields
+        __typename
+      }
+      privileges {
+        id
+        name
+        key
+        createdAt
+        __typename
       }
       __typename
     }
