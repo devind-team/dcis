@@ -460,7 +460,7 @@ user-agents = ">=2.2.0,<3.0.0"
 
 [[package]]
 name = "devind-dictionaries"
-version = "0.4.0"
+version = "0.4.1"
 description = "Common dictionaries for devind applications."
 category = "main"
 optional = false
@@ -2040,8 +2040,8 @@ devind-core = [
     {file = "devind_core-0.6.1.tar.gz", hash = "sha256:8179fed433c79abebd23d595f0e5b6a892524aa4c4ef2f8c990aca9a6ed7edb3"},
 ]
 devind-dictionaries = [
-    {file = "devind_dictionaries-0.4.0-py3-none-any.whl", hash = "sha256:8e0c0c252a88ea15373854f1e57ffccd867fca69d0266f626c28d0acdb8fe606"},
-    {file = "devind_dictionaries-0.4.0.tar.gz", hash = "sha256:099a3ee4c2ab5f049e105d0bc4b915ccb27898e780a468715408962cd2c7d340"},
+    {file = "devind_dictionaries-0.4.1-py3-none-any.whl", hash = "sha256:67e1d77ca0db6530586dfccbb63845f709899426c5222b5fe37fbf62706ab3a0"},
+    {file = "devind_dictionaries-0.4.1.tar.gz", hash = "sha256:15b12ca3352e5ff5206018f855e76cc6d44c837dcb3946eed574804b2dc0c9c7"},
 ]
 devind-helpers = [
     {file = "devind_helpers-0.3.0-py3-none-any.whl", hash = "sha256:3a0d838dac430223a289f65dab1d45ba61a974d227c2954b74246fe070d75b50"},

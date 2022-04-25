@@ -36,6 +36,7 @@ import GridCellFiles from '~/components/dcis/grid/cells/GridCellFiles.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
 import GridCellUser from '~/components/dcis/grid/cells/GridCellUser.vue'
+import GridCellClassification from '~/components/dcis/grid/cells/GridCellClassification.vue'
 
 export type ChangeValueMutationResult = { data: ChangeValueMutation }
 export type ChangeFileValueMutationResult = { data: ChangeFileValueMutation }
@@ -54,7 +55,8 @@ export default defineComponent({
     GridCellFiles,
     GridCellMoney,
     GridCellDepartment,
-    GridCellUser
+    GridCellUser,
+    GridCellClassification
   },
   props: {
     cell: { type: Object as PropType<BuildCellType>, required: true },
