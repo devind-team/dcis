@@ -89,8 +89,8 @@ class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     class Meta:
         model = ColumnDimension
-        only_fields = ('width', 'fixed', 'hidden', 'auto_size',)
-        required_fields = ('fixed', 'hidden', 'auto_size')
+        only_fields = ('width', 'fixed', 'hidden',)
+        required_fields = ('fixed', 'hidden',)
         login_required = True
         permissions = ('dcis.change_columndimension',)
 
