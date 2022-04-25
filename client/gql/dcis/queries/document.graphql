@@ -31,7 +31,6 @@ query Document($documentId: ID!) {
       cells(documentId: $documentId) {
         ...CellFields
       }
-
       values(documentId: $documentId) {
         ...ValueFields
       }
