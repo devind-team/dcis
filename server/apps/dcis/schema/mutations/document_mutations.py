@@ -8,12 +8,14 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Max
+from django.utils.timezone import make_aware
 from graphene_django_cud.mutations import DjangoUpdateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Document, DocumentStatus, Period, Sheet, Status, Value
+from apps.core.models import User
+from apps.dcis.models import Period, Document, Value, Sheet, Status, Document, DocumentStatus, RowDimension
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, ValueType
 from apps.dcis.services.document_unload import DocumentUnload
@@ -23,38 +25,52 @@ from apps.dcis.services.value import (
     update_or_create_file_value,
     update_or_create_value,
 )
+from apps.dcis.services.document_services import create_new_document
 
 
 class AddDocumentMutation(BaseMutation):
     """Добавление документа."""
 
     class Input:
+        """Входные параметры мутации.
+
+            comment - комментарий к документу
+            period_id - идентификатор периода
+            status_id - идентификатор устанавливаемого статуса
+            division_id - идентификатор дивизиона
+            document_id - документ от которого создавать копию
+        """
         comment = graphene.String(required=True, description='Комментарий')
-        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        period_id = graphene.Int(required=True, description='Идентификатор периода')
         status_id = graphene.Int(required=True, description='Начальный статус документа')
+        document_id = graphene.ID(description='Идентификатор документа')
+        division_id = graphene.Int(description='Идентификатор дивизиона')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
     @permission_classes((IsAuthenticated, AddDocument,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, comment: str, period_id: str, status_id: int):
-        period: Period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
-        status: Status = get_object_or_404(Status, pk=status_id)
-        # Служба поддержки
-        object_id: int = 1
-        max_version: Optional[int] = Document.objects.filter(period=period).aggregate(version=Max('version'))['version']
-        document = Document.objects.create(
-            version=max_version + 1 if max_version is not None else 1,
-            comment=comment,
-            object_id=object_id,
-            period=period
+    def mutate_and_get_payload(
+            root: None,
+            info: ResolveInfo,
+            comment: str,
+            period_id: str,
+            status_id: int,
+            document_id: Optional[int] = None,
+            division_id: Optional[int] = None
+    ) -> 'AddDocumentMutation':
+        """Мутация для создания документа."""
+        user: User = info.context.user
+        period: Period = get_object_or_404(Period, pk=period_id)
+        document_id: Optional[int] = from_global_id(document_id)[1] if document_id else None
+        document: Document = create_new_document(
+            user,
+            period,
+            status_id,
+            comment,
+            document_id,
+            division_id
         )
-        document.documentstatus_set.create(
-            comment='Создание документа.',
-            user=info.context.user,
-            status=status
-        )
-        document.sheets.add(*period.sheet_set.all())
         return AddDocumentMutation(document=document)
 
 

@@ -260,9 +260,11 @@ export function useGrid (
   const boundaryRowCells = computed<BoundaryRowCell[]>(() => {
     const result: BoundaryRowCell[] = []
     let i = 0
+    let offset = 0
     while (i < columns.value.length) {
-      const cell = rows.value[0].cells[i]
+      const cell = rows.value[0].cells[i - offset]
       result.push({ cell, columns: columns.value.slice(i, i + cell.colspan) })
+      offset += cell.colspan - 1
       i += cell.colspan
     }
     return result

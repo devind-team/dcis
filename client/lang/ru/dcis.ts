@@ -65,7 +65,8 @@ export default {
     add: {
       header: 'Создать новый документ',
       comment: 'Комментарий',
-      status: 'Статус'
+      status: 'Статус',
+      lastDocument: 'Значения из документа'
     },
     status: {
       name: 'Статус документа',
