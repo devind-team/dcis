@@ -1,5 +1,5 @@
 {
-  "name": "Eleden",
+  "name": "dcis",
   "schemaPath": "client/schema.graphql",
   "extensions": {
     "endpoints": {
