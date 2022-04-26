@@ -69,6 +69,15 @@ export default {
       status: 'Статус',
       lastDocument: 'Значения из документа'
     },
+    change: {
+      column: {
+        header: 'Изменение свойств',
+        fixed: 'Зафиксировать',
+        hidden: 'Скрыть',
+        kind: 'Тип ячейки по умолчанию',
+        buttonText: 'Сохранить'
+      }
+    },
     status: {
       name: 'Статус документа',
       header: 'Назначение статуса',

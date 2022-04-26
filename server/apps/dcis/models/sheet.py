@@ -145,15 +145,12 @@ class ColumnDimension(KindCell, models.Model):
 
     Ссылка на оригинальный класс из openpyxl:
     https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.0/openpyxl/worksheet/dimensions.py
-
-    - auto_size - если True, то поле width не имеет значения
     """
 
     index = models.PositiveIntegerField(help_text='Индекс колонки')
     width = models.PositiveIntegerField(null=True, help_text='Ширина колонки')
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
     hidden = models.BooleanField(default=False, help_text='Скрытое поле')
-    auto_size = models.BooleanField(default=False, help_text='Автоматическая ширина')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')

@@ -14,15 +14,22 @@
         @mousedown="mousedownColumnIndex($event, column)"
         @mouseup="mouseupColumnIndex"
       )
-        div(:class="getHeaderContentClasses(column)") {{ column.position }}
+        grid-column-control(v-slot="{ on, attrs }" :column="column")
+          div(
+            v-bind="attrs"
+            @contextmenu.prevent="on.click"
+            :class="getHeaderContentClasses(column)"
+          ) {{ column.position }}
 </template>
 
 <script lang="ts">
 import type { PropType } from '#app'
 import { defineComponent } from '#app'
 import { BuildColumnType, BoundaryRowCell } from '~/types/grid-types'
+import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
+  components: { GridColumnControl },
   props: {
     rowIndexColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },

@@ -719,7 +719,10 @@ input ChangeCellsOptionMutationInput {
 - strong - true, false
 - italic - true, false
 - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
-- kind - ['n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money', 'bigMoney', 'fl', 'user', 'department', 'organization']
+- kind - [
+    'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money',
+    'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
+]
 """
 type ChangeCellsOptionMutationPayload {
   """Измененные ячейки"""
@@ -1231,8 +1234,6 @@ type ChangeValueMutationPayload {
 
 """Тип колонок."""
 type ColumnDimensionType {
-  """Автоматическая ширина"""
-  autoSize: Boolean!
   """Ячейки"""
   cells: [CellType]
   """Фиксация колонки"""
@@ -1242,6 +1243,8 @@ type ColumnDimensionType {
   id: ID!
   """Индекс колонки"""
   index: Int!
+  """Тип значения"""
+  kind: String!
   """Листы"""
   sheet: SheetType
   """Пользователь"""
@@ -3526,12 +3529,12 @@ type UnloadFileValueArchiveMutationPayload {
 }
 
 input UpdateColumnDimensionInput {
-  """Автоматическая ширина"""
-  autoSize: Boolean!
   """Фиксация колонки"""
   fixed: Boolean!
   """Скрытое поле"""
   hidden: Boolean!
+  """Тип поля"""
+  kind: String
   """Ширина колонки"""
   width: Int
 }

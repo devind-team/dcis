@@ -10,7 +10,7 @@
             :class="contentClass"
           ) {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
-    v-list
+    v-list(dense)
       v-list-item(@click="addRowDimension(+row.id, 'before')")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
