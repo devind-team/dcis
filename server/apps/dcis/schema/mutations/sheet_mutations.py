@@ -54,7 +54,10 @@ class AddRowDimensionMutation(BaseMutation):
             document=document,
             user=info.context.user
         )
-        cells = [Cell.objects.create(row=row_dimension, column=column) for column in sheet.columndimension_set.all()]
+        cells = [
+            Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
+            for column in sheet.columndimension_set.all()
+        ]
         sheet.move_merged_cells(insert_index, 1)
         return AddRowDimensionMutation(
             row_dimension=row_dimension,
