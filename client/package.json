@@ -78,7 +78,7 @@
     "@tiptap/starter-kit": "^2.0.0-beta.183",
     "@tiptap/vue-2": "^2.0.0-beta.77",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
-    "@typescript-eslint/parser": "^5.20.0",
+    "@typescript-eslint/parser": "^5.21.0",
     "core-js": "^3.22.2",
     "eslint": "^8.14.0",
     "eslint-import-resolver-typescript": "^2.7.1",
