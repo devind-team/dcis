@@ -37,9 +37,9 @@
 или воспользоваться [неофициальном портом](https://github.com/tporadowski/redis/releases).
 
 Для некоторых **редких** сценариев работы с файлами требуется установленный
-[OpenOffice](https://www.openoffice.org/download/index.html).
+[LibreOffice](https://www.libreoffice.org/).
 Для запуска таких сценариев из Windows
-рекомендуется запускать Django сервер в WSL с установленным OpenOffice.
+рекомендуется запускать Django сервер в WSL с установленным LibreOffice.
 
 Здесь и далее все команды
 должны выполняться из папки `server`, для перехода необходимо выполнить команду:
