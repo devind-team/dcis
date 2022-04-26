@@ -102,7 +102,6 @@ class ExcelExtractor:
                 'width': column.width * 7,
                 'fixed': False,
                 'hidden': column.hidden,
-                'auto_size': column.auto_size,
                 'style': {
                     'horizontal_align': column.alignment.horizontal,
                     'vertical_align': column.alignment.vertical,

@@ -13,10 +13,14 @@ export type PositionType = {
 }
 
 export type BuildColumnType = {
+  sheetId: string
   id: string
   index: number
   position: string
   width: number
+  fixed: boolean
+  hidden: boolean
+  kind: string
   style: Record<string, string | undefined>
   dimension: ColumnDimensionType
 }

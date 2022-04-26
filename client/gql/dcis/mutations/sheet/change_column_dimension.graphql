@@ -4,14 +4,14 @@ mutation ChangeColumnDimension(
   $id: ID!,
   $width: Int,
   $fixed: Boolean!,
-  $hidden: Boolean!
-  $autoSize: Boolean!
+  $hidden: Boolean!,
+  $kind: String!
 ) {
   changeColumnDimension(id: $id, input: {
     width: $width,
     fixed: $fixed
     hidden: $hidden
-    autoSize: $autoSize
+    kind: $kind
   }) {
     success
     errors {

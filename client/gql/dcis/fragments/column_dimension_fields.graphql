@@ -4,6 +4,6 @@ fragment ColumnDimensionFields on ColumnDimensionType {
   width
   fixed
   hidden
-  autoSize
+  kind
   __typename
 }

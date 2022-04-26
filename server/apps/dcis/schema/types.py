@@ -361,7 +361,7 @@ class ColumnDimensionType(DjangoObjectType):
             'width',
             'fixed',
             'hidden',
-            'auto_size',
+            'kind',
             'sheet',
             'user',
             'cells',
