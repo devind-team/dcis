@@ -13,9 +13,9 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Document, RowDimension, Sheet, ColumnDimension, Cell, Value
-from apps.dcis.schema.types import ColumnDimensionType, RowDimensionType, CellType, MergedCellType, ValueType
-from apps.dcis.services.cell import check_cell_options
+from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
+from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType, ValueType
+from apps.dcis.services.cell import change_cell_kind, check_cell_options
 from apps.dcis.services.value import updates_values_by_cell_kind_change
 
 
@@ -142,10 +142,12 @@ class ChangeCellsOptionMutation(BaseMutation):
         values: list[Value] = []
         with transaction.atomic():
             for cell in cells:
-                setattr(cell, field, value)
-                cell.save(update_fields=(field,))
                 if field == 'kind':
+                    cell.save(update_fields=change_cell_kind(cell, value))
                     values.extend(updates_values_by_cell_kind_change(cell))
+                else:
+                    setattr(cell, field, value)
+                    cell.save(update_fields=(field,))
         return ChangeCellsOptionMutation(cells=cells, values=values)
 
 

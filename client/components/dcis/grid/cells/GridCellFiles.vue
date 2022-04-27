@@ -81,11 +81,16 @@ export default defineComponent({
 
     const active = ref<boolean>(true)
 
+    const variables = ref<
+      UnloadFileValueArchiveMutationVariables |
+      ValueFilesQueryVariables
+    >(props.valueType ? { valueId: props.valueType.id } : { valueId: '' })
+
     const { mutate: unloadFileValueArchiveMutate } = useMutation<
       UnloadFileValueArchiveMutation,
       UnloadFileValueArchiveMutationVariables
     >(unloadFileValueArchiveMutation, {
-      variables: { valueId: props.valueType.id }
+      variables: variables.value
     })
 
     const uploadArchive = async () => {
@@ -98,9 +103,7 @@ export default defineComponent({
       update: valueFilesUpdate
     } = useCommonQuery<ValueFilesQuery, ValueFilesQueryVariables, 'valueFiles'>({
       document: valueFilesQuery,
-      variables: {
-        valueId: props.valueType.id
-      },
+      variables: variables.value,
       options: {
         enabled: !!props.valueType
       }
@@ -110,12 +113,14 @@ export default defineComponent({
       cache: DataProxy,
       result: ChangeFileValueMutationResult
     ) => {
-      valueFilesUpdate(cache, result, (dataCache) => {
-        const mutationResult = result.data.changeFileValue
-        const dataKey = Object.keys(dataCache)[0]
-        dataCache[dataKey] = mutationResult[dataKey]
-        return dataCache
-      })
+      if (props.valueType) {
+        valueFilesUpdate(cache, result, (dataCache) => {
+          const mutationResult = result.data.changeFileValue
+          const dataKey = Object.keys(dataCache)[0]
+          dataCache[dataKey] = mutationResult[dataKey]
+          return dataCache
+        })
+      }
     }
 
     const existingFiles = ref<ValueFile[]>([])

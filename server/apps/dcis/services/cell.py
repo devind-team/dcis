@@ -7,6 +7,14 @@ from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from apps.dcis.models import Cell
 
 
+def change_cell_kind(cell: Cell, kind: str) -> tuple:
+    """Изменение типа ячейки."""
+    if kind == 'fl':
+        cell.default = 'Нет'
+    cell.kind = kind
+    return 'kind', 'default'
+
+
 def check_cell_options(field: str, value: str) -> tuple[
     bool,
     Optional[Union[str, int, bool]],
