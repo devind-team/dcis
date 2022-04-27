@@ -43,7 +43,11 @@
           multiple
         )
       v-card-actions
-        v-btn(color="success" @click="uploadArchive") {{ $t('dcis.cells.gridCellFiles.uploadArchive') }}
+        v-btn(
+          v-if="existingFiles.length"
+          color="success"
+          @click="uploadArchive"
+        ) {{ $t('dcis.cells.gridCellFiles.uploadArchive') }}
         v-spacer
         v-btn(color="primary" @click="setValue") {{ $t('save') }}
 </template>
