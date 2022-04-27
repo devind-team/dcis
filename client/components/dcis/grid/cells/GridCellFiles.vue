@@ -43,7 +43,11 @@
           multiple
         )
       v-card-actions
-        v-btn(color="success" @click="uploadArchive") {{ $t('dcis.cells.gridCellFiles.uploadArchive') }}
+        v-btn(
+          v-if="existingFiles.length"
+          color="success"
+          @click="uploadArchive"
+        ) {{ $t('dcis.cells.gridCellFiles.uploadArchive') }}
         v-spacer
         v-btn(color="primary" @click="setValue") {{ $t('save') }}
 </template>
@@ -61,7 +65,7 @@ import {
   ValueFilesQueryVariables
 } from '~/types/graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
-import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/document/unload_file_value_archive.graphql'
+import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/sheet/unload_file_value_archive.graphql'
 import FileField from '~/components/common/FileField.vue'
 import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/GridCell.vue'
 
@@ -81,11 +85,16 @@ export default defineComponent({
 
     const active = ref<boolean>(true)
 
+    const variables = ref<
+      UnloadFileValueArchiveMutationVariables |
+      ValueFilesQueryVariables
+    >(props.valueType ? { valueId: props.valueType.id } : { valueId: '' })
+
     const { mutate: unloadFileValueArchiveMutate } = useMutation<
       UnloadFileValueArchiveMutation,
       UnloadFileValueArchiveMutationVariables
     >(unloadFileValueArchiveMutation, {
-      variables: { valueId: props.valueType.id }
+      variables: variables.value
     })
 
     const uploadArchive = async () => {
@@ -98,9 +107,7 @@ export default defineComponent({
       update: valueFilesUpdate
     } = useCommonQuery<ValueFilesQuery, ValueFilesQueryVariables, 'valueFiles'>({
       document: valueFilesQuery,
-      variables: {
-        valueId: props.valueType.id
-      },
+      variables: variables.value,
       options: {
         enabled: !!props.valueType
       }
@@ -110,12 +117,14 @@ export default defineComponent({
       cache: DataProxy,
       result: ChangeFileValueMutationResult
     ) => {
-      valueFilesUpdate(cache, result, (dataCache) => {
-        const mutationResult = result.data.changeFileValue
-        const dataKey = Object.keys(dataCache)[0]
-        dataCache[dataKey] = mutationResult[dataKey]
-        return dataCache
-      })
+      if (props.valueType) {
+        valueFilesUpdate(cache, result, (dataCache) => {
+          const mutationResult = result.data.changeFileValue
+          const dataKey = Object.keys(dataCache)[0]
+          dataCache[dataKey] = mutationResult[dataKey]
+          return dataCache
+        })
+      }
     }
 
     const existingFiles = ref<ValueFile[]>([])

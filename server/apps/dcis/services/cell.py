@@ -7,6 +7,14 @@ from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from apps.dcis.models import Cell
 
 
+def change_cell_kind(cell: Cell, kind: str) -> tuple:
+    """Изменение типа ячейки."""
+    if kind == 'fl':
+        cell.default = 'Нет'
+    cell.kind = kind
+    return 'kind', 'default'
+
+
 def check_cell_options(field: str, value: str) -> tuple[
     bool,
     Optional[Union[str, int, bool]],
@@ -21,18 +29,18 @@ def check_cell_options(field: str, value: str) -> tuple[
         )]
     if field == 'horizontal_align':
         allow_horizontal_align: list[str] = ['left', 'center', 'right']
-        if value not in allow_horizontal_align:
+        if value not in allow_horizontal_align and value is not None:
             return False, None, [ErrorFieldType(
                 'value',
-                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_horizontal_align)}']
+                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_horizontal_align)}, null']
             )]
         return True, value, None
     if field == 'vertical_align':
         allow_vertical_align: list[str] = ['top', 'middle', 'bottom']
-        if value not in allow_vertical_align:
+        if value not in allow_vertical_align and value is not None:
             return False, None, [ErrorFieldType(
                 'value',
-                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_vertical_align)}']
+                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_vertical_align)}, null']
             )]
         return True, value, None
     if field == 'size':
