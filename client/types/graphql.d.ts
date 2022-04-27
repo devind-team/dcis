@@ -798,6 +798,28 @@ export type ChangeGroupPermissionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeGroupUserPrivilegesMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор группы периода */
+  periodId: Scalars['ID'];
+  /** Привилегии */
+  privilegesIds?: InputMaybe<Array<Scalars['ID']>>;
+  /** Идентификатор группы периода */
+  userId: Scalars['ID'];
+};
+
+/** Мутация на изменение привилегий пользователя. */
+export type ChangeGroupUserPrivilegesMutationPayload = {
+  __typename?: 'ChangeGroupUserPrivilegesMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Привилегии пользователя */
+  privileges: Array<Maybe<PrivilegeType>>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type ChangeNotificationMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Название поля */
@@ -991,7 +1013,7 @@ export type ChangePeriodGroupPrivilegesMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
-  /** Новые привилегии */
+  /** Привилегии группы */
   privileges: Array<Maybe<PrivilegeType>>;
   /** Успех мутации */
   success: Scalars['Boolean'];
@@ -2085,6 +2107,8 @@ export type Mutation = {
   changeGroupName: ChangeGroupNameMutationPayload;
   /** Мутация для изменения привилегий группы. */
   changeGroupPermissions: ChangeGroupPermissionsMutationPayload;
+  /** Мутация на изменение привилегий пользователя. */
+  changeGroupUsersPrivileges: ChangeGroupUserPrivilegesMutationPayload;
   /** Изменение свойств уведомления */
   changeNotification: ChangeNotificationMutationPayload;
   /** Изменение свойств уведомлений */
@@ -2312,6 +2336,11 @@ export type MutationChangeGroupNameArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeGroupPermissionsArgs = {
   input: ChangeGroupPermissionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeGroupUsersPrivilegesArgs = {
+  input: ChangeGroupUserPrivilegesMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3036,20 +3065,10 @@ export type PeriodGroupType = {
   name: Scalars['String'];
   /** Период сбора */
   period: PeriodType;
+  /** Привилегии группы */
   privileges?: Maybe<Array<PrivilegeType>>;
+  /** Пользователи в группе */
   users?: Maybe<Array<UserType>>;
-};
-
-/** Тип для отдельных привилегий пользователей. */
-export type PeriodPrivilegeType = {
-  __typename?: 'PeriodPrivilegeType';
-  id: Scalars['ID'];
-  /** Период */
-  period: PeriodType;
-  /** Привилегия */
-  privilege: PrivilegeType;
-  /** Пользователь */
-  user: UserType;
 };
 
 /** Тип периода. */
@@ -3116,10 +3135,6 @@ export type PrivilegeType = {
   key: Scalars['String'];
   /** Наименование привилегии */
   name: Scalars['String'];
-  /** Период группы привилегии */
-  periodgroupSet: Array<PeriodGroupType>;
-  /** Привилегия */
-  periodprivilegeSet: Array<PeriodPrivilegeType>;
 };
 
 /** An enumeration. */
@@ -3291,7 +3306,7 @@ export type Query = {
   /** Информация по периоду */
   period: PeriodType;
   /** Привилегии назначенных пользователей периодов */
-  periodPrivileges: Array<PeriodPrivilegeType>;
+  periodPrivileges: Array<PrivilegeType>;
   permissions: Array<PermissionType>;
   /** Привилегии */
   privileges: Array<PrivilegeType>;
@@ -4636,6 +4651,21 @@ export type UnloadDocumentMutationVariables = Exact<{
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
+export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
+  periodGroupId: Scalars['Int'];
+  privilegesIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
+}>;
+
+export type ChangePeriodGroupPrivilegesMutation = { __typename?: 'Mutation', changePeriodGroupPrivileges: { __typename: 'ChangePeriodGroupPrivilegesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } | null> } };
+
+export type ChangeGroupUserPrivilegesMutationVariables = Exact<{
+  userId: Scalars['ID'];
+  periodId: Scalars['ID'];
+  privilegesIds: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+export type ChangeGroupUserPrivilegesMutation = { __typename?: 'Mutation', changeGroupUsersPrivileges: { __typename: 'ChangeGroupUserPrivilegesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } | null> } };
+
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
   projectId: Scalars['ID'];
@@ -4672,13 +4702,6 @@ export type ChangePeriodMutationVariables = Exact<{
 }>;
 
 export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
-
-export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
-  periodGroupId: Scalars['Int'];
-  privilegesIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
-}>;
-
-export type ChangePeriodGroupPrivilegesMutation = { __typename?: 'Mutation', changePeriodGroupPrivileges: { __typename?: 'ChangePeriodGroupPrivilegesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string } | null> } };
 
 export type ChangePeriodGroupUsersMutationVariables = Exact<{
   periodGroupId: Scalars['Int'];
@@ -4768,6 +4791,13 @@ export type PeriodQueryVariables = Exact<{
 
 export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
+export type PeriodPrivilegesQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+export type PeriodPrivilegesQuery = { __typename?: 'Query', periodPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
+
 export type PrivilegesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PrivilegesQuery = { __typename?: 'Query', privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
@@ -4788,13 +4818,6 @@ export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'Pr
 export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
-
-export type PeriodPrivilegesQueryVariables = Exact<{
-  periodId: Scalars['ID'];
-  userId: Scalars['ID'];
-}>;
-
-export type PeriodPrivilegesQuery = { __typename?: 'Query', periodPrivileges: Array<{ __typename: 'PeriodPrivilegeType', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, privilege: { __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } }> };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 

@@ -56,7 +56,7 @@ export default {
       buttonText: '@:add'
     },
     changePeriodGroupPrivileges: {
-      header: 'Изменениe привилегий группы {groupName}',
+      header: 'Изменениe привилегий {groupName}',
       buttonText: '@:change'
     },
     privileges: {

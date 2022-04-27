@@ -14,12 +14,12 @@ from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
+from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.core.models import User
-from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege, Privilege
+from apps.dcis.models import Project, Period, PeriodGroup
 from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import ProjectType, PeriodType, PeriodGroupType, PrivilegeType
+from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
@@ -154,27 +154,6 @@ class ChangePeriodGroupUsersMutation(BaseMutation):
         return ChangePeriodGroupUsersMutation(users=users)
 
 
-class ChangePeriodGroupPrivilegesMutation(BaseMutation):
-    """Мутация на изменение привилегий группы."""
-
-    class Input:
-        period_group_id = graphene.Int(required=True, description='Идентификатор группы периода')
-        privileges_ids = graphene.List(graphene.NonNull(graphene.ID), description='Привилегии')
-
-    privileges = graphene.List(PrivilegeType, required=True, description='Новые привилегии')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str, privileges_ids: list[str]):
-        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        privileges: list[Privilege] = []
-        for privilege_id in privileges_ids:
-            privilege = get_object_or_404(Privilege, pk=privilege_id)
-            privileges.append(privilege)
-        period_group.privileges.set(privileges)
-        return ChangePeriodGroupPrivilegesMutation(privileges=privileges)
-
-
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
@@ -185,5 +164,4 @@ class ProjectMutations(graphene.ObjectType):
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
-    change_period_group_privileges = ChangePeriodGroupPrivilegesMutation.Field(required=True)
     change_period_group_users = ChangePeriodGroupUsersMutation.Field(required=True)

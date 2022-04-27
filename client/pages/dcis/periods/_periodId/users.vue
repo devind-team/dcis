@@ -26,8 +26,7 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { ComputedRef, inject, PropType, ref, provide } from '#app'
-import { computed, defineComponent, useNuxt2Meta } from '#app'
+import { ComputedRef, inject, PropType, ref, provide, computed, defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodGroupType, PeriodType } from '~/types/graphql'
@@ -64,21 +63,25 @@ export default defineComponent({
       })
     }
     const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
-      periodUpdate(cache, result, (dataCache, { data: { changePeriodGroupUsers: { errors, users } } }: ChangePeriodGroupUsersMutationResult) => {
-        if (!errors.length) {
-          dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id).users = users
-        }
-        return dataCache
-      })
+      periodUpdate(
+        cache, result, (dataCache, { data: { changePeriodGroupUsers: { errors, users } } }: ChangePeriodGroupUsersMutationResult
+        ) => {
+          if (!errors.length) {
+            dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id).users = users
+          }
+          return dataCache
+        })
     }
     const changePeriodGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
-      periodUpdate(cache, result, (dataCache, { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult) => {
-        if (!errors.length) {
-          const periodGroup: any = dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id)
-          periodGroup.privileges = privileges
-        }
-        return dataCache
-      })
+      periodUpdate(
+        cache, result, (dataCache, { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult
+        ) => {
+          if (!errors.length) {
+            const periodGroup: any = dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id)
+            periodGroup.privileges = privileges
+          }
+          return dataCache
+        })
     }
     provide('periodGroupUsersUpdate', changePeriodGroupUsersUpdate)
     provide('periodGroupPrivilegesUpdate', changePeriodGroupPrivilegesUpdate)

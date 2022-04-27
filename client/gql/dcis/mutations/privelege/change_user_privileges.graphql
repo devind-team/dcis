@@ -1,0 +1,22 @@
+mutation ChangeGroupUserPrivileges($userId: ID!, $periodId: ID!, $privilegesIds: [ID!]!) {
+  changeGroupUsersPrivileges(input: {
+    userId: $userId,
+    periodId: $periodId,
+    privilegesIds: $privilegesIds
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    privileges {
+      id
+      name
+      key
+      createdAt
+      __typename
+    }
+    __typename
+  }
+}

@@ -723,6 +723,27 @@ type ChangeGroupPermissionsMutationPayload {
   success: Boolean!
 }
 
+input ChangeGroupUserPrivilegesMutationInput {
+  clientMutationId: String
+  """Идентификатор группы периода"""
+  periodId: ID!
+  """Привилегии"""
+  privilegesIds: [ID!]
+  """Идентификатор группы периода"""
+  userId: ID!
+}
+
+"""Мутация на изменение привилегий пользователя."""
+type ChangeGroupUserPrivilegesMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Привилегии пользователя"""
+  privileges: [PrivilegeType]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeNotificationMutationInput {
   clientMutationId: String
   """Название поля"""
@@ -906,7 +927,7 @@ type ChangePeriodGroupPrivilegesMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Новые привилегии"""
+  """Привилегии группы"""
   privileges: [PrivilegeType]!
   """Успех мутации"""
   success: Boolean!
@@ -1924,6 +1945,8 @@ type Mutation {
   changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
   """Мутация для изменения привилегий группы."""
   changeGroupPermissions(input: ChangeGroupPermissionsMutationInput!): ChangeGroupPermissionsMutationPayload!
+  """Мутация на изменение привилегий пользователя."""
+  changeGroupUsersPrivileges(input: ChangeGroupUserPrivilegesMutationInput!): ChangeGroupUserPrivilegesMutationPayload!
   """Изменение свойств уведомления"""
   changeNotification(input: ChangeNotificationMutationInput!): ChangeNotificationMutationPayload!
   """Изменение свойств уведомлений"""
@@ -2483,19 +2506,10 @@ type PeriodGroupType {
   name: String!
   """Период сбора"""
   period: PeriodType!
+  """Привилегии группы"""
   privileges: [PrivilegeType!]
+  """Пользователи в группе"""
   users: [UserType!]
-}
-
-"""Тип для отдельных привилегий пользователей."""
-type PeriodPrivilegeType {
-  id: ID!
-  """Период"""
-  period: PeriodType!
-  """Привилегия"""
-  privilege: PrivilegeType!
-  """Пользователь"""
-  user: UserType!
 }
 
 """Тип периода."""
@@ -2558,10 +2572,6 @@ type PrivilegeType {
   key: String!
   """Наименование привилегии"""
   name: String!
-  """Период группы привилегии"""
-  periodgroupSet: [PeriodGroupType!]!
-  """Привилегия"""
-  periodprivilegeSet: [PeriodPrivilegeType!]!
 }
 
 """An enumeration."""
@@ -2762,7 +2772,7 @@ type Query {
     periodId: ID!
     """Идентификатор пользователя"""
     userId: ID!
-  ): [PeriodPrivilegeType!]!
+  ): [PrivilegeType!]!
   permissions: [PermissionType!]!
   """Привилегии"""
   privileges: [PrivilegeType!]!

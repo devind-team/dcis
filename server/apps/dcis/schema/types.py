@@ -118,15 +118,15 @@ class PrivilegeType(DjangoObjectType):
 
     class Meta:
         model = Privilege
-        fields = '__all__'
+        fields = ('id', 'name', 'created_at', 'key',)
 
 
 class PeriodGroupType(DjangoObjectType):
     """Группы с содержанием привилегий."""
 
     period = graphene.Field(PeriodType, required=True, description='Период сбора')
-    users = DjangoListField(UserType)
-    privileges = DjangoListField(PrivilegeType)
+    users = DjangoListField(UserType, description='Пользователи в группе')
+    privileges = DjangoListField(PrivilegeType, description='Привилегии группы')
 
     class Meta:
         model = PeriodGroup

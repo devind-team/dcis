@@ -13,7 +13,9 @@ mutation ChangePeriodGroupPrivileges($periodGroupId: Int!, $privilegesIds: [ID!]
       id
       name
       key
+      createdAt
       __typename
     }
+    __typename
   }
 }

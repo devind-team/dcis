@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-menu(bottom)
+  v-menu(v-model="active" bottom)
     template(#activator="{ on }")
       slot(:on="on")
     v-list
@@ -24,6 +24,7 @@
             v-model="selectPrivileges"
             :headers="headers"
             :items="privileges"
+            :loading="loading"
             item-key="id"
             show-select
             hide-default-footer
@@ -44,7 +45,7 @@ import {
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import { useCommonQuery } from '~/composables'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
-import changePeriodGroupPrivileges from '~/gql/dcis/mutations/project/change_period_group_privileges.graphql'
+import changePeriodGroupPrivileges from '~/gql/dcis/mutations/privelege/change_period_group_privileges.graphql'
 
 export type ChangePeriodGroupPrivilegesMutationResult = { data: { changePeriodGroupPrivileges: ChangePeriodGroupPrivilegesMutationPayload } }
 
@@ -54,8 +55,10 @@ export default defineComponent({
     periodGroup: { type: Object as PropType<PeriodGroupType>, required: true }
   },
   setup (props, { emit }) {
+    const active = ref<boolean>(false)
     const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
-      document: privilegesQuery
+      document: privilegesQuery,
+      options: { enabled: active }
     })
     const groupName = ref<string>(props.periodGroup.name)
     const selectPrivileges = ref<PrivilegeType[]>(props.periodGroup.privileges)
@@ -74,7 +77,7 @@ export default defineComponent({
         periodGroupPrivilegesUpdate(cache, result)
       }
     }
-    return { headers, privileges, loading, changePeriodGroupPrivileges, groupName, selectPrivileges, done, changePeriodGroupPrivilegesUpdate }
+    return { headers, privileges, loading, changePeriodGroupPrivileges, groupName, selectPrivileges, done, active, changePeriodGroupPrivilegesUpdate }
   }
 })
 </script>

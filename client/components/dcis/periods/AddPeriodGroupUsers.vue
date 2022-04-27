@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-menu(bottom)
+  v-menu(v-model="active" bottom)
     template(#activator="{ on }")
       slot(:on="on")
     v-list
@@ -34,6 +34,7 @@
             clearable
             hide-selected
             hide-no-data
+            @change="search=''"
           )
       v-list-item
         v-list-item-icon
@@ -81,7 +82,8 @@ export default defineComponent({
       document: usersQuery,
       variables: () => ({
         search: debounceSearch.value
-      })
+      }),
+      options: { enabled: active }
     })
     const filterUsers = computed<UserType[]>(() => {
       return users

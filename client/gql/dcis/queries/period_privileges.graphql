@@ -1,0 +1,9 @@
+query PeriodPrivileges($periodId: ID!, $userId: ID!) {
+  periodPrivileges(periodId: $periodId, userId: $userId) {
+    id
+    name
+    key
+    createdAt
+    __typename
+  }
+}
