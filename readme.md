@@ -36,7 +36,7 @@
 [сайте Redis](https://redis.io/docs/getting-started/installation/install-redis-on-windows/),
 или воспользоваться [неофициальном портом](https://github.com/tporadowski/redis/releases).
 
-Для некоторых **редких** сценариев работы с файлами требуется установленный
+В исключительных сценариях, для преобразования docx в pdf может потребоваться установленный
 [LibreOffice](https://www.libreoffice.org/).
 Для запуска таких сценариев из Windows
 рекомендуется запускать Django сервер в WSL с установленным LibreOffice.
@@ -76,9 +76,14 @@ poetry install
 
 4. Убедиться в том, что Redis сервер запущен
 
-На Unix это можно сделать следующей командой:
+На Linux это можно сделать следующей командой:
 ```shell
 sudo service redis-server restart
+```
+
+На macOS необходимо выполнить следующую команду:
+```shell
+brew services start redis
 ```
 
 На Windows необходимо зайти в диспетчер задач и запустить службу `Redis`,
@@ -170,7 +175,7 @@ yarn
 
 Для этого в Unix необходимо в корне проекта выполнить команду:
 ```shell
-sudo python3 init.py
+python3 init.py
 ```
 
 В Windows необходимо открыть терминал от имени администратора
