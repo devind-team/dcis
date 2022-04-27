@@ -11,7 +11,7 @@
       v-btn-toggle.mx-1(v-model="verticalAlignValue" dense)
         v-btn(:disabled="!selectionCells.length" value="top") #[v-icon mdi-format-align-top]
         v-btn(:disabled="!selectionCells.length" value="middle") #[v-icon mdi-format-align-middle]
-        v-btn(:disabled="!selectionCells.length" value="bottom" ) #[v-icon mdi-format-align-bottom]
+        v-btn(:disabled="!selectionCells.length" value="bottom") #[v-icon mdi-format-align-bottom]
       v-btn-toggle
         v-combobox.mx-1(
           v-model="sizeValue"

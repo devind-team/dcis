@@ -29,18 +29,18 @@ def check_cell_options(field: str, value: str) -> tuple[
         )]
     if field == 'horizontal_align':
         allow_horizontal_align: list[str] = ['left', 'center', 'right']
-        if value not in allow_horizontal_align:
+        if value not in allow_horizontal_align and value is not None:
             return False, None, [ErrorFieldType(
                 'value',
-                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_horizontal_align)}']
+                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_horizontal_align)}, null']
             )]
         return True, value, None
     if field == 'vertical_align':
         allow_vertical_align: list[str] = ['top', 'middle', 'bottom']
-        if value not in allow_vertical_align:
+        if value not in allow_vertical_align and value is not None:
             return False, None, [ErrorFieldType(
                 'value',
-                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_vertical_align)}']
+                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_vertical_align)}, null']
             )]
         return True, value, None
     if field == 'size':
