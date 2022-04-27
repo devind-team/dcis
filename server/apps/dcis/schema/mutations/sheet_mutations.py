@@ -1,14 +1,17 @@
 from typing import Any, Optional
 
 import graphene
+from devind_core.schema import FileType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import F
 from graphene_django_cud.mutations import DjangoUpdateMutation
+from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -16,7 +19,13 @@ from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
 from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType, ValueType
 from apps.dcis.services.cell import change_cell_kind, check_cell_options
-from apps.dcis.services.value import updates_values_by_cell_kind_change
+from apps.dcis.services.value import (
+    create_file_value_archive,
+    get_file_value_files,
+    update_or_create_file_value,
+    update_or_create_value,
+    updates_values_by_cell_kind_change,
+)
 
 
 class AddRowDimensionMutation(BaseMutation):
@@ -151,6 +160,98 @@ class ChangeCellsOptionMutation(BaseMutation):
         return ChangeCellsOptionMutation(cells=cells, values=values)
 
 
+class UnloadFileValueArchiveMutation(BaseMutation):
+    """Выгрузка архива значения ячейки типа `Файл`."""
+
+    class Input:
+        value_id = graphene.ID(required=True, description='Идентификатор значения ячейки')
+
+    src = graphene.String(description='Ссылка на сгенерированный архив')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, value_id: str):
+        return UnloadFileValueArchiveMutation(src=create_file_value_archive(get_object_or_404(Value, pk=value_id)))
+
+
+class ChangeValueMutation(BaseMutation):
+    """Изменение значения ячейки."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+        column_id = graphene.Int(required=True, description='Идентификатор колонки')
+        row_id = graphene.Int(required=True, description='Идентификатор строки')
+        value = graphene.String(required=True, description='Значение')
+
+    value = graphene.Field(ValueType, description='Измененное значение')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: int,
+        column_id: int,
+        row_id: int,
+        value: str
+    ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
+        val, _ = update_or_create_value(
+            document=document,
+            sheet=sheet,
+            column_id=column_id,
+            row_id=row_id,
+            value=value
+        )
+        return ChangeValueMutation(value=val)
+
+
+class ChangeFileValueMutation(BaseMutation):
+    """Изменение значения ячейки типа `Файл`."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+        column_id = graphene.Int(required=True, description='Идентификатор колонки')
+        row_id = graphene.Int(required=True, description='Идентификатор строки')
+        value = graphene.String(required=True, description='Значение')
+        remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
+        new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
+
+    value = graphene.Field(ValueType, description='Измененное значение')
+    value_files = graphene.List(FileType, description='Измененные файлы')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: int,
+        column_id: int,
+        row_id: int,
+        value: str,
+        remaining_files: list[int],
+        new_files: list[InMemoryUploadedFile]
+    ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
+        val, _ = update_or_create_file_value(
+            user=info.context.user,
+            document=document,
+            sheet=sheet,
+            column_id=column_id,
+            row_id=row_id,
+            value=value,
+            remaining_files=[int(from_global_id(global_id)[1]) for global_id in remaining_files],
+            new_files=new_files
+        )
+        return ChangeFileValueMutation(value=val, value_files=get_file_value_files(val))
+
+
 class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
@@ -163,3 +264,13 @@ class SheetMutations(graphene.ObjectType):
     )
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
+
+    unload_file_value_archive = UnloadFileValueArchiveMutation.Field(
+        required=True,
+        description='Выгрузка архива значения ячейки типа `Файл`'
+    )
+    change_value = ChangeValueMutation.Field(required=True, description='Изменение значения ячейки')
+    change_file_value = ChangeFileValueMutation.Field(
+        required=True,
+        description='Изменение значения ячейки типа `Файл`'
+    )

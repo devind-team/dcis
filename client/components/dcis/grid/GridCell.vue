@@ -27,8 +27,8 @@ import {
   ChangeValueMutationVariables,
   ChangeFileValueMutationVariables
 } from '~/types/graphql'
-import changeValueMutation from '~/gql/dcis/mutations/document/change_value.graphql'
-import changeFileValueMutation from '~/gql/dcis/mutations/document/change_file_value.graphql'
+import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
+import changeFileValueMutation from '~/gql/dcis/mutations/sheet/change_file_value.graphql'
 import GridCellNumeric from '~/components/dcis/grid/cells/GridCellNumeric.vue'
 import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
 import GridCellText from '~/components/dcis/grid/cells/GridCellText.vue'

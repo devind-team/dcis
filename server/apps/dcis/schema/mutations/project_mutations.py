@@ -9,15 +9,15 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from graphene_django_cud.mutations import DjangoCreateMutation, DjangoUpdateMutation, DjangoDeleteMutation
+from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Project, Period
+from apps.dcis.models import Period, Project
 from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import ProjectType, PeriodType
+from apps.dcis.schema.types import PeriodType, ProjectType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
