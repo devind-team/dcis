@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "eleden-server"
+name = "dcis-server"
 version = "1.8.0"
 description = "electronic education environment"
 authors = ["Luferov Victor <lyferov@yandex.ru>"]
