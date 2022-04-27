@@ -38,25 +38,19 @@ import type { PropType } from '#app'
 import { cellKinds } from '~/composables/grid'
 import { BuildCellType, CellOptionsType } from '~/types/grid-types'
 import {
-  CellType,
   ValueFilesQuery,
   ValueFilesQueryVariables,
   ChangeCellsOptionMutation,
-  ChangeCellsOptionMutationPayload,
   ChangeCellsOptionMutationVariables
 } from '~/types/graphql'
 import changeCellsOption from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 
-export type ChangeCellOptionMutationResultType = { data: { changeCellsOption: ChangeCellsOptionMutationPayload } }
-type DocumentUpdateType = (cache: any, result: any, transform: (dc: any, result: any) => any) => any
-
 export default defineComponent({
   props: {
     sheetId: { type: String, required: true },
     selectionCells: { type: Array as PropType<BuildCellType[]>, required: true },
-    selectionCellsOptions: { type: Object as PropType<CellOptionsType>, required: true },
-    update: { type: Function as PropType<DocumentUpdateType>, required: true }
+    selectionCellsOptions: { type: Object as PropType<CellOptionsType>, required: true }
   },
   setup (props) {
     const { t } = useI18n()
@@ -65,7 +59,7 @@ export default defineComponent({
       ChangeCellsOptionMutation,
       ChangeCellsOptionMutationVariables
     >(changeCellsOption, {
-      update: (cache: ApolloCache<any>, result: ChangeCellOptionMutationResultType | any) => {
+      update: (cache: ApolloCache<any>) => {
         valuesId.value.forEach((id) => {
           try {
             cache.readQuery<ValueFilesQuery, ValueFilesQueryVariables>({
@@ -79,24 +73,6 @@ export default defineComponent({
             })
           } catch (_) { }
         })
-        props.update(
-          cache,
-          result,
-          (
-            dataCache,
-            { data: { changeCellsOption: { success, cells } } }: ChangeCellOptionMutationResultType
-          ) => {
-            if (success) {
-              const cellsId: string[] = cells.map((cell: CellType) => (cell.id))
-              const sheetCells: CellType[] = dataCache.document.sheets
-                .find(sheet => sheet.id === props.sheetId)
-                .cells.filter(c => !cellsId.includes(c.id))
-              sheetCells.push(...cells)
-              dataCache.document.sheets.find(sheet => sheet.id === props.sheetId).cells = sheetCells
-            }
-            return dataCache
-          }
-        )
       }
     })
     const cellsId = computed<number[]>(() => props.selectionCells.map(c => parseInt(c.cell.id)))

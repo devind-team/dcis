@@ -4,7 +4,6 @@
       :sheet-id="sheet.id"
       :selection-cells="selectionCells"
       :selection-cells-options="selectionCellsOptions"
-      :update="update"
     )
     .grid__body
       div.grid__container(ref="gridContainer")
