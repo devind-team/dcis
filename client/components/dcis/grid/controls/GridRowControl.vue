@@ -9,29 +9,36 @@
             @contextmenu.prevent="onMenu.click"
             :class="contentClass"
           ) {{ row.index }}
-        span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
+        span {{ t('dcis.grid.rowControl.updatedAt', { updatedAt: dateTimeHM(row.dimension.updatedAt) } ) }}
     v-list(dense)
+      v-list-item
+        v-list-item-icon
+          v-icon mdi-cog
+        v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
       v-list-item(@click="addRowDimension(+row.id, 'before')")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
-        v-list-item-content Добавить строку выше
+        v-list-item-content {{ t('dcis.grid.rowControl.addRowAbove') }}
       v-list-item(@click="addRowDimension(+row.id, 'after')")
         v-list-item-icon
           v-icon mdi-table-row-plus-after
-        v-list-item-content Добавить строку ниже
+        v-list-item-content {{ t('dcis.grid.rowControl.addRowBelow') }}
+      v-list-item(v-if="row.dynamic")
+        v-list-item-icon
+          v-icon
+        v-list-item-content {{ t('dcis.grid.rowControl.addChildRow') }}
       v-list-item(@click="deleteRowDimension(+row.id)")
         v-list-item-icon
           v-icon(color="error") mdi-delete
-        v-list-item-content(color="error") Удалить строку
+        v-list-item-content(color="error") {{ t('dcis.grid.rowControl.deleteRow') }}
 </template>
 
 <script lang="ts">
 import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
 import type { PropType } from '#app'
-import { defineComponent, inject } from '#app'
-import { BuildRowType } from '~/types/grid-types'
-import {
+import type { BuildRowType } from '~/types/grid-types'
+import type {
   RowDimensionFieldsFragment,
   CellType,
   ValueType,
@@ -43,7 +50,6 @@ import {
 } from '~/types/graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
-import { useFilters } from '~/composables'
 
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
 export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
@@ -60,18 +66,24 @@ export default defineComponent({
     contentClass: { type: Array as PropType<(string | Record<string, boolean>)[]>, required: true }
   },
   setup (props) {
+    const { t } = useI18n()
+
     const { dateTimeHM } = useFilters()
     const documentId: string = inject<string>('documentId')
     const documentUpdate: DocumentUpdateType<any> = inject<DocumentUpdateType<any>>('documentUpdate')
     const addRowDimension = (rowId: number, position: 'before' | 'after') => {
-      const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
+      const { mutate } = useMutation<
+        AddRowDimensionMutation,
+        AddRowDimensionMutationVariables
+      >(addRowDimensionMutation, {
         update: (cache, result) => documentUpdate(
           cache,
           result,
           (
             dataCache: DocumentQuery, {
               data: { addRowDimension: { success, rowDimension, cells, mergedCells } }
-            }: AddRowDimensionMutationResult) => {
+            }: AddRowDimensionMutationResult
+          ) => {
             if (success) {
               const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId)
               sheet.cells.push(...cells)
@@ -99,7 +111,8 @@ export default defineComponent({
             (
               dataCache: DocumentQuery, {
                 data: { deleteRowDimension: { success, rowId, index, mergedCells } }
-              }: DeleteRowDimensionMutationResult) => {
+              }: DeleteRowDimensionMutationResult
+            ) => {
               if (success) {
                 const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId)
                 sheet.rows = sheet.rows
@@ -118,7 +131,7 @@ export default defineComponent({
       )
       mutate({ rowId })
     }
-    return { addRowDimension, deleteRowDimension, dateTimeHM }
+    return { t, addRowDimension, deleteRowDimension, dateTimeHM }
   }
 })
 </script>

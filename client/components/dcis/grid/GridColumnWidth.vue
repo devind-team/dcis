@@ -4,14 +4,13 @@
     :style="style"
     dense
     outlined
-  )
-    = 'Ширина: '
+  ) {{ t('dcis.grid.columnWidth.width') }}
     span.primary--text {{ width }}
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
-import { PositionType } from '~/types/grid-types'
+import type { PropType } from '#app'
+import type { PositionType } from '~/types/grid-types'
 
 export default defineComponent({
   props: {
@@ -20,14 +19,14 @@ export default defineComponent({
     width: { type: Number, required: true }
   },
   setup (props) {
+    const { t } = useI18n()
+
     const style = computed<Record<string, string>>(() =>
       Object.entries(props.position)
         .filter(([_, v]) => v !== null)
         .reduce((acc, [k, v]) => ({ ...acc, [k]: `${v}px` }), {})
     )
-    return {
-      style
-    }
+    return { t, style }
   }
 })
 </script>

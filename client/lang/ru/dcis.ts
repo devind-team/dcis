@@ -3,6 +3,37 @@ export default {
   grid: {
     toolbar: {
       addRow: 'Добавить строку'
+    },
+    columnControl: {
+      properties: '@:properties'
+    },
+    columnSettings: {
+      header: 'Изменение свойств',
+      width: 'Ширина: {width}',
+      fix: '@:fix',
+      hide: '@:hide',
+      kind: 'Тип ячейки по умолчанию',
+      buttonText: '@:save'
+    },
+    columnWidth: {
+      width: 'Ширина: '
+    },
+    rowControl: {
+      properties: '@:properties',
+      updatedAt: 'Дата изменения: {updatedAt}',
+      addRowAbove: 'Добавить строку выше',
+      addRowBelow: 'Добавить строку ниже',
+      addChildRow: 'Добавить дочернюю строку',
+      deleteRow: 'Удалить строку'
+    },
+    cellText: {
+      title: 'Изменение текста'
+    },
+    cellFiles: {
+      title: 'Изменение файлов',
+      file: 'Файл №{number}',
+      newFiles: 'Новые файлы',
+      uploadArchive: 'Скачать архив'
     }
   },
   projects: {
@@ -69,15 +100,6 @@ export default {
       status: 'Статус',
       lastDocument: 'Значения из документа'
     },
-    change: {
-      column: {
-        header: 'Изменение свойств',
-        fixed: 'Зафиксировать',
-        hidden: 'Скрыть',
-        kind: 'Тип ячейки по умолчанию',
-        buttonText: 'Сохранить'
-      }
-    },
     status: {
       name: 'Статус документа',
       header: 'Назначение статуса',
@@ -93,17 +115,6 @@ export default {
       user: 'Пользователь, добавивший строку',
       additional: 'Дополнительные колонки',
       unload: 'Выгрузить'
-    }
-  },
-  cells: {
-    gridCellText: {
-      title: 'Изменение текста'
-    },
-    gridCellFiles: {
-      title: 'Изменение файлов',
-      file: 'Файл №{number}',
-      newFiles: 'Новые файлы',
-      uploadArchive: 'Скачать архив'
     }
   }
 }

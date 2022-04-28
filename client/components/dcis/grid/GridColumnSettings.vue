@@ -1,12 +1,12 @@
 <template lang="pug">
   mutation-modal-form(
     @close="$emit('close')"
-    :header="String($t('dcis.documents.change.column.header'))"
-    :subheader="`Ширина: ${column.width}px`"
+    :header="String(t('dcis.grid.columnSettings.header'))"
+    :subheader="String(t('dcis.grid.columnSettings.width', { width: column.width }))"
     :mutation="changeColumnDimensionMutation"
     :variables="{ id: column.id, hidden, fixed, kind: kind.value, width: column.width  }"
     :update="changeColumnDimensionUpdate"
-    :button-text="String($t('dcis.documents.change.column.buttonText'))"
+    :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
     i18n-path="dcis.documents.change.column"
     mutation-name="changeColumnDimension"
   )
@@ -17,21 +17,19 @@
       //- В разработке
       v-row
         v-col
-          v-checkbox(v-model="fixed" :label="$t('dcis.documents.change.column.fixed')")
+          v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')")
         v-col
-          v-checkbox(v-model="hidden" :label="$t('dcis.documents.change.column.hidden')")
+          v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')")
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import type { PropType, ComputedRef } from '#app'
-import { computed, defineComponent, inject, ref } from '#app'
-import { useI18n } from '~/composables'
+import type { PropType } from '#app'
 import { cellKinds } from '~/composables/grid'
-import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
-import { BuildColumnType } from '~/types/grid-types'
-import { ChangeColumnDimensionPayload, ColumnDimensionType } from '~/types/graphql'
+import type { BuildColumnType } from '~/types/grid-types'
+import type { ChangeColumnDimensionPayload, ColumnDimensionType } from '~/types/graphql'
 import type { DocumentUpdateTransformType } from '~/components/dcis/Grid.vue'
+import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 type ChangeColumnDimensionResultMutation = { data: ChangeColumnDimensionPayload }
@@ -48,13 +46,15 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
+
     const fixed = ref<boolean>(props.column.fixed)
     const hidden = ref<boolean>(props.column.hidden)
+
     const kind = ref<{ text: string, value: string }>({
       text: t(`dcis.cellKinds.${props.column.kind}`) as string,
       value: props.column.kind
     })
-    const kinds: ComputedRef<{ text: string, value: string }[]> = computed<{ text: string, value: string }[]>(() => (
+    const kinds = computed<{ text: string, value: string }[]>(() => (
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))
     )
 
@@ -62,7 +62,10 @@ export default defineComponent({
 
     const changeColumnDimensionUpdate = (cache: DataProxy, result: ChangeColumnDimensionResultMutation) => {
       if (!result.data.errors.length) {
-        documentUpdate(cache, result, (dataCache, { data: { columnDimension } }: ChangeColumnDimensionResultMutation) => {
+        documentUpdate(cache, result, (
+          dataCache,
+          { data: { columnDimension } }: ChangeColumnDimensionResultMutation
+        ) => {
           const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.column.sheetId)
           sheet.columns = sheet.columns.map((column: ColumnDimensionType) => (
             column.id === columnDimension.id ? Object.assign(column, columnDimension) : column
@@ -72,7 +75,7 @@ export default defineComponent({
       }
     }
 
-    return { fixed, hidden, kinds, kind, changeColumnDimensionMutation, changeColumnDimensionUpdate }
+    return { t, fixed, hidden, kinds, kind, changeColumnDimensionMutation, changeColumnDimensionUpdate }
   }
 })
 </script>

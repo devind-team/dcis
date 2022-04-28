@@ -3,7 +3,7 @@
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
     v-card
-      v-card-title {{ t('dcis.cells.gridCellText.title') }}
+      v-card-title {{ t('dcis.grid.cellText.title') }}
         v-spacer
         v-btn(@click="cancel" icon)
           v-icon mdi-close

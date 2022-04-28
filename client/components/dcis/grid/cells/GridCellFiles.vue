@@ -3,7 +3,7 @@
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
     v-card
-      v-card-title {{ $t('dcis.cells.gridCellFiles.title') }}
+      v-card-title {{ t('dcis.grid.cellFiles.title') }}
         v-spacer
         v-btn(@click="cancel" icon)
           v-icon mdi-close
@@ -27,7 +27,7 @@
                   @click="localFile.deleted = !localFile.deleted"
                 )
                   v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
-              span {{ $t(localFile.deleted ? 'cancelDeletion' : 'delete') }}
+              span {{ t(localFile.deleted ? 'cancelDeletion' : 'delete') }}
           v-list-item-content
             v-list-item-title
               nuxt-link(
@@ -37,7 +37,7 @@
               ) {{ localFile.file.name }}
         v-file-input(
           v-model="newFiles"
-          :label="$t('dcis.cells.gridCellFiles.newFiles')"
+          :label="t('dcis.grid.cellFiles.newFiles')"
           chips
           clearable
           multiple
@@ -47,16 +47,16 @@
           v-if="existingFiles.length"
           color="success"
           @click="uploadArchive"
-        ) {{ $t('dcis.cells.gridCellFiles.uploadArchive') }}
+        ) {{ t('dcis.grid.cellFiles.uploadArchive') }}
         v-spacer
-        v-btn(color="primary" @click="setValue") {{ $t('save') }}
+        v-btn(color="primary" @click="setValue") {{ t('save') }}
 </template>
 
 <script lang="ts">
 import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from '@apollo/client'
 import type { PropType } from '#app'
-import {
+import type {
   FileType,
   ValueType,
   UnloadFileValueArchiveMutation,
@@ -154,6 +154,7 @@ export default defineComponent({
     }
 
     return {
+      t,
       active,
       uploadArchive,
       existingFiles,
