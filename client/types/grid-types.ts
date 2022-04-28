@@ -58,6 +58,9 @@ export type BuildRowType = {
   sheetId: string
   id: string
   index: number
+  height: number
+  fixed: boolean
+  hidden: boolean
   dynamic: boolean
   style: Record<string, string | undefined>
   cells: BuildCellType[],

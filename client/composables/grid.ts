@@ -149,6 +149,9 @@ export function useGrid (
         sheetId: sheet.value.id,
         id: row.id,
         index: row.index,
+        height: row.height,
+        fixed: row.fixed,
+        hidden: row.hidden,
         dynamic: row.dynamic,
         style: {
           height: row.height ? `${row.height}px` : undefined

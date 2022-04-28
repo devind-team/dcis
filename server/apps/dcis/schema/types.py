@@ -395,6 +395,8 @@ class RowDimensionType(DjangoObjectType):
             'id',
             'index',
             'height',
+            'fixed',
+            'hidden',
             'sheet',
             'dynamic',
             'aggregation',

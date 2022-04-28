@@ -1221,7 +1221,7 @@ input ChangeValueMutationInput {
   value: String!
 }
 
-"""Изменение значения."""
+"""Изменение значения ячейки."""
 type ChangeValueMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
@@ -1238,7 +1238,7 @@ type ColumnDimensionType {
   cells: [CellType]
   """Фиксация колонки"""
   fixed: Boolean!
-  """Скрытое поле"""
+  """Скрытие колонки"""
   hidden: Boolean!
   id: ID!
   """Индекс колонки"""
@@ -2073,7 +2073,7 @@ type Mutation {
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
-  """Изменение значения ячейки типа `Файл`."""
+  """Изменение значения ячейки типа `Файл`"""
   changeFileValue(input: ChangeFileValueMutationInput!): ChangeFileValueMutationPayload!
   """Мутация для изменения имени группы."""
   changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
@@ -2117,7 +2117,7 @@ type Mutation {
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
-  """Изменение значения."""
+  """Изменение значения ячейки"""
   changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
@@ -2163,7 +2163,7 @@ type Mutation {
   supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
   """Выгрузка документа."""
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
-  """Выгрузка архива значения ячейки типа `Файл`."""
+  """Выгрузка архива значения ячейки типа `Файл`"""
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
@@ -3111,8 +3111,12 @@ type RowDimensionType {
   document: DocumentType
   """Динамическая ли строка"""
   dynamic: Boolean!
-  """Высота колонки"""
+  """Фиксация строки"""
+  fixed: Boolean!
+  """Высота строки"""
   height: Int
+  """Скрытие строки"""
+  hidden: Boolean!
   id: ID!
   """Индекс строки"""
   index: Int!
@@ -3531,7 +3535,7 @@ type UnloadFileValueArchiveMutationPayload {
 input UpdateColumnDimensionInput {
   """Фиксация колонки"""
   fixed: Boolean!
-  """Скрытое поле"""
+  """Скрытие колонки"""
   hidden: Boolean!
   """Тип поля"""
   kind: String

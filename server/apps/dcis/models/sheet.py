@@ -150,7 +150,7 @@ class ColumnDimension(KindCell, models.Model):
     index = models.PositiveIntegerField(help_text='Индекс колонки')
     width = models.PositiveIntegerField(null=True, help_text='Ширина колонки')
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
-    hidden = models.BooleanField(default=False, help_text='Скрытое поле')
+    hidden = models.BooleanField(default=False, help_text='Скрытие колонки')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
@@ -187,7 +187,9 @@ class RowDimension(models.Model):
     )
 
     index = models.PositiveIntegerField(help_text='Индекс строки')
-    height = models.PositiveIntegerField(null=True, help_text='Высота колонки')
+    height = models.PositiveIntegerField(null=True, help_text='Высота строки')
+    fixed = models.BooleanField(default=False, help_text='Фиксация строки')
+    hidden = models.BooleanField(default=False, help_text='Скрытие строки')
 
     dynamic = models.BooleanField(default=False, help_text='Динамическая ли строка')
     object_id = models.PositiveIntegerField(null=True)

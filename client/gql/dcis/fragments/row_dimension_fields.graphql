@@ -2,6 +2,8 @@ fragment RowDimensionFields on RowDimensionType {
   id
   index
   height
+  fixed
+  hidden
   dynamic
   createdAt
   updatedAt
