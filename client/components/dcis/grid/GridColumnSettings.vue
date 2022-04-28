@@ -5,7 +5,6 @@
     :subheader="String(t('dcis.grid.columnSettings.width', { width: column.width }))"
     :mutation="changeColumnDimensionMutation"
     :variables="{ id: column.id, hidden, fixed, kind: kind.value, width: column.width  }"
-    :update="changeColumnDimensionUpdate"
     :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
     i18n-path="dcis.documents.change.column"
     mutation-name="changeColumnDimension"
@@ -23,21 +22,11 @@
 </template>
 
 <script lang="ts">
-import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { cellKinds } from '~/composables/grid'
 import type { BuildColumnType } from '~/types/grid-types'
-import type { ChangeColumnDimensionPayload, ColumnDimensionType } from '~/types/graphql'
-import type { DocumentUpdateTransformType } from '~/components/dcis/Grid.vue'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-
-type ChangeColumnDimensionResultMutation = { data: ChangeColumnDimensionPayload }
-type UpdateFunction = (
-  cache: DataProxy,
-  result: ChangeColumnDimensionResultMutation,
-  transform: DocumentUpdateTransformType
-) => DataProxy | any
 
 export default defineComponent({
   components: { MutationModalForm },
@@ -58,24 +47,7 @@ export default defineComponent({
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))
     )
 
-    const documentUpdate = inject<UpdateFunction>('documentUpdate')
-
-    const changeColumnDimensionUpdate = (cache: DataProxy, result: ChangeColumnDimensionResultMutation) => {
-      if (!result.data.errors.length) {
-        documentUpdate(cache, result, (
-          dataCache,
-          { data: { columnDimension } }: ChangeColumnDimensionResultMutation
-        ) => {
-          const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.column.sheetId)
-          sheet.columns = sheet.columns.map((column: ColumnDimensionType) => (
-            column.id === columnDimension.id ? Object.assign(column, columnDimension) : column
-          ))
-          return dataCache
-        })
-      }
-    }
-
-    return { t, fixed, hidden, kinds, kind, changeColumnDimensionMutation, changeColumnDimensionUpdate }
+    return { t, fixed, hidden, kinds, kind, changeColumnDimensionMutation }
   }
 })
 </script>
