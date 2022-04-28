@@ -6,7 +6,7 @@
     :mutation="changeColumnDimensionMutation"
     :variables="{ id: column.id, hidden, fixed, kind: kind.value, width: column.width  }"
     :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
-    i18n-path="dcis.documents.change.column"
+    i18n-path="dcis.grid.columnSettings"
     mutation-name="changeColumnDimension"
   )
     template(#activator="{ on }")
@@ -14,11 +14,8 @@
     template(#form)
       v-combobox.mx-1(v-model="kind" :items="kinds" label="Тип")
       //- В разработке
-      v-row
-        v-col
-          v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')")
-        v-col
-          v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')")
+      v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')")
+      v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')")
 </template>
 
 <script lang="ts">

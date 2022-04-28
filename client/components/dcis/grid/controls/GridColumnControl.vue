@@ -1,9 +1,9 @@
 <template lang="pug">
-  v-menu(v-model="active" bottom close-on-content-click)
+  v-menu(v-model="settingsActive" bottom close-on-content-click)
     template(#activator="{ on, attrs }")
       slot(:on="on" :attrs="attrs")
     v-list(dense)
-      grid-column-settings(@close="active = false" :column="column")
+      grid-column-settings(@close="settingsActive = false" :column="column")
         template(#activator="{ on }")
           v-list-item(v-on="on")
             v-list-item-icon
@@ -25,9 +25,9 @@ export default defineComponent({
   setup () {
     const { t } = useI18n()
 
-    const active = ref<boolean>(false)
+    const settingsActive = ref<boolean>(false)
 
-    return { t, active }
+    return { t, settingsActive }
   }
 })
 </script>

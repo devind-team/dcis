@@ -58,7 +58,7 @@ export type BuildRowType = {
   sheetId: string
   id: string
   index: number
-  height: number
+  height: number | null
   fixed: boolean
   hidden: boolean
   dynamic: boolean

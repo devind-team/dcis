@@ -149,7 +149,7 @@ export function useGrid (
         sheetId: sheet.value.id,
         id: row.id,
         index: row.index,
-        height: row.height,
+        height: row.height ?? null,
         fixed: row.fixed,
         hidden: row.hidden,
         dynamic: row.dynamic,

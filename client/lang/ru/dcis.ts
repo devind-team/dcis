@@ -26,6 +26,14 @@ export default {
       addChildRow: 'Добавить дочернюю строку',
       deleteRow: 'Удалить строку'
     },
+    rowSettings: {
+      header: 'Изменение свойств',
+      height: 'Высота: {height}',
+      fix: '@:fix',
+      hide: '@:hide',
+      makeDynamic: 'Разрешить дочерние строки',
+      buttonText: '@:save'
+    },
     cellText: {
       title: 'Изменение текста'
     },

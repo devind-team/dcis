@@ -11,10 +11,12 @@
           ) {{ row.index }}
         span {{ t('dcis.grid.rowControl.updatedAt', { updatedAt: dateTimeHM(row.dimension.updatedAt) } ) }}
     v-list(dense)
-      v-list-item
-        v-list-item-icon
-          v-icon mdi-cog
-        v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
+      grid-row-settings(@close="settingsActive = false" :row="row")
+        template(#activator="{ on }")
+          v-list-item(v-on="on")
+            v-list-item-icon
+              v-icon mdi-cog
+            v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
       v-list-item(@click="addRowDimension(+row.id, 'before')")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
@@ -50,6 +52,7 @@ import type {
 } from '~/types/graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
+import GridRowSettings from '~/components/dcis/grid/GridRowSettings.vue'
 
 export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
 export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
@@ -61,12 +64,15 @@ type DocumentUpdateType<T> = (
 ) => DataProxy
 
 export default defineComponent({
+  components: { GridRowSettings },
   props: {
     row: { type: Object as PropType<BuildRowType>, required: true },
     contentClass: { type: Array as PropType<(string | Record<string, boolean>)[]>, required: true }
   },
   setup (props) {
     const { t } = useI18n()
+
+    const settingsActive = ref<boolean>(false)
 
     const { dateTimeHM } = useFilters()
     const documentId: string = inject<string>('documentId')
@@ -131,7 +137,7 @@ export default defineComponent({
       )
       mutate({ rowId })
     }
-    return { t, addRowDimension, deleteRowDimension, dateTimeHM }
+    return { t, settingsActive, addRowDimension, deleteRowDimension, dateTimeHM }
   }
 })
 </script>
