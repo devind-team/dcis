@@ -1166,6 +1166,17 @@ export type ChangeProjectMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Мутация для изменения стилей строки таблицы. */
+export type ChangeRowDimensionPayload = {
+  __typename?: 'ChangeRowDimensionPayload';
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Измененные стили строки таблицы */
+  rowDimension?: Maybe<RowDimensionType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type ChangeSectionFilesMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Загружаемые изображения */
@@ -2272,6 +2283,8 @@ export type Mutation = {
   changeProfileVisibility: ChangeProfileVisibilityMutationPayload;
   /** Мутация изменения настроек проекта. */
   changeProject: ChangeProjectMutationPayload;
+  /** Изменение стилей строки таблицы */
+  changeRowDimension: ChangeRowDimensionPayload;
   /** Изменение текста секции */
   changeSectionFiles: ChangeSectionFilesMutationPayload;
   /** Изменение текста секции */
@@ -2538,6 +2551,12 @@ export type MutationChangeProfileVisibilityArgs = {
 export type MutationChangeProjectArgs = {
   id: Scalars['ID'];
   input: UpdateProjectInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeRowDimensionArgs = {
+  id: Scalars['ID'];
+  input: UpdateRowDimensionInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4377,6 +4396,17 @@ export type UpdateProjectInput = {
   visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
+export type UpdateRowDimensionInput = {
+  /** Динамическая ли строка */
+  dynamic: Scalars['Boolean'];
+  /** Фиксация строки */
+  fixed: Scalars['Boolean'];
+  /** Высота строки */
+  height?: InputMaybe<Scalars['Int']>;
+  /** Скрытие строки */
+  hidden: Scalars['Boolean'];
+};
+
 export type UploadUsersMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Источник данных, файл xlsx или csv */
@@ -4949,6 +4979,16 @@ export type ChangeFileValueMutationVariables = Exact<{
 }>;
 
 export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null, valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> | null } };
+
+export type ChangeRowDimensionMutationVariables = Exact<{
+  id: Scalars['ID'];
+  height?: InputMaybe<Scalars['Int']>;
+  fixed: Scalars['Boolean'];
+  hidden: Scalars['Boolean'];
+  dynamic: Scalars['Boolean'];
+}>;
+
+export type ChangeRowDimensionMutation = { __typename?: 'Mutation', changeRowDimension: { __typename?: 'ChangeRowDimensionPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension?: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, createdAt: any, updatedAt: any, parentId?: number | null } | null } };
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];

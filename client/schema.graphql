@@ -1075,6 +1075,16 @@ type ChangeProjectMutationPayload {
   success: Boolean!
 }
 
+"""Мутация для изменения стилей строки таблицы."""
+type ChangeRowDimensionPayload {
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененные стили строки таблицы"""
+  rowDimension: RowDimensionType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeSectionFilesMutationInput {
   clientMutationId: String
   """Загружаемые изображения"""
@@ -2105,6 +2115,8 @@ type Mutation {
   changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
   """Мутация изменения настроек проекта."""
   changeProject(id: ID!, input: UpdateProjectInput!): ChangeProjectMutationPayload!
+  """Изменение стилей строки таблицы"""
+  changeRowDimension(id: ID!, input: UpdateRowDimensionInput!): ChangeRowDimensionPayload!
   """Изменение текста секции"""
   changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
   """Изменение текста секции"""
@@ -3585,6 +3597,17 @@ input UpdateProjectInput {
   user: ID
   """Видимость проекта"""
   visibility: Boolean
+}
+
+input UpdateRowDimensionInput {
+  """Динамическая ли строка"""
+  dynamic: Boolean!
+  """Фиксация строки"""
+  fixed: Boolean!
+  """Высота строки"""
+  height: Int
+  """Скрытие строки"""
+  hidden: Boolean!
 }
 
 """

@@ -112,6 +112,19 @@ class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
     column_dimension = graphene.Field(ColumnDimensionType, description='Измененные стили колонки таблицы')
 
 
+class ChangeRowDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
+    """Мутация для изменения стилей строки таблицы."""
+
+    class Meta:
+        model = RowDimension
+        only_fields = ('height', 'fixed', 'hidden', 'dynamic',)
+        required_fields = ('fixed', 'hidden', 'dynamic',)
+        login_required = True
+        permissions = ('dcis.change_rowdimension',)
+
+    row_dimension = graphene.Field(RowDimensionType, description='Измененные стили строки таблицы')
+
+
 class ChangeCellsOptionMutation(BaseMutation):
     """Мутация для изменения свойств ячеек:
 
@@ -261,6 +274,10 @@ class SheetMutations(graphene.ObjectType):
     change_column_dimension = ChangeColumnDimensionPayload.Field(
         required=True,
         description='Изменение стилей колонки таблицы'
+    )
+    change_row_dimension = ChangeRowDimensionPayload.Field(
+        required=True,
+        description='Изменение стилей строки таблицы'
     )
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
