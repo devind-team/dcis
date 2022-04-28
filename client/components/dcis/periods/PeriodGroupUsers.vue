@@ -9,53 +9,34 @@
       temporary
     )
       v-card.ma-2.transparent(v-if="selectUser" flat)
-        v-card-subtitle.text-h6.text-center Привилегии пользователя {{ getUserFullName(selectUser) }}
+        v-card-subtitle.text-h6.text-center {{ $t('dcis.periods.changePrivileges.privileges') }} {{ getUserFullName(selectUser) }}
         v-divider
-        v-card-text
+        v-card-text(v-if="userPrivileges")
           v-data-table.transparent(
             :headers="additionalHeaders"
             :loading="loading"
-            :items="periodPrivileges"
+            :items="userPrivileges"
             hide-default-footer
             disable-pagination
           )
           v-divider
-          v-card-actions.d-flex.flex-wrap.justify-center(v-if="selectPrivileges")
-            mutation-modal-form(
-              :header="String($t('dcis.periods.changeGroupUsersPrivileges.header'))"
-              :button-text="String($t('dcis.periods.changeGroupUsersPrivileges.buttonText'))"
-              :mutation="changeGroupUsersPrivileges"
-              :variables="{ periodId: period.id, userId: selectUser.id, privilegesIds: selectPrivileges.map(e => e.id) }"
+          v-card-actions.d-flex.flex-wrap.justify-center
+            period-group-privileges(
+              :period-group="periodGroup"
+              :period="period"
+              :user="selectUser"
+              :user-privileges="userPrivileges"
               :update="changeGroupUsersPrivilegesUpdate"
-              mutation-name="changeGroupUsersPrivileges"
-              errors-in-alert
-              persistent
             )
               template(#activator="{ on }")
-                v-btn(v-on="on" color="primary") Изменить привилегии
-              template(#form)
-                v-data-table(
-                  v-model="selectPrivileges"
-                  :headers="additionalHeaders"
-                  :items="periodGroup.privileges"
-                  item-key="id"
-                  show-select
-                  hide-default-footer
-                )
+                v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
     v-card-actions
-      add-period-group-users(
-        v-slot="{ on }"
-        :period-group="periodGroup"
-      )
-        v-btn(v-on="on" color="primary") Добавить пользователей
+      add-period-group-users(v-slot="{ on }" :period-group="periodGroup")
+        v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
       v-spacer
-      period-group-privileges(
-        v-slot="{ on }"
-        :period-group="periodGroup"
-        :key="periodGroup.id"
-      )
-        v-btn(v-on="on" class="align-self-center" icon text)
-          v-icon mdi-cog
+      period-group-privileges(:period-group="periodGroup" :key="periodGroup.id" active-query)
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
     v-card-text
       v-data-table(
         :headers="headers"
@@ -72,25 +53,16 @@
 import { computed, defineComponent, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { DataProxy } from 'apollo-cache'
-import {
-  AddPeriodMutationPayload,
-  ChangeGroupUserPrivilegesMutationPayload,
-  PeriodGroupType,
-  PeriodPrivilegesQuery,
-  PeriodPrivilegesQueryVariables,
-  PeriodType,
-  PrivilegeType,
-  UserType
-} from '~/types/graphql'
+import { PeriodGroupType, PeriodType, UserPrivilegesQuery, UserPrivilegesQueryVariables, UserType } from '~/types/graphql'
 import { useCommonQuery, useFilters, useI18n } from '~/composables'
-import periodPrivilegesQuery from '~/gql/dcis/queries/period_privileges.graphql'
+import userPrivilegesQuery from '~/gql/dcis/queries/user_privileges.graphql'
 import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
 import AddPeriodGroupUsers from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
-import PeriodGroupPrivileges from '~/components/dcis/periods/PeriodGroupPrivileges.vue'
+import PeriodGroupPrivileges, {
+  ChangeGroupUsersPrivilegesMutationResult
+} from '~/components/dcis/periods/PeriodGroupPrivileges.vue'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-
-export type ChangeGroupUsersPrivilegesMutationResult = { data: { changeGroupUsersPrivileges: ChangeGroupUserPrivilegesMutationPayload } }
 
 export default defineComponent({
   components: { AvatarDialog, AddPeriodGroupUsers, PeriodGroupPrivileges, MutationModalForm },
@@ -100,10 +72,11 @@ export default defineComponent({
     periodGroup: { type: Object as PropType<PeriodGroupType>, default: null }
   },
   setup (props) {
-    const { dateTimeHM, getUserFullName } = useFilters()
+    const { getUserFullName } = useFilters()
     const { t } = useI18n()
+
     const selectUser = ref<UserType | null>(null)
-    const selectPrivileges = ref<any>(null)
+
     const active = computed<boolean>({
       get: () => (!!selectUser.value),
       set: (value: boolean): void => {
@@ -112,45 +85,45 @@ export default defineComponent({
         }
       }
     })
+    const additionalHeaders = computed<DataTableHeader[]>(() => ([
+      { text: t('dcis.periods.changePrivileges.name') as string, value: 'name' },
+      { text: t('dcis.periods.changePrivileges.key') as string, value: 'key' }
+    ]))
+    const headers = computed<DataTableHeader[]>(() => ([
+      { text: t('dcis.periods.changePeriodUsers.avatar') as string, value: 'avatar' },
+      { text: t('dcis.periods.changePeriodUsers.name') as string, value: 'name' },
+      { text: t('dcis.periods.changePeriodUsers.jobPost') as string, value: '' },
+      { text: t('dcis.periods.changePeriodUsers.division') as string, value: '' }
+    ]))
     const options = ref({ enabled: active })
-    const { data: periodPrivileges, loading, variables, changeUpdate } = useCommonQuery<PeriodPrivilegesQuery, PeriodPrivilegesQueryVariables>({
-      document: periodPrivilegesQuery,
-      variables: { userId: selectUser.value?.id, periodId: props.period.id },
+    const { data: userPrivileges, loading, update } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
+      document: userPrivilegesQuery,
+      variables: () => ({ userId: selectUser.value?.id, periodId: props.period.id }),
       options: options.value
     })
     const changeGroupUsersPrivilegesUpdate = (cache: DataProxy, result: ChangeGroupUsersPrivilegesMutationResult) => {
-      const { success } = result.data.changeGroupUsersPrivileges
-      if (success) {
-        changeUpdate(cache, result, 'privileges')
+      const { errors } = result.data.changeGroupUsersPrivileges
+      if (!errors.length) {
+        update(
+          cache,
+          result,
+          (dataCache, { data: { changeGroupUsersPrivileges: { privileges } } }: ChangeGroupUsersPrivilegesMutationResult) => {
+            dataCache.userPrivileges = privileges
+            return dataCache
+          })
       }
     }
     const selectedUser = (userId: string): void => {
-      variables.value = { userId, periodId: props.period.id }
       selectUser.value = props.periodGroup.users.find(user => user.id === userId)
     }
-    watchEffect(() => {
-      selectPrivileges.value = periodPrivileges.value
-    })
-    const additionalHeaders = computed<DataTableHeader[]>(() => ([
-      { text: t('dcis.periods.privileges.name') as string, value: 'name' },
-      { text: t('dcis.periods.privileges.key') as string, value: 'key' }
-    ]))
-    const headers: DataTableHeader[] = [
-      { text: 'Аватар', value: 'avatar' },
-      { text: 'ФИО', value: 'name' },
-      { text: 'Должность', value: '' },
-      { text: 'Департамент', value: '' }
-    ]
     return {
-      headers,
-      dateTimeHM,
-      getUserFullName,
       active,
-      selectUser,
+      headers,
       additionalHeaders,
+      getUserFullName,
+      selectUser,
       loading,
-      periodPrivileges,
-      selectPrivileges,
+      userPrivileges,
       selectedUser,
       changeGroupUsersPrivileges,
       changeGroupUsersPrivilegesUpdate

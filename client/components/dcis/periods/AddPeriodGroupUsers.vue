@@ -32,7 +32,6 @@
             deletable-chips
             multiple
             clearable
-            hide-selected
             hide-no-data
             @change="search=''"
           )
@@ -75,6 +74,7 @@ export default defineComponent({
     const { dateTimeHM, getUserFullName } = useFilters()
     const active = ref<boolean>(false)
     const selectUsers = ref<UserType[] | null>(null)
+    const options = ref({ enabled: active })
     const {
       loading,
       data: users
@@ -83,7 +83,7 @@ export default defineComponent({
       variables: () => ({
         search: debounceSearch.value
       }),
-      options: { enabled: active }
+      options: options.value
     })
     const filterUsers = computed<UserType[]>(() => {
       return users

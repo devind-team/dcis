@@ -2766,13 +2766,6 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
-  """Привилегии назначенных пользователей периодов"""
-  periodPrivileges(
-    """Идентификатор периода"""
-    periodId: ID!
-    """Идентификатор пользователя"""
-    userId: ID!
-  ): [PrivilegeType!]!
   permissions: [PermissionType!]!
   """Привилегии"""
   privileges: [PrivilegeType!]!
@@ -2826,6 +2819,13 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID!
   ): UserType
+  """Привилегии назначенных пользователей периодов"""
+  userPrivileges(
+    """Идентификатор периода"""
+    periodId: ID!
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
 }

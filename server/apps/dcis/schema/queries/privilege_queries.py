@@ -17,7 +17,7 @@ class PrivilegeQueries(graphene.ObjectType):
         description='Привилегии'
     )
 
-    period_privileges = DjangoListField(
+    user_privileges = DjangoListField(
         PrivilegeType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         user_id=graphene.ID(required=True, description='Идентификатор пользователя'),
@@ -26,5 +26,5 @@ class PrivilegeQueries(graphene.ObjectType):
     )
 
     @staticmethod
-    def resolve_period_privileges(root, info: ResolveInfo, period_id: str, user_id: str, *args, **kwargs) -> QuerySet:
+    def resolve_user_privileges(root, info: ResolveInfo, period_id: str, user_id: str, *args, **kwargs) -> QuerySet:
         return Privilege.objects.filter(periodprivilege__user_id=from_global_id(user_id)[1], periodprivilege__period_id=period_id).all()

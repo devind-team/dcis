@@ -53,16 +53,22 @@ export default {
     },
     changePeriodUsers: {
       header: 'Добавление пользователей',
-      buttonText: '@:add'
+      buttonText: '@:add',
+      addUsers: 'Добавить пользователей',
+      avatar: 'Аватар',
+      name: 'ФИО',
+      jobPost: 'Должность',
+      division: 'Объект сбора'
     },
-    changePeriodGroupPrivileges: {
-      header: 'Изменениe привилегий {groupName}',
-      buttonText: '@:change'
-    },
-    privileges: {
+    changePrivileges: {
+      header: 'Изменениe привилегий',
+      buttonText: '@:change',
+      change: 'Изменить привилегии',
       name: 'Описание привилегии',
+      privileges: 'Привилегии пользователя',
       key: 'Ключ',
-      createdAt: 'Дата создания'
+      createdAt: 'Дата создания',
+      alert: 'Не заданы привилегии сбора или группы'
     },
     statuses: {
       open: 'Открыто',

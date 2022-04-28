@@ -24,14 +24,6 @@
           :success="valid"
           :error-messages="errors"
         )
-      v-select(
-        v-model="selectGroup"
-        :items="period.periodGroups"
-        item-text="name"
-        item-value="id"
-        :label="$t('dcis.periods.addPeriodGroup.groups')"
-        clearable
-      )
 </template>
 
 <script lang="ts">
@@ -54,8 +46,6 @@ export default defineComponent({
   setup (props) {
     const name = ref<string>('')
     const selectGroup = ref<PeriodGroupType | null>(null)
-    const dialog = ref<boolean>(false)
-
     const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
       const { success } = result.data.addPeriodGroup
       if (success) {
@@ -66,7 +56,6 @@ export default defineComponent({
       name,
       selectGroup,
       addPeriodGroup,
-      dialog,
       addPeriodGroupUpdate
     }
   }

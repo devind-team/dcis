@@ -3305,8 +3305,6 @@ export type Query = {
   pages: PageTypeConnection;
   /** Информация по периоду */
   period: PeriodType;
-  /** Привилегии назначенных пользователей периодов */
-  periodPrivileges: Array<PrivilegeType>;
   permissions: Array<PermissionType>;
   /** Привилегии */
   privileges: Array<PrivilegeType>;
@@ -3337,6 +3335,8 @@ export type Query = {
   user?: Maybe<UserType>;
   /** Доступная информация о пользователе */
   userInformation?: Maybe<UserType>;
+  /** Привилегии назначенных пользователей периодов */
+  userPrivileges: Array<PrivilegeType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
 };
@@ -3491,12 +3491,6 @@ export type QueryPeriodArgs = {
 };
 
 /** Схема запросов данных. */
-export type QueryPeriodPrivilegesArgs = {
-  periodId: Scalars['ID'];
-  userId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
 export type QueryProfileInformationArgs = {
   userId: Scalars['ID'];
 };
@@ -3548,6 +3542,12 @@ export type QueryUserArgs = {
 
 /** Схема запросов данных. */
 export type QueryUserInformationArgs = {
+  userId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryUserPrivilegesArgs = {
+  periodId: Scalars['ID'];
   userId: Scalars['ID'];
 };
 
@@ -4791,13 +4791,6 @@ export type PeriodQueryVariables = Exact<{
 
 export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
-export type PeriodPrivilegesQueryVariables = Exact<{
-  periodId: Scalars['ID'];
-  userId: Scalars['ID'];
-}>;
-
-export type PeriodPrivilegesQuery = { __typename?: 'Query', periodPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
-
 export type PrivilegesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PrivilegesQuery = { __typename?: 'Query', privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
@@ -4818,6 +4811,13 @@ export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'Pr
 export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
+
+export type UserPrivilegesQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+export type UserPrivilegesQuery = { __typename?: 'Query', userPrivileges: Array<{ __typename?: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 
