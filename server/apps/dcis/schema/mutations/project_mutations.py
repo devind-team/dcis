@@ -18,7 +18,7 @@ from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Period, Project
 from apps.dcis.permissions import AddPeriod
 from apps.dcis.schema.types import PeriodType, ProjectType
-from apps.dcis.services.excel_extractor import ExcelExtractor
+from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
 

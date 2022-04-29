@@ -18,9 +18,9 @@ from graphql_relay import from_global_id
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
 from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType, ValueType
-from apps.dcis.services.cell import change_cell_kind, check_cell_options
-from apps.dcis.services.sheet import move_merged_cells
-from apps.dcis.services.value import (
+from apps.dcis.services.cell_services import change_cell_kind, check_cell_options
+from apps.dcis.services.sheet_services import move_merged_cells
+from apps.dcis.services.value_services import (
     create_file_value_archive,
     get_file_value_files,
     update_or_create_file_value,

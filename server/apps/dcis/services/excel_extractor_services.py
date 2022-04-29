@@ -1,14 +1,14 @@
 from pathlib import PosixPath
-from typing import List, Iterator, Tuple, Dict
+from typing import Iterator
 
-from openpyexcel import load_workbook, Workbook
+from openpyexcel import Workbook, load_workbook
 from openpyexcel.styles.colors import COLOR_INDEX, WHITE
 from openpyexcel.utils.cell import column_index_from_string
 from openpyexcel.worksheet.dimensions import DimensionHolder
 from openpyexcel.worksheet.merge import MergeCell
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
-from ..models import Period, Sheet, Cell, MergedCell, RowDimension, ColumnDimension
+from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 
 
 class ExcelExtractor:
@@ -17,14 +17,14 @@ class ExcelExtractor:
     def __init__(self, path: PosixPath):
         """Инициализация.
 
-        :param path - путь к файлу excel.
+        :param path - путь к файлу Excel.
         """
         self.path = path
         self.work_book = load_workbook(path)
 
     def save(self, period: Period):
         """Сохранение обработанного файла в базу данных."""
-        extract_sheets: List[Dict] = self.extract()
+        extract_sheets: list[dict] = self.extract()
         for position, extract_sheet in enumerate(extract_sheets):
             sheet = Sheet.objects.create(
                 name=extract_sheet['name'],
@@ -32,10 +32,10 @@ class ExcelExtractor:
                 period=period
             )
             # Соотношение позиции и созданных идентификаторов
-            columns_mapper: Dict[int, int] = {}
-            rows_mapper: Dict[int, int] = {}
-            columns_styles: Dict[int, Dict[str, str]] = {}
-            rows_styles: Dict[int, Dict[str, str]] = {}
+            columns_mapper: dict[int, int] = {}
+            rows_mapper: dict[int, int] = {}
+            columns_styles: dict[int, dict[str, str]] = {}
+            rows_styles: dict[int, dict[str, str]] = {}
             for cell in extract_sheet['cells']:
                 column_id: int = cell['column_id']
                 row_id: int = cell['row_id']
@@ -70,18 +70,18 @@ class ExcelExtractor:
             for merged_cell in extract_sheet['merged_cells']:
                 MergedCell.objects.create(sheet=sheet, **merged_cell)
 
-    def extract(self) -> List[Dict]:
-        """Парсинг файла эксель.
+    def extract(self) -> list[dict]:
+        """Парсинг файла Excel.
 
         Функция создает структуру данных, которая является первоначальной обработкой.
         После выделения необходимых данных можно осуществлять транзакционную запись в базу данных.
         Структура данных может использоваться для предварительной демонстрации планируемого отчета.
         """
-        sheets: List[Dict] = []
+        sheets: list[dict] = []
         for sheet in self.work_book.worksheets:
             name: str = sheet.title
-            columns_dimension: Dict[int, object] = self._parse_columns_dimension(sheet.column_dimensions)
-            rows_dimension: Dict[int, object] = self._parse_rows_dimension(sheet.row_dimensions)
+            columns_dimension: dict[int, object] = self._parse_columns_dimension(sheet.column_dimensions)
+            rows_dimension: dict[int, object] = self._parse_rows_dimension(sheet.row_dimensions)
             cells = self._parse_cells(self.work_book, sheet.rows)
             merged_cells = self._parse_merged_cells(sheet.merged_cells.ranges)
 
@@ -95,7 +95,7 @@ class ExcelExtractor:
         return sheets
 
     @staticmethod
-    def _parse_columns_dimension(holder: DimensionHolder) -> Dict:
+    def _parse_columns_dimension(holder: DimensionHolder) -> dict:
         """Парсинг имеющихся колонок."""
         return {
             column_index_from_string(col_letter): {
@@ -127,7 +127,7 @@ class ExcelExtractor:
         }
 
     @staticmethod
-    def _parse_rows_dimension(holder: DimensionHolder) -> Dict:
+    def _parse_rows_dimension(holder: DimensionHolder) -> dict:
         """Парсинг имеющихся строк."""
         return {
             row.index: {
@@ -157,13 +157,13 @@ class ExcelExtractor:
         }
 
     @staticmethod
-    def _parse_cells(wb: Workbook, rows: Iterator[Tuple[Cell]]) -> List[Dict]:
+    def _parse_cells(wb: Workbook, rows: Iterator[tuple[Cell]]) -> list[dict]:
         """Парсинг ячеек.
 
         Переданный параметр rows представляет собой матрицу.
         Каждая строка включает в себя массив ячеек, который соотноситься с колонками.
         """
-        rows_result: List[Dict] = []
+        rows_result: list[dict] = []
         for row in rows:
             for cell in row:
                 top_color = cell.border.top.color
@@ -237,7 +237,7 @@ class ExcelExtractor:
         return rows_result
 
     @staticmethod
-    def _parse_merged_cells(ranges: List[MergeCell]) -> List[Dict]:
+    def _parse_merged_cells(ranges: list[MergeCell]) -> list[dict]:
         """Парсинг объединенных ячеек."""
         return [{
             'min_col': rng.min_col,

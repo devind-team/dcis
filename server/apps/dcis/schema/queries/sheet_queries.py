@@ -11,7 +11,7 @@ from graphql import ResolveInfo
 
 from apps.dcis.models import Sheet
 from apps.dcis.schema.types import Value, SheetType
-from apps.dcis.services.value import get_file_value_files
+from apps.dcis.services.value_services import get_file_value_files
 
 
 class SheetQueries(graphene.ObjectType):
