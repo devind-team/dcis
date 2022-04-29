@@ -62,6 +62,12 @@ type ActiveStatisticsType {
   times: [DateStatisticsType]!
 }
 
+"""Мутация для добавления КБК в словарь."""
+type AddBudgetClassificationMutationPayload {
+  """Добавленная КБК"""
+  budgetClassification: BudgetClassificationType
+}
+
 input AddCategoryMutationInput {
   """Аватар"""
   avatar: Upload
@@ -1221,7 +1227,7 @@ input ChangeValueMutationInput {
   value: String!
 }
 
-"""Изменение значения."""
+"""Изменение значения ячейки."""
 type ChangeValueMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
@@ -1350,6 +1356,17 @@ type ContentTypeType {
   permissionSet: [PermissionType!]!
   """Тип дивизиона"""
   projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
+}
+
+input CreateBudgetClassificationInput {
+  """Active"""
+  active: Boolean
+  """Code"""
+  code: String!
+  """Date of end activity"""
+  end: DateTime
+  """Name"""
+  name: String!
 }
 
 input CreateProjectInput {
@@ -2025,6 +2042,8 @@ type MergedCellType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Мутация для добавления КБК в словарь."""
+  addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление документа."""
@@ -2073,7 +2092,7 @@ type Mutation {
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
-  """Изменение значения ячейки типа `Файл`."""
+  """Изменение значения ячейки типа `Файл`"""
   changeFileValue(input: ChangeFileValueMutationInput!): ChangeFileValueMutationPayload!
   """Мутация для изменения имени группы."""
   changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
@@ -2117,7 +2136,7 @@ type Mutation {
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
-  """Изменение значения."""
+  """Изменение значения ячейки"""
   changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
@@ -2163,7 +2182,7 @@ type Mutation {
   supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
   """Выгрузка документа."""
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
-  """Выгрузка архива значения ячейки типа `Файл`."""
+  """Выгрузка архива значения ячейки типа `Файл`"""
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
