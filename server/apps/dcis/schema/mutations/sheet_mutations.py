@@ -19,6 +19,7 @@ from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
 from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType, ValueType
 from apps.dcis.services.cell import change_cell_kind, check_cell_options
+from apps.dcis.services.sheet import move_merged_cells
 from apps.dcis.services.value import (
     create_file_value_archive,
     get_file_value_files,
@@ -29,9 +30,9 @@ from apps.dcis.services.value import (
 
 
 class AddRowDimensionMutation(BaseMutation):
-    """Вставка строк.
+    """Добавление строки.
 
-    После добавления строки бы то не было, строка приобретает новый индекс,
+    После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
 
@@ -67,7 +68,7 @@ class AddRowDimensionMutation(BaseMutation):
             Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
             for column in sheet.columndimension_set.all()
         ]
-        sheet.move_merged_cells(insert_index, 1)
+        move_merged_cells(sheet, insert_index, 1)
         return AddRowDimensionMutation(
             row_dimension=row_dimension,
             cells=cells,
@@ -76,7 +77,7 @@ class AddRowDimensionMutation(BaseMutation):
 
 
 class DeleteRowDimensionMutation(BaseMutation):
-    """Мутация для удаления строки."""
+    """Удаление строки."""
 
     class Input:
         row_id = graphene.Int(required=True, description='Идентификатор строки')
@@ -92,12 +93,12 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
         row.delete()
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
-        sheet.move_merged_cells(row.index, -1, True)
+        move_merged_cells(sheet, row.index, -1, True)
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
 
 
 class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
-    """Мутация для изменения стилей колонки таблицы."""
+    """Изменение стилей колонки таблицы."""
 
     class Meta:
         model = ColumnDimension
@@ -113,7 +114,7 @@ class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
 
 class ChangeRowDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
-    """Мутация для изменения стилей строки таблицы."""
+    """Изменение стилей строки таблицы."""
 
     class Meta:
         model = RowDimension
@@ -126,7 +127,7 @@ class ChangeRowDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
 
 class ChangeCellsOptionMutation(BaseMutation):
-    """Мутация для изменения свойств ячеек:
+    """Изменение свойств ячеек:
 
         - horizontal_align - ['left', 'center', 'right']
         - vertical_align - ['top', 'middle', 'bottom']
