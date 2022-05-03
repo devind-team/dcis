@@ -47,7 +47,7 @@
     "@nuxt/bridge": "npm:@nuxt/bridge-edge",
     "@nuxt/types": "^2.15.8",
     "@nuxtjs/color-mode": "^3.0.2",
-    "@nuxtjs/eslint-config-typescript": "^9.0.0",
+    "@nuxtjs/eslint-config-typescript": "^10.0.0",
     "@tiptap/core": "^2.0.0-beta.174",
     "@tiptap/extension-bold": "^2.0.0-beta.26",
     "@tiptap/extension-bullet-list": "^2.0.0-beta.26",
