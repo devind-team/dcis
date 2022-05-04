@@ -95,6 +95,13 @@ export type ActiveStatisticsType = {
   times: Array<Maybe<DateStatisticsType>>;
 };
 
+/** Мутация для добавления КБК в словарь. */
+export type AddBudgetClassificationMutationPayload = {
+  __typename?: 'AddBudgetClassificationMutationPayload';
+  /** Добавленная КБК */
+  budgetClassification?: Maybe<BudgetClassificationType>;
+};
+
 export type AddCategoryMutationInput = {
   /** Аватар */
   avatar?: InputMaybe<Scalars['Upload']>;
@@ -1318,7 +1325,7 @@ export type ChangeValueMutationInput = {
   value: Scalars['String'];
 };
 
-/** Изменение значения. */
+/** Изменение значения ячейки. */
 export type ChangeValueMutationPayload = {
   __typename?: 'ChangeValueMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
@@ -1483,6 +1490,17 @@ export type ContentTypeTypeProjectSetArgs = {
   offset?: InputMaybe<Scalars['Int']>;
   user?: InputMaybe<Scalars['ID']>;
   user_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+};
+
+export type CreateBudgetClassificationInput = {
+  /** Active */
+  active?: InputMaybe<Scalars['Boolean']>;
+  /** Code */
+  code: Scalars['String'];
+  /** Date of end activity */
+  end?: InputMaybe<Scalars['DateTime']>;
+  /** Name */
+  name: Scalars['String'];
 };
 
 export type CreateProjectInput = {
@@ -2192,6 +2210,8 @@ export type MergedCellType = {
 /** Мутации на изменение чего-либо. */
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Мутация для добавления КБК в словарь. */
+  addBudgetClassification: AddBudgetClassificationMutationPayload;
   /** Мутация для добавления категории */
   addCategory: AddCategoryMutationPayload;
   /** Добавление документа. */
@@ -2240,7 +2260,7 @@ export type Mutation = {
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
-  /** Изменение значения ячейки типа `Файл`. */
+  /** Изменение значения ячейки типа `Файл` */
   changeFileValue: ChangeFileValueMutationPayload;
   /** Мутация для изменения имени группы. */
   changeGroupName: ChangeGroupNameMutationPayload;
@@ -2284,7 +2304,7 @@ export type Mutation = {
   changeUserGroups: ChangeUserGroupsMutationPayload;
   /** Мутация для изменения полей пользователя. */
   changeUserProps: ChangeUserPropsMutationPayload;
-  /** Изменение значения. */
+  /** Изменение значения ячейки */
   changeValue: ChangeValueMutationPayload;
   /** Подтверждение кода. */
   confirmEmail: ConfirmEmailMutationPayload;
@@ -2330,10 +2350,15 @@ export type Mutation = {
   supportSubmit: SupportSubmitMutationPayload;
   /** Выгрузка документа. */
   unloadDocument: UnloadDocumentMutationPayload;
-  /** Выгрузка архива значения ячейки типа `Файл`. */
+  /** Выгрузка архива значения ячейки типа `Файл` */
   unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddBudgetClassificationArgs = {
+  input: CreateBudgetClassificationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4817,6 +4842,13 @@ export type AuthCbiasMutationVariables = Exact<{
 
 export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
 
+export type AddBudgetClassificationMutationVariables = Exact<{
+  code: Scalars['String'];
+  name: Scalars['String'];
+}>;
+
+export type AddBudgetClassificationMutation = { __typename?: 'Mutation', addBudgetClassification: { __typename?: 'AddBudgetClassificationMutationPayload', budgetClassification?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } };
+
 export type AddDocumentMutationVariables = Exact<{
   comment: Scalars['String'];
   periodId: Scalars['Int'];
@@ -4842,28 +4874,6 @@ export type ChangeDocumentCommentMutationVariables = Exact<{
 
 export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any } | null } };
 
-export type ChangeFileValueMutationVariables = Exact<{
-  documentId: Scalars['ID'];
-  sheetId: Scalars['Int'];
-  columnId: Scalars['Int'];
-  rowId: Scalars['Int'];
-  value: Scalars['String'];
-  remainingFiles: Array<Scalars['ID']> | Scalars['ID'];
-  newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
-}>;
-
-export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null, valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> | null } };
-
-export type ChangeValueMutationVariables = Exact<{
-  documentId: Scalars['ID'];
-  sheetId: Scalars['Int'];
-  columnId: Scalars['Int'];
-  rowId: Scalars['Int'];
-  value: Scalars['String'];
-}>;
-
-export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null } };
-
 export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];
 }>;
@@ -4876,12 +4886,6 @@ export type UnloadDocumentMutationVariables = Exact<{
 }>;
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
-
-export type UnloadFileValueArchiveMutationVariables = Exact<{
-  valueId: Scalars['ID'];
-}>;
-
-export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
@@ -4947,7 +4951,7 @@ export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension
 export type ChangeCellsOptionMutationVariables = Exact<{
   cellsId: Array<Scalars['Int']> | Scalars['Int'];
   field: Scalars['String'];
-  value: Scalars['String'];
+  value?: InputMaybe<Scalars['String']>;
 }>;
 
 export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null> | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null> | null } };
@@ -4962,11 +4966,39 @@ export type ChangeColumnDimensionMutationVariables = Exact<{
 
 export type ChangeColumnDimensionMutation = { __typename?: 'Mutation', changeColumnDimension: { __typename?: 'ChangeColumnDimensionPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, columnDimension?: { __typename: 'ColumnDimensionType', id: string, index: number, width?: number | null, fixed: boolean, hidden: boolean, kind: string } | null } };
 
+export type ChangeFileValueMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['Int'];
+  columnId: Scalars['Int'];
+  rowId: Scalars['Int'];
+  value: Scalars['String'];
+  remainingFiles: Array<Scalars['ID']> | Scalars['ID'];
+  newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
+}>;
+
+export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null, valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> | null } };
+
+export type ChangeValueMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['Int'];
+  columnId: Scalars['Int'];
+  rowId: Scalars['Int'];
+  value: Scalars['String'];
+}>;
+
+export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, value?: { __typename: 'ValueType', id: string, value: string, verified: boolean, error?: string | null, columnId?: number | null, rowId?: number | null } | null } };
+
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowId: Scalars['Int'];
 }>;
 
 export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowId: number, index: number, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
+
+export type UnloadFileValueArchiveMutationVariables = Exact<{
+  valueId: Scalars['ID'];
+}>;
+
+export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ActiveBudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;

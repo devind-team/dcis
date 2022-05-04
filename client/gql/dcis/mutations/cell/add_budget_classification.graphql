@@ -1,0 +1,10 @@
+mutation AddBudgetClassification($code: String!, $name: String!) {
+  addBudgetClassification(input: {code: $code, name: $name}) {
+    budgetClassification {
+      id
+      code
+      name
+      __typename
+    }
+  }
+}
