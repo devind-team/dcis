@@ -27,6 +27,8 @@ def add_row(
         sheet=sheet,
         index=index,
         document=document,
+        parent_id=parent_id,
+        dynamic=bool(parent_id),
         user=user
     )
     cells = [
