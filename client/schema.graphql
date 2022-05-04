@@ -3133,7 +3133,7 @@ type RowDimensionType {
   """Родительское правило"""
   parent: RowDimensionType
   """Идентификатор родителя"""
-  parentId: Int
+  parentId: ID
   """Лист"""
   sheet: SheetType!
   """Дата обновления"""

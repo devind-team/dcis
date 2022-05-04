@@ -1,5 +1,5 @@
 import type { CellType, ValueType } from '~/types/graphql'
-import type { RangePositionsType, RangeSpanType, RangeType } from '~/types/grid-types'
+import type { BuildRowType, RangePositionsType, RangeSpanType, RangeType } from '~/types/grid-types'
 
 const coordinateExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
 const rangeExp = /[$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<minRow>\d+)?(:[$]?(?<maxColumn>[A-Za-z]{1,3})?[$]?(?<maxRow>\d+))?/
@@ -224,6 +224,49 @@ const positionToLetter = (position: number): string => {
 }
 
 /**
+ * Связывание строк
+ * @param buildRows
+ */
+const connectBuildRows = (buildRows: BuildRowType[]) => {
+  for (const buildRow of buildRows) {
+    buildRow.children = buildRows.filter(row => row.dimension.parentId === buildRow.id)
+    for (const child of buildRow.children) {
+      child.parent = buildRow
+    }
+  }
+  return buildRows
+}
+
+/**
+ * Сортировка строк
+ * @param buildRows
+ */
+const sortBuildRows = (buildRows: BuildRowType[]) => {
+  return sortBuildRowsChunk(buildRows.filter(buildRow => buildRow.parent === null))
+}
+const sortBuildRowsChunk = (buildRowsChunk: BuildRowType[]) => {
+  const result: BuildRowType[] = []
+  for (const buildRow of buildRowsChunk.sort((r1, r2) => r1.index - r2.index)) {
+    result.push(buildRow)
+    result.push(...sortBuildRowsChunk(buildRow.children))
+  }
+  return result
+}
+
+/**
+ * Получение имени для строки
+ * @param buildRow
+ * @param indices
+ */
+const getBuildRowName = (buildRow: BuildRowType, indices: number[] | null = null) => {
+  indices = indices ?? []
+  if (buildRow.parent) {
+    return getBuildRowName(buildRow.parent, [buildRow.index, ...indices])
+  }
+  return [buildRow.index, ...indices].join('.')
+}
+
+/**
  * Функция построения основных стилей
  * @param cell
  */
@@ -288,6 +331,9 @@ export {
   rangeLetterToCells,
   applyToRange,
   normalizationRange,
+  connectBuildRows,
+  sortBuildRows,
+  getBuildRowName,
   getCellStyle,
   getCellBorder,
   getCellValue,

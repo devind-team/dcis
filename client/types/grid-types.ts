@@ -62,6 +62,9 @@ export type BuildRowType = {
   fixed: boolean
   hidden: boolean
   dynamic: boolean
+  parent: BuildRowType | null
+  children: BuildRowType[]
+  name: string
   style: Record<string, string | undefined>
   cells: BuildCellType[],
   dimension: RowDimensionType

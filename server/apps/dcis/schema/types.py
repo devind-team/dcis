@@ -384,7 +384,7 @@ class ColumnDimensionType(DjangoObjectType):
 class RowDimensionType(DjangoObjectType):
     """Тип строк."""
 
-    parent_id = graphene.Int(description='Идентификатор родителя')
+    parent_id = graphene.ID(description='Идентификатор родителя')
     children = graphene.List(lambda: RowDimensionType, description='Дочерние строки')
     user = graphene.List(UserType, description='Пользователь')
     cells = graphene.List(lambda: CellType, description='Ячейки')

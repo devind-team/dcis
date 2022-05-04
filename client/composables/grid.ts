@@ -11,8 +11,10 @@ import {
   letterToPosition,
   parseCoordinate,
   positionToLetter,
+  connectBuildRows,
+  getBuildRowName,
   rangeLetterToCells,
-  unionValues
+  unionValues, sortBuildRows
 } from '~/services/grid'
 import {
   PositionType,
@@ -143,7 +145,7 @@ export function useGrid (
   })
 
   const rows = computed<BuildRowType[]>(() => {
-    const buildRows: BuildRowType[] = []
+    let buildRows: BuildRowType[] = []
     for (const row of sheet.value.rows) {
       const buildRow: BuildRowType = {
         sheetId: sheet.value.id,
@@ -153,6 +155,9 @@ export function useGrid (
         fixed: row.fixed,
         hidden: row.hidden,
         dynamic: row.dynamic,
+        parent: null,
+        children: [],
+        name: '',
         style: {
           height: row.height ? `${row.height}px` : undefined
         },
@@ -168,6 +173,10 @@ export function useGrid (
         }
       }
       buildRows.push(buildRow)
+    }
+    buildRows = sortBuildRows(connectBuildRows(buildRows))
+    for (const buildRow of buildRows) {
+      buildRow.name = getBuildRowName(buildRow)
     }
     return buildRows
   })

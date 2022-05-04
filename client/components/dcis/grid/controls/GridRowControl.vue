@@ -8,7 +8,7 @@
             v-on="onTooltip"
             @contextmenu.prevent="onMenu.click"
             :class="contentClass"
-          ) {{ row.index }}
+          ) {{ row.name }}
         span {{ t('dcis.grid.rowControl.updatedAt', { updatedAt: dateTimeHM(row.dimension.updatedAt) } ) }}
     v-list(dense)
       grid-row-settings(@close="settingsActive = false" :row="row")
@@ -25,13 +25,16 @@
         v-list-item-icon
           v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addRowBelow') }}
-      v-list-item(v-if="row.dynamic")
+      v-list-item(
+        v-if="row.dynamic"
+        @click="addRowDimension(+row.sheetId, row.children.length ? row.children.at(-1).index + 1 : 1, +row.id)"
+      )
         v-list-item-icon
-          v-icon
+          v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addChildRow') }}
       v-list-item(@click="deleteRowDimension(+row.id)")
         v-list-item-icon
-          v-icon(color="error") mdi-delete
+          v-icon(color="error") mdi-table-row-remove
         v-list-item-content(color="error") {{ t('dcis.grid.rowControl.deleteRow') }}
 </template>
 
