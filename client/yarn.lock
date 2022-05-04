@@ -3072,10 +3072,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@tiptap/core@^2.0.0-beta.174":
-  version "2.0.0-beta.174"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.174.tgz#cfdf16b7d7401e4b255dc69147d784f5f537b942"
-  integrity sha512-APQDto40PdvagG1HTwkKlieQS4Vp6GXNe7qgV1Qo2QCgJCLyxc/fXCTghtrOx0CQb+9JT7fjSLZxbSyUFXjx7Q==
+"@tiptap/core@^2.0.0-beta.174", "@tiptap/core@^2.0.0-beta.175":
+  version "2.0.0-beta.175"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.0.0-beta.175.tgz#d23f6e60308cde192451121e21df83c256bdcd92"
+  integrity sha512-dDf+2GtifskNLysn49kaCIz0o5hf6VDZ8J7jSQAfoPDEkEkfw9OKhWrR7NzWW6J34CSJreFDRiWkGt8Qz283Vg==
   dependencies:
     "@types/prosemirror-commands" "^1.0.4"
     "@types/prosemirror-keymap" "^1.0.4"
@@ -3280,12 +3280,12 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-underline/-/extension-underline-2.0.0-beta.23.tgz#050a31ac55b7ad63e8abf57ac941c62e255f57b8"
   integrity sha512-pMjFH/NpFWLd2XQQa5rG9rGVQ9mu3ygdtu6VGfJ3aAjzBiyLXDKhE4biIFWyFsr8zLpp7DjwbrmLV0UGvbG1WQ==
 
-"@tiptap/starter-kit@^2.0.0-beta.183":
-  version "2.0.0-beta.183"
-  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.0.0-beta.183.tgz#35ff9f4b236bd321ffdd44c5061514959c1b4b9d"
-  integrity sha512-Lcms6lEfFfdL1oHoATcNKfu1C8+yhuZnI5Pq+U6o2zSslfnUSDf3jgmy6nSoZrrkqvFoXjQk4dxMDFg3giw2Kg==
+"@tiptap/starter-kit@^2.0.0-beta.184":
+  version "2.0.0-beta.184"
+  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.0.0-beta.184.tgz#c621d51d9cb8a1b18cbec7af6080ce8288bdce72"
+  integrity sha512-FgF94i5RQzXiGAIkaubnXEaYwJfiZRbMPZcmarwNo8IyqPnLT34Q1yjw/qZ3nv7rDehWV5l/zenbrrNtPYVCkA==
   dependencies:
-    "@tiptap/core" "^2.0.0-beta.174"
+    "@tiptap/core" "^2.0.0-beta.175"
     "@tiptap/extension-blockquote" "^2.0.0-beta.26"
     "@tiptap/extension-bold" "^2.0.0-beta.26"
     "@tiptap/extension-bullet-list" "^2.0.0-beta.26"
@@ -3925,7 +3925,7 @@
   resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.3.tgz#781d360c282436494b32fe7d9f7f8e64b3118aa3"
   integrity sha512-fbF6oTd4sGGy0xjHPKAt+eS2CrxJ3+6gQ3FGcBoIJR2TLAyCkCyI8JqZNy+FeON0AhVgNJoUumVoZQjBFUqHkw==
 
-"@typescript-eslint/eslint-plugin@^5.14.0", "@typescript-eslint/eslint-plugin@^5.22.0":
+"@typescript-eslint/eslint-plugin@^5.21.0", "@typescript-eslint/eslint-plugin@^5.22.0":
   version "5.22.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.22.0.tgz#7b52a0de2e664044f28b36419210aea4ab619e2a"
   integrity sha512-YCiy5PUzpAeOPGQ7VSGDEY2NeYUV1B0swde2e0HzokRsHBYjSdF6DZ51OuRZxVPHx0032lXGLvOMls91D8FXlg==
@@ -4010,7 +4010,6 @@
     is-glob "^4.0.3"
     semver "^7.3.5"
     tsutils "^3.21.0"
-
 
 "@typescript-eslint/utils@5.22.0":
   version "5.22.0"
