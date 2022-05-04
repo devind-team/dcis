@@ -27,9 +27,9 @@
 </template>
 
 <script lang="ts">
+import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
-import { DataProxy } from 'apollo-cache'
 import { AddPeriodGroupMutationPayload, PeriodGroupType, PeriodType } from '~/types/graphql'
 import addPeriodGroup from '~/gql/dcis/mutations/project/add_period_group.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'

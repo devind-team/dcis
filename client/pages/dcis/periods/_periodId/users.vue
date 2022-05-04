@@ -18,7 +18,16 @@
               :key="index"
               :value="item"
             )
-              v-list-item-title {{ item.name }}
+              v-list-item-content {{ item.name }}
+              v-list-item-action
+                delete-menu(@confirm="deletePeriodGroupMutate({ id: Number(item.id) }).then")
+                  template(v-slot:default="{ on: onMenu }")
+                    v-tooltip(bottom)
+                      template(v-slot:activator="{ on: onTooltip }")
+                        v-hover(v-slot="{ hover }")
+                          v-btn(:color="hover ? 'error' : ''" @click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
+                            v-icon mdi-delete
+                      span {{ $t('dcis.periods.actions.deleteGroup') }}
       v-divider(vertical)
       v-col(cols="12" md="8" sm="8")
         period-group-users(:period-group="selectGroup" :period="period")
@@ -26,18 +35,23 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
+import { useMutation } from '@vue/apollo-composable'
 import { ComputedRef, inject, PropType, ref, provide, computed, defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodGroupType, PeriodType } from '~/types/graphql'
+import { PeriodGroupType, PeriodType, DeletePeriodGroupMutation, DeletePeriodGroupMutationVariables } from '~/types/graphql'
+import deletePeriodGroup from '~/gql/dcis/mutations/project/delete_period_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import PeriodGroupUsers from '~/components/dcis/periods/PeriodGroupUsers.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
 import { ChangePeriodGroupUsersMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
 import { ChangePeriodGroupPrivilegesMutationResult } from '~~/components/dcis/periods/PeriodGroupPrivileges.vue'
 
+export type DeletePeriodGroupMutationResult = { data: DeletePeriodGroupMutation }
+
 export default defineComponent({
-  components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup },
+  components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup, DeleteMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -83,9 +97,22 @@ export default defineComponent({
           return dataCache
         })
     }
+    const { mutate: deletePeriodGroupMutate } = useMutation<DeletePeriodGroupMutation, DeletePeriodGroupMutationVariables>(deletePeriodGroup, {
+      update: (cache, result) => periodUpdate(
+        cache,
+        result,
+        (dataCache, { data: { deletePeriodGroup: { errors, deletedId } } }: DeletePeriodGroupMutationResult) => {
+          if (!errors.length) {
+            dataCache.period.periodGroups = dataCache.period.periodGroups.filter((e: any) => e.id !== deletedId
+            )
+          }
+          return dataCache
+        }
+      )
+    })
     provide('periodGroupUsersUpdate', changePeriodGroupUsersUpdate)
     provide('periodGroupPrivilegesUpdate', changePeriodGroupPrivilegesUpdate)
-    return { bc, selectGroup, addPeriodGroupUpdate, changePeriodGroupUsersUpdate, changePeriodGroupPrivilegesUpdate }
+    return { bc, selectGroup, addPeriodGroupUpdate, changePeriodGroupUsersUpdate, changePeriodGroupPrivilegesUpdate, deletePeriodGroupMutate }
   }
 })
 </script>

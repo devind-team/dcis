@@ -1,0 +1,12 @@
+mutation DeletePeriodGroup($id: ID!) {
+  deletePeriodGroup(id: $id) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    found
+    deletedId
+  }
+}

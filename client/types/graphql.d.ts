@@ -1556,6 +1556,19 @@ export type DeletePageMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Мутация на удаление группы сбора. */
+export type DeletePeriodGroupMutationPayload = {
+  __typename?: 'DeletePeriodGroupMutationPayload';
+  deletedId?: Maybe<Scalars['ID']>;
+  deletedInputId?: Maybe<Scalars['ID']>;
+  deletedRawId?: Maybe<Scalars['ID']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  found?: Maybe<Scalars['Boolean']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 /** Мутация на удаление периода. */
 export type DeletePeriodMutationPayload = {
   __typename?: 'DeletePeriodMutationPayload';
@@ -2169,6 +2182,8 @@ export type Mutation = {
   deletePage: DeletePageMutationPayload;
   /** Мутация на удаление периода. */
   deletePeriod: DeletePeriodMutationPayload;
+  /** Мутация на удаление группы сбора. */
+  deletePeriodGroup: DeletePeriodGroupMutationPayload;
   /** Мутация для удаления записи профиля. */
   deleteProfile: DeleteProfileMutationPayload;
   /** Мутация на удаление проекта. */
@@ -2492,6 +2507,11 @@ export type MutationDeletePageArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationDeletePeriodArgs = {
+  id: Scalars['ID'];
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeletePeriodGroupArgs = {
   id: Scalars['ID'];
 };
 
@@ -4726,6 +4746,12 @@ export type DeletePeriodMutationVariables = Exact<{
 }>;
 
 export type DeletePeriodMutation = { __typename?: 'Mutation', deletePeriod: { __typename: 'DeletePeriodMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type DeletePeriodGroupMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodGroup: { __typename?: 'DeletePeriodGroupMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeleteProjectMutationVariables = Exact<{
   id: Scalars['ID'];

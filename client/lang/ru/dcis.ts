@@ -36,6 +36,7 @@ export default {
     deleteItemName: 'период',
     actions: {
       delete: '@:delete',
+      deleteGroup: 'Удалить группу',
       save: '@:save',
       deleteItemName: 'период'
     },

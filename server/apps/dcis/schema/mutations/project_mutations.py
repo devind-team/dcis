@@ -154,6 +154,15 @@ class ChangePeriodGroupUsersMutation(BaseMutation):
         return ChangePeriodGroupUsersMutation(users=users)
 
 
+class DeletePeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+    """Мутация на удаление группы сбора."""
+
+    class Meta:
+        model = PeriodGroup
+        login_required = True
+        permissions = ('dcis.delete_periodgroup',)
+
+
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
@@ -164,4 +173,5 @@ class ProjectMutations(graphene.ObjectType):
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
+    delete_period_group = DeletePeriodGroupMutationPayload.Field(required=True)
     change_period_group_users = ChangePeriodGroupUsersMutation.Field(required=True)
