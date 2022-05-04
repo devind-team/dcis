@@ -1,7 +1,43 @@
-from apps.dcis.models.sheet import Sheet
+from typing import Optional
+
+from django.db.models import F
+
+from apps.dcis.models.sheet import Document, Sheet, RowDimension, Cell, MergedCell
+from apps.core.models import User
 
 
-def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False):
+def add_row(
+    user: User,
+    document: Document,
+    sheet: Sheet,
+    parent_id: Optional[int],
+    index: int
+) -> tuple[RowDimension, list[Cell], list[MergedCell]]:
+    """Добавление строки.
+
+    После добавления строки, строка приобретает новый индекс,
+    соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
+    """
+    if parent_id:
+        rows = RowDimension.objects.filter(parent_id=parent_id)
+    else:
+        rows = sheet.rowdimension_set
+    rows.filter(index__gte=index).update(index=F('index') + 1)
+    row_dimension = RowDimension.objects.create(
+        sheet=sheet,
+        index=index,
+        document=document,
+        user=user
+    )
+    cells = [
+        Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
+        for column in sheet.columndimension_set.all()
+    ]
+    move_merged_cells(sheet, index, 1)
+    return row_dimension, cells, sheet.mergedcell_set.all()
+
+
+def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False) -> None:
     """Двигаем объединенные строки в зависимости от добавления или удаления.
 
     В будущем метод нужно сделать универсальным (и для колонок).

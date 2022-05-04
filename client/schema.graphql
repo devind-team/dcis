@@ -259,18 +259,15 @@ input AddRowDimensionMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
   documentId: ID!
-  """Позиция вставки"""
-  position: String!
-  """Идентификатор строки"""
-  rowId: Int!
+  """Индекс вставки"""
+  index: Int!
+  """Идентификатор родительской строки"""
+  parentId: Int
+  """Идентификатор листа"""
+  sheetId: Int!
 }
 
-"""
-Вставка строк.
-
-После добавления строки бы то не было, строка приобретает новый индекс,
-соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
-"""
+"""Добавление строки."""
 type AddRowDimensionMutationPayload {
   """Добавленные ячейки"""
   cells: [CellType]!
@@ -711,7 +708,7 @@ input ChangeCellsOptionMutationInput {
 }
 
 """
-Мутация для изменения свойств ячеек:
+Изменение свойств ячеек:
 
 - horizontal_align - ['left', 'center', 'right']
 - vertical_align - ['top', 'middle', 'bottom']
@@ -736,7 +733,7 @@ type ChangeCellsOptionMutationPayload {
   values: [ValueType]
 }
 
-"""Мутация для изменения стилей колонки таблицы."""
+"""Изменение стилей колонки таблицы."""
 type ChangeColumnDimensionPayload {
   """Измененные стили колонки таблицы"""
   columnDimension: ColumnDimensionType
@@ -1075,7 +1072,7 @@ type ChangeProjectMutationPayload {
   success: Boolean!
 }
 
-"""Мутация для изменения стилей строки таблицы."""
+"""Изменение стилей строки таблицы."""
 type ChangeRowDimensionPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1541,7 +1538,7 @@ input DeleteRowDimensionMutationInput {
   rowId: Int!
 }
 
-"""Мутация для удаления строки."""
+"""Удаление строки."""
 type DeleteRowDimensionMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""

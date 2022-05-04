@@ -17,11 +17,11 @@
             v-list-item-icon
               v-icon mdi-cog
             v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
-      v-list-item(@click="addRowDimension(+row.id, 'before')")
+      v-list-item(@click="addRowDimension(+row.sheetId, row.index - 1)")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
         v-list-item-content {{ t('dcis.grid.rowControl.addRowAbove') }}
-      v-list-item(@click="addRowDimension(+row.id, 'after')")
+      v-list-item(@click="addRowDimension(+row.sheetId, row.index + 1)")
         v-list-item-icon
           v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addRowBelow') }}
@@ -77,7 +77,7 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
     const documentId: string = inject<string>('documentId')
     const documentUpdate: DocumentUpdateType<any> = inject<DocumentUpdateType<any>>('documentUpdate')
-    const addRowDimension = (rowId: number, position: 'before' | 'after') => {
+    const addRowDimension = (sheetId: number, index: number, parentId: number | undefined = undefined) => {
       const { mutate } = useMutation<
         AddRowDimensionMutation,
         AddRowDimensionMutationVariables
@@ -105,7 +105,12 @@ export default defineComponent({
           }
         )
       })
-      mutate({ documentId, rowId, position })
+      mutate({
+        documentId,
+        sheetId,
+        parentId,
+        index
+      })
     }
 
     const deleteRowDimension = (rowId: number) => {

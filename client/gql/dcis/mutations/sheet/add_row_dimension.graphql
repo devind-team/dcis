@@ -2,11 +2,12 @@
 #import "../../fragments/cell_fields.graphql"
 #import "../../fragments/merged_cell_fields.graphql"
 
-mutation AddRowDimension($documentId: ID!, $rowId: Int!, $position: String!) {
+mutation AddRowDimension($documentId: ID!, $sheetId: Int!, $parentId: Int, $index: Int!) {
   addRowDimension(input: {
     documentId: $documentId,
-    rowId: $rowId,
-    position: $position
+    sheetId: $sheetId,
+    parentId: $parentId,
+    index: $index
   }) {
     success
     errors {

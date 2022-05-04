@@ -301,18 +301,15 @@ export type AddRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор документа */
   documentId: Scalars['ID'];
-  /** Позиция вставки */
-  position: Scalars['String'];
-  /** Идентификатор строки */
-  rowId: Scalars['Int'];
+  /** Индекс вставки */
+  index: Scalars['Int'];
+  /** Идентификатор родительской строки */
+  parentId?: InputMaybe<Scalars['Int']>;
+  /** Идентификатор листа */
+  sheetId: Scalars['Int'];
 };
 
-/**
- * Вставка строк.
- *
- * После добавления строки бы то не было, строка приобретает новый индекс,
- * соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
- */
+/** Добавление строки. */
 export type AddRowDimensionMutationPayload = {
   __typename?: 'AddRowDimensionMutationPayload';
   /** Добавленные ячейки */
@@ -782,7 +779,7 @@ export type ChangeCellsOptionMutationInput = {
 };
 
 /**
- * Мутация для изменения свойств ячеек:
+ * Изменение свойств ячеек:
  *
  * - horizontal_align - ['left', 'center', 'right']
  * - vertical_align - ['top', 'middle', 'bottom']
@@ -808,7 +805,7 @@ export type ChangeCellsOptionMutationPayload = {
   values?: Maybe<Array<Maybe<ValueType>>>;
 };
 
-/** Мутация для изменения стилей колонки таблицы. */
+/** Изменение стилей колонки таблицы. */
 export type ChangeColumnDimensionPayload = {
   __typename?: 'ChangeColumnDimensionPayload';
   /** Измененные стили колонки таблицы */
@@ -1166,7 +1163,7 @@ export type ChangeProjectMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Мутация для изменения стилей строки таблицы. */
+/** Изменение стилей строки таблицы. */
 export type ChangeRowDimensionPayload = {
   __typename?: 'ChangeRowDimensionPayload';
   /** Ошибки мутации */
@@ -1671,7 +1668,7 @@ export type DeleteRowDimensionMutationInput = {
   rowId: Scalars['Int'];
 };
 
-/** Мутация для удаления строки. */
+/** Удаление строки. */
 export type DeleteRowDimensionMutationPayload = {
   __typename?: 'DeleteRowDimensionMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
@@ -4944,8 +4941,9 @@ export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { 
 
 export type AddRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];
-  rowId: Scalars['Int'];
-  position: Scalars['String'];
+  sheetId: Scalars['Int'];
+  parentId?: InputMaybe<Scalars['Int']>;
+  index: Scalars['Int'];
 }>;
 
 export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, createdAt: any, updatedAt: any, parentId?: number | null }, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, default?: string | null, tooltip?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, color: string, background: string, borderStyle: any, borderColor: any, columnId?: number | null, rowId?: number | null } | null>, mergedCells: Array<{ __typename: 'MergedCellType', id: string, colspan?: number | null, rowspan?: number | null, target?: string | null, cells?: Array<string | null> | null } | null> } };
