@@ -42,7 +42,7 @@
     "@graphql-codegen/schema-ast": "^2.4.1",
     "@graphql-codegen/typescript": "^2.4.8",
     "@graphql-codegen/typescript-operations": "^2.3.5",
-    "@graphql-codegen/typescript-vue-apollo": "^3.2.9",
+    "@graphql-codegen/typescript-vue-apollo": "^3.2.10",
     "@mdi/font": "^6.6.96",
     "@nuxt/bridge": "npm:@nuxt/bridge-edge",
     "@nuxt/types": "^2.15.8",
