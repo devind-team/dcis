@@ -40,7 +40,7 @@
     "@babel/plugin-proposal-optional-chaining": "^7.16.7",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/schema-ast": "^2.4.1",
-    "@graphql-codegen/typescript": "^2.4.8",
+    "@graphql-codegen/typescript": "^2.4.9",
     "@graphql-codegen/typescript-operations": "^2.3.5",
     "@graphql-codegen/typescript-vue-apollo": "^3.2.9",
     "@mdi/font": "^6.6.96",
