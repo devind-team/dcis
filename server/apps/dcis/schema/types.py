@@ -396,10 +396,10 @@ class MergedCellType(DjangoObjectType):
     """Тип для объединенных ячеек."""
 
     range = graphene.String(required=True, description='Объединенный диапазон')
-    colspan = graphene.Int()
-    rowspan = graphene.Int()
-    target = graphene.String()
-    cells = graphene.List(graphene.String)
+    colspan = graphene.Int(required=True, description='Объединение колонок')
+    rowspan = graphene.Int(required=True, description='Объединение строк')
+    target = graphene.String(required=True, description='Позиция основной ячейки')
+    cells = graphene.List(graphene.String, description='Позиции ячеек')
 
     class Meta:
         model = MergedCell
