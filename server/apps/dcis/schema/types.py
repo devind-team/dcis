@@ -14,10 +14,9 @@ from apps.core.schema import UserType
 from ..models import (
     Project, Period, Division,
     Privilege, PeriodGroup, PeriodPrivilege,
-    Status, Sheet, Document, DocumentStatus,
-    Attribute, AttributeValue, ColumnDimension,
-    RowDimension, Cell, Limitation, MergedCell,
-    Value
+    Status, Sheet, Document,
+    DocumentStatus, Attribute, AttributeValue,
+    ColumnDimension, Limitation, MergedCell
 )
 
 
@@ -165,10 +164,8 @@ class StatusType(DjangoObjectType):
 class SheetType(DjangoObjectType):
     """Тип моделей листов.
 
-        rows, cells - могут иметь идентификатор документа, в противном случае
-            выгружается только каркас
-        values - могут выгружаться только значения привязанные к строкам
-        columns, merged_cells - привязываются к каркасу и от документа не зависят.
+    rows - могут иметь идентификатор документа,
+    в противном случае выгружается только каркас
     """
 
     period = graphene.Field(PeriodType, description='Период')
@@ -178,16 +175,6 @@ class SheetType(DjangoObjectType):
         lambda: RowDimensionType,
         document_id=graphene.ID(description='Идентификатор документа'),
         description='Строки'
-    )
-    cells = graphene.List(
-        lambda: CellType,
-        document_id=graphene.ID(description='Идентификатор документа'),
-        description='Мета информация о ячейках'
-    )
-    values = graphene.List(
-        lambda: ValueType,
-        document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        description='Значения документа'
     )
 
     class Meta:
@@ -218,31 +205,10 @@ class SheetType(DjangoObjectType):
         return sheet.rowdimension_set.filter(Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id))
 
     @staticmethod
-    def resolve_cells(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
-        """Получаем все ячейки, связанные со строками.
-
-            Получение зависит от строк, так как от документа к документу они могут меняться.
-        """
-        if document_id is None:
-            rows_id = sheet.rowdimension_set.filter(parent__isnull=True).values_list('pk', flat=True)
-        else:
-            document_id = from_global_id(document_id)[1]
-            rows_id = sheet.rowdimension_set.filter(
-                Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id)
-            ).values_list('id', flat=True)
-        return Cell.objects.filter(row_id__in=rows_id).all()
-
-    @staticmethod
     @resolver_hints(model_field='mergedcell_set')
     def resolve_merged_cells(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
         """Получение всех объединенных ячеек связанных с листом."""
         return sheet.mergedcell_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='value_set')
-    def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: str, *args, **kwargs):
-        """Получение значений, связанных с листом."""
-        return sheet.value_set.filter(document_id=from_global_id(document_id)[1]).all()
 
 
 class DocumentType(DjangoObjectType):
@@ -344,14 +310,7 @@ class AttributeValueType(DjangoObjectType):
 class ColumnDimensionType(DjangoObjectType):
     """Тип колонок."""
 
-    sheet = graphene.Field(SheetType, description='Листы')
     user = graphene.List(UserType, description='Пользователь')
-    cells = graphene.List(lambda: CellType, description='Ячейки')
-    values = graphene.List(
-        lambda: ValueType,
-        document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        description='Значения документа'
-    )
 
     class Meta:
         model = ColumnDimension
@@ -362,105 +321,58 @@ class ColumnDimensionType(DjangoObjectType):
             'fixed',
             'hidden',
             'kind',
-            'sheet',
             'user',
-            'cells',
-            'values',
         )
         convert_choices_to_enum = False
 
-    @staticmethod
-    @resolver_hints(model_field='cell_set')
-    def resolve_cells(column: ColumnDimension, info: ResolveInfo, *args, **kwargs):
-        return column.cell_set.all()
 
-    @staticmethod
-    @resolver_hints(model_field='value_set')
-    def resolve_values(column: ColumnDimension, info: ResolveInfo, document_id: str, *args, **kwargs):
-        """Получение значений, связанных с листом."""
-        return column.value_set.filter(document_id=from_global_id(document_id)[1]).all()
+class RowDimensionType(graphene.ObjectType):
+    """Тип строки."""
 
-
-class RowDimensionType(DjangoObjectType):
-    """Тип строк."""
-
+    id = graphene.ID(required=True, description='Идентификатор')
+    index = graphene.Int(required=True, description='Индекс строки относительно родителя')
+    global_index = graphene.Int(required=True, description='Индекс строки в плоской структуре')
+    name = graphene.String(required=True, description='Название строки')
+    height = graphene.Int(description='Высота строки')
+    fixed = graphene.Boolean(required=True, description='Фиксация строки')
+    hidden = graphene.Boolean(required=True, description='Скрытие строки')
+    dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
+    aggregation = graphene.String(description='Агрегирование перечисление (мин, макс) для динамических строк')
+    created_at = graphene.DateTime(required=True, description='Дата добавления')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления')
     parent_id = graphene.ID(description='Идентификатор родителя')
     children = graphene.List(lambda: RowDimensionType, description='Дочерние строки')
+    document_id = graphene.ID(description='Идентификатор документа')
     user = graphene.List(UserType, description='Пользователь')
     cells = graphene.List(lambda: CellType, description='Ячейки')
 
-    class Meta:
-        model = RowDimension
-        fields = (
-            'id',
-            'index',
-            'height',
-            'fixed',
-            'hidden',
-            'sheet',
-            'dynamic',
-            'aggregation',
-            'object_id',
-            'created_at',
-            'updated_at',
-            'parent',
-            'parent_id',
-            'document',
-            'children',
-            'user',
-            'cells',
-        )
-        convert_choices_to_enum = False
 
-    @staticmethod
-    @resolver_hints(model_field='rowdimension_set')
-    def resolve_children(row: RowDimension, info: ResolveInfo, *args, **kwargs):
-        return row.rowdimension_set.all()
-
-
-class CellType(DjangoObjectType):
+class CellType(graphene.ObjectType):
     """Тип ячейки."""
 
-    column = graphene.Field(ColumnDimensionType, description='Колонка')
-    column_id = graphene.Int(description='Идентификатор колонки')
-    row = graphene.Field(RowDimensionType, description='Строка')
-    row_id = graphene.Int(description='Идентификатор строки')
-    limitations = graphene.List(lambda: LimitationType, description='Ограничения на ячейку')
-
-    class Meta:
-        model = Cell
-        fields = (
-            'id',
-            'kind',
-            'editable',
-            'formula',
-            'comment',
-            'default',
-            'mask',
-            'tooltip',
-            'column',
-            'column_id',
-            'row',
-            'row_id',
-            'horizontal_align',
-            'vertical_align',
-            'size',
-            'strong',
-            'italic',
-            'strike',
-            'underline',
-            'color',
-            'background',
-            'limitations',
-            'border_style',
-            'border_color'
-        )
-        convert_choices_to_enum = False
-
-    @staticmethod
-    @resolver_hints(model_field='limitation_set')
-    def resolve_limitations(cell: Cell, info: ResolveInfo, *args, **kwargs):
-        return cell.limitation_set.all()
+    id = graphene.ID(required=True, description='Идентификатор')
+    kind = graphene.String(required=True, description='Тип значения')
+    editable = graphene.Boolean(required=True, description='Редактируемая ячейка')
+    formula = graphene.String(description='Формула')
+    comment = graphene.String(description='Комментарий')
+    mask = graphene.String(description='Маска для ввода значений')
+    tooltip = graphene.String(description='Подсказка')
+    column_id = graphene.ID(description='Идентификатор колонки')
+    row_id = graphene.ID(description='Идентификатор строки')
+    horizontal_align = graphene.ID(description='Горизонтальное выравнивание')
+    vertical_align = graphene.ID(description='Вертикальное выравнивание')
+    size = graphene.Int(required=True, description='Размер шрифта')
+    strong = graphene.Boolean(required=True, description='Жирный шрифт')
+    italic = graphene.Boolean(required=True, description='Курсив')
+    strike = graphene.Boolean(description='Зачеркнутый')
+    underline = graphene.Boolean(description='Тип подчеркивания')
+    color = graphene.String(required=True, description='Цвет индекса')
+    background = graphene.String(required=True, description='Цвет фона')
+    border_style = graphene.JSONString(required=True, description='Стили границ')
+    border_color = graphene.JSONString(required=True, description='Цвет границ')
+    value = graphene.String(description='Значение')
+    verified = graphene.Boolean(required=True, description='Валидно ли поле')
+    error = graphene.String(description='Текст ошибки')
 
 
 class LimitationType(DjangoObjectType):
@@ -507,21 +419,3 @@ class MergedCellType(DjangoObjectType):
     @staticmethod
     def resolve_range(merge_cell: MergedCell, info: ResolveInfo, *args, **kwargs):
         return str(merge_cell)
-
-
-class ValueType(DjangoObjectType):
-    """Тип для значений."""
-
-    column_id = graphene.Int(description='Идентификатор колонки')
-    row_id = graphene.Int(description='Идентификатор строки')
-
-    class Meta:
-        model = Value
-        fields = (
-            'id',
-            'value',
-            'verified',
-            'error',
-            'column_id',
-            'row_id',
-        )

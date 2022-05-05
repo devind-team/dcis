@@ -16,7 +16,7 @@ from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
-from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType, ValueType
+from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType
 from apps.dcis.services.cell_services import change_cell_kind, check_cell_options
 from apps.dcis.services.sheet_services import move_merged_cells, add_row
 from apps.dcis.services.value_services import (
@@ -98,19 +98,6 @@ class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
     column_dimension = graphene.Field(ColumnDimensionType, description='Измененные стили колонки таблицы')
 
 
-class ChangeRowDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
-    """Изменение стилей строки таблицы."""
-
-    class Meta:
-        model = RowDimension
-        only_fields = ('height', 'fixed', 'hidden', 'dynamic',)
-        required_fields = ('fixed', 'hidden', 'dynamic',)
-        login_required = True
-        permissions = ('dcis.change_rowdimension',)
-
-    row_dimension = graphene.Field(RowDimensionType, description='Измененные стили строки таблицы')
-
-
 class ChangeCellsOptionMutation(BaseMutation):
     """Изменение свойств ячеек:
 
@@ -132,7 +119,6 @@ class ChangeCellsOptionMutation(BaseMutation):
         value = graphene.String(description='Значение поля')
 
     cells = graphene.List(CellType, description='Измененные ячейки')
-    values = graphene.List(ValueType, description='Измененные значения')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -183,8 +169,6 @@ class ChangeValueMutation(BaseMutation):
         row_id = graphene.Int(required=True, description='Идентификатор строки')
         value = graphene.String(required=True, description='Значение')
 
-    value = graphene.Field(ValueType, description='Измененное значение')
-
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
@@ -220,7 +204,6 @@ class ChangeFileValueMutation(BaseMutation):
         remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
 
-    value = graphene.Field(ValueType, description='Измененное значение')
     value_files = graphene.List(FileType, description='Измененные файлы')
 
     @staticmethod
@@ -260,10 +243,6 @@ class SheetMutations(graphene.ObjectType):
     change_column_dimension = ChangeColumnDimensionPayload.Field(
         required=True,
         description='Изменение стилей колонки таблицы'
-    )
-    change_row_dimension = ChangeRowDimensionPayload.Field(
-        required=True,
-        description='Изменение стилей строки таблицы'
     )
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
