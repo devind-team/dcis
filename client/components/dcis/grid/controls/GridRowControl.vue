@@ -96,11 +96,11 @@ export default defineComponent({
             if (success) {
               const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId)
               sheet.cells.push(...cells)
-              const rows = sheet.rows
+              const rows = (parentId ? sheet.rows.filter(row => row.parentId === String(parentId)) : sheet.rows)
                 .map((r: RowDimensionFieldsFragment) => (
                   r.index >= rowDimension.index ? Object.assign(r, { index: r.index + 1 }) : r)
                 )
-              rows.splice(rowDimension.index - 1, 0, rowDimension)
+              rows.push(rowDimension)
               sheet.rows = rows
               sheet.mergedCells = mergedCells
             }

@@ -35,7 +35,8 @@ def add_row(
         Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
         for column in sheet.columndimension_set.all()
     ]
-    move_merged_cells(sheet, index, 1)
+    if not parent_id:
+        move_merged_cells(sheet, index, 1)
     return row_dimension, cells, sheet.mergedcell_set.all()
 
 
