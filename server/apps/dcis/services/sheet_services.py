@@ -12,7 +12,6 @@ class RowsUploader:
     def __init__(self, sheet: Sheet, document_id: Optional[str] = None) -> None:
         self.sheet = sheet
         self.document_id = document_id
-        self.upload()
 
     def upload(self) -> list[dict]:
         """Выгрузка строк листа."""
@@ -82,8 +81,8 @@ class RowsUploader:
         """Получение имени строки."""
         indices = indices or []
         if row['parent'] is not None:
-            return cls._get_row_name(row['parent'], [row['index'], *indices])
-        return '.'.join([row['index'], *indices])
+            return cls._get_row_name(row['parent'], [str(row['index']), *indices])
+        return '.'.join([str(row['index']), *indices])
 
     @classmethod
     def _add_row_names(cls, rows_tree: list[dict]) -> list[dict]:
@@ -100,7 +99,7 @@ class RowsUploader:
         result: list[dict] = []
         for row in sorted(rows_tree, key=lambda r: r['index']):
             result.append(row)
-            result.append(*cls._sort_rows(row['children']))
+            result.extend(cls._sort_rows(row['children']))
         for i, row in enumerate(result, 1):
             row['global_index'] = i
         return result

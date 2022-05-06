@@ -7,6 +7,7 @@ from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
 from apps.dcis.services.sheet_services import RowsUploader
@@ -198,7 +199,7 @@ class SheetType(DjangoObjectType):
     @resolver_hints(model_field='rowdimension_set')
     def resolve_rows(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
         """Получения всех строк."""
-        return RowsUploader(sheet, document_id).upload()
+        return RowsUploader(sheet, from_global_id(document_id)[1]).upload()
 
     @staticmethod
     @resolver_hints(model_field='mergedcell_set')
