@@ -15,7 +15,7 @@ class SheetQueries(graphene.ObjectType):
 
     sheet = graphene.Field(
         SheetType,
-        sheet_id=graphene.Int(required=True, description='Идентификатор листа'),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
         required=True,
         description='Выгрузка листа'
     )

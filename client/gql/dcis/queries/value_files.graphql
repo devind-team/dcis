@@ -1,7 +1,0 @@
-#import "../../core/fragments/file_fields.graphql"
-
-query ValueFiles($valueId: ID!) {
-  valueFiles(valueId: $valueId) {
-    ...FileFields
-  }
-}

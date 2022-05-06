@@ -1,10 +1,3 @@
-#import "../fragments/sheet_fields.graphql"
-#import "../fragments/column_dimension_fields.graphql"
-#import "../fragments/row_dimension_fields.graphql"
-#import "../fragments/merged_cell_fields.graphql"
-#import "../fragments/cell_fields.graphql"
-#import "../fragments/value_fields.graphql"
-
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
@@ -18,22 +11,9 @@ query Document($documentId: ID!) {
     createdAt
     updatedAt
     sheets {
-      ...SheetFields
-      columns {
-        ...ColumnDimensionFields
-      }
-      mergedCells {
-        ...MergedCellsFields
-      }
-      rows(documentId: $documentId) {
-        ...RowDimensionFields
-      }
-      cells(documentId: $documentId) {
-        ...CellFields
-      }
-      values(documentId: $documentId) {
-        ...ValueFields
-      }
+      id
+      name
+      __typename
     }
     __typename
   }

@@ -1,4 +1,3 @@
-#import "../../fragments/value_fields.graphql"
 #import "../../../core/fragments/file_fields.graphql"
 
 mutation ChangeFileValue(
@@ -20,9 +19,6 @@ mutation ChangeFileValue(
     newFiles: $newFiles
   }) {
     success
-    value {
-      ...ValueFields
-    }
     valueFiles {
       ...FileFields
     }
