@@ -6,11 +6,10 @@ from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
-from django.db.models import Q
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
 
 from apps.core.schema import UserType
+from apps.dcis.services.sheet_services import RowsUploader
 from ..models import (
     Project, Period, Division,
     Privilege, PeriodGroup, PeriodPrivilege,
@@ -199,10 +198,7 @@ class SheetType(DjangoObjectType):
     @resolver_hints(model_field='rowdimension_set')
     def resolve_rows(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
         """Получения всех строк."""
-        if document_id is None:
-            return sheet.rowdimension_set.filter(parent__isnull=True)
-        document_id = from_global_id(document_id)[1]
-        return sheet.rowdimension_set.filter(Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id))
+        return RowsUploader(sheet, document_id).upload()
 
     @staticmethod
     @resolver_hints(model_field='mergedcell_set')
@@ -340,8 +336,8 @@ class RowDimensionType(graphene.ObjectType):
     aggregation = graphene.String(description='Агрегирование перечисление (мин, макс) для динамических строк')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
-    parent_id = graphene.ID(description='Идентификатор родителя')
-    children = graphene.List(lambda: RowDimensionType, description='Дочерние строки')
+    parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
+    children = graphene.List(lambda: RowDimensionType, required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
     user = graphene.List(UserType, description='Пользователь')
     cells = graphene.List(lambda: CellType, description='Ячейки')
