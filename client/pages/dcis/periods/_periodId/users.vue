@@ -30,7 +30,7 @@
                       span {{ $t('dcis.periods.actions.deleteGroup') }}
       v-divider(vertical)
       v-col(cols="12" md="8" sm="8")
-        period-group-users(:period-group="selectGroup" :period="period")
+        period-group-users(:period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
 </template>
 
 <script lang="ts">
@@ -42,7 +42,7 @@ import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodGroupType, PeriodType, DeletePeriodGroupMutation, DeletePeriodGroupMutationVariables } from '~/types/graphql'
 import deletePeriodGroup from '~/gql/dcis/mutations/project/delete_period_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import PeriodGroupUsers from '~/components/dcis/periods/PeriodGroupUsers.vue'
+import PeriodGroupUsers, { DeleteUserFromPeriodGroupMutationResult } from '~/components/dcis/periods/PeriodGroupUsers.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
 import { ChangePeriodGroupUsersMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
@@ -103,16 +103,36 @@ export default defineComponent({
         result,
         (dataCache, { data: { deletePeriodGroup: { errors, deletedId } } }: DeletePeriodGroupMutationResult) => {
           if (!errors.length) {
-            dataCache.period.periodGroups = dataCache.period.periodGroups.filter((e: any) => e.id !== deletedId
-            )
+            dataCache.period.periodGroups = dataCache.period.periodGroups.filter((e: any) => e.id !== deletedId)
           }
           return dataCache
         }
       )
     })
+    const deleteUserFromPeriodGroupUpdate = (cache: DataProxy, result: DeleteUserFromPeriodGroupMutationResult) => {
+      periodUpdate(
+        cache, result, (dataCache, { data: { deleteUserFromPeriodGroup: { errors, id } } }: DeleteUserFromPeriodGroupMutationResult
+        ) => {
+          if (!errors.length) {
+            const selectedPeriodGroup: any = dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id)
+            selectedPeriodGroup.users = selectedPeriodGroup.users.filter((e: any) => e.id !== id)
+          }
+          return dataCache
+        })
+    }
+
     provide('periodGroupUsersUpdate', changePeriodGroupUsersUpdate)
     provide('periodGroupPrivilegesUpdate', changePeriodGroupPrivilegesUpdate)
-    return { bc, selectGroup, addPeriodGroupUpdate, changePeriodGroupUsersUpdate, changePeriodGroupPrivilegesUpdate, deletePeriodGroupMutate }
+
+    return {
+      bc,
+      selectGroup,
+      addPeriodGroupUpdate,
+      changePeriodGroupUsersUpdate,
+      changePeriodGroupPrivilegesUpdate,
+      deletePeriodGroupMutate,
+      deleteUserFromPeriodGroupUpdate
+    }
   }
 })
 </script>

@@ -1663,6 +1663,26 @@ export type DeleteSessionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteUserFromPeriodGroupMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор группы периода */
+  periodGroupId: Scalars['Int'];
+  /** Идентификатор пользователя */
+  userId: Scalars['ID'];
+};
+
+/** Мутация на удаление пользователя из группы. */
+export type DeleteUserFromPeriodGroupMutationPayload = {
+  __typename?: 'DeleteUserFromPeriodGroupMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленного пользователя */
+  id: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 /** Object type for Department. */
 export type DepartmentType = {
   __typename?: 'DepartmentType';
@@ -2194,6 +2214,8 @@ export type Mutation = {
   deleteSection: DeleteSectionMutationPayload;
   /** Мутация для удаления всех сессий кроме текущей. */
   deleteSessions: DeleteSessionsMutationPayload;
+  /** Мутация на удаление пользователя из группы. */
+  deleteUserFromPeriodGroup: DeleteUserFromPeriodGroupMutationPayload;
   /** Мутация для получения токена авторизации. */
   getToken: GetTokenMutationPayload;
   /** Мутация выхода */
@@ -2538,6 +2560,11 @@ export type MutationDeleteSectionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteSessionsArgs = {
   input: DeleteSessionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteUserFromPeriodGroupArgs = {
+  input: DeleteUserFromPeriodGroupMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4758,6 +4785,13 @@ export type DeleteProjectMutationVariables = Exact<{
 }>;
 
 export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type DeleteUserFromPeriodGroupMutationVariables = Exact<{
+  userId: Scalars['ID'];
+  periodGroupId: Scalars['Int'];
+}>;
+
+export type DeleteUserFromPeriodGroupMutation = { __typename?: 'Mutation', deleteUserFromPeriodGroup: { __typename: 'DeleteUserFromPeriodGroupMutationPayload', id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];

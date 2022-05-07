@@ -30,6 +30,11 @@
             )
               template(#activator="{ on }")
                 v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
+            v-spacer
+            v-btn(
+              color="error"
+              @click="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: periodGroup.id }).then"
+              ) {{ $t('dcis.periods.changePrivileges.deleteUser') }}
     v-card-actions
       add-period-group-users(v-slot="{ on }" :period-group="periodGroup")
         v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
@@ -50,12 +55,23 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { DataProxy } from 'apollo-cache'
-import { PeriodGroupType, PeriodType, UserPrivilegesQuery, UserPrivilegesQueryVariables, UserType } from '~/types/graphql'
+import { useMutation } from '@vue/apollo-composable'
+import { computed, defineComponent, PropType, ref } from '#app'
+import {
+  PeriodGroupType,
+  PeriodType,
+  UserPrivilegesQuery,
+  UserPrivilegesQueryVariables,
+  UserType,
+  DeleteUserFromPeriodGroupMutation,
+  DeleteUserFromPeriodGroupMutationVariables,
+  DeleteUserFromPeriodGroupMutationPayload
+} from '~/types/graphql'
 import { useCommonQuery, useFilters, useI18n } from '~/composables'
 import userPrivilegesQuery from '~/gql/dcis/queries/user_privileges.graphql'
+import deleteUserFromPeriodGroup from '~/gql/dcis/mutations/project/delete_user_from_period_group.graphql'
 import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
 import AddPeriodGroupUsers from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
@@ -64,12 +80,16 @@ import PeriodGroupPrivileges, {
 } from '~/components/dcis/periods/PeriodGroupPrivileges.vue'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
+export type DeleteUserFromPeriodGroupMutationResult = { data: { deleteUserFromPeriodGroup: DeleteUserFromPeriodGroupMutationPayload } }
+type UpdateFunction = (cache: DataProxy | any, result: DeleteUserFromPeriodGroupMutationPayload | any) => DataProxy | any
+
 export default defineComponent({
   components: { AvatarDialog, AddPeriodGroupUsers, PeriodGroupPrivileges, MutationModalForm },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
-    periodGroup: { type: Object as PropType<PeriodGroupType>, default: null }
+    periodGroup: { type: Object as PropType<PeriodGroupType>, default: null },
+    update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
     const { getUserFullName } = useFilters()
@@ -116,6 +136,18 @@ export default defineComponent({
     const selectedUser = (userId: string): void => {
       selectUser.value = props.periodGroup.users.find(user => user.id === userId)
     }
+    const deleteUserUpdate = (cache: DataProxy | any, result: DeleteUserFromPeriodGroupMutationResult | any) => {
+      const { errors } = result.data.deleteUserFromPeriodGroup
+      if (!errors.length) {
+        props.update(cache, result)
+        selectUser.value = null
+        active.value = false
+      }
+    }
+    const { mutate: deleteUserFromPeriodGroupMutate } =
+     useMutation<DeleteUserFromPeriodGroupMutation, DeleteUserFromPeriodGroupMutationVariables>(deleteUserFromPeriodGroup, {
+       update: deleteUserUpdate
+     })
     return {
       active,
       headers,
@@ -126,7 +158,8 @@ export default defineComponent({
       userPrivileges,
       selectedUser,
       changeGroupUsersPrivileges,
-      changeGroupUsersPrivilegesUpdate
+      changeGroupUsersPrivilegesUpdate,
+      deleteUserFromPeriodGroupMutate
     }
   }
 })

@@ -65,6 +65,7 @@ export default {
       header: 'Изменениe привилегий',
       buttonText: '@:change',
       change: 'Изменить привилегии',
+      deleteUser: 'Удалить из группы',
       name: 'Описание привилегии',
       privileges: 'Привилегии пользователя',
       key: 'Ключ',

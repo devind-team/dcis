@@ -1,0 +1,13 @@
+mutation DeleteUserFromPeriodGroup($userId: ID!, $periodGroupId: Int!) {
+  deleteUserFromPeriodGroup(
+    input: { userId: $userId, periodGroupId: $periodGroupId }
+  ) {
+    id
+    errors {
+      field
+      messages
+      __typename
+    }
+    __typename
+  }
+}

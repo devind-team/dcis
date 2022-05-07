@@ -17,12 +17,11 @@ from graphql_relay import from_global_id
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Project, Period, PeriodGroup
+from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
 from apps.dcis.permissions import AddPeriod
 from apps.dcis.schema.types import ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
-
 
 class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
     """Мутация для добавления проекта."""
@@ -163,6 +162,25 @@ class DeletePeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutati
         permissions = ('dcis.delete_periodgroup',)
 
 
+class DeleteUserFromPeriodGroupMutation(BaseMutation):
+    """Мутация на удаление пользователя из группы."""
+
+    class Input:
+        period_group_id = graphene.Int(required=True, description='Идентификатор группы периода')
+        user_id = graphene.ID(required=True, description='Идентификатор пользователя')
+
+    id = graphene.ID(required=True, description='Идентификатор удаленного пользователя')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str, user_id: str):
+        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
+        period_group.users.remove(user)
+        PeriodPrivilege.objects.filter(user=user).all().delete()
+        return DeleteUserFromPeriodGroupMutation(id=user_id)
+
+
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
@@ -175,3 +193,4 @@ class ProjectMutations(graphene.ObjectType):
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
     delete_period_group = DeletePeriodGroupMutationPayload.Field(required=True)
     change_period_group_users = ChangePeriodGroupUsersMutation.Field(required=True)
+    delete_user_from_period_group = DeleteUserFromPeriodGroupMutation.Field(required=True)

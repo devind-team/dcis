@@ -1530,6 +1530,25 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
+input DeleteUserFromPeriodGroupMutationInput {
+  clientMutationId: String
+  """Идентификатор группы периода"""
+  periodGroupId: Int!
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация на удаление пользователя из группы."""
+type DeleteUserFromPeriodGroupMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленного пользователя"""
+  id: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Object type for Department."""
 type DepartmentType {
   """Code of department."""
@@ -2031,6 +2050,8 @@ type Mutation {
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
   deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
+  """Мутация на удаление пользователя из группы."""
+  deleteUserFromPeriodGroup(input: DeleteUserFromPeriodGroupMutationInput!): DeleteUserFromPeriodGroupMutationPayload!
   """Мутация для получения токена авторизации."""
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
