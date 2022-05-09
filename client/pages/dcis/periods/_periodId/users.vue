@@ -20,7 +20,7 @@
             )
               v-list-item-content {{ item.name }}
               v-list-item-action
-                delete-menu(@confirm="deletePeriodGroupMutate({ id: Number(item.id) }).then")
+                delete-menu(@confirm="deletePeriodGroupMutate({ id: Number(item.id) }).then()")
                   template(v-slot:default="{ on: onMenu }")
                     v-tooltip(bottom)
                       template(v-slot:activator="{ on: onTooltip }")
@@ -68,6 +68,7 @@ export default defineComponent({
     const selectGroup = ref<PeriodGroupType | null | undefined>(null)
     const periodUpdate: any = inject('periodUpdate')
 
+    // Обновление после добавления группы
     const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
       periodUpdate(cache, result, (dataCache, { data: { addPeriodGroup: { errors, periodGroup } } }: AddPeriodGroupMutationResult) => {
         if (!errors.length) {
@@ -76,6 +77,8 @@ export default defineComponent({
         return dataCache
       })
     }
+
+    // Обновление после добавления пользователей
     const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
       periodUpdate(
         cache, result, (dataCache, { data: { changePeriodGroupUsers: { errors, users } } }: ChangePeriodGroupUsersMutationResult
@@ -86,6 +89,8 @@ export default defineComponent({
           return dataCache
         })
     }
+
+    // Обновление после изменения привилегий группы
     const changePeriodGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
       periodUpdate(
         cache, result, (dataCache, { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult
@@ -97,6 +102,8 @@ export default defineComponent({
           return dataCache
         })
     }
+
+    // Обновление после удаления группы
     const { mutate: deletePeriodGroupMutate } = useMutation<DeletePeriodGroupMutation, DeletePeriodGroupMutationVariables>(deletePeriodGroup, {
       update: (cache, result) => periodUpdate(
         cache,
@@ -104,11 +111,14 @@ export default defineComponent({
         (dataCache, { data: { deletePeriodGroup: { errors, deletedId } } }: DeletePeriodGroupMutationResult) => {
           if (!errors.length) {
             dataCache.period.periodGroups = dataCache.period.periodGroups.filter((e: any) => e.id !== deletedId)
+            selectGroup.value = null
           }
           return dataCache
         }
       )
     })
+
+    // Обновление после удаления пользователя из группы
     const deleteUserFromPeriodGroupUpdate = (cache: DataProxy, result: DeleteUserFromPeriodGroupMutationResult) => {
       periodUpdate(
         cache, result, (dataCache, { data: { deleteUserFromPeriodGroup: { errors, id } } }: DeleteUserFromPeriodGroupMutationResult

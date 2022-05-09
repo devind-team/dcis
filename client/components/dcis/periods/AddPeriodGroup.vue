@@ -46,6 +46,8 @@ export default defineComponent({
   setup (props) {
     const name = ref<string>('')
     const selectGroup = ref<PeriodGroupType | null>(null)
+
+    // Обновление после добавления группы
     const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
       const { success } = result.data.addPeriodGroup
       if (success) {

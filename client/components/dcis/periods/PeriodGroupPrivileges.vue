@@ -28,8 +28,8 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { computed, defineComponent, inject, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
+import { computed, defineComponent, inject, PropType, ref } from '#app'
 import {
   ChangeGroupUserPrivilegesMutationPayload,
   ChangePeriodGroupPrivilegesMutationPayload,
@@ -41,7 +41,7 @@ import {
   UserType
 } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import {useCommonQuery, useFilters, useI18n} from '~/composables'
+import { useCommonQuery, useFilters, useI18n } from '~/composables'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
 import changePeriodGroupPrivileges from '~/gql/dcis/mutations/privelege/change_period_group_privileges.graphql'
 import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
@@ -66,6 +66,10 @@ export default defineComponent({
 
     const activeQuery = ref<boolean>(props.activeQuery)
     const options = ref({ enabled: activeQuery })
+    const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
+      document: privilegesQuery,
+      options: options.value
+    })
     const selectPrivileges = ref<PrivilegeType[]>(props.user ? props.userPrivileges : props.periodGroup.privileges)
 
     const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))
@@ -81,17 +85,17 @@ export default defineComponent({
       { text: t('dcis.periods.changePrivileges.name') as string, value: 'name' },
       { text: t('dcis.periods.changePrivileges.key') as string, value: 'key' }
     ]))
-    const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
-      document: privilegesQuery,
-      options: options.value
-    })
     const periodGroupPrivilegesUpdate: any = inject('periodGroupPrivilegesUpdate')
+
+    // Обновление после изменения привилегий группы
     const changeGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
       const { errors } = result.data.changePeriodGroupPrivileges
       if (!errors.length) {
         periodGroupPrivilegesUpdate(cache, result)
       }
     }
+
+    // Обновление после изменения привилегий пользователя
     const changeUsersPrivilegesUpdate = (cache: DataProxy, result: ChangeGroupUsersPrivilegesMutationResult) => {
       const { success } = result.data.changeGroupUsersPrivileges
       if (success) {

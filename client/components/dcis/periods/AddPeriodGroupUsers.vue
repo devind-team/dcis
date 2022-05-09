@@ -72,6 +72,7 @@ export default defineComponent({
   setup (props) {
     const { search, debounceSearch } = useDebounceSearch()
     const { dateTimeHM, getUserFullName } = useFilters()
+
     const active = ref<boolean>(false)
     const selectUsers = ref<UserType[] | null>(null)
     const options = ref({ enabled: active })
@@ -97,6 +98,8 @@ export default defineComponent({
         text: getUserFullName(user)
       }))
     })
+
+    // Обновление после добавления пользователей в группу
     const periodGroupUsersUpdate: any = inject('periodGroupUsersUpdate')
     const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
       const { success } = result.data.changePeriodGroupUsers

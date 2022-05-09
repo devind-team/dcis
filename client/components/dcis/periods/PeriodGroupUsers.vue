@@ -31,10 +31,12 @@
               template(#activator="{ on }")
                 v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
             v-spacer
-            v-btn(
-              color="error"
-              @click="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: periodGroup.id }).then"
-              ) {{ $t('dcis.periods.changePrivileges.deleteUser') }}
+            delete-menu(
+              :itemName="getUserFullName(selectUser)"
+              @confirm="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: periodGroup.id }).then()"
+            )
+              template(#default="{ on }")
+                v-btn(v-on="on" color="error") {{ $t('dcis.periods.changePrivileges.deleteUser') }}
     v-card-actions
       add-period-group-users(v-slot="{ on }" :period-group="periodGroup")
         v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
@@ -75,6 +77,7 @@ import deleteUserFromPeriodGroup from '~/gql/dcis/mutations/project/delete_user_
 import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
 import AddPeriodGroupUsers from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import PeriodGroupPrivileges, {
   ChangeGroupUsersPrivilegesMutationResult
 } from '~/components/dcis/periods/PeriodGroupPrivileges.vue'
@@ -84,7 +87,7 @@ export type DeleteUserFromPeriodGroupMutationResult = { data: { deleteUserFromPe
 type UpdateFunction = (cache: DataProxy | any, result: DeleteUserFromPeriodGroupMutationPayload | any) => DataProxy | any
 
 export default defineComponent({
-  components: { AvatarDialog, AddPeriodGroupUsers, PeriodGroupPrivileges, MutationModalForm },
+  components: { AvatarDialog, AddPeriodGroupUsers, PeriodGroupPrivileges, MutationModalForm, DeleteMenu },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
@@ -96,7 +99,6 @@ export default defineComponent({
     const { t } = useI18n()
 
     const selectUser = ref<UserType | null>(null)
-
     const active = computed<boolean>({
       get: () => (!!selectUser.value),
       set: (value: boolean): void => {
@@ -105,6 +107,14 @@ export default defineComponent({
         }
       }
     })
+
+    const options = ref({ enabled: active })
+    const { data: userPrivileges, loading, update } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
+      document: userPrivilegesQuery,
+      variables: () => ({ userId: selectUser.value?.id, periodId: props.period.id }),
+      options: options.value
+    })
+
     const additionalHeaders = computed<DataTableHeader[]>(() => ([
       { text: t('dcis.periods.changePrivileges.name') as string, value: 'name' },
       { text: t('dcis.periods.changePrivileges.key') as string, value: 'key' }
@@ -115,12 +125,8 @@ export default defineComponent({
       { text: t('dcis.periods.changePeriodUsers.jobPost') as string, value: '' },
       { text: t('dcis.periods.changePeriodUsers.division') as string, value: '' }
     ]))
-    const options = ref({ enabled: active })
-    const { data: userPrivileges, loading, update } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
-      document: userPrivilegesQuery,
-      variables: () => ({ userId: selectUser.value?.id, periodId: props.period.id }),
-      options: options.value
-    })
+
+    // Обновление после изменения привилегий пользователя
     const changeGroupUsersPrivilegesUpdate = (cache: DataProxy, result: ChangeGroupUsersPrivilegesMutationResult) => {
       const { errors } = result.data.changeGroupUsersPrivileges
       if (!errors.length) {
@@ -136,9 +142,15 @@ export default defineComponent({
     const selectedUser = (userId: string): void => {
       selectUser.value = props.periodGroup.users.find(user => user.id === userId)
     }
+
+    // Обновление после удаления пользователя из группы
     const deleteUserUpdate = (cache: DataProxy | any, result: DeleteUserFromPeriodGroupMutationResult | any) => {
       const { errors } = result.data.deleteUserFromPeriodGroup
       if (!errors.length) {
+        update(cache, result, (dataCache) => {
+          dataCache.userPrivileges = []
+          return dataCache
+        })
         props.update(cache, result)
         selectUser.value = null
         active.value = false

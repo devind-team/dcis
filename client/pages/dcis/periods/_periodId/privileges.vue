@@ -12,8 +12,8 @@
 </template>
 
 <script lang="ts">
-import type { ComputedRef, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
+import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import { useI18n, useCommonQuery } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
