@@ -1375,6 +1375,7 @@
     change-case-all "1.0.14"
     tslib "~2.4.0"
 
+
 "@graphql-codegen/typescript@^2.4.10":
   version "2.4.10"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript/-/typescript-2.4.10.tgz#245512826fc0c6663756cca6359ac4d45719af5f"
