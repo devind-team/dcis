@@ -21,7 +21,7 @@
     "@vueuse/core": "^8.4.1",
     "@vueuse/integrations": "^8.4.1",
     "accounting": "^0.4.1",
-    "apexcharts": "^3.35.0",
+    "apexcharts": "^3.35.2",
     "detect-browser": "^5.3.0",
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.3",
