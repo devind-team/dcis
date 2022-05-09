@@ -26,7 +26,7 @@
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.3",
     "nuxt-edge": "latest",
-    "pinia": "^2.0.13",
+    "pinia": "^2.0.14",
     "scule": "^0.2.1",
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
