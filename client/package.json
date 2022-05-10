@@ -16,7 +16,7 @@
     "@nuxtjs/apollo": "^4.0.1-rc.5",
     "@nuxtjs/i18n": "^7.2.2",
     "@nuxtjs/vuetify": "^1.12.3",
-    "@pinia/nuxt": "^0.1.8",
+    "@pinia/nuxt": "^0.1.9",
     "@vue/apollo-composable": "^4.0.0-alpha.17",
     "@vueuse/core": "^8.4.2",
      "@vueuse/integrations": "^8.4.2",
