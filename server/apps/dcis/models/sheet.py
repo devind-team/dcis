@@ -68,7 +68,7 @@ class Style(models.Model):
     size = models.PositiveIntegerField(default=12, help_text='Размер шрифта')
     strong = models.BooleanField(default=False, help_text='Жирный шрифт')
     italic = models.BooleanField(default=False, help_text='Курсив')
-    strike = models.BooleanField(default=None, null=True, help_text='Зачеркнутый')
+    strike = models.BooleanField(default=False, help_text='Зачеркнутый')
     underline = models.CharField(
         max_length=20,
         default=None,

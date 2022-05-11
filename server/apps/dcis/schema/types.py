@@ -364,7 +364,7 @@ class CellType(graphene.ObjectType):
     size = graphene.Int(required=True, description='Размер шрифта')
     strong = graphene.Boolean(required=True, description='Жирный шрифт')
     italic = graphene.Boolean(required=True, description='Курсив')
-    strike = graphene.Boolean(description='Зачеркнутый')
+    strike = graphene.Boolean(required=True, description='Зачеркнутый')
     underline = graphene.Boolean(description='Тип подчеркивания')
     color = graphene.String(required=True, description='Цвет индекса')
     background = graphene.String(required=True, description='Цвет фона')
