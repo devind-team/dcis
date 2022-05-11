@@ -58,16 +58,6 @@ export enum KindCell {
   ERROR = 'e'
 }
 
-export type CellPositionType = string
-export type RangeType = string
-
-export type RangePositionsType = {
-  minColumn: number
-  minRow: number
-  maxColumn: number
-  maxRow: number
-}
-
 /**
  * Опции ячейки
  */
@@ -101,59 +91,9 @@ export type RowType = {
   children?: RowType[]
 }
 
-/**
- * cell - позиция ячейки формата A1, B2, C10 ...
- *   colspan - объединение по столбцам
- *   rowspan - объединение по строкам
- *   cells - объединенные ячейки (значения объединенных ячеек всегда null)
- */
-export type MergeCellType = {
-  colspan: number
-  rowspan: number
-  cells: CellPositionType[]
-}
-
-/**
- * Тип ячейки при выводе
- *   columnIndex - позиция колонки
- *   position - позиция ячейки A1
- */
-export type MergeBuildCellType = CellType & {
-  columnIndex: number
-  position: string
-  colspan: number
-  rowspan: number
-  originCell: CellType
-}
-
-/**
- * Тип смердженной ячейки
- *   buildCells - содержит ячейки для отображения
- *   rowIndex - индекс таблицы
- */
-export type MergeRowType = RowType & {
-  buildCells: MergeBuildCellType[]
-  rowIndex: number
-}
-
-export type MergeCellsType = {
-  [cell: RangeType]: MergeCellType
-}
-
 export type RangeSpanType = {
   target: RangeType
   colspan: number
   rowspan: number
   cells: CellPositionType[]
-}
-
-export type StyleCellType = {
-  [cell: RangeType]: string
-}
-
-export type SheetType = MergeRowType[]
-
-export type MergedType = {
-  merged: boolean
-  unmerged: boolean
 }

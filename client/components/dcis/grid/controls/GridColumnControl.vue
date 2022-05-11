@@ -13,9 +13,9 @@
 </template>
 
 <script lang="ts">
-import type { PropType } from '#app'
-import type { BuildColumnType } from '~/types/grid-types'
-import GridColumnSettings from '~/components/dcis/grid/GridColumnSettings.vue'
+import { PropType } from '#app'
+import { BuildColumnType } from '~/types/grid'
+import GridColumnSettings from '~/components/dcis/grid/settings/GridColumnSettings.vue'
 
 export default defineComponent({
   components: { GridColumnSettings },

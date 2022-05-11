@@ -4,7 +4,11 @@
     .grid__body
       div.grid__container(ref="gridContainer")
         table.grid__table(:style="{ width: `${gridWidth}px` }")
-          grid-header(:row-index-column-width="rowIndexColumnWidth" :columns="columns")
+          grid-header(
+            :row-index-column-width="rowIndexColumnWidth"
+            :columns="columns"
+            :selected-column-positions="selectedColumnPositions"
+          )
           grid-body(:rows="rows")
 </template>
 
@@ -27,7 +31,9 @@ export default defineComponent({
       columns,
       rows,
       gridContainer,
-      gridWidth
+      gridWidth,
+      selectedColumnPositions,
+      selectedRowPositions
     } = useGrid(sheet)
 
     return {
@@ -35,7 +41,9 @@ export default defineComponent({
       columns,
       rows,
       gridContainer,
-      gridWidth
+      gridWidth,
+      selectedColumnPositions,
+      selectedRowPositions
     }
   }
 })

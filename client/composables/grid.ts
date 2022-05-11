@@ -6,7 +6,7 @@ import {
   BuildRowType,
   ResizingBuildRowType, BuildCellType
 } from '~/types/grid'
-import { positionToLetter, getCellStyle } from '~/services/grid'
+import { positionToLetter, rangeToCellPositions, getCellStyle } from '~/services/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -21,6 +21,7 @@ export const cellKinds = {
 export function useGrid (sheet: Ref<SheetType>) {
   const rowIndexColumnWidth = ref<number>(30)
   const defaultColumnWidth = ref<number>(64)
+  const borderGag = ref<number>(10)
 
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
   const resizingRow = ref<ResizingBuildRowType | null>(null)
@@ -105,11 +106,77 @@ export function useGrid (sheet: Ref<SheetType>) {
       columns.value.reduce((sum, column) => sum + column.width, 0)
   )
 
+  const activeCell = ref<BuildCellType | null>(null)
+  const firstSelectedCell = ref<BuildCellType | null>(null)
+  const lastSelectedCell = ref<BuildCellType | null>(null)
+  const allCellsRange = computed<string>(() =>
+    `A1:${columns.value.at(-1).columnDimension.index}${rows.value.at(-1).rowDimension.globalIndex}`)
+  const selectedCellsRange = computed<string | null>(() => {
+    if (firstSelectedCell.value && lastSelectedCell.value) {
+      return `${firstSelectedCell.value.globalPosition}:${lastSelectedCell.value.globalPosition}`
+    } else if (firstSelectedCell.value) {
+      return `${firstSelectedCell.value.globalPosition}:${firstSelectedCell.value.globalPosition}`
+    }
+    return null
+  })
+  const selectedCellPositions = computed<string[]>(() => {
+    if (selectedCellsRange.value) {
+      return rangeToCellPositions(selectedCellsRange.value)
+    }
+    return []
+  })
+  const selectedColumnPositions = computed<number[]>(() => {
+    if (firstSelectedCell.value && lastSelectedCell.value) {
+      return Array.from({
+        length: lastSelectedCell.value.columnDimension.index - firstSelectedCell.value.columnDimension.index + 1
+      }).map((_, i) => i + firstSelectedCell.value.columnDimension.index)
+    } else if (firstSelectedCell.value) {
+      return [firstSelectedCell.value.columnDimension.index]
+    }
+    return []
+  })
+  const selectedRowPositions = computed<number[]>(() => {
+    if (firstSelectedCell.value && lastSelectedCell.value) {
+      return Array.from({
+        length: lastSelectedCell.value.rowDimension.globalIndex - firstSelectedCell.value.rowDimension.globalIndex
+      }).map((_, i) => i + firstSelectedCell.value.rowDimension.globalIndex)
+    } else if (firstSelectedCell.value) {
+      return [firstSelectedCell.value.rowDimension.globalIndex]
+    }
+    return []
+  })
+  const allCellsSelected = computed<boolean>(() => selectedCellsRange.value === allCellsRange.value)
+
+  const mousedownCell = (buildCell: BuildCellType): void => {
+    firstSelectedCell.value = buildCell
+    lastSelectedCell.value = null
+  }
+
+  const mouseenterCell = (buildCell: BuildCellType): void => {
+    if (firstSelectedCell.value && buildCell.cell.id !== firstSelectedCell.value.cell.id) {
+      lastSelectedCell.value = buildCell
+    }
+  }
+
+  const mouseupCell = (buildCell: BuildCellType): void => {
+    if (firstSelectedCell.value && lastSelectedCell.value) {
+      activeCell.value = buildCell
+    }
+  }
+
   return {
     rowIndexColumnWidth,
     rows,
     columns,
     gridContainer,
-    gridWidth
+    gridWidth,
+    activeCell,
+    selectedCellPositions,
+    selectedColumnPositions,
+    selectedRowPositions,
+    allCellsSelected,
+    mousedownCell,
+    mouseenterCell,
+    mouseupCell
   }
 }

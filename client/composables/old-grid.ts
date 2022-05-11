@@ -25,15 +25,12 @@ export function useOldGrid (
   sheet: Ref<SheetType>,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
 ) {
-  const borderGag = ref<number>(10)
 
   /**
    * Блок выделения
    */
-  const active = ref<string | null>(null)
   const selectionRange = ref<string | null>(null)
   const selection = computed<string[]>(() => selectionRange.value ? rangeLetterToCells(selectionRange.value) : [])
-  const startCellSelectionPosition = ref<string | null>(null)
   /**
    * Начало выделения ячейки по событию MouseDown на ячейке
    */
@@ -319,7 +316,6 @@ export function useOldGrid (
   return {
     rowIndexColumnWidth,
     defaultColumnWidth,
-    borderGag,
     sheet,
     gridWidth,
     active,

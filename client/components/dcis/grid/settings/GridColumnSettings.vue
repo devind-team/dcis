@@ -4,7 +4,7 @@
     :header="String(t('dcis.grid.columnSettings.header'))"
     :subheader="String(t('dcis.grid.columnSettings.width', { width: column.width }))"
     :mutation="changeColumnDimensionMutation"
-    :variables="{ id: column.id, hidden, fixed, kind: kind.value, width: column.width  }"
+    :variables="{ id: column.columnDimension.id, hidden, fixed, kind: kind.value, width: column.width  }"
     :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
     i18n-path="dcis.grid.columnSettings"
     mutation-name="changeColumnDimension"
@@ -19,9 +19,9 @@
 </template>
 
 <script lang="ts">
-import type { PropType } from '#app'
-import { cellKinds } from '~/composables/old-grid'
-import type { BuildColumnType } from '~/types/grid-types'
+import { PropType } from '#app'
+import { cellKinds } from '~/composables/grid'
+import { BuildColumnType } from '~/types/grid'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
@@ -33,12 +33,12 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
-    const fixed = ref<boolean>(props.column.fixed)
-    const hidden = ref<boolean>(props.column.hidden)
+    const fixed = ref<boolean>(props.column.columnDimension.fixed)
+    const hidden = ref<boolean>(props.column.columnDimension.hidden)
 
     const kind = ref<{ text: string, value: string }>({
-      text: t(`dcis.cellKinds.${props.column.kind}`) as string,
-      value: props.column.kind
+      text: t(`dcis.cellKinds.${props.column.columnDimension.kind}`) as string,
+      value: props.column.columnDimension.kind
     })
     const kinds = computed<{ text: string, value: string }[]>(() => (
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))

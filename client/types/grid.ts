@@ -1,5 +1,21 @@
 import { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 
+export type RangeType = string
+
+export type RangePositionsType = {
+  minColumn: string
+  minRow: number
+  maxColumn: string
+  maxRow: number
+}
+
+export type RangeIndicesType = {
+  minColumn: number
+  minRow: number
+  maxColumn: number
+  maxRow: number
+}
+
 export type MousePositionType = {
   x: number
   y: number
