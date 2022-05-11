@@ -1,44 +1,33 @@
 <template lang="pug">
-  v-menu(v-model="active" bottom)
+  mutation-modal-form(
+    :header="String($t('dcis.periods.changePeriodUsers.header'))"
+    :button-text="String($t('dcis.periods.changePeriodUsers.buttonText'))"
+    :mutation="changePeriodGroupUsers"
+    :variables="{ periodGroupId: periodGroup.id, usersIds: selectUsers }"
+    :update="changePeriodGroupUsersUpdate"
+    mutation-name="changePeriodGroupUsers"
+    errors-in-alert
+    persistent
+    @close="close"
+  )
     template(#activator="{ on }")
-      slot(:on="on")
-    v-list
-      mutation-modal-form(
-        :header="String($t('dcis.periods.changePeriodUsers.header'))"
-        :button-text="String($t('dcis.periods.changePeriodUsers.buttonText'))"
-        :mutation="changePeriodGroupUsers"
-        :variables="{ periodGroupId: periodGroup.id, usersIds: selectUsers }"
-        :update="changePeriodGroupUsersUpdate"
-        mutation-name="changePeriodGroupUsers"
-        errors-in-alert
-        persistent
-        @close="close"
+      slot(name="activator" :on="on")
+    template(#form)
+      v-autocomplete(
+        v-model="selectUsers"
+        :label="$t('ac.users.components.changeUsers.users')"
+        :items="allUsers"
+        :search-input.sync="search"
+        :loading="loading"
+        item-text="text"
+        item-value="id"
+        chips
+        deletable-chips
+        multiple
+        clearable
+        hide-no-data
+        @change="search=''"
       )
-        template(#activator="{ on }")
-          v-list-item(v-on="on")
-            v-list-item-icon
-              v-icon mdi-account-multiple-plus
-            v-list-item-title Добавить
-        template(#form)
-          v-autocomplete(
-            v-model="selectUsers"
-            :label="$t('ac.users.components.changeUsers.users')"
-            :items="allUsers"
-            :search-input.sync="search"
-            :loading="loading"
-            item-text="text"
-            item-value="id"
-            chips
-            deletable-chips
-            multiple
-            clearable
-            hide-no-data
-            @change="search=''"
-          )
-      v-list-item
-        v-list-item-icon
-          v-icon mdi-account-switch
-        v-list-item-title Скопировать из сбора
 </template>
 
 <script lang="ts">
@@ -67,15 +56,15 @@ export type ChangePeriodGroupUsersMutationResult = { data: { changePeriodGroupUs
 export default defineComponent({
   components: { MutationModalForm },
   props: {
-    periodGroup: { type: Object as PropType<PeriodGroupType>, required: true }
+    periodGroup: { type: Object as PropType<PeriodGroupType>, required: true },
+    activeQuery: { type: Boolean, default: false }
   },
   setup (props) {
     const { search, debounceSearch } = useDebounceSearch()
     const { dateTimeHM, getUserFullName } = useFilters()
 
-    const active = ref<boolean>(false)
     const selectUsers = ref<UserType[] | null>(null)
-    const options = ref({ enabled: active })
+    const options = ref({ enabled: props.activeQuery })
     const {
       loading,
       data: users
@@ -111,7 +100,6 @@ export default defineComponent({
       selectUsers.value = null
     }
     return {
-      active,
       users,
       loading,
       changePeriodGroupUsers,

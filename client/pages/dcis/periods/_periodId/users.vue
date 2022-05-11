@@ -10,9 +10,19 @@
                 v-subheader Группы
               v-col.text-right(cols="12" md="8" sm="10")
                 add-period-group(:period="period" :update="addPeriodGroupUpdate")
-                  template(#activator="{ on }")
-                    v-btn(v-on="on" class="align-self-center mr-4" color="primary" icon text)
-                      v-icon(large) mdi-plus-circle
+                  template(#activator="{ on: onMenu }")
+                    v-tooltip(bottom)
+                      template(#activator="{ on: onTooltip }")
+                        v-btn(class="align-self-center mr-4" color="primary" v-on="{...onMenu, ...onTooltip}" icon)
+                          v-icon(large) mdi-plus-circle-outline
+                      span {{ $t('dcis.periods.actions.addGroup') }}
+                copy-period-groups(:period="period" :update="addPeriodGroupUpdate")
+                  template(#activator="{ on: onMenu }")
+                    v-tooltip(bottom)
+                      template(#activator="{ on: onTooltip }")
+                        v-btn(class="align-self-center mr-4" color="primary" v-on="{...onMenu, ...onTooltip}" icon)
+                          v-icon(large) mdi-import
+                      span {{ $t('dcis.periods.actions.copyGroups') }}
             v-list-item(
               v-for="(item, index) in period.periodGroups"
               :key="index"
@@ -21,9 +31,9 @@
               v-list-item-content {{ item.name }}
               v-list-item-action
                 delete-menu(@confirm="deletePeriodGroupMutate({ id: Number(item.id) }).then()")
-                  template(v-slot:default="{ on: onMenu }")
+                  template(#default="{ on: onMenu }")
                     v-tooltip(bottom)
-                      template(v-slot:activator="{ on: onTooltip }")
+                      template(#activator="{ on: onTooltip }")
                         v-hover(v-slot="{ hover }")
                           v-btn(:color="hover ? 'error' : ''" @click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
                             v-icon mdi-delete
@@ -45,13 +55,14 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import PeriodGroupUsers, { DeleteUserFromPeriodGroupMutationResult } from '~/components/dcis/periods/PeriodGroupUsers.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
+import CopyPeriodGroups from '~/components/dcis/periods/CopyPeriodGroups.vue'
 import { ChangePeriodGroupUsersMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
 import { ChangePeriodGroupPrivilegesMutationResult } from '~~/components/dcis/periods/PeriodGroupPrivileges.vue'
 
 export type DeletePeriodGroupMutationResult = { data: DeletePeriodGroupMutation }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup, DeleteMenu },
+  components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup, CopyPeriodGroups, DeleteMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },

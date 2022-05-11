@@ -2,7 +2,7 @@
   v-card(v-if="periodGroup" flat)
     v-navigation-drawer(
       v-model="active"
-      width="35vw"
+      width="40vw"
       app
       right
       bottom
@@ -38,8 +38,9 @@
               template(#default="{ on }")
                 v-btn(v-on="on" color="error") {{ $t('dcis.periods.changePrivileges.deleteUser') }}
     v-card-actions
-      add-period-group-users(v-slot="{ on }" :period-group="periodGroup")
-        v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
+      add-period-group-users(:period-group="periodGroup" active-query)
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
       v-spacer
       period-group-privileges(:period-group="periodGroup" :key="periodGroup.id" active-query)
         template(#activator="{ on }")

@@ -35,8 +35,10 @@ export default {
     expiration: 'Дата окончания периода',
     deleteItemName: 'период',
     actions: {
+      addGroup: 'Добавить группу',
       delete: '@:delete',
       deleteGroup: 'Удалить группу',
+      copyGroups: 'Копировать из сбора',
       save: '@:save',
       deleteItemName: 'период'
     },
@@ -50,6 +52,12 @@ export default {
       header: 'Добавление группы периода',
       name: 'Название группы периода',
       groups: 'Пользователи и привилегии из другой группы',
+      buttonText: '@:add'
+    },
+    copyPeriodGroups: {
+      header: 'Импорт групп из сбора',
+      name: 'Название группы периода',
+      groups: 'Группы',
       buttonText: '@:add'
     },
     changePeriodUsers: {
