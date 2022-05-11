@@ -18,7 +18,7 @@ import { DataProxy } from 'apollo-cache'
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { BuildCellType } from '~/types/grid-types'
-import { cellKinds } from '~/composables/grid'
+import { cellKinds } from '~/composables/old-grid'
 import {
   DocumentQuery,
   ValueType,

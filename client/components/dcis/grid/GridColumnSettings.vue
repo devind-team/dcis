@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { cellKinds } from '~/composables/grid'
+import { cellKinds } from '~/composables/old-grid'
 import type { BuildColumnType } from '~/types/grid-types'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'

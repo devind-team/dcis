@@ -35,7 +35,7 @@
 import { useMutation } from '@vue/apollo-composable'
 import { ApolloCache } from '@apollo/client'
 import type { PropType } from '#app'
-import { cellKinds } from '~/composables/grid'
+import { cellKinds } from '~/composables/old-grid'
 import { BuildCellType, CellOptionsType } from '~/types/grid-types'
 import {
   ValueFilesQuery,

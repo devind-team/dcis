@@ -10,7 +10,7 @@
         v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
       v-tabs-items(v-model="active")
         v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
-          pre(v-if="!activeSheetLoading") {{ activeSheet }}
+          grid(v-if="!activeSheetLoading && activeSheet" :sheet="activeSheet")
           v-progress-circular(v-else color="primary" indeterminate)
     v-progress-circular(v-else color="primary" indeterminate)
 </template>
@@ -26,9 +26,10 @@ import type {
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import sheetQuery from '~/gql/dcis/queries/sheet.graphql'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
+import Grid from '~/components/dcis/Grid.vue'
 
 export default defineComponent({
-  components: { SettingsDocument },
+  components: { SettingsDocument, Grid },
   setup () {
     const route = useRoute()
 
