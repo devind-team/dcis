@@ -2620,10 +2620,10 @@
     vue-cli-plugin-apollo "^0.22.2"
     webpack-node-externals "^2.5.2"
 
-"@nuxtjs/color-mode@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@nuxtjs/color-mode/-/color-mode-3.0.2.tgz#17110d78864ad00ce524f7fc2d379d8c28ff765a"
-  integrity sha512-JgppnxOsVe2T/UGj0xjok/8TKDI27bRuhNh+Qrvr0FsS90Mty2acZLLN0lkrOTV0WLrpnTgN7mZCrgCWmhvziA==
+"@nuxtjs/color-mode@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@nuxtjs/color-mode/-/color-mode-3.0.3.tgz#f5b332f4383f169759ccb31e60fad1537d67adc8"
+  integrity sha512-FQVyLgRQ4C4C5NmTBrFRNm+LNjgT4cPFqyqfoRxD6hfVZhLxWJfKPGUaT8H/BCeBzkZZ29583MG9GqyDX7rnNg==
   dependencies:
     "@nuxt/kit" "npm:@nuxt/kit-edge@latest"
     defu "^5.0.0"
@@ -6588,10 +6588,10 @@ core-js-pure@^3.10.2:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.21.1.tgz#8c4d1e78839f5f46208de7230cebfb72bc3bdb51"
   integrity sha512-12VZfFIu+wyVbBebyHmRTuEE/tZrB4tJToWcwAMcsp3h4+sHR+fMJWbKpYiCRWlhFBq+KNyO8rIV9rTkeVmznQ==
 
-core-js@^3.0.1, core-js@^3.19.0, core-js@^3.21.0, core-js@^3.22.4, core-js@^3.6.5:
-  version "3.22.4"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.4.tgz#f4b3f108d45736935aa028444a69397e40d8c531"
-  integrity sha512-1uLykR+iOfYja+6Jn/57743gc9n73EWiOnSJJ4ba3B4fOEYDBv25MagmEZBxTp5cWq4b/KPx/l77zgsp28ju4w==
+core-js@^3.0.1, core-js@^3.19.0, core-js@^3.21.0, core-js@^3.22.5, core-js@^3.6.5:
+  version "3.22.5"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.5.tgz#a5f5a58e663d5c0ebb4e680cd7be37536fb2a9cf"
+  integrity sha512-VP/xYuvJ0MJWRAobcmQ8F2H6Bsn+s7zqAAjFaHGBMc5AQm7zaelhD1LGduFn2EehEcQcU+br6t+fwbpQ5d1ZWA==
 
 core-util-is@~1.0.0:
   version "1.0.3"
