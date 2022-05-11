@@ -199,7 +199,10 @@ class SheetType(DjangoObjectType):
     @resolver_hints(model_field='rowdimension_set')
     def resolve_rows(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
         """Получения всех строк."""
-        return RowsUploader(sheet, from_global_id(document_id)[1]).upload()
+        if document_id is not None:
+            return RowsUploader.create_document_uploader(sheet, from_global_id(document_id)[1]).upload()
+        else:
+            return RowsUploader.create_sheet_uploader(sheet).upload()
 
     @staticmethod
     @resolver_hints(model_field='mergedcell_set')
