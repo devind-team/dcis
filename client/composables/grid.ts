@@ -8,7 +8,18 @@ import {
 } from '~/types/grid'
 import { positionToLetter, getCellStyle } from '~/services/grid'
 
+export const cellKinds = {
+  n: 'Numeric',
+  s: 'String',
+  text: 'Text',
+  fl: 'Files',
+  money: 'Money',
+  department: 'Department',
+  classification: 'Classification'
+}
+
 export function useGrid (sheet: Ref<SheetType>) {
+  const rowIndexColumnWidth = ref<number>(30)
   const defaultColumnWidth = ref<number>(64)
 
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
@@ -87,8 +98,18 @@ export function useGrid (sheet: Ref<SheetType>) {
     })
   )
 
+  const gridContainer = ref<HTMLDivElement | null>(null)
+
+  const gridWidth = computed<number>(
+    () => rowIndexColumnWidth.value +
+      columns.value.reduce((sum, column) => sum + column.width, 0)
+  )
+
   return {
+    rowIndexColumnWidth,
+    rows,
     columns,
-    rows
+    gridContainer,
+    gridWidth
   }
 }

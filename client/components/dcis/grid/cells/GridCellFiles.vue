@@ -67,7 +67,7 @@ import type {
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/sheet/unload_file_value_archive.graphql'
 import FileField from '~/components/common/FileField.vue'
-import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/GridCell.vue'
+import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/OldGridCell.vue'
 
 type ValueFile = {
   file: FileType

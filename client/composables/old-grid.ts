@@ -21,30 +21,11 @@ import {
   CellOptionsType
 } from '~/types/grid-types'
 
-export const cellKinds: Record<string, string> = {
-  n: 'Numeric',
-  s: 'String',
-  text: 'Text',
-  fl: 'Files',
-  money: 'Money',
-  department: 'Department',
-  classification: 'Classification'
-}
-
 export function useOldGrid (
   sheet: Ref<SheetType>,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
 ) {
-  const rowIndexColumnWidth = ref<number>(30)
   const borderGag = ref<number>(10)
-
-  /**
-   * Ширина таблицы
-   */
-  const gridWidth = computed<number>(
-    () => rowIndexColumnWidth.value +
-      columns.value.reduce((sum, column) => sum + column.width, 0)
-  )
 
   /**
    * Блок выделения
@@ -183,7 +164,6 @@ export function useOldGrid (
   /**
    * Блок изменения ширины столбца и массового выделения
    */
-  const gridContainer = ref<HTMLDivElement | null>(null)
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
   const columnWidthPosition = ref<PositionType>({ left: null, right: null, top: null, bottom: null })
   const columnWidth = computed<ColumnWidthType>(() => ({
