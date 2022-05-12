@@ -2,9 +2,10 @@ import { DocumentNode } from 'graphql'
 import { DataProxy } from '@apollo/client'
 import { UseQueryReturn } from '@vue/apollo-composable/dist/useQuery'
 import { FetchResult } from '@apollo/client/link/core'
-import { useQuery, useResult } from '@vue/apollo-composable'
+import { useQuery } from '@vue/apollo-composable'
 import { QueryRelayParams, TransformUpdate } from '~/composables/query-relay'
 import { getValue } from '~/services/graphql-relay'
+import { useResult } from '~/composables/query-result'
 
 export function useCommonQuery<
   TResult = any,
