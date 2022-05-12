@@ -37,5 +37,5 @@ class SheetQueries(graphene.ObjectType):
                 DefaultOrderedDict(list),
                 set()
             ).keys() if k != '__typename'],
-            document_id=from_global_id(document_id)[1]
+            document_id=from_global_id(document_id)[1] if document_id else None
         ).unload()
