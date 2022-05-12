@@ -1,22 +1,20 @@
-from typing import Optional
-
 import graphene
-from devind_core.schema.types import FileType, ContentTypeType
+from devind_core.schema.types import ContentTypeType, FileType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
-from graphene_django import DjangoObjectType, DjangoListField
+from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
+from graphql.execution.utils import collect_fields
+from graphql.pyutils.default_ordered_dict import DefaultOrderedDict
 
 from apps.core.schema import UserType
-from apps.dcis.services.sheet_services import RowsUploader
+from apps.dcis.services.sheet_unload_services import SheetUploader
 from ..models import (
-    Project, Period, Division,
-    Privilege, PeriodGroup, PeriodPrivilege,
-    Status, Sheet, Document,
-    DocumentStatus, Attribute, AttributeValue,
-    ColumnDimension, Limitation, MergedCell
+    Attribute, AttributeValue, Division,
+    Document, DocumentStatus, Limitation,
+    Period, PeriodGroup, PeriodPrivilege,
+    Privilege, Project, Status,
 )
 
 
@@ -161,61 +159,11 @@ class StatusType(DjangoObjectType):
         fields = ('id', 'name', 'edit', 'comment',)
 
 
-class SheetType(DjangoObjectType):
-    """Тип моделей листов.
-
-    rows - могут иметь идентификатор документа,
-    в противном случае выгружается только каркас
-    """
-
-    period = graphene.Field(PeriodType, description='Период')
-    columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
-    merged_cells = graphene.List(lambda: MergedCellType, description='Объединенные ячейки')
-    rows = graphene.List(
-        lambda: RowDimensionType,
-        document_id=graphene.ID(description='Идентификатор документа'),
-        description='Строки'
-    )
-
-    class Meta:
-        model = Sheet
-        fields = (
-            'id',
-            'name',
-            'position',
-            'comment',
-            'created_at',
-            'updated_at',
-            'period',
-        )
-
-    @staticmethod
-    @resolver_hints(model_field='columndimension_set')
-    def resolve_columns(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
-        """Получение всех колонок."""
-        return sheet.columndimension_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='rowdimension_set')
-    def resolve_rows(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
-        """Получения всех строк."""
-        if document_id is not None:
-            return RowsUploader.create_document_uploader(sheet, from_global_id(document_id)[1]).upload()
-        else:
-            return RowsUploader.create_sheet_uploader(sheet).upload()
-
-    @staticmethod
-    @resolver_hints(model_field='mergedcell_set')
-    def resolve_merged_cells(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
-        """Получение всех объединенных ячеек связанных с листом."""
-        return sheet.mergedcell_set.all()
-
-
 class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
     period = graphene.Field(PeriodType, description='Период сбора')
-    sheets = DjangoListField(SheetType, description='Листы')
+    sheets = graphene.List(lambda: SheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     class Meta:
@@ -236,7 +184,24 @@ class DocumentType(DjangoObjectType):
         connection_class = CountableConnection
 
     @staticmethod
-    def resolve_last_status(document: Document, info: ResolveInfo, *args, **kwargs):
+    def resolve_sheets(document: Document, info: ResolveInfo):
+        sheets: list[list[dict]] = []
+        for sheet in document.sheets.all():
+            sheets.append(SheetUploader(
+                sheet=sheet,
+                fields=[k for k in collect_fields(
+                    info.context,
+                    info.parent_type,
+                    info.field_asts[0].selection_set,
+                    DefaultOrderedDict(list),
+                    set()
+                ).keys() if k != '__typename'],
+                document_id=document.id
+            ).unload())
+        return sheets
+
+    @staticmethod
+    def resolve_last_status(document: Document, info: ResolveInfo):
         try:
             return document.documentstatus_set.latest('created_at')
         except DocumentStatus.DoesNotExist:
@@ -307,23 +272,16 @@ class AttributeValueType(DjangoObjectType):
         )
 
 
-class ColumnDimensionType(DjangoObjectType):
-    """Тип колонок."""
+class ColumnDimensionType(graphene.ObjectType):
+    """Тип колонки."""
 
+    id = graphene.ID(required=True, description='Идентификатор')
+    index = graphene.Int(required=True, description='Индекс колонки')
+    width = graphene.Int(required=True, description='Ширина колонки')
+    fixed = graphene.Boolean(required=True, description='Фиксация колонки')
+    hidden = graphene.Boolean(required=True, description='Скрытие колонки')
+    kind = graphene.String(required=True, description='Тип значений')
     user = graphene.List(UserType, description='Пользователь')
-
-    class Meta:
-        model = ColumnDimension
-        fields = (
-            'id',
-            'index',
-            'width',
-            'fixed',
-            'hidden',
-            'kind',
-            'user',
-        )
-        convert_choices_to_enum = False
 
 
 class RowDimensionType(graphene.ObjectType):
@@ -370,9 +328,26 @@ class CellType(graphene.ObjectType):
     background = graphene.String(required=True, description='Цвет фона')
     border_style = graphene.JSONString(required=True, description='Стили границ')
     border_color = graphene.JSONString(required=True, description='Цвет границ')
+    position = graphene.String(required=True, description='Позиция')
+    colspan = graphene.Int(required=True, description='Объединение колонок')
+    rowspan = graphene.Int(required=True, description='Объединение строк')
     value = graphene.String(description='Значение')
     verified = graphene.Boolean(required=True, description='Валидно ли поле')
     error = graphene.String(description='Текст ошибки')
+
+
+class SheetType(graphene.ObjectType):
+    """Тип листа."""
+
+    id = graphene.ID(required=True, description='Идентификатор')
+    name = graphene.String(required=True, description='Наименование')
+    position = graphene.Int(required=True, description='Позиция')
+    comment = graphene.String(required=True, description='Комментарий')
+    created_at = graphene.DateTime(required=True, description='Дата добавления')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления')
+    period = graphene.Field(PeriodType, description='Период')
+    columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
+    rows = graphene.List(lambda: RowDimensionType, description='Строки')
 
 
 class LimitationType(DjangoObjectType):
@@ -390,32 +365,3 @@ class LimitationType(DjangoObjectType):
             'cell',
         )
         convert_choices_to_enum = False
-
-
-class MergedCellType(DjangoObjectType):
-    """Тип для объединенных ячеек."""
-
-    range = graphene.String(required=True, description='Объединенный диапазон')
-    colspan = graphene.Int(required=True, description='Объединение колонок')
-    rowspan = graphene.Int(required=True, description='Объединение строк')
-    target = graphene.String(required=True, description='Позиция основной ячейки')
-    cells = graphene.List(graphene.String, description='Позиции ячеек')
-
-    class Meta:
-        model = MergedCell
-        fields = (
-            'id',
-            'min_col',
-            'min_row',
-            'max_col',
-            'max_row',
-            'range',
-            'colspan',
-            'rowspan',
-            'target',
-            'cells'
-        )
-
-    @staticmethod
-    def resolve_range(merge_cell: MergedCell, info: ResolveInfo, *args, **kwargs):
-        return str(merge_cell)

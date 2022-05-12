@@ -9,16 +9,14 @@ from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import F
-from graphene_django_cud.mutations import DjangoUpdateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
-from apps.dcis.schema.types import CellType, ColumnDimensionType, MergedCellType, RowDimensionType
+from apps.dcis.models import Cell, Document, RowDimension, Sheet, Value
+from apps.dcis.schema.types import CellType, RowDimensionType
 from apps.dcis.services.cell_services import change_cell_kind, check_cell_options
-from apps.dcis.services.sheet_services import move_merged_cells, add_row
+from apps.dcis.services.sheet_services import add_row, move_merged_cells
 from apps.dcis.services.value_services import (
     create_file_value_archive,
     get_file_value_files,
@@ -39,7 +37,6 @@ class AddRowDimensionMutation(BaseMutation):
 
     row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
     cells = graphene.List(CellType, required=True, description='Добавленные ячейки')
-    merged_cells = graphene.List(MergedCellType, required=True, description='Объединенные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -69,7 +66,6 @@ class DeleteRowDimensionMutation(BaseMutation):
 
     row_id = graphene.Int(required=True, description='Идентификатор удаленной строки')
     index = graphene.Int(required=True, description='Измененные строки')
-    merged_cells = graphene.List(MergedCellType, required=True, description='Объединенные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -80,22 +76,6 @@ class DeleteRowDimensionMutation(BaseMutation):
         sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
         move_merged_cells(sheet, row.index, -1, True)
         return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
-
-
-class ChangeColumnDimensionPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
-    """Изменение стилей колонки таблицы."""
-
-    class Meta:
-        model = ColumnDimension
-        only_fields = ('width', 'fixed', 'hidden', 'kind',)
-        required_fields = ('fixed', 'hidden', 'kind',)
-        field_types = {
-            'kind': graphene.String(description='Тип поля')
-        }
-        login_required = True
-        permissions = ('dcis.change_columndimension',)
-
-    column_dimension = graphene.Field(ColumnDimensionType, description='Измененные стили колонки таблицы')
 
 
 class ChangeCellsOptionMutation(BaseMutation):
@@ -239,11 +219,6 @@ class SheetMutations(graphene.ObjectType):
 
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
-
-    change_column_dimension = ChangeColumnDimensionPayload.Field(
-        required=True,
-        description='Изменение стилей колонки таблицы'
-    )
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
 
