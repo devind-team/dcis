@@ -1289,6 +1289,25 @@ type ContentTypeType {
   projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
 }
 
+input CopyPeriodGroupMutationInput {
+  clientMutationId: String
+  """Выбранные группы"""
+  periodGroupsIds: [ID!]
+  """Идентификатор текущего периода"""
+  periodId: ID!
+}
+
+"""Мутация на перенос группы с пользователями из другого сбора."""
+type CopyPeriodGroupMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Группы сбора"""
+  periodGroups: [PeriodGroupType]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input CreatePeriodGroupInput {
   """Наименование группы периода привилегии"""
   name: String!
@@ -2024,6 +2043,8 @@ type Mutation {
   changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
+  """Мутация на перенос группы с пользователями из другого сбора."""
+  copyPeriodGroups(input: CopyPeriodGroupMutationInput!): CopyPeriodGroupMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление статуса документа."""
@@ -2801,6 +2822,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
+  """Периоды"""
+  periods(
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): [PeriodType!]!
   permissions: [PermissionType!]!
   """Привилегии"""
   privileges: [PrivilegeType!]!

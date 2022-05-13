@@ -1,28 +1,26 @@
 <template lang="pug">
   left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ period.name }}
-    v-row
-      v-col(cols="12" md="4" sm="4")
+      template(#header) {{ period.name }}
+      v-row(align="center")
+        v-col(cols="12" md="2" sm="2")
+          v-subheader Группы
+        v-col.text-right(cols="12" md="2" sm="4")
+          add-period-group(:period="period" :update="addPeriodGroupUpdate")
+            template(#activator="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{...onMenu, ...onTooltip}" class="align-self-center mr-4" color="primary" icon)
+                    v-icon(large) mdi-plus-circle-outline
+                span {{ $t('dcis.periods.actions.addGroup') }}
+          copy-period-groups(active-query)
+            template(#activator="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{...onMenu, ...onTooltip}" class="align-self-center mr-4" color="primary" icon)
+                    v-icon(large) mdi-import
+                span {{ $t('dcis.periods.actions.copyGroups') }}
         v-list
           v-list-item-group(v-model="selectGroup" color="primary")
-            v-row(no-gutters align="center")
-              v-col(cols="12" md="4" sm="2")
-                v-subheader Группы
-              v-col.text-right(cols="12" md="8" sm="10")
-                add-period-group(:period="period" :update="addPeriodGroupUpdate")
-                  template(#activator="{ on: onMenu }")
-                    v-tooltip(bottom)
-                      template(#activator="{ on: onTooltip }")
-                        v-btn(class="align-self-center mr-4" color="primary" v-on="{...onMenu, ...onTooltip}" icon)
-                          v-icon(large) mdi-plus-circle-outline
-                      span {{ $t('dcis.periods.actions.addGroup') }}
-                copy-period-groups(:period="period" :update="addPeriodGroupUpdate")
-                  template(#activator="{ on: onMenu }")
-                    v-tooltip(bottom)
-                      template(#activator="{ on: onTooltip }")
-                        v-btn(class="align-self-center mr-4" color="primary" v-on="{...onMenu, ...onTooltip}" icon)
-                          v-icon(large) mdi-import
-                      span {{ $t('dcis.periods.actions.copyGroups') }}
             v-list-item(
               v-for="(item, index) in period.periodGroups"
               :key="index"
@@ -38,9 +36,9 @@
                           v-btn(:color="hover ? 'error' : ''" @click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
                             v-icon mdi-delete
                       span {{ $t('dcis.periods.actions.deleteGroup') }}
-      v-divider(vertical)
-      v-col(cols="12" md="8" sm="8")
-        period-group-users(:period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
+        v-divider(vertical)
+        v-col(cols="12" md="8" sm="6")
+          period-group-users(:period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
 </template>
 
 <script lang="ts">

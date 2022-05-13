@@ -1,4 +1,6 @@
+from tokenize import group
 from typing import Any
+from unicodedata import name
 
 import graphene
 from devind_core.models import File
@@ -19,7 +21,7 @@ from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
 from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import ProjectType, PeriodType
+from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
@@ -131,6 +133,28 @@ class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation)
         permissions = ('dcis.add_periodgroup',)
         exclude_fields = ('users', 'privileges',)
 
+class CopyPeriodGroupMutation(BaseMutation):
+    """Мутация на перенос группы с пользователями из другого сбора."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор текущего периода')
+        period_groups_ids = graphene.List(graphene.NonNull(graphene.ID), description='Выбранные группы')
+
+    period_groups = graphene.List(PeriodGroupType, required=True, description='Группы сбора')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, period_groups_ids: list[str]):
+        period = get_object_or_404(Period, pk=period_id)
+        period_groups: list[PeriodGroup] = []
+        for period_group_id in period_groups_ids:
+            period_group = get_object_or_404(PeriodGroup, pk=from_global_id(period_group_id)[1])
+            period_groups.append(period_group)
+        period_groups_list = PeriodGroup.objects.bulk_create(
+            [PeriodGroup(name=period_group.name, period=period, users=period_group.users, privileges=period_group.privileges) for period_group in period_groups]
+        )
+        return CopyPeriodGroupMutation(period_groups=period_groups_list)
+
 
 class ChangePeriodGroupUsersMutation(BaseMutation):
     """Мутация на добавление пользователей в группу."""
@@ -191,6 +215,7 @@ class ProjectMutations(graphene.ObjectType):
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
+    copy_period_groups = CopyPeriodGroupMutation.Field(required=True)
     delete_period_group = DeletePeriodGroupMutationPayload.Field(required=True)
     change_period_group_users = ChangePeriodGroupUsersMutation.Field(required=True)
     delete_user_from_period_group = DeleteUserFromPeriodGroupMutation.Field(required=True)

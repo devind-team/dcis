@@ -3,38 +3,46 @@
     :header="String($t('dcis.periods.copyPeriodGroups.header'))"
     :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
     :mutation="copyPeriodGroups"
-    :variables="{ periodId: selectPeriod.id }"
-    :update="copyPeriodGroupsUpdate"
+    :variables="{ periodId: selectPeriod }"
     mutation-name="copyPeriodGroups"
     errors-in-alert
     persistent
-    @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
       v-autocomplete(
         v-model="selectPeriod"
-        :label="$t('ac.users.components.changeUsers.users')"
+        :label="String($t('dcis.periods.copyPeriodGroups.period'))"
         :items="periods"
-        :search-input.sync="search"
         :loading="loading"
         item-text="name"
         item-value="id"
-        clearable
+        return-object
         hide-no-data
+        hide-selected
+      )
+      v-autocomplete(
+        v-model="selectGroups"
+        :label="String($t('dcis.periods.copyPeriodGroups.groups'))"
+        :items="selectPeriod ? periods.find(e => e.id === selectPeriod.id).periodGroups: []"
+        :loading="loading"
+        :disabled="!selectPeriod"
+        item-text="name"
+        item-value="id"
+        return-object
+        hide-no-data
+        hide-selected
       )
 </template>
 
 <script lang="ts">
-import { DataProxy } from 'apollo-cache'
-import { ChangePeriodGroupUsersMutationResult } from './AddPeriodGroupUsers.vue'
-import { defineComponent, inject } from '#app'
-import changePeriodGroupUsers from '~/gql/dcis/mutations/project/change_period_group_users.graphql'
-import { useDebounceSearch } from '~/composables'
+import { defineComponent } from '#app'
+import copyPeriodGroups from '~/gql/dcis/mutations/project/copy_period_groups.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { PeriodType } from '~/types/graphql'
+import { PeriodType, PeriodsQuery, PeriodsQueryVariables, PeriodGroupType } from '~/types/graphql'
 import periodsQuery from '~/gql/dcis/queries/periods.graphql'
+import { useAuthStore } from '~/store'
 
 export default defineComponent({
   components: { MutationModalForm },
@@ -42,33 +50,26 @@ export default defineComponent({
     activeQuery: { type: Boolean, default: false }
   },
   setup (props) {
-    const { search, debounceSearch } = useDebounceSearch()
+    const authStore = useAuthStore()
 
+    const user = toRef(authStore, 'user')
     const selectPeriod = ref<PeriodType | null>(null)
+    const selectGroups = ref<PeriodGroupType[] | null>(null)
 
     const options = ref({ enabled: props.activeQuery })
-    const { data: periods, loading } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
+    const { data: periods, loading } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
       document: periodsQuery,
       variables: () => ({
-        search: debounceSearch.value
+        userId: user.value.id
       }),
       options: options.value
     })
-
-    // Обновление после добавления пользователей в группу
-    const periodGroupUsersUpdate: any = inject('periodGroupUsersUpdate')
-    const copyPeriodGroupsUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
-      const { success } = result.data.changePeriodGroupUsers
-      if (success) {
-        periodGroupUsersUpdate(cache, result)
-      }
-    }
     return {
-      changePeriodGroupUsers,
       selectPeriod,
-      search,
-      close,
-      copyPeriodGroupsUpdate
+      selectGroups,
+      periods,
+      loading,
+      copyPeriodGroups
     }
   }
 })

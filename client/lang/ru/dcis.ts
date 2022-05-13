@@ -58,6 +58,7 @@ export default {
       header: 'Импорт групп из сбора',
       name: 'Название группы периода',
       groups: 'Группы',
+      period: 'Период',
       buttonText: '@:add'
     },
     changePeriodUsers: {
