@@ -19,6 +19,10 @@ fragment CellFields on CellType {
   background
   borderStyle
   borderColor
+  position
+  globalPosition
+  colspan
+  rowspan
   value
   verified
   error

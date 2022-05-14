@@ -1,6 +1,5 @@
 #import "../../fragments/row_dimension_fields.graphql"
 #import "../../fragments/cell_fields.graphql"
-#import "../../fragments/merged_cell_fields.graphql"
 
 mutation AddRowDimension($documentId: ID!, $sheetId: Int!, $parentId: Int, $index: Int!) {
   addRowDimension(input: {
@@ -20,9 +19,6 @@ mutation AddRowDimension($documentId: ID!, $sheetId: Int!, $parentId: Int, $inde
     }
     cells {
       ...CellFields
-    }
-    mergedCells {
-      ...MergedCellsFields
     }
     __typename
   }

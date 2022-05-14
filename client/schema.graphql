@@ -274,8 +274,6 @@ type AddRowDimensionMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Объединенные ячейки"""
-  mergedCells: [MergedCellType]!
   """Добавленная строка"""
   rowDimension: RowDimensionType!
   """Успех мутации"""
@@ -567,6 +565,8 @@ type CellType {
   borderStyle: JSONString!
   """Цвет индекса"""
   color: String!
+  """Объединение колонок"""
+  colspan: Int!
   """Идентификатор колонки"""
   columnId: ID
   """Комментарий"""
@@ -577,6 +577,8 @@ type CellType {
   error: String
   """Формула"""
   formula: String
+  """Позиция в плоской структуре"""
+  globalPosition: String!
   """Горизонтальное выравнивание"""
   horizontalAlign: ID
   """Идентификатор"""
@@ -587,12 +589,16 @@ type CellType {
   kind: String!
   """Маска для ввода значений"""
   mask: String
+  """Позиция относительно родительской строки"""
+  position: String!
   """Идентификатор строки"""
   rowId: ID
+  """Объединение строк"""
+  rowspan: Int!
   """Размер шрифта"""
   size: Int!
   """Зачеркнутый"""
-  strike: Boolean
+  strike: Boolean!
   """Жирный шрифт"""
   strong: Boolean!
   """Подсказка"""
@@ -724,16 +730,6 @@ type ChangeCellsOptionMutationPayload {
   """Измененные ячейки"""
   cells: [CellType]
   clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-"""Изменение стилей колонки таблицы."""
-type ChangeColumnDimensionPayload {
-  """Измененные стили колонки таблицы"""
-  columnDimension: ColumnDimensionType
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
@@ -1222,21 +1218,22 @@ type ChangeValueMutationPayload {
   success: Boolean!
 }
 
-"""Тип колонок."""
+"""Тип колонки."""
 type ColumnDimensionType {
   """Фиксация колонки"""
   fixed: Boolean!
   """Скрытие колонки"""
   hidden: Boolean!
+  """Идентификатор"""
   id: ID!
   """Индекс колонки"""
   index: Int!
-  """Тип значения"""
+  """Тип значений"""
   kind: String!
   """Пользователь"""
   user: [UserType]
   """Ширина колонки"""
-  width: Int
+  width: Int!
 }
 
 """Комментарии"""
@@ -1519,8 +1516,6 @@ type DeleteRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Измененные строки"""
   index: Int!
-  """Объединенные ячейки"""
-  mergedCells: [MergedCellType]!
   """Идентификатор удаленной строки"""
   rowId: Int!
   """Успех мутации"""
@@ -1728,7 +1723,7 @@ type DocumentType implements Node {
   """Период сбора"""
   period: PeriodType
   """Листы"""
-  sheets: [SheetType!]
+  sheets: [SheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
   """Версия документа"""
@@ -1972,29 +1967,6 @@ type MailingType {
   user: UserType!
 }
 
-"""Тип для объединенных ячеек."""
-type MergedCellType {
-  """Позиции ячеек"""
-  cells: [String]
-  """Объединение колонок"""
-  colspan: Int!
-  id: ID!
-  """Конечная позиция в колонке"""
-  maxCol: Int!
-  """Конечная позиция в строке"""
-  maxRow: Int!
-  """Начальная позиция в колонке"""
-  minCol: Int!
-  """Начальная позиция в строке"""
-  minRow: Int!
-  """Объединенный диапазон"""
-  range: String!
-  """Объединение строк"""
-  rowspan: Int!
-  """Позиция основной ячейки"""
-  target: String!
-}
-
 """Мутации на изменение чего-либо."""
 type Mutation {
   """Мутация для добавления категории"""
@@ -2039,8 +2011,6 @@ type Mutation {
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
-  """Изменение стилей колонки таблицы"""
-  changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
@@ -2922,6 +2892,8 @@ type Query {
   settings: [SettingType!]!
   """Выгрузка листа"""
   sheet(
+    """Идентификатор документа"""
+    documentId: ID
     """Идентификатор листа"""
     sheetId: ID!
   ): SheetType!
@@ -3325,22 +3297,16 @@ type SettingType {
   value: String!
 }
 
-"""
-Тип моделей листов.
-
-rows - могут иметь идентификатор документа,
-в противном случае выгружается только каркас
-"""
+"""Тип листа."""
 type SheetType {
   """Колонки"""
   columns: [ColumnDimensionType]
   """Комментарий"""
   comment: String!
-  """Дата создания"""
+  """Дата добавления"""
   createdAt: DateTime!
+  """Идентификатор"""
   id: ID!
-  """Объединенные ячейки"""
-  mergedCells: [MergedCellType]
   """Наименование"""
   name: String!
   """Период"""
@@ -3348,10 +3314,7 @@ type SheetType {
   """Позиция"""
   position: Int!
   """Строки"""
-  rows(
-    """Идентификатор документа"""
-    documentId: ID
-  ): [RowDimensionType]
+  rows: [RowDimensionType]
   """Дата обновления"""
   updatedAt: DateTime!
 }
@@ -3485,17 +3448,6 @@ type UnloadFileValueArchiveMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
-}
-
-input UpdateColumnDimensionInput {
-  """Фиксация колонки"""
-  fixed: Boolean!
-  """Скрытие колонки"""
-  hidden: Boolean!
-  """Тип поля"""
-  kind: String
-  """Ширина колонки"""
-  width: Int
 }
 
 input UpdateDocumentInput {
