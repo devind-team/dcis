@@ -323,7 +323,7 @@ class CellType(graphene.ObjectType):
     strong = graphene.Boolean(required=True, description='Жирный шрифт')
     italic = graphene.Boolean(required=True, description='Курсив')
     strike = graphene.Boolean(required=True, description='Зачеркнутый')
-    underline = graphene.Boolean(description='Тип подчеркивания')
+    underline = graphene.String(description='Тип подчеркивания')
     color = graphene.String(required=True, description='Цвет индекса')
     background = graphene.String(required=True, description='Цвет фона')
     border_style = graphene.JSONString(required=True, description='Стили границ')

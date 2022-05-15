@@ -1,6 +1,16 @@
 import { CellType } from '~/types/graphql'
-import { RangeIndicesType, RangePositionsType, RangeType } from '~/types/grid'
+import {
+  RangeType,
+  CoordinatePartsType,
+  SheetCoordinatePartsType,
+  RangePartsType,
+  SheetRangePartsType,
+  RangeIndicesType,
+  RangeSpanType
+} from '~/types/grid'
 
+const coordinateExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
+const sheetExp = /(?<sheet>([^'^!])*)?![$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<minRow>\d+)?(:[$]?(?<maxColumn>[A-Za-z]{1,3})?[$]?(?<maxRow>\d+))?/
 const rangeExp = /[$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<minRow>\d+)?(:[$]?(?<maxColumn>[A-Za-z]{1,3})?[$]?(?<maxRow>\d+))?/
 
 // Кеш преобразования 1 -> A
@@ -9,11 +19,11 @@ const __CACHE_COLUMN_PL: Record<number, string> = {}
 const __CACHE_COLUMN_LP: Record<string, number> = {}
 
 /**
- * Преобразование числа в строку
+ * Преобразование числовой позиции в строковую
  * positionToLetter(1) -> 'A'
  * positionToLetter(26) -> 'Z'
  * positionToLetter(27) -> 'AA'
- * @param position
+ * @param position числовая позиция
  */
 const positionToLetter = (position: number): string => {
   if (position in __CACHE_COLUMN_PL) {
@@ -36,11 +46,11 @@ const positionToLetter = (position: number): string => {
 }
 
 /**
- * Преобразование строки в число
+ * Преобразование строковой позиции в числовую
  * letterToPosition('A') -> 1
  * letterToPosition('Z') -> 26
  * letterToPosition('AA') -> 27
- * @param letter
+ * @param letter строковая позиция
  */
 const letterToPosition = (letter: string): number => {
   const l = letter.toUpperCase().replace(/[^A-Z]/gi, '')
@@ -57,10 +67,45 @@ const letterToPosition = (letter: string): number => {
 }
 
 /**
+ * Разбор координаты на составляющие
+ * parseCoordinate('A1') -> { column: 'A', row: 1 }
+ * parseCoordinate('$A1') -> { column: 'A', row: 1 }
+ * parseCoordinate('A$1') -> { column: 'A', row: 1 }
+ * parseCoordinate('$A$1') -> { column: 'A', row: 1 }
+ * @param coordinate координата
+ */
+const parseCoordinate = (coordinate: string): CoordinatePartsType => {
+  const coordinateParse: object | null = coordinate.match(coordinateExp)
+  if (coordinateParse === null) {
+    throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
+  }
+  const column: string = coordinateParse[1]
+  const row: number = +coordinateParse[2]
+  return { column, row }
+}
+
+/**
+ * Разбор координаты с указанием sheet
+ * parseCoordinateWithSheet('Лист!A1') -> { sheet: 'Лист', column: 'A', row: '1' }
+ * @param coordinate координата
+ */
+const parseCoordinateWithSheet = (coordinate: string): SheetCoordinatePartsType => {
+  const match = coordinate.match(sheetExp)
+  if (match === null) {
+    throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
+  }
+  const { sheet, minColumn: column, minRow: row } = match.groups
+  if (!(sheet && column && row)) {
+    throw new TypeError(`Не удалось преобразовать координату: ${coordinate}`)
+  }
+  return { sheet, column, row: parseInt(row) }
+}
+
+/**
  * Нормализация диапазона
  * normalizationRange('A1:B2') -> 'A1:B2'
  * normalizationRange('B2:A1') -> 'A1:B2'
- * @param range
+ * @param range диапазон
  */
 const normalizeRange = (range: RangeType): RangeType => {
   const { minColumn, minRow, maxColumn, maxRow } = parseRange(range)
@@ -74,11 +119,11 @@ const normalizeRange = (range: RangeType): RangeType => {
 }
 
 /**
- * Парсинг диапазона
+ * Разбор диапазона
  * parseRange('A1:B2') -> { minColumn: 'A', minRow: 1, maxColumn: 'B', maxRow: 2 }
- * @param range
+ * @param range диапазон
  */
-const parseRange = (range: RangeType): RangePositionsType => {
+const parseRange = (range: RangeType): RangePartsType => {
   const groups = range.match(rangeExp).groups
   const { minColumn, minRow, maxColumn, maxRow } = groups
   if (!(minColumn && minRow && maxColumn && maxRow)) {
@@ -89,9 +134,26 @@ const parseRange = (range: RangeType): RangePositionsType => {
 }
 
 /**
+ * Разбор диапазона с указанием sheet
+ * parseRangeWithSheet('Лист1!A1:B2') -> { sheet: 'Лист1', minColumn: 'A', minRow: '1', maxColumn: 'B', maxRow: '2' }
+ * @param range диапазон
+ */
+const parseRangeWithSheet = (range: string): SheetRangePartsType => {
+  const match = range.match(sheetExp)
+  if (match === null) {
+    throw new TypeError(`Неверный формат диапазона: ${range}`)
+  }
+  const { sheet, minColumn, minRow, maxColumn, maxRow } = match.groups
+  if (!(sheet && minColumn && minRow && maxColumn && maxRow)) {
+    throw new TypeError(`Не удалось преобразовать диапазон: ${range}`)
+  }
+  return { sheet, minColumn, minRow: parseInt(minRow), maxColumn, maxRow: parseInt(maxRow) }
+}
+
+/**
  * Преобразование диапазона в числовое представление
  * rangeToPositions('A1:B2') -> { minColumn: 1, minRow: 1, maxColumn: 2, maxRow: 2 }
- * @param range
+ * @param range диапазон
  */
 const rangeToRangeIndices = (range: RangeType): RangeIndicesType => {
   const { minColumn, minRow, maxColumn, maxRow } = parseRange(range)
@@ -103,7 +165,7 @@ const rangeToRangeIndices = (range: RangeType): RangeIndicesType => {
 /**
  * Преобразование числового представления диапазона в набор ячеек
  * rangeIndicesToCells({ minColumn: 1, minRow: 1, maxColumn: 2, maxRow: 2 }) -> ['A1', 'A2', 'B1', 'B2']
- * @param rangeIndices минимальная позиция строки
+ * @param rangeIndices числовое представление диапазона
  */
 const rangeIndicesToCells = (rangeIndices: RangeIndicesType): string[] => {
   const cells: string[] = []
@@ -118,15 +180,29 @@ const rangeIndicesToCells = (rangeIndices: RangeIndicesType): string[] => {
 /**
  * Преобразование диапазона в набор позиций входящих в него ячеек
  * rangeLetterToCells('A1:B2') -> ['A1', 'A2', 'B1', 'B2']
- * @param range
+ * @param range диапазон
  */
 const rangeToCellPositions = (range: RangeType): string[] => {
-  return rangeIndicesToCells(rangeToRangeIndices(normalizeRange(range)))
+  return rangeIndicesToCells(rangeToRangeIndices(range))
+}
+
+/**
+ * Разбор диапазона на составляющие
+ * rangeSpan('A1:B2') -> { target: 'A1', colspan: 2, rowSpan = 2, cells: ['A2', 'B1', 'B2'] }
+ * @param range диапазон
+ */
+const rangeSpan = (range: RangeType): RangeSpanType => {
+  const { minColumn, minRow, maxColumn, maxRow } = rangeToRangeIndices(range)
+  const cells: string[] = rangeToCellPositions(range)
+  const colspan: number = maxColumn - minColumn + 1
+  const rowspan: number = maxRow - minRow + 1
+  const target: string = cells.shift()
+  return { target, colspan, rowspan, cells }
 }
 
 /**
  * Получение стилей ячейки
- * @param cell
+ * @param cell ячейка
  */
 const getCellStyle = (cell: CellType): Record<string, string> => {
   const styles: Record<string, string> = {}
@@ -147,13 +223,35 @@ const getCellStyle = (cell: CellType): Record<string, string> => {
   return styles
 }
 
+/**
+ * Объединение опций ячеек
+ * @param options опции ячеек
+ */
+const uniteCellsOptions = <T>(options: T[]): T | null => {
+  if (options.length === 0) {
+    return null
+  }
+  const value = options[0]
+  for (const val of options) {
+    if (value !== val) {
+      return null
+    }
+  }
+  return value
+}
+
 export {
   positionToLetter,
   letterToPosition,
+  parseCoordinate,
+  parseCoordinateWithSheet,
   normalizeRange,
   parseRange,
+  parseRangeWithSheet,
   rangeToRangeIndices,
   rangeIndicesToCells,
   rangeToCellPositions,
-  getCellStyle
+  rangeSpan,
+  getCellStyle,
+  uniteCellsOptions
 }

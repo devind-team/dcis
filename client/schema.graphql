@@ -604,7 +604,7 @@ type CellType {
   """Подсказка"""
   tooltip: String
   """Тип подчеркивания"""
-  underline: Boolean
+  underline: String
   """Значение"""
   value: String
   """Валидно ли поле"""
