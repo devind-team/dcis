@@ -5,11 +5,11 @@ from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
-from graphql.execution.utils import collect_fields
-from graphql.pyutils.default_ordered_dict import DefaultOrderedDict
+from stringcase import snakecase
 
 from apps.core.schema import UserType
 from apps.dcis.services.sheet_unload_services import SheetUploader
+from ..helpers.info_fields import get_fields
 from ..models import (
     Attribute, AttributeValue, Division,
     Document, DocumentStatus, Limitation,
@@ -189,13 +189,7 @@ class DocumentType(DjangoObjectType):
         for sheet in document.sheets.all():
             sheets.append(SheetUploader(
                 sheet=sheet,
-                fields=[k for k in collect_fields(
-                    info.context,
-                    info.parent_type,
-                    info.field_asts[0].selection_set,
-                    DefaultOrderedDict(list),
-                    set()
-                ).keys() if k != '__typename'],
+                fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
                 document_id=document.id
             ).unload())
         return sheets
@@ -277,7 +271,7 @@ class ColumnDimensionType(graphene.ObjectType):
 
     id = graphene.ID(required=True, description='Идентификатор')
     index = graphene.Int(required=True, description='Индекс колонки')
-    width = graphene.Int(required=True, description='Ширина колонки')
+    width = graphene.Int(description='Ширина колонки')
     fixed = graphene.Boolean(required=True, description='Фиксация колонки')
     hidden = graphene.Boolean(required=True, description='Скрытие колонки')
     kind = graphene.String(required=True, description='Тип значений')
@@ -302,7 +296,7 @@ class RowDimensionType(graphene.ObjectType):
     children = graphene.List(lambda: RowDimensionType, required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
     user = graphene.List(UserType, description='Пользователь')
-    cells = graphene.List(lambda: CellType, description='Ячейки')
+    cells = graphene.List(lambda: CellType, required=True, description='Ячейки')
 
 
 class CellType(graphene.ObjectType):

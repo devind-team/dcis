@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from functools import reduce
+from itertools import chain
 from typing import Optional, Sequence, Union
 
 from django.db.models import Model, Q, QuerySet
-from django.forms.models import model_to_dict
 from openpyxl.utils import get_column_letter
 
 from apps.dcis.models.sheet import Cell, ColumnDimension, MergedCell, RowDimension, Sheet, Value
@@ -27,8 +27,9 @@ class DataUnloader(ABC):
         self.data = self.unload_data()
         return self.data
 
-    @staticmethod
+    @classmethod
     def unload_raw_data(
+        cls,
         objects: Union[QuerySet, Sequence[Model]],
         fields: tuple,
         properties: Optional[Sequence[str]] = None
@@ -37,14 +38,24 @@ class DataUnloader(ABC):
         if properties is not None:
             result: list[dict] = []
             for obj in (objects.all() if isinstance(objects, QuerySet) else objects):
-                obj_dict = model_to_dict(obj, fields=fields)
+                obj_dict = cls._model_to_dict(obj, fields=fields)
                 for pr in properties:
                     obj_dict[pr] = getattr(obj, pr)
                 result.append(obj_dict)
             return result
         if isinstance(objects, QuerySet):
             return list(objects.values(*fields))
-        return [model_to_dict(obj, fields=fields) for obj in objects]
+        return [cls._model_to_dict(obj, fields=fields) for obj in objects]
+
+    @staticmethod
+    def _model_to_dict(instance: Model, fields: Optional[Sequence[str]] = None) -> dict:
+        """Преобразование модели в словарь."""
+        opts = instance._meta
+        data = {}
+        for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
+            if fields is not None and f.name in fields:
+                data[f.name] = f.value_from_object(instance)
+        return data
 
 
 class SheetColumnsUnloader(DataUnloader):
@@ -281,7 +292,7 @@ class SheetUploader(DataUnloader):
 
     def unload_data(self) -> Union[list[dict], dict]:
         """Выгрузка листа."""
-        sheet = model_to_dict(
+        sheet = self._model_to_dict(
             self.sheet,
             fields=[field for field in self.fields if field not in ('columns', 'rows')]
         )
