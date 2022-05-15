@@ -1,12 +1,13 @@
 <template lang="pug">
   tbody
-    tr(v-for="row in rows" :key="row.rowDimension.id" :style="row.style")
+    tr(v-for="buildRow in rows" :key="buildRow.rowDimension.id" :style="buildRow.style")
       td.grid__cell_row-index
+        grid-row-control(:build-row="buildRow")
       td(
-        v-for="buildCell in row.cells"
+        v-for="buildCell in buildRow.buildCells"
         :key="buildCell.cell.id"
-        :colspan="buildCell.colspan"
-        :rowspan="buildCell.rowspan"
+        :colspan="buildCell.cell.colspan"
+        :rowspan="buildCell.cell.rowspan"
         :style="`${buildCell.style}`"
       )
         grid-cell(
@@ -17,10 +18,11 @@
 <script lang="ts">
 import { PropType } from '#app'
 import { BuildRowType } from '~/types/grid'
+import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
 export default defineComponent({
-  components: { GridCell },
+  components: { GridRowControl, GridCell },
   props: {
     rows: { type: Array as PropType<BuildRowType[]>, required: true }
   }

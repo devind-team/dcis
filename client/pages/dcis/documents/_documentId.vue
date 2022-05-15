@@ -16,7 +16,6 @@
 </template>
 
 <script lang="ts">
-import type { Ref } from '#app'
 import type {
   DocumentQuery,
   DocumentQueryVariables,
@@ -33,7 +32,7 @@ export default defineComponent({
   setup () {
     const route = useRoute()
 
-    const active: Ref<number> = ref<number>(0)
+    const active = ref<number>(0)
 
     const { data: doc, loading: docLoading } = useCommonQuery<
       DocumentQuery,

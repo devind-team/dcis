@@ -5,16 +5,16 @@
         .grid__header-content
           .grid__select-all
       th(
-        v-for="column in columns"
-        :key="column.columnDimension.id"
-        :style="column.style"
+        v-for="buildColumn in columns"
+        :key="buildColumn.columnDimension.id"
+        :style="buildColumn.style"
       )
-        grid-column-control(v-slot="{ on, attrs }" :column="column")
+        grid-column-control(v-slot="{ on, attrs }" :build-column="buildColumn")
           div(
             v-bind="attrs"
             @contextmenu.prevent="on.click"
-            :class="getHeaderContentClasses(column)"
-          ) {{ column.columnDimension.index }}
+            :class="getHeaderContentClasses(buildColumn)"
+          ) {{ buildColumn.columnDimension.index }}
 </template>
 
 <script lang="ts">
@@ -30,10 +30,10 @@ export default defineComponent({
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true }
   },
   setup (props) {
-    const getHeaderContentClasses = (column: BuildColumnType): (string | Record<string, boolean>)[] => {
+    const getHeaderContentClasses = (buildColumn: BuildColumnType): (string | Record<string, boolean>)[] => {
       return [
         'grid__header-content',
-        { 'grid__header-content_selected': props.selectedColumnPositions.includes(column.columnDimension.index) }
+        { 'grid__header-content_selected': props.selectedColumnPositions.includes(buildColumn.columnDimension.index) }
       ]
     }
     return {

@@ -28,22 +28,64 @@ export default defineComponent({
     const sheet = toRef(props, 'sheet')
     const {
       rowIndexColumnWidth,
-      columns,
+      columnWidth,
+      rowHeight,
       rows,
+      columns,
       gridContainer,
       gridWidth,
+      activeCell,
+      selectedCellPositions,
       selectedColumnPositions,
-      selectedRowPositions
-    } = useGrid(sheet)
+      selectedRowPositions,
+      allCellsSelected,
+      selectedCellsOptions,
+      mousedownCell,
+      mouseenterCell,
+      mouseupCell,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      boundaryRowCells,
+      selectedBoundaryRowCells,
+      mouseenterColumnIndex,
+      mousemoveColumnIndex,
+      mouseleaveColumnIndex,
+      mousedownColumnIndex,
+      mouseupColumnIndex,
+      mouseenterRowIndex,
+      mousedownRowIndex,
+      selectAllCells
+    } = useGrid(sheet, () => {})
 
     return {
       rowIndexColumnWidth,
-      columns,
+      columnWidth,
+      rowHeight,
       rows,
+      columns,
       gridContainer,
       gridWidth,
+      activeCell,
+      selectedCellPositions,
       selectedColumnPositions,
-      selectedRowPositions
+      selectedRowPositions,
+      allCellsSelected,
+      selectedCellsOptions,
+      mousedownCell,
+      mouseenterCell,
+      mouseupCell,
+      boundaryColumnCells,
+      selectedBoundaryColumnCells,
+      boundaryRowCells,
+      selectedBoundaryRowCells,
+      mouseenterColumnIndex,
+      mousemoveColumnIndex,
+      mouseleaveColumnIndex,
+      mousedownColumnIndex,
+      mouseupColumnIndex,
+      mouseenterRowIndex,
+      mousedownRowIndex,
+      selectAllCells
     }
   }
 })

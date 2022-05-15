@@ -81,7 +81,7 @@ const parseCoordinate = (coordinate: string): CoordinatePartsType => {
   }
   const column: string = coordinateParse[1]
   const row: number = +coordinateParse[2]
-  return { column, row }
+  return { column: buildColumn, row }
 }
 
 /**
@@ -98,7 +98,7 @@ const parseCoordinateWithSheet = (coordinate: string): SheetCoordinatePartsType 
   if (!(sheet && column && row)) {
     throw new TypeError(`Не удалось преобразовать координату: ${coordinate}`)
   }
-  return { sheet, column, row: parseInt(row) }
+  return { sheet, column: buildColumn, row: parseInt(row) }
 }
 
 /**
