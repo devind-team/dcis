@@ -271,6 +271,7 @@ class ColumnDimensionType(graphene.ObjectType):
 
     id = graphene.ID(required=True, description='Идентификатор')
     index = graphene.Int(required=True, description='Индекс колонки')
+    name = graphene.String(required=True, description='Название колонки')
     width = graphene.Int(description='Ширина колонки')
     fixed = graphene.Boolean(required=True, description='Фиксация колонки')
     hidden = graphene.Boolean(required=True, description='Скрытие колонки')

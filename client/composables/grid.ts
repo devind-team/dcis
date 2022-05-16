@@ -93,8 +93,11 @@ export function useGrid (
         style: { width: `${width}px` },
         width,
         columnDimension,
-        buildCells: rows.value.map((buildRow: BuildRowType) =>
-          buildRow.buildCells.find((buildCell: BuildCellType) => buildCell.columnDimension.id === columnDimension.id))
+        buildCells: rows.value
+          .map((buildRow: BuildRowType) => buildRow.buildCells.find(
+            (buildCell: BuildCellType) => buildCell.columnDimension.id === columnDimension.id)
+          )
+          .filter((buildCell: BuildCellType | undefined) => buildCell)
       }
     })
   )

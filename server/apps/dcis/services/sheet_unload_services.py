@@ -67,7 +67,10 @@ class SheetColumnsUnloader(DataUnloader):
 
     def unload_data(self) -> Union[list[dict], dict]:
         """Выгрузка колонок листа."""
-        return self.unload_raw_data(self.columns, self._column_fields)
+        columns = self.unload_raw_data(self.columns, self._column_fields)
+        for column in columns:
+            column['name'] = get_column_letter(column['index'])
+        return columns
 
     _column_fields = (
         'id', 'index', 'width',
@@ -241,9 +244,8 @@ class SheetRowsUploader(DataUnloader):
     @staticmethod
     def _add_cell_positions(row: dict, column: dict, cell: dict) -> None:
         """Добавление позиций для ячейки."""
-        letter = get_column_letter(column['index'])
-        cell['position'] = f'{letter}{row["name"]}'
-        cell['global_position'] = f'{letter}{row["global_index"]}'
+        cell['position'] = f'{column["name"]}{row["name"]}'
+        cell['global_position'] = f'{column["name"]}{row["global_index"]}'
 
     @classmethod
     def _add_cell_spans(cls, row: dict, cell: dict, merged_cells_map: dict) -> None:

@@ -1230,10 +1230,12 @@ type ColumnDimensionType {
   index: Int!
   """Тип значений"""
   kind: String!
+  """Название колонки"""
+  name: String!
   """Пользователь"""
   user: [UserType]
   """Ширина колонки"""
-  width: Int!
+  width: Int
 }
 
 """Комментарии"""
@@ -3041,7 +3043,7 @@ type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
   """Ячейки"""
-  cells: [CellType]
+  cells: [CellType]!
   """Дочерние строки"""
   children: [RowDimensionType]!
   """Дата добавления"""

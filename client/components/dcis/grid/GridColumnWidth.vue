@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-alert.grid-column-width.font-weight-medium.px-1.py-0(
+  v-alert.grid__column-width.font-weight-medium.px-1.py-0(
     v-show="visible",
     :style="style"
     dense
@@ -10,12 +10,12 @@
 
 <script lang="ts">
 import type { PropType } from '#app'
-import type { PositionType } from '~/types/grid-types'
+import type { ElementPositionType } from '~/types/grid'
 
 export default defineComponent({
   props: {
     visible: { type: Boolean, required: true },
-    position: { type: Object as PropType<PositionType>, required: true },
+    position: { type: Object as PropType<ElementPositionType>, required: true },
     width: { type: Number, required: true }
   },
   setup (props) {
@@ -30,11 +30,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="sass">
-  .grid-column-width
-    position: absolute
-    z-index: 2
-    font-size: 12px
-    background: white !important
-</style>

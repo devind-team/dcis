@@ -8,6 +8,14 @@
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
             :selected-column-positions="selectedColumnsPositions"
+            :selected-boundary-row-cells="selectedBoundaryRowCells"
+            :all-cells-selected="allCellsSelected"
+            :mouseenter-column-index="mouseenterColumnIndex"
+            :mousemove-column-index="mousemoveColumnIndex"
+            :mouseleave-column-index="mouseleaveColumnIndex"
+            :mousedown-column-index="mousedownColumnIndex"
+            :mouseup-column-index="mouseupColumnIndex"
+            :select-all-cells="selectAllCells"
           )
           grid-body(
             :rows="rows"
@@ -23,6 +31,7 @@
             :mouseenter-cell="mouseenterCell"
             :mouseup-cell="mouseupCell"
           )
+      grid-column-width(:visible="columnWidth.visible" :position="columnWidth.position" :width="columnWidth.width")
 </template>
 
 <script lang="ts">
@@ -31,9 +40,10 @@ import { SheetType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
+import GridColumnWidth from '~/components/dcis/grid/GridColumnWidth.vue'
 
 export default defineComponent({
-  components: { GridSheetToolbar, GridHeader, GridBody },
+  components: { GridSheetToolbar, GridHeader, GridBody, GridColumnWidth },
   props: {
     sheet: { type: Object as PropType<SheetType>, required: true }
   },
@@ -120,6 +130,12 @@ $index-dark: map-get($grey, 'lighten-2')
 
 div.grid__body
   position: relative
+
+  .grid__column-width
+    position: absolute
+    z-index: 2
+    font-size: 12px
+    background: white !important
 
   .grid__container
     position: relative
