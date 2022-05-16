@@ -109,7 +109,7 @@ class SheetRowsUploader(DataUnloader):
         self._add_cell_values(cells, values)
         self._add_cells(rows, cells)
         self._add_cell_properties(rows, columns_map, merged_cells_map)
-        self._filter_row_cells(rows, merged_cells_map, merged_cell_positions)
+        self._prepare_row_cells(rows, merged_cells_map, merged_cell_positions)
         return rows
 
     _rows_fields = (
@@ -254,15 +254,15 @@ class SheetRowsUploader(DataUnloader):
         cell['rowspan'] = merged_cell['rowspan'] if merged_cell else 1
 
     @classmethod
-    def _filter_row_cells(cls, rows: list[dict], merged_cells_map: dict, merged_cell_positions: list[str]) -> None:
-        """Удаление лишних ячеек из строк."""
+    def _prepare_row_cells(cls, rows: list[dict], merged_cells_map: dict, merged_cell_positions: list[str]) -> None:
+        """Сортировка ячеек строк с удалением лишних ячеек."""
         for row in rows:
             cells: list[dict] = []
             for cell in row['cells']:
                 root_cell = cls._find_root_cell(row, cell)
                 if root_cell['position'] in merged_cells_map or root_cell['position'] not in merged_cell_positions:
                     cells.append(cell)
-            row['cells'] = cells
+            row['cells'] = sorted(cells, key=lambda c: c['global_position'])
 
     @classmethod
     def _find_root_cell(cls, row: dict, cell: dict) -> dict:
