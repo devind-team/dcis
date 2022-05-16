@@ -48,7 +48,7 @@
 
 <script lang="ts">
 import { useNuxt2Meta } from '#app'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { ConfirmEmailMutation, RequestCodeMutation } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'

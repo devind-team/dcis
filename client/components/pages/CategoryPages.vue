@@ -19,7 +19,7 @@
 <script lang="ts">
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent } from '#app'
-import { usePageStore } from '~/store'
+import { usePageStore } from '~/stores'
 import { CategoryType } from '~/types/graphql'
 import PageList from '~/components/pages/views/PageGrid.vue'
 

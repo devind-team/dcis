@@ -59,7 +59,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import type { PropType, Ref } from '#app'
 import { defineComponent, ref, toRefs } from '#app'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import {
   CategoryType,
   ChangeCategoryAvatarMutation,

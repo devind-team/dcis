@@ -21,7 +21,7 @@
 import type { PropType } from '#app'
 import { defineComponent } from '#app'
 import { LinksType } from '~/types/devind'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 
 export default defineComponent({
   props: {

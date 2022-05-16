@@ -55,7 +55,7 @@ import {
   StatusType
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'

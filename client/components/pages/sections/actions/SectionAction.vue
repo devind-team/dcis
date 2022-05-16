@@ -28,9 +28,9 @@
 import { DataProxy } from 'apollo-cache'
 import type { Ref, PropType } from '#app'
 import { defineComponent, ref, toRefs } from '#app'
-import { useAuthStore } from '~/store'
+import type { HasPermissionFnType } from '~/stores'
+import { useAuthStore } from '~/stores'
 import { SectionInterface, UserType } from '~/types/graphql'
-import { HasPermissionFnType } from '~/store/auth'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({

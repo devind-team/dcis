@@ -8,7 +8,7 @@
 import { useMutation } from '@vue/apollo-composable'
 import type { Ref } from '#app'
 import { useSelectFiles } from '~/composables'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import {
   ChangeAvatarMutation, ChangeAvatarMutationPayload,
   ChangeAvatarMutationVariables, UserType

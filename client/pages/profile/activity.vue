@@ -29,7 +29,7 @@ import { DataTableHeader } from 'vuetify/types'
 import { computed, defineComponent, Ref, toRef, useNuxt2Meta } from '#app'
 import type { ComputedRef } from '#app'
 import type { LogEntryQuery, LogEntryQueryVariables, LogEntryType, UserType } from '~/types/graphql'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { useCursorPagination, useI18n, useQueryRelay } from '~/composables'
 import logEntryQuery from '~/gql/core/queries/log_entry.graphql'
 

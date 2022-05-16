@@ -61,7 +61,7 @@ import {
   UploadUsersMutationPayload
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { useCommonQuery, useCursorPagination, useDebounceSearch, useI18n, useQueryRelay } from '~/composables'
 import usersQuery from '~/gql/core/queries/users.graphql'
 import groupsQuery from '~/gql/core/queries/groups.graphql'

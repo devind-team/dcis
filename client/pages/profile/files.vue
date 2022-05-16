@@ -51,12 +51,13 @@
 </template>
 
 <script lang="ts">
-import { DataTableHeader } from 'vuetify'
+import type { DataTableHeader } from 'vuetify'
 import { useMutation } from '@vue/apollo-composable'
 import type { ComputedRef } from '#app'
-import { computed, defineComponent, useNuxt2Meta, useNuxtApp } from '#app'
+import { computed, defineComponent, toRefs, useNuxt2Meta } from '#app'
 import { useI18n, useQueryRelay, useCursorPagination, useSelectFiles, useDebounceSearch } from '~/composables'
-import { HasPermissionFnType } from '~/store/auth'
+import type { HasPermissionFnType } from '~/stores'
+import { useAuthStore } from '~/stores'
 import {
   AddFileMutation,
   AddFileMutationVariables,
@@ -79,13 +80,13 @@ export default defineComponent({
   components: { TextMenu },
   middleware: 'auth',
   setup () {
-    const { $store } = useNuxtApp()
+    const authStore = useAuthStore()
     const { t } = useI18n()
     const tl = (path: string, values: any = undefined): string => t(`profile.files.${path}`, values) as string
     useNuxt2Meta({ title: tl('name') })
 
-    const user: ComputedRef<UserType> = computed<UserType>(() => $store.getters['auth/user'])
-    const hasPerm: ComputedRef<HasPermissionFnType> = computed<HasPermissionFnType>(() => $store.getters['auth/hasPerm'])
+    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
+
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
       { text: t('profile.files.tableHeaders.name') as string, value: 'name' },
       { text: t('profile.files.tableHeaders.ext') as string, value: 'ext', width: 120 },
