@@ -65,3 +65,5 @@ deploy:
   script:
     - echo "Deploy application!"
   when: manual
+  only:
+    - tags
