@@ -2,7 +2,7 @@ import { useEventListener } from '@vueuse/core'
 import type { Ref } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 import {
-  PositionType,
+  ElementPositionType,
   BuildCellType,
   BuildColumnType,
   ResizingBuildColumnType,
@@ -35,7 +35,7 @@ export function useGrid (
   const borderGag = ref<number>(10)
 
   const resizingColumn = ref<ResizingBuildColumnType | null>(null)
-  const columnWidthPosition = ref<PositionType>({ left: null, right: null, top: null, bottom: null })
+  const columnWidthPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
   const columnWidth = computed<ColumnWidthType>(() => ({
     visible: !!resizingColumn.value && resizingColumn.value.state === 'resizing',
     position: columnWidthPosition.value,
@@ -43,7 +43,7 @@ export function useGrid (
   }))
 
   const resizingRow = ref<ResizingBuildRowType | null>(null)
-  const rowHeightPosition = ref<PositionType>({ left: null, right: null, top: null, bottom: null })
+  const rowHeightPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
   const rowHeight = computed<RowHeightType>(() => ({
     visible: !!resizingRow.value && resizingRow.value.state === 'resizing',
     position: rowHeightPosition.value,
@@ -132,17 +132,23 @@ export function useGrid (
   })
   const selectedColumnsPositions = computed<number[]>(() => {
     if (selection.value) {
-      return Array.from({
-        length: selection.value.last.columnDimension.index - selection.value.first.columnDimension.index + 1
-      }).map((_, i) => i + selection.value.first.columnDimension.index)
+      const minIndex = Math.min(selection.value.first.columnDimension.index, selection.value.last.columnDimension.index)
+      const maxIndex = Math.max(selection.value.first.columnDimension.index, selection.value.last.columnDimension.index)
+      return Array.from({ length: maxIndex - minIndex + 1 }).map((_, i) => i + minIndex)
     }
     return []
   })
   const selectedRowsPositions = computed<number[]>(() => {
     if (selection.value) {
-      return Array.from({
-        length: selection.value.last.rowDimension.globalIndex - selection.value.first.rowDimension.globalIndex
-      }).map((_, i) => i + selection.value.first.rowDimension.globalIndex)
+      const minIndex = Math.min(
+        selection.value.first.rowDimension.globalIndex,
+        selection.value.last.rowDimension.globalIndex
+      )
+      const maxIndex = Math.max(
+        selection.value.first.rowDimension.globalIndex,
+        selection.value.last.rowDimension.globalIndex
+      )
+      return Array.from({ length: maxIndex - minIndex + 1 }).map((_, i) => i + minIndex)
     }
     return []
   })
@@ -214,7 +220,7 @@ export function useGrid (
    */
   const selectedBoundaryColumnCells = computed<BoundaryColumnCell[]>(() =>
     boundaryColumnCells.value.filter(boundaryCell =>
-      selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.position))
+      selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.globalPosition))
   )
 
   /**
@@ -237,7 +243,7 @@ export function useGrid (
    */
   const selectedBoundaryRowCells = computed<BoundaryRowCell[]>(() =>
     boundaryRowCells.value.filter(boundaryCell =>
-      selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.position))
+      selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.globalPosition))
   )
 
   const mouseenterColumnIndex = (buildColumn: BuildColumnType) => {

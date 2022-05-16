@@ -37,12 +37,12 @@ export enum AggregationMethod {
   AVG,
 }
 
-export type CoordinatePartsType = {
+export type PositionPartsType = {
   column: string,
   row: number
 }
 
-export type SheetCoordinatePartsType = CoordinatePartsType & {
+export type SheetPositionPartsType = PositionPartsType & {
   sheet: string
 }
 
@@ -76,7 +76,7 @@ export type MousePositionType = {
   y: number
 }
 
-export type PositionType = {
+export type ElementPositionType = {
   left: number | null
   right: number | null
   top: number | null
@@ -106,7 +106,7 @@ export type ResizingBuildColumnType = {
 
 export type ColumnWidthType = {
   visible: boolean
-  position: PositionType
+  position: ElementPositionType
   width: number
 }
 
@@ -126,7 +126,7 @@ export type ResizingBuildRowType = {
 
 export type RowHeightType = {
   visible: boolean
-  position: PositionType
+  position: ElementPositionType
   height: number
 }
 

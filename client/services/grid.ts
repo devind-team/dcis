@@ -1,8 +1,8 @@
 import { CellType } from '~/types/graphql'
 import {
   RangeType,
-  CoordinatePartsType,
-  SheetCoordinatePartsType,
+  PositionPartsType,
+  SheetPositionPartsType,
   RangePartsType,
   SheetRangePartsType,
   RangeIndicesType,
@@ -67,29 +67,29 @@ const letterToPosition = (letter: string): number => {
 }
 
 /**
- * Разбор координаты на составляющие
+ * Разбор позиции на составляющие
  * parseCoordinate('A1') -> { column: 'A', row: 1 }
  * parseCoordinate('$A1') -> { column: 'A', row: 1 }
  * parseCoordinate('A$1') -> { column: 'A', row: 1 }
  * parseCoordinate('$A$1') -> { column: 'A', row: 1 }
  * @param coordinate координата
  */
-const parseCoordinate = (coordinate: string): CoordinatePartsType => {
+const parsePosition = (coordinate: string): PositionPartsType => {
   const coordinateParse: object | null = coordinate.match(coordinateExp)
   if (coordinateParse === null) {
     throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
   }
   const column: string = coordinateParse[1]
   const row: number = +coordinateParse[2]
-  return { column: buildColumn, row }
+  return { column, row }
 }
 
 /**
- * Разбор координаты с указанием sheet
+ * Разбор позиции с указанием sheet
  * parseCoordinateWithSheet('Лист!A1') -> { sheet: 'Лист', column: 'A', row: '1' }
  * @param coordinate координата
  */
-const parseCoordinateWithSheet = (coordinate: string): SheetCoordinatePartsType => {
+const parsePositionWithSheet = (coordinate: string): SheetPositionPartsType => {
   const match = coordinate.match(sheetExp)
   if (match === null) {
     throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
@@ -98,7 +98,7 @@ const parseCoordinateWithSheet = (coordinate: string): SheetCoordinatePartsType 
   if (!(sheet && column && row)) {
     throw new TypeError(`Не удалось преобразовать координату: ${coordinate}`)
   }
-  return { sheet, column: buildColumn, row: parseInt(row) }
+  return { sheet, column, row: parseInt(row) }
 }
 
 /**
@@ -109,12 +109,12 @@ const parseCoordinateWithSheet = (coordinate: string): SheetCoordinatePartsType 
  */
 const normalizeRange = (range: RangeType): RangeType => {
   const { minColumn, minRow, maxColumn, maxRow } = parseRange(range)
-  const minColumnPosition: number = letterToPosition(minColumn)
-  const maxColumnPosition: number = letterToPosition(maxColumn)
-  const minNormalizationColumn: string = positionToLetter(Math.min(minColumnPosition, maxColumnPosition))
-  const maxNormalizationColumn: string = positionToLetter(Math.max(minColumnPosition, maxColumnPosition))
-  const minNormalizationRow: number = Math.min(minRow, maxRow)
-  const maxNormalizationRow: number = Math.max(minRow, maxRow)
+  const minColumnPosition = letterToPosition(minColumn)
+  const maxColumnPosition = letterToPosition(maxColumn)
+  const minNormalizationColumn = positionToLetter(Math.min(minColumnPosition, maxColumnPosition))
+  const maxNormalizationColumn = positionToLetter(Math.max(minColumnPosition, maxColumnPosition))
+  const minNormalizationRow = Math.min(minRow, maxRow)
+  const maxNormalizationRow = Math.max(minRow, maxRow)
   return `${minNormalizationColumn}${minNormalizationRow}:${maxNormalizationColumn}${maxNormalizationRow}`
 }
 
@@ -243,8 +243,8 @@ const uniteCellsOptions = <T>(options: T[]): T | null => {
 export {
   positionToLetter,
   letterToPosition,
-  parseCoordinate,
-  parseCoordinateWithSheet,
+  parsePosition,
+  parsePositionWithSheet,
   normalizeRange,
   parseRange,
   parseRangeWithSheet,

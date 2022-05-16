@@ -12,7 +12,7 @@
         :colspan="buildCell.cell.colspan"
         :rowspan="buildCell.cell.rowspan"
         :class="getCellClasses(buildCell)"
-        :style="`${buildCell.style}`"
+        :style="buildCell.style"
         @mousedown="mousedownCell(buildCell)"
         @mouseenter="mouseenterCell(buildCell)"
         @mouseup="mouseupCell(buildCell)"
@@ -50,12 +50,14 @@ export default defineComponent({
     const getRowIndexCellContentClasses = (buildRow: BuildRowType): (string | Record<string, boolean>)[] => {
       return [
         'grid__cell-content_row-index',
-        { 'grid__cell-content_row-index-selected': props.selectedRowsPositions.includes(buildRow.rowDimension.index) },
         {
-          'grid__cell-content_row-index-neighbor-selected':
-            !!props.selectedBoundaryColumnCells.find(boundaryCell =>
-              boundaryCell.buildRows.find(boundaryColumnRow =>
-                boundaryColumnRow.rowDimension.id === buildRow.rowDimension.id))
+          'grid__cell-content_row-index-selected': props.selectedRowsPositions
+            .includes(buildRow.rowDimension.globalIndex)
+        },
+        {
+          'grid__cell-content_row-index-neighbor-selected': !!props.selectedBoundaryColumnCells.find(boundaryCell =>
+            boundaryCell.buildRows.find(boundaryColumnRow =>
+              boundaryColumnRow.rowDimension.id === buildRow.rowDimension.id))
         }
       ]
     }
