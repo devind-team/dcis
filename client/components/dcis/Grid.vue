@@ -7,9 +7,22 @@
           grid-header(
             :row-index-column-width="rowIndexColumnWidth"
             :columns="columns"
-            :selected-column-positions="selectedColumnPositions"
+            :selected-column-positions="selectedColumnsPositions"
           )
-          grid-body(:rows="rows")
+          grid-body(
+            :rows="rows"
+            :active-cell="activeCell"
+            :set-active-cell="setActiveCell"
+            :selected-cells-positions="selectedCellsPositions"
+            :selected-rows-positions="selectedRowsPositions"
+            :boundary-column-cells="boundaryColumnCells"
+            :selected-boundary-column-cells="selectedBoundaryColumnCells"
+            :mouseenter-row-index="mouseenterRowIndex"
+            :mousedown-row-index="mousedownRowIndex"
+            :mousedown-cell="mousedownCell"
+            :mouseenter-cell="mouseenterCell"
+            :mouseup-cell="mouseupCell"
+          )
 </template>
 
 <script lang="ts">
@@ -35,9 +48,10 @@ export default defineComponent({
       gridContainer,
       gridWidth,
       activeCell,
-      selectedCellPositions,
-      selectedColumnPositions,
-      selectedRowPositions,
+      setActiveCell,
+      selectedCellsPositions,
+      selectedColumnsPositions,
+      selectedRowsPositions,
       allCellsSelected,
       selectedCellsOptions,
       mousedownCell,
@@ -66,9 +80,10 @@ export default defineComponent({
       gridContainer,
       gridWidth,
       activeCell,
-      selectedCellPositions,
-      selectedColumnPositions,
-      selectedRowPositions,
+      setActiveCell,
+      selectedCellsPositions,
+      selectedColumnsPositions,
+      selectedRowsPositions,
       allCellsSelected,
       selectedCellsOptions,
       mousedownCell,

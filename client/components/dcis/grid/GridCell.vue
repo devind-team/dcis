@@ -2,9 +2,9 @@
   .grid__cell-content(:class="contentClasses")
     component(
       v-if="active && buildCell.cell.editable"
-      @cancel="$emit('clear-active')"
-      :value="buildCell.cell.value"
       :is="`GridCell${cellKind}`"
+      :value="buildCell.cell.value"
+      @cancel="$emit('clear-active')"
     )
     template(v-else) {{ buildCell.cell.value }}
 </template>
@@ -41,7 +41,7 @@ export default defineComponent({
     ))
 
     const contentClasses = computed<Record<string, boolean>>(() => ({
-      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
+      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.buildCell.cell.kind)
     }))
 
     return { cellKind, contentClasses }

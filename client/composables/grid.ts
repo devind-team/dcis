@@ -109,6 +109,10 @@ export function useGrid (
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
   const activeCell = ref<BuildCellType | null>(null)
+  const setActiveCell = (buildCell: BuildCellType | null) => {
+    activeCell.value = buildCell
+  }
+
   const selection = ref<{ first: BuildCellType, last: BuildCellType } | null>(null)
   const allCellsRange = computed<string | null>(() =>
     `A1:${columns.value.at(-1).columnDimension.index}${rows.value.at(-1).rowDimension.globalIndex}`)
@@ -126,7 +130,7 @@ export function useGrid (
     }
     return []
   })
-  const selectedColumnPositions = computed<number[]>(() => {
+  const selectedColumnsPositions = computed<number[]>(() => {
     if (selection.value) {
       return Array.from({
         length: selection.value.last.columnDimension.index - selection.value.first.columnDimension.index + 1
@@ -134,7 +138,7 @@ export function useGrid (
     }
     return []
   })
-  const selectedRowPositions = computed<number[]>(() => {
+  const selectedRowsPositions = computed<number[]>(() => {
     if (selection.value) {
       return Array.from({
         length: selection.value.last.rowDimension.globalIndex - selection.value.first.rowDimension.globalIndex
@@ -188,7 +192,7 @@ export function useGrid (
   }
   const mouseupCell = (buildCell: BuildCellType): void => {
     if (selectionState.value === 'cell' && selection.value.first.cell.id === selection.value.last.cell.id) {
-      activeCell.value = buildCell
+      setActiveCell(buildCell)
     }
   }
 
@@ -372,9 +376,10 @@ export function useGrid (
     gridContainer,
     gridWidth,
     activeCell,
-    selectedCellPositions: selectedCellsPositions,
-    selectedColumnPositions,
-    selectedRowPositions,
+    setActiveCell,
+    selectedCellsPositions,
+    selectedColumnsPositions,
+    selectedRowsPositions,
     allCellsSelected,
     selectedCellsOptions,
     mousedownCell,
