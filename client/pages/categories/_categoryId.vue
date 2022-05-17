@@ -7,6 +7,7 @@
 <script lang="ts">
 import { ApolloQueryResult } from '@apollo/client'
 import type { ComputedRef } from '#app'
+import { computed, defineComponent, onUnmounted, useRoute } from '#app'
 import { useCommonQuery, useI18n, usePage } from '~/composables'
 import { CategoryQuery, CategoryQueryVariables } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
