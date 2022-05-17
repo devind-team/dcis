@@ -15,6 +15,7 @@ import {
   BoundaryRowCell
 } from '~/types/grid'
 import {
+  positionToLetter,
   positionsToRangeIndices,
   rangeIndicesToPositions,
   getCellStyle,
@@ -151,8 +152,11 @@ export function useGrid (
     return newSelectedCells
   })
 
-  const allCellsRange = computed<string | null>(() =>
-    `A1:${columns.value.at(-1).columnDimension.index}${rows.value.at(-1).rowDimension.globalIndex}`)
+  const allCellsRange = computed<string | null>(() => {
+    const lastPositionColumn = positionToLetter(columns.value.at(-1).columnDimension.index)
+    const lastPositionRow = rows.value.at(-1).rowDimension.globalIndex
+    return `A1:${lastPositionColumn}${lastPositionRow}`
+  })
   const selectedCellsRange = computed<string | null>(() => {
     if (selectedCells.value.length) {
       return `${selectedCells.value[0].cell.globalPosition}:${selectedCells.value.at(-1).cell.globalPosition}`
