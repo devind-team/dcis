@@ -2,8 +2,8 @@
 #import "../fragments/tag_fields.graphql"
 #import "../fragments/category_fields.graphql"
 
-query Pages($first: Int, $offset: Int, $categoryId: ID, $kindId: ID, $search: String) {
-  pages(first: $first, offset: $offset, category_Id: $categoryId, kind_Id: $kindId, title_Icontains: $search) {
+query Pages($first: Int, $after: String, $categoryId: ID, $kindId: ID, $search: String) {
+  pages(first: $first, after: $after, category_Id: $categoryId, kind_Id: $kindId, title_Icontains: $search) {
     totalCount
     pageInfo {
       hasNextPage

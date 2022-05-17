@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { useNuxt2Meta } from '#app'
+import { defineComponent, toRef, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/stores'
 import { CategoryType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
