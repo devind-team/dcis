@@ -19,7 +19,7 @@
     "@pinia/nuxt": "^0.1.9",
     "@vue/apollo-composable": "^4.0.0-alpha.17",
     "@vueuse/core": "^8.4.2",
-     "@vueuse/integrations": "^8.4.2",
+     "@vueuse/integrations": "^8.5.0",
     "accounting": "^0.4.1",
     "apexcharts": "^3.35.2",
     "detect-browser": "^5.3.0",
