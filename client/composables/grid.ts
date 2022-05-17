@@ -14,7 +14,12 @@ import {
   BoundaryColumnCell,
   BoundaryRowCell
 } from '~/types/grid'
-import { normalizeRange, rangeToCellPositions, getCellStyle, uniteCellsOptions } from '~/services/grid'
+import {
+  positionsToRangeIndices,
+  rangeIndicesToPositions,
+  getCellStyle,
+  uniteCellsOptions
+} from '~/services/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -117,19 +122,48 @@ export function useGrid (
   }
 
   const selection = ref<{ first: BuildCellType, last: BuildCellType } | null>(null)
+  const selectedCells = computed<BuildCellType[]>(() => {
+    if (!selection.value) {
+      return []
+    }
+    let selectedCells = [selection.value.first, selection.value.last]
+    let newSelectedCells: BuildCellType[] = []
+    while (selectedCells.length !== newSelectedCells.length) {
+      if (newSelectedCells.length) {
+        selectedCells = newSelectedCells
+        newSelectedCells = []
+      }
+      const relatedPositions = selectedCells.reduce((a: string[], c: BuildCellType) => {
+        a.push(...c.cell.relatedGlobalPositions)
+        return a
+      }, [])
+      const selectedPositions = rangeIndicesToPositions(positionsToRangeIndices(relatedPositions))
+      for (const buildRow of rows.value) {
+        for (const buildCell of buildRow.buildCells) {
+          for (const relatedPosition of buildCell.cell.relatedGlobalPositions) {
+            if (selectedPositions.includes(relatedPosition)) {
+              newSelectedCells.push(buildCell)
+            }
+          }
+        }
+      }
+    }
+    return newSelectedCells
+  })
+
   const allCellsRange = computed<string | null>(() =>
     `A1:${columns.value.at(-1).columnDimension.index}${rows.value.at(-1).rowDimension.globalIndex}`)
   const selectedCellsRange = computed<string | null>(() => {
-    if (selection.value) {
-      return normalizeRange(
-        `${selection.value.first.cell.globalPosition}:${selection.value.last.cell.globalPosition}`
-      )
+    if (selectedCells.value.length) {
+      return `${selectedCells.value[0].cell.globalPosition}:${selectedCells.value.at(-1).cell.globalPosition}`
     }
     return null
   })
+  const allCellsSelected = computed<boolean>(() => selectedCellsRange.value === allCellsRange.value)
+
   const selectedCellsPositions = computed<string[]>(() => {
     if (selectedCellsRange.value) {
-      return rangeToCellPositions(selectedCellsRange.value)
+      return selectedCells.value.map((buildCell: BuildCellType) => buildCell.cell.globalPosition)
     }
     return []
   })
@@ -154,21 +188,6 @@ export function useGrid (
       return Array.from({ length: maxIndex - minIndex + 1 }).map((_, i) => i + minIndex)
     }
     return []
-  })
-  const allCellsSelected = computed<boolean>(() => selectedCellsRange.value === allCellsRange.value)
-  const selectedCells = computed<BuildCellType[]>(() => {
-    if (!selectedCellsPositions.value.length) {
-      return []
-    }
-    const result: BuildCellType[] = []
-    for (const buildRow of rows.value) {
-      for (const buildCell of buildRow.buildCells) {
-        if (selectedCellsPositions.value.includes(buildCell.cell.globalPosition)) {
-          result.push(buildCell)
-        }
-      }
-    }
-    return result
   })
   const possibleCellsOptions: (keyof CellOptionsType)[] = [
     'kind', 'horizontalAlign', 'verticalAlign',
@@ -386,10 +405,10 @@ export function useGrid (
     gridWidth,
     activeCell,
     setActiveCell,
+    allCellsSelected,
     selectedCellsPositions,
     selectedColumnsPositions,
     selectedRowsPositions,
-    allCellsSelected,
     selectedCellsOptions,
     mousedownCell,
     mouseenterCell,

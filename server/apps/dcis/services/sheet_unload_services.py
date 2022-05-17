@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Optional, Sequence, Union
 
 from django.db.models import Model, Q, QuerySet
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import get_column_letter, column_index_from_string
 
 from apps.dcis.models.sheet import Cell, ColumnDimension, MergedCell, RowDimension, Sheet, Value
 
@@ -31,7 +31,7 @@ class DataUnloader(ABC):
     def unload_raw_data(
         cls,
         objects: Union[QuerySet, Sequence[Model]],
-        fields: tuple,
+        fields: Sequence[str],
         properties: Optional[Sequence[str]] = None
     ) -> list[dict]:
         """Выгрузка необработанных данных."""
@@ -225,6 +225,7 @@ class SheetRowsUploader(DataUnloader):
                 column = columns_map[cell['column_id']]
                 cls._add_cell_positions(row, column, cell)
                 cls._add_cell_spans(row, cell, merged_cells_map)
+                cls._add_cell_related_positions(row, column, cell)
 
     @staticmethod
     def _create_columns_map(columns: list[dict]) -> dict[dict]:
@@ -254,6 +255,16 @@ class SheetRowsUploader(DataUnloader):
         merged_cell = merged_cells_map.get(root_cell['position'], None)
         cell['colspan'] = merged_cell['colspan'] if merged_cell else 1
         cell['rowspan'] = merged_cell['rowspan'] if merged_cell else 1
+
+    @staticmethod
+    def _add_cell_related_positions(row: dict, column: dict, cell: dict):
+        """Добавление связанных с объединением позиций."""
+        cell['related_global_positions'] = []
+        for row_offset in range(cell['rowspan']):
+            for column_offset in range(cell['colspan']):
+                column_name = get_column_letter(column_index_from_string(column['name']) + column_offset)
+                row_index = row['global_index'] + row_offset
+                cell['related_global_positions'].append(f'{column_name}{row_index}')
 
     @classmethod
     def _prepare_row_cells(cls, rows: list[dict], merged_cells_map: dict, merged_cell_positions: list[str]) -> None:

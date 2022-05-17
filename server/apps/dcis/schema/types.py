@@ -294,10 +294,10 @@ class RowDimensionType(graphene.ObjectType):
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
     parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
-    children = graphene.List(lambda: RowDimensionType, required=True, description='Дочерние строки')
+    children = graphene.List(graphene.NonNull(lambda: RowDimensionType), required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
     user = graphene.List(UserType, description='Пользователь')
-    cells = graphene.List(lambda: CellType, required=True, description='Ячейки')
+    cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
 
 class CellType(graphene.ObjectType):
@@ -325,6 +325,11 @@ class CellType(graphene.ObjectType):
     border_color = graphene.JSONString(required=True, description='Цвет границ')
     position = graphene.String(required=True, description='Позиция относительно родительской строки')
     global_position = graphene.String(required=True, description='Позиция в плоской структуре')
+    related_global_positions = graphene.List(
+        graphene.NonNull(graphene.String),
+        required=True,
+        description='Связанные с объединением позиции в плоской структуре'
+    )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
     value = graphene.String(description='Значение')

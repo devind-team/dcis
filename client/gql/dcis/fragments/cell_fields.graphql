@@ -21,6 +21,7 @@ fragment CellFields on CellType {
   borderColor
   position
   globalPosition
+  relatedGlobalPositions
   colspan
   rowspan
   value

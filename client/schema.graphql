@@ -591,6 +591,8 @@ type CellType {
   mask: String
   """Позиция относительно родительской строки"""
   position: String!
+  """Связанные с объединением позиции в плоской структуре"""
+  relatedGlobalPositions: [String!]!
   """Идентификатор строки"""
   rowId: ID
   """Объединение строк"""
@@ -3043,9 +3045,9 @@ type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
   """Ячейки"""
-  cells: [CellType]!
+  cells: [CellType!]!
   """Дочерние строки"""
-  children: [RowDimensionType]!
+  children: [RowDimensionType!]!
   """Дата добавления"""
   createdAt: DateTime!
   """Идентификатор документа"""
