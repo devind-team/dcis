@@ -12,10 +12,9 @@ import {
   RowHeightType,
   CellOptionsType,
   BoundaryColumnCell,
-  BoundaryRowCell
+  BoundaryRowCell, RangeIndicesType
 } from '~/types/grid'
 import {
-  positionToLetter,
   positionsToRangeIndices,
   rangeIndicesToPositions,
   getCellStyle,
@@ -152,44 +151,48 @@ export function useGrid (
     return newSelectedCells
   })
 
-  const allCellsRange = computed<string | null>(() => {
-    const lastPositionColumn = positionToLetter(columns.value.at(-1).columnDimension.index)
-    const lastPositionRow = rows.value.at(-1).rowDimension.globalIndex
-    return `A1:${lastPositionColumn}${lastPositionRow}`
-  })
-  const selectedCellsRange = computed<string | null>(() => {
-    if (selectedCells.value.length) {
-      return `${selectedCells.value[0].cell.globalPosition}:${selectedCells.value.at(-1).cell.globalPosition}`
+  const selectedCellsPositions = computed<string[]>(() =>
+    selectedCells.value.reduce((a: string[], c: BuildCellType) => {
+      a.push(...c.cell.relatedGlobalPositions)
+      return a
+    }, []))
+  const allCellsRangeIndices = computed<RangeIndicesType>(() => ({
+    minColumn: 1,
+    minRow: 1,
+    maxColumn: columns.value.at(-1).columnDimension.index,
+    maxRow: rows.value.at(-1).rowDimension.globalIndex
+  }))
+  const selectedRangeIndices = computed<RangeIndicesType | null>(() => {
+    if (selectedCellsPositions.value.length) {
+      return positionsToRangeIndices(selectedCellsPositions.value)
     }
     return null
   })
-  const allCellsSelected = computed<boolean>(() => selectedCellsRange.value === allCellsRange.value)
-
-  const selectedCellsPositions = computed<string[]>(() => {
-    if (selectedCellsRange.value) {
-      return selectedCells.value.map((buildCell: BuildCellType) => buildCell.cell.globalPosition)
+  const allCellsSelected = computed<boolean>(() => {
+    if (selectedRangeIndices.value) {
+      for (const [k, v] of Object.entries(selectedRangeIndices.value)) {
+        if (allCellsRangeIndices.value[k] !== v) {
+          return false
+        }
+      }
+      return true
     }
-    return []
+    return false
   })
+
   const selectedColumnsPositions = computed<number[]>(() => {
-    if (selection.value) {
-      const minIndex = Math.min(selection.value.first.columnDimension.index, selection.value.last.columnDimension.index)
-      const maxIndex = Math.max(selection.value.first.columnDimension.index, selection.value.last.columnDimension.index)
-      return Array.from({ length: maxIndex - minIndex + 1 }).map((_, i) => i + minIndex)
+    if (selectedRangeIndices.value) {
+      return Array.from({
+        length: selectedRangeIndices.value.maxColumn - selectedRangeIndices.value.minColumn + 1
+      }).map((_, i) => i + selectedRangeIndices.value.minColumn)
     }
     return []
   })
   const selectedRowsPositions = computed<number[]>(() => {
-    if (selection.value) {
-      const minIndex = Math.min(
-        selection.value.first.rowDimension.globalIndex,
-        selection.value.last.rowDimension.globalIndex
-      )
-      const maxIndex = Math.max(
-        selection.value.first.rowDimension.globalIndex,
-        selection.value.last.rowDimension.globalIndex
-      )
-      return Array.from({ length: maxIndex - minIndex + 1 }).map((_, i) => i + minIndex)
+    if (selectedRangeIndices.value) {
+      return Array.from({
+        length: selectedRangeIndices.value.maxRow - selectedRangeIndices.value.minRow + 1
+      }).map((_, i) => i + selectedRangeIndices.value.minRow)
     }
     return []
   })

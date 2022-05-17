@@ -134,18 +134,6 @@ const parseRangeWithSheet = (range: string): SheetRangePartsType => {
 }
 
 /**
- * Преобразование диапазона в числовое представление
- * rangeToPositions('A1:B2') -> { minColumn: 1, minRow: 1, maxColumn: 2, maxRow: 2 }
- * @param range диапазон
- */
-const rangeToRangeIndices = (range: RangeType): RangeIndicesType => {
-  const { minColumn, minRow, maxColumn, maxRow } = parseRange(range)
-  const minColumnPosition = letterToPosition(minColumn)
-  const maxColumnPosition = letterToPosition(maxColumn)
-  return { minColumn: minColumnPosition, minRow, maxColumn: maxColumnPosition, maxRow }
-}
-
-/**
  * Преобразование набора позиций ячеек в числовое представление диапазона
  * rangeToPositions('A1', 'A2', 'B1', 'B2') -> { minColumn: 1, minRow: 1, maxColumn: 2, maxRow: 2 }
  * rangeToPositions('A1', 'B2') -> { minColumn: 1, minRow: 1, maxColumn: 2, maxRow: 2 }
@@ -166,6 +154,18 @@ const positionsToRangeIndices = (positions: string[]): RangeIndicesType => {
     maxColumn: Math.max(...columnsIndices),
     maxRow: Math.max(...rowsIndices)
   }
+}
+
+/**
+ * Преобразование диапазона в числовое представление
+ * rangeToPositions('A1:B2') -> { minColumn: 1, minRow: 1, maxColumn: 2, maxRow: 2 }
+ * @param range диапазон
+ */
+const rangeToRangeIndices = (range: RangeType): RangeIndicesType => {
+  const { minColumn, minRow, maxColumn, maxRow } = parseRange(range)
+  const minColumnPosition = letterToPosition(minColumn)
+  const maxColumnPosition = letterToPosition(maxColumn)
+  return { minColumn: minColumnPosition, minRow, maxColumn: maxColumnPosition, maxRow }
 }
 
 /**
@@ -253,8 +253,8 @@ export {
   parsePositionWithSheet,
   parseRange,
   parseRangeWithSheet,
-  rangeToRangeIndices,
   positionsToRangeIndices,
+  rangeToRangeIndices,
   rangeIndicesToPositions,
   rangeToCellPositions,
   rangeSpan,
