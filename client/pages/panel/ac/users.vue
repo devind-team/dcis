@@ -58,7 +58,8 @@ import {
   UsersQuery,
   UserTypeEdge,
   ChangeUserGroupsMutationPayload,
-  UploadUsersMutationPayload
+  UploadUsersMutationPayload,
+  GroupType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useAuthStore } from '~/stores'
@@ -119,7 +120,8 @@ export default defineComponent({
     const {
       loading,
       pagination: { count, totalCount },
-      data: users
+      data: users,
+      update
     } = useQueryRelay<UsersQuery, UsersQueryVariables, UserType>({
       document: usersQuery,
       variables: () => ({
@@ -130,29 +132,44 @@ export default defineComponent({
       fetchScroll: typeof document === 'undefined' ? null : document
     })
 
-    // Обновление групп пользователя после изменения
+    /**
+     * Обновление групп пользователя после изменения
+     * @param user - выбранный пользователь
+     * @param cache - кеш
+     * @param result - результат мутации
+     */
     const updateGroups = (
       user: UserType,
-      store: DataProxy,
-      { data: { changeUserGroups: { success, groups } } }: ChangeUserGroupsData
+      cache: DataProxy,
+      result: ChangeUserGroupsData
     ) => {
+      const { data: { changeUserGroups: { success } } } = result
       if (success) {
-        const data: any = store.readQuery({ query: usersQuery, variables: { search: debounceSearch.value } })
-        data.users.edges.find((el: UserTypeEdge) => el.node === user).node.groups = groups
-        store.writeQuery({ query: usersQuery, variables: { search: debounceSearch.value }, data })
+        update(cache, result, (dataCache, { data: { changeUserGroups: { groups } } }) => {
+          dataCache.users.edges
+            .find((u: UserTypeEdge | any) => u.node.id === user.id).node
+            .groups = groups as Required<Pick<GroupType, '__typename' | 'id' | 'name'>>[]
+          return dataCache
+        })
       }
     }
 
-    // Обновление пользователей после добавления нового пользователя
-    const updateUsers = (store: DataProxy, { data: { uploadUsers: { success, users } } }: UploadUsersData) => {
+    /**
+     * Обновление пользователей после добавления нового пользователя
+     * @param cache - кеш
+     * @param result - результат мутации
+     */
+    const updateUsers = (cache: DataProxy, result: UploadUsersData) => {
+      const { data: { uploadUsers: { success } } } = result
       if (success) {
-        const data: any = store.readQuery({ query: usersQuery, variables: { search: debounceSearch.value } })
-        data.users.totalCount += users!.length
-        data.users.edges = [
-          ...users!.map(user => ({ node: user, __typename: 'UserType' })).reverse(),
-          ...data.users.edges
-        ]
-        store.writeQuery({ query: usersQuery, variables: { search: debounceSearch.value }, data })
+        update(cache, result, (dataCache, { data: { uploadUsers: { users } } }) => {
+          dataCache.users.totalCount += users.length
+          dataCache.users.edges = [
+            ...users!.map(user => ({ node: user, __typename: 'UserTypeEdge' })).reverse(),
+            ...dataCache.users.edges
+          ] as typeof dataCache.users.edges
+          return dataCache
+        })
       }
     }
 
