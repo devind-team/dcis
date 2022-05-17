@@ -16,8 +16,8 @@
               | {{ $t('panel.ac.users.unloadUsers') }}
     v-row(align="center")
       v-col(cols="12" md="6")
-        v-text-field(v-model="search" :placeholder="$t('panel.ac.users.search')" prepend-icon="mdi-magnify" clearable)
-      v-col.caption.text-right(cols="12" md="6") {{ $t('panel.ac.users.shownOf', { count, totalCount }) }}
+        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+      v-col.caption.text-right(cols="12" md="6") {{ $t('shownOf', { count, totalCount }) }}
     v-data-table(
       :headers="headers"
       :items="users"
@@ -27,7 +27,7 @@
     )
       template(#item.avatar="{ item }")
         avatar-dialog(:item="item")
-      template(#item.name="{ item }") {{ $getUserFullName(item) }}
+      template(#item.name="{ item }") {{ getUserFullName(item) }}
       template(#item.groups="{ item }")
         change-group-dialog(
           :user="item"
@@ -42,7 +42,7 @@
                   style="cursor: pointer"
                 ) {{ item.groups.length ? item.groups.map(e => e.name).join(', ') : $t('panel.ac.users.changeGroups.noGroups') }}
               span {{ $t('panel.ac.users.change') }}
-      template(#item.createdAt="{ item }") {{ $filters.dateTimeHM(item.createdAt) }}
+      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">
@@ -63,7 +63,7 @@ import {
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useAuthStore } from '~/stores'
-import { useCommonQuery, useCursorPagination, useDebounceSearch, useI18n, useQueryRelay } from '~/composables'
+import { useCommonQuery, useCursorPagination, useDebounceSearch, useI18n, useQueryRelay, useFilters } from '~/composables'
 import usersQuery from '~/gql/core/queries/users.graphql'
 import groupsQuery from '~/gql/core/queries/groups.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -95,6 +95,7 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     useNuxt2Meta({ title: t('panel.ac.users.name') as string })
+    const { dateTimeHM, getUserFullName } = useFilters()
 
     const { hasPerm } = useAuthStore()
 
@@ -173,7 +174,21 @@ export default defineComponent({
       }
     }
 
-    return { hasPerm, bc, headers, groups, search, loading, count, totalCount, users, updateGroups, updateUsers }
+    return {
+      hasPerm,
+      dateTimeHM,
+      getUserFullName,
+      bc,
+      headers,
+      groups,
+      search,
+      loading,
+      count,
+      totalCount,
+      users,
+      updateGroups,
+      updateUsers
+    }
   }
 })
 </script>
