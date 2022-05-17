@@ -16,7 +16,7 @@
 <script lang="ts">
 import type { PropType } from '#app'
 import { defineComponent } from '#app'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { SectionInterface } from '~/types/graphql'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 

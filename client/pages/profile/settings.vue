@@ -31,6 +31,7 @@
 import { useMutation } from '@vue/apollo-composable'
 import { defineComponent, ref, Ref, toRef, useNuxt2Meta } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
+import { useAuthStore } from '~/stores'
 import {
   SettingsQuery,
   SettingsQueryVariables,
@@ -41,7 +42,6 @@ import {
 import settingsQuery from '~/gql/core/queries/settings.graphql'
 import changeSettings from '~/gql/core/mutations/settings/change_settings.graphql'
 import SettingsForm from '~/components/profile/SettingsForm.vue'
-import { useAuthStore } from '~/store'
 
 export default defineComponent({
   components: { SettingsForm },

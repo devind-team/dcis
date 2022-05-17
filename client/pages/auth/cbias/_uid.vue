@@ -23,7 +23,7 @@ import {
   onMounted
 } from '#app'
 import { useApolloHelpers, useI18n } from '~/composables'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { AuthCbiasMutation, AuthCbiasMutationVariables, UserType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import authCbiasMutation from '~/gql/dcis/mutations/auth_cbias.graphql'
@@ -38,7 +38,6 @@ export default defineComponent({
     const { t, localePath } = useI18n()
     const router = useRouter()
     const route = useRoute()
-    const { $store } = useNuxtApp()
     const { onLogin, defaultClient } = useApolloHelpers()
     const userStore = useAuthStore()
     const { CLIENT_ID, CLIENT_SECRET } = useRuntimeConfig()
@@ -56,9 +55,6 @@ export default defineComponent({
       if (success) {
         onLogin(token.accessToken, defaultClient, { maxAge: token.expiresIn, path: '/' }, true)
         userStore.user = Object.assign({}, user) as UserType
-
-        // Убрать после удаления vuex
-        $store.dispatch('auth/fetchExistUser', Object.assign({}, user))
         // Необходимо для нормальной перезагрузки сокетов
         router.push(localePath({ name: 'dcis-projects' }))
       }

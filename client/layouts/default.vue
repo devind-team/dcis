@@ -9,7 +9,8 @@
 
 <script lang="ts">
 import type { Ref, ComputedRef } from '#app'
-import { useAuthStore } from '~/store'
+import { defineComponent } from '#app'
+import { useAuthStore } from '~/stores'
 import { useCursorPagination, useQueryRelay, useVuetify } from '~/composables'
 import { updateQueryNotifications } from '~/services/notifications'
 import { NotificationsQuery, NotificationsQueryVariables, NotificationType, UserType } from '~/types/graphql'

@@ -95,7 +95,7 @@ import {
   ProfileType
 } from '~/types/graphql'
 import { useCommonQuery, useI18n } from '~/composables'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import DateMenu from '~/components/common/menu/DateMenu.vue'
 import SelectMenu from '~/components/common/menu/SelectMenu.vue'
