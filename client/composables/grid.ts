@@ -1,18 +1,16 @@
 import { useEventListener } from '@vueuse/core'
-import type { Ref } from '#app'
+import { Ref, UnwrapRef } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 import {
   ElementPositionType,
+  ElementSizeType,
+  ResitingType,
   BuildCellType,
   BuildColumnType,
-  ResizingBuildColumnType,
-  ColumnWidthType,
   BuildRowType,
-  ResizingBuildRowType,
-  RowHeightType,
   CellOptionsType,
   BoundaryColumnCell,
-  BoundaryRowCell, RangeIndicesType
+  BoundaryRowCell, RangeIndicesType, MousePositionType
 } from '~/types/grid'
 import {
   parsePosition,
@@ -34,27 +32,61 @@ export const cellKinds = {
 
 export function useGrid (
   sheet: Ref<SheetType>,
-  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void
+  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void,
+  changeRowHeight: (rowDimension: RowDimensionType, height: number) => void
 ) {
-  const rowIndexColumnWidth = ref<number>(30)
-  const defaultColumnWidth = ref<number>(64)
-  const borderGag = ref<number>(10)
+  const rowNameColumnWidth = computed<number>(() => {
+    let maxDigits = 0
+    let maxDots = 0
+    for (const row of sheet.value.rows) {
+      const indices = row.name.split('.')
+      const dots = indices.length - 1
+      if (dots > maxDots) {
+        maxDots = dots
+      }
+      const digits = row.name.length - dots
+      if (digits > maxDigits) {
+        maxDigits = digits
+      }
+    }
+    return maxDigits * 11 + maxDots * 2 + 10
+  })
+  const gridContainer = ref<HTMLDivElement | null>(null)
+  const gridWidth = computed<number>(
+    () => rowNameColumnWidth.value +
+      columns.value.reduce((sum, column) => sum + column.width, 0)
+  )
 
-  const resizingColumn = ref<ResizingBuildColumnType | null>(null)
-  const columnWidthPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
-  const columnWidth = computed<ColumnWidthType>(() => ({
-    visible: !!resizingColumn.value && resizingColumn.value.state === 'resizing',
-    position: columnWidthPosition.value,
-    width: resizingColumn.value?.width ?? 0
-  }))
-
-  const resizingRow = ref<ResizingBuildRowType | null>(null)
-  const rowHeightPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
-  const rowHeight = computed<RowHeightType>(() => ({
-    visible: !!resizingRow.value && resizingRow.value.state === 'resizing',
-    position: rowHeightPosition.value,
-    height: resizingRow.value?.height ?? 0
-  }))
+  const {
+    resizing: resizingColumn,
+    elementSize: columnWidth,
+    getSize: getColumnWidth,
+    mousemove: mousemoveColumnNameResizing,
+    mouseleave: mouseleaveColumnNameResizing,
+    mousedown: mousedownColumnNameResizing,
+    mouseup: mouseupColumnNameResizing
+  } = useResizing<BuildColumnType, ColumnDimensionType>(
+    gridContainer,
+    64,
+    'x',
+    (buildColumn: BuildColumnType) => buildColumn.columnDimension,
+    changeColumnWidth
+  )
+  const {
+    resizing: resizingRow,
+    elementSize: rowHeight,
+    getSize: getRowHeight,
+    mousemove: mousemoveRowNameResizing,
+    mouseleave: mouseleaveRowNameResizing,
+    mousedown: mousedownRowNameResizing,
+    mouseup: mouseupRowNameResizing
+  } = useResizing<BuildRowType, RowDimensionType>(
+    gridContainer,
+    16,
+    'y',
+    (buildRow: BuildRowType) => buildRow.rowDimension,
+    changeRowHeight
+  )
 
   /**
    * Структура для быстрого поиска колонок
@@ -90,14 +122,9 @@ export function useGrid (
   }
   const rows = computed<BuildRowType[]>(() => {
     const buildRows = sheet.value.rows.map((rowDimension: RowDimensionType) => {
-      let height = 0
-      if (resizingRow.value && resizingRow.value.buildRow.rowDimension.id === rowDimension.id) {
-        height = resizingRow.value.height
-      } else {
-        height = rowDimension.height ?? null
-      }
+      const height = getRowHeight(rowDimension)
       return {
-        style: { height: height ? `${height}px` : undefined },
+        style: { height: `${height}px` },
         height,
         rowDimension,
         buildCells: rowDimension.cells.map((cell: CellType) => ({
@@ -147,12 +174,7 @@ export function useGrid (
   }
   const columns = computed<BuildColumnType[]>(() => {
     const buildColumns = sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
-      let width = 0
-      if (resizingColumn.value && resizingColumn.value.buildColumn.columnDimension.id === columnDimension.id) {
-        width = resizingColumn.value.width
-      } else {
-        width = columnDimension.width ? columnDimension.width : defaultColumnWidth.value
-      }
+      const width = getColumnWidth(columnDimension)
       return {
         style: { width: `${width}px` },
         width,
@@ -167,13 +189,6 @@ export function useGrid (
     }
     return buildColumns
   })
-
-  const gridContainer = ref<HTMLDivElement | null>(null)
-
-  const gridWidth = computed<number>(
-    () => rowIndexColumnWidth.value +
-      columns.value.reduce((sum, column) => sum + column.width, 0)
-  )
 
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
@@ -336,64 +351,26 @@ export function useGrid (
       selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.globalPosition))
   )
 
-  const mouseenterColumnIndex = (buildColumn: BuildColumnType) => {
+  const mouseenterColumnName = (buildColumn: BuildColumnType) => {
     if (selectionState.value === 'column') {
       selection.value.last = buildColumn.lastBuildCell
     }
   }
-  const mousemoveColumnIndex = (buildColumn: BuildColumnType, event: MouseEvent) => {
-    const mousePosition = { x: event.clientX, y: event.clientY }
-    const cell = event.target as HTMLTableCellElement
-    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
-      resizingColumn.value.width = Math.max(
-        resizingColumn.value.width + mousePosition.x - resizingColumn.value.mousePosition.x, 0
-      )
-      resizingColumn.value.mousePosition = mousePosition
-    } else if (cell.offsetWidth - event.offsetX < borderGag.value) {
-      resizingColumn.value = {
-        buildColumn,
-        width: buildColumn.columnDimension.width ?? defaultColumnWidth.value,
-        mousePosition,
-        state: 'hover'
-      }
-    } else if (
-      cell.offsetWidth - event.offsetX > cell.offsetWidth - borderGag.value &&
+  const mousemoveColumnName = (buildColumn: BuildColumnType, event: MouseEvent) => {
+    mousemoveColumnNameResizing(
+      buildColumn,
       buildColumn.columnDimension.index - 1 > 0
-    ) {
-      resizingColumn.value = {
-        buildColumn: columns.value[buildColumn.columnDimension.index - 2],
-        width: columns.value[buildColumn.columnDimension.index - 2].columnDimension.width ?? defaultColumnWidth.value,
-        mousePosition,
-        state: 'hover'
-      }
-    } else {
-      resizingColumn.value = null
-    }
+        ? columns.value[buildColumn.columnDimension.index - 2]
+        : null,
+      event
+    )
   }
-  const mouseleaveColumnIndex = () => {
-    if (resizingColumn.value && resizingColumn.value.state === 'hover') {
-      resizingColumn.value = null
-    }
+  const mouseleaveColumnName = () => {
+    mouseleaveColumnNameResizing()
   }
-  const mousedownColumnIndex = (buildColumn: BuildColumnType, event: MouseEvent) => {
+  const mousedownColumnName = (buildColumn: BuildColumnType, event: MouseEvent) => {
     if (resizingColumn.value) {
-      const cell = event.target as HTMLTableCellElement
-      if (cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX < document.body.offsetWidth - 150) {
-        columnWidthPosition.value = {
-          left: cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX,
-          right: null,
-          top: cell.offsetTop + event.offsetY - 25,
-          bottom: null
-        }
-      } else {
-        columnWidthPosition.value = {
-          left: null,
-          right: 25,
-          top: cell.offsetTop + event.offsetY - 25,
-          bottom: null
-        }
-      }
-      resizingColumn.value.state = 'resizing'
+      mousedownColumnNameResizing(event)
     } else {
       selectionState.value = 'column'
       selection.value = {
@@ -402,24 +379,40 @@ export function useGrid (
       }
     }
   }
-  const mouseupColumnIndex = () => {
-    if (resizingColumn.value) {
-      changeColumnWidth(resizingColumn.value.buildColumn.columnDimension, resizingColumn.value.width)
-      resizingColumn.value.state = 'hover'
-    }
+  const mouseupColumnName = () => {
+    mouseupColumnNameResizing()
   }
 
-  const mouseenterRowIndex = (buildRow: BuildRowType) => {
+  const mouseenterRowName = (buildRow: BuildRowType) => {
     if (selectionState.value === 'row') {
       selection.value.last = buildRow.lastBuildCell
     }
   }
-  const mousedownRowIndex = (buildRow: BuildRowType) => {
-    selectionState.value = 'row'
-    selection.value = {
-      first: buildRow.firstBuildCell,
-      last: buildRow.lastBuildCell
+  const mousemoveRowName = (buildRow: BuildRowType, event: MouseEvent) => {
+    mousemoveRowNameResizing(
+      buildRow,
+      buildRow.rowDimension.globalIndex - 1 > 0
+        ? rows.value[buildRow.rowDimension.globalIndex - 2]
+        : null,
+      event
+    )
+  }
+  const mouseleaveRowName = () => {
+    mouseleaveRowNameResizing()
+  }
+  const mousedownRowName = (buildRow: BuildRowType, event: MouseEvent) => {
+    if (resizingRow.value) {
+      mousedownRowNameResizing(event)
+    } else {
+      selectionState.value = 'row'
+      selection.value = {
+        first: buildRow.firstBuildCell,
+        last: buildRow.lastBuildCell
+      }
     }
+  }
+  const mouseupRowName = () => {
+    mouseupRowNameResizing()
   }
 
   const selectAllCells = () => {
@@ -432,12 +425,17 @@ export function useGrid (
   /**
    * Класс курсора на странице
    */
-  const cursorClass = computed<'grid__cursor_cell' | 'grid__cursor_col-resize' | null>(() => {
+  const cursorClass = computed<
+    'grid__cursor_cell' | 'grid__cursor_col-resize' | 'grid__cursor_row-resize' | null
+  >(() => {
     if (selectionState.value) {
       return 'grid__cursor_cell'
     }
     if (resizingColumn.value) {
       return 'grid__cursor_col-resize'
+    }
+    if (resizingRow.value) {
+      return 'grid__cursor_row-resize'
     }
     return null
   })
@@ -447,28 +445,14 @@ export function useGrid (
     if (selectionState.value) {
       selectionState.value = null
     }
-    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
-      changeColumnWidth(resizingColumn.value.buildColumn.columnDimension, resizingColumn.value.width)
-      resizingColumn.value = null
-    }
-  })
-
-  useEventListener('mousemove', (event: MouseEvent) => {
-    if (resizingColumn.value && resizingColumn.value.state === 'resizing') {
-      const mousePosition = { x: event.clientX, y: event.clientY }
-      resizingColumn.value.width = Math.max(
-        resizingColumn.value.width + mousePosition.x - resizingColumn.value.mousePosition.x, 0
-      )
-      resizingColumn.value.mousePosition = mousePosition
-    }
   })
 
   return {
-    rowIndexColumnWidth,
     columnWidth,
     rowHeight,
     rows,
     columns,
+    rowNameColumnWidth,
     gridContainer,
     gridWidth,
     activeCell,
@@ -485,13 +469,161 @@ export function useGrid (
     selectedBoundaryColumnCells,
     boundaryRowCells,
     selectedBoundaryRowCells,
-    mouseenterColumnIndex,
-    mousemoveColumnIndex,
-    mouseleaveColumnIndex,
-    mousedownColumnIndex,
-    mouseupColumnIndex,
-    mouseenterRowIndex,
-    mousedownRowIndex,
+    mouseenterColumnName,
+    mousemoveColumnName,
+    mouseleaveColumnName,
+    mousedownColumnName,
+    mouseupColumnName,
+    mouseenterRowName,
+    mousemoveRowName,
+    mouseleaveRowName,
+    mousedownRowName,
+    mouseupRowName,
     selectAllCells
+  }
+}
+
+function useResizing<T, K extends { id: string, width?: number, height?: number }> (
+  gridContainer: Ref<HTMLDivElement>,
+  defaultSize: number,
+  direction: 'x' | 'y',
+  getDimension: (object: T) => K,
+  changeSize: (object: K, size: number) => void
+) {
+  const borderGag = 10
+
+  const dimensionKey = direction === 'x' ? 'width' : 'height'
+  const offsetSizeKey = direction === 'x' ? 'offsetWidth' : 'offsetHeight'
+  const eventOffsetKey = direction === 'x' ? 'offsetX' : 'offsetY'
+
+  const defaultElementSize = ref<number>(defaultSize)
+  const resizing = ref<ResitingType<T> | null>(null)
+  const elementPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
+  const elementSize = computed<ElementSizeType>(() => ({
+    visible: !!resizing.value && resizing.value.state === 'resizing',
+    position: elementPosition.value,
+    size: resizing.value ? resizing.value.size : 0
+  }))
+
+  const getSize = (dimension: K): number => {
+    let size = 0
+    if (resizing.value && getDimension(resizing.value.object as T).id === dimension.id) {
+      size = resizing.value.size
+    } else {
+      size = dimension[dimensionKey] ? dimension[dimensionKey] : defaultElementSize.value
+    }
+    return size
+  }
+
+  const mousemove = (object: T, previousObject: T | null, event: MouseEvent) => {
+    const mousePosition = { x: event.clientX, y: event.clientY }
+    const cell = event.target as HTMLTableCellElement
+    if (resizing.value && resizing.value.state === 'resizing') {
+      resizing.value.size = Math.max(
+        resizing.value.size + mousePosition[direction] - resizing.value.mousePosition[direction], 0
+      )
+      resizing.value.mousePosition = mousePosition
+    } else if (cell[offsetSizeKey] - event[eventOffsetKey] < borderGag) {
+      setResizingHover(object, mousePosition)
+    } else if (
+      cell[offsetSizeKey] - event[eventOffsetKey] > cell[offsetSizeKey] - borderGag &&
+      previousObject
+    ) {
+      setResizingHover(previousObject, mousePosition)
+    } else {
+      resizing.value = null
+    }
+  }
+
+  const mouseleave = () => {
+    if (resizing.value && resizing.value.state === 'hover') {
+      resizing.value = null
+    }
+  }
+
+  const mousedown = (event: MouseEvent) => {
+    if (resizing.value) {
+      const target = event.target as HTMLDivElement | HTMLTableCellElement
+      if (direction === 'x') {
+        elementPosition.value = getElementPositionX(event, target)
+      } else {
+        elementPosition.value = getElementPositionY(event, target)
+      }
+      resizing.value.state = 'resizing'
+    }
+  }
+
+  const mouseup = () => {
+    if (resizing.value) {
+      changeSize(getDimension(resizing.value.object as T), resizing.value.size)
+      resizing.value.state = 'hover'
+    }
+  }
+
+  const getElementPositionX = (event: MouseEvent, target: HTMLDivElement | HTMLTableCellElement) => {
+    if (
+      target.offsetLeft - gridContainer.value.scrollLeft +
+      event.offsetX < document.body[offsetSizeKey] - 150
+    ) {
+      return {
+        left: target.offsetLeft - gridContainer.value.scrollLeft + event.offsetX,
+        right: null,
+        top: target.offsetTop + event.offsetY - 25,
+        bottom: null
+      }
+    } else {
+      return {
+        left: null,
+        right: 25,
+        top: target.offsetTop + event.offsetY - 25,
+        bottom: null
+      }
+    }
+  }
+
+  const getElementPositionY = (event: MouseEvent, target: HTMLDivElement | HTMLTableCellElement) => {
+    const row = target.closest('tr')
+    return {
+      left: target.offsetLeft + event.offsetX,
+      right: null,
+      top: row.offsetTop - gridContainer.value.scrollTop + event.offsetY - 25,
+      bottom: null
+    }
+  }
+
+  const setResizingHover = (object: T, mousePosition: MousePositionType) => {
+    resizing.value = {
+      object: object as UnwrapRef<T>,
+      size: getDimension(object)[dimensionKey] ?? defaultElementSize.value,
+      mousePosition,
+      state: 'hover'
+    }
+  }
+
+  useEventListener('mouseup', () => {
+    if (resizing.value && resizing.value.state === 'resizing') {
+      changeSize(getDimension(resizing.value.object as T), resizing.value.size)
+      resizing.value = null
+    }
+  })
+
+  useEventListener('mousemove', (event: MouseEvent) => {
+    if (resizing.value && resizing.value.state === 'resizing') {
+      const mousePosition = { x: event.clientX, y: event.clientY }
+      resizing.value.size = Math.max(
+        resizing.value.size + mousePosition[direction] - resizing.value.mousePosition[direction], 0
+      )
+      resizing.value.mousePosition = mousePosition
+    }
+  })
+
+  return {
+    resizing,
+    elementSize,
+    getSize,
+    mousemove,
+    mouseleave,
+    mousedown,
+    mouseup
   }
 }

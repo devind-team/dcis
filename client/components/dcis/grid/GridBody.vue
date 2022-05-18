@@ -1,9 +1,12 @@
 <template lang="pug">
   tbody
     tr(v-for="buildRow in rows" :key="buildRow.rowDimension.id" :style="buildRow.style")
-      td.grid__cell_row-index(
-        @mouseenter="mouseenterRowIndex(buildRow)"
-        @mousedown="mousedownRowIndex(buildRow)"
+      td.grid__cell_row-name(
+        @mouseenter="mouseenterRowName(buildRow)"
+        @mousemove="mousemoveRowName(buildRow, $event)"
+        @mouseleave="mouseleaveRowName"
+        @mousedown="mousedownRowName(buildRow, $event)"
+        @mouseup="mouseupRowName"
       )
         grid-row-control(:build-row="buildRow" :content-class="getRowIndexCellContentClasses(buildRow)")
       td(
@@ -40,8 +43,20 @@ export default defineComponent({
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
     boundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
     selectedBoundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
-    mouseenterRowIndex: { type: Function as PropType<(buildRow: BuildRowType) => void>, required: true },
-    mousedownRowIndex: { type: Function as PropType<(buildRow: BuildRowType) => void>, required: true },
+    mouseenterRowName: {
+      type: Function as PropType<(buildRow: BuildRowType) => void>,
+      required: true
+    },
+    mousemoveRowName: {
+      type: Function as PropType<(buildRow: BuildRowType, event: MouseEvent) => void>,
+      required: true
+    },
+    mouseleaveRowName: { type: Function as PropType<() => void>, required: true },
+    mousedownRowName: {
+      type: Function as PropType<(buildRow: BuildRowType, event: MouseEvent) => void>,
+      required: true
+    },
+    mouseupRowName: { type: Function as PropType<() => void>, required: true },
     mousedownCell: { type: Function as PropType<(buildCell: BuildCellType) => void>, required: true },
     mouseenterCell: { type: Function as PropType<(buildCell: BuildCellType) => void>, required: true },
     mouseupCell: { type: Function as PropType<(buildCell: BuildCellType) => void>, required: true }
@@ -49,13 +64,13 @@ export default defineComponent({
   setup (props) {
     const getRowIndexCellContentClasses = (buildRow: BuildRowType): (string | Record<string, boolean>)[] => {
       return [
-        'grid__cell-content_row-index',
+        'grid__cell-content_row-name',
         {
-          'grid__cell-content_row-index-selected': props.selectedRowsPositions
+          'grid__cell-content_row-name-selected': props.selectedRowsPositions
             .includes(buildRow.rowDimension.globalIndex)
         },
         {
-          'grid__cell-content_row-index-neighbor-selected': !!props.selectedBoundaryColumnCells.find(boundaryCell =>
+          'grid__cell-content_row-name-neighbor-selected': !!props.selectedBoundaryColumnCells.find(boundaryCell =>
             boundaryCell.buildRows.find(boundaryColumnRow =>
               boundaryColumnRow.rowDimension.id === buildRow.rowDimension.id))
         }

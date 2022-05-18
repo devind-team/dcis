@@ -2,7 +2,7 @@
   mutation-modal-form(
     @close="$emit('close')"
     :header="String(t('dcis.grid.rowSettings.header'))"
-    :subheader="subheader"
+    :subheader="String(t('dcis.grid.rowSettings.height', { height: buildRow.height }))"
     :mutation="null"
     :variables="{ id: buildRow.rowDimension.id, hidden, fixed, dynamic, height: buildRow.rowDimension.height }"
     :button-text="String(t('dcis.grid.rowSettings.buttonText'))"
@@ -34,13 +34,7 @@ export default defineComponent({
     const hidden = ref<boolean>(props.buildRow.rowDimension.hidden)
     const dynamic = ref<boolean>(props.buildRow.rowDimension.dynamic)
 
-    const subheader = computed(() =>
-      props.buildRow.rowDimension.height
-        ? String(t('dcis.grid.rowSettings.height', { height: props.buildRow.rowDimension.height }))
-        : undefined
-    )
-
-    return { t, fixed, hidden, dynamic, subheader }
+    return { t, fixed, hidden, dynamic }
   }
 })
 </script>

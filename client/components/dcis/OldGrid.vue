@@ -52,7 +52,7 @@ import changeColumnDimension from '~/gql/dcis/mutations/sheet/change_column_dime
 import GridHeader from '~/components/dcis/grid/OldGridHeader.vue'
 import GridBody from '~/components/dcis/grid/OldGridBody.vue'
 import GridSheetToolbar from '~/components/dcis/grid/OldGridSheetToolbar.vue'
-import GridColumnWidth from '~/components/dcis/grid/GridColumnWidth.vue'
+import GridColumnWidth from '~/components/dcis/grid/GridElementResizing.vue'
 
 export type DocumentUpdateTransformType = (dc: any, result: any) => any
 type DocumentUpdateType = (cache: any, result: any, transform: DocumentUpdateTransformType) => any

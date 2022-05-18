@@ -15,9 +15,8 @@ export default {
       kind: 'Тип ячейки по умолчанию',
       buttonText: '@:save'
     },
-    columnWidth: {
-      width: 'Ширина: '
-    },
+    columnWidth: 'Ширина: ',
+    rowHeight: 'Высота: ',
     rowControl: {
       properties: '@:properties',
       updatedAt: 'Дата изменения: {updatedAt}',

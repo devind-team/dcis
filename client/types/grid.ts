@@ -83,6 +83,19 @@ export type ElementPositionType = {
   bottom: number | null
 }
 
+export type ElementSizeType = {
+  visible: boolean
+  position: ElementPositionType
+  size: number
+}
+
+export type ResitingType<T> = {
+  object: T
+  size: number
+  mousePosition: MousePositionType
+  state: 'hover' | 'resizing'
+}
+
 export type BuildCellType = {
   style: Record<string, string>
   columnDimension: ColumnDimensionType
@@ -98,39 +111,13 @@ export type BuildColumnType = {
   lastBuildCell: BuildCellType
 }
 
-export type ResizingBuildColumnType = {
-  buildColumn: BuildColumnType
-  width: number
-  mousePosition: MousePositionType
-  state: 'hover' | 'resizing'
-}
-
-export type ColumnWidthType = {
-  visible: boolean
-  position: ElementPositionType
-  width: number
-}
-
 export type BuildRowType = {
   style: Record<string, string>
-  height: number | null
+  height: number
   rowDimension: RowDimensionType
   buildCells: BuildCellType[]
   firstBuildCell: BuildCellType
   lastBuildCell: BuildCellType
-}
-
-export type ResizingBuildRowType = {
-  buildRow: BuildRowType
-  height: number
-  mousePosition: MousePositionType
-  state: 'hover' | 'resizing'
-}
-
-export type RowHeightType = {
-  visible: boolean
-  position: ElementPositionType
-  height: number
 }
 
 export type CellOptionsType = {

@@ -5,16 +5,16 @@
       div.grid__container(ref="gridContainer")
         table.grid__table(:style="{ width: `${gridWidth}px` }")
           grid-header(
-            :row-index-column-width="rowIndexColumnWidth"
+            :row-name-column-width="rowNameColumnWidth"
             :columns="columns"
             :selected-column-positions="selectedColumnsPositions"
             :selected-boundary-row-cells="selectedBoundaryRowCells"
             :all-cells-selected="allCellsSelected"
-            :mouseenter-column-index="mouseenterColumnIndex"
-            :mousemove-column-index="mousemoveColumnIndex"
-            :mouseleave-column-index="mouseleaveColumnIndex"
-            :mousedown-column-index="mousedownColumnIndex"
-            :mouseup-column-index="mouseupColumnIndex"
+            :mouseenter-column-name="mouseenterColumnName"
+            :mousemove-column-name="mousemoveColumnName"
+            :mouseleave-column-name="mouseleaveColumnName"
+            :mousedown-column-name="mousedownColumnName"
+            :mouseup-column-name="mouseupColumnName"
             :select-all-cells="selectAllCells"
           )
           grid-body(
@@ -25,13 +25,27 @@
             :selected-rows-positions="selectedRowsPositions"
             :boundary-column-cells="boundaryColumnCells"
             :selected-boundary-column-cells="selectedBoundaryColumnCells"
-            :mouseenter-row-index="mouseenterRowIndex"
-            :mousedown-row-index="mousedownRowIndex"
+            :mouseenter-row-name="mouseenterRowName"
+            :mousemove-row-name="mousemoveRowName"
+            :mouseleave-row-name="mouseleaveRowName"
+            :mousedown-row-name="mousedownRowName"
+            :mouseup-row-name="mouseupRowName"
             :mousedown-cell="mousedownCell"
             :mouseenter-cell="mouseenterCell"
             :mouseup-cell="mouseupCell"
           )
-      grid-column-width(:visible="columnWidth.visible" :position="columnWidth.position" :width="columnWidth.width")
+      grid-element-resizing(
+        :message="String(t('dcis.grid.columnWidth'))"
+        :visible="columnWidth.visible"
+        :position="columnWidth.position"
+        :size="columnWidth.size"
+      )
+      grid-element-resizing(
+        :message="String(t('dcis.grid.rowHeight'))"
+        :visible="rowHeight.visible"
+        :position="rowHeight.position"
+        :size="rowHeight.size"
+      )
 </template>
 
 <script lang="ts">
@@ -40,21 +54,22 @@ import { SheetType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
-import GridColumnWidth from '~/components/dcis/grid/GridColumnWidth.vue'
+import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
-  components: { GridSheetToolbar, GridHeader, GridBody, GridColumnWidth },
+  components: { GridSheetToolbar, GridHeader, GridBody, GridElementResizing },
   props: {
     sheet: { type: Object as PropType<SheetType>, required: true }
   },
   setup (props) {
     const sheet = toRef(props, 'sheet')
+    const { t } = useI18n()
     const {
-      rowIndexColumnWidth,
       columnWidth,
       rowHeight,
       rows,
       columns,
+      rowNameColumnWidth,
       gridContainer,
       gridWidth,
       activeCell,
@@ -71,22 +86,26 @@ export default defineComponent({
       selectedBoundaryColumnCells,
       boundaryRowCells,
       selectedBoundaryRowCells,
-      mouseenterColumnIndex,
-      mousemoveColumnIndex,
-      mouseleaveColumnIndex,
-      mousedownColumnIndex,
-      mouseupColumnIndex,
-      mouseenterRowIndex,
-      mousedownRowIndex,
+      mouseenterColumnName,
+      mousemoveColumnName,
+      mouseleaveColumnName,
+      mousedownColumnName,
+      mouseupColumnName,
+      mouseenterRowName,
+      mousemoveRowName,
+      mouseleaveRowName,
+      mousedownRowName,
+      mouseupRowName,
       selectAllCells
-    } = useGrid(sheet, () => {})
+    } = useGrid(sheet, () => {}, () => {})
 
     return {
-      rowIndexColumnWidth,
+      t,
       columnWidth,
       rowHeight,
       rows,
       columns,
+      rowNameColumnWidth,
       gridContainer,
       gridWidth,
       activeCell,
@@ -103,13 +122,16 @@ export default defineComponent({
       selectedBoundaryColumnCells,
       boundaryRowCells,
       selectedBoundaryRowCells,
-      mouseenterColumnIndex,
-      mousemoveColumnIndex,
-      mouseleaveColumnIndex,
-      mousedownColumnIndex,
-      mouseupColumnIndex,
-      mouseenterRowIndex,
-      mousedownRowIndex,
+      mouseenterColumnName,
+      mousemoveColumnName,
+      mouseleaveColumnName,
+      mousedownColumnName,
+      mouseupColumnName,
+      mouseenterRowName,
+      mousemoveRowName,
+      mouseleaveRowName,
+      mousedownRowName,
+      mouseupRowName,
       selectAllCells
     }
   }
@@ -123,6 +145,8 @@ export default defineComponent({
   cursor: cell !important
 .grid__cursor_col-resize *
   cursor: col-resize !important
+.grid__cursor_row-resize *
+  cursor: row-resize !important
 
 $border: 1px solid silver
 $index-light: map-get($grey, 'lighten-3')
@@ -131,7 +155,7 @@ $index-dark: map-get($grey, 'lighten-2')
 div.grid__body
   position: relative
 
-  .grid__column-width
+  .grid__element-resizing
     position: absolute
     z-index: 2
     font-size: 12px
@@ -216,10 +240,10 @@ div.grid__body
       tbody
         tr:first-child
 
-          td:not(.grid__cell_row-index)
+          td:not(.grid__cell_row-name)
             border-top: none !important
 
-          .grid__cell-content_row-index
+          .grid__cell-content_row-name
             top: 0 !important
 
         td:first-child
@@ -228,7 +252,7 @@ div.grid__body
         td
           overflow: hidden
 
-        td.grid__cell_row-index
+        td.grid__cell_row-name
           position: sticky
           height: 100%
           left: 0
@@ -239,7 +263,7 @@ div.grid__body
           text-align: center
           width: 30px
 
-          .grid__cell-content_row-index
+          .grid__cell-content_row-name
             position: relative
             top: 0.5px
             width: calc(100% + 0.5px)
@@ -249,13 +273,13 @@ div.grid__body
             border-left: $border
             background: white
 
-            &.grid__cell-content_row-index-selected
+            &.grid__cell-content_row-name-selected
               background: $index-light
 
             &:hover
               background: $index-dark !important
 
-        td:not(.grid__cell_row-index)
+        td:not(.grid__cell_row-name)
           position: relative
           border: $border
           cursor: cell
@@ -277,7 +301,7 @@ div.grid__body
               &:focus
                 outline: none
 
-@mixin grid__browser-specific($browser, $border-width, $first-row-index-height, $row-index-height)
+@mixin grid__browser-specific($browser, $border-width, $first-row-name-height, $row-name-height)
   .browser-#{$browser}
 
     table.grid__table
@@ -291,18 +315,18 @@ div.grid__body
 
       tr:first-child
 
-        .grid__cell-content_row-index
-          height: #{$first-row-index-height} !important
+        .grid__cell-content_row-name
+          height: #{$first-row-name-height} !important
 
-      td.grid__cell_row-index
-        height: #{$row-index-height} !important
+      td.grid__cell_row-name
+        height: #{$row-name-height} !important
 
-        .grid__cell-content_row-index
+        .grid__cell-content_row-name
 
-          &.grid__cell-content_row-index-neighbor-selected
+          &.grid__cell-content_row-name-neighbor-selected
             border-right: #{$border-width} solid blue !important
 
-      td:not(.grid__cell_row-index)
+      td:not(.grid__cell_row-name)
 
         &.grid__cell_selected
           border: #{$border-width} solid blue !important
