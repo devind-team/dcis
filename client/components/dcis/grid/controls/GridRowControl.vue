@@ -3,15 +3,10 @@
     template(#activator="{ on: onMenu }")
       v-tooltip(right open-delay="1000")
         template(#activator="{ on: onTooltip, attrs }")
-          div(
-            v-bind="attrs"
-            v-on="onTooltip"
-            @contextmenu.prevent="onMenu.click"
-            :class="contentClass"
-          ) {{ buildRow.rowDimension.name }}
+          slot(:onMenu="onMenu" :onTooltip="onTooltip" :attrs="attrs")
         span {{ t('dcis.grid.rowControl.updatedAt', { updatedAt: dateTimeHM(buildRow.rowDimension.updatedAt) } ) }}
     v-list(dense)
-      grid-row-settings(@close="settingsActive = false" :build-row="buildRow")
+      grid-row-settings(:build-row="buildRow" @close="settingsActive = false" :get-row-height="getRowHeight")
         template(#activator="{ on }")
           v-list-item(v-on="on")
             v-list-item-icon
@@ -47,7 +42,7 @@ export default defineComponent({
   components: { GridRowSettings },
   props: {
     buildRow: { type: Object as PropType<BuildRowType>, required: true },
-    contentClass: { type: Array as PropType<(string | Record<string, boolean>)[]>, default: null }
+    getRowHeight: { type: Function as PropType<(buildRow: BuildRowType) => number>, required: true }
   },
   setup () {
     const { t } = useI18n()

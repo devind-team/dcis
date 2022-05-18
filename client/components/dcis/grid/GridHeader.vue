@@ -8,14 +8,14 @@
         v-for="buildColumn in columns"
         :key="buildColumn.columnDimension.id"
         :class="{ 'grid__header_hover': !resizingColumn }"
-        :style="buildColumn.style"
+        :style="{ 'width': `${getColumnWidth(buildColumn)}px` }"
         @mouseenter="mouseenterColumnName(buildColumn)"
         @mousemove="mousemoveColumnName(buildColumn, $event)"
         @mouseleave="mouseleaveColumnName"
         @mousedown="mousedownColumnName(buildColumn, $event)"
         @mouseup="mouseupColumnName"
       )
-        grid-column-control(v-slot="{ on }" :build-column="buildColumn")
+        grid-column-control(v-slot="{ on }" :build-column="buildColumn" :get-column-width="getColumnWidth")
           div(
             :class="getHeaderContentClasses(buildColumn)"
             @contextmenu.prevent="on.click"
@@ -33,6 +33,7 @@ export default defineComponent({
     rowNameColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
     resizingColumn: { type: Object as PropType<ResizingType<BuildColumnType>>, default: null },
+    getColumnWidth: { type: Function as PropType<(buildColumn: BuildColumnType) => number>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
     selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },

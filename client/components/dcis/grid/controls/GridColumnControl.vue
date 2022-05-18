@@ -3,7 +3,11 @@
     template(#activator="{ on, attrs }")
       slot(:on="on" :attrs="attrs")
     v-list(dense)
-      grid-column-settings(@close="settingsActive = false" :buildColumn="buildColumn")
+      grid-column-settings(
+        :buildColumn="buildColumn"
+        :get-column-width="getColumnWidth"
+        @close="settingsActive = false"
+      )
         template(#activator="{ on }")
           v-list-item(v-on="on")
             v-list-item-icon
@@ -20,7 +24,8 @@ import GridColumnSettings from '~/components/dcis/grid/settings/GridColumnSettin
 export default defineComponent({
   components: { GridColumnSettings },
   props: {
-    buildColumn: { type: Object as PropType<BuildColumnType>, required: true }
+    buildColumn: { type: Object as PropType<BuildColumnType>, required: true },
+    getColumnWidth: { type: Function as PropType<(buildColumn: BuildColumnType) => number>, required: true }
   },
   setup () {
     const { t } = useI18n()

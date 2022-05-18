@@ -83,7 +83,7 @@ export type ElementPositionType = {
   bottom: number | null
 }
 
-export type ElementSizeType = {
+export type ElementResizingType = {
   visible: boolean
   position: ElementPositionType
   size: number
@@ -104,16 +104,12 @@ export type BuildCellType = {
 }
 
 export type BuildColumnType = {
-  style: Record<string, string>
-  width: number
   columnDimension: ColumnDimensionType
   firstBuildCell: BuildCellType
   lastBuildCell: BuildCellType
 }
 
 export type BuildRowType = {
-  style: Record<string, string>
-  height: number
   rowDimension: RowDimensionType
   buildCells: BuildCellType[]
   firstBuildCell: BuildCellType

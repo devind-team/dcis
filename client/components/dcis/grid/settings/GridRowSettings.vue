@@ -2,9 +2,9 @@
   mutation-modal-form(
     @close="$emit('close')"
     :header="String(t('dcis.grid.rowSettings.header'))"
-    :subheader="String(t('dcis.grid.rowSettings.height', { height: buildRow.height }))"
+    :subheader="String(t('dcis.grid.rowSettings.height', { height }))"
     :mutation="null"
-    :variables="{ id: buildRow.rowDimension.id, hidden, fixed, dynamic, height: buildRow.rowDimension.height }"
+    :variables="{ id: buildRow.rowDimension.id, hidden, fixed, dynamic, height }"
     :button-text="String(t('dcis.grid.rowSettings.buttonText'))"
     i18n-path="dcis.grid.rowSettings"
     mutation-name="changeRowDimension"
@@ -25,16 +25,18 @@ import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 export default defineComponent({
   components: { MutationModalForm },
   props: {
-    buildRow: { type: Object as PropType<BuildRowType>, required: true }
+    buildRow: { type: Object as PropType<BuildRowType>, required: true },
+    getRowHeight: { type: Function as PropType<(buildRow: BuildRowType) => number>, required: true },
   },
   setup (props) {
     const { t } = useI18n()
 
+    const height = computed<number>(() => props.getRowHeight(props.buildRow))
     const fixed = ref<boolean>(props.buildRow.rowDimension.fixed)
     const hidden = ref<boolean>(props.buildRow.rowDimension.hidden)
     const dynamic = ref<boolean>(props.buildRow.rowDimension.dynamic)
 
-    return { t, fixed, hidden, dynamic }
+    return { t, height, fixed, hidden, dynamic }
   }
 })
 </script>

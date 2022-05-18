@@ -3,7 +3,7 @@ import { Ref, UnwrapRef } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 import {
   ElementPositionType,
-  ElementSizeType,
+  ElementResizingType,
   ResizingType,
   BuildCellType,
   BuildColumnType,
@@ -52,14 +52,10 @@ export function useGrid (
     return maxDigits * 11 + maxDots * 2 + 10
   })
   const gridContainer = ref<HTMLDivElement | null>(null)
-  const gridWidth = computed<number>(
-    () => rowNameColumnWidth.value +
-      columns.value.reduce((sum, column) => sum + column.width, 0)
-  )
 
   const {
     resizing: resizingColumn,
-    elementSize: columnWidth,
+    elementResizing: resizingColumnWidth,
     getSize: getColumnWidth,
     mousemove: mousemoveColumnNameResizing,
     mouseleave: mouseleaveColumnNameResizing,
@@ -74,7 +70,7 @@ export function useGrid (
   )
   const {
     resizing: resizingRow,
-    elementSize: rowHeight,
+    elementResizing: resizingRowHeight,
     getSize: getRowHeight,
     mousemove: mousemoveRowNameResizing,
     mouseleave: mouseleaveRowNameResizing,
@@ -82,10 +78,15 @@ export function useGrid (
     mouseup: mouseupRowNameResizing
   } = useResizing<BuildRowType, RowDimensionType>(
     gridContainer,
-    16,
+    25,
     'y',
     (buildRow: BuildRowType) => buildRow.rowDimension,
     changeRowHeight
+  )
+
+  const gridWidth = computed<number>(
+    () => rowNameColumnWidth.value +
+      columns.value.reduce((sum, column) => sum + getColumnWidth(column), 0)
   )
 
   /**
@@ -121,22 +122,17 @@ export function useGrid (
     }
   }
   const rows = computed<BuildRowType[]>(() => {
-    const buildRows = sheet.value.rows.map((rowDimension: RowDimensionType) => {
-      const height = getRowHeight(rowDimension)
-      return {
-        style: { height: `${height}px` },
-        height,
+    const buildRows = sheet.value.rows.map((rowDimension: RowDimensionType) => ({
+      rowDimension,
+      buildCells: rowDimension.cells.map((cell: CellType) => ({
+        style: getCellStyle(cell),
+        columnDimension: columnsMap.value[cell.columnId],
         rowDimension,
-        buildCells: rowDimension.cells.map((cell: CellType) => ({
-          style: getCellStyle(cell),
-          columnDimension: columnsMap.value[cell.columnId],
-          rowDimension,
-          cell
-        })),
-        firstBuildCell: null,
-        lastBuildCell: null
-      }
-    })
+        cell
+      })),
+      firstBuildCell: null,
+      lastBuildCell: null
+    }))
     for (const currentBuildRow of buildRows) {
       assignRowFirstBuildCell(buildRows, currentBuildRow)
       assignRowLastBuildCell(buildRows, currentBuildRow)
@@ -173,16 +169,11 @@ export function useGrid (
     }
   }
   const columns = computed<BuildColumnType[]>(() => {
-    const buildColumns = sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
-      const width = getColumnWidth(columnDimension)
-      return {
-        style: { width: `${width}px` },
-        width,
-        columnDimension,
-        firstBuildCell: null,
-        lastBuildCell: null
-      }
-    })
+    const buildColumns = sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
+      columnDimension,
+      firstBuildCell: null,
+      lastBuildCell: null
+    }))
     for (const currentBuildColumn of buildColumns) {
       assignColumnFirstBuildCell(currentBuildColumn)
       assignColumnLastBuildCell(currentBuildColumn)
@@ -449,11 +440,13 @@ export function useGrid (
 
   return {
     gridContainer,
-    gridWidth,
     resizingColumn,
-    columnWidth,
+    resizingColumnWidth,
+    getColumnWidth,
     resizingRow,
-    rowHeight,
+    resizingRowHeight,
+    getRowHeight,
+    gridWidth,
     rows,
     columns,
     rowNameColumnWidth,
@@ -501,13 +494,14 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
   const defaultElementSize = ref<number>(defaultSize)
   const resizing = ref<ResizingType<T> | null>(null)
   const elementPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
-  const elementSize = computed<ElementSizeType>(() => ({
+  const elementResizing = computed<ElementResizingType>(() => ({
     visible: !!resizing.value && resizing.value.state === 'resizing',
     position: elementPosition.value,
     size: resizing.value ? resizing.value.size : 0
   }))
 
-  const getSize = (dimension: K): number => {
+  const getSize = (object: T): number => {
+    const dimension = getDimension(object)
     let size = 0
     if (resizing.value && getDimension(resizing.value.object as T).id === dimension.id) {
       size = resizing.value.size
@@ -621,7 +615,7 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
 
   return {
     resizing,
-    elementSize,
+    elementResizing,
     getSize,
     mousemove,
     mouseleave,

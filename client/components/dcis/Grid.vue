@@ -8,6 +8,7 @@
             :row-name-column-width="rowNameColumnWidth"
             :columns="columns"
             :resizing-column="resizingColumn"
+            :get-column-width="getColumnWidth"
             :selected-column-positions="selectedColumnsPositions"
             :selected-boundary-row-cells="selectedBoundaryRowCells"
             :all-cells-selected="allCellsSelected"
@@ -21,6 +22,7 @@
           grid-body(
             :rows="rows"
             :resizing-row="resizingRow"
+            :get-row-height="getRowHeight"
             :active-cell="activeCell"
             :set-active-cell="setActiveCell"
             :selected-cells-positions="selectedCellsPositions"
@@ -38,15 +40,15 @@
           )
       grid-element-resizing(
         :message="String(t('dcis.grid.columnWidth'))"
-        :visible="columnWidth.visible"
-        :position="columnWidth.position"
-        :size="columnWidth.size"
+        :visible="resizingColumnWidth.visible"
+        :position="resizingColumnWidth.position"
+        :size="resizingColumnWidth.size"
       )
       grid-element-resizing(
         :message="String(t('dcis.grid.rowHeight'))"
-        :visible="rowHeight.visible"
-        :position="rowHeight.position"
-        :size="rowHeight.size"
+        :visible="resizingRowHeight.visible"
+        :position="resizingRowHeight.position"
+        :size="resizingRowHeight.size"
       )
 </template>
 
@@ -68,11 +70,13 @@ export default defineComponent({
     const { t } = useI18n()
     const {
       gridContainer,
-      gridWidth,
       resizingColumn,
-      columnWidth,
+      resizingColumnWidth,
+      getColumnWidth,
       resizingRow,
-      rowHeight,
+      resizingRowHeight,
+      getRowHeight,
+      gridWidth,
       rows,
       columns,
       rowNameColumnWidth,
@@ -106,11 +110,13 @@ export default defineComponent({
     return {
       t,
       gridContainer,
-      gridWidth,
       resizingColumn,
-      columnWidth,
+      resizingColumnWidth,
+      getColumnWidth,
       resizingRow,
-      rowHeight,
+      resizingRowHeight,
+      getRowHeight,
+      gridWidth,
       rows,
       columns,
       rowNameColumnWidth,
@@ -237,6 +243,13 @@ div.grid__body
               .grid__select-all
                 border-color: transparent transparent $name-dark transparent
 
+        th:not(:first-child)
+
+          .grid__header-content
+            display: flex
+            justify-content: center
+            align-items: center
+
         th:not(:first-child).grid__header_hover
           cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
@@ -249,9 +262,6 @@ div.grid__body
           td:not(.grid__cell_row-name)
             border-top: none !important
 
-          .grid__cell-content_row-name
-            top: 0 !important
-
         td
           overflow: hidden
 
@@ -263,14 +273,15 @@ div.grid__body
           overflow: visible
 
           font-weight: bold
-          text-align: center
-          width: 30px
 
           .grid__cell-content_row-name
+            display: flex
+            justify-content: center
+            align-items: center
             position: relative
+            overflow: hidden
             top: 0.5px
             width: calc(100% + 0.5px)
-            height: 100%
             border-right: $border
             border-bottom: $border
             border-left: $border
@@ -307,7 +318,7 @@ div.grid__body
               &:focus
                 outline: none
 
-@mixin grid__browser-specific($browser, $border-width, $first-row-name-height, $row-name-height)
+@mixin grid__browser-specific($browser, $border-width)
   .browser-#{$browser}
 
     table.grid__table
@@ -319,13 +330,7 @@ div.grid__body
           &.grid__header-content_neighbor-selected
             border-bottom: #{$border-width} solid blue !important
 
-      tr:first-child
-
-        .grid__cell-content_row-name
-          height: #{$first-row-name-height} !important
-
       td.grid__cell_row-name
-        height: #{$row-name-height} !important
 
         .grid__cell-content_row-name
 
@@ -337,6 +342,6 @@ div.grid__body
         &.grid__cell_selected
           border: #{$border-width} solid blue !important
 
-@include grid__browser-specific('default', 1.2px, calc(100% + 1px), 1px)
-@include grid__browser-specific('firefox', 2px, calc(100% + 0.5px), 100%)
+@include grid__browser-specific('default', 1.2px)
+@include grid__browser-specific('firefox', 2px)
 </style>
