@@ -94,7 +94,8 @@ export type BuildColumnType = {
   style: Record<string, string>
   width: number
   columnDimension: ColumnDimensionType
-  buildCells: BuildCellType[]
+  firstBuildCell: BuildCellType
+  lastBuildCell: BuildCellType
 }
 
 export type ResizingBuildColumnType = {
@@ -115,6 +116,8 @@ export type BuildRowType = {
   height: number | null
   rowDimension: RowDimensionType
   buildCells: BuildCellType[]
+  firstBuildCell: BuildCellType
+  lastBuildCell: BuildCellType
 }
 
 export type ResizingBuildRowType = {

@@ -15,6 +15,7 @@ import {
   BoundaryRowCell, RangeIndicesType
 } from '~/types/grid'
 import {
+  parsePosition,
   positionsToRangeIndices,
   rangeIndicesToPositions,
   getCellStyle,
@@ -62,8 +63,33 @@ export function useGrid (
     sheet.value.columns.reduce((a, c: ColumnDimensionType) => ({ ...a, [c.id]: c }), {})
   )
 
-  const rows = computed<BuildRowType[]>(() =>
-    sheet.value.rows.map((rowDimension: RowDimensionType) => {
+  const assignRowFirstBuildCell = (buildRows: BuildRowType[], currentBuildRow: BuildRowType) => {
+    for (const buildRow of buildRows) {
+      if (
+        buildRow.buildCells[0].cell.relatedGlobalPositions.some((position: string) => {
+          const { column, row } = parsePosition(position)
+          return column === 'A' && row === currentBuildRow.rowDimension.globalIndex
+        })
+      ) {
+        currentBuildRow.firstBuildCell = buildRow.buildCells[0]
+        return
+      }
+    }
+  }
+  const assignRowLastBuildCell = (buildRows: BuildRowType[], currentBuildRow: BuildRowType) => {
+    for (const buildRow of buildRows) {
+      if (
+        buildRow.buildCells.at(-1).cell.relatedGlobalPositions.some((position: string) => {
+          const { column, row } = parsePosition(position)
+          return column === sheet.value.columns.at(-1).name && row === currentBuildRow.rowDimension.globalIndex
+        })
+      ) {
+        currentBuildRow.lastBuildCell = buildRow.buildCells.at(-1)
+      }
+    }
+  }
+  const rows = computed<BuildRowType[]>(() => {
+    const buildRows = sheet.value.rows.map((rowDimension: RowDimensionType) => {
       let height = 0
       if (resizingRow.value && resizingRow.value.buildRow.rowDimension.id === rowDimension.id) {
         height = resizingRow.value.height
@@ -74,20 +100,53 @@ export function useGrid (
         style: { height: height ? `${height}px` : undefined },
         height,
         rowDimension,
-        buildCells: rowDimension.cells.map((cell: CellType) => {
-          return {
-            style: getCellStyle(cell),
-            columnDimension: columnsMap.value[cell.columnId],
-            rowDimension,
-            cell
-          }
-        })
+        buildCells: rowDimension.cells.map((cell: CellType) => ({
+          style: getCellStyle(cell),
+          columnDimension: columnsMap.value[cell.columnId],
+          rowDimension,
+          cell
+        })),
+        firstBuildCell: null,
+        lastBuildCell: null
       }
     })
-  )
+    for (const currentBuildRow of buildRows) {
+      assignRowFirstBuildCell(buildRows, currentBuildRow)
+      assignRowLastBuildCell(buildRows, currentBuildRow)
+    }
+    return buildRows
+  })
 
-  const columns = computed<BuildColumnType[]>(() =>
-    sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
+  const assignColumnFirstBuildCell = (currentBuildColumn: BuildColumnType) => {
+    for (const buildCell of rows.value[0].buildCells) {
+      if (
+        buildCell.cell.relatedGlobalPositions.some((position: string) => {
+          const { column } = parsePosition(position)
+          return column === currentBuildColumn.columnDimension.name
+        })
+      ) {
+        currentBuildColumn.firstBuildCell = buildCell
+        return
+      }
+    }
+  }
+  const assignColumnLastBuildCell = (currentBuildColumn: BuildColumnType) => {
+    for (const buildRow of [...rows.value].reverse()) {
+      for (const buildCell of buildRow.buildCells) {
+        if (
+          buildCell.cell.relatedGlobalPositions.some((position: string) => {
+            const { column } = parsePosition(position)
+            return column === currentBuildColumn.columnDimension.name
+          })
+        ) {
+          currentBuildColumn.lastBuildCell = buildCell
+          return
+        }
+      }
+    }
+  }
+  const columns = computed<BuildColumnType[]>(() => {
+    const buildColumns = sheet.value.columns.map((columnDimension: ColumnDimensionType) => {
       let width = 0
       if (resizingColumn.value && resizingColumn.value.buildColumn.columnDimension.id === columnDimension.id) {
         width = resizingColumn.value.width
@@ -98,14 +157,16 @@ export function useGrid (
         style: { width: `${width}px` },
         width,
         columnDimension,
-        buildCells: rows.value
-          .map((buildRow: BuildRowType) => buildRow.buildCells.find(
-            (buildCell: BuildCellType) => buildCell.columnDimension.id === columnDimension.id)
-          )
-          .filter((buildCell: BuildCellType | undefined) => buildCell)
+        firstBuildCell: null,
+        lastBuildCell: null
       }
     })
-  )
+    for (const currentBuildColumn of buildColumns) {
+      assignColumnFirstBuildCell(currentBuildColumn)
+      assignColumnLastBuildCell(currentBuildColumn)
+    }
+    return buildColumns
+  })
 
   const gridContainer = ref<HTMLDivElement | null>(null)
 
@@ -277,7 +338,7 @@ export function useGrid (
 
   const mouseenterColumnIndex = (buildColumn: BuildColumnType) => {
     if (selectionState.value === 'column') {
-      selection.value.last = buildColumn.buildCells.at(-1)
+      selection.value.last = buildColumn.lastBuildCell
     }
   }
   const mousemoveColumnIndex = (buildColumn: BuildColumnType, event: MouseEvent) => {
@@ -336,8 +397,8 @@ export function useGrid (
     } else {
       selectionState.value = 'column'
       selection.value = {
-        first: buildColumn.buildCells[0],
-        last: buildColumn.buildCells.at(-1)
+        first: buildColumn.firstBuildCell,
+        last: buildColumn.lastBuildCell
       }
     }
   }
@@ -350,21 +411,21 @@ export function useGrid (
 
   const mouseenterRowIndex = (buildRow: BuildRowType) => {
     if (selectionState.value === 'row') {
-      selection.value.last = buildRow.buildCells.at(-1)
+      selection.value.last = buildRow.lastBuildCell
     }
   }
   const mousedownRowIndex = (buildRow: BuildRowType) => {
     selectionState.value = 'row'
     selection.value = {
-      first: buildRow.buildCells[0],
-      last: buildRow.buildCells.at(-1)
+      first: buildRow.firstBuildCell,
+      last: buildRow.lastBuildCell
     }
   }
 
   const selectAllCells = () => {
     selection.value = {
-      first: rows.value[0].buildCells[0],
-      last: rows.value.at(-1).buildCells.at(-1)
+      first: rows.value[0].firstBuildCell,
+      last: rows.value.at(-1).lastBuildCell
     }
   }
 
