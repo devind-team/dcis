@@ -7,6 +7,7 @@
       th(
         v-for="buildColumn in columns"
         :key="buildColumn.columnDimension.id"
+        :class="{ 'grid__header_hover': !resizingColumn }"
         :style="buildColumn.style"
         @mouseenter="mouseenterColumnName(buildColumn)"
         @mousemove="mousemoveColumnName(buildColumn, $event)"
@@ -23,7 +24,7 @@
 
 <script lang="ts">
 import { PropType } from '#app'
-import { BuildColumnType, BoundaryRowCell } from '~/types/grid'
+import { ResizingType, BuildColumnType, BoundaryRowCell } from '~/types/grid'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -31,6 +32,7 @@ export default defineComponent({
   props: {
     rowNameColumnWidth: { type: Number, required: true },
     columns: { type: Array as PropType<BuildColumnType[]>, required: true },
+    resizingColumn: { type: Object as PropType<ResizingType<BuildColumnType>>, default: null },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
     selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },

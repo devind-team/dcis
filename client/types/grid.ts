@@ -89,7 +89,7 @@ export type ElementSizeType = {
   size: number
 }
 
-export type ResitingType<T> = {
+export type ResizingType<T> = {
   object: T
   size: number
   mousePosition: MousePositionType

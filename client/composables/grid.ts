@@ -4,7 +4,7 @@ import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/ty
 import {
   ElementPositionType,
   ElementSizeType,
-  ResitingType,
+  ResizingType,
   BuildCellType,
   BuildColumnType,
   BuildRowType,
@@ -448,13 +448,15 @@ export function useGrid (
   })
 
   return {
+    gridContainer,
+    gridWidth,
+    resizingColumn,
     columnWidth,
+    resizingRow,
     rowHeight,
     rows,
     columns,
     rowNameColumnWidth,
-    gridContainer,
-    gridWidth,
     activeCell,
     setActiveCell,
     allCellsSelected,
@@ -490,14 +492,14 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
   getDimension: (object: T) => K,
   changeSize: (object: K, size: number) => void
 ) {
-  const borderGag = 10
+  const borderGag = 6
 
   const dimensionKey = direction === 'x' ? 'width' : 'height'
   const offsetSizeKey = direction === 'x' ? 'offsetWidth' : 'offsetHeight'
   const eventOffsetKey = direction === 'x' ? 'offsetX' : 'offsetY'
 
   const defaultElementSize = ref<number>(defaultSize)
-  const resizing = ref<ResitingType<T> | null>(null)
+  const resizing = ref<ResizingType<T> | null>(null)
   const elementPosition = ref<ElementPositionType>({ left: null, right: null, top: null, bottom: null })
   const elementSize = computed<ElementSizeType>(() => ({
     visible: !!resizing.value && resizing.value.state === 'resizing',

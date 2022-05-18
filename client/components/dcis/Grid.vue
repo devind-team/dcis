@@ -7,6 +7,7 @@
           grid-header(
             :row-name-column-width="rowNameColumnWidth"
             :columns="columns"
+            :resizing-column="resizingColumn"
             :selected-column-positions="selectedColumnsPositions"
             :selected-boundary-row-cells="selectedBoundaryRowCells"
             :all-cells-selected="allCellsSelected"
@@ -19,6 +20,7 @@
           )
           grid-body(
             :rows="rows"
+            :resizing-row="resizingRow"
             :active-cell="activeCell"
             :set-active-cell="setActiveCell"
             :selected-cells-positions="selectedCellsPositions"
@@ -65,13 +67,15 @@ export default defineComponent({
     const sheet = toRef(props, 'sheet')
     const { t } = useI18n()
     const {
+      gridContainer,
+      gridWidth,
+      resizingColumn,
       columnWidth,
+      resizingRow,
       rowHeight,
       rows,
       columns,
       rowNameColumnWidth,
-      gridContainer,
-      gridWidth,
       activeCell,
       setActiveCell,
       allCellsSelected,
@@ -101,13 +105,15 @@ export default defineComponent({
 
     return {
       t,
+      gridContainer,
+      gridWidth,
+      resizingColumn,
       columnWidth,
+      resizingRow,
       rowHeight,
       rows,
       columns,
       rowNameColumnWidth,
-      gridContainer,
-      gridWidth,
       activeCell,
       setActiveCell,
       allCellsSelected,
@@ -149,8 +155,8 @@ export default defineComponent({
   cursor: row-resize !important
 
 $border: 1px solid silver
-$index-light: map-get($grey, 'lighten-3')
-$index-dark: map-get($grey, 'lighten-2')
+$name-light: map-get($grey, 'lighten-3')
+$name-dark: map-get($grey, 'lighten-2')
 
 div.grid__body
   position: relative
@@ -196,7 +202,7 @@ div.grid__body
             background: white
 
             &.grid__header-content_selected
-              background: $index-light
+              background: $name-light
 
         th:first-child
           position: sticky
@@ -222,20 +228,20 @@ div.grid__body
               border-color: transparent transparent transparent transparent
 
             .grid__select-all_selected
-              border-color: transparent transparent $index-light transparent
+              border-color: transparent transparent $name-light transparent
 
           &:hover
 
             .grid__header-content
 
               .grid__select-all
-                border-color: transparent transparent $index-dark transparent
+                border-color: transparent transparent $name-dark transparent
 
-        th:not(:first-child)
+        th:not(:first-child).grid__header_hover
           cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
           .grid__header-content:hover
-            background: $index-dark !important
+            background: $name-dark !important
 
       tbody
         tr:first-child
@@ -245,9 +251,6 @@ div.grid__body
 
           .grid__cell-content_row-name
             top: 0 !important
-
-        td:first-child
-          cursor: url("/cursors/arrow-right.svg") 8 8, pointer
 
         td
           overflow: hidden
@@ -274,10 +277,13 @@ div.grid__body
             background: white
 
             &.grid__cell-content_row-name-selected
-              background: $index-light
+              background: $name-light
 
-            &:hover
-              background: $index-dark !important
+        td.grid__cell_row-name-hover
+          cursor: url("/cursors/arrow-right.svg") 8 8, pointer
+
+          .grid__cell-content_row-name:hover
+            background: $name-dark !important
 
         td:not(.grid__cell_row-name)
           position: relative

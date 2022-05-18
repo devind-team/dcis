@@ -2,6 +2,7 @@
   tbody
     tr(v-for="buildRow in rows" :key="buildRow.rowDimension.id" :style="buildRow.style")
       td.grid__cell_row-name(
+        :class="{ 'grid__cell_row-name-hover': !resizingRow }"
         @mouseenter="mouseenterRowName(buildRow)"
         @mousemove="mousemoveRowName(buildRow, $event)"
         @mouseleave="mouseleaveRowName"
@@ -29,7 +30,7 @@
 
 <script lang="ts">
 import { PropType } from '#app'
-import { BuildRowType, BuildCellType, BoundaryColumnCell } from '~/types/grid'
+import { ResizingType, BuildRowType, BuildCellType, BoundaryColumnCell } from '~/types/grid'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -37,6 +38,7 @@ export default defineComponent({
   components: { GridRowControl, GridCell },
   props: {
     rows: { type: Array as PropType<BuildRowType[]>, required: true },
+    resizingRow: { type: Object as PropType<ResizingType<BuildRowType>>, default: null },
     activeCell: { type: Object as PropType<BuildCellType>, default: null },
     setActiveCell: { type: Function as PropType<(buildCell: BuildCellType | null) => void>, required: true },
     selectedCellsPositions: { type: Array as PropType<string[]>, required: true },
