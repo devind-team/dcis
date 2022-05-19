@@ -1,6 +1,4 @@
-from tokenize import group
 from typing import Any
-from unicodedata import name
 
 import graphene
 from devind_core.models import File
@@ -24,6 +22,7 @@ from apps.dcis.permissions import AddPeriod
 from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
+
 
 class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
     """Мутация для добавления проекта."""
@@ -133,6 +132,7 @@ class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation)
         permissions = ('dcis.add_periodgroup',)
         exclude_fields = ('users', 'privileges',)
 
+
 class CopyPeriodGroupMutation(BaseMutation):
     """Мутация на перенос группы с пользователями из другого сбора."""
 
@@ -148,12 +148,12 @@ class CopyPeriodGroupMutation(BaseMutation):
         period = get_object_or_404(Period, pk=period_id)
         period_groups: list[PeriodGroup] = []
         for period_group_id in period_groups_ids:
-            period_group = get_object_or_404(PeriodGroup, pk=from_global_id(period_group_id)[1])
+            period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
             period_groups.append(period_group)
-        period_groups_list = PeriodGroup.objects.bulk_create(
-            [PeriodGroup(name=period_group.name, period=period, users=period_group.users, privileges=period_group.privileges) for period_group in period_groups]
-        )
-        return CopyPeriodGroupMutation(period_groups=period_groups_list)
+            new_group = PeriodGroup.objects.create(name=period_group.name, period=period)
+            new_group.users.set(period_group.users.all())
+            new_group.privileges.set(period_group.privileges.all())
+        return CopyPeriodGroupMutation(period_groups=period_groups)
 
 
 class ChangePeriodGroupUsersMutation(BaseMutation):

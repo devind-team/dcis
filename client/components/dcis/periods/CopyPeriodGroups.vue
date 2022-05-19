@@ -3,7 +3,8 @@
     :header="String($t('dcis.periods.copyPeriodGroups.header'))"
     :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
     :mutation="copyPeriodGroups"
-    :variables="{ periodId: selectPeriod }"
+    :variables="{ periodId: period.id, periodGroupIds: selectGroups }"
+    :update="copyPeriodGroupsUpdate"
     mutation-name="copyPeriodGroups"
     errors-in-alert
     persistent
@@ -30,23 +31,34 @@
         :disabled="!selectPeriod"
         item-text="name"
         item-value="id"
-        return-object
+        multiple
         hide-no-data
         hide-selected
       )
 </template>
 
 <script lang="ts">
-import { defineComponent } from '#app'
+import { DataProxy } from 'apollo-cache'
+import { defineComponent, inject, PropType, ref, toRef } from '#app'
 import copyPeriodGroups from '~/gql/dcis/mutations/project/copy_period_groups.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { PeriodType, PeriodsQuery, PeriodsQueryVariables, PeriodGroupType } from '~/types/graphql'
+import {
+  PeriodType,
+  PeriodsQuery,
+  PeriodsQueryVariables,
+  PeriodGroupType,
+  CopyPeriodGroupMutationPayload
+} from '~/types/graphql'
 import periodsQuery from '~/gql/dcis/queries/periods.graphql'
 import { useAuthStore } from '~/store'
+import { useCommonQuery } from '~/composables'
+
+export type CopyPeriodGroupsMutationResult = { data: { copyPeriodGroups: CopyPeriodGroupMutationPayload } }
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
+    period: { type: Object as PropType<PeriodType>, required: true },
     activeQuery: { type: Boolean, default: false }
   },
   setup (props) {
@@ -64,12 +76,21 @@ export default defineComponent({
       }),
       options: options.value
     })
+    // Обновление после добавления пользователей в группу
+    const periodGroupsUpdate: any = inject('copyPeriodGroupsUpdate')
+    const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => {
+      const { success } = result.data.copyPeriodGroups
+      if (success) {
+        periodGroupsUpdate(cache, result)
+      }
+    }
     return {
       selectPeriod,
       selectGroups,
+      copyPeriodGroups,
+      copyPeriodGroupsUpdate,
       periods,
-      loading,
-      copyPeriodGroups
+      loading
     }
   }
 })

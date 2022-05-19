@@ -10,7 +10,6 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Project, Period
-from apps.core.models import User
 from ..types import ProjectType, PeriodType
 
 

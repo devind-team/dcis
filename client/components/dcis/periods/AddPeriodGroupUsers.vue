@@ -17,6 +17,7 @@
         v-model="selectUsers"
         :label="$t('ac.users.components.changeUsers.users')"
         :items="allUsers"
+        :filter="filterInputUsers"
         :search-input.sync="search"
         :loading="loading"
         item-text="text"
@@ -25,7 +26,6 @@
         deletable-chips
         multiple
         clearable
-        hide-no-data
         @change="search=''"
       )
 </template>
@@ -87,6 +87,10 @@ export default defineComponent({
         text: getUserFullName(user)
       }))
     })
+    const filterInputUsers = (item: GroupUser, queryText: string): boolean => {
+      const qt: string = queryText.toLowerCase()
+      return item.text.toLowerCase().split(' ').some((word: string) => word.includes(qt))
+    }
 
     // Обновление после добавления пользователей в группу
     const periodGroupUsersUpdate: any = inject('periodGroupUsersUpdate')
@@ -104,6 +108,7 @@ export default defineComponent({
       loading,
       changePeriodGroupUsers,
       selectUsers,
+      filterInputUsers,
       allUsers,
       search,
       dateTimeHM,

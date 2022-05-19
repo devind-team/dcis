@@ -1,41 +1,42 @@
 <template lang="pug">
   left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
       template(#header) {{ period.name }}
-      v-row(align="center")
-        v-col(cols="12" md="2" sm="2")
-          v-subheader Группы
-        v-col.text-right(cols="12" md="2" sm="4")
-          add-period-group(:period="period" :update="addPeriodGroupUpdate")
-            template(#activator="{ on: onMenu }")
-              v-tooltip(bottom)
-                template(#activator="{ on: onTooltip }")
-                  v-btn(v-on="{...onMenu, ...onTooltip}" class="align-self-center mr-4" color="primary" icon)
-                    v-icon(large) mdi-plus-circle-outline
-                span {{ $t('dcis.periods.actions.addGroup') }}
-          copy-period-groups(active-query)
-            template(#activator="{ on: onMenu }")
-              v-tooltip(bottom)
-                template(#activator="{ on: onTooltip }")
-                  v-btn(v-on="{...onMenu, ...onTooltip}" class="align-self-center mr-4" color="primary" icon)
-                    v-icon(large) mdi-import
-                span {{ $t('dcis.periods.actions.copyGroups') }}
-        v-list
-          v-list-item-group(v-model="selectGroup" color="primary")
-            v-list-item(
-              v-for="(item, index) in period.periodGroups"
-              :key="index"
-              :value="item"
-            )
-              v-list-item-content {{ item.name }}
-              v-list-item-action
-                delete-menu(@confirm="deletePeriodGroupMutate({ id: Number(item.id) }).then()")
-                  template(#default="{ on: onMenu }")
-                    v-tooltip(bottom)
-                      template(#activator="{ on: onTooltip }")
-                        v-hover(v-slot="{ hover }")
-                          v-btn(:color="hover ? 'error' : ''" @click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
-                            v-icon mdi-delete
-                      span {{ $t('dcis.periods.actions.deleteGroup') }}
+      v-row
+        v-col(cols="12" md="4" sm="4")
+          v-row
+            v-subheader Группы
+            v-spacer
+            add-period-group(:period="period" :update="addPeriodGroupUpdate")
+              template(#activator="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{...onMenu, ...onTooltip}" class="align-self-center mr-4" color="primary" icon)
+                      v-icon(large) mdi-plus-circle-outline
+                  span {{ $t('dcis.periods.actions.addGroup') }}
+            copy-period-groups(:period="period" active-query)
+              template(#activator="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{...onMenu, ...onTooltip}" class="align-self-center mr-4" color="primary" icon)
+                      v-icon(large) mdi-import
+                  span {{ $t('dcis.periods.actions.copyGroups') }}
+          v-list
+            v-list-item-group(v-model="selectGroup" color="primary")
+              v-list-item(
+                v-for="(item, index) in period.periodGroups"
+                :key="index"
+                :value="item"
+              )
+                v-list-item-content {{ item.name }}
+                v-list-item-action
+                  delete-menu(@confirm="deletePeriodGroupMutate({ id: Number(item.id) }).then()")
+                    template(#default="{ on: onMenu }")
+                      v-tooltip(bottom)
+                        template(#activator="{ on: onTooltip }")
+                          v-hover(v-slot="{ hover }")
+                            v-btn(:color="hover ? 'error' : ''" @click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
+                              v-icon mdi-delete
+                        span {{ $t('dcis.periods.actions.deleteGroup') }}
         v-divider(vertical)
         v-col(cols="12" md="8" sm="6")
           period-group-users(:period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
@@ -53,7 +54,7 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import PeriodGroupUsers, { DeleteUserFromPeriodGroupMutationResult } from '~/components/dcis/periods/PeriodGroupUsers.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
-import CopyPeriodGroups from '~/components/dcis/periods/CopyPeriodGroups.vue'
+import CopyPeriodGroups, {CopyPeriodGroupsMutationResult} from '~/components/dcis/periods/CopyPeriodGroups.vue'
 import { ChangePeriodGroupUsersMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
 import { ChangePeriodGroupPrivilegesMutationResult } from '~~/components/dcis/periods/PeriodGroupPrivileges.vue'
 
@@ -94,6 +95,18 @@ export default defineComponent({
         ) => {
           if (!errors.length) {
             dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id).users = users
+          }
+          return dataCache
+        })
+    }
+
+    // Обновление после добавления групп из другого сбора
+    const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => {
+      periodUpdate(
+        cache, result, (dataCache, { data: { copyPeriodGroups: { success, periodGroups } } }: CopyPeriodGroupsMutationResult
+        ) => {
+          if (success) {
+            dataCache.period.periodGroups.push(...periodGroups)
           }
           return dataCache
         })
@@ -142,6 +155,7 @@ export default defineComponent({
 
     provide('periodGroupUsersUpdate', changePeriodGroupUsersUpdate)
     provide('periodGroupPrivilegesUpdate', changePeriodGroupPrivilegesUpdate)
+    provide('copyPeriodGroupsUpdate', copyPeriodGroupsUpdate)
 
     return {
       bc,

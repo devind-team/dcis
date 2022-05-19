@@ -1,13 +1,14 @@
 #import "../../../core/fragments/user_fields.graphql"
 
 mutation CopyPeriodGroups($periodId: ID!, $periodGroupIds: [ID!]) {
-    copyPeriodGroups(input: { periodId: $periodId, periodGroupsIds: $periodGroupIds }) {
-      errors {
-          field
-          messages
-          __typename
-      }
-      periodGroups {
+  copyPeriodGroups(input: { periodId: $periodId, periodGroupsIds: $periodGroupIds }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    periodGroups {
       id
       name
       createdAt
@@ -24,5 +25,5 @@ mutation CopyPeriodGroups($periodId: ID!, $periodGroupIds: [ID!]) {
       }
       __typename
     }
-    }
+  }
 }

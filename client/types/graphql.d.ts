@@ -4807,7 +4807,7 @@ export type CopyPeriodGroupsMutationVariables = Exact<{
   periodGroupIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
 }>;
 
-export type CopyPeriodGroupsMutation = { __typename?: 'Mutation', copyPeriodGroups: { __typename?: 'CopyPeriodGroupMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, periodGroups: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> } };
+export type CopyPeriodGroupsMutation = { __typename?: 'Mutation', copyPeriodGroups: { __typename?: 'CopyPeriodGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, periodGroups: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> } };
 
 export type DeletePeriodMutationVariables = Exact<{
   id: Scalars['ID'];
