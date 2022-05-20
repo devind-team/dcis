@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from functools import reduce
-from itertools import chain
 from typing import Optional, Sequence, Union
 
 from django.db.models import Model, Q, QuerySet
@@ -50,12 +49,7 @@ class DataUnloader(ABC):
     @staticmethod
     def _model_to_dict(instance: Model, fields: Optional[Sequence[str]] = None) -> dict:
         """Преобразование модели в словарь."""
-        opts = instance._meta
-        data = {}
-        for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
-            if fields is not None and f.name in fields:
-                data[f.name] = f.value_from_object(instance)
-        return data
+        return {k: v for k, v in instance.__dict__.items() if k in fields}
 
 
 class SheetColumnsUnloader(DataUnloader):
@@ -88,7 +82,8 @@ class SheetRowsUploader(DataUnloader):
         rows: Union[QuerySet[RowDimension], Sequence[RowDimension]],
         cells: Union[QuerySet[Cell], Sequence[Cell]],
         merged_cells: Union[QuerySet[MergedCell], Sequence[MergedCell]],
-        values: Union[QuerySet[Value], Sequence[Value]]
+        values: Union[QuerySet[Value], Sequence[Value]],
+        partial: bool = False
     ) -> None:
         super().__init__()
         self.columns_unloader = columns_unloader
@@ -96,24 +91,28 @@ class SheetRowsUploader(DataUnloader):
         self.cells = cells
         self.merged_cells = merged_cells
         self.values = values
+        self.partial = partial
 
     def unload_data(self) -> Union[list[dict], dict]:
         """Выгрузка строк листа."""
-        columns = self.columns_unloader.unload()
         rows = self._unload_raw_rows()
         cells = self._unload_raw_cells()
-        merged_cells = self._unload_raw_merged_cells()
-        values = self._unload_raw_values()
-        columns_map = self._create_columns_map(columns)
-        merged_cells_map = self._create_merged_cells_map(merged_cells)
-        merged_cell_positions = self._create_merged_cell_positions(merged_cells)
-        row_trees = self._add_row_names(self._connect_rows(rows))
-        rows = self._sort_rows(row_trees)
-        self._add_cell_values(cells, values)
-        self._add_cells(rows, cells)
-        self._add_cell_properties(rows, columns_map, merged_cells_map)
-        self._prepare_row_cells(rows, merged_cells_map, merged_cell_positions)
-        return rows
+        if self.partial:
+            parent_rows = self._find_row_parents(rows)
+            row_trees = self._connect_rows([*rows, *parent_rows])
+            self._add_row_names(row_trees)
+            all_rows = self._flatten_rows(row_trees)
+            all_cells = [*cells, *self._find_rows_cells(parent_rows)]
+            self._add_global_indices_partial(all_rows)
+            self._prepare_data(all_rows, all_cells)
+            return self._sort_rows_partial(rows)
+        else:
+            row_trees = self._connect_rows(rows)
+            self._add_row_names(row_trees)
+            rows = self._flatten_rows(row_trees)
+            self._add_global_indices(rows)
+            self._prepare_data(rows, cells)
+            return rows
 
     _rows_fields = (
         'id', 'index', 'height',
@@ -138,6 +137,19 @@ class SheetRowsUploader(DataUnloader):
         'colspan', 'rowspan', 'target', 'cells',
     )
 
+    def _prepare_data(self, rows: list[dict], cells: list[dict]) -> None:
+        """Подготовка строк и ячеек к выгрузке после сортировки строк."""
+        columns = self.columns_unloader.unload()
+        merged_cells = self._unload_raw_merged_cells()
+        values = self._unload_raw_values()
+        columns_map = self._create_columns_map(columns)
+        merged_cells_map = self._create_merged_cells_map(merged_cells)
+        merged_cell_positions = self._create_merged_cell_positions(merged_cells)
+        self._add_cell_values(cells, values)
+        self._add_cells(rows, cells)
+        self._add_cell_properties(rows, columns_map, merged_cells_map)
+        self._prepare_row_cells(rows, merged_cells_map, merged_cell_positions)
+
     def _unload_raw_rows(self) -> list[dict]:
         """Выгрузка необработанных строк листа."""
         return self.unload_raw_data(self.rows, self._rows_fields)
@@ -155,6 +167,36 @@ class SheetRowsUploader(DataUnloader):
         return self.unload_raw_data(self.merged_cells, self._merged_cells_fields, self._merged_cells_properties)
 
     @staticmethod
+    def _create_columns_map(columns: list[dict]) -> dict[dict]:
+        """Создание структуры для быстрого поиска колонок по id."""
+        return reduce(lambda a, c: {**a, c['id']: c}, columns, {})
+
+    @staticmethod
+    def _create_merged_cells_map(merged_cells: list[dict]) -> dict[dict]:
+        """Создание структуры для быстрого поиска объединенных ячеек по позиции основной ячейки."""
+        return reduce(lambda a, c: {**a, c['target']: c}, merged_cells, {})
+
+    @staticmethod
+    def _create_merged_cell_positions(merged_cells: list[dict]) -> list[str]:
+        """Создание списка позиций объединенных строк."""
+        return reduce(lambda a, c: [*a, *c['cells']], merged_cells, [])
+
+    @classmethod
+    def _find_row_parents(cls, rows: list[dict]) -> list[dict]:
+        """Поиск родительских строк для частичной выгрузки."""
+        parent_rows = cls.unload_raw_data(
+            RowDimension.objects.filter(pk__in=[row['parent_id'] for row in rows if row['parent_id'] is not None]),
+            cls._rows_fields
+        )
+        unique_parent_rows = [
+            parent_row for parent_row in parent_rows if
+            next((row for row in rows if row['id'] == parent_row['id']), None) is None
+        ]
+        if len(unique_parent_rows):
+            return [*unique_parent_rows, *cls._find_row_parents(unique_parent_rows)]
+        return unique_parent_rows
+
+    @staticmethod
     def _connect_rows(rows: list[dict]) -> list[dict]:
         """Создание деревьев строк."""
         for row in rows:
@@ -168,6 +210,14 @@ class SheetRowsUploader(DataUnloader):
         return trees
 
     @classmethod
+    def _add_row_names(cls, rows_tree: list[dict]) -> None:
+        """Добавление имен к строкам."""
+        for row in rows_tree:
+            row['name'] = cls._get_row_name(row)
+            if len(row['children']):
+                cls._add_row_names(row['children'])
+
+    @classmethod
     def _get_row_name(cls, row: dict, indices: Optional[list[int]] = None) -> str:
         """Получение имени строки."""
         indices = indices or []
@@ -176,24 +226,42 @@ class SheetRowsUploader(DataUnloader):
         return '.'.join([str(row['index']), *indices])
 
     @classmethod
-    def _add_row_names(cls, rows_tree: list[dict]) -> list[dict]:
-        """Добавление имен к строкам."""
-        for row in rows_tree:
-            row['name'] = cls._get_row_name(row)
-            if len(row['children']):
-                cls._add_row_names(row['children'])
-        return rows_tree
-
-    @classmethod
-    def _sort_rows(cls, rows_tree: list[dict]) -> list[dict]:
-        """Сортировка строк и добавление глобальных индексов."""
+    def _flatten_rows(cls, rows_tree: list[dict]) -> list[dict]:
+        """Превращение строк в плоскую структуру."""
         result: list[dict] = []
         for row in sorted(rows_tree, key=lambda r: r['index']):
             result.append(row)
-            result.extend(cls._sort_rows(row['children']))
-        for i, row in enumerate(result, 1):
-            row['global_index'] = i
+            result.extend(cls._flatten_rows(row['children']))
         return result
+
+    @classmethod
+    def _add_global_indices(cls, rows: list[dict]) -> None:
+        """Добавление индексов в плоской структуре для строк."""
+        for i, row in enumerate(rows, 1):
+            row['global_index'] = i
+
+    @classmethod
+    def _add_global_indices_partial(cls, rows: list[dict]) -> None:
+        """Добавление индексов в плоской структуре для строк для частичной выгрузки."""
+        for row in rows:
+            row['global_index'] = cls._get_row_global_index(row)
+
+    @staticmethod
+    def _sort_rows_partial(rows: list[dict]) -> list[dict]:
+        """Сортировка строк для частичной выгрузки."""
+        return sorted(rows, key=lambda row: row['global_index'])
+
+    @classmethod
+    def _get_row_global_index(cls, row: dict) -> int:
+        """Получение позиции строки в плоской структуре для частичной выгрузки."""
+        if row['parent'] is not None:
+            return row['index'] + cls._get_row_global_index(row['parent'])
+        return row['index']
+
+    @classmethod
+    def _find_rows_cells(cls, rows: list[dict]) -> list[dict]:
+        """Поиск строк для ячеек для частичной выгрузки."""
+        return cls.unload_raw_data(Cell.objects.filter(row__id__in=[row['id'] for row in rows]), cls._cells_fields)
 
     @staticmethod
     def _add_cell_values(cells: list[dict], values: list[dict]) -> None:
@@ -226,21 +294,6 @@ class SheetRowsUploader(DataUnloader):
                 cls._add_cell_positions(row, column, cell)
                 cls._add_cell_spans(row, cell, merged_cells_map)
                 cls._add_cell_related_positions(row, column, cell)
-
-    @staticmethod
-    def _create_columns_map(columns: list[dict]) -> dict[dict]:
-        """Создание структуры для быстрого поиска колонок по id."""
-        return reduce(lambda a, c: {**a, c['id']: c}, columns, {})
-
-    @staticmethod
-    def _create_merged_cells_map(merged_cells: list[dict]) -> dict[dict]:
-        """Создание структуры для быстрого поиска объединенных ячеек по позиции основной ячейки."""
-        return reduce(lambda a, c: {**a, c['target']: c}, merged_cells, {})
-
-    @staticmethod
-    def _create_merged_cell_positions(merged_cells: list[dict]) -> list[str]:
-        """Создание списка позиций объединенных строк."""
-        return reduce(lambda a, c: [*a, *c['cells']], merged_cells, [])
 
     @staticmethod
     def _add_cell_positions(row: dict, column: dict, cell: dict) -> None:
