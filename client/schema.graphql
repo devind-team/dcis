@@ -258,19 +258,17 @@ type AddProjectMutationPayload {
 input AddRowDimensionMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
-  documentId: ID!
+  documentId: ID
   """Индекс вставки"""
   index: Int!
   """Идентификатор родительской строки"""
-  parentId: Int
+  parentId: ID
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
 }
 
 """Добавление строки."""
 type AddRowDimensionMutationPayload {
-  """Добавленные ячейки"""
-  cells: [CellType]!
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!

@@ -3,16 +3,17 @@ from typing import Optional
 from django.db.models import F
 
 from apps.core.models import User
-from apps.dcis.models.sheet import Cell, Document, MergedCell, RowDimension, Sheet
+from apps.dcis.models.sheet import Cell, Document, RowDimension, Sheet
+from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetRowsUploader
 
 
 def add_row(
     user: User,
-    document: Document,
     sheet: Sheet,
+    document: Optional[Document],
     parent_id: Optional[int],
     index: int
-) -> tuple[RowDimension, list[Cell], list[MergedCell]]:
+) -> dict:
     """Добавление строки.
 
     После добавления строки, строка приобретает новый индекс,
@@ -22,7 +23,7 @@ def add_row(
         rows = RowDimension.objects.filter(parent_id=parent_id)
     else:
         rows = sheet.rowdimension_set
-    rows.filter(index__gte=index).update(index=F('index') + 1)
+    rows.filter(parent_id=parent_id, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
         index=index,
@@ -37,7 +38,14 @@ def add_row(
     ]
     if not parent_id:
         move_merged_cells(sheet, index, 1)
-    return row_dimension, cells, sheet.mergedcell_set.all()
+    return SheetRowsUploader(
+        columns_unloader=SheetColumnsUnloader(sheet.columndimension_set.all()),
+        rows=[row_dimension],
+        cells=cells,
+        merged_cells=sheet.mergedcell_set.all(),
+        values=[],
+        partial=True
+    ).unload()[0]
 
 
 def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False) -> None:

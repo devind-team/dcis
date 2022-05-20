@@ -30,32 +30,27 @@ class AddRowDimensionMutation(BaseMutation):
     """Добавление строки."""
 
     class Input:
-        document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
-        parent_id = graphene.Int(description='Идентификатор родительской строки')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        document_id = graphene.ID(description='Идентификатор документа')
+        parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')
 
     row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
-    cells = graphene.List(CellType, required=True, description='Добавленные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        document_id: str,
+        document_id: Optional[str],
         sheet_id: int,
-        parent_id: Optional[int],
+        parent_id: Optional[str],
         index: int
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
-        row_dimension, cells, merged_cells = add_row(info.context.user, document, sheet, parent_id, index)
-        return AddRowDimensionMutation(
-            row_dimension=row_dimension,
-            cells=cells,
-            merged_cells=merged_cells
-        )
+        row_dimension = add_row(info.context.user, sheet, document, int(parent_id) if parent_id else None, index)
+        return AddRowDimensionMutation(row_dimension=row_dimension)
 
 
 class DeleteRowDimensionMutation(BaseMutation):

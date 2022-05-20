@@ -246,11 +246,6 @@ class SheetRowsUploader(DataUnloader):
         for row in rows:
             row['global_index'] = cls._get_row_global_index(row)
 
-    @staticmethod
-    def _sort_rows_partial(rows: list[dict]) -> list[dict]:
-        """Сортировка строк для частичной выгрузки."""
-        return sorted(rows, key=lambda row: row['global_index'])
-
     @classmethod
     def _get_row_global_index(cls, row: dict) -> int:
         """Получение позиции строки в плоской структуре для частичной выгрузки."""
@@ -329,6 +324,11 @@ class SheetRowsUploader(DataUnloader):
                 if root_cell['position'] in merged_cells_map or root_cell['position'] not in merged_cell_positions:
                     cells.append(cell)
             row['cells'] = sorted(cells, key=lambda c: c['global_position'])
+
+    @staticmethod
+    def _sort_rows_partial(rows: list[dict]) -> list[dict]:
+        """Сортировка строк для частичной выгрузки."""
+        return sorted(rows, key=lambda row: row['global_index'])
 
     @classmethod
     def _find_root_cell(cls, row: dict, cell: dict) -> dict:
