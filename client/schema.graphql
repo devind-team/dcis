@@ -3168,8 +3168,8 @@ type Query {
   ): UserType
   """Привилегии назначенных пользователей периодов"""
   userPrivileges(
-    """Идентификатор периода"""
-    periodId: ID!
+    """Идентификатор группы"""
+    periodGroupId: ID!
     """Идентификатор пользователя"""
     userId: ID!
   ): [PrivilegeType!]!

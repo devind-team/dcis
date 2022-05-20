@@ -3951,7 +3951,7 @@ export type QueryUserInformationArgs = {
 
 /** Схема запросов данных. */
 export type QueryUserPrivilegesArgs = {
-  periodId: Scalars['ID'];
+  periodGroupId: Scalars['ID'];
   userId: Scalars['ID'];
 };
 
@@ -5364,7 +5364,7 @@ export type UserDivisionsQueryVariables = Exact<{
 export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
 
 export type UserPrivilegesQueryVariables = Exact<{
-  periodId: Scalars['ID'];
+  periodGroupId: Scalars['ID'];
   userId: Scalars['ID'];
 }>;
 

@@ -16,14 +16,12 @@
       v-data-table(
         v-model="selectPrivileges"
         :headers="headers"
-        :items="user ? periodGroup.privileges : privileges"
+        :items="privileges"
         :loading="loading"
         item-key="id"
         show-select
         hide-default-footer
       )
-        template(#no-data)
-          v-alert(type="warning") {{ $t('dcis.periods.changePrivileges.alert') }}
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
-query UserPrivileges($periodId: ID!, $userId: ID!) {
-  userPrivileges(periodId: $periodId, userId: $userId) {
+query UserPrivileges($periodGroupId: ID! $userId: ID!) {
+  userPrivileges(periodGroupId: $periodGroupId, userId: $userId) {
     id
     name
     key

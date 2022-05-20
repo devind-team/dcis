@@ -27,6 +27,7 @@
               :user="selectUser"
               :user-privileges="userPrivileges"
               :update="changeGroupUsersPrivilegesUpdate"
+              active-query
             )
               template(#activator="{ on }")
                 v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
@@ -38,13 +39,13 @@
               template(#default="{ on }")
                 v-btn(v-on="on" color="error") {{ $t('dcis.periods.changePrivileges.deleteUser') }}
     v-card-actions
-      add-period-group-users(:period-group="periodGroup" active-query)
-        template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
-      v-spacer
       period-group-privileges(:period-group="periodGroup" :key="periodGroup.id" active-query)
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
+      v-spacer
+      add-period-group-users(:period-group="periodGroup" active-query)
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
     v-card-text
       v-data-table(
         :headers="headers"
@@ -112,7 +113,7 @@ export default defineComponent({
     const options = ref({ enabled: active })
     const { data: userPrivileges, loading, update } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
       document: userPrivilegesQuery,
-      variables: () => ({ userId: selectUser.value?.id, periodId: props.period.id }),
+      variables: () => ({ userId: selectUser.value?.id, periodGroupId: props.periodGroup.id }),
       options: options.value
     })
 
