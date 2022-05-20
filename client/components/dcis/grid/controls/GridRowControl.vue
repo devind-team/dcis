@@ -12,17 +12,17 @@
             v-list-item-icon
               v-icon mdi-cog
             v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
-      v-list-item(@click="addRowDimension(buildRow.rowDimension.index - 1)")
+      v-list-item(@click="addRowDimension(buildRow, AddRowDimensionPosition.BEFORE)")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
         v-list-item-content {{ t('dcis.grid.rowControl.addRowAbove') }}
-      v-list-item(@click="addRowDimension(buildRow.rowDimension.index + 1)")
+      v-list-item(@click="addRowDimension(buildRow, AddRowDimensionPosition.AFTER)")
         v-list-item-icon
           v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addRowBelow') }}
       v-list-item(
         v-if="buildRow.rowDimension.dynamic"
-        @click="addRowDimension(buildRow.rowDimension.children.length ? buildRow.rowDimension.children.at(-1).index + 1 : 1, +buildRow.rowDimension.id)"
+        @click="addRowDimension(buildRow, AddRowDimensionPosition.INSIDE)"
       )
         v-list-item-icon
           v-icon mdi-table-row-plus-after
@@ -34,7 +34,10 @@
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
+import { PropType, Ref } from '#app'
+import { UpdateType } from '~/composables/query-common'
+import { AddRowDimensionPosition } from '~/composables/grid-mutation'
+import { DocumentType, SheetType, SheetQuery } from '~/types/graphql'
 import { BuildRowType } from '~/types/grid'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
 
@@ -50,14 +53,29 @@ export default defineComponent({
     const settingsActive = ref<boolean>(false)
 
     const { dateTimeHM } = useFilters()
-    const addRowDimension = (index: number, parentId: number | undefined = undefined) => {
-      console.log('addRowDimension', index, parentId)
-    }
+
+    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+
+    const addRowDimension = useAddRowDimensionMutation(
+      computed(() => activeSheet.value.id),
+      computed(() => activeDocument.value.id),
+      updateSheet
+    )
 
     const deleteRowDimension = (rowId: number) => {
       console.log('deleteRowDimension', rowId)
     }
-    return { t, settingsActive, addRowDimension, deleteRowDimension, dateTimeHM }
+
+    return {
+      AddRowDimensionPosition,
+      t,
+      settingsActive,
+      dateTimeHM,
+      addRowDimension,
+      deleteRowDimension
+    }
   }
 })
 </script>

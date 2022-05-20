@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
+import { Ref } from '#app'
 import { SheetType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
@@ -62,11 +62,8 @@ import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
   components: { GridSheetToolbar, GridHeader, GridBody, GridElementResizing },
-  props: {
-    sheet: { type: Object as PropType<SheetType>, required: true }
-  },
-  setup (props) {
-    const sheet = toRef(props, 'sheet')
+  setup () {
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const { t } = useI18n()
     const {
       gridContainer,
@@ -105,7 +102,7 @@ export default defineComponent({
       mousedownRowName,
       mouseupRowName,
       selectAllCells
-    } = useGrid(sheet, () => {}, () => {})
+    } = useGrid(activeSheet, () => {}, () => {})
 
     return {
       t,

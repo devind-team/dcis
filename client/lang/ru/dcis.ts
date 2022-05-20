@@ -1,6 +1,7 @@
 export default {
   home: 'Проекты сборов',
   grid: {
+    version: 'Версия: {version}',
     toolbar: {
       addRow: 'Добавить строку'
     },

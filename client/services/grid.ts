@@ -9,7 +9,7 @@ import {
   RangeSpanType
 } from '~/types/grid'
 
-const coordinateExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
+const positionExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
 const sheetExp = /(?<sheet>([^'^!])*)?![$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<minRow>\d+)?(:[$]?(?<maxColumn>[A-Za-z]{1,3})?[$]?(?<maxRow>\d+))?/
 const rangeExp = /[$]?(?<minColumn>[A-Za-z]{1,3})?[$]?(?<minRow>\d+)?(:[$]?(?<maxColumn>[A-Za-z]{1,3})?[$]?(?<maxRow>\d+))?/
 
@@ -72,31 +72,29 @@ const letterToPosition = (letter: string): number => {
  * parseCoordinate('$A1') -> { column: 'A', row: 1 }
  * parseCoordinate('A$1') -> { column: 'A', row: 1 }
  * parseCoordinate('$A$1') -> { column: 'A', row: 1 }
- * @param coordinate координата
+ * @param position позиция
  */
-const parsePosition = (coordinate: string): PositionPartsType => {
-  const coordinateParse: object | null = coordinate.match(coordinateExp)
-  if (coordinateParse === null) {
-    throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
+const parsePosition = (position: string): PositionPartsType => {
+  const match = position.match(positionExp)
+  if (match === null) {
+    throw new TypeError(`Неверный формат ячейки: ${position}`)
   }
-  const column: string = coordinateParse[1]
-  const row: number = +coordinateParse[2]
-  return { column, row }
+  return { column: match[1], row: +match[2] }
 }
 
 /**
  * Разбор позиции с указанием sheet
  * parseCoordinateWithSheet('Лист!A1') -> { sheet: 'Лист', column: 'A', row: '1' }
- * @param coordinate координата
+ * @param position координата
  */
-const parsePositionWithSheet = (coordinate: string): SheetPositionPartsType => {
-  const match = coordinate.match(sheetExp)
+const parsePositionWithSheet = (position: string): SheetPositionPartsType => {
+  const match = position.match(sheetExp)
   if (match === null) {
-    throw new TypeError(`Неверный формат ячейки: ${coordinate}`)
+    throw new TypeError(`Неверный формат ячейки: ${position}`)
   }
   const { sheet, minColumn: column, minRow: row } = match.groups
   if (!(sheet && column && row)) {
-    throw new TypeError(`Не удалось преобразовать координату: ${coordinate}`)
+    throw new TypeError(`Не удалось преобразовать координату: ${position}`)
   }
   return { sheet, column, row: parseInt(row) }
 }
