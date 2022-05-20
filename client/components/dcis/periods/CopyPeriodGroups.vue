@@ -3,7 +3,7 @@
     :header="String($t('dcis.periods.copyPeriodGroups.header'))"
     :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
     :mutation="copyPeriodGroups"
-    :variables="{ periodId: period.id, periodGroupIds: selectGroups }"
+    :variables="{ periodId: period.id, selectedPeriodId: selectPeriod && selectPeriod.id, periodGroupIds: selectGroups }"
     :update="copyPeriodGroupsUpdate"
     mutation-name="copyPeriodGroups"
     errors-in-alert
