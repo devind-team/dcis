@@ -1,6 +1,78 @@
 [
   {
-    "name": "Изменять параметры сбора",
-    "key": "change_project"
+    "name": "Просмотр сбора",
+    "key": "view_period"
+  },
+  {
+    "name": "Изменениe объектов сбора",
+    "key": "change_division"
+  },
+  {
+    "name": "Удаление сбора",
+    "key": "delete_period"
+  },
+  {
+    "name": "Добавить новый документ",
+    "key": "add_document"
+  },
+  {
+    "name": "Просмотр документа",
+    "key": "view_document"
+  },
+  {
+    "name": "Редактирование документа",
+    "key": "edit_document"
+  },
+  {
+    "name": "Изменениe настроек документа",
+    "key": "change_document_settings"
+  },
+  {
+    "name": "Удаление документа",
+    "key": "delete_document"
+  },
+  {
+    "name": "Добавление групп в сбор",
+    "key": "add_period_group"
+  },
+  {
+    "name": "Удаление групп из сбора",
+    "key": "delete_period_group"
+  },
+  {
+    "name": "Добавление пользователей в группу сбора",
+    "key": "add_period_group_users"
+  },
+  {
+    "name": "Удаление пользователей из группы сбора",
+    "key": "delete_period_group_users"
+  },
+  {
+    "name": "Изменениe привилегий пользователей",
+    "key": "change_user_privileges"
+  },
+  {
+    "name": "Изменениe привилегий групп сбора",
+    "key": "change_group_privileges"
+  },
+  {
+    "name": "Добавление строки документа",
+    "key": "add_row"
+  },
+  {
+    "name": "Добавление колонки документа",
+    "key": "add_column"
+  },
+  {
+    "name": "Удаление строки документа",
+    "key": "delete_row"
+  },
+  {
+    "name": "Удаление колонки документа",
+    "key": "delete_column"
+  },
+  {
+    "name": "Назначение объекта сборов для строки документа",
+    "key": "change_division_for_row"
   }
 ]
