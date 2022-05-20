@@ -1432,6 +1432,8 @@ input CopyPeriodGroupMutationInput {
   periodGroupsIds: [ID!]
   """Идентификатор текущего периода"""
   periodId: ID!
+  """Идентификатор выбранного периода"""
+  selectedPeriodId: ID!
 }
 
 """Мутация на перенос группы с пользователями из другого сбора."""

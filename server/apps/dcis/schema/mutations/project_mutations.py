@@ -138,13 +138,15 @@ class CopyPeriodGroupMutation(BaseMutation):
 
     class Input:
         period_id = graphene.ID(required=True, description='Идентификатор текущего периода')
+        selected_period_id = graphene.ID(required=True, description='Идентификатор выбранного периода')
         period_groups_ids = graphene.List(graphene.NonNull(graphene.ID), description='Выбранные группы')
 
     period_groups = graphene.List(PeriodGroupType, required=True, description='Группы сбора')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, period_groups_ids: list[str]):
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, selected_period_id: str, period_groups_ids: list[str]):
+        selected_period = get_object_or_404(Period, pk=selected_period_id)
         period = get_object_or_404(Period, pk=period_id)
         period_groups: list[PeriodGroup] = []
         for period_group_id in period_groups_ids:
@@ -153,6 +155,9 @@ class CopyPeriodGroupMutation(BaseMutation):
             new_group = PeriodGroup.objects.create(name=period_group.name, period=period)
             new_group.users.set(period_group.users.all())
             new_group.privileges.set(period_group.privileges.all())
+            for user in period_group.users.all():
+                for period_privilege in user.periodprivilege_set.filter(period=selected_period).all():
+                    PeriodPrivilege.objects.create(period=period, user=user, privilege=period_privilege.privilege)
         return CopyPeriodGroupMutation(period_groups=period_groups)
 
 

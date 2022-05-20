@@ -1570,6 +1570,8 @@ export type CopyPeriodGroupMutationInput = {
   periodGroupsIds?: InputMaybe<Array<Scalars['ID']>>;
   /** Идентификатор текущего периода */
   periodId: Scalars['ID'];
+  /** Идентификатор выбранного периода */
+  selectedPeriodId: Scalars['ID'];
 };
 
 /** Мутация на перенос группы с пользователями из другого сбора. */
@@ -5187,6 +5189,7 @@ export type ChangeProjectMutation = { __typename?: 'Mutation', changeProject: { 
 
 export type CopyPeriodGroupsMutationVariables = Exact<{
   periodId: Scalars['ID'];
+  selectedPeriodId: Scalars['ID'];
   periodGroupIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
 }>;
 

@@ -57,7 +57,7 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
             if privilege_id not in list(user_privileges.values_list('id', flat=True)):
                 privilege = get_object_or_404(Privilege, pk=privilege_id)
                 PeriodPrivilege.objects.create(privilege=privilege, user=user, period=period)
-        privileges: list[Privilege] = Privilege.objects.filter(periodprivilege__user=user)
+        privileges: list[Privilege] = Privilege.objects.filter(periodprivilege__user=user, periodprivilege__period=period)
         return ChangePeriodGroupPrivilegesMutation(privileges=privileges)
 
 
