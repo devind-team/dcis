@@ -259,6 +259,10 @@ input AddRowDimensionMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
   documentId: ID
+  """Индекс вставки в плоскую структуру"""
+  globalIndex: Int!
+  """Вспомогательные индексы в плоской структуре"""
+  globalIndices: [GlobalIndicesInputType!]!
   """Индекс вставки"""
   index: Int!
   """Идентификатор родительской строки"""
@@ -1836,6 +1840,14 @@ type GetTokenMutationPayload {
   tokenType: String
   """Авторизованный пользователь"""
   user: UserType
+}
+
+"""Индекс строки в плоской структуре."""
+input GlobalIndicesInputType {
+  """Индекс в плоской структуре"""
+  globalIndex: Int!
+  """Идентификатор строки"""
+  rowId: ID!
 }
 
 """Группа пользователей."""

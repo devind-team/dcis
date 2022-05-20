@@ -301,6 +301,10 @@ export type AddRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор документа */
   documentId?: InputMaybe<Scalars['ID']>;
+  /** Индекс вставки в плоскую структуру */
+  globalIndex: Scalars['Int'];
+  /** Вспомогательные индексы в плоской структуре */
+  globalIndices: Array<GlobalIndicesInputType>;
   /** Индекс вставки */
   index: Scalars['Int'];
   /** Идентификатор родительской строки */
@@ -1983,6 +1987,14 @@ export type GetTokenMutationPayload = {
   tokenType?: Maybe<Scalars['String']>;
   /** Авторизованный пользователь */
   user?: Maybe<UserType>;
+};
+
+/** Индекс строки в плоской структуре. */
+export type GlobalIndicesInputType = {
+  /** Индекс в плоской структуре */
+  globalIndex: Scalars['Int'];
+  /** Идентификатор строки */
+  rowId: Scalars['ID'];
 };
 
 /** Группа пользователей. */
@@ -4761,10 +4773,12 @@ export type DeleteProjectMutationVariables = Exact<{
 export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddRowDimensionMutationVariables = Exact<{
-  documentId: Scalars['ID'];
   sheetId: Scalars['ID'];
+  documentId?: InputMaybe<Scalars['ID']>;
   parentId?: InputMaybe<Scalars['ID']>;
   index: Scalars['Int'];
+  globalIndex: Scalars['Int'];
+  globalIndices: Array<GlobalIndicesInputType> | GlobalIndicesInputType;
 }>;
 
 export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> } } };

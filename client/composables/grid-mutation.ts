@@ -6,6 +6,7 @@ import { UpdateType } from '~/composables/query-common'
 import {
   RowDimensionFieldsFragment,
   SheetQuery,
+  GlobalIndicesInputType,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables
 } from '~/types/graphql'
@@ -20,26 +21,33 @@ export enum AddRowDimensionPosition {
 }
 
 export function useAddRowDimensionMutation (
+  rows: Ref<BuildRowType[]>,
   sheetId: Ref<string>,
   documentId: Ref<string | null>,
   updateSheet: UpdateType<SheetQuery>
 ) {
   const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRodDimension)
   return async function (buildRow: BuildRowType, position: AddRowDimensionPosition) {
-    let variables: AddRowDimensionMutationVariables | Omit<AddRowDimensionMutationVariables, 'index'> = {
+    const rowDimension = buildRow.rowDimension
+    let variables: AddRowDimensionMutationVariables | Omit<
+      AddRowDimensionMutationVariables, 'index' | 'globalIndex'
+    > = {
       sheetId: sheetId.value,
       documentId: documentId.value,
-      parentId: buildRow.rowDimension.parent?.id
+      parentId: rowDimension.parent?.id,
+      globalIndices: collectGlobalIndices(rows.value, buildRow)
     }
     if (position === AddRowDimensionPosition.AFTER) {
-      variables = { ...variables, index: buildRow.rowDimension.index + 1 }
+      variables = { ...variables, index: rowDimension.index + 1, globalIndex: rowDimension.globalIndex + 1 }
     } else if (position === AddRowDimensionPosition.BEFORE) {
-      variables = { ...variables, index: buildRow.rowDimension.index }
+      variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
     } else if (position === AddRowDimensionPosition.INSIDE) {
+      const childGlobalIndex = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
       variables = {
         ...variables,
-        parentId: buildRow.rowDimension.id,
-        index: buildRow.rowDimension.children.length ? buildRow.rowDimension.children.at(-1).index + 1 : 1
+        parentId: rowDimension.id,
+        index: rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1,
+        globalIndex: rowDimension.globalIndex + childGlobalIndex
       }
     }
     await mutate(variables as AddRowDimensionMutationVariables, {
@@ -62,6 +70,22 @@ export function useAddRowDimensionMutation (
       }
     })
   }
+}
+
+function collectGlobalIndices (
+  rows: BuildRowType[],
+  row: BuildRowType | null | undefined,
+  globalIndices: GlobalIndicesInputType[] | null = null
+): GlobalIndicesInputType[] {
+  globalIndices = globalIndices || []
+  if (!row) {
+    return globalIndices
+  }
+  return collectGlobalIndices(
+    rows,
+    rows.find((buildRow: BuildRowType) => buildRow.rowDimension.id === row.rowDimension.parent?.id),
+    [...globalIndices, { rowId: row.rowDimension.id, globalIndex: row.rowDimension.globalIndex }]
+  )
 }
 
 function addRow (rows: RowDimensionFieldsFragment[], newRow: RowDimensionFieldsFragment): RowDimensionFieldsFragment[] {

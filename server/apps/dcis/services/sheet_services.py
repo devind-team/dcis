@@ -4,7 +4,7 @@ from django.db.models import F
 
 from apps.core.models import User
 from apps.dcis.models.sheet import Cell, Document, RowDimension, Sheet
-from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetRowsUploader
+from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
 def add_row(
@@ -12,7 +12,9 @@ def add_row(
     sheet: Sheet,
     document: Optional[Document],
     parent_id: Optional[int],
-    index: int
+    index: int,
+    global_index: int,
+    global_indices_map: dict[int, int]
 ) -> dict:
     """Добавление строки.
 
@@ -38,13 +40,13 @@ def add_row(
     ]
     if not parent_id:
         move_merged_cells(sheet, index, 1)
-    return SheetRowsUploader(
+    return SheetPartialRowsUploader(
         columns_unloader=SheetColumnsUnloader(sheet.columndimension_set.all()),
         rows=[row_dimension],
         cells=cells,
         merged_cells=sheet.mergedcell_set.all(),
         values=[],
-        partial=True
+        rows_global_indices_map={**global_indices_map, row_dimension.id: global_index}
     ).unload()[0]
 
 

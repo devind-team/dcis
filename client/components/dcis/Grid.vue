@@ -104,6 +104,9 @@ export default defineComponent({
       selectAllCells
     } = useGrid(activeSheet, () => {}, () => {})
 
+    provide('rows', rows)
+    provide('columns', columns)
+
     return {
       t,
       gridContainer,

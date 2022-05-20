@@ -366,3 +366,10 @@ class LimitationType(DjangoObjectType):
             'cell',
         )
         convert_choices_to_enum = False
+
+
+class GlobalIndicesInputType(graphene.InputObjectType):
+    """Индекс строки в плоской структуре."""
+
+    row_id = graphene.ID(required=True, description='Идентификатор строки')
+    global_index = graphene.Int(required=True, description='Индекс в плоской структуре')

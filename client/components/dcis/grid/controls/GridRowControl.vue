@@ -54,11 +54,13 @@ export default defineComponent({
 
     const { dateTimeHM } = useFilters()
 
+    const rows = inject<Ref<BuildRowType[]>>('rows')
     const activeDocument = inject<Ref<DocumentType>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
 
     const addRowDimension = useAddRowDimensionMutation(
+      rows,
       computed(() => activeSheet.value.id),
       computed(() => activeDocument.value.id),
       updateSheet

@@ -14,7 +14,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, Document, RowDimension, Sheet, Value
-from apps.dcis.schema.types import CellType, RowDimensionType
+from apps.dcis.schema.types import CellType, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.cell_services import change_cell_kind, check_cell_options
 from apps.dcis.services.sheet_services import add_row, move_merged_cells
 from apps.dcis.services.value_services import (
@@ -34,6 +34,12 @@ class AddRowDimensionMutation(BaseMutation):
         document_id = graphene.ID(description='Идентификатор документа')
         parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')
+        global_index = graphene.Int(required=True, description='Индекс вставки в плоскую структуру')
+        global_indices = graphene.List(
+            graphene.NonNull(GlobalIndicesInputType),
+            required=True,
+            description='Вспомогательные индексы в плоской структуре'
+        )
 
     row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
 
@@ -45,11 +51,21 @@ class AddRowDimensionMutation(BaseMutation):
         document_id: Optional[str],
         sheet_id: int,
         parent_id: Optional[str],
-        index: int
+        index: int,
+        global_index: int,
+        global_indices: list[GlobalIndicesInputType]
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
-        row_dimension = add_row(info.context.user, sheet, document, int(parent_id) if parent_id else None, index)
+        row_dimension = add_row(
+            user=info.context.user,
+            sheet=sheet,
+            document=document,
+            parent_id=int(parent_id) if parent_id else None,
+            index=index,
+            global_index=global_index,
+            global_indices_map={int(i.row_id): i.global_index for i in global_indices}
+        )
         return AddRowDimensionMutation(row_dimension=row_dimension)
 
 
