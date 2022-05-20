@@ -205,7 +205,7 @@ class ExcelExtractor:
                     'size': cell.font.sz,
                     'strong': cell.font.b,
                     'italic': cell.font.i,
-                    'strike': cell.font.strike,
+                    'strike': cell.font.strike or False,
                     'underline': cell.font.u,
                     'color': f'#{font_color.value[2:]}'
                     if font_color and font_color.type == 'rgb' else '#000000',
