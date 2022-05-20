@@ -1,6 +1,6 @@
 <template lang="pug">
   mutation-modal-form(
-    :header="String($t('dcis.periods.copyPeriodGroups.header'))"
+    :header="String($t('dcis.periods.actions.copyGroups'))"
     :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
     :mutation="copyPeriodGroups"
     :variables="{ periodId: period.id, selectedPeriodId: selectPeriod && selectPeriod.id, periodGroupIds: selectGroups }"

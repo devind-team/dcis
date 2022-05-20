@@ -1,6 +1,7 @@
 <template lang="pug">
   mutation-modal-form(
-    :header="String($t('dcis.periods.addPeriodGroup.header'))"
+    @close="close"
+    :header="String($t('dcis.periods.actions.addGroup'))"
     :subheader="period.name"
     :button-text="String($t('dcis.periods.addPeriodGroup.buttonText'))"
     :mutation="addPeriodGroup"
@@ -14,7 +15,7 @@
       slot(name="activator" :on="on")
     template(#form)
       validation-provider(
-        :name="$t('dcis.periods.addPeriodGroup.name')"
+        :name="String($t('dcis.periods.addPeriodGroup.name'))"
         rules="required|min:2"
         v-slot="{ errors, valid }"
         )
@@ -23,6 +24,7 @@
           :label="$t('dcis.periods.addPeriodGroup.name')"
           :success="valid"
           :error-messages="errors"
+          autofocus
         )
 </template>
 
@@ -54,11 +56,17 @@ export default defineComponent({
         props.update(cache, result)
       }
     }
+
+    const close = () => {
+      name.value = ''
+      selectGroup.value = null
+    }
     return {
       name,
       selectGroup,
       addPeriodGroup,
-      addPeriodGroupUpdate
+      addPeriodGroupUpdate,
+      close
     }
   }
 })
