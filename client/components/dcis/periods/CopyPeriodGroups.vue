@@ -50,7 +50,7 @@ import {
   CopyPeriodGroupMutationPayload
 } from '~/types/graphql'
 import periodsQuery from '~/gql/dcis/queries/periods.graphql'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { useCommonQuery } from '~/composables'
 
 export type CopyPeriodGroupsMutationResult = { data: { copyPeriodGroups: CopyPeriodGroupMutationPayload } }
