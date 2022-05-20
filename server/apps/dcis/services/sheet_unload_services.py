@@ -182,32 +182,23 @@ class SheetRowsUploader(DataUnloader):
         return reduce(lambda a, c: [*a, *c['cells']], merged_cells, [])
 
     @classmethod
-    def _find_row_parents(cls, rows: list[dict]) -> list[dict]:
-        """Поиск родительских строк для частичной выгрузки."""
-        parent_rows = cls.unload_raw_data(
-            RowDimension.objects.filter(pk__in=[row['parent_id'] for row in rows if row['parent_id'] is not None]),
-            cls._rows_fields
-        )
-        unique_parent_rows = [
-            parent_row for parent_row in parent_rows if
-            next((row for row in rows if row['id'] == parent_row['id']), None) is None
-        ]
-        if len(unique_parent_rows):
-            return [*unique_parent_rows, *cls._find_row_parents(unique_parent_rows)]
-        return unique_parent_rows
-
-    @staticmethod
-    def _connect_rows(rows: list[dict]) -> list[dict]:
+    def _connect_rows(cls, rows: list[dict]) -> list[dict]:
         """Создание деревьев строк."""
         for row in rows:
             row['parent'] = None
             row['children'] = []
         trees = [row for row in rows if row['parent_id'] is None]
         for root in trees:
-            root['children'] = [row for row in rows if row['parent_id'] == root['id']]
-            for child in root['children']:
-                child['parent'] = root
+            cls._add_children(rows, root)
         return trees
+
+    @classmethod
+    def _add_children(cls, rows: list[dict], row: dict) -> None:
+        """Добавление дочерних строк к строке."""
+        row['children'] = [r for r in rows if r['parent_id'] == row['id']]
+        for child in row['children']:
+            child['parent'] = row
+            cls._add_children(rows, child)
 
     @classmethod
     def _add_row_names(cls, rows_tree: list[dict]) -> None:
