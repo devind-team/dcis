@@ -126,3 +126,13 @@ export function useCommonQuery<
     deleteUpdate
   }
 }
+
+export type UpdateType<TResult = any> = <TResultMutation>(
+  cache: DataProxy,
+  result: Omit<FetchResult<TResultMutation>, 'context'>,
+  transform: TransformUpdate<TResult, TResultMutation>
+) => void
+export type AddUpdateType = ReturnType<typeof useCommonQuery>['addUpdate']
+export type ChangeUpdateType = ReturnType<typeof useCommonQuery>['changeUpdate']
+export type ResetUpdateType = ReturnType<typeof useCommonQuery>['resetUpdate']
+export type DeleteUpdateType = ReturnType<typeof useCommonQuery>['deleteUpdate']
