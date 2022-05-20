@@ -3278,11 +3278,15 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-table-row/-/extension-table-row-2.0.0-beta.19.tgz#b45e82f29dfcc7405440ba237b069dbb93d1a94a"
   integrity sha512-ldEVDpIUX7ZqbViTy4c/RfyNGRv++O/r3A/Ivuon1PykaDDTbPlp5JM89FunAD39cLAbo2HKtweqdmzCMlZsqA==
 
-"@tiptap/extension-table@^2.0.0-beta.48":
-  version "2.0.0-beta.48"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-table/-/extension-table-2.0.0-beta.48.tgz#4b6adfe358fd38199ef5b29dafc9425fd461d1b3"
-  integrity sha512-Hcx3kOBQyazQ3dV0Oq4zKIl1og4EqUuZ5nEWxwcb8HgxSUYIhAJQ7pujPZiRLfkoFy92oVwmh9KhBRfQqRkUpQ==
+"@tiptap/extension-table@^2.0.0-beta.49":
+  version "2.0.0-beta.49"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-table/-/extension-table-2.0.0-beta.49.tgz#10e2fbc204290ae39b6768c9247f6aaced666776"
+  integrity sha512-7irrvMUe9z/6Y8DcFwSuxaIVQ71VUUT1xxv6NZADvdf0HJWesCaTpVORISTnNuQdO5nwEyJXXJ5Ri/82YzWe0g==
   dependencies:
+    "@types/prosemirror-model" "^1.16.0"
+    "@types/prosemirror-state" "^1.2.8"
+    prosemirror-model "^1.16.1"
+    prosemirror-state "^1.3.4"
     prosemirror-tables "^1.1.1"
     prosemirror-view "^1.23.6"
 
