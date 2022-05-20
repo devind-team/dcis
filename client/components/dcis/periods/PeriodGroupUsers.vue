@@ -34,7 +34,7 @@
             v-spacer
             delete-menu(
               :itemName="getUserFullName(selectUser)"
-              @confirm="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: periodGroup.id }).then()"
+              @confirm="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: Number(periodGroup.id) }).then()"
             )
               template(#default="{ on }")
                 v-btn(v-on="on" color="error") {{ $t('dcis.periods.changePrivileges.deleteUser') }}
@@ -146,14 +146,14 @@ export default defineComponent({
     }
 
     // Обновление после удаления пользователя из группы
-    const deleteUserUpdate = (cache: DataProxy | any, result: DeleteUserFromPeriodGroupMutationResult | any) => {
+    const deleteUserUpdate = (cache, result) => {
       const { errors } = result.data.deleteUserFromPeriodGroup
       if (!errors.length) {
+        props.update(cache, result)
         update(cache, result, (dataCache) => {
           dataCache.userPrivileges = []
           return dataCache
         })
-        props.update(cache, result)
         selectUser.value = null
         active.value = false
       }

@@ -2996,6 +2996,13 @@ type Query {
   ): BudgetClassificationTypeConnection
   """Статистика активности"""
   activeStatistics: ActiveStatisticsType!
+  """Дополнительные личные привилегии"""
+  additionalPrivileges(
+    """Идентификатор группы"""
+    periodGroupId: ID!
+    """Идентификатор пользователя"""
+    userId: ID!
+  ): [PrivilegeType!]!
   """Приложения"""
   applications: [ApplicationType!]!
   budgetClassifications(
@@ -3098,6 +3105,8 @@ type Query {
   ): DivisionTypeConnection
   """Периоды"""
   periods(
+    """Идентификатор периода"""
+    periodId: ID!
     """Идентификатор пользователя"""
     userId: ID!
   ): [PeriodType!]!

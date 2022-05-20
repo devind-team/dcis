@@ -50,9 +50,6 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
         period = get_object_or_404(Period, pk=period_id)
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
         user_privileges = user.periodprivilege_set.filter(period=period).all()
-        for privilege in user_privileges:
-            if privilege.id not in privileges_ids:
-                privilege.delete()
         for privilege_id in privileges_ids:
             if privilege_id not in list(user_privileges.values_list('id', flat=True)):
                 privilege = get_object_or_404(Privilege, pk=privilege_id)

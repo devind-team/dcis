@@ -3,6 +3,7 @@ mutation DeleteUserFromPeriodGroup($userId: ID!, $periodGroupId: Int!) {
     input: { userId: $userId, periodGroupId: $periodGroupId }
   ) {
     id
+    success
     errors {
       field
       messages

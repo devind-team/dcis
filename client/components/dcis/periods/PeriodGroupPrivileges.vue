@@ -16,7 +16,7 @@
       v-data-table(
         v-model="selectPrivileges"
         :headers="headers"
-        :items="privileges"
+        :items="user ? additionalPrivileges : privileges"
         :loading="loading"
         item-key="id"
         show-select
@@ -29,6 +29,8 @@ import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import { computed, defineComponent, inject, PropType, ref } from '#app'
 import {
+  AdditionalPrivilegesQuery,
+  AdditionalPrivilegesQueryVariables,
   ChangeGroupUserPrivilegesMutationPayload,
   ChangePeriodGroupPrivilegesMutationPayload,
   PeriodGroupType,
@@ -41,6 +43,7 @@ import {
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import { useCommonQuery, useFilters, useI18n } from '~/composables'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
+import additionalPrivilegesQuery from '~/gql/dcis/queries/additional_privileges.graphql'
 import changePeriodGroupPrivileges from '~/gql/dcis/mutations/privelege/change_period_group_privileges.graphql'
 import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
 
@@ -66,9 +69,14 @@ export default defineComponent({
     const options = ref({ enabled: activeQuery })
     const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
       document: privilegesQuery,
-      options: options.value
+      options: props.user ? { enabled: false } : options.value
     })
-    const selectPrivileges = ref<PrivilegeType[]>(props.user ? props.userPrivileges : props.periodGroup.privileges)
+    const { data: additionalPrivileges } = useCommonQuery<AdditionalPrivilegesQuery, AdditionalPrivilegesQueryVariables>({
+      document: additionalPrivilegesQuery,
+      variables: { periodGroupId: props.periodGroup.id, userId: props.user?.id },
+      options: props.user ? options.value : { enabled: false }
+    })
+    const selectPrivileges = ref<PrivilegeType[]>(props.user ? [] : props.periodGroup.privileges)
 
     const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))
     const mutationName = computed<string>(() => (props.user ? 'changeGroupUsersPrivileges' : 'changePeriodGroupPrivileges'))
@@ -104,6 +112,7 @@ export default defineComponent({
       headers,
       itemName,
       privileges,
+      additionalPrivileges,
       loading,
       selectPrivileges,
       formVariables,

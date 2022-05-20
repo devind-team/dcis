@@ -3599,6 +3599,8 @@ export type Query = {
   activeBudgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Статистика активности */
   activeStatistics: ActiveStatisticsType;
+  /** Дополнительные личные привилегии */
+  additionalPrivileges: Array<PrivilegeType>;
   /** Приложения */
   applications: Array<ApplicationType>;
   budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
@@ -3696,6 +3698,12 @@ export type QueryActiveBudgetClassificationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryAdditionalPrivilegesArgs = {
+  periodGroupId: Scalars['ID'];
+  userId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -3880,6 +3888,7 @@ export type QueryPeriodDivisionsArgs = {
 
 /** Схема запросов данных. */
 export type QueryPeriodsArgs = {
+  periodId: Scalars['ID'];
   userId: Scalars['ID'];
 };
 
@@ -5218,7 +5227,7 @@ export type DeleteUserFromPeriodGroupMutationVariables = Exact<{
   periodGroupId: Scalars['Int'];
 }>;
 
-export type DeleteUserFromPeriodGroupMutation = { __typename?: 'Mutation', deleteUserFromPeriodGroup: { __typename: 'DeleteUserFromPeriodGroupMutationPayload', id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type DeleteUserFromPeriodGroupMutation = { __typename?: 'Mutation', deleteUserFromPeriodGroup: { __typename: 'DeleteUserFromPeriodGroupMutationPayload', id: string, success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -5288,6 +5297,13 @@ export type ActiveBudgetClassificationsQueryVariables = Exact<{
 
 export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBudgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
 
+export type AdditionalPrivilegesQueryVariables = Exact<{
+  periodGroupId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+export type AdditionalPrivilegesQuery = { __typename?: 'Query', additionalPrivileges: Array<{ __typename?: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
+
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
@@ -5331,6 +5347,7 @@ export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodT
 
 export type PeriodsQueryVariables = Exact<{
   userId: Scalars['ID'];
+  periodId: Scalars['ID'];
 }>;
 
 export type PeriodsQuery = { __typename?: 'Query', periods: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null }> };

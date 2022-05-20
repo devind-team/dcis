@@ -27,6 +27,7 @@ class ProjectQueries(graphene.ObjectType):
     periods = DjangoListField(
         PeriodType,
         user_id=graphene.ID(required=True, description='Идентификатор пользователя'),
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Периоды'
     )
@@ -48,8 +49,8 @@ class ProjectQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_periods(root: Any, info: ResolveInfo, user_id: str, *args, **kwargs):
-        return set(Period.objects.filter(periodprivilege__user=from_global_id(user_id)[1]).all())
+    def resolve_periods(root: Any, info: ResolveInfo, user_id: str, period_id: str, *args, **kwargs):
+        return Period.objects.filter(periodprivilege__user=from_global_id(user_id)[1]).exclude(pk=period_id).all()
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

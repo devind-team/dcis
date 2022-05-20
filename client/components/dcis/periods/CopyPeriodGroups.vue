@@ -72,7 +72,8 @@ export default defineComponent({
     const { data: periods, loading } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
       document: periodsQuery,
       variables: () => ({
-        userId: user.value.id
+        userId: user.value.id,
+        periodId: props.period.id
       }),
       options: options.value
     })

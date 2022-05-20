@@ -43,7 +43,13 @@ import { useMutation } from '@vue/apollo-composable'
 import { ComputedRef, inject, PropType, ref, provide, computed, defineComponent, useNuxt2Meta } from '#app'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodGroupType, PeriodType, DeletePeriodGroupMutation, DeletePeriodGroupMutationVariables } from '~/types/graphql'
+import {
+  PeriodGroupType,
+  PeriodType,
+  DeletePeriodGroupMutation,
+  DeletePeriodGroupMutationVariables,
+  UserType
+} from '~/types/graphql'
 import deletePeriodGroup from '~/gql/dcis/mutations/project/delete_period_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import PeriodGroupUsers, { DeleteUserFromPeriodGroupMutationResult } from '~/components/dcis/periods/PeriodGroupUsers.vue'
@@ -163,8 +169,8 @@ export default defineComponent({
         cache, result, (dataCache, { data: { deleteUserFromPeriodGroup: { errors, id } } }: DeleteUserFromPeriodGroupMutationResult
         ) => {
           if (!errors.length) {
-            const selectedPeriodGroup: any = dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id)
-            selectedPeriodGroup.users = selectedPeriodGroup.users.filter((e: any) => e.id !== id)
+            const selectedPeriodGroup: any = dataCache.period.periodGroups.find((e: PeriodGroupType) => e.id === selectGroup.value.id)
+            selectedPeriodGroup.users = selectedPeriodGroup.users.filter((e: UserType) => e.id !== id)
           }
           return dataCache
         })
