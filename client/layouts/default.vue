@@ -9,14 +9,15 @@
 
 <script lang="ts">
 import type { Ref, ComputedRef } from '#app'
-import { useAuthStore } from '~/store'
+import { defineComponent, provide, ref, toRefs, watchEffect } from '#app'
+import { useAuthStore } from '~/stores'
 import { useCursorPagination, useQueryRelay, useVuetify } from '~/composables'
 import { updateQueryNotifications } from '~/services/notifications'
 import { NotificationsQuery, NotificationsQueryVariables, NotificationType, UserType } from '~/types/graphql'
 import notificationsSubscription from '~/gql/notifications/subscriptions/notifications.graphql'
 import notificationsQuery from '~/gql/notifications/queries/notifications.graphql'
-import Navigation from '~/components/global/Navigation.vue'
 import AppBar from '~/components/global/AppBar.vue'
+import Navigation from '~/components/global/Navigation.vue'
 import FooterComponent from '~/components/global/FooterComponent.vue'
 
 export default defineComponent({

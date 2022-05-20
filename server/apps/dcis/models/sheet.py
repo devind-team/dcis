@@ -1,4 +1,3 @@
-from typing import List
 from openpyexcel.utils.cell import get_column_letter
 from django.db import models
 
@@ -86,20 +85,72 @@ class Style(models.Model):
         abstract = True
 
 
-class ColumnDimension(models.Model):
+class KindCell(models.Model):
+    """Классификация ячеек."""
+
+    # Формат из openpyxl
+    NUMERIC = 'n'
+    STRING = 's'
+    FORMULA = 'f'
+    BOOL = 'b'
+    INLINE = 'inlineStr'
+    ERROR = 'e'
+    FORMULA_CACHE_STRING = 'str'
+    DATE = 'd'
+
+    # Дополнительный набор
+    TEXT = 'text'
+    MONEY = 'money'
+    BIG_MONEY = 'bigMoney'
+    FILES = 'fl'
+
+    # Поля из базы данных
+    USER = 'user'
+    DEPARTMENT = 'department'
+    ORGANIZATION = 'organization'
+    CLASSIFICATION = 'classification'
+
+    KIND_VALUE = (
+        (NUMERIC, 'n'),
+        (STRING, 's'),
+        (FORMULA, 'f'),
+        (BOOL, 'b'),
+        (INLINE, 'inlineStr'),
+        (ERROR, 'e'),
+        (FORMULA_CACHE_STRING, 'str'),
+        (DATE, 'd'),
+        (TEXT, 'text'),
+        (MONEY, 'money'),
+        (BIG_MONEY, 'bigMoney'),
+        (FILES, 'fl'),
+        (USER, 'user'),
+        (DEPARTMENT, 'department'),
+        (ORGANIZATION, 'organization'),
+        (CLASSIFICATION, 'classification')
+    )
+
+    kind = models.CharField(
+        max_length=30,
+        default=STRING,
+        choices=KIND_VALUE,
+        help_text='Тип значения'
+    )
+
+    class Meta:
+        abstract = True
+
+
+class ColumnDimension(KindCell, models.Model):
     """Модель стилей для колонки таблицы.
 
     Ссылка на оригинальный класс из openpyxl:
     https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.0/openpyxl/worksheet/dimensions.py
-
-    - auto_size - если True, то поле width не имеет значения
     """
 
     index = models.PositiveIntegerField(help_text='Индекс колонки')
     width = models.PositiveIntegerField(null=True, help_text='Ширина колонки')
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
     hidden = models.BooleanField(default=False, help_text='Скрытое поле')
-    auto_size = models.BooleanField(default=False, help_text='Автоматическая ширина')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
@@ -177,54 +228,9 @@ class RowDimension(models.Model):
         # ]
 
 
-class Cell(Style, models.Model):
+class Cell(Style, KindCell, models.Model):
     """Модель ячейки."""
 
-    # Формат из openpyxl
-    NUMERIC = 'n'
-    STRING = 's'
-    FORMULA = 'f'
-    BOOL = 'b'
-    INLINE = 'inlineStr'
-    ERROR = 'e'
-    FORMULA_CACHE_STRING = 'str'
-    DATE = 'd'
-
-    # Дополнительный набор
-    TEXT = 'text'
-    MONEY = 'money'
-    BIG_MONEY = 'bigMoney'
-    FILE = 'fl'
-
-    # Поля из базы данных
-    USER = 'user'
-    DEPARTMENT = 'department'
-    ORGANIZATION = 'organization'
-
-    KIND_VALUE = (
-        (NUMERIC, 'n'),
-        (STRING, 's'),
-        (FORMULA, 'f'),
-        (BOOL, 'b'),
-        (INLINE, 'inlineStr'),
-        (ERROR, 'e'),
-        (FORMULA_CACHE_STRING, 'str'),
-        (DATE, 'd'),
-        (TEXT, 'text'),
-        (MONEY, 'money'),
-        (BIG_MONEY, 'bigMoney'),
-        (FILE, 'fl'),
-        (USER, 'user'),
-        (DEPARTMENT, 'department'),
-        (ORGANIZATION, 'organization')
-    )
-
-    kind = models.CharField(
-        max_length=30,
-        default=STRING,
-        choices=KIND_VALUE,
-        help_text='Тип значения'
-    )
     editable = models.BooleanField(default=True, help_text='Редактируемая ячейка')
     formula = models.TextField(null=True, help_text='Формула')
     comment = models.TextField(null=True, help_text='Комментарий')
@@ -304,8 +310,8 @@ class MergedCell(models.Model):
         return f'{get_column_letter(self.min_col)}{self.min_row}'
 
     @property
-    def cells(self) -> List[str]:
-        not_cell: List[str] = []
+    def cells(self) -> list[str]:
+        not_cell: list[str] = []
         for col in range(self.min_col, self.max_col + 1):
             for row in range(self.min_row, self.max_row + 1):
                 if col == 1 and row == 1:
@@ -323,6 +329,7 @@ class Value(models.Model):
     """
 
     value = models.TextField(help_text='Значение')
+    payload = models.JSONField(null=True, help_text='Дополнительные данные')
     verified = models.BooleanField(default=True, help_text='Валидно ли поле')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
 

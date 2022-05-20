@@ -16,8 +16,6 @@
 
 <script lang="ts">
 import type { Ref } from '#app'
-import { defineComponent, ref } from '#app'
-import { useCommonQuery } from '~/composables'
 import { DepartmentsQuery, DepartmentsQueryVariables, DepartmentType } from '~/types/graphql'
 import departmentQuery from '~/gql/dcis/queries/departments.graphql'
 

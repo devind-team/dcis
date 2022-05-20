@@ -10,7 +10,7 @@
             :class="contentClass"
           ) {{ row.index }}
         span Дата изменения: {{ dateTimeHM(row.dimension.updatedAt) }}
-    v-list
+    v-list(dense)
       v-list-item(@click="addRowDimension(+row.id, 'before')")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
@@ -32,7 +32,9 @@ import type { PropType } from '#app'
 import { defineComponent, inject } from '#app'
 import { BuildRowType } from '~/types/grid-types'
 import {
-  RowDimensionType,
+  RowDimensionFieldsFragment,
+  CellType,
+  ValueType,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
   DeleteRowDimensionMutation,
@@ -66,18 +68,20 @@ export default defineComponent({
         update: (cache, result) => documentUpdate(
           cache,
           result,
-          (dataCache: DocumentQuery, { data: { addRowDimension: { success, rowDimension, cells, mergedCells } } }: AddRowDimensionMutationResult) => {
+          (
+            dataCache: DocumentQuery, {
+              data: { addRowDimension: { success, rowDimension, cells, mergedCells } }
+            }: AddRowDimensionMutationResult) => {
             if (success) {
-              dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId).cells.push(...cells)
-              const rows: RowDimensionType[] = dataCache.document.sheets
-                .find(sh => sh.id === props.row.sheetId)
-                .rows
-                .map((r: RowDimensionType | any) => (
+              const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId)
+              sheet.cells.push(...cells)
+              const rows = sheet.rows
+                .map((r: RowDimensionFieldsFragment) => (
                   r.index >= rowDimension.index ? Object.assign(r, { index: r.index + 1 }) : r)
                 )
-              rows.splice(rowDimension.index - 1, 0, rowDimension as RowDimensionType)
-              dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId).rows = rows as any
-              dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId).mergedCells = mergedCells
+              rows.splice(rowDimension.index - 1, 0, rowDimension)
+              sheet.rows = rows
+              sheet.mergedCells = mergedCells
             }
             return dataCache
           }
@@ -92,17 +96,20 @@ export default defineComponent({
           update: (cache, result) => documentUpdate(
             cache,
             result,
-            (dataCache: DocumentQuery, { data: { deleteRowDimension: { success, rowId, index, mergedCells } } }: DeleteRowDimensionMutationResult) => {
+            (
+              dataCache: DocumentQuery, {
+                data: { deleteRowDimension: { success, rowId, index, mergedCells } }
+              }: DeleteRowDimensionMutationResult) => {
               if (success) {
-                const rows: RowDimensionType[] = dataCache.document.sheets
-                  .find(sheet => sheet.id === props.row.sheetId)
-                  .rows
-                  .filter((r: RowDimensionType | any) => Number(r.id) !== rowId)
-                  .map((r: RowDimensionType | any) => (
+                const sheet = dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId)
+                sheet.rows = sheet.rows
+                  .filter((r: RowDimensionFieldsFragment) => Number(r.id) !== rowId)
+                  .map((r: RowDimensionFieldsFragment) => (
                     r.index > index ? Object.assign(r, { index: r.index - 1 }) : r
                   ))
-                dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId).rows = rows as any
-                dataCache.document.sheets.find(sheet => sheet.id === props.row.sheetId).mergedCells = mergedCells
+                sheet.cells = sheet.cells.filter((c: CellType) => c.rowId !== rowId)
+                sheet.values = sheet.values.filter((v: ValueType) => v.rowId !== rowId)
+                sheet.mergedCells = mergedCells
               }
               return dataCache
             }

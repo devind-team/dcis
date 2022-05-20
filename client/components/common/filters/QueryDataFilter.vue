@@ -46,7 +46,7 @@
         )
           v-card-text.flex-shrink-0(v-if="searchType")
             v-text-field(
-              v-stream:input="search"
+              v-model="search"
               v-on="on"
               :label="searchLabel"
               :loading="loading"
@@ -75,30 +75,30 @@ export default defineComponent({
   inheritAttrs: false,
   model: { prop: 'selectedValue', event: 'update:selectedValue' },
   props: {
-    selectedValue: { type: [Object, Array] as PropType<Item | Item[]>, required: true },
-    searchLabel: { type: String, required: true },
-    searchFunction: { type: Function as PropType<SearchFunction>, default: null },
+    selectedValue: { type: [Object, Array] as PropType<Item | Item[]>, default: null },
+    searchLabel: { type: String, default: undefined },
+    searchFunction: { type: Function as PropType<SearchFunction>, default: undefined },
     searchType: { type: String as PropType<'server' | 'client' | null>, default: null },
     searchKey: { type: [String, Array] as PropType<string | string[]>, default: 'search' },
 
-    itemKey: { type: String, default: null },
-    modal: { type: Boolean, default: null },
-    multiple: { type: Boolean, default: null },
-    hasSelectAll: { type: Boolean, default: null },
-    messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null },
-    title: { type: String, default: null },
-    maxWidth: { type: [String, Number], default: null },
-    maxHeight: { type: [String, Number], default: null },
-    noFiltrationMessage: { type: String, default: null },
-    multipleMessageFunction: { type: Function as PropType<MultipleMessageFunction>, default: null },
-    getName: { type: Function as PropType<GetName>, default: null },
-    variables: { type: Object as PropType<Variables>, default: null },
+    itemKey: { type: String, default: undefined },
+    modal: { type: Boolean, default: undefined },
+    multiple: { type: Boolean, default: undefined },
+    hasSelectAll: { type: Boolean, default: undefined },
+    messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
+    title: { type: String, default: undefined },
+    maxWidth: { type: [String, Number], default: undefined },
+    maxHeight: { type: [String, Number], default: undefined },
+    noFiltrationMessage: { type: String, default: undefined },
+    multipleMessageFunction: { type: Function as PropType<MultipleMessageFunction>, default: undefined },
+    getName: { type: Function as PropType<GetName>, default: undefined },
+    variables: { type: Object as PropType<Variables>, default: undefined },
     first: { type: Number, default: 10 }
   },
   setup (props, { emit }) {
     const { search, debounceSearch } = useDebounceSearch()
     const queryVariables = computed(() => {
-      const variables: Variables = props.variables ? { ...props.variables } : {}
+      const { variables = { } } = props
       if (props.searchType !== 'server') {
         return variables
       }

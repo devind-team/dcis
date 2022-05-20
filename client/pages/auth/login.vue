@@ -55,14 +55,13 @@ import {
   defineComponent,
   ref,
   useNuxt2Meta,
-  useNuxtApp,
   useRoute,
   useRouter,
   useRuntimeConfig
 } from '#app'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { GetTokenMutation, GetTokenMutationVariables, UserType } from '~/types/graphql'
-import { useAuthStore } from '~/store/auth-store'
+import { useAuthStore } from '~/stores'
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
@@ -73,7 +72,6 @@ export default defineComponent({
   setup () {
     const router = useRouter()
     const route = useRoute()
-    const { $store } = useNuxtApp()
     const { t, localePath } = useI18n()
     const { onLogin, defaultClient } = useApolloHelpers()
     const authStore = useAuthStore()
@@ -102,10 +100,6 @@ export default defineComponent({
       if (success) {
         onLogin(accessToken, defaultClient, { maxAge: expiresIn, path: '/' }, true)
         authStore.user = user as UserType
-
-        // Убрать после удаления vuex
-        $store.dispatch('auth/fetchExistUser', Object.assign({}, user))
-
         router.push((route.query.to as string) || '/')
       } else {
         loginError.value = errors[0].messages[0]

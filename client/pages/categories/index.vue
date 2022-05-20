@@ -50,7 +50,7 @@
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { computed, ComputedRef, defineComponent, toRefs, useNuxt2Meta } from '#app'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import { useI18n, useQueryRelay } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {

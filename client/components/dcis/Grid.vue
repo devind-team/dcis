@@ -4,7 +4,6 @@
       :sheet-id="sheet.id"
       :selection-cells="selectionCells"
       :selection-cells-options="selectionCellsOptions"
-      :update="update"
     )
     .grid__body
       div.grid__container(ref="gridContainer")
@@ -45,22 +44,17 @@ import { defineComponent, provide, toRef } from '#app'
 import {
   SheetType,
   ColumnDimensionType,
-  AddRowDimensionMutation,
-  DeleteRowDimensionMutation,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables
 } from '~/types/graphql'
 import { useGrid } from '~/composables/grid'
+import changeColumnDimension from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridColumnWidth from '~/components/dcis/grid/GridColumnWidth.vue'
-import changeColumnDimension from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 
-export type AddRowDimensionMutationResult = { data: AddRowDimensionMutation }
-export type DeleteRowDimensionMutationResult = { data: DeleteRowDimensionMutation }
-
-type DocumentUpdateTransformType = (dc: any, result: any) => any
+export type DocumentUpdateTransformType = (dc: any, result: any) => any
 type DocumentUpdateType = (cache: any, result: any, transform: DocumentUpdateTransformType) => any
 
 export default defineComponent({
@@ -80,7 +74,7 @@ export default defineComponent({
         width,
         fixed: columnDimension.fixed,
         hidden: columnDimension.hidden,
-        autoSize: columnDimension.autoSize
+        kind: columnDimension.kind
       }, {
         optimisticResponse: {
           changeColumnDimension: {
@@ -97,7 +91,7 @@ export default defineComponent({
       })
     }
 
-    const sheet: Ref<SheetType> = toRef(props, 'sheet')
+    const sheet = toRef(props, 'sheet')
     const {
       rowIndexColumnWidth,
       gridWidth,
@@ -131,8 +125,8 @@ export default defineComponent({
       selectAll
     } = useGrid(sheet, changeColumnWidth)
 
-    provide('active', active)
-    provide('documentId', props.documentId)
+    provide<Ref<string>>('active', active)
+    provide<string>('documentId', props.documentId)
     provide('documentUpdate', props.update)
 
     return {

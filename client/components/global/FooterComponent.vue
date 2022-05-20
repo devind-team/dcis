@@ -16,7 +16,7 @@
                 v-list-item-content
                   v-list-item-title {{ $t('index.theme.change') }}
       v-row
-        v-col(cols="12" md="9")
+        v-col(cols="12")
           .body-2.gray-text &copy; {{ $t('index.rights') }}. {{ new Date().getFullYear() }}
     v-btn(v-show="upVisible" @click="$vuetify.goTo(0)" size="small" fab fixed bottom right color="primary")
       v-icon mdi-chevron-up

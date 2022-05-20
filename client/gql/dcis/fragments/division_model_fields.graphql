@@ -1,0 +1,6 @@
+fragment DivisionModelFields on DivisionModelType {
+  id
+  model
+  name
+  __typename
+}

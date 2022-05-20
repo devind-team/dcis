@@ -2,11 +2,16 @@ import { DocumentNode } from 'graphql'
 import { DataProxy } from '@apollo/client'
 import { UseQueryReturn } from '@vue/apollo-composable/dist/useQuery'
 import { FetchResult } from '@apollo/client/link/core'
-import { useQuery, useResult } from '@vue/apollo-composable'
+import { useQuery } from '@vue/apollo-composable'
 import { QueryRelayParams, TransformUpdate } from '~/composables/query-relay'
 import { getValue } from '~/services/graphql-relay'
+import { useResult } from '~/composables/query-result'
 
-export function useCommonQuery<TResult = any, TVariables = any> (
+export function useCommonQuery<
+  TResult = any,
+  TVariables = any,
+  TResultKey extends keyof NonNullable<TResult> = keyof NonNullable<TResult>
+> (
   queryParams: QueryRelayParams<TResult, TVariables>
 ) {
   const { document, variables, options } = queryParams
@@ -14,7 +19,7 @@ export function useCommonQuery<TResult = any, TVariables = any> (
    * Запрос на сервер
    */
   const q: UseQueryReturn<TResult, TVariables> = useQuery<TResult, TVariables>(document, variables, options)
-  const data = useResult<TResult>(q.result)
+  const data = useResult<TResult, TResultKey>(q.result)
   /**
    * Обновление при совершении мутации
    * @param cache - хранилище

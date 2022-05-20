@@ -1,0 +1,29 @@
+#import "../fragments/document_fields.graphql"
+#import "../fragments/status_fields.graphql"
+
+query Documents($periodId: ID!, $divisionsId: [Int!]) {
+  documents(periodId: $periodId, divisionsId: $divisionsId) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+      __typename
+    }
+    edges {
+      node {
+        ...DocumentFields
+        lastStatus {
+          id
+          comment
+          createdAt
+          status {
+            ...StatusFields
+          }
+          __typename
+        }
+      }
+    }
+  }
+}

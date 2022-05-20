@@ -30,8 +30,10 @@ export const cellKinds: Record<string, string> = {
   n: 'Numeric',
   s: 'String',
   text: 'Text',
+  fl: 'Files',
   money: 'Money',
-  department: 'Department'
+  department: 'Department',
+  classification: 'Classification'
 }
 
 export function useGrid (
@@ -59,10 +61,14 @@ export function useGrid (
         width = columnDimension.width ? columnDimension.width : defaultColumnWidth.value
       }
       return {
+        sheetId: sheet.value.id,
         id: columnDimension.id,
         index: columnDimension.index,
         position: positionToLetter(columnDimension.index),
         width,
+        fixed: columnDimension.fixed,
+        hidden: columnDimension.hidden,
+        kind: columnDimension.kind,
         style: { width: `${width}px` },
         dimension: columnDimension
       }
@@ -111,11 +117,12 @@ export function useGrid (
       const column = sheet.value.columns.find(column => column.id === String(cell.columnId))
       const position = `${positionToLetter(column.index)}${row.index}`
       const valueCells: Record<number, ValueType> | null = row.id in values.value ? values.value[row.id] : null
+      const value: ValueType | null = valueCells && column.id in valueCells ? valueCells[column.id] : null
       const buildCell: BuildCellType = {
         sheetId: sheet.value.id,
         id: cell.id,
         position,
-        value: getCellValue(valueCells && column.id in valueCells ? valueCells[column.id] : null, cell),
+        value: getCellValue(value, cell),
         editable: cell.editable,
         kind: cell.kind,
         colspan: 1,
@@ -124,7 +131,8 @@ export function useGrid (
         border: getCellBorder(cell),
         column,
         row,
-        cell
+        cell,
+        valueType: value
       }
       if (position in mergeCells.value) {
         Object.assign(buildCell, mergeCells.value[position])
@@ -257,9 +265,11 @@ export function useGrid (
   const boundaryRowCells = computed<BoundaryRowCell[]>(() => {
     const result: BoundaryRowCell[] = []
     let i = 0
+    let offset = 0
     while (i < columns.value.length) {
-      const cell = rows.value[0].cells[i]
+      const cell = rows.value[0].cells[i - offset]
       result.push({ cell, columns: columns.value.slice(i, i + cell.colspan) })
+      offset += cell.colspan - 1
       i += cell.colspan
     }
     return result

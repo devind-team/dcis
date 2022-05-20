@@ -93,14 +93,26 @@ export default {
     n: 'Числовой',
     s: 'Строковый',
     text: 'Текст',
+    fl: 'Файл',
     money: 'Деньги',
-    department: 'Департаменты'
+    department: 'Департаменты',
+    classification: 'КБК'
   },
   documents: {
     add: {
       header: 'Создать новый документ',
       comment: 'Комментарий',
-      status: 'Статус'
+      status: 'Статус',
+      lastDocument: 'Значения из документа'
+    },
+    change: {
+      column: {
+        header: 'Изменение свойств',
+        fixed: 'Зафиксировать',
+        hidden: 'Скрыть',
+        kind: 'Тип ячейки по умолчанию',
+        buttonText: 'Сохранить'
+      }
     },
     status: {
       name: 'Статус документа',
@@ -117,6 +129,17 @@ export default {
       user: 'Пользователь, добавивший строку',
       additional: 'Дополнительные колонки',
       unload: 'Выгрузить'
+    }
+  },
+  cells: {
+    gridCellText: {
+      title: 'Изменение текста'
+    },
+    gridCellFiles: {
+      title: 'Изменение файлов',
+      file: 'Файл №{number}',
+      newFiles: 'Новые файлы',
+      uploadArchive: 'Скачать архив'
     }
   }
 }

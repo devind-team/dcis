@@ -1,9 +1,12 @@
+from typing import Optional
+
 import graphene
 from devind_core.schema.types import FileType, ContentTypeType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
+from django.db.models import Q
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -110,7 +113,20 @@ class DivisionType(OptimizedDjangoObjectType):
         model = Division
         interfaces = (graphene.relay.Node,)
         fields = ('id', 'period', 'object_id',)
+        filter_fields = {
+            'id': ('exact',),
+            'period': ('in', 'exact',),
+            'object_id': ('in', 'exact',)
+        }
         connection_class = CountableConnection
+
+
+class DivisionModelType(graphene.ObjectType):
+    """Описание обобщенного типа дивизиона."""
+
+    id = graphene.Int(required=True, description='Идентификатор модели дивизиона')
+    model = graphene.String(required=True, description='Модель дивизиона: department, organization')
+    name = graphene.String(required=True, description='Название дивизиона')
 
 
 class PrivilegeType(DjangoObjectType):
@@ -159,13 +175,27 @@ class StatusType(DjangoObjectType):
 
 
 class SheetType(DjangoObjectType):
-    """Тип моделей листов."""
+    """Тип моделей листов.
+
+        rows, cells - могут иметь идентификатор документа, в противном случае
+            выгружается только каркас
+        values - могут выгружаться только значения привязанные к строкам
+        columns, merged_cells - привязываются к каркасу и от документа не зависят.
+    """
 
     period = graphene.Field(PeriodType, description='Период')
     columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
-    rows = graphene.List(lambda: RowDimensionType, description='Строки')
-    cells = graphene.List(lambda: CellType, description='Мета информация о ячейках')
     merged_cells = graphene.List(lambda: MergedCellType, description='Объединенные ячейки')
+    rows = graphene.List(
+        lambda: RowDimensionType,
+        document_id=graphene.ID(description='Идентификатор документа'),
+        description='Строки'
+    )
+    cells = graphene.List(
+        lambda: CellType,
+        document_id=graphene.ID(description='Идентификатор документа'),
+        description='Мета информация о ячейках'
+    )
     values = graphene.List(
         lambda: ValueType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
@@ -192,17 +222,27 @@ class SheetType(DjangoObjectType):
 
     @staticmethod
     @resolver_hints(model_field='rowdimension_set')
-    def resolve_rows(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
+    def resolve_rows(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
         """Получения всех строк."""
-        return sheet.rowdimension_set.all()
+        if document_id is None:
+            return sheet.rowdimension_set.filter(parent__isnull=True)
+        document_id = from_global_id(document_id)[1]
+        return sheet.rowdimension_set.filter(Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id))
 
     @staticmethod
-    def resolve_cells(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
-        """Получаем все ячейки, связанные с колонками.
+    def resolve_cells(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
+        """Получаем все ячейки, связанные со строками.
 
-        Можно доставать и по строкам и по столбцам, однако разницы нет, так как таблица квадратная.
+            Получение зависит от строк, так как от документа к документу они могут меняться.
         """
-        return Cell.objects.filter(column_id__in=sheet.columndimension_set.values_list('pk', flat=True)).all()
+        if document_id is None:
+            rows_id = sheet.rowdimension_set.filter(parent__isnull=True).values_list('pk', flat=True)
+        else:
+            document_id = from_global_id(document_id)[1]
+            rows_id = sheet.rowdimension_set.filter(
+                Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id)
+            ).values_list('id', flat=True)
+        return Cell.objects.filter(row_id__in=rows_id).all()
 
     @staticmethod
     @resolver_hints(model_field='mergedcell_set')
@@ -236,8 +276,9 @@ class DocumentType(DjangoObjectType):
             'period',
             'sheets',
             'object_id',
-            'last_status'
+            'last_status',
         )
+        filter_fields = {}
         connection_class = CountableConnection
 
     @staticmethod
@@ -332,7 +373,7 @@ class ColumnDimensionType(DjangoObjectType):
             'width',
             'fixed',
             'hidden',
-            'auto_size',
+            'kind',
             'sheet',
             'user',
             'cells',

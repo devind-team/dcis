@@ -1,6 +1,6 @@
 import { DocumentNode } from 'graphql'
 import { ApolloQueryResult, DataProxy } from '@apollo/client'
-import { useQuery, useResult } from '@vue/apollo-composable'
+import { useQuery } from '@vue/apollo-composable'
 import { useScroll } from '@vueuse/core'
 import { FetchResult } from '@apollo/client/link/core'
 import type {
@@ -9,12 +9,14 @@ import type {
   OptionsParameter,
   UseQueryReturn
 } from '@vue/apollo-composable/dist/useQuery'
-import { computed, ComputedRef } from '#app'
-import { ExtractSingleKey } from '@vue/apollo-composable/dist/util/ExtractSingleKey'
+import type { ComputedRef } from '#app'
+import { computed } from '#app'
 import { UseResultReturn } from '@vue/apollo-composable/dist/useResult'
+import { ExtractSingleKey } from '@vue/apollo-composable/dist/util/ExtractSingleKey'
 import { PageInfo } from '~/types/graphql'
 import { getValue } from '~/services/graphql-relay'
 import { PaginationInterface, useOffsetPagination } from '~/composables/pagination'
+import { useResult } from '~/composables/query-result'
 
 export type ResultDefaultValueType<TNode> = {
   totalCount: number,
@@ -46,12 +48,11 @@ export type QueryRelayResult<TResult = any, TVariables = any, TNode extends { id
   fetchMoreAvailable: ComputedRef<boolean>
   fetchMoreData: () => void
   update: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, transform: TransformUpdate<TResult, TResultMutation>) => void
-  addUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key: string | null) => void
-  changeUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key: string | null) => void
+  addUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key?: string | null) => void
+  changeUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key?: string | null) => void
   deleteUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>) => void
 }
-
-export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number } = any> (
+export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number} = any> (
   queryParams: QueryRelayParams<TResult, TVariables>,
   queryOptions: QueryRelayOptions = {
     pagination: useOffsetPagination()
@@ -212,7 +213,10 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
       const mutationResult = getMutationResult(result)
       const node: TNode = mutationResult[key === null ? k : key]
       if (node) {
-        dataCache[k].edges.find((el: { node: TNode }) => el.node.id === node.id).node = node
+        dataCache[k].edges.find((el: { node: TNode }) => el.node.id === node.id).node = Object.assign(
+          dataCache[k].edges.find((el: { node: TNode }) => el.node.id === node.id).node,
+          node
+        )
       }
       return dataCache
     })

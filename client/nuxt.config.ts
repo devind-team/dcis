@@ -11,7 +11,6 @@ export default defineNuxtConfig({
   alias: {
     tslib: 'tslib/tslib.es6.js'
   },
-  buildDir: 'nuxt-dist',
   /*
   ** Nuxt rendering mode
   ** See https://nuxtjs.org/api/configuration-mode
@@ -69,7 +68,7 @@ export default defineNuxtConfig({
     '@nuxtjs/apollo',
     '@nuxtjs/i18n',
     '@nuxtjs/vuetify',
-    ['@pinia/nuxt', { disableVuex: false }]
+    '@pinia/nuxt'
   ],
   apollo: {
     includeNodeModules: true,

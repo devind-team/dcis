@@ -14,7 +14,7 @@ import { useVModel } from '@vueuse/core'
 import type { PropType, Ref } from '#app'
 import { defineComponent } from '#app'
 import { CategoryType } from '~/types/graphql'
-import { usePageStore } from '~/store'
+import { usePageStore } from '~/stores'
 
 export default defineComponent({
   props: {

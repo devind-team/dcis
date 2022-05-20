@@ -65,7 +65,7 @@ import {
   PermissionsQueryVariables,
   PermissionType
 } from '~/types/graphql'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { useCommonQuery, useI18n } from '~/composables'
 import groupsQuery from '~/gql/core/queries/groups.graphql'
 import permissionsQuery from '~/gql/core/queries/permissions.graphql'
@@ -143,6 +143,7 @@ export default defineComponent({
                 )
               }
             }
+            return dataCache
           })
       })
 

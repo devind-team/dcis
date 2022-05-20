@@ -1,5 +1,6 @@
 <template lang="pug">
   mutation-modal-form(
+    @close="close"
     :header="String($t('dcis.documents.status.header'))"
     :subheader="`Версия ${ document.version }`"
     :button-text="String($t('dcis.documents.status.buttonText'))"
@@ -9,7 +10,6 @@
     mutation-name="addDocumentStatus"
     i18n-path="dcis.documents.status"
     persistent
-    @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
@@ -55,7 +55,7 @@ import {
   StatusType
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'
@@ -104,7 +104,7 @@ export default defineComponent({
       if (success) {
         addUpdate(cache, result, 'documentStatus')
         props.update(cache, result, (dataCache, { data: { addDocumentStatus: { documentStatus } } }: AddDocumentStatusMutationResult) => {
-          dataCache.period.documents.find(d => d.id === props.document.id).lastStatus = documentStatus
+          dataCache.documents.edges.find(d => d.node.id === props.document.id).node.lastStatus = documentStatus
           return dataCache
         })
       }
@@ -118,11 +118,9 @@ export default defineComponent({
           props.update(
             cache as any,
             result as DeleteDocumentStatusMutationResult,
-            (dataCache, { data: { deleteDocumentStatus: { success, id } } }: DeleteDocumentStatusMutationResult) => {
-              if (success) {
-                dataCache.period
-                  .documents.find(d => d.id === props.document.id)
-                  .lastStatus = documentStatuses.value.filter(d => d.id !== id)[0]
+            (dataCache, { data: { deleteDocumentStatus: { errors, id } } }: DeleteDocumentStatusMutationResult) => {
+              if (!errors.length) {
+                dataCache.documents.edges.find(d => d.node.id === props.document.id).node.lastStatus = documentStatuses.value.filter(d => d.id !== id)[0]
               }
               return dataCache
             }

@@ -1,4 +1,4 @@
-import type { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import type { ColumnDimensionType, RowDimensionType, CellType, ValueType } from '~/types/graphql'
 
 export type MousePositionType = {
   x: number
@@ -13,10 +13,14 @@ export type PositionType = {
 }
 
 export type BuildColumnType = {
+  sheetId: string
   id: string
   index: number
   position: string
   width: number
+  fixed: boolean
+  hidden: boolean
+  kind: string
   style: Record<string, string | undefined>
   dimension: ColumnDimensionType
 }
@@ -47,6 +51,7 @@ export type BuildCellType = {
   column: ColumnDimensionType
   row: RowDimensionType
   cell: CellType
+  valueType: ValueType | null
 }
 
 export type BuildRowType = {

@@ -22,14 +22,14 @@ query Document($documentId: ID!) {
       columns {
         ...ColumnDimensionFields
       }
-      rows {
-        ...RowDimensionFields
-      }
-      cells {
-        ...CellFields
-      }
       mergedCells {
         ...MergedCellsFields
+      }
+      rows(documentId: $documentId) {
+        ...RowDimensionFields
+      }
+      cells(documentId: $documentId) {
+        ...CellFields
       }
       values(documentId: $documentId) {
         ...ValueFields

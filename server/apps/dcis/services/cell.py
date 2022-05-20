@@ -1,37 +1,46 @@
 from argparse import ArgumentTypeError
-from typing import Tuple, List, Optional, Union
+from typing import Optional, Union
+
 from devind_helpers.schema.types import ErrorFieldType
-from devind_helpers.utils import convert_str_to_int, convert_str_to_bool
+from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 
 from apps.dcis.models import Cell
 
 
-def check_cell_options(field: str, value: str) -> Tuple[
+def change_cell_kind(cell: Cell, kind: str) -> tuple:
+    """Изменение типа ячейки."""
+    if kind == 'fl':
+        cell.default = 'Нет'
+    cell.kind = kind
+    return 'kind', 'default'
+
+
+def check_cell_options(field: str, value: str) -> tuple[
     bool,
     Optional[Union[str, int, bool]],
-    Optional[List[ErrorFieldType]]
+    Optional[list[ErrorFieldType]]
 ]:
     """Проверяем возможность изменения значений ячеек."""
-    allow_fields: List[str] = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
+    allow_fields: list[str] = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
     if field not in allow_fields:
         return False, None, [ErrorFieldType(
             'field',
             [f'Параметр не в списке разрешенных: {field}. {", ".join(allow_fields)}']
         )]
     if field == 'horizontal_align':
-        allow_horizontal_align: List[str] = ['left', 'center', 'right']
-        if value not in allow_horizontal_align:
+        allow_horizontal_align: list[str] = ['left', 'center', 'right']
+        if value not in allow_horizontal_align and value is not None:
             return False, None, [ErrorFieldType(
                 'value',
-                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_horizontal_align)}']
+                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_horizontal_align)}, null']
             )]
         return True, value, None
     if field == 'vertical_align':
-        allow_vertical_align: List[str] = ['top', 'middle', 'bottom']
-        if value not in allow_vertical_align:
+        allow_vertical_align: list[str] = ['top', 'middle', 'bottom']
+        if value not in allow_vertical_align and value is not None:
             return False, None, [ErrorFieldType(
                 'value',
-                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_vertical_align)}']
+                [f'Значение не в списке разрешенных: {field} -> {", ".join(allow_vertical_align)}, null']
             )]
         return True, value, None
     if field == 'size':
@@ -48,7 +57,7 @@ def check_cell_options(field: str, value: str) -> Tuple[
             )]
         return True, value, None
     if field == 'underline':
-        allow_underline: List[str] = ['single', 'double', 'single_accounting', 'double_accounting']
+        allow_underline: list[str] = ['single', 'double', 'single_accounting', 'double_accounting']
         if value not in [None, *allow_underline]:
             return False, None, [ErrorFieldType(
                 'value',

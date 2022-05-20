@@ -1,20 +1,30 @@
-image: docker:19.03.12
+image: docker:19.03.13
 services:
-  - docker:19.03.12-dind
+  - docker:19.03.13-dind
 
 stages:
-  - build
   - test
+  - build
   - release
+  - deploy
 
 variables:
   CONTAINER_CLIENT_IMAGE: ${CI_REGISTRY_IMAGE}/client:latest
   CONTAINER_SERVER_IMAGE: ${CI_REGISTRY_IMAGE}/server:latest
-  CONTAINER_CLIENT_RELEASE_IMAGE: ${CI_REGISTRY_IMAGE}/client:$VERSION
-  CONTAINER_SERVER_RELEASE_IMAGE: ${CI_REGISTRY_IMAGE}/server:$VERSION
+  CONTAINER_CLIENT_RELEASE_IMAGE: ${CI_REGISTRY_IMAGE}/client:${CI_COMMIT_TAG}
+  CONTAINER_SERVER_RELEASE_IMAGE: ${CI_REGISTRY_IMAGE}/server:${CI_COMMIT_TAG}
 
 before_script:
-  - docker login -u $CI_REGISTRY_USER -p $TOKEN $CI_REGISTRY
+  - docker info
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+test:
+  stage: test
+  script:
+    - echo "Test ok!"
+#  only:
+#    - merge_requests
+#    - tags
 
 build_client:
   stage: build
@@ -22,7 +32,7 @@ build_client:
     - docker build --pull -t $CONTAINER_CLIENT_IMAGE ./client
     - docker push $CONTAINER_CLIENT_IMAGE
   only:
-    - master
+    - tags
 
 build_server:
   stage: build
@@ -30,14 +40,7 @@ build_server:
     - docker build --pull -t $CONTAINER_SERVER_IMAGE ./server
     - docker push $CONTAINER_SERVER_IMAGE
   only:
-    - master
-
-test:
-  stage: test
-  script:
-    - echo "Test ok!"
-  only:
-    - master
+    - tags
 
 release_client:
   stage: release
@@ -46,8 +49,7 @@ release_client:
     - docker tag $CONTAINER_CLIENT_IMAGE $CONTAINER_CLIENT_RELEASE_IMAGE
     - docker push $CONTAINER_CLIENT_RELEASE_IMAGE
   only:
-    - master
-  when: manual
+    - tags
 
 release_server:
   stage: release
@@ -56,5 +58,12 @@ release_server:
     - docker tag $CONTAINER_SERVER_IMAGE $CONTAINER_SERVER_RELEASE_IMAGE
     - docker push $CONTAINER_SERVER_RELEASE_IMAGE
   only:
-    - master
+    - tags
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy application!"
   when: manual
+  only:
+    - tags
