@@ -1,12 +1,12 @@
 <template lang="pug">
-  v-menu(v-model="settingsActive" bottom close-on-content-click)
+  v-menu(v-model="active" bottom close-on-content-click)
     template(#activator="{ on, attrs }")
       slot(:on="on" :attrs="attrs")
     v-list(dense)
       grid-column-settings(
-        :buildColumn="buildColumn"
+        :column="column"
         :get-column-width="getColumnWidth"
-        @close="settingsActive = false"
+        @close="active = false"
       )
         template(#activator="{ on }")
           v-list-item(v-on="on")
@@ -18,21 +18,21 @@
 
 <script lang="ts">
 import { PropType } from '#app'
-import { BuildColumnType } from '~/types/grid'
+import { ColumnDimensionType } from '~/types/graphql'
 import GridColumnSettings from '~/components/dcis/grid/settings/GridColumnSettings.vue'
 
 export default defineComponent({
   components: { GridColumnSettings },
   props: {
-    buildColumn: { type: Object as PropType<BuildColumnType>, required: true },
-    getColumnWidth: { type: Function as PropType<(buildColumn: BuildColumnType) => number>, required: true }
+    column: { type: Object as PropType<ColumnDimensionType>, required: true },
+    getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true }
   },
   setup () {
     const { t } = useI18n()
 
-    const settingsActive = ref<boolean>(false)
+    const active = ref<boolean>(false)
 
-    return { t, settingsActive }
+    return { t, active }
   }
 })
 </script>

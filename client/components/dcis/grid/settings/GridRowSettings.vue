@@ -4,7 +4,7 @@
     :header="String(t('dcis.grid.rowSettings.header'))"
     :subheader="String(t('dcis.grid.rowSettings.height', { height }))"
     :mutation="null"
-    :variables="{ id: buildRow.rowDimension.id, hidden, fixed, dynamic, height }"
+    :variables="{ id: row.id, hidden, fixed, dynamic, height }"
     :button-text="String(t('dcis.grid.rowSettings.buttonText'))"
     i18n-path="dcis.grid.rowSettings"
     mutation-name="changeRowDimension"
@@ -18,23 +18,23 @@
 </template>
 
 <script lang="ts">
-import type { PropType } from '#app'
-import type { BuildRowType } from '~/types/grid'
+import { PropType } from '#app'
+import { RowDimensionType } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
-    buildRow: { type: Object as PropType<BuildRowType>, required: true },
-    getRowHeight: { type: Function as PropType<(buildRow: BuildRowType) => number>, required: true },
+    row: { type: Object as PropType<RowDimensionType>, required: true },
+    getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
   },
   setup (props) {
     const { t } = useI18n()
 
-    const height = computed<number>(() => props.getRowHeight(props.buildRow))
-    const fixed = ref<boolean>(props.buildRow.rowDimension.fixed)
-    const hidden = ref<boolean>(props.buildRow.rowDimension.hidden)
-    const dynamic = ref<boolean>(props.buildRow.rowDimension.dynamic)
+    const height = computed<number>(() => props.getRowHeight(props.row))
+    const fixed = ref<boolean>(props.row.fixed)
+    const hidden = ref<boolean>(props.row.hidden)
+    const dynamic = ref<boolean>(props.row.dynamic)
 
     return { t, height, fixed, hidden, dynamic }
   }

@@ -6,9 +6,6 @@ import {
   ElementResizingType,
   GlobalSelectionType,
   ResizingType,
-  BuildCellType,
-  BuildColumnType,
-  BuildRowType,
   Selection,
   CellOptionsType,
   BoundaryColumnCell,
@@ -18,7 +15,6 @@ import {
   parsePosition,
   positionsToRangeIndices,
   rangeIndicesToPositions,
-  getCellStyle,
   uniteCellsOptions
 } from '~/services/grid'
 
@@ -64,11 +60,10 @@ export function useGrid (
     mouseleave: mouseleaveColumnNameResizing,
     mousedown: mousedownColumnNameResizing,
     mouseup: mouseupColumnNameResizing
-  } = useResizing<BuildColumnType, ColumnDimensionType>(
+  } = useResizing<ColumnDimensionType>(
     gridContainer,
     64,
     'x',
-    (buildColumn: BuildColumnType) => buildColumn.columnDimension,
     changeColumnWidth
   )
   watch(resizingColumnWidth, (newValue: ElementResizingType) => {
@@ -84,11 +79,10 @@ export function useGrid (
     mouseleave: mouseleaveRowNameResizing,
     mousedown: mousedownRowNameResizing,
     mouseup: mouseupRowNameResizing
-  } = useResizing<BuildRowType, RowDimensionType>(
+  } = useResizing<RowDimensionType>(
     gridContainer,
     25,
     'y',
-    (buildRow: BuildRowType) => buildRow.rowDimension,
     changeRowHeight
   )
   watch(resizingRowHeight, (newValue: ElementResizingType) => {
@@ -99,39 +93,14 @@ export function useGrid (
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
-      columns.value.reduce((sum, column) => sum + getColumnWidth(column), 0)
-  )
-
-  /**
-   * Структура для быстрого поиска колонок
-   */
-  const columnsMap = computed<Record<string, ColumnDimensionType>>(() =>
-    sheet.value.columns.reduce((a, c: ColumnDimensionType) => ({ ...a, [c.id]: c }), {})
-  )
-
-  const rows = computed<BuildRowType[]>(() =>
-    sheet.value.rows.map((rowDimension: RowDimensionType) => ({
-      rowDimension,
-      buildCells: rowDimension.cells.map((cell: CellType) => ({
-        style: getCellStyle(cell),
-        columnDimension: columnsMap.value[cell.columnId],
-        rowDimension,
-        cell
-      }))
-    }))
-  )
-
-  const columns = computed<BuildColumnType[]>(() =>
-    sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
-      columnDimension
-    }))
+      sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
   )
 
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
-  const activeCell = ref<BuildCellType | null>(null)
-  const setActiveCell = (buildCell: BuildCellType | null) => {
-    activeCell.value = buildCell
+  const activeCell = ref<CellType | null>(null)
+  const setActiveCell = (cell: CellType | null) => {
+    activeCell.value = cell
   }
 
   const getClearGlobalSelection = () => ({
@@ -148,10 +117,7 @@ export function useGrid (
     globalSelection.value = getClearGlobalSelection()
   }
   const setRowsGlobalSelection = () => {
-    const indices = [
-      rowsSelection.value.first.rowDimension.globalIndex,
-      rowsSelection.value.last.rowDimension.globalIndex
-    ]
+    const indices = [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex]
     const firstRow = grid.value.querySelector(
       `tbody tr:nth-child(${Math.min(...indices)})`
     ) as HTMLTableRowElement
@@ -175,10 +141,7 @@ export function useGrid (
   }
   const setColumnsGlobalSelection = () => {
     const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
-    const indices = [
-      columnsSelection.value.first.columnDimension.index,
-      columnsSelection.value.last.columnDimension.index
-    ]
+    const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
     const firstColumn = theadRow.cells.item(Math.min(...indices)) as HTMLTableCellElement
     const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
     globalSelection.value = {
@@ -195,23 +158,23 @@ export function useGrid (
     }
   }
 
-  const cellsSelection = ref<Selection<BuildCellType> | null>(null)
-  const rowsSelection = ref<Selection<BuildRowType> | null>(null)
-  const columnsSelection = ref<Selection<BuildColumnType> | null>(null)
+  const cellsSelection = ref<Selection<CellType> | null>(null)
+  const rowsSelection = ref<Selection<RowDimensionType> | null>(null)
+  const columnsSelection = ref<Selection<ColumnDimensionType> | null>(null)
 
-  watch(cellsSelection, (newValue: Selection<BuildCellType> | null) => {
+  watch(cellsSelection, (newValue: Selection<CellType> | null) => {
     if (newValue) {
       clearGlobalSelection()
     }
   }, { deep: true })
-  watch(rowsSelection, (newValue: Selection<BuildRowType>) => {
+  watch(rowsSelection, (newValue: Selection<RowDimensionType>) => {
     if (newValue) {
       cellsSelection.value = null
       columnsSelection.value = null
       setRowsGlobalSelection()
     }
   }, { deep: true })
-  watch(columnsSelection, (newValue: Selection<BuildColumnType>) => {
+  watch(columnsSelection, (newValue: Selection<ColumnDimensionType>) => {
     if (newValue) {
       cellsSelection.value = null
       rowsSelection.value = null
@@ -228,27 +191,27 @@ export function useGrid (
     }
   }
 
-  const selectedCells = computed<BuildCellType[]>(() => {
+  const selectedCells = computed<CellType[]>(() => {
     if (!cellsSelection.value) {
       return []
     }
     let selectedCells = [cellsSelection.value.first, cellsSelection.value.last]
-    let newSelectedCells: BuildCellType[] = []
+    let newSelectedCells: CellType[] = []
     while (selectedCells.length !== newSelectedCells.length) {
       if (newSelectedCells.length) {
         selectedCells = newSelectedCells
         newSelectedCells = []
       }
-      const relatedPositions = selectedCells.reduce((a: string[], c: BuildCellType) => {
-        a.push(...c.cell.relatedGlobalPositions)
+      const relatedPositions = selectedCells.reduce((a: string[], c: CellType) => {
+        a.push(...c.relatedGlobalPositions)
         return a
       }, [])
       const selectedPositions = rangeIndicesToPositions(positionsToRangeIndices(relatedPositions))
-      for (const buildRow of rows.value) {
-        for (const buildCell of buildRow.buildCells) {
-          for (const relatedPosition of buildCell.cell.relatedGlobalPositions) {
+      for (const row of sheet.value.rows) {
+        for (const cell of row.cells) {
+          for (const relatedPosition of cell.relatedGlobalPositions) {
             if (selectedPositions.includes(relatedPosition)) {
-              newSelectedCells.push(buildCell)
+              newSelectedCells.push(cell)
             }
           }
         }
@@ -258,15 +221,15 @@ export function useGrid (
   })
 
   const selectedCellsPositions = computed<string[]>(() =>
-    selectedCells.value.reduce((a: string[], c: BuildCellType) => {
-      a.push(...c.cell.relatedGlobalPositions)
+    selectedCells.value.reduce((a: string[], c: CellType) => {
+      a.push(...c.relatedGlobalPositions)
       return a
     }, []))
   const allCellsRangeIndices = computed<RangeIndicesType>(() => ({
     minColumn: 1,
     minRow: 1,
-    maxColumn: columns.value.at(-1).columnDimension.index,
-    maxRow: rows.value.at(-1).rowDimension.globalIndex
+    maxColumn: sheet.value.columns.at(-1).index,
+    maxRow: sheet.value.rows.at(-1).globalIndex
   }))
   const selectedRangeIndices = computed<RangeIndicesType | null>(() => {
     if (selectedCellsPositions.value.length) {
@@ -289,8 +252,8 @@ export function useGrid (
   const selectedColumnsPositions = computed<number[]>(() => {
     if (columnsSelection.value) {
       const indices = [
-        columnsSelection.value.last.columnDimension.index,
-        columnsSelection.value.first.columnDimension.index
+        columnsSelection.value.last.index,
+        columnsSelection.value.first.index
       ]
       const minIndex = Math.min(...indices)
       const maxIndex = Math.max(...indices)
@@ -308,8 +271,8 @@ export function useGrid (
   const selectedRowsPositions = computed<number[]>(() => {
     if (rowsSelection.value) {
       const indices = [
-        rowsSelection.value.last.rowDimension.globalIndex,
-        rowsSelection.value.first.rowDimension.globalIndex
+        rowsSelection.value.last.globalIndex,
+        rowsSelection.value.first.globalIndex
       ]
       const minIndex = Math.min(...indices)
       const maxIndex = Math.max(...indices)
@@ -333,29 +296,29 @@ export function useGrid (
     const result: any = {}
     for (const option of possibleCellsOptions) {
       const options = []
-      for (const buildCell of selectedCells.value) {
-        options.push(buildCell.cell[option])
+      for (const cell of selectedCells.value) {
+        options.push(cell[option])
       }
       result[option] = uniteCellsOptions(options)
     }
     return result
   })
 
-  const mousedownCell = (buildCell: BuildCellType): void => {
+  const mousedownCell = (cell: CellType): void => {
     selectionState.value = 'cell'
     cellsSelection.value = {
-      first: buildCell,
-      last: buildCell
+      first: cell,
+      last: cell
     }
   }
-  const mouseenterCell = (buildCell: BuildCellType): void => {
+  const mouseenterCell = (cell: CellType): void => {
     if (selectionState.value === 'cell') {
-      cellsSelection.value.last = buildCell
+      cellsSelection.value.last = cell
     }
   }
-  const mouseupCell = (buildCell: BuildCellType): void => {
-    if (selectionState.value === 'cell' && cellsSelection.value.first.cell.id === cellsSelection.value.last.cell.id) {
-      setActiveCell(buildCell)
+  const mouseupCell = (cell: CellType): void => {
+    if (selectionState.value === 'cell' && cellsSelection.value.first.id === cellsSelection.value.last.id) {
+      setActiveCell(cell)
     }
   }
 
@@ -365,10 +328,10 @@ export function useGrid (
   const boundaryColumnCells = computed<BoundaryColumnCell[]>(() => {
     const result: BoundaryColumnCell[] = []
     let i = 0
-    while (i < rows.value.length) {
-      const buildCell = rows.value[i].buildCells[0]
-      result.push({ buildCell, buildRows: rows.value.slice(i, i + buildCell.cell.rowspan) })
-      i += buildCell.cell.rowspan
+    while (i < sheet.value.rows.length) {
+      const cell = sheet.value.rows[i].cells[0]
+      result.push({ cell, rows: sheet.value.rows.slice(i, i + cell.rowspan) })
+      i += cell.rowspan
     }
     return result
   })
@@ -377,7 +340,7 @@ export function useGrid (
    */
   const selectedBoundaryColumnCells = computed<BoundaryColumnCell[]>(() =>
     boundaryColumnCells.value.filter(boundaryCell =>
-      selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.globalPosition))
+      selectedCellsPositions.value.includes(boundaryCell.cell.globalPosition))
   )
 
   /**
@@ -387,11 +350,11 @@ export function useGrid (
     const result: BoundaryRowCell[] = []
     let i = 0
     let offset = 0
-    while (i < columns.value.length) {
-      const buildCell = rows.value[0].buildCells[i - offset]
-      result.push({ buildCell, buildColumns: columns.value.slice(i, i + buildCell.cell.colspan) })
-      offset += buildCell.cell.colspan - 1
-      i += buildCell.cell.colspan
+    while (i < sheet.value.columns.length) {
+      const cell = sheet.value.rows[0].cells[i - offset]
+      result.push({ cell, columns: sheet.value.columns.slice(i, i + cell.colspan) })
+      offset += cell.colspan - 1
+      i += cell.colspan
     }
     return result
   })
@@ -400,19 +363,19 @@ export function useGrid (
    */
   const selectedBoundaryRowCells = computed<BoundaryRowCell[]>(() =>
     boundaryRowCells.value.filter(boundaryCell =>
-      selectedCellsPositions.value.includes(boundaryCell.buildCell.cell.globalPosition))
+      selectedCellsPositions.value.includes(boundaryCell.cell.globalPosition))
   )
 
-  const mouseenterColumnName = (buildColumn: BuildColumnType) => {
+  const mouseenterColumnName = (column: ColumnDimensionType) => {
     if (selectionState.value === 'column') {
-      columnsSelection.value.last = buildColumn
+      columnsSelection.value.last = column
     }
   }
-  const mousemoveColumnName = (buildColumn: BuildColumnType, event: MouseEvent) => {
+  const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     mousemoveColumnNameResizing(
-      buildColumn,
-      buildColumn.columnDimension.index - 1 > 0
-        ? columns.value[buildColumn.columnDimension.index - 2]
+      column,
+      column.index - 1 > 0
+        ? sheet.value.columns[column.index - 2]
         : null,
       event
     )
@@ -420,14 +383,14 @@ export function useGrid (
   const mouseleaveColumnName = () => {
     mouseleaveColumnNameResizing()
   }
-  const mousedownColumnName = (buildColumn: BuildColumnType, event: MouseEvent) => {
+  const mousedownColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     if (resizingColumn.value) {
       mousedownColumnNameResizing(event)
     } else {
       selectionState.value = 'column'
       columnsSelection.value = {
-        first: buildColumn,
-        last: buildColumn
+        first: column,
+        last: column
       }
     }
   }
@@ -435,16 +398,16 @@ export function useGrid (
     mouseupColumnNameResizing()
   }
 
-  const mouseenterRowName = (buildRow: BuildRowType) => {
+  const mouseenterRowName = (row: RowDimensionType) => {
     if (selectionState.value === 'row') {
-      rowsSelection.value.last = buildRow
+      rowsSelection.value.last = row
     }
   }
-  const mousemoveRowName = (buildRow: BuildRowType, event: MouseEvent) => {
+  const mousemoveRowName = (row: RowDimensionType, event: MouseEvent) => {
     mousemoveRowNameResizing(
-      buildRow,
-      buildRow.rowDimension.globalIndex - 1 > 0
-        ? rows.value[buildRow.rowDimension.globalIndex - 2]
+      row,
+      row.globalIndex - 1 > 0
+        ? sheet.value.rows[row.globalIndex - 2]
         : null,
       event
     )
@@ -452,14 +415,14 @@ export function useGrid (
   const mouseleaveRowName = () => {
     mouseleaveRowNameResizing()
   }
-  const mousedownRowName = (buildRow: BuildRowType, event: MouseEvent) => {
+  const mousedownRowName = (row: RowDimensionType, event: MouseEvent) => {
     if (resizingRow.value) {
       mousedownRowNameResizing(event)
     } else {
       selectionState.value = 'row'
       rowsSelection.value = {
-        first: buildRow,
-        last: buildRow
+        first: row,
+        last: row
       }
     }
   }
@@ -467,22 +430,22 @@ export function useGrid (
     mouseupRowNameResizing()
   }
 
-  const getRowLastBuildCell = (currentBuildRow: BuildRowType) => {
-    for (const buildRow of [...rows.value].reverse()) {
+  const getRowLastCell = (currentRow: RowDimensionType) => {
+    for (const row of [...sheet.value.rows].reverse()) {
       if (
-        buildRow.buildCells.at(-1).cell.relatedGlobalPositions.some((position: string) => {
+        row.cells.at(-1).relatedGlobalPositions.some((position: string) => {
           const { column, row } = parsePosition(position)
-          return column === sheet.value.columns.at(-1).name && row === currentBuildRow.rowDimension.globalIndex
+          return column === sheet.value.columns.at(-1).name && row === currentRow.globalIndex
         })
       ) {
-        return buildRow.buildCells.at(-1)
+        return row.cells.at(-1)
       }
     }
   }
   const selectAllCells = () => {
     cellsSelection.value = {
-      first: rows.value[0].buildCells[0],
-      last: getRowLastBuildCell(rows.value.at(-1))
+      first: sheet.value.rows[0].cells[0],
+      last: getRowLastCell(sheet.value.rows.at(-1))
     }
   }
 
@@ -521,8 +484,6 @@ export function useGrid (
     resizingRowHeight,
     getRowHeight,
     gridWidth,
-    rows,
-    columns,
     rowNameColumnWidth,
     activeCell,
     setActiveCell,
@@ -554,12 +515,11 @@ export function useGrid (
   }
 }
 
-function useResizing<T, K extends { id: string, width?: number, height?: number }> (
+function useResizing<T extends { id: string, width?: number, height?: number }> (
   gridContainer: Ref<HTMLDivElement>,
   defaultSize: number,
   direction: 'x' | 'y',
-  getDimension: (object: T) => K,
-  changeSize: (object: K, size: number) => void
+  changeSize: (object: T, size: number) => void
 ) {
   const borderGag = 6
 
@@ -576,15 +536,12 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
     size: resizing.value ? resizing.value.size : 0
   }))
 
-  const getSize = (object: T): number => {
-    const dimension = getDimension(object)
-    let size = 0
-    if (resizing.value && getDimension(resizing.value.object as T).id === dimension.id) {
-      size = resizing.value.size
+  const getSize = (dimension: T): number => {
+    if (resizing.value && resizing.value.object.id === dimension.id) {
+      return resizing.value.size
     } else {
-      size = dimension[dimensionKey] ? dimension[dimensionKey] : defaultElementSize.value
+      return dimension[dimensionKey] ? dimension[dimensionKey] : defaultElementSize.value
     }
-    return size
   }
 
   const mousemove = (object: T, previousObject: T | null, event: MouseEvent) => {
@@ -627,7 +584,7 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
 
   const mouseup = () => {
     if (resizing.value) {
-      changeSize(getDimension(resizing.value.object as T), resizing.value.size)
+      changeSize(resizing.value.object as T, resizing.value.size)
       resizing.value.state = 'hover'
     }
   }
@@ -663,10 +620,10 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
     }
   }
 
-  const setResizingHover = (object: T, mousePosition: MousePositionType) => {
+  const setResizingHover = (dimension: T, mousePosition: MousePositionType) => {
     resizing.value = {
-      object: object as UnwrapRef<T>,
-      size: getDimension(object)[dimensionKey] ?? defaultElementSize.value,
+      object: dimension as UnwrapRef<T>,
+      size: dimension[dimensionKey] ?? defaultElementSize.value,
       mousePosition,
       state: 'hover'
     }
@@ -674,7 +631,7 @@ function useResizing<T, K extends { id: string, width?: number, height?: number 
 
   useEventListener('mouseup', () => {
     if (resizing.value && resizing.value.state === 'resizing') {
-      changeSize(getDimension(resizing.value.object as T), resizing.value.size)
+      changeSize(resizing.value.object as T, resizing.value.size)
       resizing.value = null
     }
   })

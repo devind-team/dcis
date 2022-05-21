@@ -104,22 +104,6 @@ export type ResizingType<T> = {
   state: 'hover' | 'resizing'
 }
 
-export type BuildCellType = {
-  style: Record<string, string>
-  columnDimension: ColumnDimensionType
-  rowDimension: RowDimensionType
-  cell: CellType
-}
-
-export type BuildColumnType = {
-  columnDimension: ColumnDimensionType
-}
-
-export type BuildRowType = {
-  rowDimension: RowDimensionType
-  buildCells: BuildCellType[]
-}
-
 export type Selection<T> = {
   first: T,
   last: T,
@@ -140,14 +124,14 @@ export type CellOptionsType = {
  * Ячейка граничная к крайнему фиксированному столбцу
  */
 export type BoundaryColumnCell = {
-  buildCell: BuildCellType,
-  buildRows: BuildRowType[],
+  cell: CellType,
+  rows: RowDimensionType[],
 }
 
 /**
  * Ячейка граничная к крайней фиксированной строке
  */
 export type BoundaryRowCell = {
-  buildCell: BuildCellType
-  buildColumns: BuildColumnType[]
+  cell: CellType
+  columns: ColumnDimensionType[]
 }

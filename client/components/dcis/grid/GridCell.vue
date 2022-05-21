@@ -1,17 +1,17 @@
 <template lang="pug">
   .grid__cell-content(:class="contentClasses")
     component(
-      v-if="active && buildCell.cell.editable"
+      v-if="active && cell.editable"
       :is="`GridCell${cellKind}`"
-      :value="buildCell.cell.value"
+      :value="cell.value"
       @cancel="$emit('clear-active')"
     )
-    template(v-else) {{ buildCell.cell.value }}
+    template(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">
 import { PropType } from '#app'
-import { BuildCellType } from '~/types/grid'
+import { CellType } from '~/types/graphql'
 import { cellKinds } from '~/composables/grid'
 import GridCellNumeric from '~/components/dcis/grid/cells/GridCellNumeric.vue'
 import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
@@ -32,16 +32,16 @@ export default defineComponent({
     GridCellClassification
   },
   props: {
-    buildCell: { type: Object as PropType<BuildCellType>, required: true },
+    cell: { type: Object as PropType<CellType>, required: true },
     active: { type: Boolean, default: false }
   },
   setup (props) {
     const cellKind = computed<string>(() => (
-      props.buildCell.cell.kind in cellKinds ? cellKinds[props.buildCell.cell.kind] : 'String'
+      props.cell.kind in cellKinds ? cellKinds[props.cell.kind] : 'String'
     ))
 
     const contentClasses = computed<Record<string, boolean>>(() => ({
-      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.buildCell.cell.kind)
+      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
     }))
 
     return { cellKind, contentClasses }

@@ -6,7 +6,6 @@
         table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
           grid-header(
             :row-name-column-width="rowNameColumnWidth"
-            :columns="columns"
             :resizing-column="resizingColumn"
             :get-column-width="getColumnWidth"
             :selected-column-positions="selectedColumnsPositions"
@@ -20,7 +19,6 @@
             :select-all-cells="selectAllCells"
           )
           grid-body(
-            :rows="rows"
             :resizing-row="resizingRow"
             :get-row-height="getRowHeight"
             :active-cell="activeCell"
@@ -79,8 +77,6 @@ export default defineComponent({
       resizingRowHeight,
       getRowHeight,
       gridWidth,
-      rows,
-      columns,
       rowNameColumnWidth,
       activeCell,
       setActiveCell,
@@ -111,9 +107,6 @@ export default defineComponent({
       selectAllCells
     } = useGrid(activeSheet, () => {}, () => {})
 
-    provide('rows', rows)
-    provide('columns', columns)
-
     return {
       t,
       gridContainer,
@@ -125,8 +118,6 @@ export default defineComponent({
       resizingRowHeight,
       getRowHeight,
       gridWidth,
-      rows,
-      columns,
       rowNameColumnWidth,
       activeCell,
       setActiveCell,
