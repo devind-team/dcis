@@ -154,7 +154,7 @@ export function useGrid (
       },
       zIndex: gridContainer.value.scrollTop ? 1 : 3,
       width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
-      height: gridContainer.value.scrollHeight - theadRow.offsetHeight + 1
+      height: grid.value.offsetHeight - theadRow.offsetHeight + 1
     }
   }
 
