@@ -37,7 +37,7 @@
 import { PropType, Ref } from '#app'
 import { DocumentType, SheetType, RowDimensionType, SheetQuery } from '~/types/graphql'
 import { UpdateType } from '~/composables/query-common'
-import { AddRowDimensionPosition } from '~/composables/grid-mutation'
+import { AddRowDimensionPosition } from '~/composables/grid-mutations'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
 
 export default defineComponent({
