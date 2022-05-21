@@ -2,8 +2,8 @@
   div
     grid-sheet-toolbar
     .grid__body
-      div.grid__container(ref="gridContainer")
-        table.grid__table(:style="{ width: `${gridWidth}px` }")
+      div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
+        table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
           grid-header(
             :row-name-column-width="rowNameColumnWidth"
             :columns="columns"
@@ -38,17 +38,14 @@
             :mouseenter-cell="mouseenterCell"
             :mouseup-cell="mouseupCell"
           )
+        grid-global-selection(:global-selection="globalSelection")
       grid-element-resizing(
         :message="String(t('dcis.grid.columnWidth'))"
-        :visible="resizingColumnWidth.visible"
-        :position="resizingColumnWidth.position"
-        :size="resizingColumnWidth.size"
+        :element-resizing="resizingColumnWidth"
       )
       grid-element-resizing(
         :message="String(t('dcis.grid.rowHeight'))"
-        :visible="resizingRowHeight.visible"
-        :position="resizingRowHeight.position"
-        :size="resizingRowHeight.size"
+        :element-resizing="resizingRowHeight"
       )
 </template>
 
@@ -58,15 +55,23 @@ import { SheetType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
+import GridGlobalSelection from '~/components/dcis/grid/GridGlobalSelection.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
-  components: { GridSheetToolbar, GridHeader, GridBody, GridElementResizing },
+  components: {
+    GridSheetToolbar,
+    GridHeader,
+    GridBody,
+    GridGlobalSelection,
+    GridElementResizing
+  },
   setup () {
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const { t } = useI18n()
     const {
       gridContainer,
+      grid,
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
@@ -84,6 +89,8 @@ export default defineComponent({
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
+      globalSelection,
+      gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
@@ -110,6 +117,7 @@ export default defineComponent({
     return {
       t,
       gridContainer,
+      grid,
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
@@ -127,6 +135,8 @@ export default defineComponent({
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
+      globalSelection,
+      gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
@@ -183,7 +193,6 @@ div.grid__body
       user-select: none
       table-layout: fixed
 
-      margin-top: 3px
       border-collapse: collapse
 
       td, th
@@ -318,6 +327,10 @@ div.grid__body
               &:focus
                 outline: none
 
+    div.grid__global-selection
+      position: absolute
+      pointer-events: none
+
 @mixin grid__browser-specific($browser, $border-width)
   .browser-#{$browser}
 
@@ -341,6 +354,9 @@ div.grid__body
 
         &.grid__cell_selected
           border: #{$border-width} solid blue !important
+
+    div.grid__global-selection
+      border: $border-width solid blue
 
 @include grid__browser-specific('default', 1.2px)
 @include grid__browser-specific('firefox', 2px)

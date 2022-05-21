@@ -83,6 +83,14 @@ export type ElementPositionType = {
   bottom: number | null
 }
 
+export type GlobalSelectionType = {
+  visible: boolean
+  position: ElementPositionType
+  zIndex: number
+  width: number
+  height: number
+}
+
 export type ElementResizingType = {
   visible: boolean
   position: ElementPositionType
@@ -105,15 +113,16 @@ export type BuildCellType = {
 
 export type BuildColumnType = {
   columnDimension: ColumnDimensionType
-  firstBuildCell: BuildCellType
-  lastBuildCell: BuildCellType
 }
 
 export type BuildRowType = {
   rowDimension: RowDimensionType
   buildCells: BuildCellType[]
-  firstBuildCell: BuildCellType
-  lastBuildCell: BuildCellType
+}
+
+export type Selection<T> = {
+  first: T,
+  last: T,
 }
 
 export type CellOptionsType = {

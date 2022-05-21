@@ -6,7 +6,8 @@ import {
   RangePartsType,
   SheetRangePartsType,
   RangeIndicesType,
-  RangeSpanType
+  RangeSpanType,
+  ElementPositionType
 } from '~/types/grid'
 
 const positionExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
@@ -205,6 +206,18 @@ const rangeSpan = (range: RangeType): RangeSpanType => {
 }
 
 /**
+ * Преобразование позиции элемента в стили
+ * elementPositionToStyles({ left: 10, right: null, top: 10, bottom: null }) ->
+ * { left: '10px', top: '10px' }
+ * @param elementPosition
+ */
+const elementPositionToStyle = (elementPosition: ElementPositionType): Record<string, string> => {
+  return Object.entries(elementPosition)
+    .filter(([_, v]) => v !== null)
+    .reduce((acc, [k, v]) => ({ ...acc, [k]: `${v}px` }), {})
+}
+
+/**
  * Получение стилей ячейки
  * @param cell ячейка
  */
@@ -256,6 +269,7 @@ export {
   rangeIndicesToPositions,
   rangeToCellPositions,
   rangeSpan,
+  elementPositionToStyle,
   getCellStyle,
   uniteCellsOptions
 }

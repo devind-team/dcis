@@ -4,10 +4,12 @@ import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/ty
 import {
   ElementPositionType,
   ElementResizingType,
+  GlobalSelectionType,
   ResizingType,
   BuildCellType,
   BuildColumnType,
   BuildRowType,
+  Selection,
   CellOptionsType,
   BoundaryColumnCell,
   BoundaryRowCell, RangeIndicesType, MousePositionType
@@ -52,6 +54,7 @@ export function useGrid (
     return maxDigits * 11 + maxDots * 2 + 10
   })
   const gridContainer = ref<HTMLDivElement | null>(null)
+  const grid = ref<HTMLTableElement | null>(null)
 
   const {
     resizing: resizingColumn,
@@ -68,6 +71,11 @@ export function useGrid (
     (buildColumn: BuildColumnType) => buildColumn.columnDimension,
     changeColumnWidth
   )
+  watch(resizingColumnWidth, (newValue: ElementResizingType) => {
+    if (newValue.visible) {
+      clearGlobalSelection()
+    }
+  }, { deep: true })
   const {
     resizing: resizingRow,
     elementResizing: resizingRowHeight,
@@ -83,6 +91,11 @@ export function useGrid (
     (buildRow: BuildRowType) => buildRow.rowDimension,
     changeRowHeight
   )
+  watch(resizingRowHeight, (newValue: ElementResizingType) => {
+    if (newValue.visible) {
+      clearGlobalSelection()
+    }
+  }, { deep: true })
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
@@ -96,90 +109,23 @@ export function useGrid (
     sheet.value.columns.reduce((a, c: ColumnDimensionType) => ({ ...a, [c.id]: c }), {})
   )
 
-  const assignRowFirstBuildCell = (buildRows: BuildRowType[], currentBuildRow: BuildRowType) => {
-    for (const buildRow of buildRows) {
-      if (
-        buildRow.buildCells[0].cell.relatedGlobalPositions.some((position: string) => {
-          const { column, row } = parsePosition(position)
-          return column === 'A' && row === currentBuildRow.rowDimension.globalIndex
-        })
-      ) {
-        currentBuildRow.firstBuildCell = buildRow.buildCells[0]
-        return
-      }
-    }
-  }
-  const assignRowLastBuildCell = (buildRows: BuildRowType[], currentBuildRow: BuildRowType) => {
-    for (const buildRow of buildRows) {
-      if (
-        buildRow.buildCells.at(-1).cell.relatedGlobalPositions.some((position: string) => {
-          const { column, row } = parsePosition(position)
-          return column === sheet.value.columns.at(-1).name && row === currentBuildRow.rowDimension.globalIndex
-        })
-      ) {
-        currentBuildRow.lastBuildCell = buildRow.buildCells.at(-1)
-      }
-    }
-  }
-  const rows = computed<BuildRowType[]>(() => {
-    const buildRows = sheet.value.rows.map((rowDimension: RowDimensionType) => ({
+  const rows = computed<BuildRowType[]>(() =>
+    sheet.value.rows.map((rowDimension: RowDimensionType) => ({
       rowDimension,
       buildCells: rowDimension.cells.map((cell: CellType) => ({
         style: getCellStyle(cell),
         columnDimension: columnsMap.value[cell.columnId],
         rowDimension,
         cell
-      })),
-      firstBuildCell: null,
-      lastBuildCell: null
+      }))
     }))
-    for (const currentBuildRow of buildRows) {
-      assignRowFirstBuildCell(buildRows, currentBuildRow)
-      assignRowLastBuildCell(buildRows, currentBuildRow)
-    }
-    return buildRows
-  })
+  )
 
-  const assignColumnFirstBuildCell = (currentBuildColumn: BuildColumnType) => {
-    for (const buildCell of rows.value[0].buildCells) {
-      if (
-        buildCell.cell.relatedGlobalPositions.some((position: string) => {
-          const { column } = parsePosition(position)
-          return column === currentBuildColumn.columnDimension.name
-        })
-      ) {
-        currentBuildColumn.firstBuildCell = buildCell
-        return
-      }
-    }
-  }
-  const assignColumnLastBuildCell = (currentBuildColumn: BuildColumnType) => {
-    for (const buildRow of [...rows.value].reverse()) {
-      for (const buildCell of buildRow.buildCells) {
-        if (
-          buildCell.cell.relatedGlobalPositions.some((position: string) => {
-            const { column } = parsePosition(position)
-            return column === currentBuildColumn.columnDimension.name
-          })
-        ) {
-          currentBuildColumn.lastBuildCell = buildCell
-          return
-        }
-      }
-    }
-  }
-  const columns = computed<BuildColumnType[]>(() => {
-    const buildColumns = sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
-      columnDimension,
-      firstBuildCell: null,
-      lastBuildCell: null
+  const columns = computed<BuildColumnType[]>(() =>
+    sheet.value.columns.map((columnDimension: ColumnDimensionType) => ({
+      columnDimension
     }))
-    for (const currentBuildColumn of buildColumns) {
-      assignColumnFirstBuildCell(currentBuildColumn)
-      assignColumnLastBuildCell(currentBuildColumn)
-    }
-    return buildColumns
-  })
+  )
 
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
@@ -188,12 +134,105 @@ export function useGrid (
     activeCell.value = buildCell
   }
 
-  const selection = ref<{ first: BuildCellType, last: BuildCellType } | null>(null)
+  const getClearGlobalSelection = () => ({
+    visible: false,
+    position: { left: null, right: null, top: null, bottom: null },
+    zIndex: 0,
+    width: 0,
+    height: 0
+  })
+  const globalSelection = ref<GlobalSelectionType>(getClearGlobalSelection())
+  const clearGlobalSelection = () => {
+    rowsSelection.value = null
+    columnsSelection.value = null
+    globalSelection.value = getClearGlobalSelection()
+  }
+  const setRowsGlobalSelection = () => {
+    const indices = [
+      rowsSelection.value.first.rowDimension.globalIndex,
+      rowsSelection.value.last.rowDimension.globalIndex
+    ]
+    const firstRow = grid.value.querySelector(
+      `tbody tr:nth-child(${Math.min(...indices)})`
+    ) as HTMLTableRowElement
+    const firstRowCell = firstRow.cells.item(0)
+    const lastRow = grid.value.querySelector(
+      `tbody tr:nth-child(${Math.max(...indices)})`
+    ) as HTMLTableRowElement
+    const lastRowCell = lastRow.cells.item(0)
+    globalSelection.value = {
+      visible: true,
+      position: {
+        left: firstRowCell.offsetWidth,
+        right: null,
+        top: firstRowCell.offsetTop - 0.5,
+        bottom: null
+      },
+      zIndex: gridContainer.value.scrollLeft ? 0 : 3,
+      width: grid.value.offsetWidth - firstRowCell.offsetWidth,
+      height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1
+    }
+  }
+  const setColumnsGlobalSelection = () => {
+    const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
+    const indices = [
+      columnsSelection.value.first.columnDimension.index,
+      columnsSelection.value.last.columnDimension.index
+    ]
+    const firstColumn = theadRow.cells.item(Math.min(...indices)) as HTMLTableCellElement
+    const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
+    globalSelection.value = {
+      visible: true,
+      position: {
+        left: firstColumn.offsetLeft - 0.5,
+        right: null,
+        top: firstColumn.offsetHeight - 1,
+        bottom: null
+      },
+      zIndex: gridContainer.value.scrollTop ? 1 : 3,
+      width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
+      height: gridContainer.value.scrollHeight - theadRow.offsetHeight + 1
+    }
+  }
+
+  const cellsSelection = ref<Selection<BuildCellType> | null>(null)
+  const rowsSelection = ref<Selection<BuildRowType> | null>(null)
+  const columnsSelection = ref<Selection<BuildColumnType> | null>(null)
+
+  watch(cellsSelection, (newValue: Selection<BuildCellType> | null) => {
+    if (newValue) {
+      clearGlobalSelection()
+    }
+  }, { deep: true })
+  watch(rowsSelection, (newValue: Selection<BuildRowType>) => {
+    if (newValue) {
+      cellsSelection.value = null
+      columnsSelection.value = null
+      setRowsGlobalSelection()
+    }
+  }, { deep: true })
+  watch(columnsSelection, (newValue: Selection<BuildColumnType>) => {
+    if (newValue) {
+      cellsSelection.value = null
+      rowsSelection.value = null
+      setColumnsGlobalSelection()
+    }
+  }, { deep: true })
+
+  const gridContainerScroll = () => {
+    if (rowsSelection.value) {
+      setRowsGlobalSelection()
+    }
+    if (columnsSelection.value) {
+      setColumnsGlobalSelection()
+    }
+  }
+
   const selectedCells = computed<BuildCellType[]>(() => {
-    if (!selection.value) {
+    if (!cellsSelection.value) {
       return []
     }
-    let selectedCells = [selection.value.first, selection.value.last]
+    let selectedCells = [cellsSelection.value.first, cellsSelection.value.last]
     let newSelectedCells: BuildCellType[] = []
     while (selectedCells.length !== newSelectedCells.length) {
       if (newSelectedCells.length) {
@@ -248,6 +287,17 @@ export function useGrid (
   })
 
   const selectedColumnsPositions = computed<number[]>(() => {
+    if (columnsSelection.value) {
+      const indices = [
+        columnsSelection.value.last.columnDimension.index,
+        columnsSelection.value.first.columnDimension.index
+      ]
+      const minIndex = Math.min(...indices)
+      const maxIndex = Math.max(...indices)
+      return Array.from({
+        length: maxIndex - minIndex + 1
+      }).map((_, i) => i + minIndex)
+    }
     if (selectedRangeIndices.value) {
       return Array.from({
         length: selectedRangeIndices.value.maxColumn - selectedRangeIndices.value.minColumn + 1
@@ -256,6 +306,17 @@ export function useGrid (
     return []
   })
   const selectedRowsPositions = computed<number[]>(() => {
+    if (rowsSelection.value) {
+      const indices = [
+        rowsSelection.value.last.rowDimension.globalIndex,
+        rowsSelection.value.first.rowDimension.globalIndex
+      ]
+      const minIndex = Math.min(...indices)
+      const maxIndex = Math.max(...indices)
+      return Array.from({
+        length: maxIndex - minIndex + 1
+      }).map((_, i) => i + minIndex)
+    }
     if (selectedRangeIndices.value) {
       return Array.from({
         length: selectedRangeIndices.value.maxRow - selectedRangeIndices.value.minRow + 1
@@ -282,18 +343,18 @@ export function useGrid (
 
   const mousedownCell = (buildCell: BuildCellType): void => {
     selectionState.value = 'cell'
-    selection.value = {
+    cellsSelection.value = {
       first: buildCell,
       last: buildCell
     }
   }
   const mouseenterCell = (buildCell: BuildCellType): void => {
     if (selectionState.value === 'cell') {
-      selection.value.last = buildCell
+      cellsSelection.value.last = buildCell
     }
   }
   const mouseupCell = (buildCell: BuildCellType): void => {
-    if (selectionState.value === 'cell' && selection.value.first.cell.id === selection.value.last.cell.id) {
+    if (selectionState.value === 'cell' && cellsSelection.value.first.cell.id === cellsSelection.value.last.cell.id) {
       setActiveCell(buildCell)
     }
   }
@@ -344,7 +405,7 @@ export function useGrid (
 
   const mouseenterColumnName = (buildColumn: BuildColumnType) => {
     if (selectionState.value === 'column') {
-      selection.value.last = buildColumn.lastBuildCell
+      columnsSelection.value.last = buildColumn
     }
   }
   const mousemoveColumnName = (buildColumn: BuildColumnType, event: MouseEvent) => {
@@ -364,9 +425,9 @@ export function useGrid (
       mousedownColumnNameResizing(event)
     } else {
       selectionState.value = 'column'
-      selection.value = {
-        first: buildColumn.firstBuildCell,
-        last: buildColumn.lastBuildCell
+      columnsSelection.value = {
+        first: buildColumn,
+        last: buildColumn
       }
     }
   }
@@ -376,7 +437,7 @@ export function useGrid (
 
   const mouseenterRowName = (buildRow: BuildRowType) => {
     if (selectionState.value === 'row') {
-      selection.value.last = buildRow.lastBuildCell
+      rowsSelection.value.last = buildRow
     }
   }
   const mousemoveRowName = (buildRow: BuildRowType, event: MouseEvent) => {
@@ -396,9 +457,9 @@ export function useGrid (
       mousedownRowNameResizing(event)
     } else {
       selectionState.value = 'row'
-      selection.value = {
-        first: buildRow.firstBuildCell,
-        last: buildRow.lastBuildCell
+      rowsSelection.value = {
+        first: buildRow,
+        last: buildRow
       }
     }
   }
@@ -406,10 +467,22 @@ export function useGrid (
     mouseupRowNameResizing()
   }
 
+  const getRowLastBuildCell = (currentBuildRow: BuildRowType) => {
+    for (const buildRow of [...rows.value].reverse()) {
+      if (
+        buildRow.buildCells.at(-1).cell.relatedGlobalPositions.some((position: string) => {
+          const { column, row } = parsePosition(position)
+          return column === sheet.value.columns.at(-1).name && row === currentBuildRow.rowDimension.globalIndex
+        })
+      ) {
+        return buildRow.buildCells.at(-1)
+      }
+    }
+  }
   const selectAllCells = () => {
-    selection.value = {
-      first: rows.value[0].firstBuildCell,
-      last: rows.value.at(-1).lastBuildCell
+    cellsSelection.value = {
+      first: rows.value[0].buildCells[0],
+      last: getRowLastBuildCell(rows.value.at(-1))
     }
   }
 
@@ -440,6 +513,7 @@ export function useGrid (
 
   return {
     gridContainer,
+    grid,
     resizingColumn,
     resizingColumnWidth,
     getColumnWidth,
@@ -457,6 +531,8 @@ export function useGrid (
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
+    globalSelection,
+    gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,
