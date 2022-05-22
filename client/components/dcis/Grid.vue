@@ -9,6 +9,7 @@
             :resizing-column="resizingColumn"
             :get-column-width="getColumnWidth"
             :selected-column-positions="selectedColumnsPositions"
+            :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
             :all-cells-selected="allCellsSelected"
             :mouseenter-column-name="mouseenterColumnName"
             :mousemove-column-name="mousemoveColumnName"
@@ -23,6 +24,7 @@
             :active-cell="activeCell"
             :set-active-cell="setActiveCell"
             :selected-rows-positions="selectedRowsPositions"
+            :boundary-selected-rows-positions="boundarySelectedRowsPositions"
             :mouseenter-row-name="mouseenterRowName"
             :mousemove-row-name="mousemoveRowName"
             :mouseleave-row-name="mouseleaveRowName"
@@ -32,12 +34,14 @@
             :mouseenter-cell="mouseenterCell"
             :mouseup-cell="mouseupCell"
           )
-        grid-selection-view.grid__selection-view(:selection-view="globalSelectionView")
-        grid-selection-view.grid__selection-view(
-          v-for="view in selectionView"
-          :selection-view="view"
-          :key="view.id"
-        )
+        grid-selection-view.grid__selection-view(v-if="columnsSelectionView" :selection-view="columnsSelectionView")
+        grid-selection-view.grid__selection-view(v-if="rowsSelectionView" :selection-view="rowsSelectionView")
+        template(v-if="cellsSelectionView")
+          grid-selection-view.grid__selection-view(
+            v-for="view in cellsSelectionView"
+            :selection-view="view"
+            :key="view.id"
+          )
       grid-element-resizing(
         :message="String(t('dcis.grid.columnWidth'))"
         :element-resizing="resizingColumnWidth"
@@ -81,12 +85,16 @@ export default defineComponent({
       rowNameColumnWidth,
       activeCell,
       setActiveCell,
+      cellsSelectionView,
+      rowsSelectionView,
+      columnsSelectionView,
+      boundarySelectedColumnsPositions,
+      boundarySelectedRowsPositions,
       allCellsSelected,
-      selectionView,
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
-      globalSelectionView,
+      selectAllCells,
       gridContainerScroll,
       mousedownCell,
       mouseenterCell,
@@ -100,8 +108,7 @@ export default defineComponent({
       mousemoveRowName,
       mouseleaveRowName,
       mousedownRowName,
-      mouseupRowName,
-      selectAllCells
+      mouseupRowName
     } = useGrid(activeSheet, () => {}, () => {})
 
     return {
@@ -118,12 +125,16 @@ export default defineComponent({
       rowNameColumnWidth,
       activeCell,
       setActiveCell,
+      cellsSelectionView,
+      rowsSelectionView,
+      columnsSelectionView,
+      boundarySelectedColumnsPositions,
+      boundarySelectedRowsPositions,
       allCellsSelected,
-      selectionView,
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
-      globalSelectionView,
+      selectAllCells,
       gridContainerScroll,
       mousedownCell,
       mouseenterCell,
@@ -137,8 +148,7 @@ export default defineComponent({
       mousemoveRowName,
       mouseleaveRowName,
       mousedownRowName,
-      mouseupRowName,
-      selectAllCells
+      mouseupRowName
     }
   }
 })
@@ -155,6 +165,7 @@ export default defineComponent({
   cursor: row-resize !important
 
 $border: 1px solid silver
+$border-selected: 1px solid blue
 $name-light: map-get($grey, 'lighten-3')
 $name-dark: map-get($grey, 'lighten-2')
 
@@ -217,6 +228,9 @@ div.grid__body
             & > div
               background: $name-light !important
 
+          &.grid__header_boundary-selected
+            border-bottom: $border-selected
+
           &.grid__header_hover
             cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
@@ -244,6 +258,9 @@ div.grid__body
 
             & > div
               background: $name-light !important
+
+          &.grid__cell_row-name_boundary-selected
+            border-right: $border-selected
 
           &.grid__cell_row-name-hover
             cursor: url("/cursors/arrow-right.svg") 8 8, pointer

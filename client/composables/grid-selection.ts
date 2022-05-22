@@ -22,87 +22,16 @@ export function useGridSelection (
 ) {
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
-  const getClearGlobalSelectionView = (): SelectionViewType => ({
-    id: '0',
-    visible: false,
-    position: { left: null, right: null, top: null, bottom: null },
-    zIndex: 0,
-    width: 0,
-    height: 0,
-    border: { top: false, right: false, bottom: false, left: false }
-  })
-  const globalSelectionView = ref<SelectionViewType>(getClearGlobalSelectionView())
-  const clearGlobalSelectionView = () => {
-    rowsSelection.value = null
-    columnsSelection.value = null
-    globalSelectionView.value = getClearGlobalSelectionView()
-  }
-  const setGlobalSelectionView = (left: number, top: number, zIndex: number, width: number, height: number) => {
-    globalSelectionView.value = {
-      id: '0',
-      visible: true,
-      position: { left, right: null, top, bottom: null },
-      zIndex,
-      width,
-      height,
-      border: { top: true, right: true, bottom: true, left: true }
-    }
-  }
-  const setRowsGlobalSelectionView = () => {
-    const indices = [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex]
-    const firstRow = grid.value.querySelector(
-      `tbody tr:nth-child(${Math.min(...indices)})`
-    ) as HTMLTableRowElement
-    const firstRowCell = firstRow.cells.item(0)
-    const lastRow = grid.value.querySelector(
-      `tbody tr:nth-child(${Math.max(...indices)})`
-    ) as HTMLTableRowElement
-    const lastRowCell = lastRow.cells.item(0)
-    setGlobalSelectionView(
-      firstRowCell.offsetWidth - 1,
-      firstRowCell.offsetTop - 1,
-      gridContainer.value.scrollLeft ? 0 : 3,
-      grid.value.offsetWidth - firstRowCell.offsetWidth + 1,
-      lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1
-    )
-  }
-  const setColumnsGlobalSelectionView = () => {
-    const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
-    const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
-    const firstColumn = theadRow.cells.item(Math.min(...indices)) as HTMLTableCellElement
-    const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
-    setGlobalSelectionView(
-      firstColumn.offsetLeft - 1,
-      firstColumn.offsetHeight - 1,
-      gridContainer.value.scrollTop ? 1 : 3,
-      lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
-      grid.value.offsetHeight - theadRow.offsetHeight + 1
-    )
-  }
-
   const cellsSelection = ref<SelectionType<CellType> | null>(null)
   const rowsSelection = ref<SelectionType<RowDimensionType> | null>(null)
   const columnsSelection = ref<SelectionType<ColumnDimensionType> | null>(null)
 
-  watch(cellsSelection, (newValue: SelectionType<CellType> | null) => {
-    if (newValue) {
-      clearGlobalSelectionView()
-    }
-  }, { deep: true })
-  watch(rowsSelection, (newValue: SelectionType<RowDimensionType>) => {
-    if (newValue) {
-      cellsSelection.value = null
-      columnsSelection.value = null
-      setRowsGlobalSelectionView()
-    }
-  }, { deep: true })
-  watch(columnsSelection, (newValue: SelectionType<ColumnDimensionType>) => {
-    if (newValue) {
-      cellsSelection.value = null
-      rowsSelection.value = null
-      setColumnsGlobalSelectionView()
-    }
-  }, { deep: true })
+  const cellsSelectionView = ref<SelectionViewType[] | null>(null)
+  const rowsSelectionView = ref<SelectionViewType | null>(null)
+  const columnsSelectionView = ref<SelectionViewType | null>(null)
+
+  const boundarySelectedColumnsPositions = ref<number[]>([])
+  const boundarySelectedRowsPositions = ref<number[]>([])
 
   const selectedCells = computed<CellType[]>(() => {
     if (!cellsSelection.value) {
@@ -135,67 +64,6 @@ export function useGridSelection (
       []
     )
   })
-  const selectionView = ref<SelectionViewType[]>([])
-  const setSelectionView = (selectedCells: CellType[]) => {
-    if (selectedCells.length) {
-      const result: SelectionViewType[] = []
-      const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
-      const { leftColumn, topRow } = getSelectionViewLeftTopBorder(selectedCells)
-      for (const cell of selectedCells) {
-        const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
-        const firstColumn = theadRow.cells.item(minColumn) as HTMLTableCellElement
-        const lastColumn = theadRow.cells.item(maxColumn) as HTMLTableCellElement
-        const firstRow = grid.value.querySelector(`tbody tr:nth-child(${minRow})`) as HTMLTableRowElement
-        const firstRowCell = firstRow.cells.item(0)
-        const lastRow = grid.value.querySelector(`tbody tr:nth-child(${maxRow})`) as HTMLTableRowElement
-        const lastRowCell = lastRow.cells.item(0)
-        result.push({
-          id: cell.id,
-          visible: true,
-          position: { left: firstColumn.offsetLeft - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
-          zIndex: 2,
-          width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
-          height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
-          border: {
-            top: minRow !== 1 && minRow === topRow,
-            right: true,
-            bottom: true,
-            left: minColumn !== 1 && minColumn === leftColumn
-          }
-        })
-      }
-      selectionView.value = result
-    } else {
-      selectionView.value = null
-    }
-  }
-  const getSelectionViewLeftTopBorder = (selectedCells: CellType[]): { leftColumn: number, topRow: number} => {
-    let leftColumn = Number.MAX_VALUE
-    let topRow = Number.MAX_VALUE
-    for (const cell of selectedCells) {
-      const { minColumn, minRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
-      if (minColumn < leftColumn) {
-        leftColumn = minColumn
-      }
-      if (minRow < topRow) {
-        topRow = minRow
-      }
-    }
-    return { leftColumn, topRow }
-  }
-  watch(selectedCells, (newValue: CellType[]) => setSelectionView(newValue))
-
-  const gridContainerScroll = () => {
-    if (cellsSelection.value) {
-      setSelectionView(selectedCells.value)
-    }
-    if (rowsSelection.value) {
-      setRowsGlobalSelectionView()
-    }
-    if (columnsSelection.value) {
-      setColumnsGlobalSelectionView()
-    }
-  }
 
   const selectedCellsPositions = computed<string[]>(() =>
     selectedCells.value.reduce((a: string[], c: CellType) => {
@@ -265,35 +133,6 @@ export function useGridSelection (
     return []
   })
 
-  const boundarySelectedColumnsPositions = computed<number[]>(() => {
-    const result: number[] = []
-    let i = 0
-    let offset = 0
-    while (i < sheet.value.columns.length) {
-      const cell = sheet.value.rows[0].cells[i - offset]
-      if (selectedCellsPositions.value.includes(cell.globalPosition)) {
-        result.push(...sheet.value.columns.slice(i, i + cell.colspan)
-          .map((column: ColumnDimensionType) => column.index)
-        )
-      }
-      offset += cell.colspan - 1
-      i += cell.colspan
-    }
-    return result
-  })
-  const boundarySelectedRowsRowsPositions = computed<number[]>(() => {
-    const result: number[] = []
-    let i = 0
-    while (i < sheet.value.rows.length) {
-      const cell = sheet.value.rows[i].cells[0]
-      if (selectedCellsPositions.value.includes(cell.globalPosition)) {
-        result.push(...sheet.value.rows.slice(i, i + cell.rowspan).map((row: RowDimensionType) => row.globalIndex))
-      }
-      i += cell.rowspan
-    }
-    return result
-  })
-
   const possibleCellsOptions: (keyof CellOptionsType)[] = [
     'kind', 'horizontalAlign', 'verticalAlign',
     'size', 'strong', 'italic',
@@ -310,6 +149,182 @@ export function useGridSelection (
     }
     return result
   })
+
+  const updateSelections = () => {
+    nextTick(() => {
+      updateCellsSelectionView()
+      updateRowsSelectionView()
+      updateColumnsSelectionView()
+    })
+  }
+  const updateCellsSelectionView = () => {
+    if (cellsSelection.value) {
+      cellsSelectionView.value = []
+      const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
+      const { leftColumn, topRow } = getSelectionViewLeftTopBorder(selectedCells.value)
+      for (const cell of selectedCells.value) {
+        const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
+        const firstColumn = theadRow.cells.item(minColumn) as HTMLTableCellElement
+        const lastColumn = theadRow.cells.item(maxColumn) as HTMLTableCellElement
+        const firstRow = grid.value.querySelector(`tbody tr:nth-child(${minRow})`) as HTMLTableRowElement
+        const firstRowCell = firstRow.cells.item(0)
+        const lastRow = grid.value.querySelector(`tbody tr:nth-child(${maxRow})`) as HTMLTableRowElement
+        const lastRowCell = lastRow.cells.item(0)
+        cellsSelectionView.value.push({
+          id: cell.id,
+          position: { left: firstColumn.offsetLeft - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
+          zIndex: 0,
+          width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
+          height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
+          border: {
+            top: minRow !== 1 && minRow === topRow,
+            right: true,
+            bottom: true,
+            left: minColumn !== 1 && minColumn === leftColumn
+          }
+        })
+      }
+      updateBoundarySelectedColumnsPositions()
+      updateBoundarySelectedRowsPositions()
+    } else {
+      cellsSelectionView.value = null
+    }
+  }
+  const updateBoundarySelectedColumnsPositions = () => {
+    if (gridContainer.value.scrollTop) {
+      boundarySelectedColumnsPositions.value = []
+    } else {
+      boundarySelectedColumnsPositions.value = []
+      let i = 0
+      let offset = 0
+      while (i < sheet.value.columns.length) {
+        const cell = sheet.value.rows[0].cells[i - offset]
+        if (selectedCellsPositions.value.includes(cell.globalPosition)) {
+          boundarySelectedColumnsPositions.value.push(...sheet.value.columns.slice(i, i + cell.colspan)
+            .map((column: ColumnDimensionType) => column.index)
+          )
+        }
+        offset += cell.colspan - 1
+        i += cell.colspan
+      }
+    }
+  }
+  const updateBoundarySelectedRowsPositions = () => {
+    if (gridContainer.value.scrollLeft) {
+      boundarySelectedRowsPositions.value = []
+    } else {
+      boundarySelectedRowsPositions.value = []
+      let i = 0
+      while (i < sheet.value.rows.length) {
+        const cell = sheet.value.rows[i].cells[0]
+        if (selectedCellsPositions.value.includes(cell.globalPosition)) {
+          boundarySelectedRowsPositions.value.push(...sheet.value.rows.slice(i, i + cell.rowspan)
+            .map((row: RowDimensionType) => row.globalIndex))
+        }
+        i += cell.rowspan
+      }
+    }
+  }
+  const updateRowsSelectionView = () => {
+    if (rowsSelection.value) {
+      const indices = [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex]
+      const firstRow = grid.value.querySelector(
+        `tbody tr:nth-child(${Math.min(...indices)})`
+      ) as HTMLTableRowElement
+      const firstRowCell = firstRow.cells.item(0)
+      const lastRow = grid.value.querySelector(
+        `tbody tr:nth-child(${Math.max(...indices)})`
+      ) as HTMLTableRowElement
+      const lastRowCell = lastRow.cells.item(0)
+      rowsSelectionView.value = {
+        id: 'row',
+        position: { left: firstRowCell.offsetWidth - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
+        zIndex: gridContainer.value.scrollLeft ? 0 : 3,
+        width: grid.value.offsetWidth - firstRowCell.offsetWidth + 1,
+        height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
+        border: { top: true, right: true, bottom: true, left: true }
+      }
+    } else {
+      rowsSelectionView.value = null
+    }
+  }
+  const updateColumnsSelectionView = () => {
+    if (columnsSelection.value) {
+      const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
+      const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
+      const firstColumn = theadRow.cells.item(Math.min(...indices)) as HTMLTableCellElement
+      const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
+      columnsSelectionView.value = {
+        id: 'column',
+        position: { left: firstColumn.offsetLeft - 1, right: null, top: firstColumn.offsetHeight - 1, bottom: null },
+        zIndex: gridContainer.value.scrollTop ? 1 : 3,
+        width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
+        height: grid.value.offsetHeight - theadRow.offsetHeight + 1,
+        border: { top: true, right: true, bottom: true, left: true }
+      }
+    } else {
+      columnsSelectionView.value = null
+    }
+  }
+  const getSelectionViewLeftTopBorder = (selectedCells: CellType[]): { leftColumn: number, topRow: number} => {
+    let leftColumn = Number.MAX_VALUE
+    let topRow = Number.MAX_VALUE
+    for (const cell of selectedCells) {
+      const { minColumn, minRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
+      if (minColumn < leftColumn) {
+        leftColumn = minColumn
+      }
+      if (minRow < topRow) {
+        topRow = minRow
+      }
+    }
+    return { leftColumn, topRow }
+  }
+
+  const selectAllCells = () => {
+    cellsSelection.value = {
+      first: sheet.value.rows[0].cells[0],
+      last: getRowLastCell(sheet.value.rows.at(-1))
+    }
+  }
+  const getRowLastCell = (currentRow: RowDimensionType) => {
+    for (const row of [...sheet.value.rows].reverse()) {
+      if (
+        row.cells.at(-1).relatedGlobalPositions.some((position: string) => {
+          const { column, row } = parsePosition(position)
+          return column === sheet.value.columns.at(-1).name && row === currentRow.globalIndex
+        })
+      ) {
+        return row.cells.at(-1)
+      }
+    }
+  }
+
+  watch(cellsSelection, (newValue: SelectionType<CellType> | null) => {
+    if (newValue) {
+      rowsSelection.value = null
+      columnsSelection.value = null
+      updateSelections()
+    }
+  }, { deep: true })
+  watch(rowsSelection, (newValue: SelectionType<RowDimensionType>) => {
+    if (newValue) {
+      cellsSelection.value = null
+      columnsSelection.value = null
+      updateSelections()
+    }
+  }, { deep: true })
+  watch(columnsSelection, (newValue: SelectionType<ColumnDimensionType>) => {
+    if (newValue) {
+      cellsSelection.value = null
+      rowsSelection.value = null
+      updateSelections()
+    }
+  }, { deep: true })
+
+  const gridContainerScroll = () => {
+    updateSelections()
+  }
 
   const mousedownCell = (cell: CellType): void => {
     selectionState.value = 'cell'
@@ -357,25 +372,6 @@ export function useGridSelection (
     }
   }
 
-  const selectAllCells = () => {
-    cellsSelection.value = {
-      first: sheet.value.rows[0].cells[0],
-      last: getRowLastCell(sheet.value.rows.at(-1))
-    }
-  }
-  const getRowLastCell = (currentRow: RowDimensionType) => {
-    for (const row of [...sheet.value.rows].reverse()) {
-      if (
-        row.cells.at(-1).relatedGlobalPositions.some((position: string) => {
-          const { column, row } = parsePosition(position)
-          return column === sheet.value.columns.at(-1).name && row === currentRow.globalIndex
-        })
-      ) {
-        return row.cells.at(-1)
-      }
-    }
-  }
-
   useEventListener('mouseup', () => {
     if (selectionState.value) {
       selectionState.value = null
@@ -384,23 +380,24 @@ export function useGridSelection (
 
   return {
     selectionState,
-    globalSelectionView,
-    clearGlobalSelectionView,
-    gridContainerScroll,
-    selectionView,
+    cellsSelectionView,
+    rowsSelectionView,
+    columnsSelectionView,
+    boundarySelectedColumnsPositions,
+    boundarySelectedRowsPositions,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
-    boundarySelectedColumnsPositions,
-    boundarySelectedRowsRowsPositions,
+    updateSelections,
+    selectAllCells,
+    gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,
     mouseenterColumnName,
     mouseDownColumnName,
     mouseenterRowName,
-    mousedownRowName,
-    selectAllCells
+    mousedownRowName
   }
 }

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-show="selectionView.visible" :style="style")
+  div(:style="style")
 </template>
 
 <script lang="ts">

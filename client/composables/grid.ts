@@ -1,6 +1,5 @@
 import { Ref } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
-import { ElementResizingType } from '~/types/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -43,22 +42,25 @@ export function useGrid (
 
   const {
     selectionState,
-    globalSelectionView,
-    clearGlobalSelectionView,
-    gridContainerScroll,
-    selectionView,
+    cellsSelectionView,
+    rowsSelectionView,
+    columnsSelectionView,
+    boundarySelectedColumnsPositions,
+    boundarySelectedRowsPositions,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
+    updateSelections,
+    selectAllCells,
+    gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,
     mouseenterColumnName,
     mouseDownColumnName: mouseDownColumnNameSelection,
     mouseenterRowName,
-    mousedownRowName: mouseDownRowNameSelection,
-    selectAllCells
+    mousedownRowName: mouseDownRowNameSelection
   } = useGridSelection(sheet, gridContainer, grid, setActiveCell)
 
   const {
@@ -75,11 +77,7 @@ export function useGrid (
     'x',
     changeColumnWidth
   )
-  watch(resizingColumnWidth, (newValue: ElementResizingType) => {
-    if (newValue.visible) {
-      clearGlobalSelectionView()
-    }
-  }, { deep: true })
+  watch(resizingColumnWidth, () => updateSelections(), { deep: true })
   const {
     resizing: resizingRow,
     elementResizing: resizingRowHeight,
@@ -94,11 +92,7 @@ export function useGrid (
     'y',
     changeRowHeight
   )
-  watch(resizingRowHeight, (newValue: ElementResizingType) => {
-    if (newValue.visible) {
-      clearGlobalSelectionView()
-    }
-  }, { deep: true })
+  watch(resizingRowHeight, () => updateSelections(), { deep: true })
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
@@ -183,12 +177,16 @@ export function useGrid (
     rowNameColumnWidth,
     activeCell,
     setActiveCell,
+    cellsSelectionView,
+    rowsSelectionView,
+    columnsSelectionView,
+    boundarySelectedColumnsPositions,
+    boundarySelectedRowsPositions,
     allCellsSelected,
-    selectionView,
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
-    globalSelectionView,
+    selectAllCells,
     gridContainerScroll,
     mousedownCell,
     mouseenterCell,
@@ -202,7 +200,6 @@ export function useGrid (
     mousemoveRowName,
     mouseleaveRowName,
     mousedownRowName,
-    mouseupRowName,
-    selectAllCells
+    mouseupRowName
   }
 }
