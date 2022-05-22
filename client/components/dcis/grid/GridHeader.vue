@@ -1,13 +1,16 @@
 <template lang="pug">
   thead
     tr
-      th(:style="{ width: `${rowNameColumnWidth}px` }" @click="selectAllCells")
-        .grid__header-content
-          .grid__select-all(:class="{ 'grid__select-all_selected': allCellsSelected }")
+      th(
+        :class="{ 'grid__header_all_selected': allCellsSelected }"
+        :style="{ width: `${rowNameColumnWidth}px` }"
+        @click="selectAllCells"
+      )
+        div
       th(
         v-for="column in activeSheet.columns"
         :key="column.id"
-        :class="{ 'grid__header_hover': !resizingColumn }"
+        :class="getHeaderClass(column)"
         :style="{ 'width': `${getColumnWidth(column)}px` }"
         @mouseenter="mouseenterColumnName(column)"
         @mousemove="mousemoveColumnName(column, $event)"
@@ -16,16 +19,13 @@
         @mouseup="mouseupColumnName"
       )
         grid-column-control(v-slot="{ on }" :column="column" :get-column-width="getColumnWidth")
-          div(
-            :class="getHeaderContentClasses(column)"
-            @contextmenu.prevent="on.click"
-          ) {{ column.name }}
+          div(@contextmenu.prevent="on.click") {{ column.name }}
 </template>
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
 import { SheetType, ColumnDimensionType } from '~/types/graphql'
-import { ResizingType, BoundaryRowCell } from '~/types/grid'
+import { ResizingType } from '~/types/grid'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -35,7 +35,6 @@ export default defineComponent({
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
-    selectedBoundaryRowCells: { type: Array as PropType<BoundaryRowCell[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },
     mouseenterColumnName: {
       type: Function as PropType<(column: ColumnDimensionType) => void>,
@@ -56,19 +55,14 @@ export default defineComponent({
   setup (props) {
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
-    const getHeaderContentClasses = (column: ColumnDimensionType): (string | Record<string, boolean>)[] => {
-      return [
-        'grid__header-content',
-        { 'grid__header-content_selected': props.selectedColumnPositions.includes(column.index) },
-        {
-          'grid__header-content_neighbor-selected': !!props.selectedBoundaryRowCells.find(boundaryCell =>
-            boundaryCell.columns.find((boundaryRowColumn: ColumnDimensionType) =>
-              boundaryRowColumn.id === column.id))
-        }
-      ]
+    const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
+      return {
+        grid__header_selected: props.selectedColumnPositions.includes(column.index),
+        grid__header_hover: !props.resizingColumn
+      }
     }
 
-    return { activeSheet, getHeaderContentClasses }
+    return { activeSheet, getHeaderClass }
   }
 })
 </script>

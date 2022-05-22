@@ -9,7 +9,6 @@
             :resizing-column="resizingColumn"
             :get-column-width="getColumnWidth"
             :selected-column-positions="selectedColumnsPositions"
-            :selected-boundary-row-cells="selectedBoundaryRowCells"
             :all-cells-selected="allCellsSelected"
             :mouseenter-column-name="mouseenterColumnName"
             :mousemove-column-name="mousemoveColumnName"
@@ -23,10 +22,7 @@
             :get-row-height="getRowHeight"
             :active-cell="activeCell"
             :set-active-cell="setActiveCell"
-            :selected-cells-positions="selectedCellsPositions"
             :selected-rows-positions="selectedRowsPositions"
-            :boundary-column-cells="boundaryColumnCells"
-            :selected-boundary-column-cells="selectedBoundaryColumnCells"
             :mouseenter-row-name="mouseenterRowName"
             :mousemove-row-name="mousemoveRowName"
             :mouseleave-row-name="mouseleaveRowName"
@@ -36,7 +32,12 @@
             :mouseenter-cell="mouseenterCell"
             :mouseup-cell="mouseupCell"
           )
-        grid-global-selection(:global-selection="globalSelection")
+        grid-selection-view.grid__selection-view(:selection-view="globalSelectionView")
+        grid-selection-view.grid__selection-view(
+          v-for="view in selectionView"
+          :selection-view="view"
+          :key="view.id"
+        )
       grid-element-resizing(
         :message="String(t('dcis.grid.columnWidth'))"
         :element-resizing="resizingColumnWidth"
@@ -53,7 +54,7 @@ import { SheetType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
-import GridGlobalSelection from '~/components/dcis/grid/GridGlobalSelection.vue'
+import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
@@ -61,7 +62,7 @@ export default defineComponent({
     GridSheetToolbar,
     GridHeader,
     GridBody,
-    GridGlobalSelection,
+    GridSelectionView,
     GridElementResizing
   },
   setup () {
@@ -81,19 +82,15 @@ export default defineComponent({
       activeCell,
       setActiveCell,
       allCellsSelected,
-      selectedCellsPositions,
+      selectionView,
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
-      globalSelection,
+      globalSelectionView,
       gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
-      boundaryColumnCells,
-      selectedBoundaryColumnCells,
-      boundaryRowCells,
-      selectedBoundaryRowCells,
       mouseenterColumnName,
       mousemoveColumnName,
       mouseleaveColumnName,
@@ -122,19 +119,15 @@ export default defineComponent({
       activeCell,
       setActiveCell,
       allCellsSelected,
-      selectedCellsPositions,
+      selectionView,
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
-      globalSelection,
+      globalSelectionView,
       gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
-      boundaryColumnCells,
-      selectedBoundaryColumnCells,
-      boundaryRowCells,
-      selectedBoundaryRowCells,
       mouseenterColumnName,
       mousemoveColumnName,
       mouseleaveColumnName,
@@ -183,11 +176,13 @@ div.grid__body
       height: 1px
       user-select: none
       table-layout: fixed
-
-      border-collapse: collapse
+      border-spacing: 0
 
       td, th
+        overflow: hidden
         background-clip: padding-box
+        border-right: $border
+        border-bottom: $border
 
       thead
         position: sticky
@@ -196,113 +191,74 @@ div.grid__body
 
         th
           height: 25px
+          border-top: $border
 
-          .grid__header-content
-            position: relative
-            left: 0.5px
-            height: 100%
-            overflow: hidden
-            border-top: $border
-            border-right: $border
-            border-bottom: $border
+          & > div
             background: white
-
-            &.grid__header-content_selected
-              background: $name-light
 
         th:first-child
           position: sticky
           left: 0
-          z-index: 2
-
           cursor: cell
+          border-left: $border
 
-          .grid__header-content
-            left: 0
-            width: calc(100% + 0.5px)
-            border-left: $border
+          &.grid__header_all_selected
 
-            .grid__select-all
-              position: absolute
-              right: 1px
-              top: 1px
-
-              width: 0
-              height: 0
-              border-style: solid
-              border-width: 0 0 22px 22px
-              border-color: transparent transparent transparent transparent
-
-            .grid__select-all_selected
+            & > div
               border-color: transparent transparent $name-light transparent
 
-          &:hover
-
-            .grid__header-content
-
-              .grid__select-all
-                border-color: transparent transparent $name-dark transparent
+          & > div
+            height: 100%
+            width: 100%
 
         th:not(:first-child)
+          &.grid__header_selected
 
-          .grid__header-content
+            & > div
+              background: $name-light !important
+
+          &.grid__header_hover
+            cursor: url("/cursors/arrow-down.svg") 8 8, pointer
+
+            &:hover > div
+              background: $name-dark !important
+
+          & > div
             display: flex
             justify-content: center
             align-items: center
 
-        th:not(:first-child).grid__header_hover
-          cursor: url("/cursors/arrow-down.svg") 8 8, pointer
-
-          .grid__header-content:hover
-            background: $name-dark !important
-
       tbody
-        tr:first-child
-
-          td:not(.grid__cell_row-name)
-            border-top: none !important
-
-        td
-          overflow: hidden
-
         td.grid__cell_row-name
           position: sticky
           height: 100%
           left: 0
           z-index: 1
-          overflow: visible
-
+          border-left: $border
           font-weight: bold
 
-          .grid__cell-content_row-name
+          & > div
+            background: white
+
+          &.grid__cell_row-name-selected
+
+            & > div
+              background: $name-light !important
+
+          &.grid__cell_row-name-hover
+            cursor: url("/cursors/arrow-right.svg") 8 8, pointer
+
+            &:hover > div
+              background: $name-dark !important
+
+          & > div
             display: flex
             justify-content: center
             align-items: center
-            position: relative
-            overflow: hidden
-            top: 0.5px
-            width: calc(100% + 0.5px)
-            border-right: $border
-            border-bottom: $border
-            border-left: $border
-            background: white
-
-            &.grid__cell-content_row-name-selected
-              background: $name-light
-
-        td.grid__cell_row-name-hover
-          cursor: url("/cursors/arrow-right.svg") 8 8, pointer
-
-          .grid__cell-content_row-name:hover
-            background: $name-dark !important
 
         td:not(.grid__cell_row-name)
-          position: relative
-          border: $border
           cursor: cell
-
-          &.grid__cell_boundary
-            border-left: none !important
+          position: relative
 
           .grid__cell-content_active
             position: absolute
@@ -318,37 +274,7 @@ div.grid__body
               &:focus
                 outline: none
 
-    div.grid__global-selection
+    div.grid__selection-view
       position: absolute
       pointer-events: none
-
-@mixin grid__browser-specific($browser, $border-width)
-  .browser-#{$browser}
-
-    table.grid__table
-
-      th
-
-        .grid__header-content
-
-          &.grid__header-content_neighbor-selected
-            border-bottom: #{$border-width} solid blue !important
-
-      td.grid__cell_row-name
-
-        .grid__cell-content_row-name
-
-          &.grid__cell-content_row-name-neighbor-selected
-            border-right: #{$border-width} solid blue !important
-
-      td:not(.grid__cell_row-name)
-
-        &.grid__cell_selected
-          border: #{$border-width} solid blue !important
-
-    div.grid__global-selection
-      border: $border-width solid blue
-
-@include grid__browser-specific('default', 1.2px)
-@include grid__browser-specific('firefox', 2px)
 </style>

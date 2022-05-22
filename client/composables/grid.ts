@@ -1,10 +1,6 @@
 import { Ref } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
-import {
-  ElementResizingType,
-  BoundaryColumnCell,
-  BoundaryRowCell
-} from '~/types/grid'
+import { ElementResizingType } from '~/types/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -47,10 +43,10 @@ export function useGrid (
 
   const {
     selectionState,
-    globalSelection,
-    clearGlobalSelection,
+    globalSelectionView,
+    clearGlobalSelectionView,
     gridContainerScroll,
-    selectedCellsPositions,
+    selectionView,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
@@ -81,7 +77,7 @@ export function useGrid (
   )
   watch(resizingColumnWidth, (newValue: ElementResizingType) => {
     if (newValue.visible) {
-      clearGlobalSelection()
+      clearGlobalSelectionView()
     }
   }, { deep: true })
   const {
@@ -100,57 +96,13 @@ export function useGrid (
   )
   watch(resizingRowHeight, (newValue: ElementResizingType) => {
     if (newValue.visible) {
-      clearGlobalSelection()
+      clearGlobalSelectionView()
     }
   }, { deep: true })
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
       sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
-  )
-
-  /**
-   * Вычисление ячеек граничных к крайнему фиксированному столбцу
-   */
-  const boundaryColumnCells = computed<BoundaryColumnCell[]>(() => {
-    const result: BoundaryColumnCell[] = []
-    let i = 0
-    while (i < sheet.value.rows.length) {
-      const cell = sheet.value.rows[i].cells[0]
-      result.push({ cell, rows: sheet.value.rows.slice(i, i + cell.rowspan) })
-      i += cell.rowspan
-    }
-    return result
-  })
-  /**
-   * Вычисление выделенных ячеек граничных к крайнему фиксированному столбцу
-   */
-  const selectedBoundaryColumnCells = computed<BoundaryColumnCell[]>(() =>
-    boundaryColumnCells.value.filter(boundaryCell =>
-      selectedCellsPositions.value.includes(boundaryCell.cell.globalPosition))
-  )
-
-  /**
-   * Вычисление ячеек граничных к крайней фиксированной строке
-   */
-  const boundaryRowCells = computed<BoundaryRowCell[]>(() => {
-    const result: BoundaryRowCell[] = []
-    let i = 0
-    let offset = 0
-    while (i < sheet.value.columns.length) {
-      const cell = sheet.value.rows[0].cells[i - offset]
-      result.push({ cell, columns: sheet.value.columns.slice(i, i + cell.colspan) })
-      offset += cell.colspan - 1
-      i += cell.colspan
-    }
-    return result
-  })
-  /**
-   * Вычисление выделенных ячеек граничных к крайней фиксированной строке
-   */
-  const selectedBoundaryRowCells = computed<BoundaryRowCell[]>(() =>
-    boundaryRowCells.value.filter(boundaryCell =>
-      selectedCellsPositions.value.includes(boundaryCell.cell.globalPosition))
   )
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
@@ -232,19 +184,15 @@ export function useGrid (
     activeCell,
     setActiveCell,
     allCellsSelected,
-    selectedCellsPositions,
+    selectionView,
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
-    globalSelection,
+    globalSelectionView,
     gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,
-    boundaryColumnCells,
-    selectedBoundaryColumnCells,
-    boundaryRowCells,
-    selectedBoundaryRowCells,
     mouseenterColumnName,
     mousemoveColumnName,
     mouseleaveColumnName,

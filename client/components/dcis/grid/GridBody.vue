@@ -2,7 +2,7 @@
   tbody
     tr(v-for="row in activeSheet.rows" :key="row.id")
       td.grid__cell_row-name(
-        :class="{ 'grid__cell_row-name-hover': !resizingRow }"
+        :class="getRowNameCellClass(row)"
         @mouseenter="mouseenterRowName(row)"
         @mousemove="mousemoveRowName(row, $event)"
         @mouseleave="mouseleaveRowName"
@@ -10,19 +10,15 @@
         @mouseup="mouseupRowName"
       )
         grid-row-control(v-slot="{ onMenu, onTooltip, attrs }" :row="row" :get-row-height="getRowHeight")
-          .grid__cell-content_row-name(
-            v-bind="attrs"
-            v-on="onTooltip"
+          div(
+            :style="{ height: `${getRowHeight(row)}px` }"
             @contextmenu.prevent="onMenu.click"
-            :class="getRowNameCellContentClass(row)"
-            :style="{ height: `${getRowHeight(row) + 1}px` }"
           ) {{ row.name }}
       td(
         v-for="cell in row.cells"
         :key="cell.id"
         :colspan="cell.colspan"
         :rowspan="cell.rowspan"
-        :class="getCellClasses(cell)"
         :style="getCellStyle(cell)"
         @mousedown="mousedownCell(cell)"
         @mouseenter="mouseenterCell(cell)"
@@ -39,7 +35,7 @@
 <script lang="ts">
 import { PropType, Ref } from '#app'
 import { SheetType, RowDimensionType, CellType } from '~/types/graphql'
-import { ResizingType, BoundaryColumnCell } from '~/types/grid'
+import { ResizingType } from '~/types/grid'
 import { getCellStyle } from '~/services/grid'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
@@ -51,10 +47,7 @@ export default defineComponent({
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
-    selectedCellsPositions: { type: Array as PropType<string[]>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
-    boundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
-    selectedBoundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
     mouseenterRowName: {
       type: Function as PropType<(row: RowDimensionType) => void>,
       required: true
@@ -76,22 +69,14 @@ export default defineComponent({
   setup (props) {
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
-    const getRowNameCellContentClass = (row: RowDimensionType): Record<string, boolean> => {
+    const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
-        'grid__cell-content_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell-content_row-name-neighbor-selected': !!props.selectedBoundaryColumnCells.find(boundaryCell =>
-          boundaryCell.rows.find((boundaryColumnRow: RowDimensionType) => boundaryColumnRow.id === row.id))
+        'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-hover': !props.resizingRow
       }
     }
 
-    const getCellClasses = (cell: CellType): Record<string, boolean> => ({
-      grid__cell_selected: props.selectedCellsPositions.includes(cell.globalPosition),
-      grid__cell_boundary: !!props.boundaryColumnCells.find(
-        boundaryCell => boundaryCell.cell.id === cell.id
-      )
-    })
-
-    return { activeSheet, getRowNameCellContentClass, getCellClasses, getCellStyle }
+    return { activeSheet, getRowNameCellClass, getCellStyle }
   }
 })
 </script>

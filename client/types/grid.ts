@@ -1,5 +1,3 @@
-import { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
-
 export type RangeType = string
 
 /**
@@ -83,12 +81,19 @@ export type ElementPositionType = {
   bottom: number | null
 }
 
-export type GlobalSelectionType = {
+export type SelectionViewType = {
+  id: string
   visible: boolean
   position: ElementPositionType
   zIndex: number
   width: number
   height: number
+  border: {
+    top: boolean
+    right: boolean
+    bottom: boolean
+    left: boolean
+  }
 }
 
 export type ElementResizingType = {
@@ -104,7 +109,7 @@ export type ResizingType<T> = {
   state: 'hover' | 'resizing'
 }
 
-export type Selection<T> = {
+export type SelectionType<T> = {
   first: T,
   last: T,
 }
@@ -118,20 +123,4 @@ export type CellOptionsType = {
   italic: boolean | null
   strike: boolean | null
   underline: string | null
-}
-
-/**
- * Ячейка граничная к крайнему фиксированному столбцу
- */
-export type BoundaryColumnCell = {
-  cell: CellType,
-  rows: RowDimensionType[],
-}
-
-/**
- * Ячейка граничная к крайней фиксированной строке
- */
-export type BoundaryRowCell = {
-  cell: CellType
-  columns: ColumnDimensionType[]
 }

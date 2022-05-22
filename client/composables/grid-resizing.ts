@@ -77,21 +77,22 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   }
 
   const getElementPositionX = (event: MouseEvent, target: HTMLDivElement | HTMLTableCellElement) => {
+    const cell = target.closest('th')
     if (
-      target.offsetLeft - gridContainer.value.scrollLeft +
-      event.offsetX < document.body[offsetSizeKey] - 150
+      cell.offsetLeft - gridContainer.value.scrollLeft +
+      event.offsetX < document.body.offsetWidth - 150
     ) {
       return {
-        left: target.offsetLeft - gridContainer.value.scrollLeft + event.offsetX,
+        left: cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX,
         right: null,
-        top: target.offsetTop + event.offsetY - 25,
+        top: cell.offsetTop + event.offsetY - 25,
         bottom: null
       }
     } else {
       return {
         left: null,
         right: 25,
-        top: target.offsetTop + event.offsetY - 25,
+        top: cell.offsetTop + event.offsetY - 25,
         bottom: null
       }
     }
