@@ -1,8 +1,8 @@
 <template lang="pug">
   mutation-modal-form(
-    :header="String($t('dcis.periods.changePrivileges.header'))"
+    :header="formHeader"
     :subheader="itemName"
-    :button-text="String($t('dcis.periods.changePrivileges.buttonText'))"
+    :button-text="buttonText"
     :mutation="user ? changeGroupUsersPrivileges : changePeriodGroupPrivileges"
     :update="user ? changeUsersPrivilegesUpdate : changeGroupPrivilegesUpdate"
     :variables="formVariables"
@@ -87,13 +87,25 @@ export default defineComponent({
         return { periodGroupId: props.periodGroup.id, privilegesIds: selectPrivileges.value.map(e => e.id) }
       }
     })
+    const formHeader = computed<string>(() => (props.user
+      ? t('dcis.periods.changePrivileges.userHeader') as string
+      : t('dcis.periods.changePrivileges.groupHeader') as string)
+    )
     const headers = computed<DataTableHeader[]>(() => ([
       { text: t('dcis.periods.changePrivileges.name') as string, value: 'name' },
       { text: t('dcis.periods.changePrivileges.key') as string, value: 'key' }
     ]))
+    const buttonText = computed<string>(() => (props.user
+      ? t('dcis.periods.changePrivileges.buttonAddText') as string
+      : t('dcis.periods.changePrivileges.buttonChangeText') as string)
+    )
     const periodGroupPrivilegesUpdate: any = inject('periodGroupPrivilegesUpdate')
 
-    // Обновление после изменения привилегий группы
+    /**
+     * Обновление после изменения привилегий группы
+     * @param cache
+     * @param result
+     */
     const changeGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
       const { errors } = result.data.changePeriodGroupPrivileges
       if (!errors.length) {
@@ -101,7 +113,11 @@ export default defineComponent({
       }
     }
 
-    // Обновление после изменения привилегий пользователя
+    /**
+     * Обновление после изменения привилегий пользователя
+     * @param cache
+     * @param result
+     */
     const changeUsersPrivilegesUpdate = (cache: DataProxy, result: ChangeGroupUsersPrivilegesMutationResult) => {
       const { success } = result.data.changeGroupUsersPrivileges
       if (success) {
@@ -111,7 +127,9 @@ export default defineComponent({
     return {
       headers,
       itemName,
+      formHeader,
       privileges,
+      buttonText,
       additionalPrivileges,
       loading,
       selectPrivileges,

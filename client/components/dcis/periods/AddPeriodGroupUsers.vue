@@ -35,7 +35,7 @@
           hide-selected
           clearable
         )
-          template(#selection="{ item, index }")
+          template(#selection="{ item }")
             v-chip.ma-1(
               v-model="item"
               :key="item.id"
@@ -119,7 +119,7 @@ export default defineComponent({
       }
     }
     const close = (): void => {
-      selectUsers.value = null
+      selectUsers.value = []
     }
     return {
       users,

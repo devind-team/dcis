@@ -49,7 +49,11 @@ export default defineComponent({
     const name = ref<string>('')
     const selectGroup = ref<PeriodGroupType | null>(null)
 
-    // Обновление после добавления группы
+    /**
+     * Обновление после добавления группы
+     * @param cache
+     * @param result
+     */
     const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
       const { success } = result.data.addPeriodGroup
       if (success) {

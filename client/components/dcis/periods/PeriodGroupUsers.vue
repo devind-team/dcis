@@ -30,7 +30,7 @@
               active-query
             )
               template(#activator="{ on }")
-                v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
+                v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.add') }}
             v-spacer
             delete-menu(
               :itemName="getUserFullName(selectUser)"
@@ -128,7 +128,11 @@ export default defineComponent({
       { text: t('dcis.periods.changePeriodUsers.division') as string, value: '' }
     ]))
 
-    // Обновление после изменения привилегий пользователя
+    /**
+     * Обновление после изменения привилегий пользователя
+     * @param cache
+     * @param result
+     */
     const changeGroupUsersPrivilegesUpdate = (cache: DataProxy, result: ChangeGroupUsersPrivilegesMutationResult) => {
       const { errors } = result.data.changeGroupUsersPrivileges
       if (!errors.length) {
@@ -145,7 +149,11 @@ export default defineComponent({
       selectUser.value = props.periodGroup.users.find(user => user.id === userId)
     }
 
-    // Обновление после удаления пользователя из группы
+    /**
+     * Обновление после удаления пользователя из группы
+     * @param cache
+     * @param result
+     */
     const deleteUserUpdate = (cache, result) => {
       const { errors } = result.data.deleteUserFromPeriodGroup
       if (!errors.length) {

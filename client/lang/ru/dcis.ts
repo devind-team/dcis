@@ -72,9 +72,12 @@ export default {
       division: 'Объект сбора'
     },
     changePrivileges: {
-      header: 'Изменениe привилегий',
-      buttonText: '@:change',
+      groupHeader: 'Изменениe привилегий',
+      userHeader: 'Добавление привилегий пользователю',
+      buttonChangeText: '@:change',
+      buttonAddText: '@:add',
       change: 'Изменить привилегии',
+      add: 'Добавить привилегии',
       deleteUser: 'Удалить из группы',
       name: 'Описание привилегии',
       privileges: 'Привилегии пользователя',

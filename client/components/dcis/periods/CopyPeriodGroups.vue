@@ -77,8 +77,13 @@ export default defineComponent({
       }),
       options: options.value
     })
-    // Обновление после добавления пользователей в группу
     const periodGroupsUpdate: any = inject('copyPeriodGroupsUpdate')
+
+    /**
+     * Обновление после добавления пользователей в группу
+     * @param cache
+     * @param result
+     */
     const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => {
       const { success } = result.data.copyPeriodGroups
       if (success) {
