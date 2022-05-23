@@ -197,8 +197,12 @@ div.grid__body
       td, th
         overflow: hidden
         background-clip: padding-box
+        background: white
         border-right: $border
         border-bottom: $border
+
+        & > div
+          background: white
 
       thead
         position: sticky
@@ -208,9 +212,6 @@ div.grid__body
         th
           height: 25px
           border-top: $border
-
-          & > div
-            background: white
 
         th:first-child
           position: sticky
@@ -222,8 +223,8 @@ div.grid__body
             position: absolute
             right: 1px
             top: 1px
-            width: 0 !important
-            height: 0 !important
+            width: 0
+            height: 0
             border-style: solid
             border-width: 0 0 22px 22px
             border-color: transparent transparent transparent transparent
@@ -237,10 +238,6 @@ div.grid__body
 
             & > div
               border-color: transparent transparent $name-dark transparent
-
-          & > div
-            height: 100%
-            width: 100%
 
         th:not(:first-child)
           &.grid__header_selected
@@ -271,9 +268,6 @@ div.grid__body
           z-index: 1
           border-left: $border
           font-weight: bold
-
-          & > div
-            background: white
 
           &.grid__cell_row-name-selected
 
