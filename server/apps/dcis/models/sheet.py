@@ -152,6 +152,9 @@ class ColumnDimension(KindCell, models.Model):
     fixed = models.BooleanField(default=False, help_text='Фиксация колонки')
     hidden = models.BooleanField(default=False, help_text='Скрытие колонки')
 
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Дата добавления')
+    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь')
 

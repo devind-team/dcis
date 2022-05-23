@@ -6,5 +6,7 @@ fragment ColumnDimensionFields on ColumnDimensionType {
   fixed
   hidden
   kind
+  createdAt
+  updatedAt
   __typename
 }

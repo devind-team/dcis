@@ -276,6 +276,8 @@ class ColumnDimensionType(graphene.ObjectType):
     fixed = graphene.Boolean(required=True, description='Фиксация колонки')
     hidden = graphene.Boolean(required=True, description='Скрытие колонки')
     kind = graphene.String(required=True, description='Тип значений')
+    created_at = graphene.DateTime(required=True, description='Дата добавления')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления')
     user = graphene.List(UserType, description='Пользователь')
 
 

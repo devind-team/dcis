@@ -69,7 +69,7 @@ class SheetColumnsUnloader(DataUnloader):
     _column_fields = (
         'id', 'index', 'width',
         'fixed', 'hidden', 'kind',
-        'user'
+        'created_at', 'updated_at', 'user'
     )
 
 

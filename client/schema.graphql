@@ -1224,6 +1224,8 @@ type ChangeValueMutationPayload {
 
 """Тип колонки."""
 type ColumnDimensionType {
+  """Дата добавления"""
+  createdAt: DateTime!
   """Фиксация колонки"""
   fixed: Boolean!
   """Скрытие колонки"""
@@ -1236,6 +1238,8 @@ type ColumnDimensionType {
   kind: String!
   """Название колонки"""
   name: String!
+  """Дата обновления"""
+  updatedAt: DateTime!
   """Пользователь"""
   user: [UserType]
   """Ширина колонки"""
