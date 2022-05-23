@@ -16,7 +16,7 @@ from graphql_relay import from_global_id
 from apps.dcis.models import Cell, Document, RowDimension, Sheet, Value
 from apps.dcis.schema.types import CellType, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.cell_services import change_cell_kind, check_cell_options
-from apps.dcis.services.sheet_services import add_row, move_merged_cells
+from apps.dcis.services.sheet_services import add_row_dimension, change_row_dimension, move_merged_cells
 from apps.dcis.services.value_services import (
     create_file_value_archive,
     get_file_value_files,
@@ -55,18 +55,60 @@ class AddRowDimensionMutation(BaseMutation):
         global_index: int,
         global_indices: list[GlobalIndicesInputType]
     ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
-        row_dimension = add_row(
-            user=info.context.user,
-            sheet=sheet,
-            document=document,
-            parent_id=int(parent_id) if parent_id else None,
-            index=index,
-            global_index=global_index,
-            global_indices_map={int(i.row_id): i.global_index for i in global_indices}
+        return AddRowDimensionMutation(
+            row_dimension=add_row_dimension(
+                user=info.context.user,
+                sheet=get_object_or_404(Sheet, pk=sheet_id),
+                document=get_object_or_404(Document, pk=from_global_id(document_id)[1]),
+                parent_id=int(parent_id) if parent_id else None,
+                index=index,
+                global_index=global_index,
+                global_indices_map={int(i.row_id): i.global_index for i in global_indices}
+            )
         )
-        return AddRowDimensionMutation(row_dimension=row_dimension)
+
+
+class ChangeRowDimensionMutation(BaseMutation):
+    """Изменение строки."""
+
+    class Input:
+        row_dimension_id = graphene.ID(required=True, description='Идентификатор строки')
+        height = graphene.Int(description='Высота строки')
+        fixed = graphene.Boolean(required=True, description='Фиксация строки')
+        hidden = graphene.Boolean(required=True, description='Скрытие строки')
+        dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
+
+    row_dimension_id = graphene.ID(required=True, description='Идентификатор строки')
+    height = graphene.Int(description='Высота строки')
+    fixed = graphene.Boolean(required=True, description='Фиксация строки')
+    hidden = graphene.Boolean(required=True, description='Скрытие строки')
+    dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        row_dimension_id: str,
+        height: Optional[int],
+        fixed: bool,
+        hidden: bool,
+        dynamic: bool
+    ):
+        row_dimension = change_row_dimension(
+            get_object_or_404(RowDimension, pk=row_dimension_id),
+            height=height,
+            fixed=fixed,
+            hidden=hidden,
+            dynamic=dynamic
+        )
+        return ChangeRowDimensionMutation(
+            row_dimension_id=row_dimension.pk,
+            height=row_dimension.height,
+            fixed=row_dimension.fixed,
+            hidden=row_dimension.hidden,
+            dynamic=row_dimension.dynamic
+        )
 
 
 class DeleteRowDimensionMutation(BaseMutation):
@@ -229,6 +271,7 @@ class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
+    change_row_dimension = ChangeRowDimensionMutation.Field(required=True, description='Изменение строки')
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')

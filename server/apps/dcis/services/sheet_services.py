@@ -7,7 +7,7 @@ from apps.dcis.models.sheet import Cell, Document, RowDimension, Sheet
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
-def add_row(
+def add_row_dimension(
     user: User,
     sheet: Sheet,
     document: Optional[Document],
@@ -48,6 +48,22 @@ def add_row(
         values=[],
         rows_global_indices_map={**global_indices_map, row_dimension.id: global_index}
     ).unload()[0]
+
+
+def change_row_dimension(
+    row_dimension: RowDimension,
+    height: Optional[int],
+    fixed: bool,
+    hidden: bool,
+    dynamic: bool
+) -> RowDimension:
+    """Изменение строки."""
+    row_dimension.height = height
+    row_dimension.fixed = fixed
+    row_dimension.hidden = hidden
+    row_dimension.dynamic = dynamic
+    row_dimension.save(update_fields=('height', 'fixed', 'hidden', 'dynamic', 'updated_at'))
+    return row_dimension
 
 
 def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False) -> None:
