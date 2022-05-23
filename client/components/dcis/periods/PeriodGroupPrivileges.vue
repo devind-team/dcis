@@ -16,7 +16,7 @@
       v-data-table(
         v-model="selectPrivileges"
         :headers="headers"
-        :items="user ? additionalPrivileges : privileges"
+        :items="items"
         :loading="loading"
         item-key="id"
         show-select
@@ -68,23 +68,32 @@ export default defineComponent({
     const activeQuery = ref<boolean>(props.activeQuery)
     const options = ref({ enabled: activeQuery })
     const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
-      document: privilegesQuery,
-      options: props.user ? { enabled: false } : options.value
+      document: privilegesQuery
     })
     const { data: additionalPrivileges } = useCommonQuery<AdditionalPrivilegesQuery, AdditionalPrivilegesQueryVariables>({
       document: additionalPrivilegesQuery,
-      variables: { periodGroupId: props.periodGroup.id, userId: props.user?.id },
+      variables: { periodId: props.period?.id, userId: props.user?.id },
       options: props.user ? options.value : { enabled: false }
     })
-    const selectPrivileges = ref<PrivilegeType[]>(props.user ? [] : props.periodGroup.privileges)
-
+    const privilegesListId = ref<string[]>([])
+    const selectPrivileges = computed<PrivilegeType[]>({
+      get: (): PrivilegeType[] => props.user ? additionalPrivileges.value?.map((e: PrivilegeType) => e) : props.periodGroup.privileges,
+      set: (value: PrivilegeType[]) => {
+        privilegesListId.value = value.map((e: PrivilegeType) => e.id)
+        return value
+      }
+    })
+    const items = computed<PrivilegeType[]>(() => props.user
+      ? privileges.value.filter((privilege: PrivilegeType) => !props.periodGroup.privileges.find(groupPrivilege => privilege.id === groupPrivilege.id))
+      : privileges.value.map((privilege: PrivilegeType) => privilege)
+    )
     const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))
     const mutationName = computed<string>(() => (props.user ? 'changeGroupUsersPrivileges' : 'changePeriodGroupPrivileges'))
     const formVariables = computed<any>(() => {
       if (props.user) {
-        return { periodId: props.period.id, userId: props.user.id, privilegesIds: selectPrivileges.value.map(e => e.id) }
+        return { periodGroupId: props.periodGroup.id, userId: props.user.id, privilegesIds: privilegesListId.value }
       } else {
-        return { periodGroupId: props.periodGroup.id, privilegesIds: selectPrivileges.value.map(e => e.id) }
+        return { periodGroupId: props.periodGroup.id, privilegesIds: privilegesListId.value }
       }
     })
     const formHeader = computed<string>(() => (props.user
@@ -126,6 +135,7 @@ export default defineComponent({
     }
     return {
       headers,
+      items,
       itemName,
       formHeader,
       privileges,

@@ -29,7 +29,7 @@ class PrivilegeQueries(graphene.ObjectType):
 
     additional_privileges = DjangoListField(
         PrivilegeType,
-        period_group_id=graphene.ID(required=True, description='Идентификатор группы'),
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
         user_id=graphene.ID(required=True, description='Идентификатор пользователя'),
         required=True,
         description='Дополнительные личные привилегии'
@@ -47,8 +47,5 @@ class PrivilegeQueries(graphene.ObjectType):
         return privileges
 
     @staticmethod
-    def resolve_additional_privileges(root, info: ResolveInfo, period_group_id: str, user_id: str, *args,
-                                      **kwargs) -> QuerySet:
-        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
-        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        return Privilege.objects.exclude(periodprivilege__user=user, periodprivilege__period=period_group.period.id).exclude(periodgroup=period_group).all()
+    def resolve_additional_privileges(root, info: ResolveInfo, period_id: str, user_id: str, *args, **kwargs) -> QuerySet:
+        return Privilege.objects.filter(periodprivilege__user=from_global_id(user_id)[1], periodprivilege__period_id=period_id).all()

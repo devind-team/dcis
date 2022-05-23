@@ -38,7 +38,7 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
     """Мутация на изменение привилегий пользователя."""
 
     class Input:
-        period_id = graphene.ID(required=True, description='Идентификатор группы периода')
+        period_group_id = graphene.ID(required=True, description='Идентификатор группы периода')
         user_id = graphene.ID(required=True, description='Идентификатор группы периода')
         privileges_ids = graphene.List(graphene.NonNull(graphene.ID), description='Привилегии')
 
@@ -46,16 +46,20 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, user_id: str, privileges_ids: list[str]):
-        period = get_object_or_404(Period, pk=period_id)
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str, user_id: str, privileges_ids: list[str]):
+        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+        period = get_object_or_404(Period, pk=period_group.period.id)
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
-        user_privileges = user.periodprivilege_set.filter(period=period).all()
+        period_privileges = PeriodPrivilege.objects.filter(user=user, period=period)
+        privileges = period_privileges.values_list('privilege', flat=True)
+        for period_privilege in period_privileges:
+            if period_privilege.privilege.id not in privileges_ids:
+                period_privilege.delete()
         for privilege_id in privileges_ids:
-            if privilege_id not in list(user_privileges.values_list('id', flat=True)):
-                privilege = get_object_or_404(Privilege, pk=privilege_id)
-                PeriodPrivilege.objects.create(privilege=privilege, user=user, period=period)
-        privileges: list[Privilege] = Privilege.objects.filter(periodprivilege__user=user, periodprivilege__period=period)
-        return ChangePeriodGroupPrivilegesMutation(privileges=privileges)
+            if privilege_id not in privileges:
+                PeriodPrivilege.objects.create(user=user, period=period, privilege_id=privilege_id)
+        user_privileges = Privilege.objects.filter(periodprivilege__user=user, periodprivilege__period=period)
+        return ChangePeriodGroupPrivilegesMutation(privileges=user_privileges | Privilege.objects.filter(periodgroup=period_group).all())
 
 
 class PrivilegeMutations(graphene.ObjectType):

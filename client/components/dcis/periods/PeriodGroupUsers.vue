@@ -27,7 +27,7 @@
               :user="selectUser"
               :user-privileges="userPrivileges"
               :update="changeGroupUsersPrivilegesUpdate"
-              active-query
+              :active-query="active"
             )
               template(#activator="{ on }")
                 v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.add') }}
@@ -109,8 +109,7 @@ export default defineComponent({
         }
       }
     })
-
-    const options = ref({ enabled: active })
+    const options = ref({ enabled: active, fetchPolicy: 'cache-and-network' as const })
     const { data: userPrivileges, loading, update } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
       document: userPrivilegesQuery,
       variables: () => ({ userId: selectUser.value?.id, periodGroupId: props.periodGroup.id }),

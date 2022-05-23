@@ -863,7 +863,7 @@ type ChangeGroupPermissionsMutationPayload {
 input ChangeGroupUserPrivilegesMutationInput {
   clientMutationId: String
   """Идентификатор группы периода"""
-  periodId: ID!
+  periodGroupId: ID!
   """Привилегии"""
   privilegesIds: [ID!]
   """Идентификатор группы периода"""
@@ -2998,8 +2998,8 @@ type Query {
   activeStatistics: ActiveStatisticsType!
   """Дополнительные личные привилегии"""
   additionalPrivileges(
-    """Идентификатор группы"""
-    periodGroupId: ID!
+    """Идентификатор периода"""
+    periodId: ID!
     """Идентификатор пользователя"""
     userId: ID!
   ): [PrivilegeType!]!

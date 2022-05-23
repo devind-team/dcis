@@ -1,7 +1,7 @@
-mutation ChangeGroupUserPrivileges($userId: ID!, $periodId: ID!, $privilegesIds: [ID!]!) {
+mutation ChangeGroupUserPrivileges($userId: ID!, $periodGroupId: ID!, $privilegesIds: [ID!]!) {
   changeGroupUsersPrivileges(input: {
     userId: $userId,
-    periodId: $periodId,
+    periodGroupId: $periodGroupId,
     privilegesIds: $privilegesIds
   }) {
     success
