@@ -184,11 +184,11 @@ export function useGridSelection (
           }
         })
       }
-      updateBoundarySelectedColumnsPositions()
-      updateBoundarySelectedRowsPositions()
     } else {
       cellsSelectionView.value = null
     }
+    updateBoundarySelectedColumnsPositions()
+    updateBoundarySelectedRowsPositions()
   }
   const updateBoundarySelectedColumnsPositions = () => {
     if (gridContainer.value.scrollTop) {
