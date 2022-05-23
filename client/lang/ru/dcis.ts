@@ -67,6 +67,7 @@ export default {
       addUsers: 'Добавить пользователей',
       avatar: 'Аватар',
       name: 'ФИО',
+      users: 'Пользователи',
       jobPost: 'Должность',
       division: 'Объект сбора'
     },

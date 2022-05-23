@@ -3,31 +3,45 @@
     :header="String($t('dcis.periods.changePeriodUsers.header'))"
     :button-text="String($t('dcis.periods.changePeriodUsers.buttonText'))"
     :mutation="changePeriodGroupUsers"
-    :variables="{ periodGroupId: periodGroup.id, usersIds: selectUsers }"
+    :variables="formVariables"
     :update="changePeriodGroupUsersUpdate"
     mutation-name="changePeriodGroupUsers"
     errors-in-alert
     persistent
     @close="close"
+    @done="selectUsers = []"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
-      v-autocomplete(
-        v-model="selectUsers"
-        :label="$t('ac.users.components.changeUsers.users')"
-        :items="allUsers"
-        :filter="filterInputUsers"
-        :search-input.sync="search"
-        :loading="loading"
-        item-text="text"
-        item-value="id"
-        chips
-        deletable-chips
-        multiple
-        clearable
-        @change="search=''"
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="$t('dcis.periods.changePeriodUsers.users')"
+        rules="required"
       )
+        v-combobox(
+          v-model="selectUsers"
+          :search-input.sync="search"
+          :loading="loading"
+          :items="allUsers"
+          :label="$t('dcis.periods.changePeriodUsers.users')"
+          :filter="filterInputUsers"
+          :success="valid"
+          :error-messages="errors"
+          multiple
+          return-object
+          item-text="text"
+          item-value="value"
+          hide-selected
+          clearable
+        )
+          template(#selection="{ item, index }")
+            v-chip.ma-1(
+              v-model="item"
+              :key="item.id"
+              close
+              @click:close="selectUsers.splice(selectUsers.indexOf(item), 1)"
+            ) {{ item.text }}
 </template>
 
 <script lang="ts">
@@ -36,6 +50,7 @@ import { computed, defineComponent, inject, PropType, ref } from '#app'
 import {
   ChangePeriodGroupUsersMutationPayload,
   PeriodGroupType,
+  ChangePeriodGroupUsersMutationVariables,
   UsersQuery,
   UsersQueryVariables,
   UserType
@@ -63,7 +78,11 @@ export default defineComponent({
     const { search, debounceSearch } = useDebounceSearch()
     const { dateTimeHM, getUserFullName } = useFilters()
 
-    const selectUsers = ref<UserType[] | null>(null)
+    const selectUsers = ref<GroupUser[] | null>([])
+    const formVariables = computed<ChangePeriodGroupUsersMutationVariables>(() => ({
+      periodGroupId: props.periodGroup.id,
+      usersIds: selectUsers.value.map((user: GroupUser) => (user.id || null))
+    }))
     const options = ref({ enabled: props.activeQuery })
     const {
       loading,
@@ -92,7 +111,6 @@ export default defineComponent({
       return item.text.toLowerCase().split(' ').some((word: string) => word.includes(qt))
     }
 
-    // Обновление после добавления пользователей в группу
     const periodGroupUsersUpdate: any = inject('periodGroupUsersUpdate')
     const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
       const { success } = result.data.changePeriodGroupUsers
@@ -109,6 +127,7 @@ export default defineComponent({
       changePeriodGroupUsers,
       selectUsers,
       filterInputUsers,
+      formVariables,
       allUsers,
       search,
       dateTimeHM,
