@@ -213,10 +213,25 @@ div.grid__body
           cursor: cell
           border-left: $border
 
+          & > div
+            position: absolute
+            right: 1px
+            top: 1px
+            width: 0 !important
+            height: 0 !important
+            border-style: solid
+            border-width: 0 0 22px 22px
+            border-color: transparent transparent transparent transparent
+
           &.grid__header_all_selected
 
             & > div
               border-color: transparent transparent $name-light transparent
+
+          &:hover
+
+            & > div
+              border-color: transparent transparent $name-dark transparent
 
           & > div
             height: 100%
