@@ -18,8 +18,8 @@
         @mousedown="mousedownColumnName(column, $event)"
         @mouseup="mouseupColumnName"
       )
-        grid-column-control(v-slot="{ on }" :column="column" :get-column-width="getColumnWidth")
-          div(@contextmenu.prevent="on.click") {{ column.name }}
+        grid-column-control(v-slot="{ on, attrs }" :column="column" :get-column-width="getColumnWidth")
+          div(v-bind="attrs" @contextmenu.prevent="on.click") {{ column.name }}
 </template>
 
 <script lang="ts">

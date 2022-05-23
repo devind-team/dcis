@@ -168,6 +168,8 @@ $border: 1px solid silver
 $border-selected: 1px solid blue
 $name-light: map-get($grey, 'lighten-3')
 $name-dark: map-get($grey, 'lighten-2')
+$arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
+$arrow-down-cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
 div.grid__body
   position: relative
@@ -247,10 +249,11 @@ div.grid__body
             border-bottom: $border-selected
 
           &.grid__header_hover
-            cursor: url("/cursors/arrow-down.svg") 8 8, pointer
+            cursor: $arrow-down-cursor
 
             &:hover > div
               background: $name-dark !important
+              cursor: $arrow-down-cursor
 
           & > div
             display: flex
@@ -278,10 +281,11 @@ div.grid__body
             border-right: $border-selected
 
           &.grid__cell_row-name-hover
-            cursor: url("/cursors/arrow-right.svg") 8 8, pointer
+            cursor: $arrow-right-cursor
 
             &:hover > div
               background: $name-dark !important
+              cursor: $arrow-right-cursor
 
           & > div
             display: flex

@@ -1,10 +1,7 @@
 <template lang="pug">
-  v-menu(bottom close-on-content-click)
-    template(#activator="{ on: onMenu }")
-      v-tooltip(right open-delay="1000")
-        template(#activator="{ on: onTooltip, attrs }")
-          slot(:onMenu="onMenu" :onTooltip="onTooltip" :attrs="attrs")
-        span {{ t('dcis.grid.rowControl.updatedAt', { updatedAt: dateTimeHM(row.updatedAt) } ) }}
+  v-menu(v-model="active" bottom close-on-content-click)
+    template(#activator="{ on, attrs }")
+      slot(:on="on" :attrs="attrs")
     v-list(dense)
       grid-row-settings(:row="row" @close="settingsActive = false" :get-row-height="getRowHeight")
         template(#activator="{ on }")
@@ -49,9 +46,7 @@ export default defineComponent({
   setup () {
     const { t } = useI18n()
 
-    const settingsActive = ref<boolean>(false)
-
-    const { dateTimeHM } = useFilters()
+    const active = ref<boolean>(false)
 
     const activeDocument = inject<Ref<DocumentType>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
@@ -69,12 +64,11 @@ export default defineComponent({
     }
 
     return {
-      AddRowDimensionPosition,
       t,
-      settingsActive,
-      dateTimeHM,
+      active,
       addRowDimension,
-      deleteRowDimension
+      deleteRowDimension,
+      AddRowDimensionPosition
     }
   }
 })

@@ -5,22 +5,22 @@ export default {
     toolbar: {
       addRow: 'Добавить строку'
     },
+    columnWidth: 'Ширина: ',
+    rowHeight: 'Высота: ',
     columnControl: {
       properties: '@:properties'
     },
     columnSettings: {
       header: 'Изменение свойств',
-      width: 'Ширина: {width}',
+      subheader: 'Дата изменения: {updatedAt}',
+      width: 'Ширина',
       fix: '@:fix',
       hide: '@:hide',
       kind: 'Тип ячейки по умолчанию',
       buttonText: '@:save'
     },
-    columnWidth: 'Ширина: ',
-    rowHeight: 'Высота: ',
     rowControl: {
       properties: '@:properties',
-      updatedAt: 'Дата изменения: {updatedAt}',
       addRowAbove: 'Добавить строку выше',
       addRowBelow: 'Добавить строку ниже',
       addChildRow: 'Добавить дочернюю строку',
@@ -28,7 +28,8 @@ export default {
     },
     rowSettings: {
       header: 'Изменение свойств',
-      height: 'Высота: {height}',
+      subheader: 'Дата изменения: {updatedAt}',
+      height: 'Высота',
       fix: '@:fix',
       hide: '@:hide',
       makeDynamic: 'Разрешить дочерние строки',

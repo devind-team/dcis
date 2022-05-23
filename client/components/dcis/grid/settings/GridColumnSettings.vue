@@ -2,9 +2,9 @@
   mutation-modal-form(
     @close="$emit('close')"
     :header="String(t('dcis.grid.columnSettings.header'))"
-    :subheader="String(t('dcis.grid.columnSettings.width', { width }))"
+    :subheader="String(t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
     :mutation="null"
-    :variables="{ id: column.id, hidden, fixed, kind: kind.value, width  }"
+    :variables="{ id: column.id, hidden, fixed, kind: kind.value, width }"
     :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
     i18n-path="dcis.grid.columnSettings"
     mutation-name="changeColumnDimension"
@@ -12,10 +12,21 @@
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
-      v-combobox.mx-1(v-model="kind" :items="kinds" label="Тип")
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="String(t('dcis.grid.columnSettings.width'))"
+        rules="required|integer|min_value:0"
+      )
+        v-text-field(
+          v-model="width"
+          :error-messages="errors"
+          :success="valid"
+          :label="t('dcis.grid.columnSettings.width')"
+        )
+      v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" success)
       //- В разработке
-      v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')")
-      v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')")
+      v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')" success)
+      v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" success)
 </template>
 
 <script lang="ts">
@@ -33,7 +44,9 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
-    const width = computed<number>(() => props.getColumnWidth(props.column))
+    const { dateTimeHM } = useFilters()
+
+    const width = ref<number>(props.getColumnWidth(props.column))
     const fixed = ref<boolean>(props.column.fixed)
     const hidden = ref<boolean>(props.column.hidden)
 
@@ -45,7 +58,7 @@ export default defineComponent({
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))
     )
 
-    return { t, width, fixed, hidden, kinds, kind }
+    return { t, dateTimeHM, width, fixed, hidden, kinds, kind }
   }
 })
 </script>

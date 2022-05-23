@@ -9,10 +9,11 @@
         @mousedown="mousedownRowName(row, $event)"
         @mouseup="mouseupRowName"
       )
-        grid-row-control(v-slot="{ onMenu, onTooltip, attrs }" :row="row" :get-row-height="getRowHeight")
+        grid-row-control(v-slot="{ on, attrs }" :row="row" :get-row-height="getRowHeight")
           div(
+            v-bind="attrs"
             :style="{ height: `${getRowHeight(row)}px` }"
-            @contextmenu.prevent="onMenu.click"
+            @contextmenu.prevent="on.click"
           ) {{ row.name }}
       td(
         v-for="cell in row.cells"
