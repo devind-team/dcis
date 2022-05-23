@@ -54,7 +54,8 @@
 
 <script lang="ts">
 import { Ref } from '#app'
-import { SheetType } from '~/types/graphql'
+import { UpdateType } from '~/composables'
+import { SheetQuery, SheetType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
@@ -70,8 +71,10 @@ export default defineComponent({
     GridElementResizing
   },
   setup () {
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const { t } = useI18n()
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const changeRowHeight = useChangeRowDimensionHeightMutation(updateSheet)
     const {
       gridContainer,
       grid,
@@ -109,7 +112,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(activeSheet, () => {}, () => {})
+    } = useGrid(activeSheet, () => {}, changeRowHeight)
 
     return {
       t,

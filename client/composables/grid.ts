@@ -13,8 +13,8 @@ export const cellKinds = {
 
 export function useGrid (
   sheet: Ref<SheetType>,
-  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => void,
-  changeRowHeight: (rowDimension: RowDimensionType, height: number) => void
+  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void>,
+  changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
   const rowNameColumnWidth = computed<number>(() => {
     let maxDigits = 0
@@ -118,8 +118,8 @@ export function useGrid (
       mouseDownColumnNameSelection(column)
     }
   }
-  const mouseupColumnName = () => {
-    mouseupColumnNameResizing()
+  const mouseupColumnName = async () => {
+    await mouseupColumnNameResizing()
   }
 
   const mousemoveRowName = (row: RowDimensionType, event: MouseEvent) => {
@@ -141,8 +141,8 @@ export function useGrid (
       mouseDownRowNameSelection(row)
     }
   }
-  const mouseupRowName = () => {
-    mouseupRowNameResizing()
+  const mouseupRowName = async () => {
+    await mouseupRowNameResizing()
   }
 
   /**

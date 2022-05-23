@@ -3,7 +3,7 @@
     @close="$emit('close')"
     :header="String(t('dcis.grid.rowSettings.header'))"
     :subheader="String(t('dcis.grid.rowSettings.subheader', { updatedAt: dateTimeHM(row.updatedAt) }))"
-    :mutation="changeRowMutation"
+    :mutation="changeRowDimensionMutation"
     :variables="variables"
     :optimistic-response="optimisticResponse"
     :update="update"
@@ -43,11 +43,10 @@ import { UpdateType } from '~/composables'
 import {
   SheetQuery,
   RowDimensionType,
-  RowDimensionFieldsFragment,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables
 } from '~/types/graphql'
-import changeRowMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
+import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export default defineComponent({
@@ -65,6 +64,9 @@ export default defineComponent({
     const fixed = ref<boolean>(props.row.fixed)
     const hidden = ref<boolean>(props.row.hidden)
     const dynamic = ref<boolean>(props.row.dynamic)
+    watch(computed<number>(() => props.getRowHeight(props.row)), (newValue: number) => {
+      height.value = newValue
+    })
 
     const variables = computed<ChangeRowDimensionMutationVariables>(() => ({
       rowDimensionId: props.row.id,
@@ -80,35 +82,13 @@ export default defineComponent({
         __typename: 'ChangeRowDimensionMutationPayload',
         success: true,
         errors: [],
-        rowDimensionId: variables.value.rowDimensionId,
-        height: variables.value.height,
-        fixed: variables.value.fixed,
-        hidden: variables.value.hidden,
-        dynamic: variables.value.dynamic
+        ...variables.value
       }
     }))
 
     const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
-
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) => {
-      updateSheet(
-        dataProxy,
-        result,
-        (
-          data: SheetQuery,
-          { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
-        ) => {
-          if (changeRowDimension.success) {
-            const rowDimension = data.sheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
-              rowDimension.id === changeRowDimension.rowDimensionId)!
-            rowDimension.height = changeRowDimension.height
-            rowDimension.fixed = changeRowDimension.fixed
-            rowDimension.hidden = changeRowDimension.hidden
-            rowDimension.dynamic = changeRowDimension.dynamic
-          }
-          return data
-        }
-      )
+      updateRowDimension(updateSheet, dataProxy, result)
     }
 
     return {
@@ -121,7 +101,7 @@ export default defineComponent({
       variables,
       optimisticResponse,
       update,
-      changeRowMutation
+      changeRowDimensionMutation
     }
   }
 })

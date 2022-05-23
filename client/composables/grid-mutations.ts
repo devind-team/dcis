@@ -4,15 +4,18 @@ import { FetchResult } from '@apollo/client/link/core'
 import { Ref } from '#app'
 import { UpdateType } from '~/composables/query-common'
 import {
+  SheetQuery,
   RowDimensionType,
   RowDimensionFieldsFragment,
   GlobalIndicesInputType,
-  SheetQuery,
   AddRowDimensionMutation,
-  AddRowDimensionMutationVariables
+  AddRowDimensionMutationVariables,
+  ChangeRowDimensionMutation,
+  ChangeRowDimensionMutationVariables
 } from '~/types/graphql'
 import { parsePosition } from '~/services/grid'
-import addRodDimension from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
+import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
+import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 
 export enum AddRowDimensionPosition {
   BEFORE,
@@ -26,27 +29,27 @@ export function useAddRowDimensionMutation (
   documentId: Ref<string | null>,
   updateSheet: UpdateType<SheetQuery>
 ) {
-  const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRodDimension)
-  return async function (row: RowDimensionType, position: AddRowDimensionPosition) {
+  const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation)
+  return async function (rowDimension: RowDimensionType, position: AddRowDimensionPosition) {
     let variables: AddRowDimensionMutationVariables | Omit<
       AddRowDimensionMutationVariables, 'index' | 'globalIndex'
     > = {
       sheetId: sheetId.value,
       documentId: documentId.value,
-      parentId: row.parent?.id,
-      globalIndices: collectGlobalIndices(rows.value, row)
+      parentId: rowDimension.parent?.id,
+      globalIndices: collectGlobalIndices(rows.value, rowDimension)
     }
     if (position === AddRowDimensionPosition.AFTER) {
-      variables = { ...variables, index: row.index + 1, globalIndex: row.globalIndex + 1 }
+      variables = { ...variables, index: rowDimension.index + 1, globalIndex: rowDimension.globalIndex + 1 }
     } else if (position === AddRowDimensionPosition.BEFORE) {
-      variables = { ...variables, index: row.index, globalIndex: row.globalIndex }
+      variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
     } else if (position === AddRowDimensionPosition.INSIDE) {
-      const childGlobalIndex = row.children.length ? row.children.at(-1).index + 1 : 1
+      const childGlobalIndex = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
       variables = {
         ...variables,
-        parentId: row.id,
-        index: row.children.length ? row.children.at(-1).index + 1 : 1,
-        globalIndex: row.globalIndex + childGlobalIndex
+        parentId: rowDimension.id,
+        index: rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1,
+        globalIndex: rowDimension.globalIndex + childGlobalIndex
       }
     }
     await mutate(variables as AddRowDimensionMutationVariables, {
@@ -134,4 +137,59 @@ function updateCellsPositions (row: RowDimensionFieldsFragment): void {
       return `${parsedPosition.column}${parsedPosition.row + 1}`
     })
   }
+}
+
+export function useChangeRowDimensionHeightMutation (updateSheet: UpdateType<SheetQuery>) {
+  const { mutate } = useMutation<
+    ChangeRowDimensionMutation,
+    ChangeRowDimensionMutationVariables
+  >(changeRowDimensionMutation)
+  return async function (rowDimension: RowDimensionType, height: number) {
+    const variables = {
+      rowDimensionId: rowDimension.id,
+      height,
+      fixed: rowDimension.fixed,
+      hidden: rowDimension.hidden,
+      dynamic: rowDimension.dynamic
+    }
+    await mutate(variables, {
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeRowDimension: {
+          __typename: 'ChangeRowDimensionMutationPayload',
+          success: true,
+          errors: [],
+          ...variables
+        }
+      },
+      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) {
+        updateRowDimension(updateSheet, dataProxy, result)
+      }
+    })
+  }
+}
+
+export function updateRowDimension (
+  updateSheet: UpdateType<SheetQuery>,
+  dataProxy: DataProxy,
+  result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
+) {
+  updateSheet(
+    dataProxy,
+    result,
+    (
+      data: SheetQuery,
+      { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
+    ) => {
+      if (changeRowDimension.success) {
+        const rowDimension = data.sheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+          rowDimension.id === changeRowDimension.rowDimensionId)!
+        rowDimension.height = changeRowDimension.height
+        rowDimension.fixed = changeRowDimension.fixed
+        rowDimension.hidden = changeRowDimension.hidden
+        rowDimension.dynamic = changeRowDimension.dynamic
+      }
+      return data
+    }
+  )
 }
