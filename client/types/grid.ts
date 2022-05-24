@@ -84,7 +84,6 @@ export type ElementPositionType = {
 export type SelectionViewType = {
   id: string
   position: ElementPositionType
-  zIndex: number
   width: number
   height: number
   border: {

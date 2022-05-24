@@ -173,7 +173,6 @@ export function useGridSelection (
         cellsSelectionView.value.push({
           id: cell.id,
           position: { left: firstColumn.offsetLeft - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
-          zIndex: 0,
           width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
           height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
           border: {
@@ -193,6 +192,13 @@ export function useGridSelection (
   const updateBoundarySelectedColumnsPositions = () => {
     if (gridContainer.value.scrollTop) {
       boundarySelectedColumnsPositions.value = []
+    } else if (
+      rowsSelection.value &&
+      [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex].includes(1)
+    ) {
+      boundarySelectedColumnsPositions.value = sheet.value.columns.map((column: ColumnDimensionType) => column.index)
+    } else if (columnsSelection.value) {
+      boundarySelectedColumnsPositions.value = selectedColumnsPositions.value
     } else {
       boundarySelectedColumnsPositions.value = []
       let i = 0
@@ -212,6 +218,13 @@ export function useGridSelection (
   const updateBoundarySelectedRowsPositions = () => {
     if (gridContainer.value.scrollLeft) {
       boundarySelectedRowsPositions.value = []
+    } else if (rowsSelection.value) {
+      boundarySelectedRowsPositions.value = selectedRowsPositions.value
+    } else if (
+      columnsSelection.value &&
+      [columnsSelection.value.first.index, columnsSelection.value.last.index].includes(1)
+    ) {
+      boundarySelectedRowsPositions.value = sheet.value.rows.map((row: RowDimensionType) => row.globalIndex)
     } else {
       boundarySelectedRowsPositions.value = []
       let i = 0
@@ -228,8 +241,9 @@ export function useGridSelection (
   const updateRowsSelectionView = () => {
     if (rowsSelection.value) {
       const indices = [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex]
+      const firstRowIndex = Math.min(...indices)
       const firstRow = grid.value.querySelector(
-        `tbody tr:nth-child(${Math.min(...indices)})`
+        `tbody tr:nth-child(${firstRowIndex})`
       ) as HTMLTableRowElement
       const firstRowCell = firstRow.cells.item(0)
       const lastRow = grid.value.querySelector(
@@ -239,10 +253,9 @@ export function useGridSelection (
       rowsSelectionView.value = {
         id: 'row',
         position: { left: firstRowCell.offsetWidth - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
-        zIndex: gridContainer.value.scrollLeft ? 0 : 3,
         width: grid.value.offsetWidth - firstRowCell.offsetWidth + 1,
         height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
-        border: { top: true, right: true, bottom: true, left: true }
+        border: { top: firstRowIndex !== 1, right: true, bottom: true, left: false }
       }
     } else {
       rowsSelectionView.value = null
@@ -252,15 +265,15 @@ export function useGridSelection (
     if (columnsSelection.value) {
       const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
       const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
-      const firstColumn = theadRow.cells.item(Math.min(...indices)) as HTMLTableCellElement
+      const firstColumnIndex = Math.min(...indices)
+      const firstColumn = theadRow.cells.item(firstColumnIndex) as HTMLTableCellElement
       const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
       columnsSelectionView.value = {
         id: 'column',
         position: { left: firstColumn.offsetLeft - 1, right: null, top: firstColumn.offsetHeight - 1, bottom: null },
-        zIndex: gridContainer.value.scrollTop ? 1 : 3,
         width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
         height: grid.value.offsetHeight - theadRow.offsetHeight + 1,
-        border: { top: true, right: true, bottom: true, left: true }
+        border: { top: false, right: true, bottom: true, left: firstColumnIndex !== 1 }
       }
     } else {
       columnsSelectionView.value = null

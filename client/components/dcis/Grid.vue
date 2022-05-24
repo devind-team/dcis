@@ -34,8 +34,16 @@
             :mouseenter-cell="mouseenterCell"
             :mouseup-cell="mouseupCell"
           )
-        grid-selection-view.grid__selection-view(v-if="columnsSelectionView" :selection-view="columnsSelectionView")
-        grid-selection-view.grid__selection-view(v-if="rowsSelectionView" :selection-view="rowsSelectionView")
+        grid-selection-view.grid__selection-view(
+          v-if="columnsSelectionView"
+          :key="columnsSelectionView.id"
+          :selection-view="columnsSelectionView"
+        )
+        grid-selection-view.grid__selection-view(
+          v-if="rowsSelectionView"
+          :key="rowsSelectionView.id"
+          :selection-view="rowsSelectionView"
+        )
         template(v-if="cellsSelectionView")
           grid-selection-view.grid__selection-view(
             v-for="view in cellsSelectionView"

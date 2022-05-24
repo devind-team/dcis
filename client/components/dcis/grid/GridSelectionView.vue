@@ -14,7 +14,6 @@ export default defineComponent({
   setup (props) {
     const style = computed<Record<string, string | number>>(() => ({
       ...elementPositionToStyle(props.selectionView.position),
-      zIndex: props.selectionView.zIndex,
       width: `${props.selectionView.width}px`,
       height: `${props.selectionView.height}px`,
       ...Object.fromEntries(
