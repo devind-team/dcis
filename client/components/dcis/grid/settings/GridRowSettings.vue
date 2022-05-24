@@ -75,7 +75,6 @@ export default defineComponent({
       hidden: hidden.value,
       dynamic: dynamic.value
     }))
-
     const optimisticResponse = computed<ChangeRowDimensionMutation>(() => ({
       __typename: 'Mutation',
       changeRowDimension: {

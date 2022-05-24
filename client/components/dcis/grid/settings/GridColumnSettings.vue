@@ -3,8 +3,10 @@
     @close="$emit('close')"
     :header="String(t('dcis.grid.columnSettings.header'))"
     :subheader="String(t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
-    :mutation="null"
-    :variables="{ id: column.id, hidden, fixed, kind: kind.value, width }"
+    :mutation="changeColumnDimensionMutation"
+    :variables="variables"
+    :optimistic-response="optimisticResponse"
+    :update="update"
     :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
     i18n-path="dcis.grid.columnSettings"
     mutation-name="changeColumnDimension"
@@ -30,9 +32,18 @@
 </template>
 
 <script lang="ts">
+import { DataProxy } from '@apollo/client'
+import { FetchResult } from '@apollo/client/link/core'
 import { PropType } from '#app'
-import { ColumnDimensionType } from '~/types/graphql'
+import {updateColumnDimension, UpdateType} from '~/composables'
 import { cellKinds } from '~/composables/grid'
+import {
+  SheetQuery,
+  ColumnDimensionType,
+  ChangeColumnDimensionMutation,
+  ChangeColumnDimensionMutationVariables
+} from '~/types/graphql'
+import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export default defineComponent({
@@ -49,6 +60,9 @@ export default defineComponent({
     const width = ref<number>(props.getColumnWidth(props.column))
     const fixed = ref<boolean>(props.column.fixed)
     const hidden = ref<boolean>(props.column.hidden)
+    watch(computed<number>(() => props.getColumnWidth(props.column)), (newValue: number) => {
+      width.value = newValue
+    })
 
     const kind = ref<{ text: string, value: string }>({
       text: t(`dcis.cellKinds.${props.column.kind}`) as string,
@@ -58,7 +72,42 @@ export default defineComponent({
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))
     )
 
-    return { t, dateTimeHM, width, fixed, hidden, kinds, kind }
+    const variables = computed<ChangeColumnDimensionMutationVariables>(() => ({
+      columnDimensionId: props.column.id,
+      width: width.value,
+      fixed: fixed.value,
+      hidden: hidden.value,
+      kind: kind.value.value
+    }))
+    const optimisticResponse = computed<ChangeColumnDimensionMutation>(() => ({
+      __typename: 'Mutation',
+      changeColumnDimension: {
+        __typename: 'ChangeColumnDimensionMutationPayload',
+        success: true,
+        errors: [],
+        ...variables.value,
+        updatedAt: new Date().toISOString()
+      }
+    }))
+
+    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) => {
+      updateColumnDimension(updateSheet, dataProxy, result)
+    }
+
+    return {
+      t,
+      dateTimeHM,
+      width,
+      fixed,
+      hidden,
+      kinds,
+      kind,
+      variables,
+      optimisticResponse,
+      update,
+      changeColumnDimensionMutation
+    }
   }
 })
 </script>
