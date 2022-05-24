@@ -159,7 +159,8 @@ export function useChangeRowDimensionHeightMutation (updateSheet: UpdateType<She
           __typename: 'ChangeRowDimensionMutationPayload',
           success: true,
           errors: [],
-          ...variables
+          ...variables,
+          updatedAt: new Date().toISOString()
         }
       },
       update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) {
@@ -188,6 +189,7 @@ export function updateRowDimension (
         rowDimension.fixed = changeRowDimension.fixed
         rowDimension.hidden = changeRowDimension.hidden
         rowDimension.dynamic = changeRowDimension.dynamic
+        rowDimension.updatedAt = changeRowDimension.updatedAt
       }
       return data
     }

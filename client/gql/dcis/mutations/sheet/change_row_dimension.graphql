@@ -23,6 +23,7 @@ mutation ChangeRowDimension(
     fixed
     hidden
     dynamic
+    updatedAt
     __typename
   }
 }

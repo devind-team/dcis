@@ -82,7 +82,8 @@ export default defineComponent({
         __typename: 'ChangeRowDimensionMutationPayload',
         success: true,
         errors: [],
-        ...variables.value
+        ...variables.value,
+        updatedAt: new Date().toISOString()
       }
     }))
 

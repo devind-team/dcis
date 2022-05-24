@@ -1189,6 +1189,8 @@ export type ChangeRowDimensionMutationPayload = {
   rowDimensionId: Scalars['ID'];
   /** Успех мутации */
   success: Scalars['Boolean'];
+  /** Дата обновления строки */
+  updatedAt: Scalars['DateTime'];
 };
 
 export type ChangeSectionFilesMutationInput = {
@@ -4856,7 +4858,7 @@ export type ChangeRowDimensionMutationVariables = Exact<{
   dynamic: Scalars['Boolean'];
 }>;
 
-export type ChangeRowDimensionMutation = { __typename?: 'Mutation', changeRowDimension: { __typename: 'ChangeRowDimensionMutationPayload', success: boolean, rowDimensionId: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type ChangeRowDimensionMutation = { __typename?: 'Mutation', changeRowDimension: { __typename: 'ChangeRowDimensionMutationPayload', success: boolean, rowDimensionId: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];

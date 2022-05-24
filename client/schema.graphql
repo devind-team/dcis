@@ -1098,6 +1098,8 @@ type ChangeRowDimensionMutationPayload {
   rowDimensionId: ID!
   """Успех мутации"""
   success: Boolean!
+  """Дата обновления строки"""
+  updatedAt: DateTime!
 }
 
 input ChangeSectionFilesMutationInput {

@@ -83,6 +83,7 @@ class ChangeRowDimensionMutation(BaseMutation):
     fixed = graphene.Boolean(required=True, description='Фиксация строки')
     hidden = graphene.Boolean(required=True, description='Скрытие строки')
     dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления строки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -107,7 +108,8 @@ class ChangeRowDimensionMutation(BaseMutation):
             height=row_dimension.height,
             fixed=row_dimension.fixed,
             hidden=row_dimension.hidden,
-            dynamic=row_dimension.dynamic
+            dynamic=row_dimension.dynamic,
+            updated_at=row_dimension.updated_at
         )
 
 
