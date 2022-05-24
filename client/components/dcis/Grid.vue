@@ -74,6 +74,7 @@ export default defineComponent({
     const { t } = useI18n()
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const changeColumnWidth = useChangeColumnDimensionWidthMutation(updateSheet)
     const changeRowHeight = useChangeRowDimensionHeightMutation(updateSheet)
     const {
       gridContainer,
@@ -112,7 +113,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(activeSheet, () => {}, changeRowHeight)
+    } = useGrid(activeSheet, changeColumnWidth, changeRowHeight)
 
     return {
       t,

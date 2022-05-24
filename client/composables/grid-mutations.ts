@@ -7,13 +7,18 @@ import {
   SheetQuery,
   RowDimensionType,
   RowDimensionFieldsFragment,
+  ColumnDimensionType,
+  ColumnDimensionFieldsFragment,
   GlobalIndicesInputType,
+  ChangeColumnDimensionMutation,
+  ChangeColumnDimensionMutationVariables,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables
 } from '~/types/graphql'
 import { parsePosition } from '~/services/grid'
+import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 
@@ -139,13 +144,69 @@ function updateCellsPositions (row: RowDimensionFieldsFragment): void {
   }
 }
 
+export function useChangeColumnDimensionWidthMutation (updateSheet: UpdateType<SheetQuery>) {
+  const { mutate } = useMutation<
+    ChangeColumnDimensionMutation,
+    ChangeColumnDimensionMutationVariables
+  >(changeColumnDimensionMutation)
+  return async function (columnDimension: ColumnDimensionType, width: number) {
+    const variables: ChangeColumnDimensionMutationVariables = {
+      columnDimensionId: columnDimension.id,
+      width,
+      fixed: columnDimension.fixed,
+      hidden: columnDimension.hidden,
+      kind: columnDimension.kind
+    }
+    await mutate(variables, {
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeColumnDimension: {
+          __typename: 'ChangeColumnDimensionMutationPayload',
+          success: true,
+          errors: [],
+          ...variables,
+          updatedAt: new Date().toISOString()
+        }
+      },
+      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) {
+        updateColumnDimension(updateSheet, dataProxy, result)
+      }
+    })
+  }
+}
+
+export function updateColumnDimension (
+  updateSheet: UpdateType<SheetQuery>,
+  dataProxy: DataProxy,
+  result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
+) {
+  updateSheet(
+    dataProxy,
+    result,
+    (
+      data: SheetQuery,
+      { data: { changeColumnDimension } }: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
+    ) => {
+      if (changeColumnDimension.success) {
+        const columnDimension = data.sheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
+          columnDimension.id === changeColumnDimension.columnDimensionId)!
+        columnDimension.width = changeColumnDimension.width
+        columnDimension.fixed = changeColumnDimension.fixed
+        columnDimension.hidden = changeColumnDimension.hidden
+        columnDimension.updatedAt = changeColumnDimension.updatedAt
+      }
+      return data
+    }
+  )
+}
+
 export function useChangeRowDimensionHeightMutation (updateSheet: UpdateType<SheetQuery>) {
   const { mutate } = useMutation<
     ChangeRowDimensionMutation,
     ChangeRowDimensionMutationVariables
   >(changeRowDimensionMutation)
   return async function (rowDimension: RowDimensionType, height: number) {
-    const variables = {
+    const variables: ChangeRowDimensionMutationVariables = {
       rowDimensionId: rowDimension.id,
       height,
       fixed: rowDimension.fixed,
