@@ -1,0 +1,28 @@
+mutation ChangeColumnDimension(
+  $columnDimensionId: ID!,
+  $width: Int,
+  $fixed: Boolean!,
+  $hidden: Boolean!,
+  $kind: String!
+) {
+  changeColumnDimension(input: {
+    columnDimensionId: $columnDimensionId,
+    width: $width,
+    fixed: $fixed,
+    hidden: $hidden,
+    kind: $kind
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    columnDimensionId
+    width
+    fixed
+    hidden
+    updatedAt
+    __typename
+  }
+}

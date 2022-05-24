@@ -3,8 +3,24 @@ from typing import Optional
 from django.db.models import F
 
 from apps.core.models import User
-from apps.dcis.models.sheet import Cell, Document, RowDimension, Sheet
+from apps.dcis.models.sheet import Cell, ColumnDimension, Document, RowDimension, Sheet
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
+
+
+def change_column_dimension(
+    column_dimension: ColumnDimension,
+    width: Optional[int],
+    fixed: bool,
+    hidden: bool,
+    kind: str
+):
+    """Изменение колонки."""
+    column_dimension.width = width
+    column_dimension.fixed = fixed
+    column_dimension.hidden = hidden
+    column_dimension.kind = kind
+    column_dimension.save(update_fields=('width', 'fixed', 'hidden', 'kind', 'updated_at'))
+    return column_dimension
 
 
 def add_row_dimension(

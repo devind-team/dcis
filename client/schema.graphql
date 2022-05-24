@@ -740,6 +740,41 @@ type ChangeCellsOptionMutationPayload {
   success: Boolean!
 }
 
+input ChangeColumnDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор колонки"""
+  columnDimensionId: ID!
+  """Фиксация колонки"""
+  fixed: Boolean!
+  """Скрытие колонки"""
+  hidden: Boolean!
+  """Тип значения"""
+  kind: String!
+  """Ширина колонки"""
+  width: Int
+}
+
+"""Изменение колонки."""
+type ChangeColumnDimensionMutationPayload {
+  clientMutationId: String
+  """Идентификатор колонки"""
+  columnDimensionId: ID!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Фиксация колонки"""
+  fixed: Boolean!
+  """Скрытие колонки"""
+  hidden: Boolean!
+  """Тип значения"""
+  kind: String!
+  """Успех мутации"""
+  success: Boolean!
+  """Дата обновления колонки"""
+  updatedAt: DateTime!
+  """Ширина колонки"""
+  width: Int
+}
+
 """Изменение комментария версии документа."""
 type ChangeDocumentCommentMutationPayload {
   document: DocumentType
@@ -2064,6 +2099,8 @@ type Mutation {
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
+  """Изменение колонки"""
+  changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""

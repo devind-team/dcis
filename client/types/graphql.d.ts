@@ -812,6 +812,42 @@ export type ChangeCellsOptionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeColumnDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор колонки */
+  columnDimensionId: Scalars['ID'];
+  /** Фиксация колонки */
+  fixed: Scalars['Boolean'];
+  /** Скрытие колонки */
+  hidden: Scalars['Boolean'];
+  /** Тип значения */
+  kind: Scalars['String'];
+  /** Ширина колонки */
+  width?: InputMaybe<Scalars['Int']>;
+};
+
+/** Изменение колонки. */
+export type ChangeColumnDimensionMutationPayload = {
+  __typename?: 'ChangeColumnDimensionMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Идентификатор колонки */
+  columnDimensionId: Scalars['ID'];
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Фиксация колонки */
+  fixed: Scalars['Boolean'];
+  /** Скрытие колонки */
+  hidden: Scalars['Boolean'];
+  /** Тип значения */
+  kind: Scalars['String'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Дата обновления колонки */
+  updatedAt: Scalars['DateTime'];
+  /** Ширина колонки */
+  width?: Maybe<Scalars['Int']>;
+};
+
 /** Изменение комментария версии документа. */
 export type ChangeDocumentCommentMutationPayload = {
   __typename?: 'ChangeDocumentCommentMutationPayload';
@@ -2227,6 +2263,8 @@ export type Mutation = {
   changeCategoryPosition: ChangeCategoryPositionMutationPayload;
   /** Изменения опций ячейки */
   changeCellsOption: ChangeCellsOptionMutationPayload;
+  /** Изменение колонки */
+  changeColumnDimension: ChangeColumnDimensionMutationPayload;
   /** Изменение комментария версии документа. */
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
@@ -2432,6 +2470,11 @@ export type MutationChangeCategoryPositionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeCellsOptionArgs = {
   input: ChangeCellsOptionMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeColumnDimensionArgs = {
+  input: ChangeColumnDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4837,6 +4880,16 @@ export type ChangeCellsOptionMutationVariables = Exact<{
 }>;
 
 export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null } | null> | null } };
+
+export type ChangeColumnDimensionMutationVariables = Exact<{
+  columnDimensionId: Scalars['ID'];
+  width?: InputMaybe<Scalars['Int']>;
+  fixed: Scalars['Boolean'];
+  hidden: Scalars['Boolean'];
+  kind: Scalars['String'];
+}>;
+
+export type ChangeColumnDimensionMutation = { __typename?: 'Mutation', changeColumnDimension: { __typename: 'ChangeColumnDimensionMutationPayload', success: boolean, columnDimensionId: string, width?: number | null, fixed: boolean, hidden: boolean, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ChangeFileValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
