@@ -707,8 +707,8 @@ type ChangeCategoryPositionMutationPayload {
 }
 
 input ChangeCellsOptionMutationInput {
-  """Идентификатор ячейки"""
-  cellsId: [Int!]!
+  """Идентификаторы ячеек"""
+  cellIds: [ID!]!
   clientMutationId: String
   """Идентификатор поля"""
   field: String!
@@ -721,7 +721,7 @@ input ChangeCellsOptionMutationInput {
 
 - horizontal_align - ['left', 'center', 'right']
 - vertical_align - ['top', 'middle', 'bottom']
-- size - цифра от 10 до 24
+- size - число от 6 до 24
 - strong - true, false
 - italic - true, false
 - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
@@ -731,8 +731,8 @@ input ChangeCellsOptionMutationInput {
 ]
 """
 type ChangeCellsOptionMutationPayload {
-  """Измененные ячейки"""
-  cells: [CellType]
+  """Измененные свойства ячеек"""
+  changedOptions: [ChangedCellOption!]!
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1290,6 +1290,16 @@ type ChangeValueMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+}
+
+"""Измененное свойство ячейки."""
+type ChangedCellOption {
+  """Идентификаторы ячеек"""
+  cellId: ID!
+  """Идентификатор поля"""
+  field: String!
+  """Значение поля"""
+  value: String!
 }
 
 """Тип колонки."""

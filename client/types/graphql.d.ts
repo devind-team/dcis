@@ -778,8 +778,8 @@ export type ChangeCategoryPositionMutationPayload = {
 };
 
 export type ChangeCellsOptionMutationInput = {
-  /** Идентификатор ячейки */
-  cellsId: Array<Scalars['Int']>;
+  /** Идентификаторы ячеек */
+  cellIds: Array<Scalars['ID']>;
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор поля */
   field: Scalars['String'];
@@ -792,7 +792,7 @@ export type ChangeCellsOptionMutationInput = {
  *
  * - horizontal_align - ['left', 'center', 'right']
  * - vertical_align - ['top', 'middle', 'bottom']
- * - size - цифра от 10 до 24
+ * - size - число от 6 до 24
  * - strong - true, false
  * - italic - true, false
  * - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
@@ -803,8 +803,8 @@ export type ChangeCellsOptionMutationInput = {
  */
 export type ChangeCellsOptionMutationPayload = {
   __typename?: 'ChangeCellsOptionMutationPayload';
-  /** Измененные ячейки */
-  cells?: Maybe<Array<Maybe<CellType>>>;
+  /** Измененные свойства ячеек */
+  changedOptions: Array<ChangedCellOption>;
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -1389,6 +1389,17 @@ export type ChangeValueMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+};
+
+/** Измененное свойство ячейки. */
+export type ChangedCellOption = {
+  __typename?: 'ChangedCellOption';
+  /** Идентификаторы ячеек */
+  cellId: Scalars['ID'];
+  /** Идентификатор поля */
+  field: Scalars['String'];
+  /** Значение поля */
+  value: Scalars['String'];
 };
 
 /** Тип колонки. */
@@ -4874,12 +4885,12 @@ export type AddRowDimensionMutationVariables = Exact<{
 export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> } } };
 
 export type ChangeCellsOptionMutationVariables = Exact<{
-  cellsId: Array<Scalars['Int']> | Scalars['Int'];
+  cellIds: Array<Scalars['ID']> | Scalars['ID'];
   field: Scalars['String'];
   value?: InputMaybe<Scalars['String']>;
 }>;
 
-export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null } | null> | null } };
+export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value: string }> } };
 
 export type ChangeColumnDimensionMutationVariables = Exact<{
   columnDimensionId: Scalars['ID'];

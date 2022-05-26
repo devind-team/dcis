@@ -6,25 +6,28 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.schema.types import ErrorFieldType
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db import transaction
 from django.db.models import F
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
-from apps.dcis.schema.types import CellType, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.services.cell_services import change_cell_kind, check_cell_options
+from apps.dcis.schema.types import ChangedCellOption, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.sheet_services import (
-    add_row_dimension, change_column_dimension, change_row_dimension, move_merged_cells,
+    CheckCellOptions,
+    add_row_dimension,
+    change_cells_option,
+    change_column_dimension,
+    change_row_dimension,
+    move_merged_cells,
 )
 from apps.dcis.services.value_services import (
     create_file_value_archive,
     get_file_value_files,
     update_or_create_file_value,
     update_or_create_value,
-    updates_values_by_cell_kind_change,
 )
 
 
@@ -185,7 +188,7 @@ class ChangeCellsOptionMutation(BaseMutation):
 
         - horizontal_align - ['left', 'center', 'right']
         - vertical_align - ['top', 'middle', 'bottom']
-        - size - цифра от 10 до 24
+        - size - число от 6 до 24
         - strong - true, false
         - italic - true, false
         - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
@@ -196,35 +199,31 @@ class ChangeCellsOptionMutation(BaseMutation):
     """
 
     class Input:
-        cells_id = graphene.List(graphene.NonNull(graphene.Int), required=True, description='Идентификатор ячейки')
+        cell_ids = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Идентификаторы ячеек')
         field = graphene.String(required=True, description='Идентификатор поля')
         value = graphene.String(description='Значение поля')
 
-    cells = graphene.List(CellType, description='Измененные ячейки')
+    changed_options = graphene.List(
+        graphene.NonNull(ChangedCellOption),
+        required=True,
+        description='Измененные свойства ячеек'
+    )
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        cells_id: list[int],
+        cell_ids: list[int],
         field: str,
         value: Optional[str] = None
     ):
-        success, value, errors = check_cell_options(field, value)
-        if not success:
-            return ChangeCellsOptionMutation(success=success, errors=errors)
-        cells = Cell.objects.filter(pk__in=cells_id).all()
-        values: list[Value] = []
-        with transaction.atomic():
-            for cell in cells:
-                if field == 'kind':
-                    cell.save(update_fields=change_cell_kind(cell, value))
-                    values.extend(updates_values_by_cell_kind_change(cell))
-                else:
-                    setattr(cell, field, value)
-                    cell.save(update_fields=(field,))
-        return ChangeCellsOptionMutation(cells=cells, values=values)
+        match CheckCellOptions(field, value):
+            case CheckCellOptions.Error(field, error):
+                return ChangeCellsOptionMutation(success=False, errors=ErrorFieldType(field, [error]))
+            case CheckCellOptions.Success(value):
+                cells = Cell.objects.filter(pk__in=cell_ids).all()
+                return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 
 class UnloadFileValueArchiveMutation(BaseMutation):

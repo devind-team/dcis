@@ -59,18 +59,6 @@ def update_or_create_file_value(
     return update_or_create_value(document, sheet, column_id, row_id, value, payload)
 
 
-def updates_values_by_cell_kind_change(cell: Cell) -> list[Value]:
-    """Изменение значений из-за изменения типа ячейки."""
-    values = []
-    if cell.kind == Cell.FILES:
-        values = list(Value.objects.filter(column__id=cell.column_id, row__id=cell.row_id).all())
-        for value in values:
-            value.payload = None
-            value.value = 'Нет'
-        Value.objects.bulk_update(values, ('payload', 'value',))
-    return values
-
-
 def get_file_value_payload(value: Value) -> list[int]:
     """Получение дополнительных данных значения ячейки типа `Файл`."""
     if value.payload is None:

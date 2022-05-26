@@ -370,6 +370,14 @@ class LimitationType(DjangoObjectType):
         convert_choices_to_enum = False
 
 
+class ChangedCellOption(graphene.ObjectType):
+    """Измененное свойство ячейки."""
+
+    cell_id = graphene.ID(required=True, description='Идентификаторы ячеек')
+    field = graphene.String(required=True, description='Идентификатор поля')
+    value = graphene.String(required=True, description='Значение поля')
+
+
 class GlobalIndicesInputType(graphene.InputObjectType):
     """Индекс строки в плоской структуре."""
 
