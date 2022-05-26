@@ -2,8 +2,27 @@ export default {
   home: 'Проекты сборов',
   grid: {
     version: 'Версия: {version}',
+    cellKinds: {
+      n: 'Числовой',
+      s: 'Строковый',
+      text: 'Текст',
+      fl: 'Файл',
+      money: 'Деньги',
+      department: 'Департаменты',
+      classification: 'КБК'
+    },
     toolbar: {
       addRow: 'Добавить строку'
+    },
+    sheetToolbar: {
+      underlineValues: {
+        single: 'Одинарное, по значению',
+        double: 'Двойное, по значению',
+        singleAccounting: 'Одинарное, по ячейке',
+        doubleAccounting: 'Двойное, по ячейке'
+      },
+      fontSize: 'Шрифт',
+      kind: 'Тип'
     },
     columnWidth: 'Ширина: ',
     rowHeight: 'Высота: ',
@@ -92,15 +111,6 @@ export default {
     },
     delete: 'Удаление периода',
     deleteWarning: 'Период нельзя восстановить.'
-  },
-  cellKinds: {
-    n: 'Числовой',
-    s: 'Строковый',
-    text: 'Текст',
-    fl: 'Файл',
-    money: 'Деньги',
-    department: 'Департаменты',
-    classification: 'КБК'
   },
   documents: {
     add: {

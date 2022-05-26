@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(:style="style")
+  .grid__selection-view(:style="style")
 </template>
 
 <script lang="ts">
