@@ -9,18 +9,23 @@ import {
   RowDimensionFieldsFragment,
   ColumnDimensionType,
   ColumnDimensionFieldsFragment,
+  CellType,
+  ChangedCellOption,
   GlobalIndicesInputType,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
   ChangeRowDimensionMutation,
-  ChangeRowDimensionMutationVariables
+  ChangeRowDimensionMutationVariables,
+  ChangeCellsOptionMutation,
+  ChangeCellsOptionMutationVariables
 } from '~/types/graphql'
 import { parsePosition } from '~/services/grid'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
+import changeCellsOptionMutation from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
 
 export enum AddRowDimensionPosition {
   BEFORE,
@@ -34,7 +39,25 @@ export function useAddRowDimensionMutation (
   documentId: Ref<string | null>,
   updateSheet: UpdateType<SheetQuery>
 ) {
-  const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation)
+  const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) {
+      updateSheet(
+        dataProxy,
+        result,
+        (data: SheetQuery, {
+          data: {
+            addRowDimension: {
+              success, rowDimension
+            }
+          }
+        }: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) => {
+          if (success) {
+            data.sheet.rows = addRow(data.sheet.rows, rowDimension)
+          }
+          return data
+        })
+    }
+  })
   return async function (rowDimension: RowDimensionType, position: AddRowDimensionPosition) {
     let variables: AddRowDimensionMutationVariables | Omit<
       AddRowDimensionMutationVariables, 'index' | 'globalIndex'
@@ -57,25 +80,7 @@ export function useAddRowDimensionMutation (
         globalIndex: rowDimension.globalIndex + childGlobalIndex
       }
     }
-    await mutate(variables as AddRowDimensionMutationVariables, {
-      update (dataProxy: DataProxy, result: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) {
-        updateSheet(
-          dataProxy,
-          result,
-          (data: SheetQuery, {
-            data: {
-              addRowDimension: {
-                success, rowDimension
-              }
-            }
-          }: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) => {
-            if (success) {
-              data.sheet.rows = addRow(data.sheet.rows, rowDimension)
-            }
-            return data
-          })
-      }
-    })
+    await mutate(variables as AddRowDimensionMutationVariables)
   }
 }
 
@@ -148,7 +153,11 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: UpdateType<S
   const { mutate } = useMutation<
     ChangeColumnDimensionMutation,
     ChangeColumnDimensionMutationVariables
-  >(changeColumnDimensionMutation)
+  >(changeColumnDimensionMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) {
+      updateColumnDimension(updateSheet, dataProxy, result)
+    }
+  })
   return async function (columnDimension: ColumnDimensionType, width: number) {
     const variables: ChangeColumnDimensionMutationVariables = {
       columnDimensionId: columnDimension.id,
@@ -167,9 +176,6 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: UpdateType<S
           ...variables,
           updatedAt: new Date().toISOString()
         }
-      },
-      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) {
-        updateColumnDimension(updateSheet, dataProxy, result)
       }
     })
   }
@@ -204,7 +210,11 @@ export function useChangeRowDimensionHeightMutation (updateSheet: UpdateType<She
   const { mutate } = useMutation<
     ChangeRowDimensionMutation,
     ChangeRowDimensionMutationVariables
-  >(changeRowDimensionMutation)
+  >(changeRowDimensionMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) {
+      updateRowDimension(updateSheet, dataProxy, result)
+    }
+  })
   return async function (rowDimension: RowDimensionType, height: number) {
     const variables: ChangeRowDimensionMutationVariables = {
       rowDimensionId: rowDimension.id,
@@ -223,9 +233,6 @@ export function useChangeRowDimensionHeightMutation (updateSheet: UpdateType<She
           ...variables,
           updatedAt: new Date().toISOString()
         }
-      },
-      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) {
-        updateRowDimension(updateSheet, dataProxy, result)
       }
     })
   }
@@ -255,4 +262,38 @@ export function updateRowDimension (
       return data
     }
   )
+}
+
+export function useChangeCellsOptionMutation (updateSheet: UpdateType<SheetQuery>) {
+  const { mutate } = useMutation<
+    ChangeCellsOptionMutation,
+    ChangeCellsOptionMutationVariables
+  >(changeCellsOptionMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>) {
+      updateSheet(dataProxy, result, (
+        data: SheetQuery, {
+          data: { changeCellsOption: { success, changedOptions } }
+        }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
+      ) => {
+        if (success) {
+          for (const row of data.sheet.rows) {
+            for (const cell of row.cells) {
+              const option = changedOptions.find((o: ChangedCellOption) => o.cellId === cell.id)
+              if (option) {
+                cell[option.field] = option.value
+              }
+            }
+          }
+        }
+        return data
+      })
+    }
+  })
+  return async function (cells: CellType[], field: string, value: string) {
+    await mutate({
+      cellIds: cells.map((cell: CellType) => cell.id),
+      field,
+      value
+    })
+  }
 }
