@@ -11,6 +11,8 @@ import {
   parsePosition,
   positionsToRangeIndices,
   rangeIndicesToPositions,
+  findCell,
+  getRelatedGlobalPositions,
   uniteCellsOptions
 } from '~/services/grid'
 
@@ -44,38 +46,19 @@ export function useGridSelection (
         selectedCells = newSelectedCells
         newSelectedCells = []
       }
-      const relatedPositions = selectedCells.reduce((a: string[], c: CellType) => {
-        a.push(...c.relatedGlobalPositions)
-        return a
-      }, [])
+      const relatedPositions = getRelatedGlobalPositions(selectedCells)
       const selectedPositions = rangeIndicesToPositions(positionsToRangeIndices(relatedPositions))
-      for (const row of sheet.value.rows) {
-        for (const cell of row.cells) {
-          for (const relatedPosition of cell.relatedGlobalPositions) {
-            if (selectedPositions.includes(relatedPosition)) {
-              newSelectedCells.push(cell)
-            }
-          }
+      for (const position of selectedPositions) {
+        const cell = findCell(sheet.value, (c: CellType) => c.relatedGlobalPositions.includes(position))
+        if (cell && !newSelectedCells.find((c: CellType) => c.id === cell.id)) {
+          newSelectedCells.push(cell)
         }
       }
     }
-    return newSelectedCells.reduce(
-      (acc: CellType[], cell: CellType) => acc.find((c: CellType) => c.id === cell.id) ? acc : [...acc, cell],
-      []
-    )
+    return newSelectedCells
   })
 
-  const selectedCellsPositions = computed<string[]>(() =>
-    selectedCells.value.reduce((a: string[], c: CellType) => {
-      a.push(...c.relatedGlobalPositions)
-      return a
-    }, []))
-  const allCellsRangeIndices = computed<RangeIndicesType>(() => ({
-    minColumn: 1,
-    minRow: 1,
-    maxColumn: sheet.value.columns.at(-1).index,
-    maxRow: sheet.value.rows.at(-1).globalIndex
-  }))
+  const selectedCellsPositions = computed<string[]>(() => getRelatedGlobalPositions(selectedCells.value))
   const selectedRangeIndices = computed<RangeIndicesType | null>(() => {
     if (selectedCellsPositions.value.length) {
       return positionsToRangeIndices(selectedCellsPositions.value)
@@ -83,23 +66,16 @@ export function useGridSelection (
     return null
   })
   const allCellsSelected = computed<boolean>(() => {
-    if (selectedRangeIndices.value) {
-      for (const [k, v] of Object.entries(selectedRangeIndices.value)) {
-        if (allCellsRangeIndices.value[k] !== v) {
-          return false
-        }
-      }
-      return true
-    }
-    return false
+    return selectedRangeIndices.value !== null &&
+      selectedRangeIndices.value.minColumn === 1 &&
+      selectedRangeIndices.value.minRow === 1 &&
+      selectedRangeIndices.value.maxColumn === sheet.value.columns.at(-1).index &&
+      selectedRangeIndices.value.maxRow === sheet.value.rows.at(-1).globalIndex
   })
 
   const selectedColumnsPositions = computed<number[]>(() => {
     if (columnsSelection.value) {
-      const indices = [
-        columnsSelection.value.last.index,
-        columnsSelection.value.first.index
-      ]
+      const indices = [columnsSelection.value.last.index, columnsSelection.value.first.index]
       const minIndex = Math.min(...indices)
       const maxIndex = Math.max(...indices)
       return Array.from({
@@ -115,10 +91,7 @@ export function useGridSelection (
   })
   const selectedRowsPositions = computed<number[]>(() => {
     if (rowsSelection.value) {
-      const indices = [
-        rowsSelection.value.last.globalIndex,
-        rowsSelection.value.first.globalIndex
-      ]
+      const indices = [rowsSelection.value.last.globalIndex, rowsSelection.value.first.globalIndex]
       const minIndex = Math.min(...indices)
       const maxIndex = Math.max(...indices)
       return Array.from({

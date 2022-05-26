@@ -10,7 +10,6 @@ import {
   ColumnDimensionType,
   ColumnDimensionFieldsFragment,
   CellType,
-  ChangedCellOption,
   GlobalIndicesInputType,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables,
@@ -19,9 +18,9 @@ import {
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables,
   ChangeCellsOptionMutation,
-  ChangeCellsOptionMutationVariables
+  ChangeCellsOptionMutationVariables, SheetType
 } from '~/types/graphql'
-import { parsePosition } from '~/services/grid'
+import { parsePosition, findCell } from '~/services/grid'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
@@ -276,13 +275,9 @@ export function useChangeCellsOptionMutation (updateSheet: UpdateType<SheetQuery
         }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
       ) => {
         if (success) {
-          for (const row of data.sheet.rows) {
-            for (const cell of row.cells) {
-              const option = changedOptions.find((o: ChangedCellOption) => o.cellId === cell.id)
-              if (option) {
-                cell[option.field] = option.value
-              }
-            }
+          for (const option of changedOptions) {
+            const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === option.cellId)
+            cell[option.field] = option.value
           }
         }
         return data

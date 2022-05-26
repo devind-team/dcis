@@ -1,4 +1,4 @@
-import { CellType } from '~/types/graphql'
+import { SheetType, CellType } from '~/types/graphql'
 import {
   RangeType,
   PositionPartsType,
@@ -218,6 +218,32 @@ const elementPositionToStyle = (elementPosition: ElementPositionType): Record<st
 }
 
 /**
+ * Поиск ячейки на листе
+ * @param sheet
+ * @param predicate
+ */
+const findCell = (sheet: SheetType, predicate: (cell: CellType) => boolean): CellType | undefined => {
+  for (const row of sheet.rows) {
+    const cell = row.cells.find(predicate)
+    if (cell) {
+      return cell
+    }
+  }
+  return undefined
+}
+
+/**
+ * Получение связанных с объединением позиций в плоской структуре для массива ячеек
+ * @param cells
+ */
+const getRelatedGlobalPositions = (cells: CellType[]): string[] => {
+  return cells.reduce((a: string[], c: CellType) => {
+    a.push(...c.relatedGlobalPositions)
+    return a
+  }, [])
+}
+
+/**
  * Получение стилей ячейки
  * @param cell ячейка
  */
@@ -270,6 +296,8 @@ export {
   rangeToCellPositions,
   rangeSpan,
   elementPositionToStyle,
+  findCell,
+  getRelatedGlobalPositions,
   getCellStyle,
   uniteCellsOptions
 }
