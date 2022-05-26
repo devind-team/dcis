@@ -826,6 +826,30 @@ export type ChangeColumnDimensionPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeDivisionsMutationInput = {
+  /** Действие */
+  action: ActionRelationShip;
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификаторы объектов сбора */
+  divisionsId: Array<InputMaybe<Scalars['Int']>>;
+  /** Идентификатор периода */
+  periodId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Мутация на изменение дивизионов. */
+export type ChangeDivisionsMutationPayload = {
+  __typename?: 'ChangeDivisionsMutationPayload';
+  /** Действие */
+  action: ActionRelationShip;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Идентификаторы объектов сбора */
+  divisionsId: Array<Maybe<Scalars['Int']>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 /** Изменение комментария версии документа. */
 export type ChangeDocumentCommentMutationPayload = {
   __typename?: 'ChangeDocumentCommentMutationPayload';
@@ -2256,6 +2280,8 @@ export type Mutation = {
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение стилей колонки таблицы */
   changeColumnDimension: ChangeColumnDimensionPayload;
+  /** Мутация на изменение дивизионов. */
+  changeDivisions: ChangeDivisionsMutationPayload;
   /** Изменение комментария версии документа. */
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
@@ -2470,6 +2496,11 @@ export type MutationChangeCellsOptionArgs = {
 export type MutationChangeColumnDimensionArgs = {
   id: Scalars['ID'];
   input: UpdateColumnDimensionInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeDivisionsArgs = {
+  input: ChangeDivisionsMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4905,6 +4936,14 @@ export type AddProjectMutationVariables = Exact<{
 
 export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } };
 
+export type ChangeDivisionsMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  divisionsId: Array<InputMaybe<Scalars['Int']>> | InputMaybe<Scalars['Int']>;
+  action: ActionRelationShip;
+}>;
+
+export type ChangeDivisionsMutation = { __typename?: 'Mutation', changeDivisions: { __typename: 'ChangeDivisionsMutationPayload', success: boolean, divisionsId: Array<number | null>, action: ActionRelationShip, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
 export type ChangePeriodMutationVariables = Exact<{
   id: Scalars['ID'];
   name: Scalars['String'];
@@ -5340,7 +5379,7 @@ export type PageKindsQuery = { __typename?: 'Query', pageKinds: Array<{ __typena
 
 export type PagesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
   categoryId?: InputMaybe<Scalars['ID']>;
   kindId?: InputMaybe<Scalars['ID']>;
   search?: InputMaybe<Scalars['String']>;

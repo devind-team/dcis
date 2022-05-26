@@ -1,0 +1,13 @@
+mutation ChangeDivisions($periodId: ID!, $divisionsId: [Int]!, $action: ActionRelationShip!) {
+  changeDivisions(input: { periodId: $periodId, divisionsId: $divisionsId, action: $action }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    divisionsId
+    action
+    __typename
+  }
+}

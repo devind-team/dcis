@@ -752,6 +752,29 @@ type ChangeColumnDimensionPayload {
   success: Boolean!
 }
 
+input ChangeDivisionsMutationInput {
+  """Действие"""
+  action: ActionRelationShip!
+  clientMutationId: String
+  """Идентификаторы объектов сбора"""
+  divisionsId: [Int]!
+  """Идентификатор периода"""
+  periodId: ID
+}
+
+"""Мутация на изменение дивизионов."""
+type ChangeDivisionsMutationPayload {
+  """Действие"""
+  action: ActionRelationShip!
+  clientMutationId: String
+  """Идентификаторы объектов сбора"""
+  divisionsId: [Int]!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Изменение комментария версии документа."""
 type ChangeDocumentCommentMutationPayload {
   document: DocumentType
@@ -2088,6 +2111,8 @@ type Mutation {
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение стилей колонки таблицы"""
   changeColumnDimension(id: ID!, input: UpdateColumnDimensionInput!): ChangeColumnDimensionPayload!
+  """Мутация на изменение дивизионов."""
+  changeDivisions(input: ChangeDivisionsMutationInput!): ChangeDivisionsMutationPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""

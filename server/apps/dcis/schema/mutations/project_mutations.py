@@ -2,11 +2,12 @@ from typing import Any
 
 import graphene
 from devind_core.models import File
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Department, Organization
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.schema.types import ActionRelationShip, ErrorFieldType
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
@@ -15,7 +16,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Period, Project
+from apps.dcis.models import Period, Project, Division
 from apps.dcis.permissions import AddPeriod
 from apps.dcis.schema.types import PeriodType, ProjectType
 from apps.dcis.services.excel_extractor import ExcelExtractor
@@ -121,6 +122,44 @@ class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
         permissions = ('dcis.delete_period',)
 
 
+class ChangeDivisionsMutation(BaseMutation):
+    """Мутация на изменение дивизионов."""
+
+    class Input:
+        period_id = graphene.ID(description='Идентификатор периода')
+        divisions_id = graphene.List(graphene.Int, required=True, description='Идентификаторы объектов сбора')
+        action = graphene.Field(ActionRelationShip, required=True, description='Действие')
+
+    divisions_id = graphene.List(graphene.Int, required=True, description='Идентификаторы объектов сбора')
+    action = graphene.Field(ActionRelationShip, required=True, description='Действие')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+            root,
+            info: ResolveInfo,
+            period_id: int,
+            divisions_id,
+            action: ActionRelationShip):
+        period = get_object_or_404(Period, pk=period_id)
+        object_type = ContentType.objects.get_for_id(period.project.content_type_id)
+        if object_type.model == 'department':
+            divisions = Department.objects.filter(pk__in=divisions_id)
+        else:
+            divisions = Organization.objects.filter(pk__in=divisions_id)
+        for division in divisions:
+            if action == ActionRelationShip.ADD:
+                Division.objects.create(period=period, object=division)
+            elif action == ActionRelationShip.DELETE:
+                division.delete()
+            else:
+                return ChangeDivisionsMutation(
+                    status=False,
+                    errors=[ErrorFieldType('action', ['Действие не найдено'])]
+                )
+        return ChangeDivisionsMutation(divisions_id=divisions_id, action=action)
+
+
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
@@ -130,3 +169,4 @@ class ProjectMutations(graphene.ObjectType):
     add_period = AddPeriodMutation.Field(required=True)
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
+    change_divisions = ChangeDivisionsMutation.Field(required=True)
