@@ -375,7 +375,7 @@ class ChangedCellOption(graphene.ObjectType):
 
     cell_id = graphene.ID(required=True, description='Идентификаторы ячеек')
     field = graphene.String(required=True, description='Идентификатор поля')
-    value = graphene.String(required=True, description='Значение поля')
+    value = graphene.String(description='Значение поля')
 
 
 class GlobalIndicesInputType(graphene.InputObjectType):

@@ -277,7 +277,13 @@ export function useChangeCellsOptionMutation (updateSheet: UpdateType<SheetQuery
         if (success) {
           for (const option of changedOptions) {
             const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === option.cellId)
-            cell[option.field] = option.value
+            if (option.field === 'size') {
+              cell[option.field] = Number(option.value)
+            } else if (['strong', 'italic', 'strike'].includes(option.field)) {
+              cell[option.field] = option.value === 'true'
+            } else {
+              cell[option.field] = option.value
+            }
           }
         }
         return data

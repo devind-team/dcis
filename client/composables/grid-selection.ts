@@ -5,32 +5,33 @@ import {
   RangeIndicesType,
   SelectionViewType,
   SelectionType,
-  CellOptionsType
+  CellsOptionsType
 } from '~/types/grid'
 import {
   parsePosition,
   positionsToRangeIndices,
   rangeIndicesToPositions,
+  filterCells,
   findCell,
   getRelatedGlobalPositions,
-  uniteCellsOptions
+  getCellOptions
 } from '~/services/grid'
 
 export function useGridSelection (
   sheet: Ref<SheetType>,
   gridContainer: Ref<HTMLDivElement | null>,
   grid: Ref<HTMLTableElement | null>,
-  setActiveCell: (cell: CellType) => void
+  setActiveCell: (cell: CellType | null) => void
 ) {
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
   const cellsSelection = ref<SelectionType<CellType> | null>(null)
-  const rowsSelection = ref<SelectionType<RowDimensionType> | null>(null)
   const columnsSelection = ref<SelectionType<ColumnDimensionType> | null>(null)
+  const rowsSelection = ref<SelectionType<RowDimensionType> | null>(null)
 
   const cellsSelectionView = ref<SelectionViewType[] | null>(null)
-  const rowsSelectionView = ref<SelectionViewType | null>(null)
   const columnsSelectionView = ref<SelectionViewType | null>(null)
+  const rowsSelectionView = ref<SelectionViewType | null>(null)
 
   const boundarySelectedColumnsPositions = ref<number[]>([])
   const boundarySelectedRowsPositions = ref<number[]>([])
@@ -57,6 +58,38 @@ export function useGridSelection (
     }
     return newSelectedCells
   })
+  const selectedColumns = computed<ColumnDimensionType[]>(() => {
+    if (!columnsSelection.value) {
+      return []
+    }
+    const indices = [columnsSelection.value.last.index, columnsSelection.value.first.index]
+    const minIndex = Math.min(...indices)
+    const maxIndex = Math.max(...indices)
+    return sheet.value.columns.slice(minIndex - 1, maxIndex)
+  })
+  const selectedRows = computed<RowDimensionType[]>(() => {
+    if (!rowsSelection.value) {
+      return []
+    }
+    const indices = [rowsSelection.value.last.globalIndex, rowsSelection.value.first.globalIndex]
+    const minIndex = Math.min(...indices)
+    const maxIndex = Math.max(...indices)
+    return sheet.value.rows.slice(minIndex - 1, maxIndex)
+  })
+
+  const selectedColumnsCells = computed<CellType[]>(() => selectedColumns.value
+    .reduce((acc: CellType[], column: ColumnDimensionType) => {
+      acc.push(...filterCells(sheet.value, (c: CellType) => {
+        const parsedPosition = parsePosition(c.globalPosition)
+        return parsedPosition.column === column.name
+      }))
+      return acc
+    }, []))
+  const selectedRowsCells = computed<CellType[]>(() => selectedRows.value
+    .reduce((acc: CellType[], row: RowDimensionType) => {
+      acc.push(...row.cells)
+      return acc
+    }, []))
 
   const selectedCellsPositions = computed<string[]>(() => getRelatedGlobalPositions(selectedCells.value))
   const selectedRangeIndices = computed<RangeIndicesType | null>(() => {
@@ -74,13 +107,8 @@ export function useGridSelection (
   })
 
   const selectedColumnsPositions = computed<number[]>(() => {
-    if (columnsSelection.value) {
-      const indices = [columnsSelection.value.last.index, columnsSelection.value.first.index]
-      const minIndex = Math.min(...indices)
-      const maxIndex = Math.max(...indices)
-      return Array.from({
-        length: maxIndex - minIndex + 1
-      }).map((_, i) => i + minIndex)
+    if (selectedColumns.value.length) {
+      return selectedColumns.value.map((column: ColumnDimensionType) => column.index)
     }
     if (selectedRangeIndices.value) {
       return Array.from({
@@ -90,13 +118,8 @@ export function useGridSelection (
     return []
   })
   const selectedRowsPositions = computed<number[]>(() => {
-    if (rowsSelection.value) {
-      const indices = [rowsSelection.value.last.globalIndex, rowsSelection.value.first.globalIndex]
-      const minIndex = Math.min(...indices)
-      const maxIndex = Math.max(...indices)
-      return Array.from({
-        length: maxIndex - minIndex + 1
-      }).map((_, i) => i + minIndex)
+    if (selectedRows.value.length) {
+      return selectedRows.value.map((row: RowDimensionType) => row.globalIndex)
     }
     if (selectedRangeIndices.value) {
       return Array.from({
@@ -106,28 +129,24 @@ export function useGridSelection (
     return []
   })
 
-  const possibleCellsOptions: (keyof CellOptionsType)[] = [
-    'kind', 'horizontalAlign', 'verticalAlign',
-    'size', 'strong', 'italic',
-    'strike', 'underline'
-  ]
-  const selectedCellsOptions = computed<CellOptionsType>(() => {
-    const result: any = {}
-    for (const option of possibleCellsOptions) {
-      const options = []
-      for (const cell of selectedCells.value) {
-        options.push(cell[option])
-      }
-      result[option] = uniteCellsOptions(options)
+  const selectedCellsOptions = computed<CellsOptionsType | null>(() => {
+    if (cellsSelection.value) {
+      return getCellOptions(selectedCells.value)
     }
-    return result
+    if (rowsSelection.value) {
+      return getCellOptions(selectedRowsCells.value)
+    }
+    if (columnsSelection.value) {
+      return getCellOptions(selectedColumnsCells.value)
+    }
+    return null
   })
 
-  const updateSelections = () => {
+  const updateSelectionViews = () => {
     nextTick(() => {
       updateCellsSelectionView()
-      updateRowsSelectionView()
       updateColumnsSelectionView()
+      updateRowsSelectionView()
     })
   }
   const updateCellsSelectionView = () => {
@@ -211,6 +230,24 @@ export function useGridSelection (
       }
     }
   }
+  const updateColumnsSelectionView = () => {
+    if (columnsSelection.value) {
+      const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
+      const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
+      const firstColumnIndex = Math.min(...indices)
+      const firstColumn = theadRow.cells.item(firstColumnIndex) as HTMLTableCellElement
+      const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
+      columnsSelectionView.value = {
+        id: 'column',
+        position: { left: firstColumn.offsetLeft - 1, right: null, top: firstColumn.offsetHeight - 1, bottom: null },
+        width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
+        height: grid.value.offsetHeight - theadRow.offsetHeight + 1,
+        border: { top: false, right: true, bottom: true, left: firstColumnIndex !== 1 }
+      }
+    } else {
+      columnsSelectionView.value = null
+    }
+  }
   const updateRowsSelectionView = () => {
     if (rowsSelection.value) {
       const indices = [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex]
@@ -232,24 +269,6 @@ export function useGridSelection (
       }
     } else {
       rowsSelectionView.value = null
-    }
-  }
-  const updateColumnsSelectionView = () => {
-    if (columnsSelection.value) {
-      const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
-      const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
-      const firstColumnIndex = Math.min(...indices)
-      const firstColumn = theadRow.cells.item(firstColumnIndex) as HTMLTableCellElement
-      const lastColumn = theadRow.cells.item(Math.max(...indices)) as HTMLTableCellElement
-      columnsSelectionView.value = {
-        id: 'column',
-        position: { left: firstColumn.offsetLeft - 1, right: null, top: firstColumn.offsetHeight - 1, bottom: null },
-        width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
-        height: grid.value.offsetHeight - theadRow.offsetHeight + 1,
-        border: { top: false, right: true, bottom: true, left: firstColumnIndex !== 1 }
-      }
-    } else {
-      columnsSelectionView.value = null
     }
   }
   const getSelectionViewLeftTopBorder = (selectedCells: CellType[]): { leftColumn: number, topRow: number} => {
@@ -290,26 +309,28 @@ export function useGridSelection (
     if (newValue) {
       rowsSelection.value = null
       columnsSelection.value = null
-      updateSelections()
-    }
-  }, { deep: true })
-  watch(rowsSelection, (newValue: SelectionType<RowDimensionType>) => {
-    if (newValue) {
-      cellsSelection.value = null
-      columnsSelection.value = null
-      updateSelections()
+      updateSelectionViews()
     }
   }, { deep: true })
   watch(columnsSelection, (newValue: SelectionType<ColumnDimensionType>) => {
     if (newValue) {
       cellsSelection.value = null
       rowsSelection.value = null
-      updateSelections()
+      setActiveCell(null)
+      updateSelectionViews()
+    }
+  }, { deep: true })
+  watch(rowsSelection, (newValue: SelectionType<RowDimensionType>) => {
+    if (newValue) {
+      cellsSelection.value = null
+      columnsSelection.value = null
+      setActiveCell(null)
+      updateSelectionViews()
     }
   }, { deep: true })
 
   const gridContainerScroll = () => {
-    updateSelections()
+    updateSelectionViews()
   }
 
   const mousedownCell = (cell: CellType): void => {
@@ -375,7 +396,7 @@ export function useGridSelection (
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
-    updateSelections,
+    updateSelectionViews,
     selectAllCells,
     gridContainerScroll,
     mousedownCell,

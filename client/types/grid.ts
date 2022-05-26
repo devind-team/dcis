@@ -1,3 +1,5 @@
+import { CellType } from '~/types/graphql'
+
 export type RangeType = string
 
 /**
@@ -112,13 +114,14 @@ export type SelectionType<T> = {
   last: T,
 }
 
-export type CellOptionsType = {
-  kind: string | null,
-  horizontalAlign: 'left' | 'center' | 'right' | null
-  verticalAlign: 'top' | 'middle' | 'bottom' | null
-  size: number | null
+export type CellsOptionsType = {
+  cells: CellType[]
   strong: boolean | null
   italic: boolean | null
   strike: boolean | null
   underline: string | null
+  horizontalAlign: 'left' | 'center' | 'right' | null
+  verticalAlign: 'top' | 'middle' | 'bottom' | null
+  size: number | null
+  kind: string | null
 }

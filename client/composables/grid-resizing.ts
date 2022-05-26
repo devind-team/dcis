@@ -117,9 +117,9 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     }
   }
 
-  useEventListener('mouseup', () => {
+  useEventListener('mouseup', async () => {
     if (resizing.value && resizing.value.state === 'resizing') {
-      changeSize(resizing.value.object as T, resizing.value.size)
+      await changeSize(resizing.value.object as T, resizing.value.size)
       resizing.value = null
     }
   })

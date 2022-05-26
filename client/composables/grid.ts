@@ -51,7 +51,7 @@ export function useGrid (
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
-    updateSelections,
+    updateSelectionViews,
     selectAllCells,
     gridContainerScroll,
     mousedownCell,
@@ -77,7 +77,7 @@ export function useGrid (
     'x',
     changeColumnWidth
   )
-  watch(resizingColumnWidth, () => updateSelections(), { deep: true })
+  watch(resizingColumnWidth, () => updateSelectionViews(), { deep: true })
   const {
     resizing: resizingRow,
     elementResizing: resizingRowHeight,
@@ -92,7 +92,7 @@ export function useGrid (
     'y',
     changeRowHeight
   )
-  watch(resizingRowHeight, () => updateSelections(), { deep: true })
+  watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +

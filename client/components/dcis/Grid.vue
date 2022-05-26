@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    grid-sheet-toolbar
+    grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
     .grid__body
       div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
         table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
@@ -301,6 +301,9 @@ div.grid__body
         td:not(.grid__cell_row-name)
           cursor: cell
           position: relative
+
+          .grid__cell-content
+            display: flex
 
           .grid__cell-content_active
             position: absolute

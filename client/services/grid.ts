@@ -7,7 +7,8 @@ import {
   SheetRangePartsType,
   RangeIndicesType,
   RangeSpanType,
-  ElementPositionType
+  ElementPositionType,
+  CellsOptionsType
 } from '~/types/grid'
 
 const positionExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
@@ -218,6 +219,23 @@ const elementPositionToStyle = (elementPosition: ElementPositionType): Record<st
 }
 
 /**
+ * Фильтрация ячеек на листе
+ * @param sheet
+ * @param predicate
+ */
+const filterCells = (sheet: SheetType, predicate: (cell: CellType) => boolean): CellType[] => {
+  const result: CellType[] = []
+  for (const row of sheet.rows) {
+    for (const cell of row.cells) {
+      if (predicate(cell)) {
+        result.push(cell)
+      }
+    }
+  }
+  return result
+}
+
+/**
  * Поиск ячейки на листе
  * @param sheet
  * @param predicate
@@ -244,29 +262,6 @@ const getRelatedGlobalPositions = (cells: CellType[]): string[] => {
 }
 
 /**
- * Получение стилей ячейки
- * @param cell ячейка
- */
-const getCellStyle = (cell: CellType): Record<string, string> => {
-  const styles: Record<string, string> = {}
-  if (cell.verticalAlign) { styles['vertical-align'] = cell.verticalAlign }
-  if (cell.horizontalAlign) { styles['text-align'] = cell.horizontalAlign }
-  if (cell.size) { styles['font-size'] = `${cell.size}px` }
-  if (cell.strong) { styles['font-weight'] = 'bold' }
-  if (cell.italic) { styles['font-style'] = 'italic' }
-  if (cell.underline) { styles['text-decoration'] = 'underline' }
-  if (cell.color) { styles['font-color'] = cell.color }
-  if (cell.background) { styles['background-color'] = cell.background }
-  const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
-  for (const position of ['top', 'right', 'bottom', 'left']) {
-    if (borderColor[position]) {
-      cell[`border-${position}`] = `1 px solid ${borderColor[position] || 'black'}`
-    }
-  }
-  return styles
-}
-
-/**
  * Объединение опций ячеек
  * @param options опции ячеек
  */
@@ -283,6 +278,27 @@ const uniteCellsOptions = <T>(options: T[]): T | null => {
   return value
 }
 
+/**
+ * Получение опций ячеек
+ * @param cells
+ */
+const getCellOptions = (cells: CellType[]): CellsOptionsType => {
+  const possibleCellsOptions: (keyof CellsOptionsType)[] = [
+    'strong', 'italic', 'strike',
+    'underline', 'horizontalAlign', 'verticalAlign',
+    'size', 'kind'
+  ]
+  const result: any = { cells }
+  for (const option of possibleCellsOptions) {
+    const options = []
+    for (const cell of cells) {
+      options.push(cell[option])
+    }
+    result[option] = uniteCellsOptions(options)
+  }
+  return result
+}
+
 export {
   positionToLetter,
   letterToPosition,
@@ -296,8 +312,8 @@ export {
   rangeToCellPositions,
   rangeSpan,
   elementPositionToStyle,
+  filterCells,
   findCell,
   getRelatedGlobalPositions,
-  getCellStyle,
-  uniteCellsOptions
+  getCellOptions
 }

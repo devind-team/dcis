@@ -1,44 +1,35 @@
 <template lang="pug">
   v-row
     v-col.my-2.d-flex.align-center
-      v-btn-toggle(multiple)
-        v-btn(height="40")
+      v-btn-toggle(v-model="formatting" multiple)
+        v-btn(:disabled="disabled" value="strong" height="40")
           v-icon mdi-format-bold
-        v-btn(height="40")
+        v-btn(:disabled="disabled" value="italic" height="40")
           v-icon mdi-format-italic
-        v-btn(height="40")
-          v-icon mdi-format-strikethrough
-      v-select.mx-1.shrink(
-        v-model="underline"
-        :items="underlineValues"
-        style="width: 75px"
-        filled
-        outlined
-        hide-details
-        dense
-      )
-        template(#selection)
-        template(#prepend-inner)
+        v-btn(:disabled="disabled" value="underline" height="40")
           v-icon mdi-format-underline
-      v-btn-toggle.mx-1
-        v-btn(height="40")
+        v-btn(:disabled="disabled" value="strike" height="40")
+          v-icon mdi-format-strikethrough
+      v-btn-toggle.mx-1(v-model="horizontalAlign")
+        v-btn(:disabled="disabled" value="left" height="40")
           v-icon mdi-format-align-left
-        v-btn(height="40")
+        v-btn(:disabled="disabled" value="center" height="40")
           v-icon mdi-format-align-center
-        v-btn(height="40")
+        v-btn(:disabled="disabled" value="right" height="40")
           v-icon mdi-format-align-right
-      v-btn-toggle.mx-1
-        v-btn(height="40")
+      v-btn-toggle.mx-1(v-model="verticalAlign")
+        v-btn(:disabled="disabled" value="top" height="40")
           v-icon mdi-format-align-top
-        v-btn(height="40")
+        v-btn(:disabled="disabled" value="middle" height="40")
           v-icon mdi-format-align-middle
-        v-btn(height="40")
+        v-btn(:disabled="disabled" value="bottom" height="40")
           v-icon mdi-format-align-bottom
       v-combobox.mx-1.shrink(
         v-model="size"
         :label="t('dcis.grid.sheetToolbar.fontSize')"
         :items="sizes"
-        style="width: 150px"
+        :disabled="disabled"
+        style="width: 160px"
         filled
         outlined
         hide-details
@@ -48,7 +39,8 @@
         v-model="kind"
         :label="t('dcis.grid.sheetToolbar.kind')"
         :items="kinds"
-        style="width: 150px"
+        :disabled="disabled"
+        style="width: 160px"
         filled
         outlined
         hide-details
@@ -57,30 +49,91 @@
 </template>
 
 <script lang="ts">
+import { PropType } from '#app'
+import { UpdateType } from '~/composables'
+import { SheetQuery } from '~/types/graphql'
+import { CellsOptionsType } from '~/types/grid'
+
 export default defineComponent({
-  setup () {
+  props: {
+    selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
+  },
+  setup (props) {
     const { t } = useI18n()
 
-    const underline = ref<string | null>(null)
-    const underlineValues = [
-      { text: t('dcis.grid.sheetToolbar.underlineValues.single'), value: 'single' },
-      { text: t('dcis.grid.sheetToolbar.underlineValues.double'), value: 'double' },
-      { text: t('dcis.grid.sheetToolbar.underlineValues.singleAccounting'), value: 'singleAccounting' },
-      { text: t('dcis.grid.sheetToolbar.underlineValues.doubleAccounting'), value: 'doubleAccounting' }
-    ]
+    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const changeCellsOption = useChangeCellsOptionMutation(updateSheet)
 
-    const size = ref<number | null>(null)
+    const disabled = computed<boolean>(() => !props.selectedCellsOptions)
+
+    const formatting = computed<string[]>({
+      get: () => !disabled.value
+        ? (['strong', 'italic', 'underline', 'strike'].filter(f => !!props.selectedCellsOptions[f]))
+        : [],
+      set: (value) => {
+        const diff = formatting.value.length > value.length
+          ? formatting.value.filter(e => !value.includes(e))
+          : value.filter(v => !formatting.value.includes(v))
+        if (diff.length) {
+          let field: string | null = null
+          const [intersectionFormat, intersectionValue] = formatting.value.length > value.length
+            ? [formatting.value, value]
+            : [value, formatting.value]
+          for (const v of intersectionFormat) {
+            if (!intersectionValue.includes(v)) {
+              field = v
+              break
+            }
+          }
+          let val: string | null = null
+          if (field === 'underline') {
+            val = props.selectedCellsOptions.underline ? null : 'single'
+          } else {
+            val = String(!props.selectedCellsOptions[field])
+          }
+          changeCellsOption(props.selectedCellsOptions.cells, field, val)
+        }
+      }
+    })
+
+    const horizontalAlign = computed<string | null>({
+      get: () => !disabled.value ? props.selectedCellsOptions.horizontalAlign : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'horizontalAlign', value)
+    })
+
+    const verticalAlign = computed<string | null>({
+      get: () => !disabled.value ? props.selectedCellsOptions.verticalAlign : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'verticalAlign', value)
+    })
+
     const sizes = Array
       .from(new Array(19).keys())
       .map((e: number) => e + 6)
       .map((e: number) => ({ text: `${e}px`, value: e }))
+    const size = computed<{text: string, value: number} | null>({
+      get: () => !disabled.value ? sizes.find(s => s.value === props.selectedCellsOptions.size) : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'size', String(value.value))
+    })
 
-    const kind = ref<string | null>(null)
     const kinds = computed<{ text: string, value: string }[]>(() => (
       Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.grid.cellKinds.${k}`) as string, value: k })))
     )
+    const kind = computed<{ text: string, value: string } | null>({
+      get: () => !disabled.value ? kinds.value.find(k => k.value === props.selectedCellsOptions.kind) : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'kind', value.value)
+    })
 
-    return { t, underline, underlineValues, size, sizes, kind, kinds }
+    return {
+      t,
+      disabled,
+      formatting,
+      horizontalAlign,
+      verticalAlign,
+      sizes,
+      size,
+      kinds,
+      kind
+    }
   }
 })
 </script>

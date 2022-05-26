@@ -4,6 +4,7 @@ from typing import NamedTuple, Optional, Sequence, Union
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import F
+from stringcase import camelcase
 
 from apps.core.models import User
 from apps.dcis.models.sheet import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
@@ -129,7 +130,7 @@ class CheckCellOptions:
                     )
                 )
 
-    _allowed_fields = ['horizontal_align', 'vertical_align', 'size', 'strong', 'italic', 'underline', 'kind']
+    _allowed_fields = ['strong', 'italic', 'strike', 'underline', 'horizontal_align', 'vertical_align', 'size', 'kind']
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']
     _allowed_underline = [None, 'single', 'double', 'single_accounting', 'double_accounting']
@@ -144,7 +145,7 @@ class CheckCellOptions:
     @classmethod
     def _standard_check(cls, field: str, value: str, allowed_values: list[Union[str, None]]) -> Union[Success, Error]:
         """Проверка для большинства случаев."""
-        if value not in allowed_values:
+        if value in allowed_values:
             return cls.Success(value)
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
 
@@ -166,7 +167,7 @@ def change_cells_option(cells: Sequence[Cell], field: str, value: Optional[Union
             result.append({'cell_id': cell.id, 'field': 'value', 'value': cell.default})
         setattr(cell, field, value)
         cell.save(update_fields=update_fields)
-        result.append({'cell_id': cell.id, 'field': field, 'value': value})
+        result.append({'cell_id': cell.id, 'field': camelcase(field), 'value': value})
     return result
 
 

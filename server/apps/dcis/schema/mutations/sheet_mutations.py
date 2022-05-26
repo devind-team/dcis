@@ -12,6 +12,7 @@ from django.db.models import F
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from stringcase import snakecase
 
 from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
 from apps.dcis.schema.types import ChangedCellOption, GlobalIndicesInputType, RowDimensionType
@@ -186,12 +187,13 @@ class DeleteRowDimensionMutation(BaseMutation):
 class ChangeCellsOptionMutation(BaseMutation):
     """Изменение свойств ячеек:
 
+        - strong - true, false
+        - italic - true, false
+        - strike - true, false
+        - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
         - horizontal_align - ['left', 'center', 'right']
         - vertical_align - ['top', 'middle', 'bottom']
         - size - число от 6 до 24
-        - strong - true, false
-        - italic - true, false
-        - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
         - kind - [
             'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money',
             'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
@@ -205,7 +207,6 @@ class ChangeCellsOptionMutation(BaseMutation):
 
     changed_options = graphene.List(
         graphene.NonNull(ChangedCellOption),
-        required=True,
         description='Измененные свойства ячеек'
     )
 
@@ -218,9 +219,10 @@ class ChangeCellsOptionMutation(BaseMutation):
         field: str,
         value: Optional[str] = None
     ):
+        field = snakecase(field)
         match CheckCellOptions(field, value):
             case CheckCellOptions.Error(field, error):
-                return ChangeCellsOptionMutation(success=False, errors=ErrorFieldType(field, [error]))
+                return ChangeCellsOptionMutation(success=False, errors=[ErrorFieldType(field, [error])])
             case CheckCellOptions.Success(value):
                 cells = Cell.objects.filter(pk__in=cell_ids).all()
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))

@@ -15,12 +15,6 @@ export default {
       addRow: 'Добавить строку'
     },
     sheetToolbar: {
-      underlineValues: {
-        single: 'Одинарное, по значению',
-        double: 'Двойное, по значению',
-        singleAccounting: 'Одинарное, по ячейке',
-        doubleAccounting: 'Двойное, по ячейке'
-      },
       fontSize: 'Шрифт',
       kind: 'Тип'
     },
