@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.0",
-    "@babel/eslint-parser": "^7.17.0",
+    "@babel/eslint-parser": "^7.18.2",
     "@babel/plugin-proposal-decorators": "^7.17.12",
     "@babel/plugin-proposal-optional-chaining": "^7.17.12",
     "@graphql-codegen/cli": "^2.6.2",
