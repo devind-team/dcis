@@ -48,9 +48,7 @@ export default {
       makeDynamic: 'Разрешить дочерние строки',
       buttonText: '@:save'
     },
-    cellText: {
-      title: 'Изменение текста'
-    },
+    changeValue: 'Изменение значения',
     cellFiles: {
       title: 'Изменение файлов',
       file: 'Файл №{number}',

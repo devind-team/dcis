@@ -20,7 +20,6 @@ import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
 import GridCellText from '~/components/dcis/grid/cells/GridCellText.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
-import GridCellUser from '~/components/dcis/grid/cells/GridCellUser.vue'
 import GridCellClassification from '~/components/dcis/grid/cells/GridCellClassification.vue'
 
 export default defineComponent({
@@ -30,7 +29,6 @@ export default defineComponent({
     GridCellText,
     GridCellMoney,
     GridCellDepartment,
-    GridCellUser,
     GridCellClassification
   },
   props: {

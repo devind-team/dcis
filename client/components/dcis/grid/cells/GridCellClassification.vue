@@ -3,7 +3,7 @@
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
     v-card(:loading="loading")
-      v-card-title Изменение значения
+      v-card-title {{ t('dcis.grid.changeValue') }}
         v-spacer
         v-btn(@click="close" icon)
           v-icon mdi-close
@@ -17,10 +17,14 @@
           clearable
         )
       v-divider
-      v-card-text(style="height: 300px;")
+      v-card-text(style="height: 300px")
         v-list
-          v-list-item(v-for="classification in classifications" :key="classification.id" @click="setValue(classification)")
-            v-list-item-content(v-on="on")
+          v-list-item(
+            v-for="classification in classifications"
+            :key="classification.id"
+            @click="setValue(classification)"
+          )
+            v-list-item-content
               v-list-item-title {{ classification.code }}
               .caption {{ classification.name }}
 </template>
@@ -38,6 +42,8 @@ export default defineComponent({
     value: { type: String, required: true }
   },
   setup (props, { emit }) {
+    const { t } = useI18n()
+
     const { search, debounceSearch } = useDebounceSearch()
     search.value = debounceSearch.value = props.value
     const active = ref<boolean>(true)
@@ -67,7 +73,7 @@ export default defineComponent({
       emit('cancel')
     }
 
-    return { active, search, loading, classifications, count, totalCount, setValue, close }
+    return { t, active, search, loading, classifications, count, totalCount, setValue, close }
   }
 })
 </script>

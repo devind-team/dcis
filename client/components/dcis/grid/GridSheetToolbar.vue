@@ -29,7 +29,7 @@
         :label="t('dcis.grid.sheetToolbar.fontSize')"
         :items="sizes"
         :disabled="disabled"
-        style="width: 160px"
+        style="width: 170px"
         filled
         outlined
         hide-details
@@ -40,7 +40,7 @@
         :label="t('dcis.grid.sheetToolbar.kind')"
         :items="kinds"
         :disabled="disabled"
-        style="width: 160px"
+        style="width: 170px"
         filled
         outlined
         hide-details
