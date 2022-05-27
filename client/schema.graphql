@@ -719,12 +719,13 @@ input ChangeCellsOptionMutationInput {
 """
 Изменение свойств ячеек:
 
+- strong - true, false
+- italic - true, false
+- strike - true, false
+- underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
 - horizontal_align - ['left', 'center', 'right']
 - vertical_align - ['top', 'middle', 'bottom']
 - size - число от 6 до 24
-- strong - true, false
-- italic - true, false
-- underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
 - kind - [
     'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money',
     'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
@@ -732,7 +733,7 @@ input ChangeCellsOptionMutationInput {
 """
 type ChangeCellsOptionMutationPayload {
   """Измененные свойства ячеек"""
-  changedOptions: [ChangedCellOption!]!
+  changedOptions: [ChangedCellOption!]
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -804,7 +805,7 @@ type ChangeFileMutationPayload {
 input ChangeFileValueMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
-  columnId: Int!
+  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
   """Новые файлы"""
@@ -812,9 +813,9 @@ input ChangeFileValueMutationInput {
   """Оставшиеся файлы"""
   remainingFiles: [ID!]!
   """Идентификатор строки"""
-  rowId: Int!
+  rowId: ID!
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
   """Значение"""
   value: String!
 }
@@ -826,6 +827,10 @@ type ChangeFileValueMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+  """Дата изменения"""
+  updatedAt: DateTime!
+  """Измененное значение"""
+  value: String!
   """Измененные файлы"""
   valueFiles: [FileType]
 }
@@ -1272,13 +1277,13 @@ type ChangeUserPropsMutationPayload {
 input ChangeValueMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
-  columnId: Int!
+  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
   """Идентификатор строки"""
-  rowId: Int!
+  rowId: ID!
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
   """Значение"""
   value: String!
 }
@@ -1290,6 +1295,10 @@ type ChangeValueMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+  """Дата изменения"""
+  updatedAt: DateTime!
+  """Измененное значение"""
+  value: String!
 }
 
 """Измененное свойство ячейки."""
@@ -1299,7 +1308,7 @@ type ChangedCellOption {
   """Идентификатор поля"""
   field: String!
   """Значение поля"""
-  value: String!
+  value: String
 }
 
 """Тип колонки."""

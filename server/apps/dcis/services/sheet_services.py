@@ -1,13 +1,23 @@
 from argparse import ArgumentTypeError
-from typing import NamedTuple, Optional, Sequence, Union
+from datetime import datetime
+from os import path
+from pathlib import Path
+from typing import Any, NamedTuple, Optional, Sequence, Union, cast
+from zipfile import ZipFile
 
+from devind_core.models import File
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
+from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import F
+from django.utils.timezone import make_aware
+from openpyxl.utils import get_column_letter
 from stringcase import camelcase
 
 from apps.core.models import User
-from apps.dcis.models.sheet import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
+from apps.dcis.models import Document, RowDimension, Sheet, Value
+from apps.dcis.models.sheet import Cell, ColumnDimension
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
@@ -169,6 +179,83 @@ def change_cells_option(cells: Sequence[Cell], field: str, value: Optional[Union
         cell.save(update_fields=update_fields)
         result.append({'cell_id': cell.id, 'field': camelcase(field), 'value': value})
     return result
+
+
+class UpdateOrCrateValueResult(NamedTuple):
+    """Результат создания или обновления значения."""
+    value: Value
+    updated_at: datetime
+    created: bool
+
+
+def update_or_create_value(
+    document: Document,
+    sheet: Sheet,
+    column_id: int,
+    row_id: int,
+    value: str,
+    payload: Any = None
+) -> UpdateOrCrateValueResult:
+    """Создание или обновление значения."""
+    val, created = Value.objects.update_or_create(
+        column_id=column_id,
+        row_id=row_id,
+        document=document,
+        sheet=sheet,
+        defaults={
+            'value': value,
+            'payload': payload
+        }
+    )
+    updated_at = make_aware(datetime.now())
+    RowDimension.objects.filter(pk=row_id).update(updated_at=updated_at)
+    return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
+
+
+def update_or_create_file_value(
+    user: User,
+    document: Document,
+    sheet: Sheet,
+    column_id: int,
+    row_id: int,
+    value: str,
+    remaining_files: list[int],
+    new_files: list[InMemoryUploadedFile],
+) -> UpdateOrCrateValueResult:
+    """Изменение файлов значения ячейки типа `Файл`."""
+    payload = [*remaining_files]
+    for new_file in new_files:
+        payload.append(File.objects.create(
+            name=new_file.name,
+            src=new_file,
+            deleted=True,
+            user=user
+        ).pk)
+    return update_or_create_value(document, sheet, column_id, row_id, value, payload)
+
+
+def create_file_value_archive(value: Value) -> str:
+    """Создание архива значения ячейки типа `Файл`."""
+    cell = f'{get_column_letter(value.column.index)}{value.row.index}'
+    archive_path = f'{path.join(settings.TEMP_FILES_DIR, cell)}.zip'
+    with ZipFile(archive_path, 'w') as zip_file:
+        for file in get_file_value_files(value):
+            zip_file.write(file.src.path, path.basename(file.src.path))
+    return f'/{Path(path.relpath(archive_path, settings.BASE_DIR)).as_posix()}'
+
+
+def get_file_value_files(value: Value) -> list[File]:
+    """Получение файлов значения ячейки типа `Файл`."""
+    payload = get_file_value_payload(value)
+    files = File.objects.filter(pk__in=payload)
+    return sorted(files, key=lambda file: payload.index(file.pk))
+
+
+def get_file_value_payload(value: Value) -> list[int]:
+    """Получение дополнительных данных значения ячейки типа `Файл`."""
+    if value.payload is None:
+        return []
+    return cast(list[int], value.payload)
 
 
 def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False) -> None:
