@@ -23,13 +23,10 @@
 </template>
 
 <script lang="ts">
-import { camelCase } from 'scule'
 import { defineComponent, PropType, ref, useRouter } from '#app'
 import { DataProxy } from 'apollo-cache'
-import { ValidationObserver } from 'vee-validate'
-import { useAuthStore } from '~/stores'
 import { useI18n } from '~/composables'
-import { AddSectionTextMutationPayload, ErrorFieldType, PageType } from '~/types/graphql'
+import { AddSectionTextMutationPayload, PageType } from '~/types/graphql'
 import RichTextEditor from '~/components/common/editor/RichTextEditor.vue'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
 
@@ -37,9 +34,8 @@ export default defineComponent({
   components: { MutationForm, RichTextEditor },
   props: { page: { required: true, type: Object as PropType<PageType> } },
   setup (props, { emit }) {
-    const { t, localePath } = useI18n()
+    const { localePath } = useI18n()
     const router = useRouter()
-    const addSection = ref<InstanceType<typeof ValidationObserver>>(null)
 
     const toPage = ref(true)
     const text = ref('')
@@ -51,19 +47,14 @@ export default defineComponent({
      * @param errors
      * @param id Идентификатор новой секции
      */
-    const addSectionDone = (store: DataProxy, { data: { addSectionText: { success, errors, section } } }: { data: { addSectionText: AddSectionTextMutationPayload } }) => {
-      if (success) {
+    const addSectionDone = (store: DataProxy, { data: { addSectionText: { errors, section } } }: { data: { addSectionText: AddSectionTextMutationPayload } }) => {
+      if (!errors.length) {
         toPage.value
           ? router.push(localePath({ name: 'pages-pageId', params: { pageId: props.page.id } }))
           : router.push(localePath({
             name: 'pages-pageId-section-sectionId', params: { pageId: props.page.id, sectionId: section!.id as unknown as string }
           }))
         emit('done', store, section)
-      } else {
-        addSection.value.setErrors(errors.reduce(
-          (a: { [key: string]: string[] }, c: ErrorFieldType) => {
-            return { ...a, [t(`pages.section.names.${camelCase(c.field)}`) as string]: c.messages }
-          }, {}))
       }
     }
     return { toPage, text, addSectionDone }

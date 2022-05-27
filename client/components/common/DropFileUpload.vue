@@ -108,7 +108,7 @@ export default defineComponent({
     const filesSelected = (fileList: FileList) => {
       dragover.value = false
       error.value = false
-      emit('filesSelected', Array.from(fileList).filter(x => x.type && x.size))
+      emit('files-selected', Array.from(fileList).filter(x => x.type && x.size))
     }
     return { dragover, error }
   }
