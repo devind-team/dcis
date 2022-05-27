@@ -36,11 +36,11 @@ export function useAddRowDimensionMutation (
   rows: Ref<RowDimensionType[]>,
   sheetId: Ref<string>,
   documentId: Ref<string | null>,
-  updateSheet: UpdateType<SheetQuery>
+  updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) {
-      updateSheet(
+      updateSheet.value(
         dataProxy,
         result,
         (data: SheetQuery, {
@@ -148,13 +148,13 @@ function updateCellsPositions (row: RowDimensionFieldsFragment): void {
   }
 }
 
-export function useChangeColumnDimensionWidthMutation (updateSheet: UpdateType<SheetQuery>) {
+export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
   const { mutate } = useMutation<
     ChangeColumnDimensionMutation,
     ChangeColumnDimensionMutationVariables
   >(changeColumnDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) {
-      updateColumnDimension(updateSheet, dataProxy, result)
+      updateColumnDimension(updateSheet.value, dataProxy, result)
     }
   })
   return async function (columnDimension: ColumnDimensionType, width: number) {
@@ -205,13 +205,13 @@ export function updateColumnDimension (
   )
 }
 
-export function useChangeRowDimensionHeightMutation (updateSheet: UpdateType<SheetQuery>) {
+export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
   const { mutate } = useMutation<
     ChangeRowDimensionMutation,
     ChangeRowDimensionMutationVariables
   >(changeRowDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) {
-      updateRowDimension(updateSheet, dataProxy, result)
+      updateRowDimension(updateSheet.value, dataProxy, result)
     }
   })
   return async function (rowDimension: RowDimensionType, height: number) {
@@ -263,13 +263,13 @@ export function updateRowDimension (
   )
 }
 
-export function useChangeCellsOptionMutation (updateSheet: UpdateType<SheetQuery>) {
+export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
   const { mutate } = useMutation<
     ChangeCellsOptionMutation,
     ChangeCellsOptionMutationVariables
   >(changeCellsOptionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>) {
-      updateSheet(dataProxy, result, (
+      updateSheet.value(dataProxy, result, (
         data: SheetQuery, {
           data: { changeCellsOption: { success, changedOptions } }
         }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>

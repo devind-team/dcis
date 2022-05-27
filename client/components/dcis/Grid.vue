@@ -61,9 +61,9 @@
 </template>
 
 <script lang="ts">
-import { Ref } from '#app'
+import { PropType } from '#app'
 import { UpdateType } from '~/composables'
-import { SheetQuery, SheetType } from '~/types/graphql'
+import { SheetQuery, SheetType, DocumentType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
@@ -78,12 +78,25 @@ export default defineComponent({
     GridSelectionView,
     GridElementResizing
   },
-  setup () {
+  props: {
+    activeSheet: { type: Object as PropType<SheetType>, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateType<SheetQuery>>, required: true },
+    activeDocument: { type: Object as PropType<DocumentType>, required: true }
+  },
+  setup (props) {
     const { t } = useI18n()
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
-    const changeColumnWidth = useChangeColumnDimensionWidthMutation(updateSheet)
-    const changeRowHeight = useChangeRowDimensionHeightMutation(updateSheet)
+
+    const activeSheet = toRef(props, 'activeSheet')
+    const updateActiveSheet = toRef(props, 'updateActiveSheet')
+    const activeDocument = toRef(props, 'activeDocument')
+
+    provide('activeDocument', activeDocument)
+    provide('activeSheet', activeSheet)
+    provide('updateActiveSheet', updateActiveSheet)
+
+    const changeColumnWidth = useChangeColumnDimensionWidthMutation(updateActiveSheet)
+    const changeRowHeight = useChangeRowDimensionHeightMutation(updateActiveSheet)
+
     const {
       gridContainer,
       grid,

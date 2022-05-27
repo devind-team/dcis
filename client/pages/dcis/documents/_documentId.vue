@@ -10,7 +10,12 @@
         v-tab(v-for="sheet in activeDocument.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
       v-tabs-items(v-model="active")
         v-tab-item(v-for="sheet in activeDocument.sheets" :key="sheet.id")
-          grid(v-if="!activeSheetLoading && activeSheet")
+          grid(
+            v-if="!activeSheetLoading && activeSheet"
+            :active-sheet="activeSheet"
+            :update-active-sheet="updateActiveSheet"
+            :active-document="activeDocument"
+          )
           v-progress-circular(v-else color="primary" indeterminate)
     v-progress-circular(v-else color="primary" indeterminate)
 </template>
@@ -58,10 +63,6 @@ export default defineComponent({
       })
     })
 
-    provide('activeDocument', activeDocument)
-    provide('activeSheet', activeSheet)
-    provide('updateActiveSheet', updateActiveSheet)
-
     const setFooter = inject<(state: boolean) => void>('setFooter')
     setFooter(false)
     onUnmounted(() => {
@@ -74,7 +75,8 @@ export default defineComponent({
       activeDocument,
       activeDocumentLoading,
       activeSheet,
-      activeSheetLoading
+      activeSheetLoading,
+      updateActiveSheet
     }
   }
 })

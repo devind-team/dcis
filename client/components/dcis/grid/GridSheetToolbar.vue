@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
+import { PropType, Ref } from '#app'
 import { UpdateType } from '~/composables'
 import { SheetQuery } from '~/types/graphql'
 import { CellsOptionsType } from '~/types/grid'
@@ -61,7 +61,7 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
-    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(updateSheet)
 
     const disabled = computed<boolean>(() => !props.selectedCellsOptions)

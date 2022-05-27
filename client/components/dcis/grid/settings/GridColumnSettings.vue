@@ -34,8 +34,8 @@
 <script lang="ts">
 import { DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
-import { PropType } from '#app'
-import {updateColumnDimension, UpdateType} from '~/composables'
+import { PropType, Ref } from '#app'
+import { updateColumnDimension, UpdateType } from '~/composables'
 import { cellKinds } from '~/composables/grid'
 import {
   SheetQuery,
@@ -65,11 +65,11 @@ export default defineComponent({
     })
 
     const kind = ref<{ text: string, value: string }>({
-      text: t(`dcis.cellKinds.${props.column.kind}`) as string,
+      text: t(`dcis.grid.cellKinds.${props.column.kind}`) as string,
       value: props.column.kind
     })
     const kinds = computed<{ text: string, value: string }[]>(() => (
-      Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))
+      Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.grid.cellKinds.${k}`) as string, value: k })))
     )
 
     const variables = computed<ChangeColumnDimensionMutationVariables>(() => ({
@@ -90,9 +90,9 @@ export default defineComponent({
       }
     }))
 
-    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) => {
-      updateColumnDimension(updateSheet, dataProxy, result)
+      updateColumnDimension(updateSheet.value, dataProxy, result)
     }
 
     return {

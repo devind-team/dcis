@@ -38,7 +38,7 @@
 <script lang="ts">
 import { DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
-import { PropType } from '#app'
+import { PropType, Ref } from '#app'
 import { UpdateType } from '~/composables'
 import {
   SheetQuery,
@@ -86,9 +86,9 @@ export default defineComponent({
       }
     }))
 
-    const updateSheet = inject<UpdateType<SheetQuery>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) => {
-      updateRowDimension(updateSheet, dataProxy, result)
+      updateRowDimension(updateSheet.value, dataProxy, result)
     }
 
     return {
