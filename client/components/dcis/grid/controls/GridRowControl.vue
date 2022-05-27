@@ -53,9 +53,9 @@ export default defineComponent({
     const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
 
     const addRowDimension = useAddRowDimensionMutation(
-      computed(() => activeSheet.value.rows),
-      computed(() => activeSheet.value.id),
-      computed(() => activeDocument.value.id),
+      toRef(activeSheet.value, 'rows'),
+      toRef(activeSheet.value, 'id'),
+      toRef(activeDocument.value, 'id'),
       updateSheet
     )
 

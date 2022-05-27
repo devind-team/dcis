@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import F
-from django.utils.timezone import make_aware
+from django.utils.timezone import now
 from openpyxl.utils import get_column_letter
 from stringcase import camelcase
 
@@ -207,7 +207,7 @@ def update_or_create_value(
             'payload': payload
         }
     )
-    updated_at = make_aware(datetime.now())
+    updated_at = now()
     RowDimension.objects.filter(pk=row_id).update(updated_at=updated_at)
     return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
 

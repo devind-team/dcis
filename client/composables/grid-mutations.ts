@@ -5,11 +5,13 @@ import { Ref } from '#app'
 import { UpdateType } from '~/composables/query-common'
 import {
   SheetQuery,
+  SheetType,
   RowDimensionType,
   RowDimensionFieldsFragment,
   ColumnDimensionType,
   ColumnDimensionFieldsFragment,
   CellType,
+  CellFieldsFragment,
   GlobalIndicesInputType,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables,
@@ -18,13 +20,16 @@ import {
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables,
   ChangeCellsOptionMutation,
-  ChangeCellsOptionMutationVariables, SheetType
+  ChangeCellsOptionMutationVariables,
+  ChangeValueMutation,
+  ChangeValueMutationVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
+import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
 
 export enum AddRowDimensionPosition {
   BEFORE,
@@ -295,6 +300,52 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<SheetQ
       cellIds: cells.map((cell: CellType) => cell.id),
       field,
       value
+    })
+  }
+}
+
+export function useChangeValueMutation (
+  sheetId: Ref<string>,
+  documentId: Ref<string | null>,
+  updateSheet: Ref<UpdateType<SheetQuery>>
+) {
+  const { mutate } = useMutation<
+    ChangeValueMutation,
+    ChangeValueMutationVariables
+  >(changeValueMutation)
+  return async function (cell: CellType, value: string) {
+    await mutate({
+      documentId: documentId.value,
+      sheetId: sheetId.value,
+      columnId: cell.columnId,
+      rowId: cell.rowId,
+      value
+    }, {
+      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) {
+        updateSheet.value(dataProxy, result, (
+          data: SheetQuery, {
+            data: { changeValue: { success, value, updatedAt } }
+          }: Omit<FetchResult<ChangeValueMutation>, 'context'>
+        ) => {
+          if (success) {
+            const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
+            dataRow.updatedAt = updatedAt
+            const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
+            dataCell.value = value
+          }
+          return data
+        })
+      },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeValue: {
+          __typename: 'ChangeValueMutationPayload',
+          success: true,
+          errors: [],
+          value,
+          updatedAt: new Date().toISOString()
+        }
+      }
     })
   }
 }
