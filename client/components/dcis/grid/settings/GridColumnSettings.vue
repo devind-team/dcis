@@ -57,11 +57,11 @@ export default defineComponent({
 
     const { dateTimeHM } = useFilters()
 
-    const width = ref<number>(props.getColumnWidth(props.column))
+    const width = ref<string>(String(props.getColumnWidth(props.column)))
     const fixed = ref<boolean>(props.column.fixed)
     const hidden = ref<boolean>(props.column.hidden)
     watch(computed<number>(() => props.getColumnWidth(props.column)), (newValue: number) => {
-      width.value = newValue
+      width.value = String(newValue)
     })
 
     const kind = ref<{ text: string, value: string }>({
@@ -74,7 +74,7 @@ export default defineComponent({
 
     const variables = computed<ChangeColumnDimensionMutationVariables>(() => ({
       columnDimensionId: props.column.id,
-      width: width.value,
+      width: +width.value,
       fixed: fixed.value,
       hidden: hidden.value,
       kind: kind.value.value

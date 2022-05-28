@@ -60,17 +60,17 @@ export default defineComponent({
 
     const { dateTimeHM } = useFilters()
 
-    const height = ref<number>(props.getRowHeight(props.row))
+    const height = ref<string>(String(props.getRowHeight(props.row)))
     const fixed = ref<boolean>(props.row.fixed)
     const hidden = ref<boolean>(props.row.hidden)
     const dynamic = ref<boolean>(props.row.dynamic)
     watch(computed<number>(() => props.getRowHeight(props.row)), (newValue: number) => {
-      height.value = newValue
+      height.value = String(newValue)
     })
 
     const variables = computed<ChangeRowDimensionMutationVariables>(() => ({
       rowDimensionId: props.row.id,
-      height: height.value,
+      height: +height.value,
       fixed: fixed.value,
       hidden: hidden.value,
       dynamic: dynamic.value
