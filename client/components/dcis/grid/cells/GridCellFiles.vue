@@ -78,7 +78,7 @@ export default defineComponent({
     }
 
     const existingFiles = ref<ValueFile[]>([])
-    watch(props.files, (value) => {
+    watch(() => props.files, (value) => {
       if (value) {
         existingFiles.value = value.map((file: FileType) => ({ file, deleted: false }))
       }

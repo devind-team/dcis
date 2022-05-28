@@ -72,12 +72,23 @@ export default defineComponent({
       updateSheet
     )
 
+    const changeFileValue = useChangeFileValueMutation(
+      toRef(activeSheet.value, 'id'),
+      toRef(activeDocument.value, 'id'),
+      updateSheet,
+      updateFiles
+    )
+
     const setValue = async (value: string) => {
-      await changeValue(props.cell, value)
+      emit('clear-active')
+      if (props.cell.value !== value) {
+        await changeValue(props.cell, value)
+      }
     }
 
     const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {
-      await console.log(value, remainingFiles, newFiles)
+      emit('clear-active')
+      await changeFileValue(props.cell, value, remainingFiles, newFiles)
     }
 
     const cancel = () => {

@@ -5,6 +5,7 @@ import { Ref } from '#app'
 import { UpdateType } from '~/composables/query-common'
 import {
   SheetQuery,
+  ValueFilesQuery,
   SheetType,
   RowDimensionType,
   RowDimensionFieldsFragment,
@@ -22,7 +23,9 @@ import {
   ChangeCellsOptionMutation,
   ChangeCellsOptionMutationVariables,
   ChangeValueMutation,
-  ChangeValueMutationVariables
+  ChangeValueMutationVariables,
+  ChangeFileValueMutation,
+  ChangeFileValueMutationVariables, ValueFilesQueryVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
@@ -30,6 +33,8 @@ import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimensio
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
+import changeFileValueMutation from '~/gql/dcis/mutations/sheet/change_file_value.graphql'
+import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 
 export enum AddRowDimensionPosition {
   BEFORE,
@@ -45,21 +50,17 @@ export function useAddRowDimensionMutation (
 ) {
   const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) {
-      updateSheet.value(
-        dataProxy,
-        result,
-        (data: SheetQuery, {
-          data: {
-            addRowDimension: {
-              success, rowDimension
-            }
-          }
-        }: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) => {
-          if (success) {
+      if (result.data.addRowDimension.success) {
+        updateSheet.value(
+          dataProxy,
+          result,
+          (data: SheetQuery, {
+            data: { addRowDimension: { rowDimension } }
+          }: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) => {
             data.sheet.rows = addRow(data.sheet.rows, rowDimension)
-          }
-          return data
-        })
+            return data
+          })
+      }
     }
   })
   return async function (rowDimension: RowDimensionType, position: AddRowDimensionPosition) {
@@ -190,24 +191,24 @@ export function updateColumnDimension (
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
 ) {
-  updateSheet(
-    dataProxy,
-    result,
-    (
-      data: SheetQuery,
-      { data: { changeColumnDimension } }: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
-    ) => {
-      if (changeColumnDimension.success) {
+  if (result.data.changeColumnDimension.success) {
+    updateSheet(
+      dataProxy,
+      result,
+      (
+        data: SheetQuery,
+        { data: { changeColumnDimension } }: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
+      ) => {
         const columnDimension = data.sheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
           columnDimension.id === changeColumnDimension.columnDimensionId)!
         columnDimension.width = changeColumnDimension.width
         columnDimension.fixed = changeColumnDimension.fixed
         columnDimension.hidden = changeColumnDimension.hidden
         columnDimension.updatedAt = changeColumnDimension.updatedAt
+        return data
       }
-      return data
-    }
-  )
+    )
+  }
 }
 
 export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
@@ -247,14 +248,14 @@ export function updateRowDimension (
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
 ) {
-  updateSheet(
-    dataProxy,
-    result,
-    (
-      data: SheetQuery,
-      { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
-    ) => {
-      if (changeRowDimension.success) {
+  if (result.data.changeRowDimension.success) {
+    updateSheet(
+      dataProxy,
+      result,
+      (
+        data: SheetQuery,
+        { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
+      ) => {
         const rowDimension = data.sheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
           rowDimension.id === changeRowDimension.rowDimensionId)!
         rowDimension.height = changeRowDimension.height
@@ -262,26 +263,49 @@ export function updateRowDimension (
         rowDimension.hidden = changeRowDimension.hidden
         rowDimension.dynamic = changeRowDimension.dynamic
         rowDimension.updatedAt = changeRowDimension.updatedAt
+        return data
       }
-      return data
-    }
-  )
+    )
+  }
 }
 
-export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
+export function useChangeCellsOptionMutation (
+  sheetId: Ref<string>,
+  documentId: Ref<string | null>,
+  updateSheet: Ref<UpdateType<SheetQuery>>
+) {
   const { mutate } = useMutation<
     ChangeCellsOptionMutation,
     ChangeCellsOptionMutationVariables
   >(changeCellsOptionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>) {
-      updateSheet.value(dataProxy, result, (
-        data: SheetQuery, {
-          data: { changeCellsOption: { success, changedOptions } }
-        }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
-      ) => {
-        if (success) {
+      if (result.data.changeCellsOption.success) {
+        updateSheet.value(dataProxy, result, (
+          data: SheetQuery, {
+            data: { changeCellsOption: { changedOptions } }
+          }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
+        ) => {
           for (const option of changedOptions) {
             const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === option.cellId)
+            if (cell.kind === 'fl' && option.field === 'kind' && option.value !== 'fl') {
+              try {
+                const variables: ValueFilesQueryVariables = {
+                  sheetId: sheetId.value,
+                  documentId: documentId.value,
+                  columnId: cell.columnId,
+                  rowId: cell.rowId
+                }
+                dataProxy.readQuery<ValueFilesQuery, ValueFilesQueryVariables>({
+                  query: valueFilesQuery,
+                  variables
+                })
+                dataProxy.writeQuery<ValueFilesQuery, ValueFilesQueryVariables>({
+                  data: { valueFiles: [] },
+                  query: valueFilesQuery,
+                  variables
+                })
+              } catch (_) {}
+            }
             if (option.field === 'size') {
               cell[option.field] = Number(option.value)
             } else if (['strong', 'italic', 'strike'].includes(option.field)) {
@@ -290,9 +314,9 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<SheetQ
               cell[option.field] = option.value
             }
           }
-        }
-        return data
-      })
+          return data
+        })
+      }
     }
   })
   return async function (cells: CellType[], field: string, value: string) {
@@ -322,19 +346,19 @@ export function useChangeValueMutation (
       value
     }, {
       update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) {
-        updateSheet.value(dataProxy, result, (
-          data: SheetQuery, {
-            data: { changeValue: { success, value, updatedAt } }
-          }: Omit<FetchResult<ChangeValueMutation>, 'context'>
-        ) => {
-          if (success) {
+        if (result.data.changeValue.success) {
+          updateSheet.value(dataProxy, result, (
+            data: SheetQuery, {
+              data: { changeValue: { value, updatedAt } }
+            }: Omit<FetchResult<ChangeValueMutation>, 'context'>
+          ) => {
             const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
             dataRow.updatedAt = updatedAt
             const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
             dataCell.value = value
-          }
-          return data
-        })
+            return data
+          })
+        }
       },
       optimisticResponse: {
         __typename: 'Mutation',
@@ -344,6 +368,53 @@ export function useChangeValueMutation (
           errors: [],
           value,
           updatedAt: new Date().toISOString()
+        }
+      }
+    })
+  }
+}
+
+export function useChangeFileValueMutation (
+  sheetId: Ref<string>,
+  documentId: Ref<string | null>,
+  updateSheet: Ref<UpdateType<SheetQuery>>,
+  updateFiles: UpdateType<ValueFilesQuery>
+) {
+  const { mutate } = useMutation<
+    ChangeFileValueMutation,
+    ChangeFileValueMutationVariables
+  >(changeFileValueMutation)
+  return async function (cell: CellType, value: string, remainingFiles: string[], newFiles: File[]) {
+    await mutate({
+      documentId: documentId.value,
+      sheetId: sheetId.value,
+      columnId: cell.columnId,
+      rowId: cell.rowId,
+      value,
+      remainingFiles,
+      newFiles
+    }, {
+      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeFileValueMutation>, 'context'>) {
+        if (result.data.changeFileValue.success) {
+          updateSheet.value(dataProxy, result, (
+            data: SheetQuery, {
+              data: { changeFileValue: { value, updatedAt } }
+            }: Omit<FetchResult<ChangeFileValueMutation>, 'context'>
+          ) => {
+            const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
+            dataRow.updatedAt = updatedAt
+            const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
+            dataCell.value = value
+            return data
+          })
+          updateFiles(dataProxy, result, (
+            data: ValueFilesQuery, {
+              data: { changeFileValue: { valueFiles } }
+            }: Omit<FetchResult<ChangeFileValueMutation>, 'context'>
+          ) => {
+            data.valueFiles = valueFiles
+            return data
+          })
         }
       }
     })
