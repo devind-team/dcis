@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import graphene
 from devind_core.schema import FileType
@@ -14,7 +14,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
 
-from apps.dcis.models import Cell, ColumnDimension, Document, RowDimension, Sheet, Value
+from apps.dcis.models import Cell, ColumnDimension, RowDimension, Sheet, Value
 from apps.dcis.schema.types import ChangedCellOption, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
@@ -53,7 +53,7 @@ class ChangeColumnDimensionMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         column_dimension_id: str,
-        width: Optional[int],
+        width: int | None,
         fixed: bool,
         hidden: bool,
         kind: str
@@ -97,9 +97,9 @@ class AddRowDimensionMutation(BaseMutation):
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        document_id: Optional[str],
+        document_id: str | None,
         sheet_id: int,
-        parent_id: Optional[str],
+        parent_id: str | None,
         index: int,
         global_index: int,
         global_indices: list[GlobalIndicesInputType]
@@ -108,7 +108,7 @@ class AddRowDimensionMutation(BaseMutation):
             row_dimension=add_row_dimension(
                 user=info.context.user,
                 sheet=get_object_or_404(Sheet, pk=sheet_id),
-                document=get_object_or_404(Document, pk=from_global_id(document_id)[1]),
+                document_id=from_global_id(document_id)[1],
                 parent_id=int(parent_id) if parent_id else None,
                 index=index,
                 global_index=global_index,
@@ -140,7 +140,7 @@ class ChangeRowDimensionMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         row_dimension_id: str,
-        height: Optional[int],
+        height: int | None,
         fixed: bool,
         hidden: bool,
         dynamic: bool
@@ -215,7 +215,7 @@ class ChangeCellsOptionMutation(BaseMutation):
         info: ResolveInfo,
         cell_ids: list[int],
         field: str,
-        value: Optional[str] = None
+        value: str | None = None
     ):
         field = snakecase(field)
         match CheckCellOptions(field, value):
@@ -250,11 +250,9 @@ class ChangeValueMutation(BaseMutation):
         row_id: str,
         value: str
     ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
         result = update_or_create_value(
-            document=document,
-            sheet=sheet,
+            document_id=from_global_id(document_id)[1],
+            sheet_id=sheet_id,
             column_id=column_id,
             row_id=row_id,
             value=value
@@ -291,12 +289,10 @@ class ChangeFileValueMutation(BaseMutation):
         remaining_files: list[str],
         new_files: list[InMemoryUploadedFile]
     ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
         result = update_or_create_file_value(
             user=info.context.user,
-            document=document,
-            sheet=sheet,
+            document_id=from_global_id(document_id)[1],
+            sheet_id=sheet_id,
             column_id=column_id,
             row_id=row_id,
             value=value,

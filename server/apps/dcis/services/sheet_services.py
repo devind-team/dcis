@@ -2,7 +2,7 @@ from argparse import ArgumentTypeError
 from datetime import datetime
 from os import path
 from pathlib import Path
-from typing import Any, NamedTuple, Optional, Sequence, Union, cast
+from typing import Any, NamedTuple, Sequence, cast
 from zipfile import ZipFile
 
 from devind_core.models import File
@@ -16,14 +16,14 @@ from openpyxl.utils import get_column_letter
 from stringcase import camelcase
 
 from apps.core.models import User
-from apps.dcis.models import Document, RowDimension, Sheet, Value
+from apps.dcis.models import RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
 def change_column_dimension(
     column_dimension: ColumnDimension,
-    width: Optional[int],
+    width: int | None,
     fixed: bool,
     hidden: bool,
     kind: str
@@ -41,8 +41,8 @@ def change_column_dimension(
 def add_row_dimension(
     user: User,
     sheet: Sheet,
-    document: Optional[Document],
-    parent_id: Optional[int],
+    document_id: str | int,
+    parent_id: int | None,
     index: int,
     global_index: int,
     global_indices_map: dict[int, int]
@@ -60,7 +60,7 @@ def add_row_dimension(
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
         index=index,
-        document=document,
+        document_id=document_id,
         parent_id=parent_id,
         dynamic=bool(parent_id),
         user=user
@@ -83,7 +83,7 @@ def add_row_dimension(
 
 def change_row_dimension(
     row_dimension: RowDimension,
-    height: Optional[int],
+    height: int,
     fixed: bool,
     hidden: bool,
     dynamic: bool
@@ -101,13 +101,13 @@ class CheckCellOptions:
     """Проверка возможности изменения свойств ячеек."""
 
     class Success(NamedTuple):
-        value: Union[str, int, bool]
+        value: str | int | bool
 
     class Error(NamedTuple):
         field: str
         error: str
 
-    def __new__(cls, field: str, value: str) -> Union[Success, Error]:
+    def __new__(cls, field: str, value: str) -> Success | Error:
         if field not in cls._allowed_fields:
             return cls.Error('field', f'Свойство не в списке разрешенных: {field} -> {", ".join(cls._allowed_fields)}.')
         if field == 'horizontal_align':
@@ -147,13 +147,13 @@ class CheckCellOptions:
     _allowed_kinds = [kind[0] for kind in Cell.KIND_VALUE]
 
     @staticmethod
-    def _get_value_error_message(field: str, value: str, allowed_values: list[Union[str, None]]) -> str:
+    def _get_value_error_message(field: str, value: str, allowed_values: list[str | None]) -> str:
         """Получение сообщения ошибки для значения."""
         str_allowed_values = ', '.join(['null' if v is None else v for v in allowed_values])
         return f'Значение свойства {field} не в списке разрешенных: {value} -> {str_allowed_values}.'
 
     @classmethod
-    def _standard_check(cls, field: str, value: str, allowed_values: list[Union[str, None]]) -> Union[Success, Error]:
+    def _standard_check(cls, field: str, value: str, allowed_values: list[str | None]) -> Success | Error:
         """Проверка для большинства случаев."""
         if value in allowed_values:
             return cls.Success(value)
@@ -161,7 +161,7 @@ class CheckCellOptions:
 
 
 @transaction.atomic
-def change_cells_option(cells: Sequence[Cell], field: str, value: Optional[Union[str, int, bool]]) -> list[dict]:
+def change_cells_option(cells: Sequence[Cell], field: str, value:  str | int | bool | None) -> list[dict]:
     """Изменение свойств ячеек."""
     result: list[dict] = []
     for cell in cells:
@@ -189,10 +189,10 @@ class UpdateOrCrateValueResult(NamedTuple):
 
 
 def update_or_create_value(
-    document: Document,
-    sheet: Sheet,
-    column_id: Union[int, str],
-    row_id: Union[int, str],
+    document_id: int | str,
+    sheet_id: int | str,
+    column_id: int | str,
+    row_id: int | str,
     value: str,
     payload: Any = None
 ) -> UpdateOrCrateValueResult:
@@ -200,8 +200,8 @@ def update_or_create_value(
     val, created = Value.objects.update_or_create(
         column_id=column_id,
         row_id=row_id,
-        document=document,
-        sheet=sheet,
+        document_id=document_id,
+        sheet_id=sheet_id,
         defaults={
             'value': value,
             'payload': payload
@@ -214,10 +214,10 @@ def update_or_create_value(
 
 def update_or_create_file_value(
     user: User,
-    document: Document,
-    sheet: Sheet,
-    column_id: Union[int, str],
-    row_id: Union[int, str],
+    document_id: int | str,
+    sheet_id: int | str,
+    column_id: int | str,
+    row_id: int | str,
     value: str,
     remaining_files: list[int],
     new_files: list[InMemoryUploadedFile],
@@ -231,7 +231,7 @@ def update_or_create_file_value(
             deleted=True,
             user=user
         ).pk)
-    return update_or_create_value(document, sheet, column_id, row_id, value, payload)
+    return update_or_create_value(document_id, sheet_id, column_id, row_id, value, payload)
 
 
 def create_file_value_archive(value: Value) -> str:
