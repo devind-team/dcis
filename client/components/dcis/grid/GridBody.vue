@@ -28,7 +28,7 @@
         grid-cell(
           :style="getCellContentStyle(row, cell)"
           :cell="cell"
-          :active="activeCell && activeCell.id === cell.id"
+          :active="!!activeCell && activeCell.id === cell.id"
           @clear-active="setActiveCell(null)"
         )
 </template>

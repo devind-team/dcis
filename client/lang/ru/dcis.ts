@@ -50,7 +50,6 @@ export default {
     },
     changeValue: 'Изменение значения',
     cellFiles: {
-      title: 'Изменение файлов',
       file: 'Файл №{number}',
       newFiles: 'Новые файлы',
       uploadArchive: 'Скачать архив'

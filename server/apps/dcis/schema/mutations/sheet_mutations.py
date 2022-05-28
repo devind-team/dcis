@@ -245,9 +245,9 @@ class ChangeValueMutation(BaseMutation):
         root: None,
         info: ResolveInfo,
         document_id: str,
-        sheet_id: int,
-        column_id: int,
-        row_id: int,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
         value: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
@@ -284,11 +284,11 @@ class ChangeFileValueMutation(BaseMutation):
         root: None,
         info: ResolveInfo,
         document_id: str,
-        sheet_id: int,
-        column_id: int,
-        row_id: int,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
         value: str,
-        remaining_files: list[int],
+        remaining_files: list[str],
         new_files: list[InMemoryUploadedFile]
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])

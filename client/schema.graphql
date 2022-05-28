@@ -3028,6 +3028,17 @@ type Query {
   ): UserType
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+  """Файлы значения ячейки типа `Файл`"""
+  valueFiles(
+    """Идентификатор колонки"""
+    columnId: ID!
+    """Идентификатор документа"""
+    documentId: ID!
+    """Идентификатор строки"""
+    rowId: ID!
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): [FileType!]
 }
 
 input RecoveryPasswordMutationInput {

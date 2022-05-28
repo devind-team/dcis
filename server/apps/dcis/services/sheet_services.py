@@ -170,9 +170,9 @@ def change_cells_option(cells: Sequence[Cell], field: str, value: Optional[Union
             cell.default = 'Нет'
             update_fields.append('default')
             values = list(Value.objects.filter(column__id=cell.column_id, row__id=cell.row_id).all())
-            for value in values:
-                value.payload = None
-                value.value = 'Нет'
+            for val in values:
+                val.payload = None
+                val.value = 'Нет'
             Value.objects.bulk_update(values, ('payload', 'value',))
             result.append({'cell_id': cell.id, 'field': 'value', 'value': cell.default})
         setattr(cell, field, value)
@@ -191,8 +191,8 @@ class UpdateOrCrateValueResult(NamedTuple):
 def update_or_create_value(
     document: Document,
     sheet: Sheet,
-    column_id: int,
-    row_id: int,
+    column_id: Union[int, str],
+    row_id: Union[int, str],
     value: str,
     payload: Any = None
 ) -> UpdateOrCrateValueResult:
@@ -216,8 +216,8 @@ def update_or_create_file_value(
     user: User,
     document: Document,
     sheet: Sheet,
-    column_id: int,
-    row_id: int,
+    column_id: Union[int, str],
+    row_id: Union[int, str],
     value: str,
     remaining_files: list[int],
     new_files: list[InMemoryUploadedFile],

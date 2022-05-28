@@ -3495,6 +3495,8 @@ export type Query = {
   userInformation?: Maybe<UserType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
+  /** Файлы значения ячейки типа `Файл` */
+  valueFiles?: Maybe<Array<FileType>>;
 };
 
 /** Схема запросов данных. */
@@ -3766,6 +3768,14 @@ export type QueryUsersArgs = {
   offset?: InputMaybe<Scalars['Int']>;
   sirName_Icontains?: InputMaybe<Scalars['String']>;
   username_Icontains?: InputMaybe<Scalars['String']>;
+};
+
+/** Схема запросов данных. */
+export type QueryValueFilesArgs = {
+  columnId: Scalars['ID'];
+  documentId: Scalars['ID'];
+  rowId: Scalars['ID'];
+  sheetId: Scalars['ID'];
 };
 
 export type RecoveryPasswordMutationInput = {
@@ -5034,6 +5044,15 @@ export type UserDivisionsQueryVariables = Exact<{
 }>;
 
 export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
+
+export type ValueFilesQueryVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+  columnId: Scalars['ID'];
+  rowId: Scalars['ID'];
+}>;
+
+export type ValueFilesQuery = { __typename?: 'Query', valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any }> | null };
 
 export type MailingFieldsFragment = { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any };
 
