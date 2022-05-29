@@ -1605,7 +1605,7 @@ type DeleteProjectMutationPayload {
 input DeleteRowDimensionMutationInput {
   clientMutationId: String
   """Идентификатор строки"""
-  rowId: Int!
+  rowDimensionId: ID!
 }
 
 """Удаление строки."""
@@ -1613,10 +1613,8 @@ type DeleteRowDimensionMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Измененные строки"""
-  index: Int!
   """Идентификатор удаленной строки"""
-  rowId: Int!
+  rowDimensionId: ID!
   """Успех мутации"""
   success: Boolean!
 }

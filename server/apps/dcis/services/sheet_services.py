@@ -12,7 +12,6 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import F
 from django.utils.timezone import now
-from openpyxl.utils import get_column_letter
 from stringcase import camelcase
 
 from apps.core.models import User
@@ -52,11 +51,7 @@ def add_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
-    if parent_id:
-        rows = RowDimension.objects.filter(parent_id=parent_id)
-    else:
-        rows = sheet.rowdimension_set
-    rows.filter(parent_id=parent_id, index__gte=index).update(index=F('index') + 1)
+    sheet.rowdimension_set.filter(parent_id=parent_id, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
         index=index,
@@ -95,6 +90,20 @@ def change_row_dimension(
     row_dimension.dynamic = dynamic
     row_dimension.save(update_fields=('height', 'fixed', 'hidden', 'dynamic', 'updated_at'))
     return row_dimension
+
+
+@transaction.atomic
+def delete_row_dimension(row_dimension: RowDimension) -> int:
+    """Удаление строки."""
+    row_dimension_id = row_dimension.id
+    row_dimension.delete()
+    row_dimension.sheet.rowdimension_set.filter(
+        parent_id=row_dimension.parent_id,
+        index__gt=row_dimension.index,
+    ).update(index=F('index') - 1)
+    if not row_dimension.parent_id:
+        move_merged_cells(row_dimension.sheet, row_dimension.index, -1, True)
+    return row_dimension_id
 
 
 class CheckCellOptions:

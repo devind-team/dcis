@@ -8,7 +8,6 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db.models import F
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
@@ -23,8 +22,8 @@ from apps.dcis.services.sheet_services import (
     change_column_dimension,
     change_row_dimension,
     create_file_value_archive,
+    delete_row_dimension,
     get_file_value_files,
-    move_merged_cells,
     update_or_create_file_value,
     update_or_create_value,
 )
@@ -166,20 +165,18 @@ class DeleteRowDimensionMutation(BaseMutation):
     """Удаление строки."""
 
     class Input:
-        row_id = graphene.Int(required=True, description='Идентификатор строки')
+        row_dimension_id = graphene.ID(required=True, description='Идентификатор строки')
 
-    row_id = graphene.Int(required=True, description='Идентификатор удаленной строки')
-    index = graphene.Int(required=True, description='Измененные строки')
+    row_dimension_id = graphene.ID(required=True, description='Идентификатор удаленной строки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, row_id: int):
-        row: RowDimension = get_object_or_404(RowDimension, pk=row_id)
-        sheet: Sheet = Sheet.objects.get(pk=row.sheet_id)
-        row.delete()
-        sheet.rowdimension_set.filter(index__gt=row.index).update(index=F('index') - 1)
-        move_merged_cells(sheet, row.index, -1, True)
-        return DeleteRowDimensionMutation(row_id=row_id, index=row.index, merged_cells=sheet.mergedcell_set.all())
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
+        return DeleteRowDimensionMutation(
+            row_dimension_id=delete_row_dimension(
+                row_dimension=get_object_or_404(RowDimension, pk=row_dimension_id)
+            )
+        )
 
 
 class ChangeCellsOptionMutation(BaseMutation):

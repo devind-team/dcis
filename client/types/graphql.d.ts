@@ -1734,7 +1734,7 @@ export type DeleteProjectMutationPayload = {
 export type DeleteRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор строки */
-  rowId: Scalars['Int'];
+  rowDimensionId: Scalars['ID'];
 };
 
 /** Удаление строки. */
@@ -1743,10 +1743,8 @@ export type DeleteRowDimensionMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
-  /** Измененные строки */
-  index: Scalars['Int'];
   /** Идентификатор удаленной строки */
-  rowId: Scalars['Int'];
+  rowDimensionId: Scalars['ID'];
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -4962,10 +4960,10 @@ export type ChangeValueMutationVariables = Exact<{
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, value: string, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
-  rowId: Scalars['Int'];
+  rowDimensionId: Scalars['ID'];
 }>;
 
-export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowId: number, index: number } };
+export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowDimensionId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];

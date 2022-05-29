@@ -24,7 +24,7 @@
         v-list-item-icon
           v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addChildRow') }}
-      v-list-item(@click="deleteRowDimension(+row.id)")
+      v-list-item(@click="deleteRowDimension(row)")
         v-list-item-icon
           v-icon(color="error") mdi-table-row-remove
         v-list-item-content(color="error") {{ t('dcis.grid.rowControl.deleteRow') }}
@@ -59,9 +59,7 @@ export default defineComponent({
       updateSheet
     )
 
-    const deleteRowDimension = (rowId: number) => {
-      console.log('deleteRowDimension', rowId)
-    }
+    const deleteRowDimension = useDeleteRowDimensionMutation(updateSheet)
 
     return {
       t,

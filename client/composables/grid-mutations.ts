@@ -15,10 +15,12 @@ import {
   CellType,
   CellFieldsFragment,
   GlobalIndicesInputType,
-  ChangeColumnDimensionMutation,
-  ChangeColumnDimensionMutationVariables,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
+  DeleteRowDimensionMutation,
+  DeleteRowDimensionMutationVariables,
+  ChangeColumnDimensionMutation,
+  ChangeColumnDimensionMutationVariables,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables,
   ChangeCellsOptionMutation,
@@ -31,8 +33,9 @@ import {
   UnloadFileValueArchiveMutationVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
-import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
+import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
+import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
@@ -93,6 +96,32 @@ export function useAddRowDimensionMutation (
   }
 }
 
+export function useDeleteRowDimensionMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
+  const { mutate } = useMutation<
+    DeleteRowDimensionMutation,
+    DeleteRowDimensionMutationVariables
+  >(deleteRowDimensionMutation)
+  return async function (rowDimension: RowDimensionType) {
+    await mutate({ rowDimensionId: rowDimension.id }, {
+      update (dataProxy: DataProxy, result: Omit<FetchResult<DeleteRowDimensionMutation>, 'context'>) {
+        if (result.data.deleteRowDimension.success) {
+          updateSheet.value(
+            dataProxy,
+            result,
+            (
+              data: SheetQuery, {
+                data: { deleteRowDimension: { rowDimensionId } }
+              }: Omit<FetchResult<DeleteRowDimensionMutation>, 'context'>
+            ) => {
+              data.sheet.rows = deleteRow(data.sheet.rows, rowDimensionId)
+              return data
+            })
+        }
+      }
+    })
+  }
+}
+
 function collectGlobalIndices (
   rows: RowDimensionType[],
   row: RowDimensionType | null | undefined,
@@ -109,7 +138,10 @@ function collectGlobalIndices (
   )
 }
 
-function addRow (rows: RowDimensionFieldsFragment[], newRow: RowDimensionFieldsFragment): RowDimensionFieldsFragment[] {
+function addRow (
+  rows: RowDimensionFieldsFragment[],
+  newRow: RowDimensionFieldsFragment
+): RowDimensionFieldsFragment[] {
   const newRows: RowDimensionFieldsFragment[] = []
   for (const row of rows) {
     if (row.globalIndex === newRow.globalIndex) {
@@ -117,10 +149,36 @@ function addRow (rows: RowDimensionFieldsFragment[], newRow: RowDimensionFieldsF
     }
     if (row.globalIndex < newRow.globalIndex) {
       newRows.push(row)
-    } else if (row.globalIndex >= newRow.globalIndex) {
+    } else {
       row.globalIndex += 1
       if (row.index >= newRow.index && row.parent?.id === newRow.parent?.id) {
         row.index += 1
+      }
+      row.name = getRowName(rows, row)
+      updateCellsPositions(row)
+      newRows.push(row)
+    }
+  }
+  return newRows
+}
+
+function deleteRow (
+  rows: RowDimensionFieldsFragment[],
+  deletedRowId: string
+): RowDimensionFieldsFragment[] {
+  const newRows: RowDimensionFieldsFragment[] = []
+  let deletedRow: RowDimensionFieldsFragment | null = null
+  for (const row of rows) {
+    if (row.id === deletedRowId) {
+      deletedRow = row
+      continue
+    }
+    if (!deletedRow) {
+      newRows.push(row)
+    } else {
+      row.globalIndex -= 1
+      if (row.index >= deletedRow.index && row.parent?.id === deletedRow.parent?.id) {
+        row.index -= 1
       }
       row.name = getRowName(rows, row)
       updateCellsPositions(row)
