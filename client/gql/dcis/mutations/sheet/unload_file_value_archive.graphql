@@ -1,5 +1,11 @@
-mutation UnloadFileValueArchive($valueId: ID!) {
-  unloadFileValueArchive(input: { valueId: $valueId }) {
+mutation UnloadFileValueArchive($documentId: ID!, $sheetId: ID!, $columnId: ID!, $rowId: ID!, $name: String!) {
+  unloadFileValueArchive(input: {
+    documentId: $documentId,
+    sheetId: $sheetId,
+    columnId: $columnId,
+    rowId: $rowId,
+    name: $name,
+  }) {
     success
     errors {
       field

@@ -242,7 +242,7 @@ class ChangeValueMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
-        root: None,
+        root: Any,
         info: ResolveInfo,
         document_id: str,
         sheet_id: str,
@@ -279,7 +279,7 @@ class ChangeFileValueMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
-        root: None,
+        root: Any,
         info: ResolveInfo,
         document_id: str,
         sheet_id: str,
@@ -310,14 +310,37 @@ class UnloadFileValueArchiveMutation(BaseMutation):
     """Выгрузка архива значения ячейки типа `Файл`."""
 
     class Input:
-        value_id = graphene.ID(required=True, description='Идентификатор значения ячейки')
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        column_id = graphene.ID(required=True, description='Идентификатор колонки')
+        row_id = graphene.ID(required=True, description='Идентификатор строки')
+        name = graphene.String(required=True, description='Название архива')
 
     src = graphene.String(description='Ссылка на сгенерированный архив')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, value_id: str):
-        return UnloadFileValueArchiveMutation(src=create_file_value_archive(get_object_or_404(Value, pk=value_id)))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
+        name: str
+    ):
+        return UnloadFileValueArchiveMutation(
+            src=create_file_value_archive(
+                value=get_object_or_404(
+                    Value,
+                    document_id=from_global_id(document_id)[1],
+                    sheet_id=sheet_id,
+                    column_id=column_id,
+                    row_id=row_id
+                ),
+                name=name
+            )
+        )
 
 
 class SheetMutations(graphene.ObjectType):

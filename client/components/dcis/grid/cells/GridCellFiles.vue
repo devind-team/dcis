@@ -46,7 +46,7 @@
         v-btn(
           v-if="existingFiles.length"
           color="success"
-          @click="uploadArchive"
+          @click="$emit('unload-archive')"
         ) {{ t('dcis.grid.cellFiles.uploadArchive') }}
         v-spacer
         v-btn(color="primary" @click="setValue") {{ t('save') }}
@@ -72,10 +72,6 @@ export default defineComponent({
     const { t } = useI18n()
 
     const active = ref<boolean>(true)
-
-    const uploadArchive = async () => {
-      await console.log('uploadArchive')
-    }
 
     const existingFiles = ref<ValueFile[]>([])
     watch(() => props.files, (value) => {
@@ -108,7 +104,6 @@ export default defineComponent({
     return {
       t,
       active,
-      uploadArchive,
       existingFiles,
       newFiles,
       cancel,

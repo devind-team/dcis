@@ -4317,8 +4317,16 @@ export type UnloadDocumentMutationPayload = {
 
 export type UnloadFileValueArchiveMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор значения ячейки */
-  valueId: Scalars['ID'];
+  /** Идентификатор колонки */
+  columnId: Scalars['ID'];
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Название архива */
+  name: Scalars['String'];
+  /** Идентификатор строки */
+  rowId: Scalars['ID'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
 };
 
 /** Выгрузка архива значения ячейки типа `Файл`. */
@@ -4960,7 +4968,11 @@ export type DeleteRowDimensionMutationVariables = Exact<{
 export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowId: number, index: number } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
-  valueId: Scalars['ID'];
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+  columnId: Scalars['ID'];
+  rowId: Scalars['ID'];
+  name: Scalars['String'];
 }>;
 
 export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };

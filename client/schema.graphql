@@ -3557,8 +3557,16 @@ type UnloadDocumentMutationPayload {
 
 input UnloadFileValueArchiveMutationInput {
   clientMutationId: String
-  """Идентификатор значения ячейки"""
-  valueId: ID!
+  """Идентификатор колонки"""
+  columnId: ID!
+  """Идентификатор документа"""
+  documentId: ID!
+  """Название архива"""
+  name: String!
+  """Идентификатор строки"""
+  rowId: ID!
+  """Идентификатор листа"""
+  sheetId: ID!
 }
 
 """Выгрузка архива значения ячейки типа `Файл`."""

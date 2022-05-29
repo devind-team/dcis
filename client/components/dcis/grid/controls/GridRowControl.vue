@@ -3,7 +3,7 @@
     template(#activator="{ on, attrs }")
       slot(:on="on" :attrs="attrs")
     v-list(dense)
-      grid-row-settings(:row="row" @close="settingsActive = false" :get-row-height="getRowHeight")
+      grid-row-settings(:row="row" @close="active = false" :get-row-height="getRowHeight")
         template(#activator="{ on }")
           v-list-item(v-on="on")
             v-list-item-icon
@@ -53,9 +53,9 @@ export default defineComponent({
     const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
 
     const addRowDimension = useAddRowDimensionMutation(
-      toRef(activeSheet.value, 'rows'),
-      toRef(activeSheet.value, 'id'),
       toRef(activeDocument.value, 'id'),
+      toRef(activeSheet.value, 'id'),
+      toRef(activeSheet.value, 'rows'),
       updateSheet
     )
 

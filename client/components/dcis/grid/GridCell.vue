@@ -67,28 +67,41 @@ export default defineComponent({
     })
 
     const changeValue = useChangeValueMutation(
-      toRef(activeSheet.value, 'id'),
       toRef(activeDocument.value, 'id'),
+      toRef(activeSheet.value, 'id'),
+      toRef(props, 'cell'),
       updateSheet
     )
 
     const changeFileValue = useChangeFileValueMutation(
-      toRef(activeSheet.value, 'id'),
       toRef(activeDocument.value, 'id'),
+      toRef(activeSheet.value, 'id'),
+      toRef(props, 'cell'),
       updateSheet,
       updateFiles
+    )
+
+    const unloadFileValueArchive = useUnloadFileValueArchiveMutation(
+      toRef(activeDocument.value, 'id'),
+      toRef(activeSheet.value, 'id'),
+      toRef(props, 'cell')
     )
 
     const setValue = async (value: string) => {
       emit('clear-active')
       if (props.cell.value !== value) {
-        await changeValue(props.cell, value)
+        await changeValue(value)
       }
     }
 
     const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {
       emit('clear-active')
-      await changeFileValue(props.cell, value, remainingFiles, newFiles)
+      await changeFileValue(value, remainingFiles, newFiles)
+    }
+
+    const uploadArchive = async () => {
+      const src = await unloadFileValueArchive()
+      window.open(src, '_blank')
     }
 
     const cancel = () => {
@@ -104,7 +117,7 @@ export default defineComponent({
 
     const cellListeners = computed<Record<string, Function>>(() => {
       if (props.cell.kind === 'fl') {
-        return { 'set-value': setFileValue, cancel }
+        return { 'set-value': setFileValue, 'unload-archive': uploadArchive, cancel }
       }
       return { 'set-value': setValue, cancel }
     })

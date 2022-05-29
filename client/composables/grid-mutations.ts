@@ -6,6 +6,7 @@ import { UpdateType } from '~/composables/query-common'
 import {
   SheetQuery,
   ValueFilesQuery,
+  ValueFilesQueryVariables,
   SheetType,
   RowDimensionType,
   RowDimensionFieldsFragment,
@@ -25,7 +26,9 @@ import {
   ChangeValueMutation,
   ChangeValueMutationVariables,
   ChangeFileValueMutation,
-  ChangeFileValueMutationVariables, ValueFilesQueryVariables
+  ChangeFileValueMutationVariables,
+  UnloadFileValueArchiveMutation,
+  UnloadFileValueArchiveMutationVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
@@ -34,6 +37,7 @@ import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_di
 import changeCellsOptionMutation from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/sheet/change_file_value.graphql'
+import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/sheet/unload_file_value_archive.graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 
 export enum AddRowDimensionPosition {
@@ -43,9 +47,9 @@ export enum AddRowDimensionPosition {
 }
 
 export function useAddRowDimensionMutation (
-  rows: Ref<RowDimensionType[]>,
-  sheetId: Ref<string>,
   documentId: Ref<string | null>,
+  sheetId: Ref<string>,
+  rows: Ref<RowDimensionType[]>,
   updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
@@ -270,8 +274,8 @@ export function updateRowDimension (
 }
 
 export function useChangeCellsOptionMutation (
-  sheetId: Ref<string>,
   documentId: Ref<string | null>,
+  sheetId: Ref<string>,
   updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<
@@ -329,20 +333,21 @@ export function useChangeCellsOptionMutation (
 }
 
 export function useChangeValueMutation (
-  sheetId: Ref<string>,
   documentId: Ref<string | null>,
+  sheetId: Ref<string>,
+  cell: Ref<CellType>,
   updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<
     ChangeValueMutation,
     ChangeValueMutationVariables
   >(changeValueMutation)
-  return async function (cell: CellType, value: string) {
+  return async function (value: string) {
     await mutate({
       documentId: documentId.value,
       sheetId: sheetId.value,
-      columnId: cell.columnId,
-      rowId: cell.rowId,
+      columnId: cell.value.columnId,
+      rowId: cell.value.rowId,
       value
     }, {
       update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) {
@@ -352,10 +357,7 @@ export function useChangeValueMutation (
               data: { changeValue: { value, updatedAt } }
             }: Omit<FetchResult<ChangeValueMutation>, 'context'>
           ) => {
-            const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
-            dataRow.updatedAt = updatedAt
-            const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
-            dataCell.value = value
+            updateCellValue(data, cell.value, updatedAt, value)
             return data
           })
         }
@@ -375,8 +377,9 @@ export function useChangeValueMutation (
 }
 
 export function useChangeFileValueMutation (
-  sheetId: Ref<string>,
   documentId: Ref<string | null>,
+  sheetId: Ref<string>,
+  cell: Ref<CellType>,
   updateSheet: Ref<UpdateType<SheetQuery>>,
   updateFiles: UpdateType<ValueFilesQuery>
 ) {
@@ -384,12 +387,12 @@ export function useChangeFileValueMutation (
     ChangeFileValueMutation,
     ChangeFileValueMutationVariables
   >(changeFileValueMutation)
-  return async function (cell: CellType, value: string, remainingFiles: string[], newFiles: File[]) {
+  return async function (value: string, remainingFiles: string[], newFiles: File[]) {
     await mutate({
       documentId: documentId.value,
       sheetId: sheetId.value,
-      columnId: cell.columnId,
-      rowId: cell.rowId,
+      columnId: cell.value.columnId,
+      rowId: cell.value.rowId,
       value,
       remainingFiles,
       newFiles
@@ -401,10 +404,7 @@ export function useChangeFileValueMutation (
               data: { changeFileValue: { value, updatedAt } }
             }: Omit<FetchResult<ChangeFileValueMutation>, 'context'>
           ) => {
-            const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
-            dataRow.updatedAt = updatedAt
-            const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
-            dataCell.value = value
+            updateCellValue(data, cell.value, updatedAt, value)
             return data
           })
           updateFiles(dataProxy, result, (
@@ -418,5 +418,33 @@ export function useChangeFileValueMutation (
         }
       }
     })
+  }
+}
+
+function updateCellValue (data: SheetQuery, cell: CellType, updatedAt: string, value: string): void {
+  const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
+  dataRow.updatedAt = updatedAt
+  const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
+  dataCell.value = value
+}
+
+export function useUnloadFileValueArchiveMutation (
+  documentId: Ref<string | null>,
+  sheetId: Ref<string>,
+  cell: Ref<CellType>
+) {
+  const { mutate } = useMutation<
+    UnloadFileValueArchiveMutation,
+    UnloadFileValueArchiveMutationVariables
+  >(unloadFileValueArchiveMutation)
+  return async function (): Promise<string> {
+    const { data: { unloadFileValueArchive: { src } } } = await mutate({
+      documentId: documentId.value,
+      sheetId: sheetId.value,
+      columnId: cell.value.columnId,
+      rowId: cell.value.rowId,
+      name: cell.value.position
+    })
+    return src
   }
 }

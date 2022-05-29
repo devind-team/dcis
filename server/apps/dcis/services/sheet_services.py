@@ -234,10 +234,9 @@ def update_or_create_file_value(
     return update_or_create_value(document_id, sheet_id, column_id, row_id, value, payload)
 
 
-def create_file_value_archive(value: Value) -> str:
+def create_file_value_archive(value: Value, name: str) -> str:
     """Создание архива значения ячейки типа `Файл`."""
-    cell = f'{get_column_letter(value.column.index)}{value.row.index}'
-    archive_path = f'{path.join(settings.TEMP_FILES_DIR, cell)}.zip'
+    archive_path = f'{path.join(settings.TEMP_FILES_DIR, name)}.zip'
     with ZipFile(archive_path, 'w') as zip_file:
         for file in get_file_value_files(value):
             zip_file.write(file.src.path, path.basename(file.src.path))
