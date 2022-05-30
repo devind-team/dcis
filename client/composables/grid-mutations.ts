@@ -80,17 +80,25 @@ export function useAddRowDimensionMutation (
       globalIndices: collectGlobalIndices(rows.value, rowDimension)
     }
     if (position === AddRowDimensionPosition.AFTER) {
-      variables = { ...variables, index: rowDimension.index + 1, globalIndex: rowDimension.globalIndex + 1 }
+      const children = collectChildren(rows.value, [rowDimension.id])
+        .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
+      variables = {
+        ...variables,
+        index: rowDimension.index + 1,
+        globalIndex: children.at(-1).globalIndex + 1
+      }
     } else if (position === AddRowDimensionPosition.BEFORE) {
       variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
     } else if (position === AddRowDimensionPosition.INSIDE) {
       const index = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
+      const children = collectChildren(rows.value, [rowDimension.id])
+        .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
       variables = {
         ...variables,
         documentId: documentId.value,
         parentId: rowDimension.id,
         index,
-        globalIndex: rowDimension.globalIndex + index
+        globalIndex: children.at(-1).globalIndex + 1
       }
     }
     await mutate(variables as AddRowDimensionMutationVariables)
@@ -157,7 +165,7 @@ function deleteRow (
   rows: RowDimensionFieldsFragment[],
   deletedRowId: string
 ): RowDimensionFieldsFragment[] {
-  const deletedRows = collectDeletedRows(rows, [deletedRowId])
+  const deletedRows = collectChildren(rows, [deletedRowId])
   const deletedGlobalIndices = deletedRows.map((r: RowDimensionFieldsFragment) => r.globalIndex)
   deletedGlobalIndices.sort((a: number, b: number) => a - b)
   const newRows: RowDimensionFieldsFragment[] = []
@@ -194,17 +202,17 @@ function collectGlobalIndices (
   )
 }
 
-function collectDeletedRows (
-  rows: RowDimensionFieldsFragment[],
-  deletedRowIds: string[]
-): RowDimensionFieldsFragment[] {
-  const deletedRows: RowDimensionFieldsFragment[] = []
-  for (const id of deletedRowIds) {
-    deletedRows.push(rows.find((r: RowDimensionFieldsFragment) => r.id === id))
+function collectChildren<T extends { id: string, children: { id: string }[]}> (
+  rows: T[],
+  rowsIds: string[]
+): T[] {
+  const rootRows: T[] = []
+  for (const id of rowsIds) {
+    rootRows.push(rows.find((r: T) => r.id === id))
   }
-  const result = [...deletedRows]
-  for (const deletedRow of deletedRows) {
-    result.push(...collectDeletedRows(rows, deletedRow.children.map(r => r.id)))
+  const result = [...rootRows]
+  for (const deletedRow of rootRows) {
+    result.push(...collectChildren(rows, deletedRow.children.map(r => r.id)))
   }
   return result
 }

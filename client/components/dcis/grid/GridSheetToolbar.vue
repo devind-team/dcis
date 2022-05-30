@@ -65,8 +65,8 @@ export default defineComponent({
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(
-      toRef(activeDocument.value, 'id'),
-      toRef(activeSheet.value, 'id'),
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
       updateSheet
     )
 

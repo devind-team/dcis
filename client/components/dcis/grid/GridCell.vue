@@ -67,24 +67,24 @@ export default defineComponent({
     })
 
     const changeValue = useChangeValueMutation(
-      toRef(activeDocument.value, 'id'),
-      toRef(activeSheet.value, 'id'),
-      toRef(props, 'cell'),
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      computed(() => props.cell),
       updateSheet
     )
 
     const changeFileValue = useChangeFileValueMutation(
-      toRef(activeDocument.value, 'id'),
-      toRef(activeSheet.value, 'id'),
-      toRef(props, 'cell'),
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      computed(() => props.cell),
       updateSheet,
       updateFiles
     )
 
     const unloadFileValueArchive = useUnloadFileValueArchiveMutation(
-      toRef(activeDocument.value, 'id'),
-      toRef(activeSheet.value, 'id'),
-      toRef(props, 'cell')
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      computed(() => props.cell)
     )
 
     const setValue = async (value: string) => {
