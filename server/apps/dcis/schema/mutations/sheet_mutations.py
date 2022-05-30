@@ -107,7 +107,7 @@ class AddRowDimensionMutation(BaseMutation):
             row_dimension=add_row_dimension(
                 user=info.context.user,
                 sheet=get_object_or_404(Sheet, pk=sheet_id),
-                document_id=from_global_id(document_id)[1],
+                document_id=from_global_id(document_id)[1] if document_id else None,
                 parent_id=int(parent_id) if parent_id else None,
                 index=index,
                 global_index=global_index,

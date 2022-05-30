@@ -75,7 +75,7 @@ export function useAddRowDimensionMutation (
       AddRowDimensionMutationVariables, 'index' | 'globalIndex'
     > = {
       sheetId: sheetId.value,
-      documentId: documentId.value,
+      documentId: rowDimension.parent ? documentId.value : null,
       parentId: rowDimension.parent?.id,
       globalIndices: collectGlobalIndices(rows.value, rowDimension)
     }
@@ -87,6 +87,7 @@ export function useAddRowDimensionMutation (
       const index = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
       variables = {
         ...variables,
+        documentId: documentId.value,
         parentId: rowDimension.id,
         index,
         globalIndex: rowDimension.globalIndex + index
