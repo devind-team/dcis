@@ -12,6 +12,7 @@
         grid-row-control(
           v-slot="{ on, attrs }"
           :row="row"
+          :can-delete="rootCount !== 1 || !!row.parent"
           :get-row-height="getRowHeight"
           :clear-selection="clearSelection"
         )
@@ -76,6 +77,9 @@ export default defineComponent({
   setup (props) {
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
+    const rootCount = computed<number>(() => activeSheet.value.rows
+      .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
+
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
@@ -124,7 +128,7 @@ export default defineComponent({
       return style
     }
 
-    return { activeSheet, getRowNameCellClass, getCellStyle, getCellContentStyle }
+    return { activeSheet, rootCount, getRowNameCellClass, getCellStyle, getCellContentStyle }
   }
 })
 </script>

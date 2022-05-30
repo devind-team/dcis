@@ -24,7 +24,7 @@
         v-list-item-icon
           v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addChildRow') }}
-      v-list-item(@click="deleteRowDimension(row)")
+      v-list-item(v-if="canDelete" @click="deleteRowDimension(row)")
         v-list-item-icon
           v-icon(color="error") mdi-table-row-remove
         v-list-item-content(color="error") {{ t('dcis.grid.rowControl.deleteRow') }}
@@ -41,6 +41,7 @@ export default defineComponent({
   components: { GridRowSettings },
   props: {
     row: { type: Object as PropType<RowDimensionType>, required: true },
+    canDelete: { type: Boolean, required: true },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
     clearSelection: { type: Function as PropType<() => void>, required: true }
   },
