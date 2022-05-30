@@ -30,7 +30,7 @@ export function useGrid (
         maxDigits = digits
       }
     }
-    return maxDigits * 11 + maxDots * 2 + 10
+    return maxDigits * 12 + maxDots * 2 + 10
   })
   const gridContainer = ref<HTMLDivElement | null>(null)
   const grid = ref<HTMLTableElement | null>(null)
