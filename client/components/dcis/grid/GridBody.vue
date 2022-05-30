@@ -9,7 +9,12 @@
         @mousedown="mousedownRowName(row, $event)"
         @mouseup="mouseupRowName"
       )
-        grid-row-control(v-slot="{ on, attrs }" :row="row" :get-row-height="getRowHeight")
+        grid-row-control(
+          v-slot="{ on, attrs }"
+          :row="row"
+          :get-row-height="getRowHeight"
+          :clear-selection="clearSelection"
+        )
           div(
             v-bind="attrs"
             :style="{ height: `${getRowHeight(row)}px` }"
@@ -49,6 +54,7 @@ export default defineComponent({
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
     boundarySelectedRowsPositions: { type: Array as PropType<number[]>, required: true },
+    clearSelection: { type: Function as PropType<() => void>, required: true },
     mouseenterRowName: {
       type: Function as PropType<(row: RowDimensionType) => void>,
       required: true

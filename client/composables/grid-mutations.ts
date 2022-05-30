@@ -123,22 +123,6 @@ export function useDeleteRowDimensionMutation (updateSheet: Ref<UpdateType<Sheet
   }
 }
 
-function collectGlobalIndices (
-  rows: RowDimensionType[],
-  row: RowDimensionType | null | undefined,
-  globalIndices: GlobalIndicesInputType[] | null = null
-): GlobalIndicesInputType[] {
-  globalIndices = globalIndices || []
-  if (!row) {
-    return globalIndices
-  }
-  return collectGlobalIndices(
-    rows,
-    rows.find((r: RowDimensionType) => r.id === row.parent?.id),
-    [...globalIndices, { rowId: row.id, globalIndex: row.globalIndex }]
-  )
-}
-
 function addRow (
   rows: RowDimensionFieldsFragment[],
   newRow: RowDimensionFieldsFragment
@@ -173,27 +157,56 @@ function deleteRow (
   rows: RowDimensionFieldsFragment[],
   deletedRowId: string
 ): RowDimensionFieldsFragment[] {
+  const deletedRows = collectDeletedRows(rows, [deletedRowId])
+  const deletedGlobalIndices = deletedRows.map((r: RowDimensionFieldsFragment) => r.globalIndex)
+  deletedGlobalIndices.sort((a: number, b: number) => a - b)
   const newRows: RowDimensionFieldsFragment[] = []
-  let deletedRow: RowDimensionFieldsFragment | null = null
   for (const row of rows) {
-    if (row.id === deletedRowId) {
-      deletedRow = row
-      continue
-    }
-    if (!deletedRow) {
+    if (row.globalIndex < deletedGlobalIndices[0]) {
       newRows.push(row)
-    } else {
-      row.globalIndex -= 1
-      if (row.index >= deletedRow.index && row.parent?.id === deletedRow.parent?.id) {
+    } else if (row.globalIndex > deletedGlobalIndices.at(-1)) {
+      row.globalIndex -= deletedGlobalIndices.length
+      if (row.index >= deletedRows[0].index && row.parent?.id === deletedRows[0].parent?.id) {
         row.index -= 1
       }
       row.name = getRowName(rows, row)
-      updateCellsPositions(row, (index: number) => index - 1)
+      updateCellsPositions(row, (index: number) => index - deletedGlobalIndices.length)
       newRows.push(row)
     }
   }
   updateRelativeRows(newRows)
   return newRows
+}
+
+function collectGlobalIndices (
+  rows: RowDimensionType[],
+  row: RowDimensionType | null | undefined,
+  globalIndices: GlobalIndicesInputType[] | null = null
+): GlobalIndicesInputType[] {
+  globalIndices = globalIndices || []
+  if (!row) {
+    return globalIndices
+  }
+  return collectGlobalIndices(
+    rows,
+    rows.find((r: RowDimensionType) => r.id === row.parent?.id),
+    [...globalIndices, { rowId: row.id, globalIndex: row.globalIndex }]
+  )
+}
+
+function collectDeletedRows (
+  rows: RowDimensionFieldsFragment[],
+  deletedRowIds: string[]
+): RowDimensionFieldsFragment[] {
+  const deletedRows: RowDimensionFieldsFragment[] = []
+  for (const id of deletedRowIds) {
+    deletedRows.push(rows.find((r: RowDimensionFieldsFragment) => r.id === id))
+  }
+  const result = [...deletedRows]
+  for (const deletedRow of deletedRows) {
+    result.push(...collectDeletedRows(rows, deletedRow.children.map(r => r.id)))
+  }
+  return result
 }
 
 function getRowName (
@@ -229,11 +242,16 @@ function updateCellsPositions (
 
 function updateRelativeRows (rows: RowDimensionFieldsFragment[]): void {
   for (const row of rows) {
+    const newChildren: RowDimensionFieldsFragment['children'] = []
     for (const child of row.children) {
       const sourceChild = rows.find((r: RowDimensionFieldsFragment) => r.id === child.id)
-      child.index = sourceChild.index
-      child.globalIndex = sourceChild.globalIndex
+      if (sourceChild) {
+        child.index = sourceChild.index
+        child.globalIndex = sourceChild.globalIndex
+        newChildren.push(child)
+      }
     }
+    row.children = newChildren
     if (row.parent) {
       const sourceParent = rows.find((r: RowDimensionFieldsFragment) => r.id === row.parent.id)
       row.parent.index = sourceParent.index

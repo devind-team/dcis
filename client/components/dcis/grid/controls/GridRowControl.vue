@@ -9,17 +9,17 @@
             v-list-item-icon
               v-icon mdi-cog
             v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
-      v-list-item(@click="addRowDimension(row, AddRowDimensionPosition.BEFORE)")
+      v-list-item(@click="addRowDimensionMutate(row, AddRowDimensionPosition.BEFORE)")
         v-list-item-icon
           v-icon mdi-table-row-plus-before
         v-list-item-content {{ t('dcis.grid.rowControl.addRowAbove') }}
-      v-list-item(@click="addRowDimension(row, AddRowDimensionPosition.AFTER)")
+      v-list-item(@click="addRowDimensionMutate(row, AddRowDimensionPosition.AFTER)")
         v-list-item-icon
           v-icon mdi-table-row-plus-after
         v-list-item-content {{ t('dcis.grid.rowControl.addRowBelow') }}
       v-list-item(
         v-if="row.dynamic"
-        @click="addRowDimension(row, AddRowDimensionPosition.INSIDE)"
+        @click="addRowDimensionMutate(row, AddRowDimensionPosition.INSIDE)"
       )
         v-list-item-icon
           v-icon mdi-table-row-plus-after
@@ -41,9 +41,10 @@ export default defineComponent({
   components: { GridRowSettings },
   props: {
     row: { type: Object as PropType<RowDimensionType>, required: true },
-    getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true }
+    getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
+    clearSelection: { type: Function as PropType<() => void>, required: true }
   },
-  setup () {
+  setup (props) {
     const { t } = useI18n()
 
     const active = ref<boolean>(false)
@@ -52,19 +53,24 @@ export default defineComponent({
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
 
-    const addRowDimension = useAddRowDimensionMutation(
+    const addRowDimensionMutate = useAddRowDimensionMutation(
       toRef(activeDocument.value, 'id'),
       toRef(activeSheet.value, 'id'),
       toRef(activeSheet.value, 'rows'),
       updateSheet
     )
 
-    const deleteRowDimension = useDeleteRowDimensionMutation(updateSheet)
+    const deleteRowDimensionMutate = useDeleteRowDimensionMutation(updateSheet)
+
+    const deleteRowDimension = async (row: RowDimensionType) => {
+      await deleteRowDimensionMutate(row)
+      props.clearSelection()
+    }
 
     return {
       t,
       active,
-      addRowDimension,
+      addRowDimensionMutate,
       deleteRowDimension,
       AddRowDimensionPosition
     }

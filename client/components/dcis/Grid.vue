@@ -25,6 +25,7 @@
             :set-active-cell="setActiveCell"
             :selected-rows-positions="selectedRowsPositions"
             :boundary-selected-rows-positions="boundarySelectedRowsPositions"
+            :clear-selection="clearSelection"
             :mouseenter-row-name="mouseenterRowName"
             :mousemove-row-name="mousemoveRowName"
             :mouseleave-row-name="mouseleaveRowName"
@@ -119,6 +120,7 @@ export default defineComponent({
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
+      clearSelection,
       selectAllCells,
       gridContainerScroll,
       mousedownCell,
@@ -159,6 +161,7 @@ export default defineComponent({
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
+      clearSelection,
       selectAllCells,
       gridContainerScroll,
       mousedownCell,

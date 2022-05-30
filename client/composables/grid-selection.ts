@@ -286,6 +286,19 @@ export function useGridSelection (
     return { leftColumn, topRow }
   }
 
+  const clearSelection = () => {
+    if (cellsSelection.value) {
+      cellsSelection.value = null
+    }
+    if (columnsSelection.value) {
+      columnsSelection.value = null
+    }
+    if (rowsSelection.value) {
+      rowsSelection.value = null
+    }
+    updateSelectionViews()
+  }
+
   const selectAllCells = () => {
     cellsSelection.value = {
       first: sheet.value.rows[0].cells[0],
@@ -397,6 +410,7 @@ export function useGridSelection (
     selectedRowsPositions,
     selectedCellsOptions,
     updateSelectionViews,
+    clearSelection,
     selectAllCells,
     gridContainerScroll,
     mousedownCell,
