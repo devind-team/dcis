@@ -84,12 +84,12 @@ export function useAddRowDimensionMutation (
     } else if (position === AddRowDimensionPosition.BEFORE) {
       variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
     } else if (position === AddRowDimensionPosition.INSIDE) {
-      const childGlobalIndex = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
+      const index = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
       variables = {
         ...variables,
         parentId: rowDimension.id,
-        index: rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1,
-        globalIndex: rowDimension.globalIndex + childGlobalIndex
+        index,
+        globalIndex: rowDimension.globalIndex + index
       }
     }
     await mutate(variables as AddRowDimensionMutationVariables)
@@ -133,7 +133,7 @@ function collectGlobalIndices (
   }
   return collectGlobalIndices(
     rows,
-    rows.find((row: RowDimensionType) => row.id === row.parent?.id),
+    rows.find((r: RowDimensionType) => r.id === row.parent?.id),
     [...globalIndices, { rowId: row.id, globalIndex: row.globalIndex }]
   )
 }
@@ -142,6 +142,11 @@ function addRow (
   rows: RowDimensionFieldsFragment[],
   newRow: RowDimensionFieldsFragment
 ): RowDimensionFieldsFragment[] {
+  if (newRow.globalIndex === rows.at(-1).globalIndex + 1) {
+    const newRows = [...rows, newRow]
+    updateRelativeRows(newRows)
+    return newRows
+  }
   const newRows: RowDimensionFieldsFragment[] = []
   for (const row of rows) {
     if (row.globalIndex === newRow.globalIndex) {
@@ -155,10 +160,11 @@ function addRow (
         row.index += 1
       }
       row.name = getRowName(rows, row)
-      updateCellsPositions(row)
+      updateCellsPositions(row, (index: number) => index + 1)
       newRows.push(row)
     }
   }
+  updateRelativeRows(newRows)
   return newRows
 }
 
@@ -181,10 +187,11 @@ function deleteRow (
         row.index -= 1
       }
       row.name = getRowName(rows, row)
-      updateCellsPositions(row)
+      updateCellsPositions(row, (index: number) => index - 1)
       newRows.push(row)
     }
   }
+  updateRelativeRows(newRows)
   return newRows
 }
 
@@ -204,15 +211,41 @@ function getRowName (
   return [String(row.index), ...indices].join('.')
 }
 
-function updateCellsPositions (row: RowDimensionFieldsFragment): void {
+function updateCellsPositions (
+  row: RowDimensionFieldsFragment,
+  updateRelatedRowIndex: (index: number) => number
+): void {
   for (const cell of row.cells) {
     const { column } = parsePosition(cell.globalPosition)
     cell.position = `${column}${row.name}`
     cell.globalPosition = `${column}${row.globalIndex}`
     cell.relatedGlobalPositions = cell.relatedGlobalPositions.map((position: string) => {
       const parsedPosition = parsePosition(position)
-      return `${parsedPosition.column}${parsedPosition.row + 1}`
+      return `${parsedPosition.column}${updateRelatedRowIndex(parsedPosition.row)}`
     })
+  }
+}
+
+function updateRelativeRows (rows: RowDimensionFieldsFragment[]): void {
+  for (const row of rows) {
+    for (const child of row.children) {
+      const sourceChild = rows.find((r: RowDimensionFieldsFragment) => r.id === child.id)
+      child.index = sourceChild.index
+      child.globalIndex = sourceChild.globalIndex
+    }
+    if (row.parent) {
+      const sourceParent = rows.find((r: RowDimensionFieldsFragment) => r.id === row.parent.id)
+      row.parent.index = sourceParent.index
+      row.parent.globalIndex = sourceParent.globalIndex
+      if (!sourceParent.children.find((r: RowDimensionFieldsFragment) => r.id === row.id)) {
+        sourceParent.children.splice(row.index - 1, 0, {
+          __typename: 'RowDimensionType',
+          id: row.id,
+          index: row.index,
+          globalIndex: row.globalIndex
+        })
+      }
+    }
   }
 }
 

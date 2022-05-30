@@ -94,7 +94,10 @@ def change_row_dimension(
 
 @transaction.atomic
 def delete_row_dimension(row_dimension: RowDimension) -> int:
-    """Удаление строки."""
+    """Удаление строки.
+
+    После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
+    """
     row_dimension_id = row_dimension.id
     row_dimension.delete()
     row_dimension.sheet.rowdimension_set.filter(
