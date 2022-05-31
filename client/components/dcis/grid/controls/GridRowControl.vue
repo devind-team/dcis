@@ -56,12 +56,11 @@ export default defineComponent({
 
     const addRowDimensionMutate = useAddRowDimensionMutation(
       computed(() => activeDocument.value.id),
-      computed(() => activeSheet.value.id),
-      computed(() => activeSheet.value.rows),
+      activeSheet,
       updateSheet
     )
 
-    const deleteRowDimensionMutate = useDeleteRowDimensionMutation(updateSheet)
+    const deleteRowDimensionMutate = useDeleteRowDimensionMutation(activeSheet, updateSheet)
 
     const deleteRowDimension = async (row: RowDimensionType) => {
       await deleteRowDimensionMutate(row)

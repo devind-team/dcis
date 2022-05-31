@@ -51,8 +51,7 @@ export enum AddRowDimensionPosition {
 
 export function useAddRowDimensionMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<string>,
-  rows: Ref<RowDimensionType[]>,
+  sheet: Ref<SheetType>,
   updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
@@ -64,7 +63,7 @@ export function useAddRowDimensionMutation (
           (data: SheetQuery, {
             data: { addRowDimension: { rowDimension } }
           }: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) => {
-            data.sheet.rows = addRow(data.sheet.rows, rowDimension)
+            data.sheet.rows = addRow(sheet.value.columns, data.sheet.rows, rowDimension)
             return data
           })
       }
@@ -74,13 +73,13 @@ export function useAddRowDimensionMutation (
     let variables: AddRowDimensionMutationVariables | Omit<
       AddRowDimensionMutationVariables, 'index' | 'globalIndex'
     > = {
-      sheetId: sheetId.value,
+      sheetId: sheet.value.id,
       documentId: rowDimension.parent ? documentId.value : null,
       parentId: rowDimension.parent?.id,
-      globalIndices: collectGlobalIndices(rows.value, rowDimension)
+      globalIndices: collectGlobalIndices(sheet.value.rows, rowDimension)
     }
     if (position === AddRowDimensionPosition.AFTER) {
-      const children = collectChildren(rows.value, [rowDimension.id])
+      const children = collectChildren(sheet.value.rows, [rowDimension.id])
         .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
       variables = {
         ...variables,
@@ -91,7 +90,7 @@ export function useAddRowDimensionMutation (
       variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
     } else if (position === AddRowDimensionPosition.INSIDE) {
       const index = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
-      const children = collectChildren(rows.value, [rowDimension.id])
+      const children = collectChildren(sheet.value.rows, [rowDimension.id])
         .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
       variables = {
         ...variables,
@@ -105,7 +104,10 @@ export function useAddRowDimensionMutation (
   }
 }
 
-export function useDeleteRowDimensionMutation (updateSheet: Ref<UpdateType<SheetQuery>>) {
+export function useDeleteRowDimensionMutation (
+  sheet: Ref<SheetType>,
+  updateSheet: Ref<UpdateType<SheetQuery>>
+) {
   const { mutate } = useMutation<
     DeleteRowDimensionMutation,
     DeleteRowDimensionMutationVariables
@@ -122,7 +124,7 @@ export function useDeleteRowDimensionMutation (updateSheet: Ref<UpdateType<Sheet
                 data: { deleteRowDimension: { rowDimensionId } }
               }: Omit<FetchResult<DeleteRowDimensionMutation>, 'context'>
             ) => {
-              data.sheet.rows = deleteRow(data.sheet.rows, rowDimensionId)
+              data.sheet.rows = deleteRow(sheet.value.columns, data.sheet.rows, rowDimensionId)
               return data
             })
         }
@@ -132,9 +134,11 @@ export function useDeleteRowDimensionMutation (updateSheet: Ref<UpdateType<Sheet
 }
 
 function addRow (
+  columns: ColumnDimensionType[],
   rows: RowDimensionFieldsFragment[],
   newRow: RowDimensionFieldsFragment
 ): RowDimensionFieldsFragment[] {
+  updateMergedCellsAdd(columns, rows, newRow)
   if (newRow.globalIndex === rows.at(-1).globalIndex + 1) {
     const newRows = [...rows, newRow]
     updateRelativeRows(newRows)
@@ -162,10 +166,12 @@ function addRow (
 }
 
 function deleteRow (
+  columns: ColumnDimensionType[],
   rows: RowDimensionFieldsFragment[],
   deletedRowId: string
 ): RowDimensionFieldsFragment[] {
   const deletedRows = collectChildren(rows, [deletedRowId])
+  updateMergedCellsDelete(columns, rows, deletedRows[0])
   const deletedGlobalIndices = deletedRows.map((r: RowDimensionFieldsFragment) => r.globalIndex)
   deletedGlobalIndices.sort((a: number, b: number) => a - b)
   const newRows: RowDimensionFieldsFragment[] = []
@@ -184,6 +190,68 @@ function deleteRow (
   }
   updateRelativeRows(newRows)
   return newRows
+}
+
+function updateMergedCellsAdd (
+  columns: ColumnDimensionType[],
+  rows: RowDimensionFieldsFragment[],
+  newRow: RowDimensionFieldsFragment
+): void {
+  const missingPositions = getMissingPositions(columns, newRow)
+  if (missingPositions.length) {
+    updateMergedCells(
+      rows,
+      missingPositions,
+      (cell: CellType) => { cell.rowspan += 1 },
+      (cell: CellType, position: string) => { cell.relatedGlobalPositions.push(position) }
+    )
+  }
+}
+
+function updateMergedCellsDelete (
+  columns: ColumnDimensionType[],
+  rows: RowDimensionFieldsFragment[],
+  deletedRow: RowDimensionFieldsFragment
+): void {
+  const missingPositions = getMissingPositions(columns, deletedRow)
+  if (missingPositions.length) {
+    updateMergedCells(
+      rows,
+      missingPositions,
+      (cell: CellType) => { cell.rowspan -= 1 },
+      (cell: CellType, position: string) => {
+        cell.relatedGlobalPositions.splice(cell.relatedGlobalPositions.indexOf(position))
+      }
+    )
+  }
+}
+
+function getMissingPositions (columns: ColumnDimensionType[], row: RowDimensionFieldsFragment): string[] {
+  const cellsColumns = row.cells.map((cell: CellType) => parsePosition(cell.globalPosition).column)
+  return columns
+    .filter((column: ColumnDimensionType) => !cellsColumns.includes(column.name))
+    .map((column: ColumnDimensionType) => `${column.name}${row.name}`)
+}
+
+function updateMergedCells (
+  rows: RowDimensionFieldsFragment[],
+  missingPositions: string[],
+  updateCell: (cell: CellType) => void,
+  updateCellRelatedGlobalPositions: (cell: CellType, position: string) => void
+) {
+  for (const row of rows) {
+    for (const cell of row.cells) {
+      const cellPositions = missingPositions.filter((p: string) => cell.relatedGlobalPositions.includes(p))
+      if (cellPositions.length) {
+        updateCell(cell)
+        const { row: lastRow } = parsePosition(cell.relatedGlobalPositions.at(-1))
+        for (const position of cellPositions) {
+          const { column } = parsePosition(position)
+          updateCellRelatedGlobalPositions(cell, `${column}${lastRow}`)
+        }
+      }
+    }
+  }
 }
 
 function collectGlobalIndices (
