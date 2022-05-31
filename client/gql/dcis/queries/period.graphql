@@ -1,5 +1,6 @@
 #import "../fragments/project_fields.graphql"
 #import "../fragments/period_fields.graphql"
+#import "../fragments/status_fields.graphql"
 #import "../../core/fragments/user_fields.graphql"
 
 query Period($periodId: ID!) {
@@ -11,6 +12,38 @@ query Period($periodId: ID!) {
     }
     user {
       ...UserFields
+    }
+    documents {
+      id
+      version
+      comment
+      createdAt
+      __typename
+      lastStatus {
+        id
+        comment
+        createdAt
+        __typename
+        status {
+          ...StatusFields
+        }
+      }
+    }
+    periodGroups {
+      id
+      name
+      createdAt
+      users {
+        ...UserFields
+      }
+      privileges {
+        id
+        name
+        key
+        createdAt
+        __typename
+      }
+      __typename
     }
   }
 }

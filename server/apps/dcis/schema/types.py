@@ -66,6 +66,7 @@ class PeriodType(DjangoObjectType):
 
     # Нужно вывести все дивизионы специальным образом
     divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
+    period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
 
     class Meta:
         model = Period
@@ -80,6 +81,7 @@ class PeriodType(DjangoObjectType):
             'created_at',
             'updated_at',
             'user',
+            'period_groups',
             'project',
             'methodical_support',
             'documents',
@@ -95,6 +97,11 @@ class PeriodType(DjangoObjectType):
     @resolver_hints(model_field='')
     def resolve_divisions(period: Period, info: ResolveInfo, *args, **kwargs):
         return period.division_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='')
+    def resolve_period_groups(period: Period, info: ResolveInfo, *args, **kwargs):
+        return period.periodgroup_set.all()
 
 
 class DivisionType(OptimizedDjangoObjectType):
@@ -127,19 +134,24 @@ class PrivilegeType(DjangoObjectType):
 
     class Meta:
         model = Privilege
-        fields = '__all__'
+        fields = ('id', 'name', 'created_at', 'key',)
 
 
 class PeriodGroupType(DjangoObjectType):
     """Группы с содержанием привилегий."""
 
     period = graphene.Field(PeriodType, required=True, description='Период сбора')
-    users = DjangoListField(UserType)
-    privileges = DjangoListField(PrivilegeType)
+    users = DjangoListField(UserType, description='Пользователи в группе')
+    privileges = DjangoListField(PrivilegeType, description='Привилегии группы')
 
     class Meta:
         model = PeriodGroup
         fields = ('id', 'name', 'created_at', 'period', 'users', 'privileges',)
+
+    @staticmethod
+    @resolver_hints(model_field='')
+    def resolve_users(period_group: PeriodGroup, info: ResolveInfo, *args, **kwargs):
+        return period_group.users.all()
 
 
 class PeriodPrivilegeType(DjangoObjectType):
