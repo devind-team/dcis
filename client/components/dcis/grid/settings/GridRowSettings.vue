@@ -30,7 +30,7 @@
       v-checkbox(
         v-model="dynamic"
         :label="t('dcis.grid.rowSettings.makeDynamic')"
-        :disabled="!!row.children.length"
+        :disabled="!!row.children.length || row.cells.some(cell => cell.rowspan !== 1)"
         success
       )
 </template>

@@ -120,7 +120,9 @@ class SheetRowsUploader(DataUnloader):
     _values_fields = (
         'column_id', 'row_id', 'value', 'verified', 'error',
     )
-    _merged_cells_fields = ()
+    _merged_cells_fields = (
+        'min_col', 'max_col',
+    )
     _merged_cells_properties = (
         'colspan', 'rowspan', 'target', 'cells',
     )
@@ -133,10 +135,11 @@ class SheetRowsUploader(DataUnloader):
         columns_map = self._create_columns_map(columns)
         merged_cells_map = self._create_merged_cells_map(merged_cells)
         merged_cell_positions = self._create_merged_cell_positions(merged_cells)
+        merged_cell_row_positions = self._create_merged_cell_row_positions(merged_cells)
         self._add_cell_values(cells, values)
         self._add_cells(rows, cells)
         self._add_cell_properties(rows, columns_map, merged_cells_map)
-        self._prepare_row_cells(rows, merged_cells_map, merged_cell_positions)
+        self._prepare_row_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
 
     def _unload_raw_rows(self) -> list[dict]:
         """Выгрузка необработанных строк листа."""
@@ -166,8 +169,13 @@ class SheetRowsUploader(DataUnloader):
 
     @staticmethod
     def _create_merged_cell_positions(merged_cells: list[dict]) -> list[str]:
-        """Создание списка позиций объединенных строк."""
+        """Создание списка позиций объединенных ячеек."""
         return reduce(lambda a, c: [*a, *c['cells']], merged_cells, [])
+
+    @staticmethod
+    def _create_merged_cell_row_positions(merged_cells: list[dict]) -> list[str]:
+        """Создание списка позиций объединенных ячеек для первой строки."""
+        return reduce(lambda a, c: [*a, *c['cells'][:c['max_col'] - c['min_col'] + 1]], merged_cells, [])
 
     @classmethod
     def _connect_rows(cls, rows: list[dict]) -> list[dict]:
@@ -263,7 +271,7 @@ class SheetRowsUploader(DataUnloader):
         root_cell = cls._find_root_cell(row, cell)
         merged_cell = merged_cells_map.get(root_cell['position'], None)
         cell['colspan'] = merged_cell['colspan'] if merged_cell else 1
-        cell['rowspan'] = merged_cell['rowspan'] if merged_cell else 1
+        cell['rowspan'] = merged_cell['rowspan'] if merged_cell and cell['id'] == root_cell['id'] else 1
 
     @staticmethod
     def _add_cell_related_positions(row: dict, column: dict, cell: dict):
@@ -276,15 +284,24 @@ class SheetRowsUploader(DataUnloader):
                 cell['related_global_positions'].append(f'{column_name}{row_index}')
 
     @classmethod
-    def _prepare_row_cells(cls, rows: list[dict], merged_cells_map: dict, merged_cell_positions: list[str]) -> None:
+    def _prepare_row_cells(
+        cls,
+        rows: list[dict],
+        merged_cells_map: dict,
+        merged_cell_positions: list[str],
+        merged_cell_row_positions: list[str]
+    ) -> None:
         """Сортировка ячеек строк с удалением лишних ячеек."""
         for row in rows:
             cells: list[dict] = []
             for cell in row['cells']:
                 root_cell = cls._find_root_cell(row, cell)
-                if root_cell['position'] in merged_cells_map or root_cell['position'] not in merged_cell_positions:
+                positions = merged_cell_positions if cell['id'] == root_cell['id'] else merged_cell_row_positions
+                if root_cell['position'] in merged_cells_map or root_cell['position'] not in positions:
                     cells.append(cell)
-            row['cells'] = sorted(cells, key=lambda c: c['global_position'])
+            row['output_cells'] = sorted(cells, key=lambda c: c['global_position'])
+        for row in rows:
+            row['cells'] = row['output_cells']
 
     @classmethod
     def _find_root_cell(cls, row: dict, cell: dict) -> dict:

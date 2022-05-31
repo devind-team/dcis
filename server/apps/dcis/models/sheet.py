@@ -313,8 +313,8 @@ class MergedCell(models.Model):
     @property
     def cells(self) -> list[str]:
         not_cell: list[str] = []
-        for col in range(self.min_col, self.max_col + 1):
-            for row in range(self.min_row, self.max_row + 1):
+        for row in range(self.min_row, self.max_row + 1):
+            for col in range(self.min_col, self.max_col + 1):
                 if col == 1 and row == 1:
                     continue
                 not_cell.append(f'{get_column_letter(col)}{row}')
