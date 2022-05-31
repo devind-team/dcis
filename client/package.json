@@ -13,6 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.18.2",
     "@nuxtjs/apollo": "^4.0.1-rc.5",
     "@nuxtjs/i18n": "^7.2.2",
     "@nuxtjs/vuetify": "^1.12.3",
@@ -21,7 +22,7 @@
     "@vueuse/core": "^8.5.0",
     "@vueuse/integrations": "^8.5.0",
     "accounting": "^0.4.1",
-    "apexcharts": "^3.35.2",
+    "apexcharts": "^3.35.3",
     "detect-browser": "^5.3.0",
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.3",
@@ -34,9 +35,9 @@
     "vuetify": "^2.6.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.0",
-    "@babel/eslint-parser": "^7.17.0",
-    "@babel/plugin-proposal-decorators": "^7.17.12",
+    "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
+    "@babel/plugin-proposal-decorators": "^7.18.2",
     "@babel/plugin-proposal-optional-chaining": "^7.17.12",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/schema-ast": "^2.4.1",
@@ -77,16 +78,16 @@
     "@tiptap/extension-underline": "^2.0.0-beta.23",
     "@tiptap/starter-kit": "^2.0.0-beta.185",
     "@tiptap/vue-2": "^2.0.0-beta.79",
-    "@typescript-eslint/eslint-plugin": "^5.26.0",
-    "@typescript-eslint/parser": "^5.26.0",
-    "core-js": "^3.22.6",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "core-js": "^3.22.7",
     "eslint": "^8.16.0",
     "eslint-import-resolver-typescript": "^2.7.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-nuxt": "^3.2.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
-    "typescript": "^4.6.4",
+    "typescript": "^4.7.2",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.1.2"
   }

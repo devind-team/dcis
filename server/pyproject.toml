@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dcis-server"
 version = "1.8.0"
-description = "electronic education environment"
+description = "Data collection information system"
 authors = ["Luferov Victor <lyferov@yandex.ru>"]
 license = "MIT"
 readme = "README.md"
@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 beautifulsoup4 = "^4.11.0"
-celery = "^5.2.6"
+celery = "^5.2.7"
 channels = "^3.0.4"
 channels-redis = "^3.4.0"
 daphne = "^3.0.2"
