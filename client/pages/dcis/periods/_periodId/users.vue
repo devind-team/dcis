@@ -4,8 +4,7 @@
     v-row
       template(v-if="period.periodGroups.length")
         v-col(cols="12" md="4" sm="4")
-          v-row
-            v-subheader Группы
+          v-subheader Группы
           v-list
             v-list-item-group(v-model="selectGroup" color="primary")
               v-list-item(
