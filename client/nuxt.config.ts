@@ -55,7 +55,6 @@ export default defineNuxtConfig({
     '~/plugins/vuetify',
     '~/plugins/vee-validate',
     '~/plugins/vue-i18n',
-    { src: '~/plugins/detect-browser', ssr: false },
     { src: '~/plugins/apex-chart', ssr: false }
   ],
 

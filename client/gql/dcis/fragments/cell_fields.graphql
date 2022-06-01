@@ -2,22 +2,30 @@ fragment CellFields on CellType {
   id
   kind
   editable
-  # formula
-  # comment
-  default
+  formula
+  comment
+  mask
   tooltip
+  columnId
+  rowId
   horizontalAlign
   verticalAlign
   size
   strong
   italic
-  # strike
-  # underline
+  strike
+  underline
   color
   background
   borderStyle
   borderColor
-  columnId
-  rowId
+  position
+  globalPosition
+  relatedGlobalPositions
+  colspan
+  rowspan
+  value
+  verified
+  error
   __typename
 }

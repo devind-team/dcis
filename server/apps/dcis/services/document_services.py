@@ -1,11 +1,12 @@
 """Модуль работы с документами."""
 
-from typing import Optional, Union, Type
+from typing import Optional, Type, Union
 
-from django.db.models import Max
 from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
+from django.db.models import Max
+
 from apps.core.models import User
-from apps.dcis.models import Period, Document, Cell, Limitation, Value, Sheet, Status, RowDimension
+from apps.dcis.models import Cell, Document, Limitation, Period, RowDimension, Sheet, Status, Value
 
 
 def get_documents(user: User, period_id: int, divisions_id):
@@ -15,12 +16,12 @@ def get_documents(user: User, period_id: int, divisions_id):
 
 
 def create_new_document(
-        user: User,
-        period: Period,
-        status_id: int,
-        comment: str,
-        document_id: Optional[int] = None,
-        division_id: Optional[int] = None
+    user: User,
+    period: Period,
+    status_id: int,
+    comment: str,
+    document_id: Optional[int] = None,
+    division_id: Optional[int] = None
 ) -> Document:
     """Создание нового документа.
 
@@ -76,12 +77,12 @@ def create_new_document(
 
 
 def transfer_rows(
-        user: User,
-        sheet: Sheet,
-        last_document: Document,
-        document: Document,
-        parent_id: int,
-        parent_ids=None
+    user: User,
+    sheet: Sheet,
+    last_document: Document,
+    document: Document,
+    parent_id: int,
+    parent_ids=None
 ) -> dict[int, int]:
     """Переносим дочерние строки.
 
@@ -115,10 +116,10 @@ def transfer_rows(
 
 
 def transfer_limitations(
-        cell_original: int,
-        cell: int,
-        parent_id_original: Optional[int] = None,
-        parent_id: Optional[int] = None
+    cell_original: int,
+    cell: int,
+    parent_id_original: Optional[int] = None,
+    parent_id: Optional[int] = None
 ) -> None:
     """Рекурсивно переносим ограничения ячеек.
 
@@ -135,4 +136,3 @@ def transfer_limitations(
         limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
         limitation.save()
         transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
-

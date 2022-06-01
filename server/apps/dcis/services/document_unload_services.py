@@ -1,18 +1,18 @@
-from collections import defaultdict
-from typing import Optional, Type, Tuple
 import posixpath
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from os.path import join
+from typing import Optional, Type
 
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
-from openpyxl.utils import get_column_letter
 from django.conf import settings
 from django.db.models import Q
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.utils import get_column_letter
 
 from apps.core.models import User
-from apps.dcis.models import Project, Period, Cell, Document, ColumnDimension, RowDimension, Value, MergedCell
+from apps.dcis.models import Cell, ColumnDimension, Document, MergedCell, Period, Project, RowDimension, Value
 
 
 @dataclass
@@ -38,10 +38,10 @@ class BuildCell:
 
 
 class DocumentUnload:
-    """Выгрузка документа в формате эксель."""
+    """Выгрузка документа в формате Excel."""
 
     ALLOW_ADDITIONAL: list[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_head', 'user']
-    DIVISION_INFO_CACHE: dict[int, Tuple[str, str]] = {}
+    DIVISION_INFO_CACHE: dict[int, tuple[str, str]] = {}
 
     def __init__(self, document: Document, host: str, additional: list[str], divisions_id=None):
         """Инициализация
@@ -157,7 +157,7 @@ class DocumentUnload:
             build_mc[merge_cell.max_row].append(merge_cell)
         return build_mc
 
-    def _division_info(self, user: Optional[User]) -> Tuple[str, str]:
+    def _division_info(self, user: Optional[User]) -> tuple[str, str]:
         """Функция возвращает название дивизиона и начальника этого дивизиона.
 
         Возвращать информацию можно только из моделей для которых указаны поля:

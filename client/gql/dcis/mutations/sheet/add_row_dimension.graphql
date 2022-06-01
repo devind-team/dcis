@@ -1,12 +1,20 @@
 #import "../../fragments/row_dimension_fields.graphql"
-#import "../../fragments/cell_fields.graphql"
-#import "../../fragments/merged_cell_fields.graphql"
 
-mutation AddRowDimension($documentId: ID!, $rowId: Int!, $position: String!) {
+mutation AddRowDimension(
+  $sheetId: ID!,
+  $documentId: ID,
+  $parentId: ID,
+  $index: Int!,
+  $globalIndex: Int!,
+  $globalIndices: [GlobalIndicesInputType!]!
+) {
   addRowDimension(input: {
+    sheetId: $sheetId,
     documentId: $documentId,
-    rowId: $rowId,
-    position: $position
+    parentId: $parentId,
+    index: $index,
+    globalIndex: $globalIndex,
+    globalIndices: $globalIndices
   }) {
     success
     errors {
@@ -16,12 +24,6 @@ mutation AddRowDimension($documentId: ID!, $rowId: Int!, $position: String!) {
     }
     rowDimension {
       ...RowDimensionFields
-    }
-    cells {
-      ...CellFields
-    }
-    mergedCells {
-      ...MergedCellsFields
     }
     __typename
   }

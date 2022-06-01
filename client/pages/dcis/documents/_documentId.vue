@@ -1,54 +1,66 @@
 <template lang="pug">
   v-container(fluid :key="$route.fullpath")
-    template(v-if="!loading")
-      .title {{ doc.period.name }}. Версия: {{ doc.version }}
+    template(v-if="!activeDocumentLoading")
+      .title {{ activeDocument.period.name }}. {{ t('dcis.grid.version', { version: activeDocument.version }) }}
       v-tabs.mt-1(v-model="active")
         settings-document(:document-id="$route.params.documentId")
           template(#activator="{ on, attrs }")
             v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
               v-icon mdi-cog
-        v-tab(v-for="sheet in doc.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
+        v-tab(v-for="sheet in activeDocument.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
       v-tabs-items(v-model="active")
-        v-tab-item(v-for="sheet in doc.sheets" :key="sheet.id")
-          grid.mt-1(:document-id="doc.id" :sheet="sheet" :update="update" :key="`grid${sheet.id}`")
+        v-tab-item(v-for="sheet in activeDocument.sheets" :key="sheet.id")
+          grid(
+            v-if="!activeSheetLoading && activeSheet"
+            :active-sheet="activeSheet"
+            :update-active-sheet="updateActiveSheet"
+            :active-document="activeDocument"
+          )
+          v-progress-circular(v-else color="primary" indeterminate)
     v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
-import type { Ref } from '#app'
-import { defineComponent, ref, useRoute, inject, onUnmounted } from '#app'
 import type {
-  DocumentQueryVariables,
   DocumentQuery,
-  UnloadDocumentMutation,
-  UnloadDocumentMutationVariables
+  DocumentQueryVariables,
+  SheetQuery,
+  SheetQueryVariables
 } from '~/types/graphql'
-import { useCommonQuery } from '~/composables'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
-import unloadDocument from '~/gql/dcis/mutations/document/unload_document.graphql'
-import Grid from '~/components/dcis/Grid.vue'
+import sheetQuery from '~/gql/dcis/queries/sheet.graphql'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
-
-export type UnloadDocumentMutationResult = { data: UnloadDocumentMutation }
+import Grid from '~/components/dcis/Grid.vue'
 
 export default defineComponent({
   components: { SettingsDocument, Grid },
   setup () {
+    const { t } = useI18n()
     const route = useRoute()
-    const active: Ref<number> = ref<number>(0)
-    const { data: doc, loading, update } = useCommonQuery<DocumentQuery, DocumentQueryVariables>({
+
+    const active = ref<number>(0)
+
+    const { data: activeDocument, loading: activeDocumentLoading } = useCommonQuery<
+      DocumentQuery,
+      DocumentQueryVariables
+    >({
       document: documentQuery,
       variables: () => ({
         documentId: route.params.documentId
       })
     })
-
-    const { mutate, loading: unloadLoading, onDone } = useMutation<UnloadDocumentMutation, UnloadDocumentMutationVariables>(unloadDocument)
-    onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
-      if (success) {
-        window.location.href = `/${src}`
-      }
+    const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet } = useCommonQuery<
+      SheetQuery,
+      SheetQueryVariables
+    >({
+      document: sheetQuery,
+      variables: () => ({
+        documentId: route.params.documentId,
+        sheetId: activeDocumentLoading.value ? '' : activeDocument.value.sheets[active.value].id
+      }),
+      options: () => ({
+        enabled: !activeDocumentLoading.value
+      })
     })
 
     const setFooter = inject<(state: boolean) => void>('setFooter')
@@ -57,7 +69,15 @@ export default defineComponent({
       setFooter(true)
     })
 
-    return { active, doc, loading, mutate, unloadLoading, update }
+    return {
+      t,
+      active,
+      activeDocument,
+      activeDocumentLoading,
+      activeSheet,
+      activeSheetLoading,
+      updateActiveSheet
+    }
   }
 })
 </script>

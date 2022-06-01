@@ -3,7 +3,7 @@
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
     v-card
-      v-card-title {{ $t('dcis.cells.gridCellFiles.title') }}
+      v-card-title {{ t('dcis.grid.changeValue') }}
         v-spacer
         v-btn(@click="cancel" icon)
           v-icon mdi-close
@@ -27,7 +27,7 @@
                   @click="localFile.deleted = !localFile.deleted"
                 )
                   v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
-              span {{ $t(localFile.deleted ? 'cancelDeletion' : 'delete') }}
+              span {{ t(localFile.deleted ? 'cancelDeletion' : 'delete') }}
           v-list-item-content
             v-list-item-title
               nuxt-link(
@@ -37,7 +37,7 @@
               ) {{ localFile.file.name }}
         v-file-input(
           v-model="newFiles"
-          :label="$t('dcis.cells.gridCellFiles.newFiles')"
+          :label="t('dcis.grid.cellFiles.newFiles')"
           chips
           clearable
           multiple
@@ -46,28 +46,16 @@
         v-btn(
           v-if="existingFiles.length"
           color="success"
-          @click="uploadArchive"
-        ) {{ $t('dcis.cells.gridCellFiles.uploadArchive') }}
+          @click="$emit('unload-archive')"
+        ) {{ t('dcis.grid.cellFiles.uploadArchive') }}
         v-spacer
-        v-btn(color="primary" @click="setValue") {{ $t('save') }}
+        v-btn(color="primary" @click="setValue") {{ t('save') }}
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
-import { DataProxy } from '@apollo/client'
-import type { PropType } from '#app'
-import {
-  FileType,
-  ValueType,
-  UnloadFileValueArchiveMutation,
-  UnloadFileValueArchiveMutationVariables,
-  ValueFilesQuery,
-  ValueFilesQueryVariables
-} from '~/types/graphql'
-import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
-import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/sheet/unload_file_value_archive.graphql'
+import { PropType } from '#app'
+import type { FileType } from '~/types/graphql'
 import FileField from '~/components/common/FileField.vue'
-import type { ChangeFileValueMutationResult } from '~/components/dcis/grid/GridCell.vue'
 
 type ValueFile = {
   file: FileType
@@ -77,7 +65,7 @@ type ValueFile = {
 export default defineComponent({
   components: { FileField },
   props: {
-    valueType: { type: Object as PropType<ValueType>, default: null },
+    files: { type: Array as PropType<FileType[]>, required: true },
     value: { type: String, default: null }
   },
   setup (props, { emit }) {
@@ -85,50 +73,8 @@ export default defineComponent({
 
     const active = ref<boolean>(true)
 
-    const variables = ref<
-      UnloadFileValueArchiveMutationVariables |
-      ValueFilesQueryVariables
-    >(props.valueType ? { valueId: props.valueType.id } : { valueId: '' })
-
-    const { mutate: unloadFileValueArchiveMutate } = useMutation<
-      UnloadFileValueArchiveMutation,
-      UnloadFileValueArchiveMutationVariables
-    >(unloadFileValueArchiveMutation, {
-      variables: variables.value
-    })
-
-    const uploadArchive = async () => {
-      const { data: { unloadFileValueArchive: { src } } } = await unloadFileValueArchiveMutate()
-      window.open(src, '_blank')
-    }
-
-    const {
-      data: valueFiles,
-      update: valueFilesUpdate
-    } = useCommonQuery<ValueFilesQuery, ValueFilesQueryVariables, 'valueFiles'>({
-      document: valueFilesQuery,
-      variables: variables.value,
-      options: {
-        enabled: !!props.valueType
-      }
-    })
-
-    const updateValueFiles = (
-      cache: DataProxy,
-      result: ChangeFileValueMutationResult
-    ) => {
-      if (props.valueType) {
-        valueFilesUpdate(cache, result, (dataCache) => {
-          const mutationResult = result.data.changeFileValue
-          const dataKey = Object.keys(dataCache)[0]
-          dataCache[dataKey] = mutationResult[dataKey]
-          return dataCache
-        })
-      }
-    }
-
     const existingFiles = ref<ValueFile[]>([])
-    watch(valueFiles, (value) => {
+    watch(() => props.files, (value) => {
       if (value) {
         existingFiles.value = value.map((file: FileType) => ({ file, deleted: false }))
       }
@@ -147,15 +93,17 @@ export default defineComponent({
 
     const setValue = () => {
       active.value = false
-      emit('set-value', remainingFiles.value.length + newFiles.value.length ? t('yes') : t('no'), {
-        remainingFiles: remainingFiles.value,
-        newFiles: newFiles.value
-      }, updateValueFiles)
+      emit(
+        'set-value',
+        remainingFiles.value.length + newFiles.value.length ? t('yes') : t('no'),
+        remainingFiles.value,
+        newFiles.value
+      )
     }
 
     return {
+      t,
       active,
-      uploadArchive,
       existingFiles,
       newFiles,
       cancel,

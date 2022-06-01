@@ -1,23 +1,20 @@
-from typing import Optional
-
 import graphene
-from devind_core.schema.types import FileType, ContentTypeType
+from devind_core.schema.types import ContentTypeType, FileType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
-from graphene_django import DjangoObjectType, DjangoListField
+from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
-from django.db.models import Q
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
+from stringcase import snakecase
 
 from apps.core.schema import UserType
+from apps.dcis.services.sheet_unload_services import SheetUploader
+from ..helpers.info_fields import get_fields
 from ..models import (
-    Project, Period, Division,
-    Privilege, PeriodGroup, PeriodPrivilege,
-    Status, Sheet, Document, DocumentStatus,
-    Attribute, AttributeValue, ColumnDimension,
-    RowDimension, Cell, Limitation, MergedCell,
-    Value
+    Attribute, AttributeValue, Division,
+    Document, DocumentStatus, Limitation,
+    Period, PeriodGroup, PeriodPrivilege,
+    Privilege, Project, Status,
 )
 
 
@@ -174,94 +171,11 @@ class StatusType(DjangoObjectType):
         fields = ('id', 'name', 'edit', 'comment',)
 
 
-class SheetType(DjangoObjectType):
-    """Тип моделей листов.
-
-        rows, cells - могут иметь идентификатор документа, в противном случае
-            выгружается только каркас
-        values - могут выгружаться только значения привязанные к строкам
-        columns, merged_cells - привязываются к каркасу и от документа не зависят.
-    """
-
-    period = graphene.Field(PeriodType, description='Период')
-    columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
-    merged_cells = graphene.List(lambda: MergedCellType, description='Объединенные ячейки')
-    rows = graphene.List(
-        lambda: RowDimensionType,
-        document_id=graphene.ID(description='Идентификатор документа'),
-        description='Строки'
-    )
-    cells = graphene.List(
-        lambda: CellType,
-        document_id=graphene.ID(description='Идентификатор документа'),
-        description='Мета информация о ячейках'
-    )
-    values = graphene.List(
-        lambda: ValueType,
-        document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        description='Значения документа'
-    )
-
-    class Meta:
-        model = Sheet
-        fields = (
-            'id',
-            'name',
-            'position',
-            'comment',
-            'created_at',
-            'updated_at',
-            'period',
-        )
-
-    @staticmethod
-    @resolver_hints(model_field='columndimension_set')
-    def resolve_columns(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
-        """Получение всех колонок."""
-        return sheet.columndimension_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='rowdimension_set')
-    def resolve_rows(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
-        """Получения всех строк."""
-        if document_id is None:
-            return sheet.rowdimension_set.filter(parent__isnull=True)
-        document_id = from_global_id(document_id)[1]
-        return sheet.rowdimension_set.filter(Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id))
-
-    @staticmethod
-    def resolve_cells(sheet: Sheet, info: ResolveInfo, document_id: Optional[str] = None, *args, **kwargs):
-        """Получаем все ячейки, связанные со строками.
-
-            Получение зависит от строк, так как от документа к документу они могут меняться.
-        """
-        if document_id is None:
-            rows_id = sheet.rowdimension_set.filter(parent__isnull=True).values_list('pk', flat=True)
-        else:
-            document_id = from_global_id(document_id)[1]
-            rows_id = sheet.rowdimension_set.filter(
-                Q(parent__isnull=True) | Q(parent__isnull=False, document_id=document_id)
-            ).values_list('id', flat=True)
-        return Cell.objects.filter(row_id__in=rows_id).all()
-
-    @staticmethod
-    @resolver_hints(model_field='mergedcell_set')
-    def resolve_merged_cells(sheet: Sheet, info: ResolveInfo, *args, **kwargs):
-        """Получение всех объединенных ячеек связанных с листом."""
-        return sheet.mergedcell_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='value_set')
-    def resolve_values(sheet: Sheet, info: ResolveInfo, document_id: str, *args, **kwargs):
-        """Получение значений, связанных с листом."""
-        return sheet.value_set.filter(document_id=from_global_id(document_id)[1]).all()
-
-
 class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
     period = graphene.Field(PeriodType, description='Период сбора')
-    sheets = DjangoListField(SheetType, description='Листы')
+    sheets = graphene.List(lambda: SheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     class Meta:
@@ -282,7 +196,18 @@ class DocumentType(DjangoObjectType):
         connection_class = CountableConnection
 
     @staticmethod
-    def resolve_last_status(document: Document, info: ResolveInfo, *args, **kwargs):
+    def resolve_sheets(document: Document, info: ResolveInfo):
+        sheets: list[list[dict]] = []
+        for sheet in document.sheets.all():
+            sheets.append(SheetUploader(
+                sheet=sheet,
+                fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
+                document_id=document.id
+            ).unload())
+        return sheets
+
+    @staticmethod
+    def resolve_last_status(document: Document, info: ResolveInfo):
         try:
             return document.documentstatus_set.latest('created_at')
         except DocumentStatus.DoesNotExist:
@@ -353,124 +278,91 @@ class AttributeValueType(DjangoObjectType):
         )
 
 
-class ColumnDimensionType(DjangoObjectType):
-    """Тип колонок."""
+class ColumnDimensionType(graphene.ObjectType):
+    """Тип колонки."""
 
-    sheet = graphene.Field(SheetType, description='Листы')
+    id = graphene.ID(required=True, description='Идентификатор')
+    index = graphene.Int(required=True, description='Индекс колонки')
+    name = graphene.String(required=True, description='Название колонки')
+    width = graphene.Int(description='Ширина колонки')
+    fixed = graphene.Boolean(required=True, description='Фиксация колонки')
+    hidden = graphene.Boolean(required=True, description='Скрытие колонки')
+    kind = graphene.String(required=True, description='Тип значений')
+    created_at = graphene.DateTime(required=True, description='Дата добавления')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления')
     user = graphene.List(UserType, description='Пользователь')
-    cells = graphene.List(lambda: CellType, description='Ячейки')
-    values = graphene.List(
-        lambda: ValueType,
-        document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        description='Значения документа'
-    )
-
-    class Meta:
-        model = ColumnDimension
-        fields = (
-            'id',
-            'index',
-            'width',
-            'fixed',
-            'hidden',
-            'kind',
-            'sheet',
-            'user',
-            'cells',
-            'values',
-        )
-        convert_choices_to_enum = False
-
-    @staticmethod
-    @resolver_hints(model_field='cell_set')
-    def resolve_cells(column: ColumnDimension, info: ResolveInfo, *args, **kwargs):
-        return column.cell_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='value_set')
-    def resolve_values(column: ColumnDimension, info: ResolveInfo, document_id: str, *args, **kwargs):
-        """Получение значений, связанных с листом."""
-        return column.value_set.filter(document_id=from_global_id(document_id)[1]).all()
 
 
-class RowDimensionType(DjangoObjectType):
-    """Тип строк."""
+class RowDimensionType(graphene.ObjectType):
+    """Тип строки."""
 
-    parent_id = graphene.Int(description='Идентификатор родителя')
-    children = graphene.List(lambda: RowDimensionType, description='Дочерние строки')
+    id = graphene.ID(required=True, description='Идентификатор')
+    index = graphene.Int(required=True, description='Индекс строки относительно родителя')
+    global_index = graphene.Int(required=True, description='Индекс строки в плоской структуре')
+    name = graphene.String(required=True, description='Название строки')
+    height = graphene.Int(description='Высота строки')
+    fixed = graphene.Boolean(required=True, description='Фиксация строки')
+    hidden = graphene.Boolean(required=True, description='Скрытие строки')
+    dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
+    aggregation = graphene.String(description='Агрегирование перечисление (мин, макс) для динамических строк')
+    created_at = graphene.DateTime(required=True, description='Дата добавления')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления')
+    parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
+    children = graphene.List(graphene.NonNull(lambda: RowDimensionType), required=True, description='Дочерние строки')
+    document_id = graphene.ID(description='Идентификатор документа')
     user = graphene.List(UserType, description='Пользователь')
-    cells = graphene.List(lambda: CellType, description='Ячейки')
-
-    class Meta:
-        model = RowDimension
-        fields = (
-            'id',
-            'index',
-            'height',
-            'sheet',
-            'dynamic',
-            'aggregation',
-            'object_id',
-            'created_at',
-            'updated_at',
-            'parent',
-            'parent_id',
-            'document',
-            'children',
-            'user',
-            'cells',
-        )
-        convert_choices_to_enum = False
-
-    @staticmethod
-    @resolver_hints(model_field='rowdimension_set')
-    def resolve_children(row: RowDimension, info: ResolveInfo, *args, **kwargs):
-        return row.rowdimension_set.all()
+    cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
 
-class CellType(DjangoObjectType):
+class CellType(graphene.ObjectType):
     """Тип ячейки."""
 
-    column = graphene.Field(ColumnDimensionType, description='Колонка')
-    column_id = graphene.Int(description='Идентификатор колонки')
-    row = graphene.Field(RowDimensionType, description='Строка')
-    row_id = graphene.Int(description='Идентификатор строки')
-    limitations = graphene.List(lambda: LimitationType, description='Ограничения на ячейку')
+    id = graphene.ID(required=True, description='Идентификатор')
+    kind = graphene.String(required=True, description='Тип значения')
+    editable = graphene.Boolean(required=True, description='Редактируемая ячейка')
+    formula = graphene.String(description='Формула')
+    comment = graphene.String(description='Комментарий')
+    mask = graphene.String(description='Маска для ввода значений')
+    tooltip = graphene.String(description='Подсказка')
+    column_id = graphene.ID(description='Идентификатор колонки')
+    row_id = graphene.ID(description='Идентификатор строки')
+    horizontal_align = graphene.ID(description='Горизонтальное выравнивание')
+    vertical_align = graphene.ID(description='Вертикальное выравнивание')
+    size = graphene.Int(required=True, description='Размер шрифта')
+    strong = graphene.Boolean(required=True, description='Жирный шрифт')
+    italic = graphene.Boolean(required=True, description='Курсив')
+    strike = graphene.Boolean(required=True, description='Зачеркнутый')
+    underline = graphene.String(description='Тип подчеркивания')
+    color = graphene.String(required=True, description='Цвет индекса')
+    background = graphene.String(required=True, description='Цвет фона')
+    border_style = graphene.JSONString(required=True, description='Стили границ')
+    border_color = graphene.JSONString(required=True, description='Цвет границ')
+    position = graphene.String(required=True, description='Позиция относительно родительской строки')
+    global_position = graphene.String(required=True, description='Позиция в плоской структуре')
+    related_global_positions = graphene.List(
+        graphene.NonNull(graphene.String),
+        required=True,
+        description='Связанные с объединением позиции в плоской структуре'
+    )
+    colspan = graphene.Int(required=True, description='Объединение колонок')
+    rowspan = graphene.Int(required=True, description='Объединение строк')
+    value = graphene.String(description='Значение')
+    verified = graphene.Boolean(required=True, description='Валидно ли поле')
+    error = graphene.String(description='Текст ошибки')
 
-    class Meta:
-        model = Cell
-        fields = (
-            'id',
-            'kind',
-            'editable',
-            'formula',
-            'comment',
-            'default',
-            'mask',
-            'tooltip',
-            'column',
-            'column_id',
-            'row',
-            'row_id',
-            'horizontal_align',
-            'vertical_align',
-            'size',
-            'strong',
-            'italic',
-            'strike',
-            'underline',
-            'color',
-            'background',
-            'limitations',
-            'border_style',
-            'border_color'
-        )
-        convert_choices_to_enum = False
 
-    @staticmethod
-    @resolver_hints(model_field='limitation_set')
-    def resolve_limitations(cell: Cell, info: ResolveInfo, *args, **kwargs):
-        return cell.limitation_set.all()
+class SheetType(graphene.ObjectType):
+    """Тип листа."""
+
+    id = graphene.ID(required=True, description='Идентификатор')
+    name = graphene.String(required=True, description='Наименование')
+    position = graphene.Int(required=True, description='Позиция')
+    comment = graphene.String(required=True, description='Комментарий')
+    created_at = graphene.DateTime(required=True, description='Дата добавления')
+    updated_at = graphene.DateTime(required=True, description='Дата обновления')
+    period = graphene.Field(PeriodType, description='Период')
+    columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
+    rows = graphene.List(lambda: RowDimensionType, description='Строки')
 
 
 class LimitationType(DjangoObjectType):
@@ -490,48 +382,16 @@ class LimitationType(DjangoObjectType):
         convert_choices_to_enum = False
 
 
-class MergedCellType(DjangoObjectType):
-    """Тип для объединенных ячеек."""
+class ChangedCellOption(graphene.ObjectType):
+    """Измененное свойство ячейки."""
 
-    range = graphene.String(required=True, description='Объединенный диапазон')
-    colspan = graphene.Int()
-    rowspan = graphene.Int()
-    target = graphene.String()
-    cells = graphene.List(graphene.String)
-
-    class Meta:
-        model = MergedCell
-        fields = (
-            'id',
-            'min_col',
-            'min_row',
-            'max_col',
-            'max_row',
-            'range',
-            'colspan',
-            'rowspan',
-            'target',
-            'cells'
-        )
-
-    @staticmethod
-    def resolve_range(merge_cell: MergedCell, info: ResolveInfo, *args, **kwargs):
-        return str(merge_cell)
+    cell_id = graphene.ID(required=True, description='Идентификаторы ячеек')
+    field = graphene.String(required=True, description='Идентификатор поля')
+    value = graphene.String(description='Значение поля')
 
 
-class ValueType(DjangoObjectType):
-    """Тип для значений."""
+class GlobalIndicesInputType(graphene.InputObjectType):
+    """Индекс строки в плоской структуре."""
 
-    column_id = graphene.Int(description='Идентификатор колонки')
-    row_id = graphene.Int(description='Идентификатор строки')
-
-    class Meta:
-        model = Value
-        fields = (
-            'id',
-            'value',
-            'verified',
-            'error',
-            'column_id',
-            'row_id',
-        )
+    row_id = graphene.ID(required=True, description='Идентификатор строки')
+    global_index = graphene.Int(required=True, description='Индекс в плоской структуре')

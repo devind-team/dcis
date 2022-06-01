@@ -1,104 +1,83 @@
 <template lang="pug">
   v-row
-    v-col
-      v-btn-toggle.ml-1(v-model="formatting" multiple dense)
-        v-btn(value="strong" :disabled="!selectionCells.length") #[v-icon mdi-format-bold]
-        v-btn(value="italic" :disabled="!selectionCells.length") #[v-icon mdi-format-italic]
-      v-btn-toggle.mx-1(v-model="horizontalAlignValue" dense)
-        v-btn(:disabled="!selectionCells.length" value="left") #[v-icon mdi-format-align-left]
-        v-btn(:disabled="!selectionCells.length" value="center") #[v-icon mdi-format-align-center]
-        v-btn(:disabled="!selectionCells.length" value="right" ) #[v-icon mdi-format-align-right]
-      v-btn-toggle.mx-1(v-model="verticalAlignValue" dense)
-        v-btn(:disabled="!selectionCells.length" value="top") #[v-icon mdi-format-align-top]
-        v-btn(:disabled="!selectionCells.length" value="middle") #[v-icon mdi-format-align-middle]
-        v-btn(:disabled="!selectionCells.length" value="bottom") #[v-icon mdi-format-align-bottom]
-      v-btn-toggle
-        v-combobox.mx-1(
-          v-model="sizeValue"
-          :items="sizes"
-          :disabled="!selectionCells.length"
-          label="Шрифт"
-          style="width: 150px"
-          dense
-        )
-        v-combobox.mx-1(
-          v-model="kindValue"
-          :items="kinds"
-          :disabled="!selectionCells.length"
-          label="Тип"
-          style="width: 150px"
-          dense
-        )
+    v-col.my-2.d-flex.align-center
+      v-btn-toggle(v-model="formatting" multiple)
+        v-btn(:disabled="disabled" value="strong" height="40")
+          v-icon mdi-format-bold
+        v-btn(:disabled="disabled" value="italic" height="40")
+          v-icon mdi-format-italic
+        v-btn(:disabled="disabled" value="underline" height="40")
+          v-icon mdi-format-underline
+        v-btn(:disabled="disabled" value="strike" height="40")
+          v-icon mdi-format-strikethrough
+      v-btn-toggle.mx-1(v-model="horizontalAlign")
+        v-btn(:disabled="disabled" value="left" height="40")
+          v-icon mdi-format-align-left
+        v-btn(:disabled="disabled" value="center" height="40")
+          v-icon mdi-format-align-center
+        v-btn(:disabled="disabled" value="right" height="40")
+          v-icon mdi-format-align-right
+      v-btn-toggle.mx-1(v-model="verticalAlign")
+        v-btn(:disabled="disabled" value="top" height="40")
+          v-icon mdi-format-align-top
+        v-btn(:disabled="disabled" value="middle" height="40")
+          v-icon mdi-format-align-middle
+        v-btn(:disabled="disabled" value="bottom" height="40")
+          v-icon mdi-format-align-bottom
+      v-combobox.mx-1.shrink(
+        v-model="size"
+        :label="t('dcis.grid.sheetToolbar.fontSize')"
+        :items="sizes"
+        :disabled="disabled"
+        style="width: 170px"
+        filled
+        outlined
+        hide-details
+        dense
+      )
+      v-combobox.ml-1.shrink(
+        v-model="kind"
+        :label="t('dcis.grid.sheetToolbar.kind')"
+        :items="kinds"
+        :disabled="disabled"
+        style="width: 170px"
+        filled
+        outlined
+        hide-details
+        dense
+      )
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
-import { ApolloCache } from '@apollo/client'
-import type { PropType } from '#app'
-import { cellKinds } from '~/composables/grid'
-import { BuildCellType, CellOptionsType } from '~/types/grid-types'
-import {
-  ValueFilesQuery,
-  ValueFilesQueryVariables,
-  ChangeCellsOptionMutation,
-  ChangeCellsOptionMutationVariables
-} from '~/types/graphql'
-import changeCellsOption from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
-import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
+import { PropType, Ref } from '#app'
+import { UpdateType } from '~/composables'
+import { DocumentType, SheetQuery, SheetType } from '~/types/graphql'
+import { CellsOptionsType } from '~/types/grid'
 
 export default defineComponent({
   props: {
-    sheetId: { type: String, required: true },
-    selectionCells: { type: Array as PropType<BuildCellType[]>, required: true },
-    selectionCellsOptions: { type: Object as PropType<CellOptionsType>, required: true }
+    selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
   },
   setup (props) {
     const { t } = useI18n()
 
-    const { mutate } = useMutation<
-      ChangeCellsOptionMutation,
-      ChangeCellsOptionMutationVariables
-    >(changeCellsOption, {
-      update: (cache: ApolloCache<any>) => {
-        valuesId.value.forEach((id) => {
-          try {
-            cache.readQuery<ValueFilesQuery, ValueFilesQueryVariables>({
-              query: valueFilesQuery,
-              variables: { valueId: id }
-            })
-            cache.writeQuery<ValueFilesQuery, ValueFilesQueryVariables>({
-              data: { valueFiles: [] },
-              query: valueFilesQuery,
-              variables: { valueId: id }
-            })
-          } catch (_) { }
-        })
-      }
-    })
-    const cellsId = computed<number[]>(() => props.selectionCells.map(c => parseInt(c.cell.id)))
-    const valuesId = computed<string[]>(() => props.selectionCells.filter(c => c.valueType).map(c => c.valueType.id))
-
-    const kinds = computed<{ text: string, value: string }[]>(() => (
-      Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.cellKinds.${k}`) as string, value: k })))
+    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const changeCellsOption = useChangeCellsOptionMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      updateSheet
     )
-    const kindValue = computed({
-      get: () => (kinds.value.find(k => (k.value === props.selectionCellsOptions.kind))),
-      set: value => mutate({ cellsId: cellsId.value, field: 'kind', value: value.value })
-    })
 
-    const sizes: { text: string, value: number }[] = Array
-      .from(new Array(19).keys())
-      .map((e: number) => e + 6)
-      .map((e: number) => ({ text: `${e}px`, value: e }))
-    const sizeValue = computed<{ text: string, value: number }>({
-      get: () => (sizes.find(s => (s.value === props.selectionCellsOptions.size))),
-      set: value => mutate({ cellsId: cellsId.value, field: 'size', value: String(value.value) })
-    })
+    const disabled = computed<boolean>(() => !props.selectedCellsOptions)
 
     const formatting = computed<string[]>({
-      get: () => (['strong', 'italic', 'underline'].filter(f => props.selectionCellsOptions[f])),
+      get: () => !disabled.value
+        ? (['strong', 'italic', 'underline', 'strike'].filter(f => !!props.selectedCellsOptions[f]))
+        : [],
       set: (value) => {
-        const diff: string[] = formatting.value.length > value.length
+        const diff = formatting.value.length > value.length
           ? formatting.value.filter(e => !value.includes(e))
           : value.filter(v => !formatting.value.includes(v))
         if (diff.length) {
@@ -112,29 +91,54 @@ export default defineComponent({
               break
             }
           }
-          const val: string = String(!props.selectionCellsOptions[field])
-          mutate({ cellsId: cellsId.value, field, value: val })
+          let val: string | null = null
+          if (field === 'underline') {
+            val = props.selectedCellsOptions.underline ? null : 'single'
+          } else {
+            val = String(!props.selectedCellsOptions[field])
+          }
+          changeCellsOption(props.selectedCellsOptions.cells, field, val)
         }
       }
     })
 
-    const horizontalAlignValue = computed<string | null>({
-      get: () => (props.selectionCellsOptions.horizontalAlign),
-      set: value => mutate({ cellsId: cellsId.value, field: 'horizontal_align', value })
+    const horizontalAlign = computed<string | null>({
+      get: () => !disabled.value ? props.selectedCellsOptions.horizontalAlign : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'horizontalAlign', value)
     })
-    const verticalAlignValue = computed<string | null>({
-      get: () => (props.selectionCellsOptions.verticalAlign),
-      set: value => mutate({ cellsId: cellsId.value, field: 'vertical_align', value })
+
+    const verticalAlign = computed<string | null>({
+      get: () => !disabled.value ? props.selectedCellsOptions.verticalAlign : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'verticalAlign', value)
+    })
+
+    const sizes = Array
+      .from(new Array(19).keys())
+      .map((e: number) => e + 6)
+      .map((e: number) => ({ text: `${e}px`, value: e }))
+    const size = computed<{text: string, value: number} | null>({
+      get: () => !disabled.value ? sizes.find(s => s.value === props.selectedCellsOptions.size) : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'size', String(value.value))
+    })
+
+    const kinds = computed<{ text: string, value: string }[]>(() => (
+      Object.keys(cellKinds).map((k: string) => ({ text: t(`dcis.grid.cellKinds.${k}`) as string, value: k })))
+    )
+    const kind = computed<{ text: string, value: string } | null>({
+      get: () => !disabled.value ? kinds.value.find(k => k.value === props.selectedCellsOptions.kind) : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'kind', value.value)
     })
 
     return {
+      t,
+      disabled,
       formatting,
-      kinds,
-      kindValue,
+      horizontalAlign,
+      verticalAlign,
       sizes,
-      horizontalAlignValue,
-      verticalAlignValue,
-      sizeValue
+      size,
+      kinds,
+      kind
     }
   }
 })

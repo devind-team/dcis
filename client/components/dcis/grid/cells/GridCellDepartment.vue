@@ -3,7 +3,7 @@
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
     v-card
-      v-card-title Изменение значения
+      v-card-title {{ t('dcis.grid.changeValue') }}
         v-spacer
         v-btn(@click="cancel" icon)
           v-icon mdi-close
@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import type { Ref } from '#app'
-import { DepartmentsQuery, DepartmentsQueryVariables, DepartmentType } from '~/types/graphql'
+import { DepartmentsQuery, DepartmentsQueryVariables, DepartmentFieldFragment } from '~/types/graphql'
 import departmentQuery from '~/gql/dcis/queries/departments.graphql'
 
 export default defineComponent({
@@ -24,13 +24,15 @@ export default defineComponent({
     value: { type: String, default: null }
   },
   setup (_, { emit }) {
+    const { t } = useI18n()
+
     const active: Ref<boolean> = ref<boolean>(true)
 
-    const { data: departments } = useCommonQuery<DepartmentsQuery, DepartmentsQueryVariables>({
+    const { data: departments } = useCommonQuery<DepartmentsQuery, DepartmentsQueryVariables, 'departments'>({
       document: departmentQuery
     })
 
-    const setValue = (department: DepartmentType) => {
+    const setValue = (department: DepartmentFieldFragment) => {
       active.value = false
       const value: string = department.code ? `${department.code} ${department.name}` : department.name
       emit('set-value', value)
@@ -41,7 +43,7 @@ export default defineComponent({
       emit('cancel')
     }
 
-    return { active, departments, setValue, cancel }
+    return { t, active, departments, setValue, cancel }
   }
 })
 </script>

@@ -38,12 +38,12 @@ export function useFilters () {
   }
 
   const getUserFullName = (user: UserType | Ref<UserType>, showSirName: boolean = true) => {
-    const u = unref<UserType>(user)
+    const u = unref(user)
     return `${u.lastName} ${u.firstName}${u.sirName && showSirName ? ' ' + u.sirName : ''}`
   }
 
   const getUserName = (user: UserType | Ref<UserType>) => {
-    const u = unref<UserType>(user)
+    const u = unref(user)
     return `${u.lastName} ${u.firstName[0]}.${u.sirName[0]}`
   }
 

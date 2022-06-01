@@ -1,9 +1,12 @@
 fragment ColumnDimensionFields on ColumnDimensionType {
   id
   index
+  name
   width
   fixed
   hidden
   kind
+  createdAt
+  updatedAt
   __typename
 }

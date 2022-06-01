@@ -1,9 +1,0 @@
-fragment ValueFields on ValueType {
-  id
-  value
-  verified
-  error
-  columnId
-  rowId
-  __typename
-}
