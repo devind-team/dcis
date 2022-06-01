@@ -48,11 +48,11 @@
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue'
-import { Vue, Component, Prop, Ref } from 'vue-property-decorator'
+import { defineComponent, PropType, ref, computed, onMounted, nextTick, watch } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { VDataTable } from 'vuetify/lib'
 import { getObjectValueByPath } from 'vuetify/lib/util/helpers'
+import { useVuetify } from '~/composables'
 
 type Item = { [key: string]: any, children?: Item[] | null }
 type HeaderScope = {
@@ -78,207 +78,205 @@ export type ItemWithProps = Omit<Item, 'children'> & {
 export type TreeFilter = (item: ItemWithProps) => boolean
 export type FlatFilter = (item: ItemWithProps) => boolean
 
-@Component<TreeDataTable>({
+export default defineComponent({
   inheritAttrs: false,
-  watch: {
-    items: {
-      immediate: true,
-      handler () {
-        this.flatItems = this.getFlatItems(this.getItemsWithProps((this.items as Item[])))
+  props: {
+    headers: { type: Array as PropType<DataTableHeader[] | undefined>, default: () => undefined },
+    items: { type: Array as PropType<Item[] | undefined>, default: () => undefined },
+    search: { type: String, default: () => undefined },
+    loading: { type: [Boolean, String], default: false },
+    treeFilter: { type: Function as PropType<TreeFilter> | undefined, required: true }, // todo: required?
+    flatFilter: { type: Function as PropType<FlatFilter | undefined>, required: true } // todo: required?
+  },
+  setup (props, { slots }) {
+    const { vuetify } = useVuetify()
+
+    const dataTable = ref<InstanceType<typeof VDataTable> & { colspanAttrs: object | undefined }>()
+
+    const flatItems = ref<ItemWithProps[]>([])
+    const sortBy = ref<string | string[]>([])
+    const colspanAttrs = ref<object | undefined>({})
+    const loadingText = ref('')
+    const noDataText = ref('')
+
+    const headerSlotName = computed(() => {
+      return props.headers ? `header.${props.headers[0].value}` : ''
+    })
+
+    const outerSlotNames = computed(() => {
+      return Object.keys(slots).filter((key: string) => // todo: scopedSlots -> slots??
+        key !== 'body' && !key.startsWith('item') && key !== headerSlotName.value)
+    })
+    const isTree = computed(() => {
+      return !((props.search && props.search.length) || sortBy.value.length)
+    })
+    const expandedItems = computed(() => {
+      if (isTree.value) {
+        const items: ItemWithProps[] = flatItems.value.filter(isItemVisible)
+        return props.treeFilter ? items.filter(props.treeFilter) : items
+      }
+      return props.flatFilter ? flatItems.value.filter(props.flatFilter) : flatItems.value
+    })
+    const hasChildren = computed(() => {
+      return expandedItems.value.length ? expandedItems.value[0].neighborsHasChildren : false
+    })
+
+    /**
+     * Определение показывать элемент или нет
+     * @param item
+     * @return boolean
+     */
+    const isItemVisible = (item: ItemWithProps): boolean => {
+      if (item.parent) {
+        if (item.parent.isExpanded) {
+          return isItemVisible(item.parent)
+        }
+        return false
+      }
+      return true
+    }
+
+    /**
+     * Получение данных для слота item.
+     * @param headerScope
+     * @param item
+     * @param index
+     * @return
+     */
+    const getItemScope = (headerScope: HeaderScope, item: Item, index: number): ItemName => {
+      return {
+        isMobile: headerScope.isMobile,
+        item,
+        header: headerScope.headers[index],
+        value: item[headerScope.headers[index].value]
       }
     }
-  },
-  computed: {
-    headerSlotName (): string {
-      return this.headers ? `header.${this.headers[0].value}` : ''
-    },
-    outerSlotNames (): string[] {
-      return Object.keys(this.$scopedSlots).filter((key: string) =>
-        key !== 'body' && !key.startsWith('item') && key !== this.headerSlotName)
-    },
-    isTree (): boolean {
-      return !((this.search && this.search.length) || this.sortBy.length)
-    },
-    expandedItems (): ItemWithProps[] {
-      if (this.isTree) {
-        const items: ItemWithProps[] = this.flatItems.filter(this.isItemVisible)
-        return this.treeFilter ? items.filter(this.treeFilter) : items
+
+    /**
+     * Раскрытие элемента
+     * @param expand
+     * @param item
+     */
+    const expand = (expand: (item: Item, v: boolean) => void, item: Item): void => {
+      expand(item, !item.isExpanded)
+      item.isExpanded = !item.isExpanded
+    }
+
+    /**
+     * Получение стиля для блока раскрытия
+     * @param item
+     * @return
+     */
+    const getExpandStyle = (item: ItemWithProps): { margin: string } => {
+      const marginRight = item.neighborsHasChildren
+        ? 24 * item.level
+        : 24 * (item.level - 1) >= 0
+          ? 24 * (item.level - 1)
+          : 0
+      return {
+        margin: `0 24px 0 ${marginRight}px`
       }
-      return this.flatFilter ? this.flatItems.filter(this.flatFilter) : this.flatItems
-    },
-    hasChildren (): boolean {
-      return this.expandedItems.length ? this.expandedItems[0].neighborsHasChildren : false
+    }
+
+    /**
+     * Получение заголовков кроме первого
+     * @param header
+     * @return
+     */
+    const getHeadersTail = (header: DataTableHeader[]): DataTableHeader[] => {
+      return header.filter((_, index: number) => index !== 0)
+    }
+
+    /**
+     * Получение классов для ячейки
+     * @param header
+     * @return
+     */
+    const getTdClasses = (header: DataTableHeader): (string | string[] | { [key: string]: boolean | undefined } | undefined)[] => {
+      return [
+        `text-${header.align || 'start'}`,
+        header.cellClass,
+        { 'v-data-table__divider': header.divider }
+      ]
+    }
+
+    /**
+     * Получение элементов с дополнительными свойствами
+     * @param items
+     * @param parent
+     * @param level
+     * @return
+     */
+    const getItemsWithProps = (items: Item[], parent: ItemWithProps | null = null, level: number = 0): ItemWithProps[] => {
+      const neighborsHasChildren = items.some((item: any) => item.children && item.children.length)
+      return items.map((item: any) => {
+        const result = { ...item, parent, level, neighborsHasChildren, isExpanded: false }
+        if (result.children && result.children.length) {
+          result.children = getItemsWithProps(result.children, result, level + 1)
+        }
+        return result
+      })
+    }
+
+    /**
+     * Разбор иерархии элементов в плоскую структуру
+     * @param item,
+     * @param items
+     */
+    const flatten = (item: ItemWithProps, items: ItemWithProps[]): void => {
+      items.push(item)
+      if (item.children && item.children.length) {
+        item.children.forEach((child: any) => flatten(child, items))
+      }
+    }
+
+    /**
+     * Получение плоской структуры элементов
+     * @param items
+     * @return
+     */
+    const getFlatItems = (items: ItemWithProps[]): ItemWithProps[] => {
+      const flatItems: ItemWithProps[] = []
+      items.forEach((item: ItemWithProps) => {
+        flatten(item, flatItems)
+      })
+      return flatItems
+    }
+    onMounted(async () => {
+      await nextTick()
+      dataTable.value.$watch('colspanAttrs', (newValue: object | undefined) => {
+        colspanAttrs.value = newValue
+      }, { immediate: true })
+      loadingText.value = vuetify.lang.t(dataTable.value.$props.loadingText)
+      noDataText.value = vuetify.lang.t(dataTable.value.$props.noDataText)
+    })
+
+    watch(
+      props.items,
+      () => {
+        flatItems.value = getFlatItems(getItemsWithProps((props.items as Item[])))
+      },
+      { immediate: true }
+    )
+    return {
+      expandedItems,
+      sortBy,
+      flatItems,
+      loadingText,
+      isTree,
+      hasChildren,
+      colspanAttrs,
+      noDataText,
+      outerSlotNames,
+      getTdClasses,
+      getExpandStyle,
+      getObjectValueByPath,
+      expand,
+      getHeadersTail,
+      getItemScope
     }
   }
 })
-export default class TreeDataTable extends Vue {
-  @Prop({ type: Array as PropType<DataTableHeader[] | undefined> })
-  readonly headers!: DataTableHeader[] | undefined
-
-  @Prop({ type: Array as PropType<Item[] | undefined> })
-  readonly items!: Item[] | undefined
-
-  @Prop({ type: String }) readonly search!: string | undefined
-  @Prop({ type: [Boolean, String], default: false }) readonly loading!: boolean | string
-  @Prop({ type: Function as PropType<TreeFilter> | undefined }) readonly treeFilter!: TreeFilter | undefined
-  @Prop({ type: Function as PropType<FlatFilter | undefined> }) readonly flatFilter!: FlatFilter | undefined
-
-  @Ref() readonly dataTable!: InstanceType<typeof VDataTable> & { colspanAttrs: object | undefined }
-
-  readonly headerSlotName!: string
-  readonly outerSlotNames!: string[]
-  readonly isTree!: boolean
-  readonly expandedItems!: ItemWithProps[]
-  readonly hasChildren!: boolean
-
-  flatItems: ItemWithProps[] = []
-  sortBy: string | string[] = []
-  colspanAttrs: object | undefined = {}
-  loadingText: string = ''
-  noDataText: string = ''
-
-  async mounted (): Promise<void> {
-    await this.$nextTick()
-    this.dataTable.$watch('colspanAttrs', (newValue: object | undefined) => {
-      this.colspanAttrs = newValue
-    }, { immediate: true })
-    this.loadingText = this.$vuetify.lang.t(this.dataTable.$props.loadingText)
-    this.noDataText = this.$vuetify.lang.t(this.dataTable.$props.noDataText)
-  }
-
-  /**
-   * Получение значения объекта по строковому пути
-   * @param obj
-   * @param path
-   * @param fallback
-   * @return
-   */
-  getObjectValueByPath (obj: any, path: string, fallback?: any): any {
-    return getObjectValueByPath(obj, path, fallback)
-  }
-
-  /**
-   * Определение показывать элемент или нет
-   * @param item
-   * @return boolean
-   */
-  isItemVisible (item: ItemWithProps): boolean {
-    if (item.parent) {
-      if (item.parent.isExpanded) {
-        return this.isItemVisible(item.parent)
-      }
-      return false
-    }
-    return true
-  }
-
-  /**
-   * Получение данных для слота item.
-   * @param headerScope
-   * @param item
-   * @param index
-   * @return
-   */
-  getItemScope (headerScope: HeaderScope, item: Item, index: number): ItemName {
-    return {
-      isMobile: headerScope.isMobile,
-      item,
-      header: headerScope.headers[index],
-      value: item[headerScope.headers[index].value]
-    }
-  }
-
-  /**
-   * Раскрытие элемента
-   * @param expand
-   * @param item
-   */
-  expand (expand: (item: Item, v: boolean) => void, item: Item): void {
-    expand(item, !item.isExpanded)
-    item.isExpanded = !item.isExpanded
-  }
-
-  /**
-   * Получение стиля для блока раскрытия
-   * @param item
-   * @return
-   */
-  getExpandStyle (item: ItemWithProps): { margin: string } {
-    const marginRight = item.neighborsHasChildren
-      ? 24 * item.level
-      : 24 * (item.level - 1) >= 0
-        ? 24 * (item.level - 1)
-        : 0
-    return {
-      margin: `0 24px 0 ${marginRight}px`
-    }
-  }
-
-  /**
-   * Получение заголовков кроме первого
-   * @param header
-   * @return
-   */
-  getHeadersTail (header: DataTableHeader[]): DataTableHeader[] {
-    return header.filter((_, index: number) => index !== 0)
-  }
-
-  /**
-   * Получение классов для ячейки
-   * @param header
-   * @return
-   */
-  getTdClasses (header: DataTableHeader): (string | string[] | { [key: string]: boolean | undefined } | undefined)[] {
-    return [
-      `text-${header.align || 'start'}`,
-      header.cellClass,
-      { 'v-data-table__divider': header.divider }
-    ]
-  }
-
-  /**
-   * Получение элементов с дополнительными свойствами
-   * @param items
-   * @param parent
-   * @param level
-   * @return
-   */
-  getItemsWithProps (items: Item[], parent: ItemWithProps | null = null, level: number = 0): ItemWithProps[] {
-    const neighborsHasChildren = items.some((item: any) => item.children && item.children.length)
-    return items.map((item: any) => {
-      const result = { ...item, parent, level, neighborsHasChildren, isExpanded: false }
-      if (result.children && result.children.length) {
-        result.children = this.getItemsWithProps(result.children, result, level + 1)
-      }
-      return result
-    })
-  }
-
-  /**
-   * Разбор иерархии элементов в плоскую структуру
-   * @param item,
-   * @param items
-   */
-  flatten (item: ItemWithProps, items: ItemWithProps[]): void {
-    items.push(item)
-    if (item.children && item.children.length) {
-      item.children.forEach((child: any) => this.flatten(child, items))
-    }
-  }
-
-  /**
-   * Получение плоской структуры элементов
-   * @param items
-   * @return
-   */
-  getFlatItems (items: ItemWithProps[]): ItemWithProps[] {
-    const flatItems: ItemWithProps[] = []
-    items.forEach((item: ItemWithProps) => {
-      this.flatten(item, flatItems)
-    })
-    return flatItems
-  }
-}
 </script>
 
 <style lang="sass">

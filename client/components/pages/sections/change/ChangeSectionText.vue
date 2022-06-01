@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { PropType } from '#app'
+import { defineComponent, useRouter, ref, PropType } from '#app'
 import { useI18n } from '~/composables'
 import { ChangeSectionTextMutationPayload, SectionTextType } from '~/types/graphql'
 import RichTextEditor from '~/components/common/editor/RichTextEditor.vue'
