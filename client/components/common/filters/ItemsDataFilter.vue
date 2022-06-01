@@ -44,7 +44,7 @@
           v-checkbox.my-2(
             v-if="hasSelectAll && searchItems.length"
             v-model="allSelected"
-            :label="t('selectAll')"
+            :label="$t('common.filters.itemsDataFilter.selectAll')"
             hide-details
           )
           template(v-for="item in searchItems")
@@ -77,11 +77,12 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import type { PropType } from '#app'
+import { computed, defineComponent, ref } from '#app'
 import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, SearchOn } from '~/types/filters'
 import BaseDataFilter from '~/components/common/filters/BaseDataFilter.vue'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { BaseDataFilter },
   props: {
     value: { type: [Object, Array] as PropType<Item | Item[]>, default: null },
@@ -97,7 +98,7 @@ export default Vue.extend<any, any, any, any>({
     noFiltrationMessage: {
       type: String,
       default () {
-        return (this as any).$options.methods.t.call(this, 'noFiltrationMessage')
+        return (this as any).$t('common.filters.itemsDataFilter.noFiltrationMessage')
       }
     },
     multipleMessageFunction: {
@@ -109,7 +110,7 @@ export default Vue.extend<any, any, any, any>({
     searchLabel: {
       type: String,
       default () {
-        return (this as any).$options.methods.t.call(this, 'search')
+        return (this as any).$t('common.filters.itemsDataFilter.search')
       }
     },
     searchFunction: { type: Function as PropType<SearchFunction>, default: null },
@@ -120,148 +121,127 @@ export default Vue.extend<any, any, any, any>({
       }
     }
   },
-  data () {
-    return {
-      search: '',
-      tempValue: this.value
-    }
-  },
-  computed: {
-    message (): string {
-      if (this.selectedItems.length === 0) {
-        return this.noFiltrationMessage
+  setup (props, { emit }) {
+    const search = ref<string>('')
+    const tempValue = ref<Item[] | Item>(props.value)
+
+    const searchOn = computed<SearchOn>((): SearchOn => ({
+      input: (value: string) => { search.value = value }
+    }))
+
+    const selectedItems = computed<Item[]>({
+      get: (): Item[] => {
+        if (!props.value) { return [] }
+        return props.multiple ? props.value : [props.value]
+      },
+      set: (items: Item[]): void => {
+        if (props.multiple) {
+          emit('input', items)
+        } else if (props.items.length) {
+          emit('input', items[items.length - 1])
+        } else {
+          emit('input', null)
+        }
       }
-      if (this.selectedItems.length === 1) {
-        return this.getName(this.selectedItems[0])
+    })
+    const tempItems = computed<Item[]>({
+      get: (): Item[] => {
+        if (!tempValue.value) { return [] }
+        return (props.multiple ? tempValue.value : [tempValue.value]) as Item[]
+      },
+      set: (items: Item[]): void => {
+        if (props.multiple) {
+          tempValue.value = items
+        } else if (props.items.length) {
+          tempValue.value = items[items.length - 1]
+        } else {
+          tempValue.value = null
+        }
       }
-      return this.multipleMessageFunction(this.getName(this.selectedItems[0]), this.selectedItems.length - 1)
-    },
-    searchItems (): Item[] {
-      const items = this.searchFunction
-        ? this.items.filter((item: Item) => this.searchFunction!(item, this.search || ''))
-        : this.items
+    })
+    const searchItems = computed<Item[]>(() => {
+      const items = props.searchFunction
+        ? props.items.filter((item: Item) => props.searchFunction(item, search.value || ''))
+        : props.items
       return [
         ...items,
-        ...this.tempItems.filter(tempItem => !items.find(item => item[this.itemKey] === tempItem[this.itemKey]))
+        ...tempItems.value.filter(tempItem => !items.find(item => item[props.itemKey] === tempItem[props.itemKey]))
       ]
-    },
-    selectedItems: {
-      get (): Item[] {
-        if (!this.value) {
-          return []
-        }
-        if (this.multiple) {
-          return this.value as Item[]
-        }
-        return [this.value as Item]
-      },
-      set (items: Item[]): void {
-        if (this.multiple) {
-          this.$emit('input', items)
-        } else if (this.items.length) {
-          this.$emit('input', items[items.length - 1])
-        } else {
-          this.$emit('input', null)
-        }
+    })
+    const message = computed<string>(() => {
+      if (selectedItems.value.length === 0) {
+        return props.noFiltrationMessage
       }
-    },
-    tempItems: {
-      get (): Item[] {
-        if (!this.tempValue) {
-          return []
-        }
-        if (this.multiple) {
-          return this.tempValue as Item[]
-        }
-        return [this.tempValue as Item]
-      },
-      set (items: Item[]): void {
-        if (this.multiple) {
-          this.tempValue = items
-        } else if (this.items.length) {
-          this.tempValue = items[items.length - 1]
-        } else {
-          this.tempValue = null
-        }
+      if (selectedItems.value.length === 1) {
+        return props.getName(selectedItems.value[0])
       }
-    },
-    allSelected: {
-      get (): boolean {
-        return this.searchItems.length === this.tempItems.length
-      },
-      set (selected: boolean): void {
-        this.tempItems = selected ? [...this.searchItems] : []
+      return props.multipleMessageFunction(props.getName(selectedItems.value[0]), selectedItems.value.length - 1)
+    })
+
+    const allSelected = computed<boolean>({
+      get: (): boolean => searchItems.value.length === tempItems.value.length,
+      set: (selected: boolean) => {
+        tempItems.value = selected ? [...searchItems.value] : []
       }
-    },
-    searchOn (): SearchOn {
-      return {
-        input: (value: string) => {
-          this.search = value
-        }
-      }
+    })
+    /** Очистка фильтра */
+    const clear = () => {
+      selectedItems.value = []
+      emit('clear')
     }
-  },
-  methods: {
-    /**
-     * Получение перевода относильно локального пути
-     * @param path
-     * @param values
-     * @return
-     */
-    t (path: string, values?: any): string {
-      return this.$t(`common.filters.itemsDataFilter.${path}`, values) as string
-    },
-    /**
-     * Очистка фильтра
-     */
-    clear (): void {
-      this.selectedItems = []
-      this.$emit('clear')
-    },
-    /**
-     * Закрытие модального окна
-     */
-    close (): void {
-      this.tempItems = []
-      this.search = ''
-      this.$emit('close')
-    },
-    /**
-     * Сброс фильтра
-     */
-    reset (): void {
-      this.clear()
-      this.tempItems = []
-      this.search = ''
-      this.$emit('reset')
-    },
-    /**
-     * Применение фильтра
-     */
-    apply (): void {
-      this.selectedItems = this.tempItems
-      this.search = ''
-      this.$emit('apply')
-    },
+    /** Закрытие модельного окна */
+    const close = () => {
+      tempItems.value = []
+      search.value = ''
+      emit('close')
+    }
+    /** Сброс фильтра */
+    const reset = () => {
+      clear()
+      tempItems.value = []
+      search.value = ''
+      emit('reset')
+    }
+    /** Применение фильтра */
+    const apply = () => {
+      selectedItems.value = tempItems.value
+      search.value = ''
+      emit('apply')
+    }
     /**
      * Получение состояния элемента (выбран или не выбран)
      * @param item
      * @return
      */
-    getSelected (item: Item): boolean {
-      return !!this.tempItems.find(selectedItem => selectedItem[this.itemKey] === item[this.itemKey])
-    },
+    const getSelected = (item: Item): boolean => {
+      return !!tempItems.value.find(selectedItem => selectedItem[props.itemKey] === item[props.itemKey])
+    }
     /**
      * Установка состояния элемента (выбран или не выбран)
      * @param item
      * @param selected
      */
-    setSelected (item: Item, selected: boolean): void {
-      if (selected) {
-        this.tempItems = [...this.tempItems, item]
-      } else {
-        this.tempItems = this.tempItems.filter(selectedItem => selectedItem[this.itemKey] !== item[this.itemKey])
-      }
+    const setSelected = (item: Item, selected: boolean) => {
+      tempItems.value = selected
+        ? [...tempItems.value, item]
+        : tempItems.value.filter(selectedItem => selectedItem[props.itemKey] !== item[props.itemKey])
+    }
+
+    return {
+      search,
+      tempValue,
+      selectedItems,
+      tempItems,
+      searchItems,
+      message,
+      allSelected,
+      searchOn,
+      clear,
+      close,
+      reset,
+      apply,
+      getSelected,
+      setSelected
     }
   }
 })

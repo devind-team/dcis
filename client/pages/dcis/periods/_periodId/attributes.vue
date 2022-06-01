@@ -1,7 +1,6 @@
 <template lang="pug">
   left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ period.name }}
-    div Ворк
+    template(#header) Атрибуты
 </template>
 
 <script lang="ts">

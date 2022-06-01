@@ -31,7 +31,7 @@ class PeriodGroup(models.Model):
     privileges = models.ManyToManyField(Privilege, help_text='Период группы привилегии')
 
     class Meta:
-        ordering = ('name', '-created_at',)
+        ordering = ('-created_at',)
 
 
 class PeriodPrivilege(models.Model):

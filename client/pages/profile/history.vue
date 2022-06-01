@@ -21,20 +21,21 @@
 
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
-import { computed, ComputedRef, defineComponent, useNuxt2Meta, useNuxtApp } from '#app'
+import { computed, ComputedRef, defineComponent, toRef, useNuxt2Meta } from '#app'
 import { useCursorPagination, useDebounceSearch, useFilters, useI18n, useQueryRelay } from '~/composables'
-import { LogRequestsQuery, LogRequestsQueryVariables, LogRequestType, UserType } from '~/types/graphql'
+import { useAuthStore } from '~/stores'
+import { LogRequestsQuery, LogRequestsQueryVariables, LogRequestType } from '~/types/graphql'
 import logRequestsQuery from '~/gql/core/queries/log_request.graphql'
 
 export default defineComponent({
   middleware: 'auth',
   setup () {
-    const { $store } = useNuxtApp()
+    const authStore = useAuthStore()
     const { t } = useI18n()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: t('profile.history.name') as string })
 
-    const user: ComputedRef<UserType> = computed<UserType>(() => $store.getters['auth/user'])
+    const user = toRef(authStore, 'user')
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
       { text: t('profile.history.tableHeaders.page') as string, value: 'page' },

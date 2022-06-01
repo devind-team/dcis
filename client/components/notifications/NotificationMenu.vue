@@ -44,7 +44,7 @@ import { ApolloError } from 'apollo-client'
 import type { PropType, Ref } from '#app'
 import { defineComponent, inject, toRef } from '#app'
 import { NotificationType } from '~/types/graphql'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 
 export default defineComponent({
   props: {

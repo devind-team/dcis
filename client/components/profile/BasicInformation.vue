@@ -64,8 +64,8 @@
 import { promiseTimeout, useClipboard } from '@vueuse/core'
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, ref, Ref, toRef } from '#app'
+import { useAuthStore } from '~/stores'
 import { ChangeUserPropsMutationPayload, UserType } from '~/types/graphql'
-import { useAuthStore } from '~/store'
 
 type ChangeUserPropsResultMutation = { data: { changeUserProps: ChangeUserPropsMutationPayload } }
 

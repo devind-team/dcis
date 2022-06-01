@@ -17,8 +17,8 @@
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { useNuxt2Meta } from '#app'
-import { useAuthStore } from '~/store'
+import { defineComponent, toRef, useNuxt2Meta } from '#app'
+import { useAuthStore } from '~/stores'
 import { CategoryType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import PageContainer from '~/components/pages/PageContainer.vue'

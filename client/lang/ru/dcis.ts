@@ -85,7 +85,10 @@ export default {
     expiration: 'Дата окончания периода',
     deleteItemName: 'период',
     actions: {
+      addGroup: 'Добавить группу',
       delete: '@:delete',
+      deleteGroup: 'Удалить группу',
+      copyGroups: 'Копировать из сбора',
       save: '@:save',
       deleteItemName: 'период'
     },
@@ -94,6 +97,43 @@ export default {
       name: 'Название периода',
       file: 'Файл с формой сбора',
       buttonText: 'Добавить период'
+    },
+    addPeriodGroup: {
+      header: 'Добавление группы периода',
+      name: 'Название группы периода',
+      groups: 'Пользователи и привилегии из другой группы',
+      buttonText: '@:add'
+    },
+    copyPeriodGroups: {
+      header: 'Импорт групп из сбора',
+      name: 'Название группы периода',
+      groups: 'Группы',
+      period: 'Период',
+      buttonText: '@:add'
+    },
+    changePeriodUsers: {
+      header: 'Добавление пользователей',
+      buttonText: '@:add',
+      addUsers: 'Добавить пользователей',
+      avatar: 'Аватар',
+      name: 'ФИО',
+      users: 'Пользователи',
+      jobPost: 'Должность',
+      division: 'Объект сбора'
+    },
+    changePrivileges: {
+      groupHeader: 'Изменениe привилегий',
+      userHeader: 'Добавление привилегий пользователю',
+      buttonChangeText: '@:change',
+      buttonAddText: '@:add',
+      change: 'Изменить привилегии',
+      add: 'Добавить привилегии',
+      deleteUser: 'Удалить из группы',
+      name: 'Описание привилегии',
+      privileges: 'Привилегии пользователя',
+      key: 'Ключ',
+      createdAt: 'Дата создания',
+      alert: 'Не заданы привилегии сбора или группы'
     },
     statuses: {
       open: 'Открыто',

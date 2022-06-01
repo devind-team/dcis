@@ -16,8 +16,8 @@
               | {{ $t('panel.ac.users.unloadUsers') }}
     v-row(align="center")
       v-col(cols="12" md="6")
-        v-text-field(v-model="search" :placeholder="$t('panel.ac.users.search')" prepend-icon="mdi-magnify" clearable)
-      v-col.caption.text-right(cols="12" md="6") {{ $t('panel.ac.users.shownOf', { count, totalCount }) }}
+        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+      v-col.caption.text-right(cols="12" md="6") {{ $t('shownOf', { count, totalCount }) }}
     v-data-table(
       :headers="headers"
       :items="users"
@@ -27,7 +27,7 @@
     )
       template(#item.avatar="{ item }")
         avatar-dialog(:item="item")
-      template(#item.name="{ item }") {{ $getUserFullName(item) }}
+      template(#item.name="{ item }") {{ getUserFullName(item) }}
       template(#item.groups="{ item }")
         change-group-dialog(
           :user="item"
@@ -42,7 +42,7 @@
                   style="cursor: pointer"
                 ) {{ item.groups.length ? item.groups.map(e => e.name).join(', ') : $t('panel.ac.users.changeGroups.noGroups') }}
               span {{ $t('panel.ac.users.change') }}
-      template(#item.createdAt="{ item }") {{ $filters.dateTimeHM(item.createdAt) }}
+      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">
@@ -58,11 +58,12 @@ import {
   UsersQuery,
   UserTypeEdge,
   ChangeUserGroupsMutationPayload,
-  UploadUsersMutationPayload
+  UploadUsersMutationPayload,
+  GroupType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useAuthStore } from '~/store'
-import { useCommonQuery, useCursorPagination, useDebounceSearch, useI18n, useQueryRelay } from '~/composables'
+import { useAuthStore } from '~/stores'
+import { useCommonQuery, useCursorPagination, useDebounceSearch, useI18n, useQueryRelay, useFilters } from '~/composables'
 import usersQuery from '~/gql/core/queries/users.graphql'
 import groupsQuery from '~/gql/core/queries/groups.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -94,6 +95,7 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     useNuxt2Meta({ title: t('panel.ac.users.name') as string })
+    const { dateTimeHM, getUserFullName } = useFilters()
 
     const { hasPerm } = useAuthStore()
 
@@ -119,7 +121,8 @@ export default defineComponent({
     const {
       loading,
       pagination: { count, totalCount },
-      data: users
+      data: users,
+      update
     } = useQueryRelay<UsersQuery, UsersQueryVariables, UserType>({
       document: usersQuery,
       variables: () => ({
@@ -130,33 +133,62 @@ export default defineComponent({
       fetchScroll: typeof document === 'undefined' ? null : document
     })
 
-    // Обновление групп пользователя после изменения
+    /**
+     * Обновление групп пользователя после изменения
+     * @param user - выбранный пользователь
+     * @param cache - кеш
+     * @param result - результат мутации
+     */
     const updateGroups = (
       user: UserType,
-      store: DataProxy,
-      { data: { changeUserGroups: { success, groups } } }: ChangeUserGroupsData
+      cache: DataProxy,
+      result: ChangeUserGroupsData
     ) => {
+      const { data: { changeUserGroups: { success } } } = result
       if (success) {
-        const data: any = store.readQuery({ query: usersQuery, variables: { search: debounceSearch.value } })
-        data.users.edges.find((el: UserTypeEdge) => el.node === user).node.groups = groups
-        store.writeQuery({ query: usersQuery, variables: { search: debounceSearch.value }, data })
+        update(cache, result, (dataCache, { data: { changeUserGroups: { groups } } }) => {
+          dataCache.users.edges
+            .find((u: UserTypeEdge | any) => u.node.id === user.id).node
+            .groups = groups as Required<Pick<GroupType, '__typename' | 'id' | 'name'>>[]
+          return dataCache
+        })
       }
     }
 
-    // Обновление пользователей после добавления нового пользователя
-    const updateUsers = (store: DataProxy, { data: { uploadUsers: { success, users } } }: UploadUsersData) => {
+    /**
+     * Обновление пользователей после добавления нового пользователя
+     * @param cache - кеш
+     * @param result - результат мутации
+     */
+    const updateUsers = (cache: DataProxy, result: UploadUsersData) => {
+      const { data: { uploadUsers: { success } } } = result
       if (success) {
-        const data: any = store.readQuery({ query: usersQuery, variables: { search: debounceSearch.value } })
-        data.users.totalCount += users!.length
-        data.users.edges = [
-          ...users!.map(user => ({ node: user, __typename: 'UserType' })).reverse(),
-          ...data.users.edges
-        ]
-        store.writeQuery({ query: usersQuery, variables: { search: debounceSearch.value }, data })
+        update(cache, result, (dataCache, { data: { uploadUsers: { users } } }) => {
+          dataCache.users.totalCount += users.length
+          dataCache.users.edges = [
+            ...users!.map(user => ({ node: user, __typename: 'UserTypeEdge' })).reverse(),
+            ...dataCache.users.edges
+          ] as typeof dataCache.users.edges
+          return dataCache
+        })
       }
     }
 
-    return { hasPerm, bc, headers, groups, search, loading, count, totalCount, users, updateGroups, updateUsers }
+    return {
+      hasPerm,
+      dateTimeHM,
+      getUserFullName,
+      bc,
+      headers,
+      groups,
+      search,
+      loading,
+      count,
+      totalCount,
+      users,
+      updateGroups,
+      updateUsers
+    }
   }
 })
 </script>

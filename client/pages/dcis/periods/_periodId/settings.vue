@@ -107,7 +107,7 @@ import {
   PeriodType,
   UserType
 } from '~/types/graphql'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import { useI18n } from '~/composables'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'

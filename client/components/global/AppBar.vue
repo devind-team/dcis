@@ -32,7 +32,7 @@
 import { useVModel } from '@vueuse/core'
 import type { Ref } from '#app'
 import { defineComponent, toRef } from '#app'
-import { useAuthStore, usePageStore } from '~/store'
+import { useAuthStore, usePageStore } from '~/stores'
 import { useQueryRelay } from '~/composables'
 import { CategoriesQuery, CategoriesQueryVariables, CategoryType } from '~/types/graphql'
 import categoriesQuery from '~/gql/pages/queries/categories.graphql'

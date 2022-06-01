@@ -67,8 +67,7 @@ export default defineNuxtConfig({
     '@nuxtjs/apollo',
     '@nuxtjs/i18n',
     '@nuxtjs/vuetify',
-    // @ts-ignore
-    ['@pinia/nuxt', { disableVuex: false }]
+    '@pinia/nuxt'
   ],
   apollo: {
     includeNodeModules: true,

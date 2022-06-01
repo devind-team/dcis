@@ -6,8 +6,9 @@
 </template>
 
 <script lang="ts">
-import { PropType, useNuxt2Meta } from '#app'
-import { useAuthStore } from '~/store'
+import type { PropType } from '#app'
+import { defineComponent, toRef, useNuxt2Meta } from '#app'
+import { useAuthStore } from '~/stores'
 import { CategoryType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import AddPage from '~/components/pages/AddPage.vue'

@@ -35,7 +35,7 @@ import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
 import { defineComponent, toRef, useNuxt2Meta } from '#app'
-import { useAuthStore } from '~/store'
+import { useAuthStore } from '~/stores'
 import { useFilters } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {

@@ -100,8 +100,8 @@ import {
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import { useI18n } from '~/composables'
-import type { HasPermissionFnType } from '~/store'
-import { useAuthStore } from '~/store'
+import type { HasPermissionFnType } from '~/stores'
+import { useAuthStore } from '~/stores'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 type ChangeProjectResultMutation = { data: { changeProject: ChangeProjectMutationPayload } }

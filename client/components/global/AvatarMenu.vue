@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { defineComponent, toRefs } from '#app'
-import { HasPermissionFnType, useAuthStore } from '~/store'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import { UserType } from '~/types/graphql'
 
 export type AvatarMenuItem = {
