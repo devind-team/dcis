@@ -13,12 +13,14 @@
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
+      p Количество привилегий: {{  selectPrivileges.length }}/{{ items.length }}
       v-data-table(
         v-model="selectPrivileges"
         :headers="headers"
         :items="items"
         :loading="loading"
         item-key="id"
+        disable-pagination
         show-select
         hide-default-footer
       )
@@ -84,7 +86,7 @@ export default defineComponent({
       }
     })
     const items = computed<PrivilegeType[]>(() => props.user
-      ? privileges.value.filter((privilege: PrivilegeType) => !props.periodGroup.privileges.find(groupPrivilege => privilege.id === groupPrivilege.id))
+      ? privileges.value.filter((privilege: PrivilegeType) => !props.periodGroup.privileges.map((p: PrivilegeType) => p.id).includes(privilege.id))
       : privileges.value.map((privilege: PrivilegeType) => privilege)
     )
     const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))

@@ -50,6 +50,7 @@
       v-data-table(
         :headers="headers"
         :items="periodGroup.users"
+        disable-pagination
         hide-default-footer
       )
         template(#item.avatar="{ item }")
