@@ -12,5 +12,9 @@ query Period($periodId: ID!) {
     user {
       ...UserFields
     }
+    divisions {
+      id
+      objectId
+    }
   }
 }

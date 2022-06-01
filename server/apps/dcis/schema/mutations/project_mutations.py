@@ -147,11 +147,12 @@ class ChangeDivisionsMutation(BaseMutation):
             divisions = Department.objects.filter(pk__in=divisions_id)
         else:
             divisions = Organization.objects.filter(pk__in=divisions_id)
+        existing_divisions = Division.objects.filter(object_id__in=divisions_id).values_list('object_id', flat=True)
         for division in divisions:
-            if action == ActionRelationShip.ADD:
-                Division.objects.create(period=period, object=division)
+            if action == ActionRelationShip.ADD and division.id not in existing_divisions:
+                Division.objects.create(period=period, object_id=division.id)
             elif action == ActionRelationShip.DELETE:
-                division.delete()
+                Division.objects.get(object_id=division.id).delete()
             else:
                 return ChangeDivisionsMutation(
                     status=False,

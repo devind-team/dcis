@@ -65,5 +65,4 @@ class ProjectQueries(graphene.ObjectType):
             if project_id is None \
             else get_object_or_404(Project, pk=from_global_id(project_id)[1])
         divisions = user.divisions(project)
-        print(divisions)
         return divisions
