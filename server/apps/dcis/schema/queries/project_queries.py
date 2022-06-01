@@ -4,6 +4,7 @@ import graphene
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
+from graphene_django import DjangoListField
 from graphene_django_filter import AdvancedDjangoFilterConnectionField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
@@ -23,7 +24,13 @@ class ProjectQueries(graphene.ObjectType):
         required=True,
         description='Получение информации по проекту'
     )
-
+    periods = DjangoListField(
+        PeriodType,
+        user_id=graphene.ID(required=True, description='Идентификатор пользователя'),
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Периоды'
+    )
     period = graphene.Field(
         PeriodType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
@@ -39,6 +46,11 @@ class ProjectQueries(graphene.ObjectType):
         required=True,
         description='Дивизионы пользователя'
     )
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_periods(root: Any, info: ResolveInfo, user_id: str, period_id: str, *args, **kwargs):
+        return Period.objects.filter(periodprivilege__user=from_global_id(user_id)[1]).exclude(pk=period_id).all()
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

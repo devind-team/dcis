@@ -1,14 +1,24 @@
 <template lang="pug">
   left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) Атрибуты
+    template(#header) Привилегии сбора {{ period.name }}
+    v-card(flat)
+      v-card-text
+        v-data-table(
+          :items="privileges"
+          :headers="headers"
+          :loading="loading"
+          hide-default-footer
+        )
 </template>
 
 <script lang="ts">
+import { DataTableHeader } from 'vuetify'
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
-import { useI18n } from '~/composables'
+import { useI18n, useCommonQuery } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType } from '~/types/graphql'
+import { PeriodType, PrivilegesQuery, PrivilegesQueryVariables } from '~/types/graphql'
+import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 export default defineComponent({
@@ -26,7 +36,14 @@ export default defineComponent({
       ...props.breadCrumbs,
       { text: 'Атрибуты', to: localePath({ name: 'dcis-periods-periodId-attributes' }), exact: true }
     ]))
-    return { bc }
+    const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
+      document: privilegesQuery
+    })
+    const headers: DataTableHeader[] = [
+      { text: 'Описание привилегии', value: 'name' },
+      { text: 'Ключ', value: 'key' }
+    ]
+    return { bc, headers, privileges, loading }
   }
 })
 </script>

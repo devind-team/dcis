@@ -1,0 +1,24 @@
+#import "../fragments/period_fields.graphql"
+#import "../../core/fragments/user_fields.graphql"
+
+query Periods($userId: ID!, $periodId: ID!) {
+  periods(userId: $userId, periodId: $periodId) {
+    ...PeriodFields
+    periodGroups {
+      id
+      name
+      createdAt
+      users {
+        ...UserFields
+      }
+      privileges {
+        id
+        name
+        key
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
