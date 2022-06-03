@@ -15,7 +15,7 @@ from stringcase import snakecase
 
 
 from apps.dcis.models import Cell, ColumnDimension, RowDimension, Sheet, Value
-from apps.dcis.schema.types import SheetType, ChangedCellOption, GlobalIndicesInputType, RowDimensionType
+from apps.dcis.schema.types import SheetType, CellType, ChangedCellOption, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.permissions import ChangeSheet
 from apps.dcis.services.sheet_services import (
     rename_sheet,
@@ -33,19 +33,25 @@ from apps.dcis.services.sheet_services import (
 
 
 class RenameSheetMutation(BaseMutation):
-    """Изменение названия листа."""
+    """Изменение названия листа.
+
+    Во время мутации изменяем только формулы и ничего не пересчитываем.
+    """
 
     class Input:
         sheet_id = graphene.ID(required=True, description='Идентификатор листа')
         name = graphene.String(required=True, description='Новое название листа')
 
     sheet = graphene.Field(SheetType, description='Лист')
+    cells = graphene.List(CellType, description='Измененные ячейки')
 
     @staticmethod
     @permission_classes((IsAuthenticated, ChangeSheet,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str, *args, **kwargs):
+        sheet, cells = rename_sheet(get_object_or_404(Sheet, pk=from_global_id(sheet_id)[1]), name)
         return RenameSheetMutation(
-            sheet=rename_sheet(get_object_or_404(Sheet, pk=from_global_id(sheet_id)[1]), name)
+            sheet=sheet,
+            cells=cells
         )
 
 

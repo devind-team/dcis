@@ -2537,6 +2537,8 @@ export type Mutation = {
   recoveryPassword: RecoveryPasswordMutationPayload;
   /** Мутация регистрации новых пользователей. */
   register: RegisterMutationPayload;
+  /** Изменение названия листа */
+  renameSheet: RenameSheetMutationPayload;
   /** Отправка email с кодом на электронную почту. */
   requestCode: RequestCodeMutationPayload;
   /** Мутация для сброса настроек по умолчанию */
@@ -2919,6 +2921,11 @@ export type MutationRecoveryPasswordArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationRegisterArgs = {
   input: RegisterMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationRenameSheetArgs = {
+  input: RenameSheetMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4097,6 +4104,32 @@ export type RegisterMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type RenameSheetMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Новое название листа */
+  name: Scalars['String'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
+};
+
+/**
+ * Изменение названия листа.
+ *
+ * Во время мутации изменяем только формулы и ничего не пересчитываем.
+ */
+export type RenameSheetMutationPayload = {
+  __typename?: 'RenameSheetMutationPayload';
+  /** Измененные ячейки */
+  cells?: Maybe<Array<Maybe<CellType>>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Лист */
+  sheet?: Maybe<SheetType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -5285,6 +5318,13 @@ export type DeleteRowDimensionMutationVariables = Exact<{
 }>;
 
 export type DeleteRowDimensionMutation = { __typename?: 'Mutation', deleteRowDimension: { __typename: 'DeleteRowDimensionMutationPayload', success: boolean, rowDimensionId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type RenameSheetMutationVariables = Exact<{
+  sheetId: Scalars['ID'];
+  name: Scalars['String'];
+}>;
+
+export type RenameSheetMutation = { __typename?: 'Mutation', renameSheet: { __typename?: 'RenameSheetMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, sheet?: { __typename: 'SheetType', id: string, name: string } | null, cells?: Array<{ __typename: 'CellType', id: string, formula?: string | null } | null> | null } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];

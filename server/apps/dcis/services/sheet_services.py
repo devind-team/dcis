@@ -23,7 +23,7 @@ from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, Sheet
 
 
 @transaction.atomic
-def rename_sheet(sheet: Sheet, name: str) -> Sheet:
+def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     """Переименование листа с учетом формул.
 
     sheet.name -> name
@@ -31,6 +31,7 @@ def rename_sheet(sheet: Sheet, name: str) -> Sheet:
     :param sheet - лист
     :param name - новое имя листа
     """
+    changed_cell: list[Cell] = []
     sheet_name: str = f"'{name}'" if ' ' in name else name
     period: Period = sheet.period
     period_sheets = period.sheet_set.exclude(pk=sheet).all()
@@ -51,9 +52,10 @@ def rename_sheet(sheet: Sheet, name: str) -> Sheet:
         if sheet.name in sheets_names:
             cell.formula = re.sub(f"(\'?{sheet.name}\'?)", sheet_name, cell.formula)
             cell.save(update_fields=('formula',))
+            changed_cell.append(cell)
     sheet.name = name
     sheet.save(update_fields=('name',))
-    return sheet
+    return sheet, changed_cell
 
 
 def change_column_dimension(
