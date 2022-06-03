@@ -1,11 +1,11 @@
 from pathlib import PosixPath
 from typing import Iterator
 
-from openpyexcel import Workbook, load_workbook
-from openpyexcel.styles.colors import COLOR_INDEX, WHITE
-from openpyexcel.utils.cell import column_index_from_string
-from openpyexcel.worksheet.dimensions import DimensionHolder
-from openpyexcel.worksheet.merge import MergeCell
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles.colors import COLOR_INDEX, WHITE
+from openpyxl.utils.cell import column_index_from_string
+from openpyxl.worksheet.dimensions import DimensionHolder
+from openpyxl.worksheet.merge import MergeCell
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet

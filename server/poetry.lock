@@ -188,18 +188,6 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
-name = "bibtexparser"
-version = "1.2.0"
-description = "Bibtex parser for python 2.7 and 3.3 and newer"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-future = ">=0.16.0"
-pyparsing = ">=2.0.3"
-
-[[package]]
 name = "billiard"
 version = "3.6.4.0"
 description = "Python multiprocessing fork with improvements and bugfixes"
@@ -611,6 +599,17 @@ python-versions = ">=3.6"
 Django = ">=2.2"
 
 [[package]]
+name = "django-model-utils"
+version = "4.2.0"
+description = "Django model mixins and utilities"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Django = ">=2.0.1"
+
+[[package]]
 name = "django-oauth-toolkit"
 version = "1.7.1"
 description = "OAuth2 Provider for Django"
@@ -638,6 +637,21 @@ Django = ">=2.2"
 [package.extras]
 apns = ["apns2 (>=0.3.0)", "pywebpush (>=1.3.0)", "Django (>=2.2)", "importlib-metadata"]
 wp = ["pywebpush (>=1.3.0)"]
+
+[[package]]
+name = "django-redis"
+version = "5.2.0"
+description = "Full featured redis cache backend for Django."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Django = ">=2.2"
+redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
+
+[package.extras]
+hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
 
 [[package]]
 name = "django-seed"
@@ -873,14 +887,6 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
-name = "future"
-version = "0.18.2"
-description = "Clean single-source support for Python 3 and 2"
-category = "main"
-optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-
-[[package]]
 name = "graphene"
 version = "2.1.9"
 description = "GraphQL Framework for Python"
@@ -1064,12 +1070,17 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
-name = "jdcal"
-version = "1.4.1"
-description = "Julian dates from proleptic Gregorian and Julian calendars."
+name = "jsonpickle"
+version = "2.2.0"
+description = "Python library for serializing any arbitrary object graph into JSON"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7"
+
+[package.extras]
+docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
+testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-black-multipy", "pytest-cov", "ecdsa", "feedparser", "numpy", "pandas", "pymongo", "scikit-learn", "sqlalchemy", "pytest-flake8 (<1.1.0)", "enum34", "jsonlib", "pytest-flake8 (>=1.1.1)"]
+"testing.libs" = ["simplejson", "ujson", "yajl"]
 
 [[package]]
 name = "jwcrypto"
@@ -1134,6 +1145,19 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "mock"
+version = "4.0.3"
+description = "Rolling backport of unittest.mock for all Pythons"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+build = ["twine", "wheel", "blurb"]
+docs = ["sphinx"]
+test = ["pytest (<5.4)", "pytest-cov"]
+
+[[package]]
 name = "msgpack"
 version = "1.0.3"
 description = "MessagePack (de)serializer."
@@ -1150,6 +1174,25 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "numpy"
+version = "1.22.4"
+description = "NumPy is the fundamental package for array computing with Python."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "numpy-financial"
+version = "1.0.0"
+description = "Simple financial functions"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+numpy = ">=1.15"
+
+[[package]]
 name = "oauthlib"
 version = "3.2.0"
 description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
@@ -1161,18 +1204,6 @@ python-versions = ">=3.6"
 rsa = ["cryptography (>=3.0.0)"]
 signals = ["blinker (>=1.4.0)"]
 signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
-
-[[package]]
-name = "openpyexcel"
-version = "2.5.14"
-description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-
-[package.dependencies]
-et-xmlfile = "*"
-jdcal = "*"
 
 [[package]]
 name = "openpyxl"
@@ -1195,6 +1226,27 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+
+[[package]]
+name = "pandas"
+version = "1.4.2"
+description = "Powerful data structures for data analysis, time series, and statistics"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+numpy = [
+    {version = ">=1.18.5", markers = "platform_machine != \"aarch64\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
+    {version = ">=1.19.2", markers = "platform_machine == \"aarch64\" and python_version < \"3.10\""},
+    {version = ">=1.20.0", markers = "platform_machine == \"arm64\" and python_version < \"3.10\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
+]
+python-dateutil = ">=2.8.1"
+pytz = ">=2020.1"
+
+[package.extras]
+test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "paramiko"
@@ -1452,7 +1504,7 @@ six = ">=1.15.0"
 
 [[package]]
 name = "redis"
-version = "4.3.1"
+version = "4.3.2"
 description = "Python client for Redis database and key-value store"
 category = "main"
 optional = false
@@ -1492,6 +1544,17 @@ description = "Reactive Extensions (Rx) for Python"
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "scipy"
+version = "1.8.1"
+description = "SciPy: Scientific Library for Python"
+category = "main"
+optional = false
+python-versions = ">=3.8,<3.11"
+
+[package.dependencies]
+numpy = ">=1.17.3,<1.25.0"
 
 [[package]]
 name = "sentry-sdk"
@@ -1738,6 +1801,24 @@ optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [[package]]
+name = "xlsx-evaluate"
+version = "0.3.0"
+description = "Calculate XLSX formulas"
+category = "main"
+optional = false
+python-versions = ">=3.9,<3.11"
+
+[package.dependencies]
+jsonpickle = ">=2.2.0,<3.0.0"
+mock = ">=4.0.3,<5.0.0"
+numpy = ">=1.22.4,<2.0.0"
+numpy-financial = ">=1.0.0,<2.0.0"
+openpyxl = ">=3.0.10,<4.0.0"
+pandas = ">=1.4.2,<2.0.0"
+scipy = ">=1.8.1,<2.0.0"
+yearfrac = ">=0.4.7,<0.5.0"
+
+[[package]]
 name = "yarl"
 version = "1.7.2"
 description = "Yet another URL library"
@@ -1748,6 +1829,17 @@ python-versions = ">=3.6"
 [package.dependencies]
 idna = ">=2.0"
 multidict = ">=4.0"
+
+[[package]]
+name = "yearfrac"
+version = "0.4.7"
+description = "Daycount methods to compute date differences in year units"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+numpy = ">=1.14,<2"
 
 [[package]]
 name = "zope.interface"
@@ -1764,8 +1856,8 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.10"
-content-hash = "91651bfbccdde43590c8344f751cb379ec7952e77c6dcca8f5db6b12ab045db8"
+python-versions = ">=3.9,<3.11"
+content-hash = "235068932a483ecd0dad8f48ced1a917bbb5e7b1a1a09d3b42f79dce1956f2be"
 
 [metadata.files]
 aiohttp = [
@@ -1901,9 +1993,6 @@ bcrypt = [
 beautifulsoup4 = [
     {file = "beautifulsoup4-4.11.1-py3-none-any.whl", hash = "sha256:58d5c3d29f5a36ffeb94f02f0d786cd53014cf9b3b3951d42e0080d8a9498d30"},
     {file = "beautifulsoup4-4.11.1.tar.gz", hash = "sha256:ad9aa55b65ef2808eb405f46cf74df7fcb7044d5cbc26487f96eb2ef2e436693"},
-]
-bibtexparser = [
-    {file = "bibtexparser-1.2.0.tar.gz", hash = "sha256:0f9ab94e3fc36ee2ee6a3713c5dd7320d4b6ee52bd66ecbab03c6b06675ae410"},
 ]
 billiard = [
     {file = "billiard-3.6.4.0-py3-none-any.whl", hash = "sha256:87103ea78fa6ab4d5c751c4909bcff74617d985de7fa8b672cf8618afd5a875b"},
@@ -2085,6 +2174,10 @@ django-filter = [
     {file = "django-filter-21.1.tar.gz", hash = "sha256:632a251fa8f1aadb4b8cceff932bb52fe2f826dd7dfe7f3eac40e5c463d6836e"},
     {file = "django_filter-21.1-py3-none-any.whl", hash = "sha256:f4a6737a30104c98d2e2a5fb93043f36dd7978e0c7ddc92f5998e85433ea5063"},
 ]
+django-model-utils = [
+    {file = "django-model-utils-4.2.0.tar.gz", hash = "sha256:e7a95e102f9c9653427eadab980d5d59e1dea972913b9c9e01ac37f86bba0ddf"},
+    {file = "django_model_utils-4.2.0-py3-none-any.whl", hash = "sha256:a768a25c80514e0ad4e4a6f9c02c44498985f36c5dfdea47b5b1e8cf994beba6"},
+]
 django-oauth-toolkit = [
     {file = "django-oauth-toolkit-1.7.1.tar.gz", hash = "sha256:37b690fa53f340c7391bdbc0fdbb32fd9ef8a7c012e72ee8754c331a2d7b4adb"},
     {file = "django_oauth_toolkit-1.7.1-py3-none-any.whl", hash = "sha256:756e44421d0993f27705736b6c33a3d89018393859a31ac926296950f76e4433"},
@@ -2092,6 +2185,10 @@ django-oauth-toolkit = [
 django-push-notifications = [
     {file = "django-push-notifications-3.0.0.tar.gz", hash = "sha256:a9752f6ab920d68a24a4099a4e4f309560c24c9e07d41a50346f27048ea3edc3"},
     {file = "django_push_notifications-3.0.0-py3-none-any.whl", hash = "sha256:8c2e06a19872d21d60a09f6923f78b2772f38f4890e71e5ce8f25245e2429b9f"},
+]
+django-redis = [
+    {file = "django-redis-5.2.0.tar.gz", hash = "sha256:8a99e5582c79f894168f5865c52bd921213253b7fd64d16733ae4591564465de"},
+    {file = "django_redis-5.2.0-py3-none-any.whl", hash = "sha256:1d037dc02b11ad7aa11f655d26dac3fb1af32630f61ef4428860a2e29ff92026"},
 ]
 django-seed = [
     {file = "django-seed-0.3.1.tar.gz", hash = "sha256:93e65d2c10449c464b83e9031be02763ec10e786aa064d649c4dd5ad06fa0eea"},
@@ -2227,9 +2324,6 @@ frozenlist = [
     {file = "frozenlist-1.3.0-cp39-cp39-win_amd64.whl", hash = "sha256:772965f773757a6026dea111a15e6e2678fbd6216180f82a48a40b27de1ee2ab"},
     {file = "frozenlist-1.3.0.tar.gz", hash = "sha256:ce6f2ba0edb7b0c1d8976565298ad2deba6f8064d2bebb6ffce2ca896eb35b0b"},
 ]
-future = [
-    {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
-]
 graphene = [
     {file = "graphene-2.1.9-py2.py3-none-any.whl", hash = "sha256:3d446eb1237c551052bc31155cf1a3a607053e4f58c9172b83a1b597beaa0868"},
     {file = "graphene-2.1.9.tar.gz", hash = "sha256:b9f2850e064eebfee9a3ef4a1f8aa0742848d97652173ab44c82cc8a62b9ed93"},
@@ -2323,9 +2417,9 @@ inflection = [
     {file = "inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"},
     {file = "inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417"},
 ]
-jdcal = [
-    {file = "jdcal-1.4.1-py2.py3-none-any.whl", hash = "sha256:1abf1305fce18b4e8aa248cf8fe0c56ce2032392bc64bbd61b5dff2a19ec8bba"},
-    {file = "jdcal-1.4.1.tar.gz", hash = "sha256:472872e096eb8df219c23f2689fc336668bdb43d194094b5cc1707e1640acfc8"},
+jsonpickle = [
+    {file = "jsonpickle-2.2.0-py2.py3-none-any.whl", hash = "sha256:de7f2613818aa4f234138ca11243d6359ff83ae528b2185efdd474f62bcf9ae1"},
+    {file = "jsonpickle-2.2.0.tar.gz", hash = "sha256:7b272918b0554182e53dc340ddd62d9b7f902fec7e7b05620c04f3ccef479a0e"},
 ]
 jwcrypto = [
     {file = "jwcrypto-1.3.1.tar.gz", hash = "sha256:54b551b115ffb4d12b1f1ee93b8ba2a71bb8556ba3d85d62f707549613da877c"},
@@ -2402,6 +2496,10 @@ lxml = [
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
+]
+mock = [
+    {file = "mock-4.0.3-py3-none-any.whl", hash = "sha256:122fcb64ee37cfad5b3f48d7a7d51875d7031aaf3d8be7c42e2bee25044eee62"},
+    {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
 msgpack = [
     {file = "msgpack-1.0.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:96acc674bb9c9be63fa8b6dabc3248fdc575c4adc005c440ad02f87ca7edd079"},
@@ -2500,13 +2598,37 @@ multidict = [
     {file = "multidict-6.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:4bae31803d708f6f15fd98be6a6ac0b6958fcf68fda3c77a048a4f9073704aae"},
     {file = "multidict-6.0.2.tar.gz", hash = "sha256:5ff3bd75f38e4c43f1f470f2df7a4d430b821c4ce22be384e1459cb57d6bb013"},
 ]
+numpy = [
+    {file = "numpy-1.22.4-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:ba9ead61dfb5d971d77b6c131a9dbee62294a932bf6a356e48c75ae684e635b3"},
+    {file = "numpy-1.22.4-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:1ce7ab2053e36c0a71e7a13a7475bd3b1f54750b4b433adc96313e127b870887"},
+    {file = "numpy-1.22.4-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:7228ad13744f63575b3a972d7ee4fd61815b2879998e70930d4ccf9ec721dce0"},
+    {file = "numpy-1.22.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:43a8ca7391b626b4c4fe20aefe79fec683279e31e7c79716863b4b25021e0e74"},
+    {file = "numpy-1.22.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a911e317e8c826ea632205e63ed8507e0dc877dcdc49744584dfc363df9ca08c"},
+    {file = "numpy-1.22.4-cp310-cp310-win32.whl", hash = "sha256:9ce7df0abeabe7fbd8ccbf343dc0db72f68549856b863ae3dd580255d009648e"},
+    {file = "numpy-1.22.4-cp310-cp310-win_amd64.whl", hash = "sha256:3e1ffa4748168e1cc8d3cde93f006fe92b5421396221a02f2274aab6ac83b077"},
+    {file = "numpy-1.22.4-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:59d55e634968b8f77d3fd674a3cf0b96e85147cd6556ec64ade018f27e9479e1"},
+    {file = "numpy-1.22.4-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:c1d937820db6e43bec43e8d016b9b3165dcb42892ea9f106c70fb13d430ffe72"},
+    {file = "numpy-1.22.4-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d4c5d5eb2ec8da0b4f50c9a843393971f31f1d60be87e0fb0917a49133d257d6"},
+    {file = "numpy-1.22.4-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:64f56fc53a2d18b1924abd15745e30d82a5782b2cab3429aceecc6875bd5add0"},
+    {file = "numpy-1.22.4-cp38-cp38-win32.whl", hash = "sha256:fb7a980c81dd932381f8228a426df8aeb70d59bbcda2af075b627bbc50207cba"},
+    {file = "numpy-1.22.4-cp38-cp38-win_amd64.whl", hash = "sha256:e96d7f3096a36c8754207ab89d4b3282ba7b49ea140e4973591852c77d09eb76"},
+    {file = "numpy-1.22.4-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:4c6036521f11a731ce0648f10c18ae66d7143865f19f7299943c985cdc95afb5"},
+    {file = "numpy-1.22.4-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:b89bf9b94b3d624e7bb480344e91f68c1c6c75f026ed6755955117de00917a7c"},
+    {file = "numpy-1.22.4-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:2d487e06ecbf1dc2f18e7efce82ded4f705f4bd0cd02677ffccfb39e5c284c7e"},
+    {file = "numpy-1.22.4-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f3eb268dbd5cfaffd9448113539e44e2dd1c5ca9ce25576f7c04a5453edc26fa"},
+    {file = "numpy-1.22.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:37431a77ceb9307c28382c9773da9f306435135fae6b80b62a11c53cfedd8802"},
+    {file = "numpy-1.22.4-cp39-cp39-win32.whl", hash = "sha256:cc7f00008eb7d3f2489fca6f334ec19ca63e31371be28fd5dad955b16ec285bd"},
+    {file = "numpy-1.22.4-cp39-cp39-win_amd64.whl", hash = "sha256:f0725df166cf4785c0bc4cbfb320203182b1ecd30fee6e541c8752a92df6aa32"},
+    {file = "numpy-1.22.4-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0791fbd1e43bf74b3502133207e378901272f3c156c4df4954cad833b1380207"},
+    {file = "numpy-1.22.4.zip", hash = "sha256:425b390e4619f58d8526b3dcf656dde069133ae5c240229821f01b5f44ea07af"},
+]
+numpy-financial = [
+    {file = "numpy-financial-1.0.0.tar.gz", hash = "sha256:f84341bc62b2485d5604a73d5fac7e91975b4b9cd5f4a5a9cf608902ea00cb40"},
+    {file = "numpy_financial-1.0.0-py3-none-any.whl", hash = "sha256:bae534b357516f12258862d1f0181d911032d0467f215bfcd1c264b4da579047"},
+]
 oauthlib = [
     {file = "oauthlib-3.2.0-py3-none-any.whl", hash = "sha256:6db33440354787f9b7f3a6dbd4febf5d0f93758354060e802f6c06cb493022fe"},
     {file = "oauthlib-3.2.0.tar.gz", hash = "sha256:23a8208d75b902797ea29fd31fa80a15ed9dc2c6c16fe73f5d346f83f6fa27a2"},
-]
-openpyexcel = [
-    {file = "openpyexcel-2.5.14-py2.py3-none-any.whl", hash = "sha256:f18f4efadbc25a26870885f342e14b6cd6862ca1f4b8195b394fc2681ccdbaab"},
-    {file = "openpyexcel-2.5.14.tar.gz", hash = "sha256:056f7f9cf543218b6e1a7ce2c3399b8c48f377c82c5d5ca23d7c679a660d9a01"},
 ]
 openpyxl = [
     {file = "openpyxl-3.0.10-py2.py3-none-any.whl", hash = "sha256:0ab6d25d01799f97a9464630abacbb34aafecdcaa0ef3cba6d6b3499867d0355"},
@@ -2515,6 +2637,29 @@ openpyxl = [
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
+]
+pandas = [
+    {file = "pandas-1.4.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:be67c782c4f1b1f24c2f16a157e12c2693fd510f8df18e3287c77f33d124ed07"},
+    {file = "pandas-1.4.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5a206afa84ed20e07603f50d22b5f0db3fb556486d8c2462d8bc364831a4b417"},
+    {file = "pandas-1.4.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:0010771bd9223f7afe5f051eb47c4a49534345dfa144f2f5470b27189a4dd3b5"},
+    {file = "pandas-1.4.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3228198333dd13c90b6434ddf61aa6d57deaca98cf7b654f4ad68a2db84f8cfe"},
+    {file = "pandas-1.4.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b79af3a69e5175c6fa7b4e046b21a646c8b74e92c6581a9d825687d92071b51"},
+    {file = "pandas-1.4.2-cp310-cp310-win_amd64.whl", hash = "sha256:5586cc95692564b441f4747c47c8a9746792e87b40a4680a2feb7794defb1ce3"},
+    {file = "pandas-1.4.2-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:061609334a8182ab500a90fe66d46f6f387de62d3a9cb9aa7e62e3146c712167"},
+    {file = "pandas-1.4.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:b8134651258bce418cb79c71adeff0a44090c98d955f6953168ba16cc285d9f7"},
+    {file = "pandas-1.4.2-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:df82739e00bb6daf4bba4479a40f38c718b598a84654cbd8bb498fd6b0aa8c16"},
+    {file = "pandas-1.4.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:385c52e85aaa8ea6a4c600a9b2821181a51f8be0aee3af6f2dcb41dafc4fc1d0"},
+    {file = "pandas-1.4.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:295872bf1a09758aba199992c3ecde455f01caf32266d50abc1a073e828a7b9d"},
+    {file = "pandas-1.4.2-cp38-cp38-win32.whl", hash = "sha256:95c1e422ced0199cf4a34385ff124b69412c4bc912011ce895582bee620dfcaa"},
+    {file = "pandas-1.4.2-cp38-cp38-win_amd64.whl", hash = "sha256:5c54ea4ef3823108cd4ec7fb27ccba4c3a775e0f83e39c5e17f5094cb17748bc"},
+    {file = "pandas-1.4.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:c072c7f06b9242c855ed8021ff970c0e8f8b10b35e2640c657d2a541c5950f59"},
+    {file = "pandas-1.4.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:f549097993744ff8c41b5e8f2f0d3cbfaabe89b4ae32c8c08ead6cc535b80139"},
+    {file = "pandas-1.4.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:ff08a14ef21d94cdf18eef7c569d66f2e24e0bc89350bcd7d243dd804e3b5eb2"},
+    {file = "pandas-1.4.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8c5bf555b6b0075294b73965adaafb39cf71c312e38c5935c93d78f41c19828a"},
+    {file = "pandas-1.4.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:51649ef604a945f781105a6d2ecf88db7da0f4868ac5d45c51cb66081c4d9c73"},
+    {file = "pandas-1.4.2-cp39-cp39-win32.whl", hash = "sha256:d0d4f13e4be7ce89d7057a786023c461dd9370040bdb5efa0a7fe76b556867a0"},
+    {file = "pandas-1.4.2-cp39-cp39-win_amd64.whl", hash = "sha256:09d8be7dd9e1c4c98224c4dfe8abd60d145d934e9fc1f5f411266308ae683e6a"},
+    {file = "pandas-1.4.2.tar.gz", hash = "sha256:92bc1fc585f1463ca827b45535957815b7deb218c549b7c18402c322c7549a12"},
 ]
 paramiko = [
     {file = "paramiko-2.11.0-py2.py3-none-any.whl", hash = "sha256:655f25dc8baf763277b933dfcea101d636581df8d6b9774d1fb653426b72c270"},
@@ -2720,8 +2865,8 @@ pywebpush = [
     {file = "pywebpush-1.14.0.tar.gz", hash = "sha256:6c36e1679268219e693ba940db2bf254c240ca02664de102b7269afc3c545731"},
 ]
 redis = [
-    {file = "redis-4.3.1-py3-none-any.whl", hash = "sha256:84316970995a7adb907a56754d2b92d88fc2d252963dc5ac34c88f0f1a22c25d"},
-    {file = "redis-4.3.1.tar.gz", hash = "sha256:94b617b4cd296e94991146f66fc5559756fbefe9493604f0312e4d3298ac63e9"},
+    {file = "redis-4.3.2-py3-none-any.whl", hash = "sha256:b30a2dc3f27cab69284829d6d423643beee88f279967c42e9014a2ffb7c2a84c"},
+    {file = "redis-4.3.2.tar.gz", hash = "sha256:b989406ea786a9d151066a683b32a437a48f043c3ffd3795ec5ad9d344ee9e8c"},
 ]
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
@@ -2730,6 +2875,31 @@ requests = [
 rx = [
     {file = "Rx-1.6.1-py2.py3-none-any.whl", hash = "sha256:7357592bc7e881a95e0c2013b73326f704953301ab551fbc8133a6fadab84105"},
     {file = "Rx-1.6.1.tar.gz", hash = "sha256:13a1d8d9e252625c173dc795471e614eadfe1cf40ffc684e08b8fff0d9748c23"},
+]
+scipy = [
+    {file = "scipy-1.8.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:65b77f20202599c51eb2771d11a6b899b97989159b7975e9b5259594f1d35ef4"},
+    {file = "scipy-1.8.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:e013aed00ed776d790be4cb32826adb72799c61e318676172495383ba4570aa4"},
+    {file = "scipy-1.8.1-cp310-cp310-macosx_12_0_universal2.macosx_10_9_x86_64.whl", hash = "sha256:02b567e722d62bddd4ac253dafb01ce7ed8742cf8031aea030a41414b86c1125"},
+    {file = "scipy-1.8.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1da52b45ce1a24a4a22db6c157c38b39885a990a566748fc904ec9f03ed8c6ba"},
+    {file = "scipy-1.8.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a0aa8220b89b2e3748a2836fbfa116194378910f1a6e78e4675a095bcd2c762d"},
+    {file = "scipy-1.8.1-cp310-cp310-win_amd64.whl", hash = "sha256:4e53a55f6a4f22de01ffe1d2f016e30adedb67a699a310cdcac312806807ca81"},
+    {file = "scipy-1.8.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:28d2cab0c6ac5aa131cc5071a3a1d8e1366dad82288d9ec2ca44df78fb50e649"},
+    {file = "scipy-1.8.1-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:6311e3ae9cc75f77c33076cb2794fb0606f14c8f1b1c9ff8ce6005ba2c283621"},
+    {file = "scipy-1.8.1-cp38-cp38-macosx_12_0_universal2.macosx_10_9_x86_64.whl", hash = "sha256:3b69b90c9419884efeffaac2c38376d6ef566e6e730a231e15722b0ab58f0328"},
+    {file = "scipy-1.8.1-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:6cc6b33139eb63f30725d5f7fa175763dc2df6a8f38ddf8df971f7c345b652dc"},
+    {file = "scipy-1.8.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9c4e3ae8a716c8b3151e16c05edb1daf4cb4d866caa385e861556aff41300c14"},
+    {file = "scipy-1.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:23b22fbeef3807966ea42d8163322366dd89da9bebdc075da7034cee3a1441ca"},
+    {file = "scipy-1.8.1-cp38-cp38-win32.whl", hash = "sha256:4b93ec6f4c3c4d041b26b5f179a6aab8f5045423117ae7a45ba9710301d7e462"},
+    {file = "scipy-1.8.1-cp38-cp38-win_amd64.whl", hash = "sha256:70ebc84134cf0c504ce6a5f12d6db92cb2a8a53a49437a6bb4edca0bc101f11c"},
+    {file = "scipy-1.8.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:f3e7a8867f307e3359cc0ed2c63b61a1e33a19080f92fe377bc7d49f646f2ec1"},
+    {file = "scipy-1.8.1-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:2ef0fbc8bcf102c1998c1f16f15befe7cffba90895d6e84861cd6c6a33fb54f6"},
+    {file = "scipy-1.8.1-cp39-cp39-macosx_12_0_universal2.macosx_10_9_x86_64.whl", hash = "sha256:83606129247e7610b58d0e1e93d2c5133959e9cf93555d3c27e536892f1ba1f2"},
+    {file = "scipy-1.8.1-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:93d07494a8900d55492401917a119948ed330b8c3f1d700e0b904a578f10ead4"},
+    {file = "scipy-1.8.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d3b3c8924252caaffc54d4a99f1360aeec001e61267595561089f8b5900821bb"},
+    {file = "scipy-1.8.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:70de2f11bf64ca9921fda018864c78af7147025e467ce9f4a11bc877266900a6"},
+    {file = "scipy-1.8.1-cp39-cp39-win32.whl", hash = "sha256:1166514aa3bbf04cb5941027c6e294a000bba0cf00f5cdac6c77f2dad479b434"},
+    {file = "scipy-1.8.1-cp39-cp39-win_amd64.whl", hash = "sha256:9dd4012ac599a1e7eb63c114d1eee1bcfc6dc75a29b589ff0ad0bb3d9412034f"},
+    {file = "scipy-1.8.1.tar.gz", hash = "sha256:9e3fb1b0e896f14a85aa9a28d5f755daaeeb54c897b746df7a55ccb02b340f33"},
 ]
 sentry-sdk = [
     {file = "sentry-sdk-1.5.12.tar.gz", hash = "sha256:259535ba66933eacf85ab46524188c84dcb4c39f40348455ce15e2c0aca68863"},
@@ -2882,6 +3052,10 @@ wrapt = [
     {file = "wrapt-1.14.1-cp39-cp39-win_amd64.whl", hash = "sha256:dee60e1de1898bde3b238f18340eec6148986da0455d8ba7848d50470a7a32fb"},
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
+xlsx-evaluate = [
+    {file = "xlsx_evaluate-0.3.0-py3-none-any.whl", hash = "sha256:e3a763bf61fab785a0021ace40b06964805f666ce55633b192fee738eb180248"},
+    {file = "xlsx_evaluate-0.3.0.tar.gz", hash = "sha256:9319c06e7a479d64302b3f73a56d4b836d91689b014ffe91053290e360073ecc"},
+]
 yarl = [
     {file = "yarl-1.7.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:f2a8508f7350512434e41065684076f640ecce176d262a7d54f0da41d99c5a95"},
     {file = "yarl-1.7.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:da6df107b9ccfe52d3a48165e48d72db0eca3e3029b5b8cb4fe6ee3cb870ba8b"},
@@ -2955,6 +3129,9 @@ yarl = [
     {file = "yarl-1.7.2-cp39-cp39-win32.whl", hash = "sha256:1edc172dcca3f11b38a9d5c7505c83c1913c0addc99cd28e993efeaafdfaa18d"},
     {file = "yarl-1.7.2-cp39-cp39-win_amd64.whl", hash = "sha256:797c2c412b04403d2da075fb93c123df35239cd7b4cc4e0cd9e5839b73f52c58"},
     {file = "yarl-1.7.2.tar.gz", hash = "sha256:45399b46d60c253327a460e99856752009fcee5f5d3c80b2f7c0cae1c38d56dd"},
+]
+yearfrac = [
+    {file = "yearfrac-0.4.7.tar.gz", hash = "sha256:17fb847d1b2070664b4c5c40959d2f34db3f75ddac6de6cbd708aa5d32688a0b"},
 ]
 "zope.interface" = [
     {file = "zope.interface-5.4.0-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:7df1e1c05304f26faa49fa752a8c690126cf98b40b91d54e6e9cc3b7d6ffe8b7"},

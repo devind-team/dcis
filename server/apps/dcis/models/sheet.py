@@ -1,4 +1,4 @@
-from openpyexcel.utils.cell import get_column_letter
+from openpyxl.utils.cell import get_column_letter
 from django.db import models
 
 from apps.core.models import User
