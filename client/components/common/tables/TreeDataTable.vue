@@ -85,8 +85,8 @@ export default defineComponent({
     items: { type: Array as PropType<Item[] | undefined>, default: () => undefined },
     search: { type: String, default: () => undefined },
     loading: { type: [Boolean, String], default: false },
-    treeFilter: { type: Function as PropType<TreeFilter> | undefined, required: true }, // todo: required?
-    flatFilter: { type: Function as PropType<FlatFilter | undefined>, required: true } // todo: required?
+    treeFilter: { type: Function as PropType<TreeFilter> | undefined, default: undefined },
+    flatFilter: { type: Function as PropType<FlatFilter | undefined>, default: undefined }
   },
   setup (props, { slots }) {
     const { vuetify } = useVuetify()
