@@ -11,6 +11,9 @@ AddPeriod = ModelPermission('dcis.add_period')
 ChangePeriod = ModelPermission('dcis.change_period')
 DeletePeriod = ModelPermission('dcis.delete_period')
 
+
+ChangeSheet = ModelPermission('dcis.change_sheet')
+
 AddDocument = ModelPermission('dcis.add_document')
 ChangeDocument = ModelPermission('dcis.change_document')
 DeleteDocument = ModelPermission('dcis.delete_document')
