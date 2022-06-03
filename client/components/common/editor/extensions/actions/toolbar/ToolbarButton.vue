@@ -7,11 +7,11 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType } from '#app'
 import { Editor } from '@tiptap/core'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },

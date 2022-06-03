@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref, onMounted, onBeforeUnmount } from '#app'
 import { Editor, EditorContent, BubbleMenu } from '@tiptap/vue-2'
 import { Editor as CoreEditor } from '@tiptap/core'
 import { Document } from '@tiptap/extension-document'
@@ -58,7 +58,7 @@ import Strike from '~/components/common/editor/extensions/nativeExtensions/Strik
 import Link from '~/components/common/editor/extensions/nativeExtensions/Link'
 import HTML from '~/components/common/editor/extensions/nativeExtensions/HTML'
 import LineHeight from '~/components/common/editor/extensions/nativeExtensions/LineHeight'
-import AbstractExtension from '~/components/common/editor/extensions/AbstractExtension'
+import AbstractExtension, { ActionType } from '~/components/common/editor/extensions/AbstractExtension'
 import EditorTypography from '~/components/common/editor/EditorTypography.vue'
 import HardBreak from '~/components/common/editor/extensions/nativeExtensions/HardBreak'
 import Heading from '~/components/common/editor/extensions/nativeExtensions/Heading'
@@ -67,7 +67,7 @@ import Iframe from '~/components/common/editor/extensions/nativeExtensions/Ifram
 import Underline from '~/components/common/editor/extensions/nativeExtensions/Underline'
 import FontColor from '~/components/common/editor/extensions/nativeExtensions/FontColor'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { EditorContent, BubbleMenu, EditorTypography },
   model: { prop: 'text', event: 'update' },
   props: {
@@ -98,50 +98,48 @@ export default Vue.extend<any, any, any, any>({
       ])
     }
   },
-  data () {
-    return {
-      editor: null,
-      editorData: '',
-      toolbarActions: [],
-      bubbleActions: [],
-      preview: false,
-      isFullscreen: false
+  setup (props, { emit }) {
+    const editor = ref<CoreEditor>(null)
+    const toolbarActions = ref<ActionType[]>([])
+    const bubbleActions = ref<ActionType[]>([])
+    const preview = ref(false)
+    const isFullscreen = ref(false)
+
+    const onUpdate = (props: { editor: CoreEditor }) => {
+      emit('update', props.editor.getHTML())
     }
-  },
-  mounted () {
-    const exts: any[] = []
-    this.extensions.forEach((el: AbstractExtension) => {
-      exts.push(el.nativeExtension)
-      this.toolbarActions.push(...el.toolbarActions)
-      this.bubbleActions.push(...el.bubbleActions)
-    })
-    this.editor = new Editor({
-      content: this.text,
-      extensions: [
-        Document,
-        Text,
-        Paragraph,
-        History,
-        Gapcursor,
-        Dropcursor,
-        ListItem,
-        TextStyle,
-        ...exts
-      ],
-      onUpdate: this.onUpdate,
-      autofocus: true
-    })
-  },
-  beforeDestroy () {
-    this.editor?.destroy()
-  },
-  methods: {
-    onUpdate (props: { editor: CoreEditor }): void {
-      this.$emit('update', props.editor.getHTML())
-    },
-    toggleFullscreen (): void {
-      this.isFullscreen = !this.isFullscreen
+    const toggleFullscreen = () => {
+      isFullscreen.value = !isFullscreen.value
     }
+
+    onMounted(() => {
+      const exts: any[] = []
+      props.extensions.forEach((el: AbstractExtension) => {
+        exts.push(el.nativeExtension)
+        toolbarActions.value.push(...el.toolbarActions)
+        bubbleActions.value.push(...el.bubbleActions)
+      })
+      editor.value = new Editor({
+        content: props.text,
+        extensions: [
+          Document,
+          Text,
+          Paragraph,
+          History,
+          Gapcursor,
+          Dropcursor,
+          ListItem,
+          TextStyle,
+          ...exts
+        ],
+        onUpdate,
+        autofocus: true
+      })
+    })
+    onBeforeUnmount(() => {
+      editor.value?.destroy()
+    })
+    return { isFullscreen, preview, toolbarActions, bubbleActions, editor, toggleFullscreen }
   }
 })
 </script>
