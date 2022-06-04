@@ -35,11 +35,12 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref, computed } from '#app'
 import { Editor } from '@tiptap/core'
+import { useI18n } from '~/composables'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },
@@ -49,50 +50,51 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    isMirroring: true,
-    isDialog: false,
-    src: '',
-    label: '',
-    target: '_blank'
-  }),
-  computed: {
-    targets () {
+  setup (props) {
+    const { t } = useI18n()
+
+    const isMirroring = ref(true)
+    const isDialog = ref(false)
+    const src = ref('')
+    const label = ref('')
+    const target = ref('_blank')
+
+    const targets = computed(() => {
       return [
-        { text: this.$t('common.richTextEditor.link.currentWindow'), value: '_self' },
-        { text: this.$t('common.richTextEditor.link.newWindow'), value: '_blank' }
+        { text: t('common.richTextEditor.link.currentWindow'), value: '_self' },
+        { text: t('common.richTextEditor.link.newWindow'), value: '_blank' }
       ]
+    })
+
+    const onInsert = () => {
+      props.onClick(props.editor, { src: src.value, label: label.value, target: target.value })
+      isDialog.value = false
+      src.value = ''
+      label.value = ''
+      isMirroring.value = true
     }
-  },
-  methods: {
-    onInsert (): void {
-      this.onClick(this.editor, { src: this.src, label: this.label, target: this.target })
-      this.isDialog = false
-      this.src = ''
-      this.label = ''
-      this.isMirroring = true
-    },
-    onSrcInput (): void {
-      if (this.isMirroring) {
-        this.label = this.src
+    const onSrcInput = () => {
+      if (isMirroring.value) {
+        label.value = src.value
       }
-    },
-    onLabelInput (value: string): void {
-      this.isMirroring = !value
-      if (this.isMirroring) {
-        this.label = this.src
+    }
+    const onLabelInput = (value: string) => {
+      isMirroring.value = !value
+      if (isMirroring.value) {
+        label.value = src.value
       }
-    },
-    initLabel (): void {
-      if (this.editor.view.state.selection.empty) {
+    }
+    const initLabel = () => {
+      if (props.editor.view.state.selection.empty) {
         return
       }
-      const { state } = this.editor
-      const selection = this.editor.view.state.selection
+      const { state } = props.editor
+      const selection = props.editor.view.state.selection
       const { from, to } = selection
-      this.label = state.doc.textBetween(from, to, ' ')
-      this.isMirroring = false
+      label.value = state.doc.textBetween(from, to, ' ')
+      isMirroring.value = false
     }
+    return { isDialog, label, target, targets, src, initLabel, onLabelInput, onSrcInput, onInsert }
   }
 })
 </script>

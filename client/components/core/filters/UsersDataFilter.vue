@@ -25,65 +25,61 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, VModel } from 'vue-property-decorator'
-import { PropType } from 'vue'
+import { defineComponent, computed, PropType } from '#app'
+import { useFilters } from '~/composables'
 import { UserType } from '~/types/graphql'
 import { Item, MultipleMessageFunction } from '~/types/filters'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
 
-@Component<UsersDataFilter>({
+export default defineComponent({
+  components: { ItemsDataFilter, QueryDataFilter, AvatarDialog },
   inheritAttrs: false,
-  components: { ItemsDataFilter, QueryDataFilter, AvatarDialog }
+  props: {
+    users: { type: Array as PropType<Item[]>, default: () => [] },
+    title: {
+      type: String,
+      default () {
+        return this.$t('core.filters.usersFilter.title')
+      }
+    },
+    noFiltrationMessage: {
+      type: String,
+      default () {
+        return this.$t('core.filters.usersFilter.noFiltrationMessage')
+      }
+    },
+    multipleMessageFunction: {
+      type: Function as PropType<MultipleMessageFunction>,
+      default (name: string, restLength: number): string {
+        return this.$tc('core.filters.usersFilter.multipleMessage', restLength, { name, restLength })
+      }
+    },
+    value: { type: [Object, Array] as PropType<Item | Item[]>, default: () => undefined }
+  },
+  setup (props, { emit }) {
+    const { getUserName, getUserFullName } = useFilters()
+    const selectedValue = computed<Item | Item[] | null | undefined>({
+      get: () => {
+        return props.value
+      },
+      set: (value) => {
+        emit('input', value)
+      }
+    })
+    /**
+     * Поиск пользователя
+     * @param user
+     * @param search
+     * @return
+     */
+    const searchUser = (user: UserType, search: string): boolean => {
+      return [getUserName(user), getUserFullName(user)].some(
+        v => v.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      )
+    }
+    return { selectedValue, searchUser }
+  }
 })
-export default class UsersDataFilter extends Vue {
-  @Prop({ type: Array as PropType<Item[]> }) readonly users?: Item[]
-
-  @Prop({
-    type: String,
-    default () {
-      return (this as any).$options.methods.t.call(this, 'title')
-    }
-  }) readonly title!: string
-
-  @Prop({
-    type: String,
-    default () {
-      return (this as any).$options.methods.t.call(this, 'noFiltrationMessage')
-    }
-  }) readonly noFiltrationMessage!: string
-
-  @Prop({
-    type: Function as PropType<MultipleMessageFunction>,
-    default (name: string, restLength: number): string {
-      return (this as any).$tc('core.filters.usersFilter.multipleMessage', restLength, { name, restLength })
-    }
-  }) readonly multipleMessageFunction!: MultipleMessageFunction
-
-  @VModel({ type: [Object, Array] as PropType<Item | Item[]> })
-  readonly selectedValue!: Item | Item[] | null | undefined
-
-  /**
-   * Поиск пользователя
-   * @param user
-   * @param search
-   * @return
-   */
-  searchUser (user: UserType, search: string): boolean {
-    return [this.$getUserName(user), this.$getUserFullName(user)].some(
-      v => v.toLocaleLowerCase().includes(search.toLocaleLowerCase())
-    )
-  }
-
-  /**
-   * Получение перевода относильно локального пути
-   * @param path
-   * @param values
-   * @return
-   */
-  t (path: string, values: any = undefined): string {
-    return this.$t(`core.filters.usersFilter.${path}`, values) as string
-  }
-}
 </script>
