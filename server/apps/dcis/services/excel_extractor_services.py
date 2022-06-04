@@ -1,11 +1,12 @@
 from pathlib import PosixPath
-from typing import Iterator
+from typing import Iterator, Union
 
 from openpyxl import Workbook, load_workbook
+from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, WHITE
 from openpyxl.utils.cell import column_index_from_string
 from openpyxl.worksheet.dimensions import DimensionHolder
-from openpyxl.worksheet.merge import MergeCell
+from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
@@ -157,7 +158,7 @@ class ExcelExtractor:
         }
 
     @staticmethod
-    def _parse_cells(wb: Workbook, rows: Iterator[tuple[Cell]]) -> list[dict]:
+    def _parse_cells(wb: Workbook, rows: Iterator[tuple[Union[OpenpyxlCell, OpenpyxlMergedCell]]]) -> list[dict]:
         """Парсинг ячеек.
 
         Переданный параметр rows представляет собой матрицу.
@@ -190,9 +191,8 @@ class ExcelExtractor:
                         (font_color and font_color.index == 1 and fill_color.value == WHITE):
                     font_color.type = 'rgb'
                     font_color.value = '00000000'
-
                 rows_result.append({
-                    'column_id': cell.col_idx,
+                    'column_id': cell.column,
                     'row_id': cell.row,
                     'kind': cell.data_type,
                     'formula': cell.value
