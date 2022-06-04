@@ -29,14 +29,14 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref, toRefs } from '#app'
 import { Editor } from '@tiptap/core'
-import { mapGetters } from 'vuex'
+import { useAuthStore } from '~/stores'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
-import { AddFileMutationPayload } from '~/types/graphql'
+import { AddFileMutationPayload, UserType } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { MutationModalForm },
   props: {
     tooltip: { type: String, required: true },
@@ -47,17 +47,17 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    image: null
-  }),
-  computed: mapGetters({ user: 'auth/user' }),
-  methods: {
-    onImageUploaded ({ data: { addFile } }: { data: { addFile: AddFileMutationPayload } }): void {
+  setup (props) {
+    const authStore = useAuthStore()
+    const { user } = toRefs<{ user: UserType }>(authStore)
+    const image = ref<any>(null)
+    const onImageUploaded = ({ data: { addFile } }: { data: { addFile: AddFileMutationPayload } }) => {
       if (addFile.success) {
-        this.editor.chain().focus().setImage({ src: `/${addFile.files[0]!.src}` }).run()
-        this.image = null
+        props.editor.chain().focus().setImage({ src: `/${addFile.files[0]!.src}` }).run()
+        image.value = null
       }
     }
+    return { user, image, onImageUploaded }
   }
 })
 </script>

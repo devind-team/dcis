@@ -20,11 +20,11 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref } from '#app'
 import { Editor } from '@tiptap/core'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },
@@ -34,17 +34,14 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data () {
-    return {
-      content: this.editor.getHTML(),
-      isDialog: false
+  setup (props) {
+    const content = ref(props.editor.getHTML())
+    const isDialog = ref(false)
+    const onInsert = () => {
+      props.onClick(props.editor, content.value)
+      isDialog.value = false
     }
-  },
-  methods: {
-    onInsert () {
-      this.onClick(this.editor, this.content)
-      this.isDialog = false
-    }
+    return { content, isDialog, onInsert }
   }
 })
 </script>

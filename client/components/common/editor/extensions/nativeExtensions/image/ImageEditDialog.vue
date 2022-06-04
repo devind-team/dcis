@@ -27,11 +27,12 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref, computed } from '#app'
 import { Editor } from '@tiptap/core'
+import { useI18n } from '~/composables'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },
@@ -41,42 +42,39 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    isDialog: false,
-    image: null,
-    keepAspectRatio: false,
-    height: 0,
-    width: 0,
-    sizeMode: 'px'
-  }),
-  computed: {
-    sizeModes () {
+  setup (props) {
+    const { t } = useI18n()
+    const sizeModes = computed(() => {
       return [
-        { text: this.$t('common.richTextEditor.image.px'), value: 'px' },
-        { text: this.$t('common.richTextEditor.image.pc'), value: '%' }
+        { text: t('common.richTextEditor.image.px'), value: 'px' },
+        { text: t('common.richTextEditor.image.pc'), value: '%' }
       ]
-    }
-  },
-  methods: {
-    onOpen () {
-      const from = this.editor.state.selection.from
-      const to = this.editor.state.selection.to
-      this.editor.state.doc.nodesBetween(from, to, (node: any) => {
+    })
+    const isDialog = ref(false)
+    const keepAspectRatio = ref(false)
+    const height = ref(0)
+    const width = ref(0)
+    const sizeMode = ref('px')
+    const onOpen = () => {
+      const from = props.editor.state.selection.from
+      const to = props.editor.state.selection.to
+      props.editor.state.doc.nodesBetween(from, to, (node: any) => {
         if (node.type.name === 'image') {
-          this.height = node.attrs.height.toFixed()
-          this.width = node.attrs.width.toFixed()
-          this.sizeMode = node.attrs.sizeMode
-          this.keepAspectRatio = node.attrs.keepAspectRatio
+          height.value = node.attrs.height.toFixed()
+          width.value = node.attrs.width.toFixed()
+          sizeMode.value = node.attrs.sizeMode
+          keepAspectRatio.value = node.attrs.keepAspectRatio
         }
       })
-    },
-    onAspectRatioChanged () {
-      this.keepAspectRatio = !this.keepAspectRatio
-    },
-    onDone (): void {
-      this.editor.chain().focus().updateAttributes('image', { width: this.width, height: this.height, keepAspectRatio: this.keepAspectRatio, sizeMode: this.sizeMode }).run()
-      this.isDialog = false
     }
+    const onAspectRatioChanged = () => {
+      keepAspectRatio.value = !keepAspectRatio.value
+    }
+    const onDone = () => {
+      props.editor.chain().focus().updateAttributes('image', { width: width.value, height: height.value, keepAspectRatio: keepAspectRatio.value, sizeMode: sizeMode.value }).run()
+      isDialog.value = false
+    }
+    return { isDialog, keepAspectRatio, height, width, sizeMode, sizeModes, onOpen, onAspectRatioChanged, onDone }
   }
 })
 </script>

@@ -20,13 +20,14 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref, computed } from '#app'
 import { Editor } from '@tiptap/core'
+import { useI18n } from '~/composables'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
 type ItemType = { text: string, value: string }
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },
@@ -36,13 +37,13 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    item: null
-  }),
-  computed: {
-    items (): ItemType[] {
+  setup (props) {
+    const { t } = useI18n()
+    const item = ref<ItemType>(null)
+
+    const items = computed(() => {
       return [
-        { text: this.$t('common.richTextEditor.lineHeight.default') as string, value: 'default' },
+        { text: t('common.richTextEditor.lineHeight.default') as string, value: 'default' },
         { text: '1.0', value: '1.0' },
         { text: '1.15', value: '1.15' },
         { text: '1.5', value: '1.5' },
@@ -50,12 +51,11 @@ export default Vue.extend<any, any, any, any>({
         { text: '2.5', value: '2.5' },
         { text: '3.0', value: '3.0' }
       ]
+    })
+    const onChange = (value: number) => {
+      props.onClick(props.editor, items.value[value].value)
     }
-  },
-  methods: {
-    onChange (value: number) {
-      this.onClick(this.editor, this.items[value].value)
-    }
+    return { item, items, onChange }
   }
 })
 </script>

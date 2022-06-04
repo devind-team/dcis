@@ -25,11 +25,11 @@ v-dialog(v-model="isTableDialog" width="600")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref } from '#app'
 import { Editor } from '@tiptap/core'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },
@@ -39,17 +39,17 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    isTableDialog: false,
-    isHeaderRowEnabled: true,
-    rows: 1,
-    cols: 1
-  }),
-  methods: {
-    onTableInsert () {
-      this.onClick(this.editor, { rows: this.rows, cols: this.cols, withHeaderRow: this.isHeaderRowEnabled })
-      this.isTableDialog = false
+  setup (props) {
+    const isTableDialog = ref(false)
+    const isHeaderRowEnabled = ref(true)
+    const rows = ref(1)
+    const cols = ref(1)
+
+    const onTableInsert = () => {
+      props.onClick(props.editor, { rows: rows.value, cols: cols.value, withHeaderRow: isHeaderRowEnabled.value })
+      isTableDialog.value = false
     }
+    return { isTableDialog, isHeaderRowEnabled, cols, rows, onTableInsert }
   }
 })
 </script>

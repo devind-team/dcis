@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref, computed, onMounted } from '#app'
 import { NodeViewWrapper } from '@tiptap/vue-2'
 import { Node as ProseMirrorNode } from 'prosemirror-model'
 import { Editor } from '@tiptap/core'
@@ -29,159 +29,161 @@ const enum ResizeDirection {
   BOTTOM_RIGHT = 'br'
 }
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { NodeViewWrapper },
   props: {
     node: { type: ProseMirrorNode, required: true },
     editor: { type: Object as PropType<Editor>, required: true },
-    getPos: { type: Function, required: true },
-    updateAttributes: { type: Function, required: true },
+    getPos: { type: Function as PropType<() => number>, required: true },
+    updateAttributes: { type: Function as PropType<({ width, height }) => void>, required: true },
     selected: { type: Boolean, required: true },
     extension: { type: Object, required: true }
   },
-  data: () => ({
-    isResizing: false,
-    resizeDirections: [
-      ResizeDirection.TOP_LEFT,
+  setup (props) {
+    const isResizing = ref(false)
+    const maxSize = ref({ width: MAX_SIZE, height: MAX_SIZE })
+    const originalSize = ref({ width: 0, height: 0 })
+    const resizerState = ref({ x: 0, y: 0, w: 0, h: 0, dir: '' })
+    const resizeDirections = ref([ResizeDirection.TOP_LEFT,
       ResizeDirection.TOP_RIGHT,
       ResizeDirection.BOTTOM_LEFT,
       ResizeDirection.BOTTOM_RIGHT
-    ],
-    maxSize: {
-      width: MAX_SIZE,
-      height: MAX_SIZE
-    },
-    originalSize: {
-      width: 0,
-      height: 0
-    },
-    resizerState: {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-      dir: ''
-    }
-  }),
-  computed: {
-    width (): number {
-      if (this.node.attrs.sizeMode === '%') {
-        return this.originalSize.width * this.node.attrs.width / 100
+    ])
+
+    const width = computed(() => {
+      if (props.node.attrs.sizeMode === '%') {
+        return originalSize.value.width * props.node.attrs.width / 100
       }
-      return this.node.attrs.width
-    },
-    keepAspectRatio (): boolean {
-      return this.node.attrs.keepAspectRatio
-    },
-    aspectRatio (): number {
-      return this.originalSize.width / this.originalSize.height
-    },
-    height (): number {
-      if (this.keepAspectRatio) {
-        return this.width / this.aspectRatio
+      return props.node.attrs.width
+    })
+    const keepAspectRatio = computed(() => {
+      return props.node.attrs.keepAspectRatio
+    })
+    const aspectRatio = computed(() => {
+      return originalSize.value.width / originalSize.value.height
+    })
+    const height = computed(() => {
+      if (keepAspectRatio.value) {
+        return width.value / aspectRatio.value
       }
-      if (this.node.attrs.sizeMode === '%') {
-        return this.originalSize.height * this.node.attrs.height / 100
+      if (props.node.attrs.sizeMode === '%') {
+        return originalSize.value.height * props.node.attrs.height / 100
       } else {
-        return this.node.attrs.height
+        return props.node.attrs.height
       }
-    }
-  },
-  mounted () {
-    this.getImgSize(this.node.attrs.src)
-  },
-  methods: {
-    selectImage (): void {
-      const { view } = this.editor
+    })
+
+    const selectImage = () => {
+      const { view } = props.editor
       const { state } = view
       let { tr } = state
-      const selection = NodeSelection.create(state.doc, this.getPos())
+      const selection = NodeSelection.create(state.doc, props.getPos())
       tr = tr.setSelection(selection)
       view.dispatch(tr)
-    },
-    async getImgSize (imgSrc: string) {
+    }
+    const getImgSize = async (imgSrc: string) => {
       const result = await resolveImg(imgSrc)
-      this.originalSize = {
+      originalSize.value = {
         width: result.width,
         height: result.height
       }
-    },
-    onMouseDown (e: MouseEvent, dir: ResizeDirection): void {
-      e.preventDefault()
-      e.stopPropagation()
-      this.resizerState.x = e.clientX
-      this.resizerState.y = e.clientY
-      const originalWidth = this.originalSize.width
-      const originalHeight = this.originalSize.height
-      const aspectRatio = originalWidth / originalHeight
-      let width = this.width
-      let height = this.height
-      const maxWidth = this.maxSize.width
-      if (width && !height) {
-        width = width > maxWidth ? maxWidth : width
-        height = Math.round(width / aspectRatio)
-      } else if (height && !width) {
-        width = Math.round(height * aspectRatio)
-        width = width > maxWidth ? maxWidth : width
-      } else if (!width && !height) {
-        width = originalWidth > maxWidth ? maxWidth : originalWidth
-        height = Math.round(width / aspectRatio)
-      } else {
-        width = width > maxWidth ? maxWidth : width
+    }
+    const updateAttrs = (width: number, height: number) => {
+      if (keepAspectRatio.value) {
+        height = width / aspectRatio.value
       }
-      this.resizerState.w = width
-      this.resizerState.h = height
-      this.resizerState.dir = dir
-      this.isResizing = true
-      this.onEvents()
-    },
-    onMouseMove (e: MouseEvent): void {
+      if (props.node.attrs.sizeMode === '%') {
+        width = width * 100 / originalSize.value.width
+        height = height * 100 / originalSize.value.height
+      }
+      props.updateAttributes({ width, height })
+    }
+    const onMouseMove = (e: MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!this.isResizing) {
+      if (!isResizing.value) {
         return
       }
-      const { x, y, w, h, dir } = this.resizerState
+      const { x, y, w, h, dir } = resizerState.value
       const dx = (e.clientX - x) * (/l/.test(dir) ? -1 : 1)
       const dy = (e.clientY - y) * (/t/.test(dir) ? -1 : 1)
-      this.updateAttrs(
-        Math.max(Math.min(w + dx, this.maxSize.width), MIN_SIZE), // clamp(w + dx, MIN_SIZE, this.maxSize.width),
+      updateAttrs(
+        Math.max(Math.min(w + dx, maxSize.value.width), MIN_SIZE), // clamp(w + dx, MIN_SIZE, this.maxSize.width),
         Math.max(h + dy, MIN_SIZE))
-    },
-    updateAttrs (width: number, height: number) {
-      if (this.keepAspectRatio) {
-        height = width / this.aspectRatio
-      }
-      if (this.node.attrs.sizeMode === '%') {
-        width = width * 100 / this.originalSize.width
-        height = height * 100 / this.originalSize.height
-      }
-      this.updateAttributes({ width, height })
-    },
-    onMouseUp (e: MouseEvent): void {
+    }
+    const offEvents = () => {
+      document.removeEventListener('mousemove', onMouseMove, true)
+      document.removeEventListener('mouseup', onMouseUp, true)
+    }
+    const onMouseUp = (e: MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!this.isResizing) {
+      if (!isResizing.value) {
         return
       }
-      this.isResizing = false
-      this.resizerState = {
+      isResizing.value = false
+      resizerState.value = {
         x: 0,
         y: 0,
         w: 0,
         h: 0,
         dir: ''
       }
-      this.offEvents()
-      this.selectImage()
-    },
-    onEvents (): void {
-      document.addEventListener('mousemove', this.onMouseMove, true)
-      document.addEventListener('mouseup', this.onMouseUp, true)
-    },
-    offEvents (): void {
-      document.removeEventListener('mousemove', this.onMouseMove, true)
-      document.removeEventListener('mouseup', this.onMouseUp, true)
+      offEvents()
+      selectImage()
+    }
+    const onEvents = () => {
+      document.addEventListener('mousemove', onMouseMove, true)
+      document.addEventListener('mouseup', onMouseUp, true)
+    }
+    const onMouseDown = (e: MouseEvent, dir: ResizeDirection) => {
+      e.preventDefault()
+      e.stopPropagation()
+      resizerState.value.x = e.clientX
+      resizerState.value.y = e.clientY
+      const originalWidth = originalSize.value.width
+      const originalHeight = originalSize.value.height
+      const aspectRatio = originalWidth / originalHeight
+      let _width = width.value
+      let _height = height.value
+      const maxWidth = maxSize.value.width
+      if (_width && !_height) {
+        _width = _width > maxWidth ? maxWidth : _width
+        _height = Math.round(_width / aspectRatio)
+      } else if (_height && !_width) {
+        _width = Math.round(_height * aspectRatio)
+        _width = _width > maxWidth ? maxWidth : _width
+      } else if (!_width && !_height) {
+        _width = originalWidth > maxWidth ? maxWidth : originalWidth
+        _height = Math.round(_width / aspectRatio)
+      } else {
+        _width = _width > maxWidth ? maxWidth : _width
+      }
+      resizerState.value.w = _width
+      resizerState.value.h = _height
+      resizerState.value.dir = dir
+      isResizing.value = true
+      onEvents()
+    }
+
+    onMounted(() => {
+      getImgSize(props.node.attrs.src)
+    })
+    return {
+      isResizing,
+      maxSize,
+      originalSize,
+      resizerState,
+      resizeDirections,
+      width,
+      keepAspectRatio,
+      aspectRatio,
+      height,
+      selectImage,
+      getImgSize,
+      updateAttrs,
+      onMouseMove,
+      onMouseDown
     }
   }
 })

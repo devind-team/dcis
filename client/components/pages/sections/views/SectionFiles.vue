@@ -20,8 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { mapGetters } from 'vuex'
+import { defineComponent, PropType, toRefs, computed } from '#app'
 import { DataProxy } from 'apollo-cache'
 import {
   DeleteSessionsMutationPayload,
@@ -33,37 +32,38 @@ import {
 } from '~/types/graphql'
 import EditorTypography from '~/components/common/editor/EditorTypography.vue'
 import SectionAction from '~/components/pages/sections/actions/SectionAction.vue'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 
-@Component<SectionFiles>({
+export default defineComponent({
   components: { EditorTypography, SectionAction },
-  computed: {
-    ...mapGetters({ user: 'auth/user', loginIn: 'auth/loginIn', hasPerm: 'auth/hasPerm' }),
-    editSection (): boolean {
-      return this.loginIn && [this.page.user?.id, this.section.user.id].includes(this.user.id)
+  props: {
+    page: { required: true, type: Object as PropType<PageType> },
+    section: { required: true, type: Object as PropType<SectionFilesType> }
+  },
+  setup (props) {
+    const authStore = useAuthStore()
+    const { user, hasPerm, loginIn } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType, loginIn: boolean }>(authStore)
+
+    const editSection = computed(() => {
+      return loginIn.value && [props.page.user?.id, props.section.user.id].includes(user.value.id)
+    })
+
+    const updateDeleteSection = (store: DataProxy, { data: { deleteSection: { success } } }: { data: { deleteSection: DeleteSessionsMutationPayload } }) => {
+      if (success) {
+        const data: PageQuery = store.readQuery<PageQuery, PageQueryVariables>({
+          query: require('~/gql/pages/queries/page.graphql'),
+          variables: { pageId: props.page.id }
+        })!
+        // @ts-ignore
+        data.page.sections = data.page.sections.filter((e: SectionInterface) => e.id !== props.section.id!)
+        store.writeQuery({
+          query: require('~/gql/pages/queries/page.graphql'),
+          variables: { pageId: props.page.id },
+          data
+        })
+      }
     }
+    return { hasPerm, editSection, updateDeleteSection }
   }
 })
-export default class SectionFiles extends Vue {
-  @Prop() section!: SectionFilesType
-  @Prop({ required: true }) page!: PageType
-
-  user!: UserType
-  loginIn!: boolean
-
-  updateDeleteSection (store: DataProxy, { data: { deleteSection: { success } } }: { data: { deleteSection: DeleteSessionsMutationPayload } }) {
-    if (success) {
-      const data: PageQuery = store.readQuery<PageQuery, PageQueryVariables>({
-        query: require('~/gql/pages/queries/page.graphql'),
-        variables: { pageId: this.page.id }
-      })!
-      // @ts-ignore
-      data.page.sections = data.page.sections.filter((e: SectionInterface) => e.id !== this.section.id!)
-      store.writeQuery({
-        query: require('~/gql/pages/queries/page.graphql'),
-        variables: { pageId: this.page.id },
-        data
-      })
-    }
-  }
-}
 </script>

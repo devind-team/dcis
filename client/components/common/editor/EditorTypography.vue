@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from '#app'
 import { VSheet } from 'vuetify/lib/components'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { VSheet },
   props: {
     html: { type: String, default: '' }
