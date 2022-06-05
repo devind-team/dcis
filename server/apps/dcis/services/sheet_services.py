@@ -50,7 +50,7 @@ def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
             continue
         sheets_names: list[str] = [token.tvalue.split('!')[0] for token in tokens]
         if sheet.name in sheets_names:
-            cell.formula = re.sub(f"(\'?{sheet.name}\'?)", sheet_name, cell.formula)
+            cell.formula = re.sub(f"([\'|\"]?{sheet.name}[\'|\"]?)", sheet_name, cell.formula)
             cell.save(update_fields=('formula',))
             changed_cell.append(cell)
     sheet.name = name
