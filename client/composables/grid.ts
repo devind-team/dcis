@@ -1,5 +1,6 @@
-import { Ref } from '#app'
+import { computed, ref, Ref, watch } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import { useGridResizing } from '~/composables/grid-resizing'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -16,6 +17,9 @@ export function useGrid (
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void>,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
+  /**
+   * Вычисляем высоту первого столбца
+   */
   const rowNameColumnWidth = computed<number>(() => {
     let maxDigits = 0
     let maxDots = 0

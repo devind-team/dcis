@@ -1,11 +1,12 @@
 from pathlib import PosixPath
-from typing import Iterator
+from typing import Iterator, Union
 
 from openpyxl import Workbook, load_workbook
+from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, WHITE
 from openpyxl.utils.cell import column_index_from_string
 from openpyxl.worksheet.dimensions import DimensionHolder
-from openpyxl.worksheet.merge import MergeCell
+from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
@@ -157,7 +158,19 @@ class ExcelExtractor:
         }
 
     @staticmethod
-    def _parse_cells(wb: Workbook, rows: Iterator[tuple[Cell]]) -> list[dict]:
+    def _color_transform(wb, color):
+        if color and color.type == 'indexed':
+            if color.index == 64 or color.index == 65:
+                color = None
+            else:
+                color.type = 'rgb'
+                color.value = COLOR_INDEX[color.index]
+        if color and color.type == 'theme':
+            color.type = 'rgb'
+            color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
+        return color
+
+    def _parse_cells(self, wb: Workbook, rows: Iterator[tuple[Union[OpenpyxlCell, OpenpyxlMergedCell]]]) -> list[dict]:
         """Парсинг ячеек.
 
         Переданный параметр rows представляет собой матрицу.
@@ -166,33 +179,20 @@ class ExcelExtractor:
         rows_result: list[dict] = []
         for row in rows:
             for cell in row:
-                top_color = cell.border.top.color
-                bottom_color = cell.border.bottom.color
-                left_color = cell.border.left.color
-                right_color = cell.border.right.color
-                diagonal_color = cell.border.diagonal.color
-                fill_color = cell.fill.fgColor
-                font_color = cell.font.color
-                colors = [top_color, bottom_color, left_color, right_color, diagonal_color, fill_color, font_color]
+                border_color: dict[str, Union[int, str]] = {
+                    positional: self._color_transform(wb, getattr(cell.border, positional).color)
+                    for positional in ('top', 'bottom', 'left', 'right', 'diagonal')
+                }
+                fill_color = self._color_transform(wb, cell.fill.fgColor)
+                font_color = self._color_transform(wb, cell.font.color)
 
-                for color in colors:
-                    if color and color.type == 'indexed':
-                        if color.index == 64 or color.index == 65:
-                            color = None
-                        else:
-                            color.type = 'rgb'
-                            color.value = COLOR_INDEX[color.index]
-                    if color and color.type == 'theme':
-                        color.type = 'rgb'
-                        color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
                 # Временная заглушка
                 if (font_color and font_color.index == 1 and cell.fill.patternType is None) or \
                         (font_color and font_color.index == 1 and fill_color.value == WHITE):
                     font_color.type = 'rgb'
                     font_color.value = '00000000'
-
                 rows_result.append({
-                    'column_id': cell.col_idx,
+                    'column_id': cell.column,
                     'row_id': cell.row,
                     'kind': cell.data_type,
                     'formula': cell.value
@@ -213,25 +213,13 @@ class ExcelExtractor:
                     if cell.fill.patternType is None
                     else f'#{cell.fill.fgColor.value[2:]}',
                     'border_style': {
-                        'top': cell.border.top.style,
-                        'bottom': cell.border.bottom.style,
-                        'left': cell.border.left.style,
-                        'right': cell.border.right.style,
-                        'diagonal': cell.border.diagonal.style,
                         'diagonalDown': cell.border.diagonalDown,
-                        'diagonalUp': cell.border.diagonalUp
+                        'diagonalUp': cell.border.diagonalUp,
+                        **{p: getattr(cell.border, p).style for p in ('top', 'bottom', 'left', 'right', 'diagonal',)}
                     },
                     'border_color': {
-                        'top': f'#{top_color.value[2:]}'
-                        if top_color and top_color.type == 'rgb' else None,
-                        'bottom': f'#{bottom_color.value[2:]}'
-                        if bottom_color and bottom_color.type == 'rgb' else None,
-                        'left': f'#{left_color.value[2:]}'
-                        if left_color and left_color.type == 'rgb' else None,
-                        'right': f'#{right_color.value[2:]}'
-                        if right_color and right_color.type == 'rgb' else None,
-                        'diagonal': f'#{diagonal_color.value[2:]}'
-                        if diagonal_color and diagonal_color.type == 'rgb' else None
+                        p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
+                        for p, c in border_color.items()
                     }
                 })
         return rows_result

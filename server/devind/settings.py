@@ -230,7 +230,7 @@ if not exists(TEMP_FILES_DIR):
     os.makedirs(TEMP_FILES_DIR)
 
 
-# Количество страниц, выгражемое по умолчанию
+# Количество страниц, выгружаемое по умолчанию
 DEFAULT_PAGE_SIZE = 12
 
 

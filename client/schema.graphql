@@ -2364,6 +2364,8 @@ type Mutation {
   recoveryPassword(input: RecoveryPasswordMutationInput!): RecoveryPasswordMutationPayload!
   """Мутация регистрации новых пользователей."""
   register(input: RegisterMutationInput!): RegisterMutationPayload!
+  """Изменение названия листа"""
+  renameSheet(input: RenameSheetMutationInput!): RenameSheetMutationPayload!
   """Отправка email с кодом на электронную почту."""
   requestCode(input: RequestCodeMutationInput!): RequestCodeMutationPayload!
   """Мутация для сброса настроек по умолчанию"""
@@ -3304,6 +3306,31 @@ type RegisterMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input RenameSheetMutationInput {
+  clientMutationId: String
+  """Новое название листа"""
+  name: String!
+  """Идентификатор листа"""
+  sheetId: ID!
+}
+
+"""
+Изменение названия листа.
+
+Во время мутации изменяем только формулы и ничего не пересчитываем.
+"""
+type RenameSheetMutationPayload {
+  """Измененные ячейки"""
+  cells: [CellType]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Лист"""
+  sheet: SheetType
   """Успех мутации"""
   success: Boolean!
 }

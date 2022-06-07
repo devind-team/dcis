@@ -1,3 +1,4 @@
+import re
 from argparse import ArgumentTypeError
 from datetime import datetime
 from os import path
@@ -13,11 +14,48 @@ from django.db import transaction
 from django.db.models import F
 from django.utils.timezone import now
 from stringcase import camelcase
+from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
-from apps.dcis.models import RowDimension, Sheet, Value
+from apps.dcis.models import RowDimension, Sheet, Value, Period
 from apps.dcis.models.sheet import Cell, ColumnDimension
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
+
+
+@transaction.atomic
+def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
+    """Переименование листа с учетом формул.
+
+    sheet.name -> name
+
+    :param sheet - лист
+    :param name - новое имя листа
+    """
+    changed_cell: list[Cell] = []
+    sheet_name: str = f"'{name}'" if ' ' in name else name
+    period: Period = sheet.period
+    period_sheets = period.sheet_set.exclude(pk=sheet.pk).all()
+    cells: Sequence[Cell] = Cell.objects.filter(
+        formula__isnull=False,
+        formula__istartswith='=',
+        row__parent__isnull=True,
+        row__sheet__in=[sheet, *period_sheets]
+    ).all()
+    for cell in cells:
+        tokens: list[f_token] = [
+            token for token in ExcelParser().parse(cell.formula).items
+            if token.tsubtype == 'range' and '!' in token.tvalue
+        ]
+        if not tokens:
+            continue
+        sheets_names: list[str] = [token.tvalue.split('!')[0] for token in tokens]
+        if sheet.name in sheets_names:
+            cell.formula = re.sub(f"([\'|\"]?{sheet.name}[\'|\"]?)", sheet_name, cell.formula)
+            cell.save(update_fields=('formula',))
+            changed_cell.append(cell)
+    sheet.name = name
+    sheet.save(update_fields=('name',))
+    return sheet, changed_cell
 
 
 def change_column_dimension(

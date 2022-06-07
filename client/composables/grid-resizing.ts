@@ -1,5 +1,5 @@
 import { useEventListener } from '@vueuse/core'
-import { Ref, UnwrapRef } from '#app'
+import { computed, ref, Ref, UnwrapRef } from '#app'
 import { ElementPositionType, ElementResizingType, MousePositionType, ResizingType } from '~/types/grid'
 
 export function useGridResizing<T extends { id: string, width?: number, height?: number }> (
@@ -27,7 +27,7 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     if (resizing.value && resizing.value.object.id === dimension.id) {
       return resizing.value.size
     } else {
-      return dimension[dimensionKey] ? dimension[dimensionKey] : defaultElementSize.value
+      return dimension[dimensionKey] ?? defaultElementSize.value
     }
   }
 
