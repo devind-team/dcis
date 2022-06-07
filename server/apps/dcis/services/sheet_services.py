@@ -34,7 +34,7 @@ def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     changed_cell: list[Cell] = []
     sheet_name: str = f"'{name}'" if ' ' in name else name
     period: Period = sheet.period
-    period_sheets = period.sheet_set.exclude(pk=sheet).all()
+    period_sheets = period.sheet_set.exclude(pk=sheet.pk).all()
     cells: Sequence[Cell] = Cell.objects.filter(
         formula__isnull=False,
         formula__istartswith='=',

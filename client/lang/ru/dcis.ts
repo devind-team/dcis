@@ -2,6 +2,9 @@ export default {
   home: 'Проекты сборов',
   grid: {
     version: 'Версия: {version}',
+    sheet: {
+      rename: 'Переименовать'
+    },
     cellKinds: {
       n: 'Числовой',
       s: 'Строковый',

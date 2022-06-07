@@ -10,8 +10,13 @@
 </template>
 
 <script lang="ts">
-import { PropType, Ref } from '#app'
-import { UpdateType } from '~/composables'
+import { computed, defineComponent, PropType, Ref } from '#app'
+import {
+  UpdateType,
+  useChangeFileValueMutation,
+  useChangeValueMutation,
+  useUnloadFileValueArchiveMutation
+} from '~/composables'
 import {
   DocumentType,
   SheetQuery,

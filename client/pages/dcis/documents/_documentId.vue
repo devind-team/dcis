@@ -7,7 +7,9 @@
           template(#activator="{ on, attrs }")
             v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
               v-icon mdi-cog
-        v-tab(v-for="sheet in activeDocument.sheets" :key="`key${sheet.id}`") {{ sheet.name }}
+        v-tab(v-for="sh in activeDocument.sheets" :key="`key${sh.id}`")
+          sheet-control(v-slot="{ on, attrs }" :sheet="sh" :update="changeUpdate")
+            div(v-bind="attrs" @contextmenu.prevent="on.click") {{ sh.name }}
       v-tabs-items(v-model="active")
         v-tab-item(v-for="sheet in activeDocument.sheets" :key="sheet.id")
           grid(
@@ -21,6 +23,8 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, inject, onUnmounted, ref, useRoute } from '#app'
+import { useCommonQuery, useI18n } from '~/composables'
 import type {
   DocumentQuery,
   DocumentQueryVariables,
@@ -31,9 +35,10 @@ import documentQuery from '~/gql/dcis/queries/document.graphql'
 import sheetQuery from '~/gql/dcis/queries/sheet.graphql'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import Grid from '~/components/dcis/Grid.vue'
+import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 
 export default defineComponent({
-  components: { SettingsDocument, Grid },
+  components: { SheetControl, SettingsDocument, Grid },
   setup () {
     const { t } = useI18n()
     const route = useRoute()
@@ -49,7 +54,7 @@ export default defineComponent({
         documentId: route.params.documentId
       })
     })
-    const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet } = useCommonQuery<
+    const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet, changeUpdate } = useCommonQuery<
       SheetQuery,
       SheetQueryVariables
     >({
@@ -76,7 +81,8 @@ export default defineComponent({
       activeDocumentLoading,
       activeSheet,
       activeSheetLoading,
-      updateActiveSheet
+      updateActiveSheet,
+      changeUpdate
     }
   }
 })

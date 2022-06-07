@@ -47,8 +47,8 @@ class RenameSheetMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated, ChangeSheet,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str, *args, **kwargs):
-        sheet, cells = rename_sheet(get_object_or_404(Sheet, pk=from_global_id(sheet_id)[1]), name)
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str):
+        sheet, cells = rename_sheet(get_object_or_404(Sheet, pk=sheet_id), name)
         return RenameSheetMutation(
             sheet=sheet,
             cells=cells

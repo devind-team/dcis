@@ -62,8 +62,13 @@
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
-import { UpdateType } from '~/composables'
+import { defineComponent, PropType, provide, toRef } from '#app'
+import {
+  UpdateType,
+  useChangeColumnDimensionWidthMutation,
+  useChangeRowDimensionHeightMutation, useGrid,
+  useI18n
+} from '~/composables'
 import { SheetQuery, SheetType, DocumentType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
