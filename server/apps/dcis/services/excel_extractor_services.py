@@ -1,17 +1,18 @@
+from dataclasses import dataclass, asdict
 from pathlib import PosixPath
 from typing import Iterator, Union, Optional
-from dataclasses import dataclass, asdict
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, WHITE
-from openpyxl.utils.cell import column_index_from_string
+from openpyxl.utils.cell import column_index_from_string, get_column_letter
 from openpyxl.worksheet.dimensions import (
     DimensionHolder,
     RowDimension as OpenpyxlRowDimension,
     ColumnDimension as OpenpyxlColumnDimension
 )
 from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
+from xlsx_evaluate import ModelCompiler, Evaluator
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
@@ -251,7 +252,29 @@ class ExcelExtractor:
         """Парсинг объединенных ячеек."""
         return [BuildMergedCell(rng.min_col, rng.min_row, rng.max_col, rng.max_row) for rng in ranges]
 
-    @staticmethod
-    def evaluate_cells(sheets: list[BuildCell]) -> list[BuildCell]:
-        cells_values: dict = {}
+    def evaluate_cells(self, sheets: list[BuildSheet]) -> list[BuildSheet]:
+        """Предварительно рассчитываем значения ячеек.
+
+        Excel не хранит кешированные значения, вместо этого он хранит формулы.
+        Нам необходимо рассчитать формулы, однако значения могут быть перекрестными.
+        Поэтому нам необходимо собирать единую структуру и каждый раз формировать модель.
+        """
+
+        cells_values: dict[str, str] = {}
+        for sheet in sheets:
+            cells_values.update({
+                self.coordinate(sheet.name, cell.column_id, cell.row_id): cell.default or 0 for cell in sheet.cells
+            })
+        for sheet in sheets:
+            # TODO: Но мы не можем просто так считать формулы, нам необходимо построить дерево и идти по нему.
+            evaluate_model = ModelCompiler().read_and_parse_dict(cells_values, default_sheet=sheet.name)
+            evaluator = Evaluator(evaluate_model)
+            for cell in sheet.cells:
+                if cell.formula:
+                    cell.default = str(evaluator.evaluate(self.coordinate(sheet.name, cell.column_id, cell.row_id)))
         return sheets
+
+    @staticmethod
+    def coordinate(sheet: str, column: int, row: int):
+        """Получаем координату"""
+        return f'{sheet}!{get_column_letter(column)}{row}'
