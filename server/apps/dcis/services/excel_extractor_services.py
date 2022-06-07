@@ -147,18 +147,14 @@ class ExcelExtractor:
                     if row.fill.patternType is None
                     else f'#{row.fill.fgColor.value[2:]}',
                     'border_style': {
-                        'top': row.border.top.style,
-                        'bottom': row.border.bottom.style,
-                        'left': row.border.left.style,
-                        'right': row.border.right.style,
-                        'diagonal': row.border.diagonal.style
+                        p: getattr(row.border, p).style for p in ('top', 'bottom', 'left', 'right', 'diagonal',)
                     }
                 }
             } for index, row in holder.items()
         }
 
     @staticmethod
-    def _color_transform(wb, color):
+    def __color_transform(wb, color):
         if color and color.type == 'indexed':
             if color.index == 64 or color.index == 65:
                 color = None
@@ -176,22 +172,22 @@ class ExcelExtractor:
         Переданный параметр rows представляет собой матрицу.
         Каждая строка включает в себя массив ячеек, который соотноситься с колонками.
         """
-        rows_result: list[dict] = []
+        cells: list[dict] = []
         for row in rows:
             for cell in row:
                 border_color: dict[str, Union[int, str]] = {
-                    positional: self._color_transform(wb, getattr(cell.border, positional).color)
+                    positional: self.__color_transform(wb, getattr(cell.border, positional).color)
                     for positional in ('top', 'bottom', 'left', 'right', 'diagonal')
                 }
-                fill_color = self._color_transform(wb, cell.fill.fgColor)
-                font_color = self._color_transform(wb, cell.font.color)
+                fill_color = self.__color_transform(wb, cell.fill.fgColor)
+                font_color = self.__color_transform(wb, cell.font.color)
 
                 # Временная заглушка
                 if (font_color and font_color.index == 1 and cell.fill.patternType is None) or \
                         (font_color and font_color.index == 1 and fill_color.value == WHITE):
                     font_color.type = 'rgb'
                     font_color.value = '00000000'
-                rows_result.append({
+                cells.append({
                     'column_id': cell.column,
                     'row_id': cell.row,
                     'kind': cell.data_type,
@@ -222,7 +218,7 @@ class ExcelExtractor:
                         for p, c in border_color.items()
                     }
                 })
-        return rows_result
+        return cells
 
     @staticmethod
     def _parse_merged_cells(ranges: list[MergeCell]) -> list[dict]:
