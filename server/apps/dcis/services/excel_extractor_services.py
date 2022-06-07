@@ -1,15 +1,81 @@
 from pathlib import PosixPath
-from typing import Iterator, Union
+from typing import Iterator, Union, Optional
+from dataclasses import dataclass, asdict
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, WHITE
 from openpyxl.utils.cell import column_index_from_string
-from openpyxl.worksheet.dimensions import DimensionHolder
+from openpyxl.worksheet.dimensions import (
+    DimensionHolder,
+    RowDimension as OpenpyxlRowDimension,
+    ColumnDimension as OpenpyxlColumnDimension
+)
 from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
+
+
+@dataclass
+class BuildStyle:
+    """Описание стилей"""
+    horizontal_align: str
+    vertical_align: str
+    size: float
+    strong: bool
+    italic: bool
+    strike: bool
+    underline: bool
+    color: str
+    background: str
+    border_style: dict[str, str]
+
+
+@dataclass
+class BuildColumnDimension:
+    """Построение колонки."""
+    width: int
+    fixed: bool
+    hidden: bool
+    style: BuildStyle
+
+
+@dataclass
+class BuildRowDimension:
+    """Построение строки."""
+    height: int
+    style: BuildStyle
+
+
+@dataclass
+class BuildCell(BuildStyle):
+    """Построение ячеек."""
+    column_id: int
+    row_id: int
+    kind: str
+    formula: Optional[str]
+    comment: Optional[str]
+    default: Optional[str]
+    border_color: dict[str, str]
+
+
+@dataclass
+class BuildMergedCell:
+    """Построение объединенных ячеек."""
+    min_col: int
+    min_row: int
+    max_col: int
+    max_row: int
+
+
+@dataclass
+class BuildSheet:
+    name: str
+    columns_dimension: dict[int, BuildColumnDimension]
+    rows_dimension: dict[int, BuildRowDimension]
+    cells: list[BuildCell]
+    merged_cells: list[BuildMergedCell]
 
 
 class ExcelExtractor:
@@ -25,133 +91,111 @@ class ExcelExtractor:
 
     def save(self, period: Period):
         """Сохранение обработанного файла в базу данных."""
-        extract_sheets: list[dict] = self.extract()
+        extract_sheets: list[BuildSheet] = self.extract()
         for position, extract_sheet in enumerate(extract_sheets):
             sheet = Sheet.objects.create(
-                name=extract_sheet['name'],
+                name=extract_sheet.name,
                 position=position,
                 period=period
             )
             # Соотношение позиции и созданных идентификаторов
             columns_mapper: dict[int, int] = {}
             rows_mapper: dict[int, int] = {}
-            columns_styles: dict[int, dict[str, str]] = {}
-            rows_styles: dict[int, dict[str, str]] = {}
-            for cell in extract_sheet['cells']:
-                column_id: int = cell['column_id']
-                row_id: int = cell['row_id']
+            columns_styles: dict[int, BuildStyle] = {}
+            rows_styles: dict[int, BuildStyle] = {}
+            for cell in extract_sheet.cells:
+                column_id: int = cell.column_id
+                row_id: int = cell.row_id
                 columns_styles[column_id] = {}
                 rows_styles[row_id] = {}
 
                 if column_id not in columns_mapper:
                     column_parameters = {'index': column_id}
-                    if column_id in extract_sheet['columns_dimension']:
-                        columns_styles[column_id] = extract_sheet['columns_dimension'][column_id].pop('style')
-                        column_parameters = {**column_parameters, **extract_sheet['columns_dimension'][column_id]}
+                    if column_id in extract_sheet.columns_dimension:
+                        cd: dict = asdict(extract_sheet.columns_dimension[column_id])
+                        columns_styles[column_id] = cd.pop('style')
+                        column_parameters = {**column_parameters, **cd}
                     column: ColumnDimension = ColumnDimension.objects.create(sheet=sheet, **column_parameters)
                     columns_mapper[column_id] = column.id
 
                 if row_id not in rows_mapper:
                     row_parameters = {'index': row_id}
-                    if row_id in extract_sheet['rows_dimension']:
-                        rows_styles[row_id] = extract_sheet['rows_dimension'][row_id].pop('style')
-                        row_parameters = {**row_parameters, **extract_sheet['rows_dimension'][row_id]}
+                    if row_id in extract_sheet.rows_dimension:
+                        rd = asdict(extract_sheet.rows_dimension[row_id])
+                        rows_styles[row_id] = rd.pop('style')
+                        row_parameters = {**row_parameters, **rd}
                     row: RowDimension = RowDimension.objects.create(sheet=sheet, **row_parameters)
                     rows_mapper[row_id] = row.id
 
-                cell['column_id'] = columns_mapper[column_id]
-                cell['row_id'] = rows_mapper[row_id]
+                cell.column_id = columns_mapper[column_id]
+                cell.row_id = rows_mapper[row_id]
                 # Объединяем стили cell <- row <- col
                 Cell.objects.create(**{
                     **columns_styles[column_id],
                     **rows_styles[row_id],
-                    **cell
+                    **asdict(cell)
                 })
 
-            for merged_cell in extract_sheet['merged_cells']:
-                MergedCell.objects.create(sheet=sheet, **merged_cell)
+            for merged_cell in extract_sheet.merged_cells:
+                MergedCell.objects.create(sheet=sheet, **asdict(merged_cell))
 
-    def extract(self) -> list[dict]:
+    def extract(self) -> list[BuildSheet]:
         """Парсинг файла Excel.
 
         Функция создает структуру данных, которая является первоначальной обработкой.
         После выделения необходимых данных можно осуществлять транзакционную запись в базу данных.
         Структура данных может использоваться для предварительной демонстрации планируемого отчета.
         """
-        sheets: list[dict] = []
+        sheets: list[BuildSheet] = []
         for sheet in self.work_book.worksheets:
             name: str = sheet.title
-            columns_dimension: dict[int, object] = self._parse_columns_dimension(sheet.column_dimensions)
-            rows_dimension: dict[int, object] = self._parse_rows_dimension(sheet.row_dimensions)
-            cells = self._parse_cells(self.work_book, sheet.rows)
-            merged_cells = self._parse_merged_cells(sheet.merged_cells.ranges)
+            columns_dimension: dict[int, BuildColumnDimension] = self._parse_columns_dimension(sheet.column_dimensions)
+            rows_dimension: dict[int, BuildRowDimension] = self._parse_rows_dimension(sheet.row_dimensions)
+            cells: list[BuildCell] = self._parse_cells(self.work_book, sheet.rows)
+            merged_cells: list[BuildMergedCell] = self._parse_merged_cells(sheet.merged_cells.ranges)
+            sheets.append(BuildSheet(
+                name,
+                columns_dimension,
+                rows_dimension,
+                cells,
+                merged_cells
+            ))
+        return self.evaluate_cells(sheets)
 
-            sheets.append({
-                'name': name,
-                'columns_dimension': columns_dimension,
-                'rows_dimension': rows_dimension,
-                'cells': cells,
-                'merged_cells': merged_cells
-            })
-        return sheets
-
-    @staticmethod
-    def _parse_columns_dimension(holder: DimensionHolder) -> dict:
+    def _parse_columns_dimension(self, holder: DimensionHolder) -> dict[int, BuildColumnDimension]:
         """Парсинг имеющихся колонок."""
         return {
-            column_index_from_string(col_letter): {
-                'width': column.width * 7,
-                'fixed': False,
-                'hidden': column.hidden,
-                'style': {
-                    'horizontal_align': column.alignment.horizontal,
-                    'vertical_align': column.alignment.vertical,
-                    'size': column.font.sz,
-                    'strong': column.font.b,
-                    'italic': column.font.i,
-                    'strike': column.font.strike,
-                    'underline': column.font.u,
-                    'color': f'#{column.font.color.value[2:]}'
-                    if column.font.color and column.font.color.type == 'rgb' else '#000000',
-                    'background': '#FFFFFF'
-                    if column.fill.patternType is None
-                    else f'#{column.fill.fgColor.value[2:]}',
-                    'border_style': {
-                        'top': column.border.top.style,
-                        'bottom': column.border.bottom.style,
-                        'left': column.border.left.style,
-                        'right': column.border.right.style,
-                        'diagonal': column.border.diagonal.style
-                    },
-                }
-            } for col_letter, column in holder.items()
+            column_index_from_string(col_letter): BuildColumnDimension(
+                column.width * 7,
+                False,
+                column.hidden,
+                self.__border_style(column)
+            ) for col_letter, column in holder.items()
         }
 
-    @staticmethod
-    def _parse_rows_dimension(holder: DimensionHolder) -> dict:
+    def _parse_rows_dimension(self, holder: DimensionHolder) -> dict[int, BuildRowDimension]:
         """Парсинг имеющихся строк."""
-        return {
-            row.index: {
-                'height': row.height,
-                'style': {
-                    'horizontal_align': row.alignment.horizontal,
-                    'vertical_align': row.alignment.vertical,
-                    'size': row.font.sz,
-                    'strong': row.font.b,
-                    'italic': row.font.i,
-                    'strike': row.font.strike,
-                    'underline': row.font.u,
-                    'color': f'#{row.font.color.value[2:]}'
-                    if row.font.color and row.font.color.type == 'rgb' else '#000000',
-                    'background': '#FFFFFF'
-                    if row.fill.patternType is None
-                    else f'#{row.fill.fgColor.value[2:]}',
-                    'border_style': {
-                        p: getattr(row.border, p).style for p in ('top', 'bottom', 'left', 'right', 'diagonal',)
-                    }
-                }
-            } for index, row in holder.items()
-        }
+        return {row.index: BuildRowDimension(row.height, self.__border_style(row)) for index, row in holder.items()}
+
+    @staticmethod
+    def __border_style(dimension: Union[OpenpyxlRowDimension, OpenpyxlColumnDimension, Cell, MergedCell]) -> BuildStyle:
+        """for p in ('top', 'bottom', 'left', 'right', 'diagonal', 'diagonalDown', 'diagonalUp',)"""
+        return BuildStyle(
+            dimension.alignment.horizontal,
+            dimension.alignment.vertical,
+            dimension.font.sz,
+            dimension.font.b,
+            dimension.font.i,
+            dimension.font.strike or False,
+            dimension.font.u,
+            f'#{dimension.font.color.value[2:]}'
+            if dimension.font.color and dimension.font.color.type == 'rgb' else '#000000',
+            '#FFFFFF' if dimension.fill.patternType is None else f'#{dimension.fill.fgColor.value[2:]}',
+            {
+                p: getattr(dimension.border, p).style
+                for p in ('top', 'bottom', 'left', 'right', 'diagonal')
+            }
+        )
 
     @staticmethod
     def __color_transform(wb, color):
@@ -166,13 +210,13 @@ class ExcelExtractor:
             color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
         return color
 
-    def _parse_cells(self, wb: Workbook, rows: Iterator[tuple[Union[OpenpyxlCell, OpenpyxlMergedCell]]]) -> list[dict]:
+    def _parse_cells(self, wb: Workbook, rows: Iterator[tuple[Union[OpenpyxlCell, OpenpyxlMergedCell]]]) -> list[BuildCell]:
         """Парсинг ячеек.
 
         Переданный параметр rows представляет собой матрицу.
         Каждая строка включает в себя массив ячеек, который соотноситься с колонками.
         """
-        cells: list[dict] = []
+        cells: list[BuildCell] = []
         for row in rows:
             for cell in row:
                 border_color: dict[str, Union[int, str]] = {
@@ -187,45 +231,27 @@ class ExcelExtractor:
                         (font_color and font_color.index == 1 and fill_color.value == WHITE):
                     font_color.type = 'rgb'
                     font_color.value = '00000000'
-                cells.append({
-                    'column_id': cell.column,
-                    'row_id': cell.row,
-                    'kind': cell.data_type,
-                    'formula': cell.value
-                    if isinstance(cell.value, str) and cell.value and cell.value[0] == '='
-                    else None,
-                    'comment': cell.comment,
-                    'default': cell.value,
-                    'horizontal_align': cell.alignment.horizontal,
-                    'vertical_align': cell.alignment.vertical,
-                    'size': cell.font.sz,
-                    'strong': cell.font.b,
-                    'italic': cell.font.i,
-                    'strike': cell.font.strike or False,
-                    'underline': cell.font.u,
-                    'color': f'#{font_color.value[2:]}'
-                    if font_color and font_color.type == 'rgb' else '#000000',
-                    'background': '#FFFFFF'
-                    if cell.fill.patternType is None
-                    else f'#{cell.fill.fgColor.value[2:]}',
-                    'border_style': {
-                        'diagonalDown': cell.border.diagonalDown,
-                        'diagonalUp': cell.border.diagonalUp,
-                        **{p: getattr(cell.border, p).style for p in ('top', 'bottom', 'left', 'right', 'diagonal',)}
-                    },
-                    'border_color': {
+                cells.append(BuildCell(
+                    column_id=cell.column,
+                    row_id=cell.row,
+                    kind=cell.data_type,
+                    formula=cell.value if isinstance(cell.value, str) and cell.value and cell.value[0] == '=' else None,
+                    comment=cell.comment,
+                    default=cell.value,
+                    border_color={
                         p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
                         for p, c in border_color.items()
-                    }
-                })
+                    },
+                    **asdict(self.__border_style(cell))
+                ))
         return cells
 
     @staticmethod
-    def _parse_merged_cells(ranges: list[MergeCell]) -> list[dict]:
+    def _parse_merged_cells(ranges: list[MergeCell]) -> list[BuildMergedCell]:
         """Парсинг объединенных ячеек."""
-        return [{
-            'min_col': rng.min_col,
-            'min_row': rng.min_row,
-            'max_col': rng.max_col,
-            'max_row': rng.max_row
-        } for rng in ranges]
+        return [BuildMergedCell(rng.min_col, rng.min_row, rng.max_col, rng.max_row) for rng in ranges]
+
+    @staticmethod
+    def evaluate_cells(sheets: list[BuildCell]) -> list[BuildCell]:
+        cells_values: dict = {}
+        return sheets
