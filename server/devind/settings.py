@@ -145,9 +145,9 @@ GRAPHENE = {
 # Настройка канальных слоев
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': os.getenv('AMQP_SERVER')
+            'hosts': [(os.getenv('REDIS_SERVER', 'localhost'), 6379)]
         }
     }
 }
@@ -230,7 +230,7 @@ if not exists(TEMP_FILES_DIR):
     os.makedirs(TEMP_FILES_DIR)
 
 
-# Количество страниц, выгражемое по умолчанию
+# Количество страниц, выгружаемое по умолчанию
 DEFAULT_PAGE_SIZE = 12
 
 
