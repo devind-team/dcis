@@ -37,6 +37,7 @@ export default defineComponent({
         n,
         (cache, mutationResult) => props.update(cache, mutationResult, 'sheet')
       ).mutate()
+      active.value = false
     }
 
     return { active, renameSheet }
