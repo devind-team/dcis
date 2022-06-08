@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 from pathlib import PosixPath
 from typing import Iterator, Union, Optional
+from collections import defaultdict
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
@@ -78,6 +79,9 @@ class BuildSheet:
     cells: list[BuildCell]
     merged_cells: list[BuildMergedCell]
 
+    inverse_dependency_cell: Optional[defaultdict[set[str]]] = None
+    associated_cells: Optional[dict[str, set[str]]] = None
+
 
 class ExcelExtractor:
     """Парсинг xlsx файла в структуру данных для последовательной загрузки в базу данных."""
@@ -102,8 +106,8 @@ class ExcelExtractor:
             # Соотношение позиции и созданных идентификаторов
             columns_mapper: dict[int, int] = {}
             rows_mapper: dict[int, int] = {}
-            columns_styles: dict[int, BuildStyle] = {}
-            rows_styles: dict[int, BuildStyle] = {}
+            columns_styles: dict[int, dict] = {}
+            rows_styles: dict[int, dict] = {}
             for cell in extract_sheet.cells:
                 column_id: int = cell.column_id
                 row_id: int = cell.row_id
@@ -266,7 +270,6 @@ class ExcelExtractor:
                 self.coordinate(sheet.name, cell.column_id, cell.row_id): cell.default or 0 for cell in sheet.cells
             })
         for sheet in sheets:
-            # TODO: Но мы не можем просто так считать формулы, нам необходимо построить дерево и идти по нему.
             evaluate_model = ModelCompiler().read_and_parse_dict(cells_values, default_sheet=sheet.name)
             evaluator = Evaluator(evaluate_model)
             for cell in sheet.cells:
