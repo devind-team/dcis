@@ -1993,6 +1993,9 @@ export type DivisionTypeEdge = {
   node?: Maybe<DivisionType>;
 };
 
+/** Список дивизионов */
+export type DivisionUnionType = DepartmentType | OrganizationType;
+
 /** Debugging information for the current query. */
 export type DjangoDebug = {
   __typename?: 'DjangoDebug';
@@ -3441,7 +3444,7 @@ export type PeriodType = {
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** Участвующие дивизионы */
-  divisions?: Maybe<Array<Maybe<DivisionType>>>;
+  divisions?: Maybe<Array<Maybe<DivisionUnionType>>>;
   /** Собираемые документов */
   documents?: Maybe<Array<Maybe<DocumentType>>>;
   /** Дата окончания */
@@ -3643,6 +3646,8 @@ export type Query = {
   departments?: Maybe<Array<DepartmentType>>;
   district?: Maybe<DistrictType>;
   districts?: Maybe<Array<DistrictType>>;
+  /** Дивизионы */
+  divisions?: Maybe<Array<Maybe<DivisionUnionType>>>;
   /** Документ */
   document?: Maybe<DocumentType>;
   /** Статусы документов */
@@ -3772,6 +3777,12 @@ export type QueryDepartmentArgs = {
 /** Схема запросов данных. */
 export type QueryDistrictArgs = {
   districtId: Scalars['Int'];
+};
+
+/** Схема запросов данных. */
+export type QueryDivisionsArgs = {
+  projectId: Scalars['ID'];
+  searchText?: InputMaybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -5355,6 +5366,13 @@ export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DepartmentsQuery = { __typename?: 'Query', departments?: Array<{ __typename: 'DepartmentType', id: string, name: string, code?: number | null, createdAt: any }> | null };
 
+export type DivisionsQueryVariables = Exact<{
+  projectId: Scalars['ID'];
+  search?: InputMaybe<Scalars['String']>;
+}>;
+
+export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string } | { __typename: 'OrganizationType', id: string, name: string } | null> | null };
+
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
@@ -5382,7 +5400,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, divisions?: Array<{ __typename?: 'DivisionType', id: string, objectId: number } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string, createdAt: any } | { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type PeriodsQueryVariables = Exact<{
   userId: Scalars['ID'];

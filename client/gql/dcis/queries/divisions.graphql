@@ -1,0 +1,17 @@
+#import "../fragments/organization_fields.graphql"
+
+query Divisions($projectId: ID!, $search: String) {
+  divisions(projectId: $projectId,searchText: $search) {
+    ... on DepartmentType {
+      id
+      name
+      __typename
+    }
+    ... on OrganizationType {
+      id
+      name
+      __typename
+    }
+    __typename
+  }
+}

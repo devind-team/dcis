@@ -46,8 +46,18 @@ query Period($periodId: ID!) {
       __typename
     }
     divisions {
+      ... on DepartmentType {
       id
-      objectId
+      name
+      createdAt
+      __typename
+    }
+    ... on OrganizationType {
+      id
+      name
+      createdAt
+      __typename
+    }
     }
   }
 }

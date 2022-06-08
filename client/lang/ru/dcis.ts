@@ -85,6 +85,14 @@ export default {
       createdAt: 'Дата создания',
       alert: 'Не заданы привилегии сбора или группы'
     },
+    divisions: {
+      header: 'Настройка объектов сбора',
+      add: 'Добавить объект',
+      formHeader: 'Изменение объектов сбора',
+      buttonText: '@:add',
+      name: 'Название объекта',
+      createdAt: 'Дата создания'
+    },
     statuses: {
       open: 'Открыто',
       close: 'Закрыто',

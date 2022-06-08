@@ -2,8 +2,11 @@ from typing import Optional
 
 import graphene
 from devind_core.schema.types import FileType, ContentTypeType
+from devind_dictionaries.models import Department, Organization
+from devind_dictionaries.schema import OrganizationType, DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
+from django.contrib.contenttypes.models import ContentType
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from django.db.models import Q
@@ -65,7 +68,7 @@ class PeriodType(DjangoObjectType):
     documents = graphene.List(lambda: DocumentType, description='Собираемые документов')
 
     # Нужно вывести все дивизионы специальным образом
-    divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
+    divisions = graphene.List(lambda: DivisionUnionType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
 
     class Meta:
@@ -96,7 +99,10 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     @resolver_hints(model_field='')
     def resolve_divisions(period: Period, info: ResolveInfo, *args, **kwargs):
-        return period.division_set.all()
+        divisions = period.division_set.all()
+        return Department.objects.filter(pk__in=divisions.values_list('object_id', flat=True)) \
+            if ContentType.objects.get_for_id(period.project.content_type_id).model == 'department' \
+            else Organization.objects.filter(pk__in=divisions.values_list('object_id', flat=True))
 
     @staticmethod
     @resolver_hints(model_field='')
@@ -127,6 +133,13 @@ class DivisionModelType(graphene.ObjectType):
     id = graphene.Int(required=True, description='Идентификатор модели дивизиона')
     model = graphene.String(required=True, description='Модель дивизиона: department, organization')
     name = graphene.String(required=True, description='Название дивизиона')
+
+
+class DivisionUnionType(graphene.Union):
+    """Список дивизионов"""
+
+    class Meta:
+        types = (OrganizationType, DepartmentType)
 
 
 class PrivilegeType(DjangoObjectType):

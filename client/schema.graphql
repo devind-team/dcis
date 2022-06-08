@@ -1846,6 +1846,9 @@ type DivisionTypeEdge {
   node: DivisionType
 }
 
+"""Список дивизионов"""
+union DivisionUnionType = DepartmentType | OrganizationType
+
 """Debugging information for the current query."""
 type DjangoDebug {
   """Executed SQL queries for this API query."""
@@ -2832,7 +2835,7 @@ type PeriodType {
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
-  divisions: [DivisionType]
+  divisions: [DivisionUnionType]
   """Собираемые документов"""
   documents: [DocumentType]
   """Дата окончания"""
@@ -3053,6 +3056,13 @@ type Query {
     districtId: Int!
   ): DistrictType
   districts: [DistrictType!]
+  """Дивизионы"""
+  divisions(
+    """Идентификатор проекта"""
+    projectId: ID!
+    """Название дивизиона"""
+    searchText: String
+  ): [DivisionUnionType]
   """Документ"""
   document(
     """Идентификатор документа"""

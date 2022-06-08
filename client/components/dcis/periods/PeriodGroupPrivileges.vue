@@ -19,6 +19,7 @@
         :items="items"
         :loading="loading"
         item-key="id"
+        disable-pagination
         show-select
         hide-default-footer
       )
@@ -84,7 +85,7 @@ export default defineComponent({
       }
     })
     const items = computed<PrivilegeType[]>(() => props.user
-      ? privileges.value.filter((privilege: PrivilegeType) => !props.periodGroup.privileges.find(groupPrivilege => privilege.id === groupPrivilege.id))
+      ? privileges.value.filter((privilege: PrivilegeType) => !props.periodGroup.privileges.map((p: PrivilegeType) => p.id).includes(privilege.id))
       : privileges.value.map((privilege: PrivilegeType) => privilege)
     )
     const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))

@@ -26,7 +26,7 @@
       v-autocomplete(
         v-model="selectGroups"
         :label="String($t('dcis.periods.copyPeriodGroups.groups'))"
-        :items="selectPeriod ? periods.find(e => e.id === selectPeriod.id).periodGroups: []"
+        :items="selectPeriod ? periods.find(e => e.id === selectPeriod.id).periodGroups : []"
         :loading="loading"
         :disabled="!selectPeriod"
         item-text="name"
