@@ -5,7 +5,7 @@ query Divisions($periodId: ID!) {
       name
       __typename
     }
-    ... on OrganizationType {
+    ... on OrganizationOriginalType {
       id
       name
       __typename

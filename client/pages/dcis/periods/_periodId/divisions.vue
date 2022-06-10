@@ -24,12 +24,12 @@ import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
-import {DivisionsQuery, DivisionsQueryVariables, PeriodType} from '~/types/graphql'
+import { DivisionsQuery, DivisionsQueryVariables, PeriodType } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import {useCommonQuery, useFilters, useI18n} from '~/composables'
+import { useCommonQuery, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ChangeDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/ChangeDivisions.vue'
-import divisionsQuery from "~/gql/dcis/queries/divisions.graphql";
+import divisionsQuery from '~/gql/dcis/queries/divisions.graphql'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, ChangeDivisions },
@@ -54,10 +54,18 @@ export default defineComponent({
       variables: { periodId: props.period.id }
     })
     const items = computed<any>(() => {
-      return divisions.value.filter(division => props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
+      if (divisions.value) {
+        return divisions.value.filter(division => props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
+      } else {
+        return []
+      }
     })
     const filterDivisions = computed<any>(() => {
-      return divisions.value.filter(division => !items.value.includes(division))
+      if (divisions.value) {
+        return divisions.value.filter(division => !props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
+      } else {
+        return []
+      }
     })
     const periodUpdate: any = inject('periodUpdate')
     const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
@@ -70,7 +78,7 @@ export default defineComponent({
           return dataCache
         })
     }
-    return { bc, headers, changeDivisionsUpdate, filterDivisions, loading, items }
+    return { bc, headers, changeDivisionsUpdate, filterDivisions, loading, divisions, items }
   }
 })
 </script>

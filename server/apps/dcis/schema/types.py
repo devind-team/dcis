@@ -2,14 +2,13 @@ from typing import Optional
 
 import graphene
 from devind_core.schema.types import FileType, ContentTypeType
-from devind_dictionaries.models import Department, Organization
-from devind_dictionaries.schema import OrganizationType, DepartmentType
+from devind_dictionaries.models import Organization
+from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
-from django.contrib.contenttypes.models import ContentType
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -132,11 +131,36 @@ class DivisionModelType(graphene.ObjectType):
     name = graphene.String(required=True, description='Название дивизиона')
 
 
+class OrganizationOriginalType(DjangoObjectType):
+    """Список организаций"""
+
+    departments = graphene.List(DepartmentType, description='Департаменты')
+
+    class Meta:
+        model = Organization
+        fields = (
+            'id', 'name', 'present_name',
+            'inn', 'kpp', 'kind',
+            'rubpnubp', 'kodbuhg', 'okpo',
+            'phone', 'site', 'mail', 'address',
+            'attributes',
+            'created_at', 'updated_at',
+            'parent',
+            'region',
+            'departments'
+        )
+
+    @staticmethod
+    @resolver_hints(model_field='department_set')
+    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
+        return organization.department_set.all()
+
+
 class DivisionUnionType(graphene.Union):
     """Список дивизионов"""
 
     class Meta:
-        types = (OrganizationType, DepartmentType)
+        types = (OrganizationOriginalType, DepartmentType)
 
 
 class PrivilegeType(DjangoObjectType):

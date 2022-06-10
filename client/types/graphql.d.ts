@@ -1990,7 +1990,7 @@ export type DivisionTypeEdge = {
 };
 
 /** Список дивизионов */
-export type DivisionUnionType = DepartmentType | OrganizationType;
+export type DivisionUnionType = DepartmentType | OrganizationOriginalType;
 
 /** Debugging information for the current query. */
 export type DjangoDebug = {
@@ -3226,6 +3226,48 @@ export type OrganizationOkpoFilterInputType = {
   icontains?: InputMaybe<Scalars['String']>;
 };
 
+/** Список организаций */
+export type OrganizationOriginalType = {
+  __typename?: 'OrganizationOriginalType';
+  /** Address */
+  address?: Maybe<Scalars['String']>;
+  /** Additional fields */
+  attributes: Scalars['JSONString'];
+  /** Created date */
+  createdAt: Scalars['DateTime'];
+  /** Департаменты */
+  departments?: Maybe<Array<Maybe<DepartmentType>>>;
+  id: Scalars['ID'];
+  /** Individual taxpayer number */
+  inn?: Maybe<Scalars['String']>;
+  /** Type */
+  kind?: Maybe<Scalars['String']>;
+  /** Accounting code */
+  kodbuhg?: Maybe<Scalars['String']>;
+  /** Code of reason */
+  kpp?: Maybe<Scalars['String']>;
+  /** Email */
+  mail?: Maybe<Scalars['String']>;
+  /** Name */
+  name: Scalars['String'];
+  /** Russian classifier of enterprises and organizations */
+  okpo?: Maybe<Scalars['String']>;
+  /** Parent */
+  parent?: Maybe<OrganizationOriginalType>;
+  /** Phone number */
+  phone?: Maybe<Scalars['String']>;
+  /** Name for view */
+  presentName: Scalars['String'];
+  /** Region */
+  region?: Maybe<RegionType>;
+  /** Rubpnubp code */
+  rubpnubp?: Maybe<Scalars['String']>;
+  /** Site url */
+  site?: Maybe<Scalars['String']>;
+  /** Updated date */
+  updatedAt: Scalars['DateTime'];
+};
+
 export type OrganizationParentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
@@ -3289,7 +3331,7 @@ export type OrganizationType = Node & {
   /** Russian classifier of enterprises and organizations */
   okpo?: Maybe<Scalars['String']>;
   /** Parent */
-  parent?: Maybe<OrganizationType>;
+  parent?: Maybe<OrganizationOriginalType>;
   /** Phone number */
   phone?: Maybe<Scalars['String']>;
   /** Name for view */
@@ -5364,7 +5406,7 @@ export type DivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string } | { __typename: 'OrganizationType', id: string, name: string } | null> | null };
+export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string } | { __typename: 'OrganizationOriginalType', id: string, name: string } | null> | null };
 
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];

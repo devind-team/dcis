@@ -1843,7 +1843,7 @@ type DivisionTypeEdge {
 }
 
 """Список дивизионов"""
-union DivisionUnionType = DepartmentType | OrganizationType
+union DivisionUnionType = DepartmentType | OrganizationOriginalType
 
 """Debugging information for the current query."""
 type DjangoDebug {
@@ -2637,6 +2637,47 @@ input OrganizationOkpoFilterInputType {
   icontains: String
 }
 
+"""Список организаций"""
+type OrganizationOriginalType {
+  """Address"""
+  address: String
+  """Additional fields"""
+  attributes: JSONString!
+  """Created date"""
+  createdAt: DateTime!
+  """Департаменты"""
+  departments: [DepartmentType]
+  id: ID!
+  """Individual taxpayer number"""
+  inn: String
+  """Type"""
+  kind: String
+  """Accounting code"""
+  kodbuhg: String
+  """Code of reason"""
+  kpp: String
+  """Email"""
+  mail: String
+  """Name"""
+  name: String!
+  """Russian classifier of enterprises and organizations"""
+  okpo: String
+  """Parent"""
+  parent: OrganizationOriginalType
+  """Phone number"""
+  phone: String
+  """Name for view"""
+  presentName: String!
+  """Region"""
+  region: RegionType
+  """Rubpnubp code"""
+  rubpnubp: String
+  """Site url"""
+  site: String
+  """Updated date"""
+  updatedAt: DateTime!
+}
+
 input OrganizationParentFilterInputType {
   """`Exact` lookup"""
   exact: ID
@@ -2699,7 +2740,7 @@ type OrganizationType implements Node {
   """Russian classifier of enterprises and organizations"""
   okpo: String
   """Parent"""
-  parent: OrganizationType
+  parent: OrganizationOriginalType
   """Phone number"""
   phone: String
   """Name for view"""

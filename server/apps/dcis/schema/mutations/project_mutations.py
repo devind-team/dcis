@@ -141,8 +141,6 @@ class ChangeDivisionsMutation(BaseMutation):
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
         for division_id in division_ids:
-            if ContentType.objects.get_for_id(period.project.content_type_id).model == 'organization':
-                division_id = from_global_id(division_id)[1]
             Division.objects.create(period=period, object_id=division_id)
         return ChangeDivisionsMutation(divisions=period.division_set.all())
 
