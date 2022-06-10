@@ -98,3 +98,6 @@ class Division(models.Model):
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     object_id = models.PositiveIntegerField(help_text='Идентификатор дивизиона')
+
+    class Meta:
+        unique_together = [['period', 'object_id']]

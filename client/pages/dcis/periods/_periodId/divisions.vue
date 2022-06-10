@@ -3,6 +3,9 @@
     template(#header) {{ $t('dcis.periods.divisions.header') }}
     change-divisions(
       :period="period"
+      :divisions="filterDivisions"
+      :loading="loading"
+      :update="changeDivisionsUpdate"
     )
       template(#activator="{ on }")
         v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.add') }}
@@ -10,11 +13,10 @@
       v-card-text
         v-data-table(
           :headers="headers"
-          :items="period.divisions"
+          :items="items"
           disable-pagination
           hide-default-footer
         )
-          template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">
@@ -22,11 +24,12 @@ import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
-import { PeriodType } from '~/types/graphql'
+import {DivisionsQuery, DivisionsQueryVariables, PeriodType} from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useFilters, useI18n } from '~/composables'
+import {useCommonQuery, useFilters, useI18n} from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ChangeDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/ChangeDivisions.vue'
+import divisionsQuery from "~/gql/dcis/queries/divisions.graphql";
 
 export default defineComponent({
   components: { LeftNavigatorContainer, ChangeDivisions },
@@ -43,14 +46,19 @@ export default defineComponent({
       { text: 'Настройка объектов сбора', to: localePath({ name: 'dcis-periods-periodId-divisions' }), exact: true }
     ]))
     const { t } = useI18n()
-    const { dateTimeHM } = useFilters()
-    const selectDivisions = computed<any[]>(():any => {
-      return props.period.divisions
-    })
     const headers: DataTableHeader[] = [
-      { text: t('dcis.periods.divisions.name') as string, value: 'name' },
-      { text: t('dcis.periods.divisions.createdAt') as string, value: 'createdAt', width: 150 }
+      { text: t('dcis.periods.divisions.name') as string, value: 'name' }
     ]
+    const { data: divisions, loading } = useCommonQuery<DivisionsQuery, DivisionsQueryVariables>({
+      document: divisionsQuery,
+      variables: { periodId: props.period.id }
+    })
+    const items = computed<any>(() => {
+      return divisions.value.filter(division => props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
+    })
+    const filterDivisions = computed<any>(() => {
+      return divisions.value.filter(division => !items.value.includes(division))
+    })
     const periodUpdate: any = inject('periodUpdate')
     const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
       periodUpdate(
@@ -62,7 +70,7 @@ export default defineComponent({
           return dataCache
         })
     }
-    return { bc, headers, selectDivisions, dateTimeHM }
+    return { bc, headers, changeDivisionsUpdate, filterDivisions, loading, items }
   }
 })
 </script>

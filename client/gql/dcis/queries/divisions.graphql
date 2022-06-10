@@ -1,15 +1,13 @@
-query Divisions($periodId: ID!, $searchText: String) {
-  divisions(periodId: $periodId, searchText: $searchText) {
+query Divisions($periodId: ID!) {
+  divisions(periodId: $periodId) {
     ... on DepartmentType {
       id
       name
-      createdAt
       __typename
     }
     ... on OrganizationType {
       id
       name
-      createdAt
       __typename
     }
     __typename

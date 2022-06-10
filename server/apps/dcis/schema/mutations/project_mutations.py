@@ -10,10 +10,12 @@ from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ActionRelationShip, ErrorFieldType
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
+from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation, \
+    DjangoBatchCreateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from lxml.html._diffcommand import description
 
 from apps.core.models import User
 from apps.core.schema import UserType
@@ -21,7 +23,7 @@ from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Period, Project, Division
 from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
 from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
+from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType, DivisionUnionType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
@@ -129,39 +131,20 @@ class ChangeDivisionsMutation(BaseMutation):
     """Мутация на изменение дивизионов."""
 
     class Input:
-        period_id = graphene.ID(description='Идентификатор периода')
-        divisions_id = graphene.List(graphene.Int, required=True, description='Идентификаторы объектов сбора')
-        action = graphene.Field(ActionRelationShip, required=True, description='Действие')
+        period_id = graphene.ID(required=True, description='Идентификатор текущего периода')
+        division_ids = graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы дивизионов')
 
-    divisions_id = graphene.List(graphene.Int, required=True, description='Идентификаторы объектов сбора')
-    action = graphene.Field(ActionRelationShip, required=True, description='Действие')
+    divisions = graphene.List(DivisionType, required=True, description='Новые дивизионы')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(
-            root,
-            info: ResolveInfo,
-            period_id: int,
-            divisions_id,
-            action: ActionRelationShip):
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
-        object_type = ContentType.objects.get_for_id(period.project.content_type_id)
-        if object_type.model == 'department':
-            divisions = Department.objects.filter(pk__in=divisions_id)
-        else:
-            divisions = Organization.objects.filter(pk__in=divisions_id)
-        existing_divisions = Division.objects.filter(object_id__in=divisions_id).values_list('object_id', flat=True)
-        for division in divisions:
-            if action == ActionRelationShip.ADD and division.id not in existing_divisions:
-                Division.objects.create(period=period, object_id=division.id)
-            elif action == ActionRelationShip.DELETE:
-                Division.objects.get(object_id=division.id).delete()
-            else:
-                return ChangeDivisionsMutation(
-                    status=False,
-                    errors=[ErrorFieldType('action', ['Действие не найдено'])]
-                )
-        return ChangeDivisionsMutation(divisions_id=divisions_id, action=action)
+        for division_id in division_ids:
+            if ContentType.objects.get_for_id(period.project.content_type_id).model == 'organization':
+                division_id = from_global_id(division_id)[1]
+            Division.objects.create(period=period, object_id=division_id)
+        return ChangeDivisionsMutation(divisions=period.division_set.all())
 
 
 class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):

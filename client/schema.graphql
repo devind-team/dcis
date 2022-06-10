@@ -762,22 +762,18 @@ type ChangeColumnDimensionPayload {
 }
 
 input ChangeDivisionsMutationInput {
-  """Действие"""
-  action: ActionRelationShip!
   clientMutationId: String
-  """Идентификаторы объектов сбора"""
-  divisionsId: [Int]!
-  """Идентификатор периода"""
-  periodId: ID
+  """Идентификаторы дивизионов"""
+  divisionIds: [ID!]
+  """Идентификатор текущего периода"""
+  periodId: ID!
 }
 
 """Мутация на изменение дивизионов."""
 type ChangeDivisionsMutationPayload {
-  """Действие"""
-  action: ActionRelationShip!
   clientMutationId: String
-  """Идентификаторы объектов сбора"""
-  divisionsId: [Int]!
+  """Новые дивизионы"""
+  divisions: [DivisionType]!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
@@ -2835,7 +2831,7 @@ type PeriodType {
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
-  divisions: [DivisionUnionType]
+  divisions: [DivisionType]
   """Собираемые документов"""
   documents: [DocumentType]
   """Дата окончания"""
@@ -3060,8 +3056,6 @@ type Query {
   divisions(
     """Идентификатор пeриода"""
     periodId: ID!
-    """Название дивизиона"""
-    searchText: String
   ): [DivisionUnionType]
   """Документ"""
   document(
