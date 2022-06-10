@@ -24,7 +24,11 @@ import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
-import { DivisionsQuery, DivisionsQueryVariables, PeriodType } from '~/types/graphql'
+import {
+  DivisionsQuery,
+  DivisionsQueryVariables,
+  PeriodType
+} from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useCommonQuery, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
@@ -55,19 +59,26 @@ export default defineComponent({
     })
     const items = computed<any>(() => {
       if (divisions.value) {
-        return divisions.value.filter(division => props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
+        return divisions.value.filter(division =>
+          props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
       } else {
         return []
       }
     })
     const filterDivisions = computed<any>(() => {
       if (divisions.value) {
-        return divisions.value.filter(division => !props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
+        return divisions.value.filter(division =>
+          !props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
       } else {
         return []
       }
     })
     const periodUpdate: any = inject('periodUpdate')
+    /**
+     * Обновление после добавления объектов
+     * @param cache
+     * @param result
+     */
     const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
       periodUpdate(
         cache, result, (dataCache, { data: { changeDivisions: { errors, divisions } } }: ChangeDivisionsMutationResult

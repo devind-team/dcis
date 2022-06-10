@@ -29,22 +29,13 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, PropType, computed } from '#app'
+import { defineComponent, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { DataProxy } from 'apollo-cache'
-import {
-  ChangeDivisionsMutationPayload,
-  DivisionsQuery,
-  PeriodType,
-  DivisionsQueryVariables,
-  OrganizationType,
-  DepartmentType
-} from '~/types/graphql'
+import { ChangeDivisionsMutationPayload, DepartmentType, OrganizationType, PeriodType } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { useCommonQuery, useI18n } from '~/composables'
+import { useI18n } from '~/composables'
 import changeDivisions from '~/gql/dcis/mutations/project/change_divisions.graphql'
-import divisionsQuery from '~/gql/dcis/queries/divisions.graphql'
-import {loading} from "@nuxt/ui-templates";
 
 export type ChangeDivisionsMutationResult = { data: { changeDivisions: ChangeDivisionsMutationPayload } }
 type UpdateFunction = (cache: DataProxy | any, result: ChangeDivisionsMutationPayload | any) => DataProxy | any
@@ -66,6 +57,11 @@ export default defineComponent({
     const headers: DataTableHeader[] = [
       { text: t('dcis.periods.divisions.name') as string, value: 'name' }
     ]
+    /**
+     * Обновление после добавления объектов
+     * @param cache
+     * @param result
+     */
     const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
       const { success } = result.data.changeDivisions
       if (success) {
