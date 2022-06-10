@@ -6,9 +6,9 @@ from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
+from django.db.models import Q, QuerySet
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
-from django.db.models import Q, QuerySet
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -65,8 +65,6 @@ class PeriodType(DjangoObjectType):
     methodical_support = DjangoListField(FileType)
     # Нужно будет отфильтровать в зависимости от прав пользователя
     documents = graphene.List(lambda: DocumentType, description='Собираемые документов')
-
-    # Нужно вывести все дивизионы специальным образом
     divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
 
@@ -132,7 +130,7 @@ class DivisionModelType(graphene.ObjectType):
 
 
 class OrganizationOriginalType(DjangoObjectType):
-    """Список организаций"""
+    """Описание списка организаций."""
 
     departments = graphene.List(DepartmentType, description='Департаменты')
 
@@ -157,14 +155,14 @@ class OrganizationOriginalType(DjangoObjectType):
 
 
 class DivisionUnionType(graphene.Union):
-    """Список дивизионов"""
+    """Описание юнион типа дивизионов."""
 
     class Meta:
         types = (OrganizationOriginalType, DepartmentType)
 
 
 class PrivilegeType(DjangoObjectType):
-    """Список сквозных привилегий."""
+    """Описание сквозных привилегий."""
 
     class Meta:
         model = Privilege

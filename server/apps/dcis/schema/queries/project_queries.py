@@ -19,12 +19,19 @@ from ..types import DivisionType, DivisionModelType, ProjectType, PeriodType, Di
 class ProjectQueries(graphene.ObjectType):
     """Запросы записей, связанных с проектами."""
 
-    projects = AdvancedDjangoFilterConnectionField(ProjectType)
     project = graphene.Field(
         ProjectType,
         project_id=graphene.ID(required=True, description='Идентификатор проекта'),
         required=True,
         description='Получение информации по проекту'
+    )
+    projects = AdvancedDjangoFilterConnectionField(ProjectType)
+
+    period = graphene.Field(
+        PeriodType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Информация по периоду'
     )
     periods = DjangoListField(
         PeriodType,
@@ -33,14 +40,7 @@ class ProjectQueries(graphene.ObjectType):
         required=True,
         description='Периоды'
     )
-    period = graphene.Field(
-        PeriodType,
-        period_id=graphene.ID(required=True, description='Идентификатор периода'),
-        required=True,
-        description='Информация по периоду'
-    )
 
-    period_divisions = AdvancedDjangoFilterConnectionField(DivisionType, description='Получение дивизионов')
     user_divisions = graphene.List(
         DivisionModelType,
         user_id=graphene.ID(description='Пользователь'),

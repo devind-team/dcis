@@ -10,7 +10,7 @@ from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.dcis.models import PeriodGroup, PeriodPrivilege, Privilege, Period
-from apps.dcis.schema.types import PrivilegeType, PeriodPrivilegeType
+from apps.dcis.schema.types import PrivilegeType
 
 
 class ChangePeriodGroupPrivilegesMutation(BaseMutation):

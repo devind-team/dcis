@@ -1,10 +1,11 @@
 from typing import cast, Dict, Type, Union
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
-from apps.core.models import User
 
 from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
+from apps.core.models import User
 
 
 def default_content_type(instance):

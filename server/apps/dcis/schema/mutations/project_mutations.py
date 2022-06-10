@@ -2,28 +2,25 @@ from typing import Any
 
 import graphene
 from devind_core.models import File
-from devind_dictionaries.models import Department, Organization
+from devind_dictionaries.models import Department
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
-from devind_helpers.schema.types import ActionRelationShip, ErrorFieldType
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation, \
-    DjangoBatchCreateMutation
+from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
-from lxml.html._diffcommand import description
 
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Period, Project, Division
+from apps.dcis.models import Division
 from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
 from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType, DivisionUnionType
+from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType
 from apps.dcis.services.excel_extractor import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
