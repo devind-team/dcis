@@ -9,6 +9,7 @@
     mutation-name="changeDivisions"
     errors-in-alert
     persistent
+    @close="search = ''"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
@@ -16,11 +17,11 @@
       v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
       v-data-table(
         :headers="headers"
-        :items="[]"
+        :items="divisions"
         :loading="loading"
-        :search="search"
+        :items-per-page="33"
+        :search.sync="search"
         item-key="id"
-        disable-pagination
         show-select
         hide-default-footer
       )
@@ -31,10 +32,16 @@
 import { ref, defineComponent, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { DataProxy } from 'apollo-cache'
-import { ChangeDivisionsMutationPayload, PeriodType } from '~/types/graphql'
+import {
+  ChangeDivisionsMutationPayload,
+  DivisionsQuery,
+  PeriodType,
+  DivisionsQueryVariables
+} from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { useDebounceSearch, useFilters, useI18n } from '~/composables'
+import { useCommonQuery, useFilters, useI18n } from '~/composables'
 import changeDivisions from '~/gql/dcis/mutations/project/change_divisions.graphql'
+import divisionsQuery from '~/gql/dcis/queries/divisions.graphql'
 
 export type ChangeDivisionsMutationResult = { data: { changeDivisions: ChangeDivisionsMutationPayload } }
 type UpdateFunction = (cache: DataProxy | any, result: ChangeDivisionsMutationPayload | any) => DataProxy | any
@@ -43,15 +50,18 @@ export default defineComponent({
   components: { MutationModalForm },
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
-    loading: { type: Boolean as PropType<boolean>, default: false },
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
     const { t } = useI18n()
     const { dateTimeHM } = useFilters()
-    const { search } = useDebounceSearch()
-    const divisionsListId = ref<string[]>([])
 
+    const search = ref<string>('')
+    const divisionsListId = ref<string[]>([])
+    const { data: divisions, loading } = useCommonQuery<DivisionsQuery, DivisionsQueryVariables>({
+      document: divisionsQuery,
+      variables: { periodId: props.period.id, searchText: search.value }
+    })
     const headers: DataTableHeader[] = [
       { text: t('dcis.periods.divisions.name') as string, value: 'name' },
       { text: t('dcis.periods.divisions.createdAt') as string, value: 'createdAt', width: 150 }
@@ -62,7 +72,7 @@ export default defineComponent({
         props.update(cache, result)
       }
     }
-    return { headers, changeDivisions, divisionsListId, search, dateTimeHM, changeDivisionsUpdate }
+    return { headers, changeDivisions, divisionsListId, search, dateTimeHM, changeDivisionsUpdate, divisions, loading }
   }
 })
 </script>

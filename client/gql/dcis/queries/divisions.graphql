@@ -1,15 +1,15 @@
-#import "../fragments/organization_fields.graphql"
-
-query Divisions($projectId: ID!, $search: String) {
-  divisions(projectId: $projectId,searchText: $search) {
+query Divisions($periodId: ID!, $searchText: String) {
+  divisions(periodId: $periodId, searchText: $searchText) {
     ... on DepartmentType {
       id
       name
+      createdAt
       __typename
     }
     ... on OrganizationType {
       id
       name
+      createdAt
       __typename
     }
     __typename

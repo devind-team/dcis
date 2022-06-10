@@ -3058,8 +3058,8 @@ type Query {
   districts: [DistrictType!]
   """Дивизионы"""
   divisions(
-    """Идентификатор проекта"""
-    projectId: ID!
+    """Идентификатор пeриода"""
+    periodId: ID!
     """Название дивизиона"""
     searchText: String
   ): [DivisionUnionType]

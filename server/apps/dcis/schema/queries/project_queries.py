@@ -50,7 +50,7 @@ class ProjectQueries(graphene.ObjectType):
     )
     divisions = graphene.List(
         DivisionUnionType,
-        project_id=graphene.ID(required=True, description='Идентификатор проекта'),
+        period_id=graphene.ID(required=True, description='Идентификатор пeриода'),
         search_text=graphene.String(description='Название дивизиона'),
         description='Дивизионы'
     )
@@ -88,13 +88,14 @@ class ProjectQueries(graphene.ObjectType):
         return divisions
 
     @staticmethod
-    def resolve_divisions(root: Any, info: ResolveInfo, project_id: int, search_text: str, *args, **kwargs):
+    def resolve_divisions(root: Any, info: ResolveInfo, period_id: int, search_text: str, *args, **kwargs):
         items = []
-        project = get_object_or_404(Project, pk=project_id)
-        if ContentType.objects.get_for_id(project.content_type_id).model == 'department':
-            departments = Department.objects.filter(name__contains=search_text)
+        period = get_object_or_404(Period, pk=period_id)
+        divisions_ids = period.division_set.all().values_list('object_id', flat=True)
+        if ContentType.objects.get_for_id(period.project.content_type_id).model == 'department':
+            departments = Department.objects.filter(name__contains=search_text).exclude(pk__in=divisions_ids)
             items.extend(departments)
         else:
-            organizations = Organization.objects.filter(name__contains=search_text)
+            organizations = Organization.objects.filter(name__contains=search_text).exclude(pk__in=divisions_ids)
             items.extend(organizations)
         return items

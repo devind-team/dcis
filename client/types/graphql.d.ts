@@ -3781,7 +3781,7 @@ export type QueryDistrictArgs = {
 
 /** Схема запросов данных. */
 export type QueryDivisionsArgs = {
-  projectId: Scalars['ID'];
+  periodId: Scalars['ID'];
   searchText?: InputMaybe<Scalars['String']>;
 };
 
@@ -5367,11 +5367,11 @@ export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 export type DepartmentsQuery = { __typename?: 'Query', departments?: Array<{ __typename: 'DepartmentType', id: string, name: string, code?: number | null, createdAt: any }> | null };
 
 export type DivisionsQueryVariables = Exact<{
-  projectId: Scalars['ID'];
-  search?: InputMaybe<Scalars['String']>;
+  periodId: Scalars['ID'];
+  searchText?: InputMaybe<Scalars['String']>;
 }>;
 
-export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string } | { __typename: 'OrganizationType', id: string, name: string } | null> | null };
+export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string, createdAt: any } | { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null> | null };
 
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
