@@ -1666,6 +1666,19 @@ export type DeleteCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Мутация на удаление объекта из периода. */
+export type DeleteDivisionsMutationPayload = {
+  __typename?: 'DeleteDivisionsMutationPayload';
+  deletedId?: Maybe<Scalars['ID']>;
+  deletedInputId?: Maybe<Scalars['ID']>;
+  deletedRawId?: Maybe<Scalars['ID']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  found?: Maybe<Scalars['Boolean']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteDocumentStatusMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор статуса документа */
@@ -1914,26 +1927,6 @@ export type DistrictType = {
   updatedAt: Scalars['DateTime'];
 };
 
-export type DivisionFilterInputType = {
-  /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<DivisionFilterInputType>>>;
-  /** `Id` field */
-  id?: InputMaybe<DivisionIdFilterInputType>;
-  /** `Not` field */
-  not?: InputMaybe<DivisionFilterInputType>;
-  /** `ObjectId` field */
-  objectId?: InputMaybe<DivisionObjectIdFilterInputType>;
-  /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<DivisionFilterInputType>>>;
-  /** `Period` field */
-  period?: InputMaybe<DivisionPeriodFilterInputType>;
-};
-
-export type DivisionIdFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['Float']>;
-};
-
 /** Описание обобщенного типа дивизиона. */
 export type DivisionModelType = {
   __typename?: 'DivisionModelType';
@@ -1943,20 +1936,6 @@ export type DivisionModelType = {
   model: Scalars['String'];
   /** Название дивизиона */
   name: Scalars['String'];
-};
-
-export type DivisionObjectIdFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['Int']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['Int']>>>;
-};
-
-export type DivisionPeriodFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Список участвующих дивизионов в сборе. */
@@ -1970,26 +1949,7 @@ export type DivisionType = Node & {
   period: PeriodType;
 };
 
-export type DivisionTypeConnection = {
-  __typename?: 'DivisionTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<DivisionTypeEdge>>;
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `DivisionType` and its cursor. */
-export type DivisionTypeEdge = {
-  __typename?: 'DivisionTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<DivisionType>;
-};
-
-/** Список дивизионов */
+/** Описание юнион типа дивизионов. */
 export type DivisionUnionType = DepartmentType | OrganizationOriginalType;
 
 /** Debugging information for the current query. */
@@ -2479,6 +2439,8 @@ export type Mutation = {
   copyPeriodGroups: CopyPeriodGroupMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
+  /** Мутация на удаление объекта из периода. */
+  deleteDivision: DeleteDivisionsMutationPayload;
   /** Удаление статуса документа. */
   deleteDocumentStatus: DeleteDocumentStatusMutationPayload;
   /** Мутация для полного удаления файла */
@@ -2811,6 +2773,11 @@ export type MutationCopyPeriodGroupsArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteCategoryArgs = {
   input: DeleteCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteDivisionArgs = {
+  id: Scalars['ID'];
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3226,7 +3193,7 @@ export type OrganizationOkpoFilterInputType = {
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-/** Список организаций */
+/** Описание списка организаций. */
 export type OrganizationOriginalType = {
   __typename?: 'OrganizationOriginalType';
   /** Address */
@@ -3530,7 +3497,7 @@ export type PointStatisticsType = {
   value: Scalars['Int'];
 };
 
-/** Список сквозных привилегий. */
+/** Описание сквозных привилегий. */
 export type PrivilegeType = {
   __typename?: 'PrivilegeType';
   /** Дата создания */
@@ -3718,8 +3685,6 @@ export type Query = {
   pages: PageTypeConnection;
   /** Информация по периоду */
   period: PeriodType;
-  /** Получение дивизионов */
-  periodDivisions?: Maybe<DivisionTypeConnection>;
   /** Периоды */
   periods: Array<PeriodType>;
   permissions: Array<PermissionType>;
@@ -3953,16 +3918,6 @@ export type QueryPagesArgs = {
 /** Схема запросов данных. */
 export type QueryPeriodArgs = {
   periodId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryPeriodDivisionsArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<DivisionFilterInputType>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Схема запросов данных. */
@@ -5289,6 +5244,12 @@ export type CopyPeriodGroupsMutationVariables = Exact<{
 }>;
 
 export type CopyPeriodGroupsMutation = { __typename?: 'Mutation', copyPeriodGroups: { __typename?: 'CopyPeriodGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, periodGroups: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> } };
+
+export type DeleteDivisionMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeleteDivisionMutation = { __typename?: 'Mutation', deleteDivision: { __typename: 'DeleteDivisionsMutationPayload', found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeletePeriodMutationVariables = Exact<{
   id: Scalars['ID'];

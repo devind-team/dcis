@@ -142,6 +142,15 @@ class ChangeDivisionsMutation(BaseMutation):
         return ChangeDivisionsMutation(divisions=period.division_set.all())
 
 
+class DeleteDivisionsMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+    """Мутация на удаление объекта из периода."""
+
+    class Meta:
+        model = Division
+        login_required = True
+        permissions = ('dcis.delete_division',)
+
+
 class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
     """Мутация на добавление группы периода."""
 
@@ -239,6 +248,7 @@ class ProjectMutations(graphene.ObjectType):
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
     change_divisions = ChangeDivisionsMutation.Field(required=True)
+    delete_division = DeleteDivisionsMutationPayload.Field(required=True)
 
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
     copy_period_groups = CopyPeriodGroupMutation.Field(required=True)

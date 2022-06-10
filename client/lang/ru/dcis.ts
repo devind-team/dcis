@@ -91,7 +91,8 @@ export default {
       formHeader: 'Изменение объектов сбора',
       buttonText: '@:add',
       name: 'Название объекта',
-      createdAt: 'Дата создания'
+      createdAt: 'Дата создания',
+      shownOf: 'Показано записей:'
     },
     statuses: {
       open: 'Открыто',

@@ -34,7 +34,7 @@ import { DataTableHeader } from 'vuetify'
 import { DataProxy } from 'apollo-cache'
 import { ChangeDivisionsMutationPayload, DepartmentType, OrganizationType, PeriodType } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { useI18n } from '~/composables'
+import { useDebounceSearch, useI18n } from '~/composables'
 import changeDivisions from '~/gql/dcis/mutations/project/change_divisions.graphql'
 
 export type ChangeDivisionsMutationResult = { data: { changeDivisions: ChangeDivisionsMutationPayload } }
@@ -51,7 +51,7 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
-    const search = ref<string>('')
+    const { search } = useDebounceSearch()
     const divisionsListId = ref<string[]>([])
     const selectedDivisions = ref<DepartmentType[] | OrganizationType[]>([])
     const headers: DataTableHeader[] = [

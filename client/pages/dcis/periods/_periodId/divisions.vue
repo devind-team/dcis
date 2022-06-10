@@ -9,14 +9,22 @@
     )
       template(#activator="{ on }")
         v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.add') }}
+    v-row(align="center")
+      v-col(cols="12" md="8")
+        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+      v-col.text-right.pr-5(cols="12" md="4") {{ $t('dcis.periods.divisions.shownOf') }} {{ items.length }}
     v-card(flat)
       v-card-text
         v-data-table(
           :headers="headers"
           :items="items"
+          :search.sync="search"
+          :loading="loading"
           disable-pagination
           hide-default-footer
         )
+          template(#item.name="{ item }")
+            a(@click="deleteDivisionMutate(item.id)") {{ item.name }}
 </template>
 
 <script lang="ts">
@@ -24,16 +32,23 @@ import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, inject } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
+import { useMutation } from '@vue/apollo-composable'
 import {
+  DeleteDivisionMutation,
+  DeleteDivisionMutationVariables,
+  DeleteDivisionsMutationPayload,
   DivisionsQuery,
   DivisionsQueryVariables,
   PeriodType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useCommonQuery, useI18n } from '~/composables'
+import { useCommonQuery, useDebounceSearch, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ChangeDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/ChangeDivisions.vue'
 import divisionsQuery from '~/gql/dcis/queries/divisions.graphql'
+import deleteDivision from '~/gql/dcis/mutations/project/delete_division.graphql'
+
+export type DeleteDivisionMutationResult = { data: { deleteDivision: DeleteDivisionsMutationPayload } }
 
 export default defineComponent({
   components: { LeftNavigatorContainer, ChangeDivisions },
@@ -44,6 +59,7 @@ export default defineComponent({
   },
   setup (props) {
     const { localePath } = useI18n()
+    const { search } = useDebounceSearch()
 
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
@@ -53,6 +69,21 @@ export default defineComponent({
     const headers: DataTableHeader[] = [
       { text: t('dcis.periods.divisions.name') as string, value: 'name' }
     ]
+    const { mutate: DeleteDivisionMutation } = useMutation<DeleteDivisionMutation, DeleteDivisionMutationVariables>(
+      deleteDivision,
+      {
+        update: (cache, result) => periodUpdate(
+          cache, result, (dataCache, { data: { deleteDivision: { errors, deletedId } } }: DeleteDivisionMutationResult
+          ) => {
+            if (!errors.length) {
+              dataCache.period.divisions = dataCache.period.divisions.filter((e: any) => e.id !== deletedId)
+            }
+            return dataCache
+          })
+      })
+    const deleteDivisionMutate = (divisionId: string): void => {
+      DeleteDivisionMutation({ id: props.period.divisions.find(e => e.objectId === Number(divisionId)).id })
+    }
     const { data: divisions, loading } = useCommonQuery<DivisionsQuery, DivisionsQueryVariables>({
       document: divisionsQuery,
       variables: { periodId: props.period.id }
@@ -89,7 +120,7 @@ export default defineComponent({
           return dataCache
         })
     }
-    return { bc, headers, changeDivisionsUpdate, filterDivisions, loading, divisions, items }
+    return { bc, headers, changeDivisionsUpdate, filterDivisions, loading, divisions, search, items, deleteDivisionMutate }
   }
 })
 </script>

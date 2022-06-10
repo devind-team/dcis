@@ -1538,6 +1538,18 @@ type DeleteCategoryMutationPayload {
   success: Boolean!
 }
 
+"""Мутация на удаление объекта из периода."""
+type DeleteDivisionsMutationPayload {
+  deletedId: ID
+  deletedInputId: ID
+  deletedRawId: ID
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  found: Boolean
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
   """Идентификатор статуса документа"""
@@ -1771,26 +1783,6 @@ type DistrictType {
   updatedAt: DateTime!
 }
 
-input DivisionFilterInputType {
-  """`And` field"""
-  and: [DivisionFilterInputType]
-  """`Id` field"""
-  id: DivisionIdFilterInputType
-  """`Not` field"""
-  not: DivisionFilterInputType
-  """`ObjectId` field"""
-  objectId: DivisionObjectIdFilterInputType
-  """`Or` field"""
-  or: [DivisionFilterInputType]
-  """`Period` field"""
-  period: DivisionPeriodFilterInputType
-}
-
-input DivisionIdFilterInputType {
-  """`Exact` lookup"""
-  exact: Float
-}
-
 """Описание обобщенного типа дивизиона."""
 type DivisionModelType {
   """Идентификатор модели дивизиона"""
@@ -1799,20 +1791,6 @@ type DivisionModelType {
   model: String!
   """Название дивизиона"""
   name: String!
-}
-
-input DivisionObjectIdFilterInputType {
-  """`Exact` lookup"""
-  exact: Int
-  """`In` lookup"""
-  in: [Int]
-}
-
-input DivisionPeriodFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Список участвующих дивизионов в сборе."""
@@ -1825,24 +1803,7 @@ type DivisionType implements Node {
   period: PeriodType!
 }
 
-type DivisionTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DivisionTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DivisionType` and its cursor."""
-type DivisionTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DivisionType
-}
-
-"""Список дивизионов"""
+"""Описание юнион типа дивизионов."""
 union DivisionUnionType = DepartmentType | OrganizationOriginalType
 
 """Debugging information for the current query."""
@@ -2303,6 +2264,8 @@ type Mutation {
   copyPeriodGroups(input: CopyPeriodGroupMutationInput!): CopyPeriodGroupMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
+  """Мутация на удаление объекта из периода."""
+  deleteDivision(id: ID!): DeleteDivisionsMutationPayload!
   """Удаление статуса документа."""
   deleteDocumentStatus(input: DeleteDocumentStatusMutationInput!): DeleteDocumentStatusMutationPayload!
   """Мутация для полного удаления файла"""
@@ -2637,7 +2600,7 @@ input OrganizationOkpoFilterInputType {
   icontains: String
 }
 
-"""Список организаций"""
+"""Описание списка организаций."""
 type OrganizationOriginalType {
   """Address"""
   address: String
@@ -2918,7 +2881,7 @@ type PointStatisticsType {
   value: Int!
 }
 
-"""Список сквозных привилегий."""
+"""Описание сквозных привилегий."""
 type PrivilegeType {
   """Дата создания"""
   createdAt: DateTime!
@@ -3163,16 +3126,6 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
-  """Получение дивизионов"""
-  periodDivisions(
-    after: String
-    before: String
-    """Advanced filter field"""
-    filter: DivisionFilterInputType
-    first: Int
-    last: Int
-    offset: Int
-  ): DivisionTypeConnection
   """Периоды"""
   periods(
     """Идентификатор периода"""
