@@ -1,7 +1,6 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import PosixPath
 from typing import Iterator, Union, Optional
-from collections import defaultdict
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
@@ -16,6 +15,7 @@ from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
 from xlsx_evaluate import ModelCompiler, Evaluator
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
+from .sheet_cache_service import FormulaContainerCache
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 
 
@@ -56,10 +56,11 @@ class BuildCell(BuildStyle):
     column_id: int
     row_id: int
     kind: str
-    formula: Optional[str]
-    comment: Optional[str]
-    default: Optional[str]
-    border_color: dict[str, str]
+    coordinate: Optional[str] = None
+    formula: Optional[str] = None
+    comment: Optional[str] = None
+    default: Optional[str] = None
+    border_color: dict[str, str] = None
 
 
 @dataclass
@@ -79,8 +80,10 @@ class BuildSheet:
     cells: list[BuildCell]
     merged_cells: list[BuildMergedCell]
 
-    inverse_dependency_cell: Optional[defaultdict[set[str]]] = None
-    associated_cells: Optional[dict[str, set[str]]] = None
+    cache_container: FormulaContainerCache = field(init=False)
+
+    def __post_init__(self):
+        self.cache_container = FormulaContainerCache(self.name)
 
 
 class ExcelExtractor:
@@ -103,6 +106,7 @@ class ExcelExtractor:
                 position=position,
                 period=period
             )
+            extract_sheet.cache_container.save(sheet.pk)
             # Соотношение позиции и созданных идентификаторов
             columns_mapper: dict[int, int] = {}
             rows_mapper: dict[int, int] = {}
@@ -138,7 +142,7 @@ class ExcelExtractor:
                 Cell.objects.create(**{
                     **columns_styles[column_id],
                     **rows_styles[row_id],
-                    **asdict(cell)
+                    **{k: v for k, v in asdict(cell).items() if k != 'coordinate'}
                 })
 
             for merged_cell in extract_sheet.merged_cells:
@@ -240,6 +244,7 @@ class ExcelExtractor:
                     column_id=cell.column,
                     row_id=cell.row,
                     kind=cell.data_type,
+                    coordinate=cell.coordinate,
                     formula=cell.value if isinstance(cell.value, str) and cell.value and cell.value[0] == '=' else None,
                     comment=cell.comment,
                     default=cell.value,
@@ -275,9 +280,10 @@ class ExcelExtractor:
             for cell in sheet.cells:
                 if cell.formula:
                     cell.default = str(evaluator.evaluate(self.coordinate(sheet.name, cell.column_id, cell.row_id)))
+                    sheet.cache_container.add_formula(cell.coordinate, cell.formula)
         return sheets
 
     @staticmethod
     def coordinate(sheet: str, column: int, row: int):
-        """Получаем координату"""
+        """Получаем координату."""
         return f'{sheet}!{get_column_letter(column)}{row}'
