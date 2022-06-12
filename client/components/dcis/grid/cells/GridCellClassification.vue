@@ -3,7 +3,7 @@
     template(#activator="{ on }")
       div(v-on="on") {{ value }}
     v-card(:loading="loading")
-      v-card-title Изменение значения
+      v-card-title {{ $t('dcis.grid.changeValue') }}
         v-spacer
         v-btn(@click="close" icon)
           v-icon mdi-close

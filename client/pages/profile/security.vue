@@ -5,12 +5,12 @@
       v-row
         v-col(cols="12" md="3") {{ $t('profile.security.changePassword') }}
         v-col(cols="12" md="9")
-          v-alert(v-show="passwordSuccess" type="success") {{ $t('profile.security.passwordSuccess') }}
           mutation-form(
             @done="changePasswordDone"
             :mutation="require('~/gql/core/mutations/user/change_password.graphql')"
             :variables="{ password, passwordNew }"
             :button-text="String($t('change'))"
+            :success-message="String($t('profile.security.passwordSuccess'))"
             mutation-name="changePassword"
             i18n-path="profile"
             flat
@@ -77,7 +77,7 @@ export default defineComponent({
     const { t } = useI18n()
     const authStore = useAuthStore()
     const user = toRef(authStore, 'user')
-    useNuxt2Meta({ title: t('profile.security.tableHeaders.name') as string })
+    useNuxt2Meta({ title: t('profile.security.name') as string })
 
     const headers = computed<DataTableHeader[]>(() => ([
       { text: t('profile.security.tableHeaders.activity') as string, value: 'activity', align: 'center' },

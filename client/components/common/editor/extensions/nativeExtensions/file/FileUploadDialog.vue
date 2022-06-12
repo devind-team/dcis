@@ -41,14 +41,14 @@
         )
 </template>
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { mapGetters } from 'vuex'
+import { defineComponent, PropType, ref, toRefs } from '#app'
 import { Editor } from '@tiptap/core'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
-import { AddFileMutationPayload } from '~/types/graphql'
+import { AddFileMutationPayload, UserType } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
+import { useAuthStore } from '~/stores'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   components: { MutationModalForm },
   props: {
     tooltip: { type: String, required: true },
@@ -59,25 +59,25 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    file: null,
-    fileLabel: ''
-  }),
-  computed: mapGetters({ user: 'auth/user' }),
-  methods: {
-    onFileUploaded ({ data: { addFile } }: { data: { addFile: AddFileMutationPayload } }): void {
+  setup (props) {
+    const authStore = useAuthStore()
+    const { user } = toRefs<{ user: UserType }>(authStore)
+    const file = ref<File | null>(null)
+    const fileLabel = ref('')
+    const onFileUploaded = ({ data: { addFile } }: { data: { addFile: AddFileMutationPayload } }) => {
       if (addFile.success) {
-        this.editor.chain().focus()
-          .insertContent(`<a href="/${addFile.files[0]!.src}" target="_blank">${this.fileLabel}</a>`).run()
-        this.file = null
-        this.fileLabel = ''
-      }
-    },
-    onFileChanged (file: File | null) {
-      if (file) {
-        this.fileLabel = file.name
+        props.editor.chain().focus()
+          .insertContent(`<a href="/${addFile.files[0]!.src}" target="_blank">${fileLabel.value}</a>`).run()
+        file.value = null
+        fileLabel.value = ''
       }
     }
+    const onFileChanged = (file: File | null) => {
+      if (file) {
+        fileLabel.value = file.name
+      }
+    }
+    return { file, fileLabel, user, onFileUploaded, onFileChanged }
   }
 })
 </script>

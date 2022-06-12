@@ -180,13 +180,14 @@ CELERY_ENABLE_UTC = True
 CELERY_RESULT_EXPIRES = None
 
 
-# Настройки уведомлений
-PUSH_NOTIFICATIONS_SETTINGS = {
-    'FCM_API_KEY': os.getenv('FCM_API_KEY'),
-    'FCM_POST_URL': 'https://fcm.googleapis.com/fcm/send',
-    'FCM_MAX_RECIPIENTS': 1000,
-    'WP_PRIVATE_KEY': os.path.join(BASE_DIR, 'private_key.pem'),
-    'WP_CLAIMS': {'sub': 'mailto: dev@devind.ru'}
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv('CACHE_LOCATION'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
 }
 
 
@@ -229,7 +230,7 @@ if not exists(TEMP_FILES_DIR):
     os.makedirs(TEMP_FILES_DIR)
 
 
-# Количество страниц, выгражемое по умолчанию
+# Количество страниц, выгружаемое по умолчанию
 DEFAULT_PAGE_SIZE = 12
 
 

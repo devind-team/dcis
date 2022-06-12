@@ -1,72 +1,134 @@
 <template lang="pug">
   tbody
-    tr(v-for="row in rows" :key="row.id" :style="row.style")
-      td.grid__cell_row-index(
-        @mouseenter="mouseenterRowIndex(row)"
-        @mousedown="mousedownRowIndex(row)"
+    tr(v-for="row in activeSheet.rows" :key="row.id")
+      td.grid__cell_row-name(
+        :class="getRowNameCellClass(row)"
+        @mouseenter="mouseenterRowName(row)"
+        @mousemove="mousemoveRowName(row, $event)"
+        @mouseleave="mouseleaveRowName"
+        @mousedown="mousedownRowName(row, $event)"
+        @mouseup="mouseupRowName"
       )
-        grid-row-control(:row="row" :content-class="getRowIndexCellContentClasses(row)")
+        grid-row-control(
+          v-slot="{ on, attrs }"
+          :row="row"
+          :can-delete="rootCount !== 1 || !!row.parent"
+          :get-row-height="getRowHeight"
+          :clear-selection="clearSelection"
+        )
+          div(
+            v-bind="attrs"
+            :style="{ height: `${getRowHeight(row)}px` }"
+            @contextmenu.prevent="on.click"
+          ) {{ row.name }}
       td(
         v-for="cell in row.cells"
         :key="cell.id"
         :colspan="cell.colspan"
         :rowspan="cell.rowspan"
-        :class="getCellClasses(cell)"
-        :style="`${cell.style}`"
-        @mousedown="startSelection(cell.position)"
-        @mouseenter="enterSelection(cell.position)"
-        @mouseup="endSelection(cell.position)"
+        :style="getCellStyle(cell)"
+        @mousedown="mousedownCell(cell)"
+        @mouseenter="mouseenterCell(cell)"
+        @mouseup="mouseupCell(cell)"
       )
         grid-cell(
-          @clear-active="setActive(null)"
+          :style="getCellContentStyle(row, cell)"
           :cell="cell"
-          :active="active === cell.position"
-          :selection="selection && selection.includes(cell.position)"
+          :active="!!activeCell && activeCell.id === cell.id"
+          @clear-active="setActiveCell(null)"
         )
 </template>
+
 <script lang="ts">
-import { defineComponent, inject } from '#app'
-import type { PropType, Ref } from '#app'
-import { BuildCellType, BuildRowType, BoundaryColumnCell, RangeType } from '~/types/grid-types'
-import GridCell from '~/components/dcis/grid/GridCell.vue'
+import { PropType, Ref } from '#app'
+import { SheetType, RowDimensionType, CellType } from '~/types/graphql'
+import { ResizingType } from '~/types/grid'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
+import GridCell from '~/components/dcis/grid/GridCell.vue'
 
 export default defineComponent({
   components: { GridRowControl, GridCell },
   props: {
-    rows: { type: Array as PropType<BuildRowType[]>, required: true },
-    selection: { type: Array as PropType<RangeType[]>, default: () => ([]) },
-    selectionRows: { type: Array as PropType<number[]>, default: () => ([]) },
-    boundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
-    selectedBoundaryColumnCells: { type: Array as PropType<BoundaryColumnCell[]>, required: true },
-    mouseenterRowIndex: { type: Function as PropType<(row: BuildRowType) => void>, required: true },
-    mousedownRowIndex: { type: Function as PropType<(row: BuildRowType) => void>, required: true },
-    setActive: { type: Function as PropType<(position: string) => void>, required: true },
-    startSelection: { type: Function as PropType<(position: string) => void>, required: true },
-    enterSelection: { type: Function as PropType<(position: string) => void>, required: true },
-    endSelection: { type: Function as PropType<(position: string) => void>, required: true }
+    resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
+    getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
+    activeCell: { type: Object as PropType<CellType>, default: null },
+    setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
+    selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
+    boundarySelectedRowsPositions: { type: Array as PropType<number[]>, required: true },
+    clearSelection: { type: Function as PropType<() => void>, required: true },
+    mouseenterRowName: {
+      type: Function as PropType<(row: RowDimensionType) => void>,
+      required: true
+    },
+    mousemoveRowName: {
+      type: Function as PropType<(row: RowDimensionType, event: MouseEvent) => void>,
+      required: true
+    },
+    mouseleaveRowName: { type: Function as PropType<() => void>, required: true },
+    mousedownRowName: {
+      type: Function as PropType<(row: RowDimensionType, event: MouseEvent) => void>,
+      required: true
+    },
+    mouseupRowName: { type: Function as PropType<() => void>, required: true },
+    mousedownCell: { type: Function as PropType<(cell: CellType) => void>, required: true },
+    mouseenterCell: { type: Function as PropType<(cell: CellType) => void>, required: true },
+    mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
-    const active = inject<Ref<string>>('active')
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
-    const getRowIndexCellContentClasses = (row: BuildRowType): (string | Record<string, boolean>)[] => {
-      return [
-        'grid__cell-content_row-index',
-        { 'grid__cell-content_row-index-selected': props.selectionRows.includes(row.index) },
-        {
-          'grid__cell-content_row-index-neighbor-selected':
-            !!props.selectedBoundaryColumnCells.find(boundaryCell =>
-              boundaryCell.rows.find(boundaryColumnCell => boundaryColumnCell.id === row.id))
-        }
-      ]
+    const rootCount = computed<number>(() => activeSheet.value.rows
+      .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
+
+    const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
+      return {
+        'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name_boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-hover': !props.resizingRow
+      }
     }
 
-    const getCellClasses = (cell: BuildCellType): Record<string, boolean> => ({
-      grid__cell_selected: props.selection.includes(cell.position),
-      grid__cell_boundary: !!props.boundaryColumnCells.find(boundaryCell => boundaryCell.cell.id === cell.id)
-    })
+    const getCellStyle = (cell: CellType): Record<string, string> => {
+      const textDecoration: string[] = []
+      const style: Record<string, string> = {}
+      if (cell.strong) { style['font-weight'] = 'bold' }
+      if (cell.italic) { style['font-style'] = 'italic' }
+      if (cell.strike) { textDecoration.push('line-through') }
+      if (cell.underline) { textDecoration.push('underline') }
+      if (cell.size) { style['font-size'] = `${cell.size}px` }
+      if (cell.color) { style['font-color'] = cell.color }
+      if (cell.background) { style['background-color'] = cell.background }
+      style['text-decoration'] = textDecoration.join(' ')
+      const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
+      for (const position of ['top', 'right', 'bottom', 'left']) {
+        if (borderColor[position]) {
+          cell[`border-${position}`] = `1 px solid ${borderColor[position] || 'black'}`
+        }
+      }
+      return style
+    }
 
-    return { active, getRowIndexCellContentClasses, getCellClasses }
+    const getCellContentStyle = (row: RowDimensionType, cell: CellType): Record<string, string> => {
+      const valuesMap = {
+        left: 'flex-start',
+        top: 'flex-start',
+        middle: 'center',
+        center: 'center',
+        right: 'flex-end',
+        bottom: 'flex-end'
+      }
+      const style: Record<string, string> = {
+        height: cell.rowspan === 1 ? `${props.getRowHeight(row)}px` : '100%'
+      }
+      if (cell.horizontalAlign) {
+        style['justify-content'] = valuesMap[cell.horizontalAlign]
+        style['text-align'] = cell.horizontalAlign
+      }
+      if (cell.verticalAlign) { style['align-items'] = valuesMap[cell.verticalAlign] }
+      return style
+    }
+
+    return { activeSheet, rootCount, getRowNameCellClass, getCellStyle, getCellContentStyle }
   }
 })
 </script>

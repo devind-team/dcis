@@ -19,11 +19,11 @@
         )
 </template>
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType, ref } from '#app'
 import { Editor } from '@tiptap/core'
 import { OnButtonStateChangedType, OnClickType } from '~/components/common/editor/extensions/ExtensionOptionsInterface'
 
-export default Vue.extend<any, any, any, any>({
+export default defineComponent({
   props: {
     tooltip: { type: String, required: true },
     icon: { type: String, required: true },
@@ -33,19 +33,18 @@ export default Vue.extend<any, any, any, any>({
     isActive: { type: Function as PropType<OnButtonStateChangedType>, default: () => null },
     isVisible: { type: Function as PropType<OnButtonStateChangedType>, default: () => null }
   },
-  data: () => ({
-    highlightColor: '#12345678',
-    defaultSwatches: [
+  setup (props) {
+    const highlightColor = ref('#12345678')
+    const defaultSwatches = ref([
       ['transparent', '#00FF00FF'],
       ['#FF0000FF', '#00FFFFFF'],
       ['#FFFF00FF', '#0000FFFF']
-    ]
-  }),
-  methods: {
-    onColorChanged (color: string) {
-      this.onClick(this.editor, color)
-      this.highlightColor = '#12345678' // костыль
+    ])
+    const onColorChanged = (color: string) => {
+      props.onClick(props.editor, color)
+      highlightColor.value = '#12345678' // костыль
     }
+    return { highlightColor, defaultSwatches, onColorChanged }
   }
 })
 </script>

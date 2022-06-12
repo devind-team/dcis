@@ -81,7 +81,6 @@ export default defineComponent({
       get: (): PrivilegeType[] => props.user ? additionalPrivileges.value?.map((e: PrivilegeType) => e) : props.periodGroup.privileges,
       set: (value: PrivilegeType[]) => {
         privilegesListId.value = value.map((e: PrivilegeType) => e.id)
-        return value
       }
     })
     const items = computed<PrivilegeType[]>(() => props.user
@@ -90,7 +89,7 @@ export default defineComponent({
     )
     const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))
     const mutationName = computed<string>(() => (props.user ? 'changeGroupUsersPrivileges' : 'changePeriodGroupPrivileges'))
-    const formVariables = computed<any>(() => {
+    const formVariables = computed<{ periodGroupId: string, privilegesIds: string[], userId?: string }>(() => {
       if (props.user) {
         return { periodGroupId: props.periodGroup.id, userId: props.user.id, privilegesIds: privilegesListId.value }
       } else {

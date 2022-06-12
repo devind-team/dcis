@@ -1,0 +1,20 @@
+
+mutation RenameSheet($sheetId: ID!, $name: String!) {
+  renameSheet(input: { sheetId: $sheetId, name: $name }) {
+    errors {
+      field
+      messages
+      __typename
+    }
+    sheet {
+      id
+      name
+      __typename
+    }
+    cells {
+      id
+      formula
+      __typename
+    }
+  }
+}

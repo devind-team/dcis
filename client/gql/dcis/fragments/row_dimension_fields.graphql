@@ -1,10 +1,32 @@
+#import "./cell_fields.graphql"
+
 fragment RowDimensionFields on RowDimensionType {
   id
   index
+  globalIndex
+  name
   height
+  fixed
+  hidden
   dynamic
+  aggregation
   createdAt
   updatedAt
-  parentId
+  parent {
+    id
+    index
+    globalIndex
+    __typename
+  }
+  children {
+    id
+    index
+    globalIndex
+    __typename
+  }
+  documentId
+  cells {
+    ...CellFields
+  }
   __typename
 }

@@ -1,7 +1,17 @@
 #import "../../core/fragments/file_fields.graphql"
 
-query ValueFiles($valueId: ID!) {
-  valueFiles(valueId: $valueId) {
+query ValueFiles(
+  $documentId: ID!,
+  $sheetId: ID!,
+  $columnId: ID!,
+  $rowId: ID!
+) {
+  valueFiles(
+    documentId: $documentId,
+    sheetId: $sheetId,
+    columnId: $columnId,
+    rowId: $rowId
+  ) {
     ...FileFields
   }
 }

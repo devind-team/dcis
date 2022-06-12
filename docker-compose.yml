@@ -1,0 +1,12 @@
+version: '3.2'
+
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    network_mode: host
+
+  rabbit:
+    container_name: rabbit
+    image: rabbitmq:latest
+    network_mode: host

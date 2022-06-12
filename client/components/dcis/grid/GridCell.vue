@@ -2,50 +2,38 @@
   .grid__cell-content(:class="contentClasses")
     component(
       v-if="active && cell.editable"
-      @set-value="setCellValue"
-      @cancel="$emit('clear-active')"
-      :value-type="cell.valueType"
-      :value="cell.value"
+      v-bind="cellProps"
+      v-on="cellListeners"
       :is="`GridCell${cellKind}`"
     )
     template(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">
-import { FetchResult } from '@apollo/client/link/core'
-import { useMutation } from '@vue/apollo-composable'
-import { DataProxy } from 'apollo-cache'
-import type { ComputedRef, PropType } from '#app'
-import { computed, defineComponent, inject } from '#app'
-import { BuildCellType } from '~/types/grid-types'
-import { cellKinds } from '~/composables/grid'
+import { computed, defineComponent, PropType, Ref } from '#app'
 import {
-  DocumentQuery,
-  ValueType,
-  ChangeValueMutation,
-  ChangeFileValueMutation,
-  ChangeValueMutationVariables,
-  ChangeFileValueMutationVariables
+  UpdateType,
+  useChangeFileValueMutation,
+  useChangeValueMutation,
+  useUnloadFileValueArchiveMutation
+} from '~/composables'
+import {
+  DocumentType,
+  SheetQuery,
+  SheetType,
+  CellType,
+  ValueFilesQuery,
+  ValueFilesQueryVariables
 } from '~/types/graphql'
-import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
-import changeFileValueMutation from '~/gql/dcis/mutations/sheet/change_file_value.graphql'
+import { cellKinds } from '~/composables/grid'
 import GridCellNumeric from '~/components/dcis/grid/cells/GridCellNumeric.vue'
 import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
 import GridCellText from '~/components/dcis/grid/cells/GridCellText.vue'
 import GridCellFiles from '~/components/dcis/grid/cells/GridCellFiles.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
-import GridCellUser from '~/components/dcis/grid/cells/GridCellUser.vue'
 import GridCellClassification from '~/components/dcis/grid/cells/GridCellClassification.vue'
-
-export type ChangeValueMutationResult = { data: ChangeValueMutation }
-export type ChangeFileValueMutationResult = { data: ChangeFileValueMutation }
-
-type ChangeValueDocumentUpdateType = (
-  cache: DataProxy,
-  result: ChangeValueMutationResult | ChangeFileValueMutationResult,
-  transform: (dc: DocumentQuery, r: ChangeValueMutationResult | ChangeFileValueMutationResult) => DocumentQuery
-) => DataProxy
+import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 
 export default defineComponent({
   components: {
@@ -55,96 +43,99 @@ export default defineComponent({
     GridCellFiles,
     GridCellMoney,
     GridCellDepartment,
-    GridCellUser,
     GridCellClassification
   },
   props: {
-    cell: { type: Object as PropType<BuildCellType>, required: true },
+    cell: { type: Object as PropType<CellType>, required: true },
     active: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
-    const cellKind: ComputedRef<string> = computed<string>(() => (
-      props.cell.kind in cellKinds ? cellKinds[props.cell.kind] : 'String'
-    ))
+    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
 
-    const contentClasses: ComputedRef<Record<string, boolean>> = computed<Record<string, boolean>>(() => ({
-      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
-    }))
+    const { data: files, update: updateFiles } = useCommonQuery<
+      ValueFilesQuery,
+      ValueFilesQueryVariables,
+      'valueFiles'
+    >({
+      document: valueFilesQuery,
+      variables: {
+        documentId: activeDocument.value.id,
+        sheetId: activeSheet.value.id,
+        columnId: props.cell.columnId,
+        rowId: props.cell.rowId
+      },
+      options: computed(() => ({
+        enabled: props.active && props.cell.editable && props.cell.kind === 'fl'
+      }))
+    })
 
-    const documentId: string = inject<string>('documentId')
-    const documentUpdate: ChangeValueDocumentUpdateType = inject<ChangeValueDocumentUpdateType>('documentUpdate')
-    const updateValue = (dataCache: DocumentQuery, value: ValueType) => {
-      const values: ValueType[] = dataCache.document.sheets!
-        .find(sh => sh.id === props.cell.sheetId)
-        .values.filter((v: ValueType) => v.id !== value.id)
-      dataCache.document.sheets!.find(sh => sh.id === props.cell.sheetId)!.values = [...values, value] as any
-      return dataCache
-    }
-    const { mutate: changeValueMutate } = useMutation<
-      ChangeValueMutation,
-      ChangeValueMutationVariables
-    >(changeValueMutation)
-    const { mutate: changeFileValueMutate } = useMutation<
-      ChangeFileValueMutation,
-      ChangeFileValueMutationVariables
-    >(changeFileValueMutation)
+    const changeValue = useChangeValueMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      computed(() => props.cell),
+      updateSheet
+    )
 
-    const setCellValue = (
-      value: string,
-      args: any,
-      additionalUpdate: <TResultMutation>(
-        cache: DataProxy,
-        result: Omit<FetchResult<TResultMutation>, 'context'>
-      ) => void | null = null
-    ) => {
-      if (props.cell.kind === 'fl') {
-        changeFileValueMutate({
-          documentId,
-          sheetId: +props.cell.sheetId,
-          columnId: props.cell.cell.columnId,
-          rowId: props.cell.cell.rowId,
-          value,
-          ...args
-        }, {
-          update: (cache, result) => {
-            const dataProxy = cache as unknown as DataProxy
-            documentUpdate(
-              dataProxy,
-              result as ChangeFileValueMutationResult,
-              (
-                dataCache: DocumentQuery,
-                { data: { changeFileValue: { success, value } } }: ChangeFileValueMutationResult
-              ) => {
-                return success ? updateValue(dataCache, value) : dataCache
-              }
-            )
-            additionalUpdate!(dataProxy, result)
-          }
-        })
-      } else if (props.cell.value !== value) {
-        changeValueMutate({
-          documentId,
-          sheetId: +props.cell.sheetId,
-          columnId: props.cell.cell.columnId,
-          rowId: props.cell.cell.rowId,
-          value
-        }, {
-          update: (cache, result) => documentUpdate(
-            cache as unknown as DataProxy,
-            result as ChangeValueMutationResult,
-            (
-              dataCache: DocumentQuery,
-              { data: { changeValue: { success, value } } }: ChangeValueMutationResult
-            ) => {
-              return success ? updateValue(dataCache, value) : dataCache
-            }
-          )
-        })
+    const changeFileValue = useChangeFileValueMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      computed(() => props.cell),
+      updateSheet,
+      updateFiles
+    )
+
+    const unloadFileValueArchive = useUnloadFileValueArchiveMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id),
+      computed(() => props.cell)
+    )
+
+    const setValue = async (value: string) => {
+      emit('clear-active')
+      if (props.cell.value !== value) {
+        await changeValue(value)
       }
+    }
+
+    const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {
+      emit('clear-active')
+      await changeFileValue(value, remainingFiles, newFiles)
+    }
+
+    const uploadArchive = async () => {
+      const src = await unloadFileValueArchive()
+      window.open(src, '_blank')
+    }
+
+    const cancel = () => {
       emit('clear-active')
     }
 
-    return { cellKind, contentClasses, setCellValue }
+    const cellProps = computed<object>(() => {
+      if (props.cell.kind === 'fl') {
+        return { value: props.cell.value, files: files.value || [] }
+      }
+      return { value: props.cell.value }
+    })
+
+    const cellListeners = computed<Record<string, Function>>(() => {
+      if (props.cell.kind === 'fl') {
+        return { 'set-value': setFileValue, 'unload-archive': uploadArchive, cancel }
+      }
+      return { 'set-value': setValue, cancel }
+    })
+
+    const cellKind = computed<string>(() => (
+      props.cell.kind in cellKinds ? cellKinds[props.cell.kind] : 'String'
+    ))
+
+    const contentClasses = computed<Record<string, boolean>>(() => ({
+      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
+    }))
+
+    return { cellKind, contentClasses, cellProps, cellListeners }
   }
 })
 </script>

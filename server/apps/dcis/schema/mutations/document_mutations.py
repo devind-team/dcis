@@ -14,7 +14,7 @@ from apps.dcis.models import Document, DocumentStatus, Period, Status
 from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
 from apps.dcis.schema.types import DocumentStatusType, DocumentType
 from apps.dcis.services.document_services import create_new_document
-from apps.dcis.services.document_unload import DocumentUnload
+from apps.dcis.services.document_unload_services import DocumentUnload
 
 
 class AddDocumentMutation(BaseMutation):

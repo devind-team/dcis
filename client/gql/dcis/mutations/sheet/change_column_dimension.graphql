@@ -1,16 +1,15 @@
-#import "../../fragments/column_dimension_fields.graphql"
-
 mutation ChangeColumnDimension(
-  $id: ID!,
+  $columnDimensionId: ID!,
   $width: Int,
   $fixed: Boolean!,
   $hidden: Boolean!,
   $kind: String!
 ) {
-  changeColumnDimension(id: $id, input: {
+  changeColumnDimension(input: {
+    columnDimensionId: $columnDimensionId,
     width: $width,
-    fixed: $fixed
-    hidden: $hidden
+    fixed: $fixed,
+    hidden: $hidden,
     kind: $kind
   }) {
     success
@@ -19,8 +18,11 @@ mutation ChangeColumnDimension(
       messages
       __typename
     }
-    columnDimension {
-      ...ColumnDimensionFields
-    }
+    columnDimensionId
+    width
+    fixed
+    hidden
+    updatedAt
+    __typename
   }
 }

@@ -123,8 +123,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { mapGetters } from 'vuex'
+import { defineComponent, ref, PropType, useRouter, toRefs, computed } from '#app'
+import { useI18n } from '~/composables'
+import { HasPermissionFnType, useAuthStore } from '~/stores'
 import { PageType, UserType, DeletePageMutation } from '~/types/graphql'
 import ChangePageTitle from '~/components/pages/ChangePageTitle.vue'
 import ChangePageKind from '~/components/pages/ChangePageKind.vue'
@@ -132,7 +133,7 @@ import ChangePageAvatar from '~/components/pages/ChangePageAvatar.vue'
 import ChangePageTags from '~/components/pages/ChangePageTags.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
-@Component<PageActions>({
+export default defineComponent({
   components: {
     ChangePageTitle,
     ChangePageKind,
@@ -140,14 +141,24 @@ import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
     ChangePageTags,
     ChangePageAvatar
   },
-  computed: {
-    ...mapGetters({ user: 'auth/user', hasPerm: 'auth/hasPerm' }),
-    addSections () {
-      const vm = this
+  props: { page: { type: Object as PropType<PageType>, required: true } },
+  setup: function (props) {
+    const { t, localePath } = useI18n()
+    const router = useRouter()
+    const authStore = useAuthStore()
+    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
+
+    const active = ref(false)
+
+    const hasChangePerm = computed(() => {
+      return hasPerm.value('pages.change_page') || props.page.user?.id === user.value.id
+    })
+
+    const addSections = computed(() => {
       const helper = {
         kind: undefined,
         get text () {
-          return vm.$t(`pages.section.names.${this.kind}`)
+          return t(`pages.section.names.${this.kind}`)
         }
       }
       return [
@@ -160,47 +171,37 @@ import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
         { icon: 'notebook', kind: 'jupyter' },
         { icon: 'file-delimited', kind: 'dataset' }
       ].map(obj => Object.setPrototypeOf(obj, helper))
-    },
-    hasChangePerm () {
-      return this.hasPerm('pages.change_page') || this.page.user?.id === this.user.id
+    })
+
+    /**
+     * Получение заголовка булевого свойсва
+     */
+    const getBoolPropTitle = (prop: 'hide' | 'parallax' | 'priority') => {
+      return props.page[prop]
+        ? t(`pages.page.actions.${prop}.on`) as string
+        : t(`pages.page.actions.${prop}.off`) as string
     }
+
+    /**
+     * Обработка окончания запроса на удаление страницы
+     * @param success
+     * @param errors
+     */
+    const deletePageDone = ({ data: { deletePage: { success } } }: { data: DeletePageMutation }) => {
+      if (success) {
+        active.value = false
+        router.push(
+          localePath({ name: 'categories-categoryId', params: { categoryId: props.page.category.id } }) // todo: удаление из кэша
+        )
+      }
+    }
+
+    return { active, hasPerm, addSections, hasChangePerm, getBoolPropTitle, deletePageDone }
   }
 })
-export default class PageActions extends Vue {
-  @Prop({ required: true, type: Object }) readonly page!: PageType
-
-  active: boolean = false
-
-  user!: UserType
-  hasPerm!: (permissions: string | string[], or?: boolean) => boolean
-  addItems!: { icon: string, kind: string, text: string }[]
-
-  /**
-   * Получение заголовка булевого свойсва
-   */
-  getBoolPropTitle (prop: 'hide' | 'parallax' | 'priority'): string {
-    return this.page[prop]
-      ? this.$t(`pages.page.actions.${prop}.on`) as string
-      : this.$t(`pages.page.actions.${prop}.off`) as string
-  }
-
-  /**
-   * Обработка окончания запроса на удаление страницы
-   * @param success
-   * @param errors
-   */
-  deletePageDone ({ data: { deletePage: { success } } }: { data: DeletePageMutation }): void {
-    if (success) {
-      this.active = false
-      this.$router.push(
-        this.localePath({ name: 'categories-categoryId', params: { categoryId: this.page.category.id } })
-      )
-    }
-  }
-}
 </script>
 
 <style lang="sass" scoped>
-  .menu-elevation
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.35)
+.menu-elevation
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.35)
 </style>

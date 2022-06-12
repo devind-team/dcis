@@ -1,8 +1,61 @@
 export default {
   home: 'Проекты сборов',
   grid: {
+    version: 'Версия: {version}',
+    sheet: {
+      rename: 'Переименовать'
+    },
+    cellKinds: {
+      n: 'Числовой',
+      s: 'Строковый',
+      text: 'Текст',
+      fl: 'Файл',
+      money: 'Деньги',
+      department: 'Департаменты',
+      classification: 'КБК'
+    },
     toolbar: {
       addRow: 'Добавить строку'
+    },
+    sheetToolbar: {
+      fontSize: 'Шрифт',
+      kind: 'Тип'
+    },
+    columnWidth: 'Ширина: ',
+    rowHeight: 'Высота: ',
+    columnControl: {
+      properties: '@:properties'
+    },
+    columnSettings: {
+      header: 'Изменение свойств',
+      subheader: 'Дата изменения: {updatedAt}',
+      width: 'Ширина',
+      fix: '@:fix',
+      hide: '@:hide',
+      kind: 'Тип ячейки по умолчанию',
+      buttonText: '@:save'
+    },
+    rowControl: {
+      properties: '@:properties',
+      addRowAbove: 'Добавить строку выше',
+      addRowBelow: 'Добавить строку ниже',
+      addChildRow: 'Добавить дочернюю строку',
+      deleteRow: 'Удалить строку'
+    },
+    rowSettings: {
+      header: 'Изменение свойств',
+      subheader: 'Дата изменения: {updatedAt}',
+      height: 'Высота',
+      fix: '@:fix',
+      hide: '@:hide',
+      makeDynamic: 'Разрешить дочерние строки',
+      buttonText: '@:save'
+    },
+    changeValue: 'Изменение значения',
+    cellFiles: {
+      file: 'Файл №{number}',
+      newFiles: 'Новые файлы',
+      uploadArchive: 'Скачать архив'
     }
   },
   projects: {
@@ -102,30 +155,12 @@ export default {
     delete: 'Удаление периода',
     deleteWarning: 'Период нельзя восстановить.'
   },
-  cellKinds: {
-    n: 'Числовой',
-    s: 'Строковый',
-    text: 'Текст',
-    fl: 'Файл',
-    money: 'Деньги',
-    department: 'Департаменты',
-    classification: 'КБК'
-  },
   documents: {
     add: {
       header: 'Создать новый документ',
       comment: 'Комментарий',
       status: 'Статус',
       lastDocument: 'Значения из документа'
-    },
-    change: {
-      column: {
-        header: 'Изменение свойств',
-        fixed: 'Зафиксировать',
-        hidden: 'Скрыть',
-        kind: 'Тип ячейки по умолчанию',
-        buttonText: 'Сохранить'
-      }
     },
     status: {
       name: 'Статус документа',
@@ -142,17 +177,6 @@ export default {
       user: 'Пользователь, добавивший строку',
       additional: 'Дополнительные колонки',
       unload: 'Выгрузить'
-    }
-  },
-  cells: {
-    gridCellText: {
-      title: 'Изменение текста'
-    },
-    gridCellFiles: {
-      title: 'Изменение файлов',
-      file: 'Файл №{number}',
-      newFiles: 'Новые файлы',
-      uploadArchive: 'Скачать архив'
     }
   }
 }

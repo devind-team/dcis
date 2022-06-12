@@ -22,6 +22,8 @@ from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
 from apps.dcis.permissions import AddPeriod
 from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType
 from apps.dcis.services.excel_extractor import ExcelExtractor
+from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
+from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
 
