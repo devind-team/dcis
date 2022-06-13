@@ -26,7 +26,7 @@
 Используем django адаптер: https://docs.djangoproject.com/en/4.0/topics/cache/
 """
 
-from typing import Optional
+from typing import Optional, Sequence
 from dataclasses import dataclass, asdict, field
 from collections import Counter, defaultdict
 
@@ -36,6 +36,10 @@ from xlsx_evaluate.utils import resolve_ranges
 
 from django.core.cache import cache
 from jsonpickle import encode, decode
+
+from openpyxl.utils.cell import get_column_letter
+
+from apps.dcis.models import Sheet, Cell
 
 
 KEY_TEMPLATE = 'cache.sheet.%s'
@@ -83,8 +87,9 @@ def dependency_formula(formula: str) -> list[str]:
 class FormulaContainerCache:
     """Контейнер для упрощения работы с кешом."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, sheet_id: Optional[None] = None):
         self.sheet_dependency = FormulaDependencyCache(name)
+        self.sheet_id = sheet_id
 
     @property
     def sheet_name(self) -> str:
@@ -168,10 +173,30 @@ class FormulaContainerCache:
         return save_to_cache(self.sheet_dependency)
 
     @classmethod
+    def get(cls, sheet: Sheet):
+        """Вытягиваем контейнер из кеша или строим новый."""
+        container = cls.from_cache(sheet.pk)
+        return container if container is not None else cls.build_cache(sheet)
+
+    @classmethod
     def from_cache(cls, sheet_id: int):
         result = get_from_cache(sheet_id)
         if result is None:
             return None
         container = cls(result.sheet_name)
         container.sheet_dependency = result
+        return container
+
+    @classmethod
+    def build_cache(cls, sheet: Sheet):
+        cells: Sequence[Cell] = Cell.objects.filter(
+            formula__isnull=False,
+            formula__istartswith='=',
+            row__parent__isnull=True,
+            row__sheet=sheet
+        ).select_related('row', 'column').all()
+        container = cls(sheet.name)
+        for cell in cells:
+            container.add_formula(f'{get_column_letter(cell.column)}{cell.row}', cell.formula)
+        container.save(sheet.pk)
         return container
