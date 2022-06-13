@@ -62,15 +62,22 @@ class FormulaDependencyCache:
         return KEY_TEMPLATE % self.sheet_id
 
 
-def save_to_cache(formula_dependency: FormulaDependencyCache):
+def save_to_cache(formula_dependency: FormulaDependencyCache) -> bool:
     """Сохраняем структуру зависимостей в кеш."""
-    cache.set(formula_dependency.key, encode(formula_dependency))
+    return cache.set(formula_dependency.key, encode(formula_dependency))
 
 
 def get_from_cache(sheet_id: int) -> Optional[FormulaDependencyCache]:
     """Забираем структуру из кеша."""
     result = cache.get(KEY_TEMPLATE % sheet_id)
     return None if result is None else decode(result)
+
+
+def dependency_formula(formula: str) -> list[str]:
+    """Возвращает зависимость токенов."""
+    tokens = FormulaParser().tokenize(formula)
+    range_tokens = [token for token in tokens if token.tsubtype == 'range']
+    return flatten([flatten(resolve_ranges(token.tvalue, '')[1]) for token in range_tokens])
 
 
 class FormulaContainerCache:
@@ -102,14 +109,30 @@ class FormulaContainerCache:
         :param formula: формула
         :return:
         """
-        tokens = FormulaParser().tokenize(formula)
-        range_tokens = [token for token in tokens if token.tsubtype == 'range']
-        dependency = flatten([flatten(resolve_ranges(token.tvalue, '')[1]) for token in range_tokens])
+        dependency: list[str] = dependency_formula(formula)
         self.sheet_dependency.dependency[coordinate] = Counter(dependency)
         for coord in set(dependency):
             self.sheet_dependency.inversion[coord].append(coordinate)
+        return self
 
-    def save(self, sheet_id: Optional[int] = None):
+    def change_formula(self, coordinate: str, formula: str):
+        """Изменяем формулу в ячейки."""
+        return self.delete_formula(coordinate).add_formula(coordinate, formula)
+
+    def delete_formula(self, coordinate: str):
+        """Удаление информации о формуле в зависимости."""
+        self.sheet_dependency.dependency = {
+            coord: counter for coord, counter in self.sheet_dependency.dependency if coord != coordinate
+        }
+        inversion: dict[str, list[str]] = defaultdict(list)
+        for ic, iv in self.sheet_dependency.inversion.items():
+            inversion_clean = [value for value in iv if value != coordinate]
+            if inversion_clean:
+                inversion[ic] = inversion_clean
+        self.sheet_dependency.inversion = inversion
+        return self
+
+    def save(self, sheet_id: Optional[int] = None) -> bool:
         if sheet_id is not None:
             self.sheet_id = sheet_id
         return save_to_cache(self.sheet_dependency)
