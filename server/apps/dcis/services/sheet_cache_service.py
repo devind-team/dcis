@@ -132,6 +132,36 @@ class FormulaContainerCache:
         self.sheet_dependency.inversion = inversion
         return self
 
+    def rename_sheet(self, old_value: str, new_value: str):
+        """Функционал для изменения названия листов."""
+        # 1. Меняем себя
+        if self.sheet_name == old_value:
+            self.sheet_name = old_value
+
+        def rename_coordinate(_coordinate: str, _old_value: str, _new_value: str) -> str:
+            """Функция изменения листа в координате."""
+            if '!' in _coordinate:
+                sn, c = _coordinate.split('!')
+                if sn == _old_value:
+                    return f'{_new_value}!{c}'
+            return _coordinate
+
+        # 2. Меняем dependency
+        self.sheet_dependency.dependency = {
+            rename_coordinate(coord, old_value, new_value): Counter([
+                rename_coordinate(d_coord, old_value, new_value) for d_coord in list(counter.keys())
+            ])
+            for coord, counter in self.sheet_dependency.dependency.items()
+        }
+        # 3. Меняем inversion
+        self.sheet_dependency.inversion = {
+            rename_coordinate(coord, old_value, new_value): [
+                rename_coordinate(i_coord, old_value, new_value) for i_coord in inversions
+            ]
+            for coord, inversions in self.sheet_dependency.inversion.items()
+        }
+        return self
+
     def save(self, sheet_id: Optional[int] = None) -> bool:
         if sheet_id is not None:
             self.sheet_id = sheet_id
