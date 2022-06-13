@@ -1793,7 +1793,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [[package]]
 name = "xlsx-evaluate"
-version = "0.3.0"
+version = "0.4.2"
 description = "Calculate XLSX formulas"
 category = "main"
 optional = false
@@ -1848,7 +1848,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "ea3589afbdc0267bb8c10222a6045adce9419cb8ff4e947a98899d1985298703"
+content-hash = "1875159715db1fb141ec52c66ba914ba6dab4e7ba5bdebff8e603ffac927b136"
 
 [metadata.files]
 aiohttp = [
@@ -3062,8 +3062,8 @@ wrapt = [
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
 xlsx-evaluate = [
-    {file = "xlsx_evaluate-0.3.0-py3-none-any.whl", hash = "sha256:e3a763bf61fab785a0021ace40b06964805f666ce55633b192fee738eb180248"},
-    {file = "xlsx_evaluate-0.3.0.tar.gz", hash = "sha256:9319c06e7a479d64302b3f73a56d4b836d91689b014ffe91053290e360073ecc"},
+    {file = "xlsx_evaluate-0.4.2-py3-none-any.whl", hash = "sha256:888bde4e38c9cb906f4683d1c5cb590c0839192002171dda9cd3de0dc912d32a"},
+    {file = "xlsx_evaluate-0.4.2.tar.gz", hash = "sha256:078cc565e9a0c8c9ca092587a6cce338b24cb3b3e0d2948bed479904317a803e"},
 ]
 yarl = [
     {file = "yarl-1.7.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:f2a8508f7350512434e41065684076f640ecce176d262a7d54f0da41d99c5a95"},
