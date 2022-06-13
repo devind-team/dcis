@@ -197,6 +197,6 @@ class FormulaContainerCache:
         ).select_related('row', 'column').all()
         container = cls(sheet.name)
         for cell in cells:
-            container.add_formula(f'{get_column_letter(cell.column)}{cell.row}', cell.formula)
+            container.add_formula(f'{get_column_letter(cell.column.index)}{cell.row.index}', cell.formula)
         container.save(sheet.pk)
         return container
