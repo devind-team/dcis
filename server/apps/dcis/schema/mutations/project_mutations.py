@@ -78,17 +78,26 @@ class AddPeriodMutation(BaseMutation):
         name = graphene.String(required=True, description='Название периода')
         project_id = graphene.ID(required=True, description='Идентификатор проекта')
         file = Upload(required=True, description='Xlsx файл с проектом')
+        multiple = graphene.Boolean(required=True, description='Множественность сбора')
 
     period = graphene.Field(PeriodType, description='Добавленный период')
 
     @staticmethod
     @permission_classes((IsAuthenticated, AddPeriod,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, project_id: str, file: InMemoryUploadedFile):
+    def mutate_and_get_payload(
+            root: Any,
+            info: ResolveInfo,
+            name: str,
+            project_id: str,
+            file: InMemoryUploadedFile,
+            multiple: bool
+    ):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
         period: Period = Period.objects.create(
             name=name,
             user=info.context.user,
-            project=project
+            project=project,
+            multiple=multiple
         )
         fl: File = period.methodical_support.create(
             name=file.name,

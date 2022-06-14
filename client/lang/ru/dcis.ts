@@ -99,6 +99,7 @@ export default {
       header: 'Добавление периода',
       name: 'Название периода',
       file: 'Файл с формой сбора',
+      multiple: 'Множественное заполнение',
       buttonText: 'Добавить период'
     },
     addPeriodGroup: {
