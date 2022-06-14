@@ -27,7 +27,7 @@
 """
 
 from typing import Optional, Sequence
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, field
 from collections import Counter, defaultdict
 
 from xlsx_evaluate.parser import FormulaParser
@@ -77,6 +77,11 @@ def get_from_cache(sheet_id: int) -> Optional[FormulaDependencyCache]:
     return None if result is None else decode(result)
 
 
+def delete_from_cache(sheet_id: int) -> bool:
+    """Удаление структуры из кеша."""
+    return cache.delete(KEY_TEMPLATE % sheet_id)
+
+
 def dependency_formula(formula: str) -> list[str]:
     """Возвращает зависимость токенов."""
     tokens = FormulaParser().tokenize(formula)
@@ -106,6 +111,29 @@ class FormulaContainerCache:
     @sheet_id.setter
     def sheet_id(self, value: Optional[int]):
         self.sheet_dependency.sheet_id = value
+
+    def recalculate_dependency(self, coordinate: str) -> tuple[list[str], list[str]]:
+        """Рассчитываем значения связанных ячеек.
+
+        Нужно вычислить какие ячейки необходимо пересчитать и какие ячейки
+        и какие данные нужны.
+            - relation - выбираемые ячейки
+            - recalculation - пересчитываемые ячейки
+        """
+        relation: list[str] = []
+        recalculation: list[str] = []
+        stack_coordinates: list[str] = [coordinate]
+        while stack_coordinates:
+            next_coord: str = stack_coordinates.pop()
+            recalculation.append(next_coord)
+
+            relation_dep: Optional[Counter] = self.sheet_dependency.dependency.get(next_coord)
+            relation_inversion: Optional[list[str]] = self.sheet_dependency.inversion.get(next_coord)
+
+            relation = [*relation, *(relation_dep.keys() if relation_dep else [])]
+            stack_coordinates = [*stack_coordinates, *(relation_inversion if relation_inversion else [])]
+
+        return relation, recalculation
 
     def add_formula(self, coordinate: str, formula: str):
         """
@@ -177,6 +205,10 @@ class FormulaContainerCache:
         """Вытягиваем контейнер из кеша или строим новый."""
         container = cls.from_cache(sheet.pk)
         return container if container is not None else cls.build_cache(sheet)
+
+    def delete(self) -> bool:
+        assert self.sheet_id is not None, 'Невозможно удалить контейнер без идентификатор'
+        return delete_from_cache(self.sheet_id)
 
     @classmethod
     def from_cache(cls, sheet_id: int):
