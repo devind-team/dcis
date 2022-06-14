@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import type { PropType, Ref } from '#app'
+import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
 import { AddPeriodMutationPayload, ProjectType } from '~/types/graphql'
 import addPeriod from '~/gql/dcis/mutations/project/add_period.graphql'
