@@ -126,10 +126,9 @@ class FormulaContainerCache:
         while stack_coordinates:
             next_coord: str = stack_coordinates.pop()
             recalculation.append(next_coord)
-
+            # Нужно предусмотреть работу с листами
             relation_dep: Optional[Counter] = self.sheet_dependency.dependency.get(next_coord)
             relation_inversion: Optional[list[str]] = self.sheet_dependency.inversion.get(next_coord)
-
             relation = [*relation, *(relation_dep.keys() if relation_dep else [])]
             stack_coordinates = [*stack_coordinates, *(relation_inversion if relation_inversion else [])]
 
@@ -142,7 +141,16 @@ class FormulaContainerCache:
         :param formula: формула
         :return:
         """
-        dependency: list[str] = dependency_formula(formula)
+        dependency: list[str] = []
+        for dep in dependency_formula(formula):
+            added_dependency: str = dep
+            if '!' in dep:
+                sheet_name, coord = dep.split('!')
+                if sheet_name == self.sheet_name:
+                    added_dependency: str = coord
+            # Мы не должны ссылаться сами на себя.
+            if added_dependency != coordinate:
+                dependency.append(added_dependency)
         self.sheet_dependency.dependency[coordinate] = Counter(dependency)
         for coord in set(dependency):
             self.sheet_dependency.inversion[coord].append(coordinate)
