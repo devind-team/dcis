@@ -141,6 +141,8 @@ export default {
     divisions: {
       header: 'Настройка объектов сбора',
       add: 'Добавить объект',
+      id: 'Идентификатор',
+      action: 'Действия',
       formHeader: 'Изменение объектов сбора',
       buttonText: '@:add',
       name: 'Название объекта',

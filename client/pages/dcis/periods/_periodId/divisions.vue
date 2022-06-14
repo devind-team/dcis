@@ -23,8 +23,8 @@
           disable-pagination
           hide-default-footer
         )
-          template(#item.name="{ item }")
-            a(@click="deleteDivisionMutate(item.id)") {{ item.name }}
+          template(#item.action="{ item }")
+            a(@click="deleteDivisionMutate(item.id)" style="color: #FF5252") {{ $t('dcis.periods.actions.delete') }}
 </template>
 
 <script lang="ts">
@@ -67,7 +67,9 @@ export default defineComponent({
     ]))
     const { t } = useI18n()
     const headers: DataTableHeader[] = [
-      { text: t('dcis.periods.divisions.name') as string, value: 'name' }
+      { text: t('dcis.periods.divisions.id') as string, value: 'id', width: '10vw' },
+      { text: t('dcis.periods.divisions.name') as string, value: 'name' },
+      { text: t('dcis.periods.divisions.action') as string, value: 'action', width: '10vw' }
     ]
     const { mutate: DeleteDivisionMutation } = useMutation<DeleteDivisionMutation, DeleteDivisionMutationVariables>(
       deleteDivision,

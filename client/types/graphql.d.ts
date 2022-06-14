@@ -3293,6 +3293,8 @@ export type OrganizationOriginalType = {
   site?: Maybe<Scalars['String']>;
   /** Updated date */
   updatedAt: Scalars['DateTime'];
+  /** Пользователи */
+  users?: Maybe<Array<Maybe<UserType>>>;
 };
 
 export type OrganizationParentFilterInputType = {

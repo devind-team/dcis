@@ -138,8 +138,9 @@ class ChangeDivisionsMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
-        for division_id in division_ids:
-            Division.objects.create(period=period, object_id=division_id)
+        divisions_list = Division.objects.bulk_create([
+            Division(period=period, object_id=division_id) for division_id in division_ids
+        ])
         return ChangeDivisionsMutation(divisions=period.division_set.all())
 
 

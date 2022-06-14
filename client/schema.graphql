@@ -2692,6 +2692,8 @@ type OrganizationOriginalType {
   site: String
   """Updated date"""
   updatedAt: DateTime!
+  """Пользователи"""
+  users: [UserType]
 }
 
 input OrganizationParentFilterInputType {

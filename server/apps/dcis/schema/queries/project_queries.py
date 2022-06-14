@@ -88,12 +88,5 @@ class ProjectQueries(graphene.ObjectType):
 
     @staticmethod
     def resolve_divisions(root: Any, info: ResolveInfo, period_id: int, *args, **kwargs):
-        divisions = []
         period = get_object_or_404(Period, pk=period_id)
-        if ContentType.objects.get_for_id(period.project.content_type_id).model == 'department':
-            departments = Department.objects.all()
-            divisions.extend(departments)
-        else:
-            organizations = Organization.objects.all()
-            divisions.extend(organizations)
-        return divisions
+        return period.project.DIVISION_KIND[str(period.project.content_type.model)].objects.all()

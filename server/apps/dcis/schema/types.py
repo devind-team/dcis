@@ -133,6 +133,7 @@ class OrganizationOriginalType(DjangoObjectType):
     """Описание списка организаций."""
 
     departments = graphene.List(DepartmentType, description='Департаменты')
+    users = graphene.List(UserType, description='Пользователи')
 
     class Meta:
         model = Organization
@@ -152,6 +153,11 @@ class OrganizationOriginalType(DjangoObjectType):
     @resolver_hints(model_field='department_set')
     def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
         return organization.department_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='')
+    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
+        return organization.users.all()
 
 
 class DivisionUnionType(graphene.Union):
