@@ -13,7 +13,7 @@
                 :value="item"
               )
                 v-list-item-content {{ item.name }}
-                delete-menu(@confirm="deletePeriodGroupMutate({ id: item.id })")
+                delete-menu(@confirm="deletePeriodGroupMutate({ id: item.id }).then()")
                   template(#default="{ on }")
                     v-list-item-action(v-on="on")
                       v-btn(icon)

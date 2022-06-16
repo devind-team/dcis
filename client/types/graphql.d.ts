@@ -868,6 +868,26 @@ export type ChangeColumnDimensionMutationPayload = {
   width?: Maybe<Scalars['Int']>;
 };
 
+export type ChangeDivisionsMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификаторы дивизионов */
+  divisionIds?: InputMaybe<Array<Scalars['ID']>>;
+  /** Идентификатор текущего периода */
+  periodId: Scalars['ID'];
+};
+
+/** Мутация на изменение дивизионов. */
+export type ChangeDivisionsMutationPayload = {
+  __typename?: 'ChangeDivisionsMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Новые дивизионы */
+  divisions: Array<Maybe<DivisionType>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 /** Изменение комментария версии документа. */
 export type ChangeDocumentCommentMutationPayload = {
   __typename?: 'ChangeDocumentCommentMutationPayload';
@@ -1725,6 +1745,19 @@ export type DeleteCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Мутация на удаление объекта из периода. */
+export type DeleteDivisionsMutationPayload = {
+  __typename?: 'DeleteDivisionsMutationPayload';
+  deletedId?: Maybe<Scalars['ID']>;
+  deletedInputId?: Maybe<Scalars['ID']>;
+  deletedRawId?: Maybe<Scalars['ID']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  found?: Maybe<Scalars['Boolean']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteDocumentStatusMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор статуса документа */
@@ -1969,26 +2002,6 @@ export type DistrictType = {
   updatedAt: Scalars['DateTime'];
 };
 
-export type DivisionFilterInputType = {
-  /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<DivisionFilterInputType>>>;
-  /** `Id` field */
-  id?: InputMaybe<DivisionIdFilterInputType>;
-  /** `Not` field */
-  not?: InputMaybe<DivisionFilterInputType>;
-  /** `ObjectId` field */
-  objectId?: InputMaybe<DivisionObjectIdFilterInputType>;
-  /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<DivisionFilterInputType>>>;
-  /** `Period` field */
-  period?: InputMaybe<DivisionPeriodFilterInputType>;
-};
-
-export type DivisionIdFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['Float']>;
-};
-
 /** Описание обобщенного типа дивизиона. */
 export type DivisionModelType = {
   __typename?: 'DivisionModelType';
@@ -1998,20 +2011,6 @@ export type DivisionModelType = {
   model: Scalars['String'];
   /** Название дивизиона */
   name: Scalars['String'];
-};
-
-export type DivisionObjectIdFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['Int']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['Int']>>>;
-};
-
-export type DivisionPeriodFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Список участвующих дивизионов в сборе. */
@@ -2025,24 +2024,8 @@ export type DivisionType = Node & {
   period: PeriodType;
 };
 
-export type DivisionTypeConnection = {
-  __typename?: 'DivisionTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<DivisionTypeEdge>>;
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `DivisionType` and its cursor. */
-export type DivisionTypeEdge = {
-  __typename?: 'DivisionTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<DivisionType>;
-};
+/** Описание юнион типа дивизионов. */
+export type DivisionUnionType = DepartmentType | OrganizationOriginalType;
 
 /** Debugging information for the current query. */
 export type DjangoDebug = {
@@ -2441,6 +2424,8 @@ export type Mutation = {
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение колонки */
   changeColumnDimension: ChangeColumnDimensionMutationPayload;
+  /** Мутация на изменение дивизионов. */
+  changeDivisions: ChangeDivisionsMutationPayload;
   /** Изменение комментария версии документа. */
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
@@ -2505,6 +2490,8 @@ export type Mutation = {
   copyPeriodGroups: CopyPeriodGroupMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
+  /** Мутация на удаление объекта из периода. */
+  deleteDivision: DeleteDivisionsMutationPayload;
   /** Удаление статуса документа. */
   deleteDocumentStatus: DeleteDocumentStatusMutationPayload;
   /** Мутация для полного удаления файла */
@@ -2678,6 +2665,11 @@ export type MutationChangeColumnDimensionArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationChangeDivisionsArgs = {
+  input: ChangeDivisionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationChangeDocumentCommentArgs = {
   id: Scalars['ID'];
   input: UpdateDocumentInput;
@@ -2838,6 +2830,11 @@ export type MutationCopyPeriodGroupsArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteCategoryArgs = {
   input: DeleteCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteDivisionArgs = {
+  id: Scalars['ID'];
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3258,6 +3255,50 @@ export type OrganizationOkpoFilterInputType = {
   icontains?: InputMaybe<Scalars['String']>;
 };
 
+/** Описание списка организаций. */
+export type OrganizationOriginalType = {
+  __typename?: 'OrganizationOriginalType';
+  /** Address */
+  address?: Maybe<Scalars['String']>;
+  /** Additional fields */
+  attributes: Scalars['JSONString'];
+  /** Created date */
+  createdAt: Scalars['DateTime'];
+  /** Департаменты */
+  departments?: Maybe<Array<Maybe<DepartmentType>>>;
+  id: Scalars['ID'];
+  /** Individual taxpayer number */
+  inn?: Maybe<Scalars['String']>;
+  /** Type */
+  kind?: Maybe<Scalars['String']>;
+  /** Accounting code */
+  kodbuhg?: Maybe<Scalars['String']>;
+  /** Code of reason */
+  kpp?: Maybe<Scalars['String']>;
+  /** Email */
+  mail?: Maybe<Scalars['String']>;
+  /** Name */
+  name: Scalars['String'];
+  /** Russian classifier of enterprises and organizations */
+  okpo?: Maybe<Scalars['String']>;
+  /** Parent */
+  parent?: Maybe<OrganizationOriginalType>;
+  /** Phone number */
+  phone?: Maybe<Scalars['String']>;
+  /** Name for view */
+  presentName: Scalars['String'];
+  /** Region */
+  region?: Maybe<RegionType>;
+  /** Rubpnubp code */
+  rubpnubp?: Maybe<Scalars['String']>;
+  /** Site url */
+  site?: Maybe<Scalars['String']>;
+  /** Updated date */
+  updatedAt: Scalars['DateTime'];
+  /** Пользователи */
+  users?: Maybe<Array<Maybe<UserType>>>;
+};
+
 export type OrganizationParentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
@@ -3321,7 +3362,7 @@ export type OrganizationType = Node & {
   /** Russian classifier of enterprises and organizations */
   okpo?: Maybe<Scalars['String']>;
   /** Parent */
-  parent?: Maybe<OrganizationType>;
+  parent?: Maybe<OrganizationOriginalType>;
   /** Phone number */
   phone?: Maybe<Scalars['String']>;
   /** Name for view */
@@ -3520,7 +3561,7 @@ export type PointStatisticsType = {
   value: Scalars['Int'];
 };
 
-/** Список сквозных привилегий. */
+/** Описание сквозных привилегий. */
 export type PrivilegeType = {
   __typename?: 'PrivilegeType';
   /** Дата создания */
@@ -3674,6 +3715,8 @@ export type Query = {
   departments?: Maybe<Array<DepartmentType>>;
   district?: Maybe<DistrictType>;
   districts?: Maybe<Array<DistrictType>>;
+  /** Дивизионы */
+  divisions?: Maybe<Array<Maybe<DivisionUnionType>>>;
   /** Документ */
   document?: Maybe<DocumentType>;
   /** Статусы документов */
@@ -3706,8 +3749,6 @@ export type Query = {
   pages: PageTypeConnection;
   /** Информация по периоду */
   period: PeriodType;
-  /** Получение дивизионов */
-  periodDivisions?: Maybe<DivisionTypeConnection>;
   /** Периоды */
   periods: Array<PeriodType>;
   permissions: Array<PermissionType>;
@@ -3803,6 +3844,11 @@ export type QueryDepartmentArgs = {
 /** Схема запросов данных. */
 export type QueryDistrictArgs = {
   districtId: Scalars['Int'];
+};
+
+/** Схема запросов данных. */
+export type QueryDivisionsArgs = {
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -3936,16 +3982,6 @@ export type QueryPagesArgs = {
 /** Схема запросов данных. */
 export type QueryPeriodArgs = {
   periodId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryPeriodDivisionsArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<DivisionFilterInputType>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Схема запросов данных. */
@@ -5192,6 +5228,13 @@ export type AddProjectMutationVariables = Exact<{
 
 export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename: 'AddProjectMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } };
 
+export type ChangeDivisionsMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  divisionIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
+}>;
+
+export type ChangeDivisionsMutation = { __typename?: 'Mutation', changeDivisions: { __typename: 'ChangeDivisionsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, divisions: Array<{ __typename: 'DivisionType', id: string, objectId: number } | null> } };
+
 export type ChangePeriodMutationVariables = Exact<{
   id: Scalars['ID'];
   name: Scalars['String'];
@@ -5229,6 +5272,12 @@ export type CopyPeriodGroupsMutationVariables = Exact<{
 }>;
 
 export type CopyPeriodGroupsMutation = { __typename?: 'Mutation', copyPeriodGroups: { __typename?: 'CopyPeriodGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, periodGroups: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> } };
+
+export type DeleteDivisionMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeleteDivisionMutation = { __typename?: 'Mutation', deleteDivision: { __typename: 'DeleteDivisionsMutationPayload', found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeletePeriodMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -5366,6 +5415,12 @@ export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DepartmentsQuery = { __typename?: 'Query', departments?: Array<{ __typename: 'DepartmentType', id: string, name: string, code?: number | null, createdAt: any }> | null };
 
+export type DivisionsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string } | { __typename: 'OrganizationOriginalType', id: string, name: string } | null> | null };
+
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
@@ -5393,7 +5448,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, divisions?: Array<{ __typename: 'DivisionType', id: string, objectId: number } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type PeriodsQueryVariables = Exact<{
   userId: Scalars['ID'];

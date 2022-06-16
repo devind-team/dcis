@@ -1,8 +1,13 @@
 import graphene
 from devind_core.schema.types import ContentTypeType, FileType
+from devind_core.schema.types import FileType, ContentTypeType
+from devind_dictionaries.models import Organization
+from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from graphene_django import DjangoListField, DjangoObjectType
+from django.db.models import Q, QuerySet
+from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
 from stringcase import snakecase
@@ -60,8 +65,6 @@ class PeriodType(DjangoObjectType):
     methodical_support = DjangoListField(FileType)
     # Нужно будет отфильтровать в зависимости от прав пользователя
     documents = graphene.List(lambda: DocumentType, description='Собираемые документов')
-
-    # Нужно вывести все дивизионы специальным образом
     divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
 
@@ -126,8 +129,46 @@ class DivisionModelType(graphene.ObjectType):
     name = graphene.String(required=True, description='Название дивизиона')
 
 
+class OrganizationOriginalType(DjangoObjectType):
+    """Описание списка организаций."""
+
+    departments = graphene.List(DepartmentType, description='Департаменты')
+    users = graphene.List(UserType, description='Пользователи')
+
+    class Meta:
+        model = Organization
+        fields = (
+            'id', 'name', 'present_name',
+            'inn', 'kpp', 'kind',
+            'rubpnubp', 'kodbuhg', 'okpo',
+            'phone', 'site', 'mail', 'address',
+            'attributes',
+            'created_at', 'updated_at',
+            'parent',
+            'region',
+            'departments'
+        )
+
+    @staticmethod
+    @resolver_hints(model_field='department_set')
+    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
+        return organization.department_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='')
+    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
+        return organization.users.all()
+
+
+class DivisionUnionType(graphene.Union):
+    """Описание юнион типа дивизионов."""
+
+    class Meta:
+        types = (OrganizationOriginalType, DepartmentType)
+
+
 class PrivilegeType(DjangoObjectType):
-    """Список сквозных привилегий."""
+    """Описание сквозных привилегий."""
 
     class Meta:
         model = Privilege

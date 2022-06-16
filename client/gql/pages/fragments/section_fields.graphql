@@ -6,7 +6,7 @@ fragment SectionFields on SectionInterface {
     id
   }
 
-  ...on SectionTextType {
+  ... on SectionTextType {
     text
   }
 
@@ -33,7 +33,7 @@ fragment SectionFields on SectionInterface {
     text
   }
 
-  ...on SectionUsersType {
+  ... on SectionUsersType {
     users {
       id
       avatar

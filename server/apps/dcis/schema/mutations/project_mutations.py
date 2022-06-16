@@ -17,8 +17,10 @@ from graphql_relay import from_global_id
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
+from apps.dcis.models import Division
 from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
 from apps.dcis.permissions import AddPeriod
+from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType
 from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
@@ -133,6 +135,34 @@ class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
         permissions = ('dcis.delete_period',)
 
 
+class ChangeDivisionsMutation(BaseMutation):
+    """Мутация на изменение дивизионов."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор текущего периода')
+        division_ids = graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы дивизионов')
+
+    divisions = graphene.List(DivisionType, required=True, description='Новые дивизионы')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
+        period = get_object_or_404(Period, pk=period_id)
+        divisions_list = Division.objects.bulk_create([
+            Division(period=period, object_id=division_id) for division_id in division_ids
+        ])
+        return ChangeDivisionsMutation(divisions=period.division_set.all())
+
+
+class DeleteDivisionsMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+    """Мутация на удаление объекта из периода."""
+
+    class Meta:
+        model = Division
+        login_required = True
+        permissions = ('dcis.delete_division',)
+
+
 class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
     """Мутация на добавление группы периода."""
 
@@ -229,6 +259,8 @@ class ProjectMutations(graphene.ObjectType):
     add_period = AddPeriodMutation.Field(required=True)
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
+    change_divisions = ChangeDivisionsMutation.Field(required=True)
+    delete_division = DeleteDivisionsMutationPayload.Field(required=True)
 
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
     copy_period_groups = CopyPeriodGroupMutation.Field(required=True)

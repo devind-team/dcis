@@ -1,10 +1,11 @@
 from typing import cast, Dict, Type, Union
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
-from apps.core.models import User
 
 from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
+from apps.core.models import User
 
 
 def default_content_type(instance):
@@ -98,3 +99,6 @@ class Division(models.Model):
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     object_id = models.PositiveIntegerField(help_text='Идентификатор дивизиона')
+
+    class Meta:
+        unique_together = [['period', 'object_id']]

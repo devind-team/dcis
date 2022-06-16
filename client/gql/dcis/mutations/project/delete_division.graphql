@@ -1,0 +1,12 @@
+mutation DeleteDivision($id: ID!) {
+  deleteDivision(id: $id) {
+    errors {
+      field
+      messages
+      __typename
+    }
+    found
+    deletedId
+    __typename
+  }
+}

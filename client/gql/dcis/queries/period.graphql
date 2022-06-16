@@ -45,5 +45,10 @@ query Period($periodId: ID!) {
       }
       __typename
     }
+    divisions {
+      id
+      objectId
+      __typename
+    }
   }
 }

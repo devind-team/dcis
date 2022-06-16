@@ -1,0 +1,15 @@
+query Divisions($periodId: ID!) {
+  divisions(periodId: $periodId) {
+    ... on DepartmentType {
+      id
+      name
+      __typename
+    }
+    ... on OrganizationOriginalType {
+      id
+      name
+      __typename
+    }
+    __typename
+  }
+}

@@ -793,6 +793,25 @@ type ChangeColumnDimensionMutationPayload {
   width: Int
 }
 
+input ChangeDivisionsMutationInput {
+  clientMutationId: String
+  """Идентификаторы дивизионов"""
+  divisionIds: [ID!]
+  """Идентификатор текущего периода"""
+  periodId: ID!
+}
+
+"""Мутация на изменение дивизионов."""
+type ChangeDivisionsMutationPayload {
+  clientMutationId: String
+  """Новые дивизионы"""
+  divisions: [DivisionType]!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Изменение комментария версии документа."""
 type ChangeDocumentCommentMutationPayload {
   document: DocumentType
@@ -1598,6 +1617,18 @@ type DeleteCategoryMutationPayload {
   success: Boolean!
 }
 
+"""Мутация на удаление объекта из периода."""
+type DeleteDivisionsMutationPayload {
+  deletedId: ID
+  deletedInputId: ID
+  deletedRawId: ID
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  found: Boolean
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
   """Идентификатор статуса документа"""
@@ -1827,26 +1858,6 @@ type DistrictType {
   updatedAt: DateTime!
 }
 
-input DivisionFilterInputType {
-  """`And` field"""
-  and: [DivisionFilterInputType]
-  """`Id` field"""
-  id: DivisionIdFilterInputType
-  """`Not` field"""
-  not: DivisionFilterInputType
-  """`ObjectId` field"""
-  objectId: DivisionObjectIdFilterInputType
-  """`Or` field"""
-  or: [DivisionFilterInputType]
-  """`Period` field"""
-  period: DivisionPeriodFilterInputType
-}
-
-input DivisionIdFilterInputType {
-  """`Exact` lookup"""
-  exact: Float
-}
-
 """Описание обобщенного типа дивизиона."""
 type DivisionModelType {
   """Идентификатор модели дивизиона"""
@@ -1855,20 +1866,6 @@ type DivisionModelType {
   model: String!
   """Название дивизиона"""
   name: String!
-}
-
-input DivisionObjectIdFilterInputType {
-  """`Exact` lookup"""
-  exact: Int
-  """`In` lookup"""
-  in: [Int]
-}
-
-input DivisionPeriodFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Список участвующих дивизионов в сборе."""
@@ -1881,22 +1878,8 @@ type DivisionType implements Node {
   period: PeriodType!
 }
 
-type DivisionTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [DivisionTypeEdge]!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `DivisionType` and its cursor."""
-type DivisionTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: DivisionType
-}
+"""Описание юнион типа дивизионов."""
+union DivisionUnionType = DepartmentType | OrganizationOriginalType
 
 """Debugging information for the current query."""
 type DjangoDebug {
@@ -2268,6 +2251,8 @@ type Mutation {
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
+  """Мутация на изменение дивизионов."""
+  changeDivisions(input: ChangeDivisionsMutationInput!): ChangeDivisionsMutationPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
@@ -2332,6 +2317,8 @@ type Mutation {
   copyPeriodGroups(input: CopyPeriodGroupMutationInput!): CopyPeriodGroupMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
+  """Мутация на удаление объекта из периода."""
+  deleteDivision(id: ID!): DeleteDivisionsMutationPayload!
   """Удаление статуса документа."""
   deleteDocumentStatus(input: DeleteDocumentStatusMutationInput!): DeleteDocumentStatusMutationPayload!
   """Мутация для полного удаления файла"""
@@ -2668,6 +2655,49 @@ input OrganizationOkpoFilterInputType {
   icontains: String
 }
 
+"""Описание списка организаций."""
+type OrganizationOriginalType {
+  """Address"""
+  address: String
+  """Additional fields"""
+  attributes: JSONString!
+  """Created date"""
+  createdAt: DateTime!
+  """Департаменты"""
+  departments: [DepartmentType]
+  id: ID!
+  """Individual taxpayer number"""
+  inn: String
+  """Type"""
+  kind: String
+  """Accounting code"""
+  kodbuhg: String
+  """Code of reason"""
+  kpp: String
+  """Email"""
+  mail: String
+  """Name"""
+  name: String!
+  """Russian classifier of enterprises and organizations"""
+  okpo: String
+  """Parent"""
+  parent: OrganizationOriginalType
+  """Phone number"""
+  phone: String
+  """Name for view"""
+  presentName: String!
+  """Region"""
+  region: RegionType
+  """Rubpnubp code"""
+  rubpnubp: String
+  """Site url"""
+  site: String
+  """Updated date"""
+  updatedAt: DateTime!
+  """Пользователи"""
+  users: [UserType]
+}
+
 input OrganizationParentFilterInputType {
   """`Exact` lookup"""
   exact: ID
@@ -2730,7 +2760,7 @@ type OrganizationType implements Node {
   """Russian classifier of enterprises and organizations"""
   okpo: String
   """Parent"""
-  parent: OrganizationType
+  parent: OrganizationOriginalType
   """Phone number"""
   phone: String
   """Name for view"""
@@ -2908,7 +2938,7 @@ type PointStatisticsType {
   value: Int!
 }
 
-"""Список сквозных привилегий."""
+"""Описание сквозных привилегий."""
 type PrivilegeType {
   """Дата создания"""
   createdAt: DateTime!
@@ -3083,6 +3113,11 @@ type Query {
     districtId: Int!
   ): DistrictType
   districts: [DistrictType!]
+  """Дивизионы"""
+  divisions(
+    """Идентификатор пeриода"""
+    periodId: ID!
+  ): [DivisionUnionType]
   """Документ"""
   document(
     """Идентификатор документа"""
@@ -3148,16 +3183,6 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
-  """Получение дивизионов"""
-  periodDivisions(
-    after: String
-    before: String
-    """Advanced filter field"""
-    filter: DivisionFilterInputType
-    first: Int
-    last: Int
-    offset: Int
-  ): DivisionTypeConnection
   """Периоды"""
   periods(
     """Идентификатор периода"""
