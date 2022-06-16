@@ -261,6 +261,8 @@ export type AddPeriodMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Xlsx файл с проектом */
   file: Scalars['Upload'];
+  /** Множественность сбора */
+  multiple: Scalars['Boolean'];
   /** Название периода */
   name: Scalars['String'];
   /** Идентификатор проекта */
@@ -5204,6 +5206,7 @@ export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
   projectId: Scalars['ID'];
   file: Scalars['Upload'];
+  multiple: Scalars['Boolean'];
 }>;
 
 export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };

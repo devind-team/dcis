@@ -4,7 +4,7 @@
     :subheader="project.name"
     :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
     :mutation="addPeriod"
-    :variables="{ name, file, projectId: project.id }"
+    :variables="{ name, file, projectId: project.id, multiple }"
     :update="addPeriodUpdate"
     mutation-name="addPeriod"
     i18n-path="dcis.projects.addPeriod"
@@ -18,11 +18,12 @@
         v-text-field(v-model="name" :label="$t('dcis.periods.addPeriod.name')" :error-messages="errors" :success="valid" autofocus)
       validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.file'))" rules="required")
         v-file-input(v-model="file" :label="$t('dcis.periods.addPeriod.file')" :error-messages="errors" :success="valid")
+      v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import type { PropType, Ref } from '#app'
+import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
 import { AddPeriodMutationPayload, ProjectType } from '~/types/graphql'
 import addPeriod from '~/gql/dcis/mutations/project/add_period.graphql'
@@ -38,8 +39,9 @@ export default defineComponent({
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
-    const name: Ref<string> = ref<string>('')
-    const file: Ref<File | null> = ref<File | null>(null)
+    const name = ref<string>('')
+    const file = ref<File | null>(null)
+    const multiple = ref<boolean>(true)
 
     const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
       const { success } = result.data.addPeriod
@@ -52,7 +54,7 @@ export default defineComponent({
       name.value = ''
       file.value = null
     }
-    return { name, file, addPeriod, addPeriodUpdate, close }
+    return { name, file, multiple, addPeriod, addPeriodUpdate, close }
   }
 })
 </script>
