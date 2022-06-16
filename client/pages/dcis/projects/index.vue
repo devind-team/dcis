@@ -1,6 +1,7 @@
 <template lang="pug">
   bread-crumbs(:items="breadCrumbs")
-    WaveContainer Мои дивизионы
+    WaveContainer
+      h2 {{ userDivisions.map(d => `${d.name} (${d.id})`).join(', ')}}
     v-card
       v-card-title {{ $t('dcis.home') }}
         template(v-if="hasPerm('dcis.add_project')")
@@ -23,10 +24,10 @@ import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
 import { defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useApolloHelpers, useCursorPagination, useFilters, useI18n, useQueryRelay } from '~/composables'
+import { useApolloHelpers, useFilters, useI18n } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
-import projectsQuery from '~/gql/dcis/queries/projects.graphql'
-import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
+import { useUserDivisions } from '~/services/grapqhl/queries/dcis/divisions'
+import { useProjects } from '~/services/grapqhl/queries/dcis/projects'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
 import WaveContainer from '~/components/dcis/ui/WaveContainer.vue'
@@ -55,17 +56,14 @@ export default defineComponent({
 
     const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
 
+    const { data: userDivisions } = useUserDivisions()
     const {
       data: projects,
       pagination: { count, totalCount },
       loading,
       addUpdate,
       deleteUpdate
-    } = useQueryRelay<ProjectsQuery, ProjectsQueryVariables, ProjectType>({
-      document: projectsQuery
-    }, {
-      pagination: useCursorPagination()
-    })
+    } = useProjects()
 
     onMounted(() => {
       if (route.query.projectId) {
@@ -80,6 +78,7 @@ export default defineComponent({
       name,
       headers,
       projects,
+      userDivisions,
       count,
       totalCount,
       loading,

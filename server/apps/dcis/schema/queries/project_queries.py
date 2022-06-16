@@ -76,9 +76,7 @@ class ProjectQueries(graphene.ObjectType):
             user_id: Optional[str] = None,
             project_id: Optional[str] = None
     ) -> list:
-        user: User = info.context.user \
-            if user_id is None \
-            else get_object_or_404(User, pk=from_global_id(user_id)[1])
+        user: User = info.context.user if user_id is None else get_object_or_404(User, pk=from_global_id(user_id)[1])
         return get_user_divisions(user, project_id)
 
     @staticmethod

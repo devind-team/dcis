@@ -20,7 +20,7 @@ class User(AbstractUser):
                 DivisionModelType(
                     division.id,
                     division.name,
-                    division.division._meta.model_name  # noqa
+                    division._meta.model_name  # noqa
                 )
                 for division in instances
             ]
@@ -30,5 +30,5 @@ class User(AbstractUser):
         divisions = []
         for division_model in Project.DIVISION_KIND.values():
             all_divisions = division_model.objects.filter(Q(users=self) | Q(user=self)).all()
-            divisions = [*divisions, *get_division(all_divisions)]
+            divisions.extend(get_division(all_divisions))
         return divisions
