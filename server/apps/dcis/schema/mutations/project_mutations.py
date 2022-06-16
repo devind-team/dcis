@@ -34,6 +34,7 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
             'content_type': graphene.String(required=True)
         }
         permissions = ('dcis.add_project',)
+        auto_context_fields = {'user': 'user'}
 
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
