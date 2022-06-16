@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import type { Ref, ComputedRef, PropType } from '#app'
+import type { PropType } from '#app'
 import { computed, defineComponent, ref, useRoute, provide } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useCommonQuery, useI18n } from '~/composables'
@@ -23,10 +23,10 @@ export default defineComponent({
   setup (props) {
     const { localePath } = useI18n()
     const route = useRoute()
-    const drawer: Ref<boolean> = ref<boolean>(false)
-    const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
+    const drawer = ref<boolean>(false)
+    const links = computed<LinksType[]>(() => ([
       { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
-      { title: 'Aтрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
+      // { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
       { title: 'Дивизионы', to: 'dcis-periods-periodId-divisions', icon: 'briefcase-outline' },
       { title: 'Пользователи', to: 'dcis-periods-periodId-users', icon: 'account-multiple' },
       {
@@ -50,7 +50,7 @@ export default defineComponent({
     })
     provide('periodUpdate', update)
     provide('changeUpdate', changeUpdate)
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => {
+    const bc = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs
       }

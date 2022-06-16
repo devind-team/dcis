@@ -220,6 +220,8 @@ input AddPeriodMutationInput {
   clientMutationId: String
   """Xlsx файл с проектом"""
   file: Upload!
+  """Множественность сбора"""
+  multiple: Boolean!
   """Название периода"""
   name: String!
   """Идентификатор проекта"""

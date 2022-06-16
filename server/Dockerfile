@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.10.5-slim
 
 MAINTAINER Luferov Victor <lyferov@yandex.ru>
 
