@@ -1,5 +1,6 @@
 <template lang="pug">
   bread-crumbs(:items="breadCrumbs")
+    WaveContainer Мои дивизионы
     v-card
       v-card-title {{ $t('dcis.home') }}
         template(v-if="hasPerm('dcis.add_project')")
@@ -28,9 +29,10 @@ import projectsQuery from '~/gql/dcis/queries/projects.graphql'
 import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
+import WaveContainer from '~/components/dcis/ui/WaveContainer.vue'
 
 export default defineComponent({
-  components: { AddProject, BreadCrumbs },
+  components: { WaveContainer, AddProject, BreadCrumbs },
   middleware: 'auth',
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
