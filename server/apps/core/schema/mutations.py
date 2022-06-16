@@ -1,9 +1,8 @@
 import datetime
-from typing import Dict
+
 from django.utils.timezone import make_aware
 
 from django.conf import settings
-from django.db.models import QuerySet
 from django_cbias_auth.schema import CbiasAuthMutation
 from graphql import ResolveInfo
 from devind_core.models import Profile, ProfileValue, Session
@@ -11,6 +10,7 @@ from devind_helpers.orm_utils import get_object_or_none
 from oauth2_provider.models import AccessToken
 
 from apps.core.models import User
+from apps.core.services.user_services import relation_division
 from .types import UserType
 
 
@@ -25,7 +25,7 @@ class AuthCbiasMutation(CbiasAuthMutation):
         description = 'Авторизация через портал https://cbias.ru'
 
     @staticmethod
-    def get_user(info: ResolveInfo, payload: Dict, data: Dict) -> QuerySet[User]:
+    def get_user(info: ResolveInfo, payload: dict, data: dict) -> User:
         """Получение пользователя по данным."""
         user = get_object_or_none(User, profilevalue__profile__code='uuid', profilevalue__value=payload.get('uid'))
         if user is None:
@@ -43,6 +43,7 @@ class AuthCbiasMutation(CbiasAuthMutation):
             )
         user.agreement = make_aware(datetime.datetime.now())
         user.save(update_fields=('agreement',))
+        relation_division(user, data)
         return user
 
     @staticmethod
