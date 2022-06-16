@@ -2024,9 +2024,6 @@ export type DivisionType = Node & {
   period: PeriodType;
 };
 
-/** Описание юнион типа дивизионов. */
-export type DivisionUnionType = DepartmentType | OrganizationOriginalType;
-
 /** Debugging information for the current query. */
 export type DjangoDebug = {
   __typename?: 'DjangoDebug';
@@ -3716,7 +3713,7 @@ export type Query = {
   district?: Maybe<DistrictType>;
   districts?: Maybe<Array<DistrictType>>;
   /** Дивизионы */
-  divisions?: Maybe<Array<Maybe<DivisionUnionType>>>;
+  divisions?: Maybe<Array<Maybe<DivisionModelType>>>;
   /** Документ */
   document?: Maybe<DocumentType>;
   /** Статусы документов */
@@ -5419,7 +5416,7 @@ export type DivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DepartmentType', id: string, name: string } | { __typename: 'OrganizationOriginalType', id: string, name: string } | null> | null };
+export type DivisionsQuery = { __typename?: 'Query', divisions?: Array<{ __typename: 'DivisionModelType', id: number, name: string } | null> | null };
 
 export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];

@@ -125,8 +125,8 @@ class DivisionModelType(graphene.ObjectType):
     """Описание обобщенного типа дивизиона."""
 
     id = graphene.Int(required=True, description='Идентификатор модели дивизиона')
-    model = graphene.String(required=True, description='Модель дивизиона: department, organization')
     name = graphene.String(required=True, description='Название дивизиона')
+    model = graphene.String(required=True, description='Модель дивизиона: department, organization')
 
 
 class OrganizationOriginalType(DjangoObjectType):
@@ -158,13 +158,6 @@ class OrganizationOriginalType(DjangoObjectType):
     @resolver_hints(model_field='')
     def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
         return organization.users.all()
-
-
-class DivisionUnionType(graphene.Union):
-    """Описание юнион типа дивизионов."""
-
-    class Meta:
-        types = (OrganizationOriginalType, DepartmentType)
 
 
 class PrivilegeType(DjangoObjectType):
@@ -238,14 +231,14 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_sheets(document: Document, info: ResolveInfo):
-        sheets: list[list[dict]] = []
-        for sheet in document.sheets.all():
-            sheets.append(SheetUploader(
+        return [
+            SheetUploader(
                 sheet=sheet,
                 fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
                 document_id=document.id
-            ).unload())
-        return sheets
+            ).unload()
+            for sheet in document.sheets.all()
+        ]
 
     @staticmethod
     def resolve_last_status(document: Document, info: ResolveInfo):

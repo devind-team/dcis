@@ -12,15 +12,17 @@ class User(AbstractUser):
     def divisions(self, project: Optional = None) -> list:
         """Получаем дивизионы пользователя в зависимости от проекта или все."""
         from apps.dcis.models import Project
+        from apps.dcis.schema.types import DivisionModelType
 
-        def get_division(instances):
+        def get_division(instances) -> list[DivisionModelType]:
             """Функция, которая возвращает тип, маппенный на DivisionModelType."""
             return [
-                {
-                    'id': division.id,
-                    'model': division._meta.model_name,  # noqa
-                    'name': division.name
-                } for division in instances
+                DivisionModelType(
+                    division.id,
+                    division.name,
+                    division.division._meta.model_name  # noqa
+                )
+                for division in instances
             ]
 
         if project:
