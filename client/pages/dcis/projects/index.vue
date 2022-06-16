@@ -1,7 +1,7 @@
 <template lang="pug">
   bread-crumbs(:items="breadCrumbs")
     WaveContainer
-      h2 {{ userDivisions.map(d => `${d.name} (${d.id})`).join(', ')}}
+      h2 {{ divisions }}
     v-card
       v-card-title {{ $t('dcis.home') }}
         template(v-if="hasPerm('dcis.add_project')")
@@ -22,7 +22,7 @@
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import type { PropType, Ref } from '#app'
-import { defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
+import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
@@ -31,6 +31,7 @@ import { useProjects } from '~/services/grapqhl/queries/dcis/projects'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
 import WaveContainer from '~/components/dcis/ui/WaveContainer.vue'
+import { UserType } from '~/types/graphql'
 
 export default defineComponent({
   components: { WaveContainer, AddProject, BreadCrumbs },
@@ -44,7 +45,7 @@ export default defineComponent({
     const route = useRoute()
     const { defaultClient } = useApolloHelpers()
     const { t, localePath } = useI18n()
-    const { dateTimeHM } = useFilters()
+    const { dateTimeHM, getUserFullName } = useFilters()
     useNuxt2Meta({ title: t('dcis.home') as string })
     const active: Ref<boolean> = ref<boolean>(false)
     const name: Ref<string> = ref<string>('')
@@ -53,10 +54,15 @@ export default defineComponent({
       { text: 'Описание', value: 'description' },
       { text: 'Дата добавления', value: 'createdAt' }
     ]
-
+    const user: Ref<UserType> = toRef(authStore, 'user')
     const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
 
-    const { data: userDivisions } = useUserDivisions()
+    const divisions = computed<string>(() => (
+      user.value.divisions && user.value.divisions.length
+        ? user.value.divisions.map(d => `${d.name} (${d.id})`).join(', ')
+        : getUserFullName(user)
+    ))
+
     const {
       data: projects,
       pagination: { count, totalCount },
@@ -78,7 +84,7 @@ export default defineComponent({
       name,
       headers,
       projects,
-      userDivisions,
+      divisions,
       count,
       totalCount,
       loading,

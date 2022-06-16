@@ -4748,6 +4748,7 @@ export type UserType = Node & {
   birthday?: Maybe<Scalars['Date']>;
   /** Дата добавления */
   createdAt: Scalars['DateTime'];
+  divisions?: Maybe<Array<Maybe<DivisionModelType>>>;
   /** email */
   email: Scalars['String'];
   /** Имя */
@@ -4760,11 +4761,11 @@ export type UserType = Node & {
   isActive: Scalars['Boolean'];
   /** Фамилия */
   lastName: Scalars['String'];
-  notices: NoticeTypeConnection;
-  notifications: NotificationTypeConnection;
+  notices?: Maybe<NoticeTypeConnection>;
+  notifications?: Maybe<NotificationTypeConnection>;
   /** Привилегии пользователя */
   permissions: Array<Maybe<Scalars['String']>>;
-  profileValues: Array<Maybe<ProfileValueType>>;
+  profileValues?: Maybe<Array<Maybe<ProfileValueType>>>;
   /** Сессия пользователя */
   session?: Maybe<SessionType>;
   /** Отчество */

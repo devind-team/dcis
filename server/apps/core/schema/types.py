@@ -19,9 +19,10 @@ class UserType(OptimizedDjangoObjectType):
     session = graphene.Field('devind_core.schema.types.SessionType', description='Сессия пользователя')
     groups = graphene.List('devind_core.schema.types.GroupType', required=True, description='Группы пользователя')
     permissions = graphene.List(graphene.String, required=True, description='Привилегии пользователя')
-    notices = DjangoFilterConnectionField('devind_notifications.schema.NoticeType', required=True)
-    notifications = DjangoFilterConnectionField('devind_notifications.schema.NotificationType', required=True)
-    profile_values = graphene.List('devind_core.schema.types.ProfileValueType', required=True)
+    notices = DjangoFilterConnectionField('devind_notifications.schema.NoticeType')
+    notifications = DjangoFilterConnectionField('devind_notifications.schema.NotificationType')
+    profile_values = graphene.List('devind_core.schema.types.ProfileValueType')
+    divisions = graphene.List('apps.dcis.schema.types.DivisionModelType')
 
     class Meta:
         model = User
@@ -77,3 +78,7 @@ class UserType(OptimizedDjangoObjectType):
     @resolver_hints(model_field='profilevalue_set')
     def resolve_profile_values(user: User, info: ResolveInfo) -> QuerySet['apps.core.schema.types.ProfileValueType']:
         return user.profilevalue_set.all()
+
+    @staticmethod
+    def resolve_divisions(user: User, info: ResolveInfo):
+        return user.divisions()

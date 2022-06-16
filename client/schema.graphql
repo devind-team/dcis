@@ -3921,6 +3921,7 @@ type UserType implements Node {
   birthday: Date
   """Дата добавления"""
   createdAt: DateTime!
+  divisions: [DivisionModelType]
   """email"""
   email: String!
   """Имя"""
@@ -3933,11 +3934,11 @@ type UserType implements Node {
   isActive: Boolean!
   """Фамилия"""
   lastName: String!
-  notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection!
-  notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection!
+  notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection
+  notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection
   """Привилегии пользователя"""
   permissions: [String]!
-  profileValues: [ProfileValueType]!
+  profileValues: [ProfileValueType]
   """Сессия пользователя"""
   session: SessionType
   """Отчество"""

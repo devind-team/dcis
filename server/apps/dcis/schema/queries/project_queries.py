@@ -13,6 +13,7 @@ from apps.core.models import User
 from apps.dcis.models import Project, Period
 from ..types import DivisionModelType, ProjectType, PeriodType
 from ...services.divisions_services import get_user_divisions
+from ...services.project_services import get_projects
 
 
 class ProjectQueries(graphene.ObjectType):
@@ -55,18 +56,23 @@ class ProjectQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_periods(root: Any, info: ResolveInfo, user_id: str, period_id: str, *args, **kwargs):
-        return Period.objects.filter(periodprivilege__user=from_global_id(user_id)[1]).exclude(pk=period_id).all()
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
     def resolve_project(root: Any, info: ResolveInfo, project_id: str, *args, **kwargs):
         return get_object_or_404(Project, pk=from_global_id(project_id)[1])
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
+    def resolve_projects(root: Any, info: ResolveInfo, *args, **kwargs):
+        return get_projects(info.context.user)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_period(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs):
         return get_object_or_404(Period, pk=from_global_id(period_id)[1])
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_periods(root: Any, info: ResolveInfo, user_id: str, period_id: str, *args, **kwargs):
+        return Period.objects.filter(periodprivilege__user=from_global_id(user_id)[1]).exclude(pk=period_id).all()
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

@@ -12,5 +12,11 @@ query Me {
     session {
       ...SessionFields
     }
+    divisions {
+      id
+      model
+      name
+      __typename
+    }
   }
 }
