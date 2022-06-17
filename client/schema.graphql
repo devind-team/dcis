@@ -1878,9 +1878,6 @@ type DivisionType implements Node {
   period: PeriodType!
 }
 
-"""Описание юнион типа дивизионов."""
-union DivisionUnionType = DepartmentType | OrganizationOriginalType
-
 """Debugging information for the current query."""
 type DjangoDebug {
   """Executed SQL queries for this API query."""
@@ -3115,9 +3112,9 @@ type Query {
   districts: [DistrictType!]
   """Дивизионы"""
   divisions(
-    """Идентификатор пeриода"""
+    """Идентификатор периода"""
     periodId: ID!
-  ): [DivisionUnionType]
+  ): [DivisionModelType]
   """Документ"""
   document(
     """Идентификатор документа"""
@@ -3924,6 +3921,7 @@ type UserType implements Node {
   birthday: Date
   """Дата добавления"""
   createdAt: DateTime!
+  divisions: [DivisionModelType]
   """email"""
   email: String!
   """Имя"""
@@ -3936,11 +3934,11 @@ type UserType implements Node {
   isActive: Boolean!
   """Фамилия"""
   lastName: String!
-  notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection!
-  notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection!
+  notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection
+  notifications(after: String, before: String, first: Int, hide: Boolean, last: Int, notice: ID, offset: Int, user: ID): NotificationTypeConnection
   """Привилегии пользователя"""
   permissions: [String]!
-  profileValues: [ProfileValueType]!
+  profileValues: [ProfileValueType]
   """Сессия пользователя"""
   session: SessionType
   """Отчество"""
