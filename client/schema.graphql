@@ -3183,9 +3183,7 @@ type Query {
   """Периоды"""
   periods(
     """Идентификатор периода"""
-    periodId: ID!
-    """Идентификатор пользователя"""
-    userId: ID!
+    projectId: ID!
   ): [PeriodType!]!
   permissions: [PermissionType!]!
   """Привилегии"""

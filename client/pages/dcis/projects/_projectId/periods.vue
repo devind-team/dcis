@@ -6,7 +6,7 @@
         add-period(:update="addPeriodUpdate" :project="project")
           template(#activator="{ on }")
             v-btn(v-on="on" color="primary") Добавить сбор
-    v-data-table(:headers="headers" :items="project.periods" disable-pagination hide-default-footer)
+    v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
       template(#item.name="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
@@ -19,14 +19,15 @@
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { Ref, PropType } from '#app'
-import { defineComponent, inject, onMounted, ref, useRoute, useRouter, toRef } from '#app'
+import { defineComponent, onMounted, ref, useRoute, useRouter, toRef } from '#app'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
-import { PeriodType, ProjectType } from '~/types/graphql'
+import { ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
 import AddPeriod, { AddPeriodMutationResult } from '~/components/dcis/projects/AddPeriod.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
+import { usePeriodsQuery } from '~/services/grapqhl/queries/dcis/periods'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, AddPeriod },
@@ -56,31 +57,26 @@ export default defineComponent({
       { text: 'Статус', value: 'status' },
       { text: 'Дата добавления', value: 'createdAt' }
     ]
-    const projectUpdate: any = inject('projectUpdate')
-    const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
-      projectUpdate(cache, result, (cacheData, { data: { addPeriod: { success, period } } }) => {
-        if (success) {
-          cacheData.project.periods = [period, ...cacheData.project.periods]
-        }
-        return cacheData
-      })
-    }
+    const {
+      data: periods,
+      loading,
+      addUpdate,
+      update
+    } = usePeriodsQuery(route.params.projectId)
+
+    const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => addUpdate(cache, result, 'period')
 
     onMounted(() => {
       if (route.query.periodId) {
-        projectUpdate(
-          defaultClient.cache,
-          { data: { deletePeriod: { id: route.query.periodId } } },
-          (cacheData, { data: { deletePeriod: { id: periodId } } }) => {
-            cacheData.project.periods = cacheData.project.periods.filter((e: PeriodType) => e.id !== periodId)
-            return cacheData
-          }
-        )
+        update(defaultClient.cache, { data: { deletePeriod: { id: route.query.periodId } } }, (cacheData, { data: { deletePeriod: { id: periodId } } }) => {
+          cacheData.periods = cacheData.periods.filter(period => period.id !== periodId)
+          return cacheData
+        })
         router.push(localePath({ name: 'dcis-projects-projectId-periods', params: route.params }))
       }
     })
 
-    return { name, file, headers, hasPerm, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
+    return { name, file, headers, hasPerm, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>
