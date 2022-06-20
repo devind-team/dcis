@@ -2,8 +2,8 @@ name: docs
 
 on:
   # trigger deployment on every push to main branch
-  push:
-    branches: [409-документирование-проекта]
+#  push:
+#    branches: [main]
   # trigger deployment manually
   workflow_dispatch:
 
