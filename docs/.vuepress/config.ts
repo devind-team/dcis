@@ -1,5 +1,5 @@
 //import { defineUserConfig } from 'vuepress'
-import { defineUserConfig } from 'vuepress'
+import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
 import { path } from '@vuepress/utils'

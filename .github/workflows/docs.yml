@@ -40,7 +40,7 @@ jobs:
 
       # run build script
       - name: Build VuePress site
-        working-directory: docs
+        working-directory: ./docs
         run: yarn docs:build
 
       # please check out the docs of the workflow for more details
