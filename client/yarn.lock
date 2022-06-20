@@ -3572,10 +3572,10 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.0.0-beta.33.tgz#530b2f9bee8cb4f03cb587f1cf5ca11a23ebfcf8"
   integrity sha512-TXyMiCcY5a0w5UFax350xU+T79GKJw2XwJ6Punc6sY2RRRgKaEbN1ZF0JCdQhQvD1ooKImHzCRYR8Pldb0xgfg==
 
-"@tiptap/extension-history@^2.0.0-beta.21":
-  version "2.0.0-beta.21"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-history/-/extension-history-2.0.0-beta.21.tgz#5d96a17a83a7130744f0757a3275dd5b11eb1bf7"
-  integrity sha512-0v8Cl30V4dsabdpspLdk+f+lMoIvLFlJN5WRxtc7RRZ5gfJVxPHwooIKdvC51brfh/oJtWFCNMRjhoz0fRaF9A==
+"@tiptap/extension-history@^2.0.0-beta.21", "@tiptap/extension-history@^2.0.0-beta.24":
+  version "2.0.0-beta.24"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-history/-/extension-history-2.0.0-beta.24.tgz#39843e04f57f0bee9dbc77393138e5df99d488fc"
+  integrity sha512-K45Lg4lKUdvFTU5i8prFkBBJxt8s512bYT3JpLN4pVbbQc4znw/GzfIbS0pm0AiMylrwLdx7ynx96tGYBPPgIA==
   dependencies:
     "@types/prosemirror-history" "^1.0.3"
     prosemirror-history "^1.2.0"
