@@ -4,7 +4,7 @@ on:
   # trigger deployment on every push to main branch
   push:
     branches: [409-документирование-проекта]
-   trigger deployment manually
+  # trigger deployment manually
   workflow_dispatch:
 
 jobs:
