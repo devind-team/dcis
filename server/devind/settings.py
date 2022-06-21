@@ -63,7 +63,8 @@ INSTALLED_APPS = [
     'apps.pages',
     'apps.dashboard',
     'apps.dcis',
-    'push_notifications'
+    'push_notifications',
+    'auditlog'
 ]
 
 
@@ -77,6 +78,7 @@ MIDDLEWARE = [
     'devind_core.middleware.TimeRequestMiddleware',
     'devind_core.middleware.LangRequestMiddleware',
     # 'apps.core.middleware.DatabaseRequestsMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 # Список шаблонов
