@@ -31,7 +31,7 @@ export default defineComponent({
         title: 'Пользователи',
         to: 'dcis-periods-periodId-users',
         icon: 'account-multiple',
-        permissions: ['dcis.add_period', 'change_period'],
+        permissions: ['dcis.add_period', 'dcis.change_period'],
         permOr: true
       },
       {
