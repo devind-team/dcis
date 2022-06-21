@@ -28,7 +28,13 @@ export default defineComponent({
       { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
       // { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
       { title: 'Дивизионы', to: 'dcis-periods-periodId-divisions', icon: 'briefcase-outline' },
-      { title: 'Пользователи', to: 'dcis-periods-periodId-users', icon: 'account-multiple' },
+      {
+        title: 'Пользователи',
+        to: 'dcis-periods-periodId-users',
+        icon: 'account-multiple',
+        permissions: ['dcis.add_period', 'change_period'],
+        permOr: true
+      },
       {
         title: 'Настройки',
         to: 'dcis-periods-periodId-settings',
