@@ -1,5 +1,9 @@
 [
   {
+    "name": "Добавление сбора",
+    "key": "add_period"
+  },
+  {
     "name": "Просмотр сбора",
     "key": "view_period"
   },
@@ -10,6 +14,10 @@
   {
     "name": "Удаление сбора",
     "key": "delete_period"
+  },
+  {
+    "name": "Изменение листа",
+    "key": "change_sheet"
   },
   {
     "name": "Добавить новый документ",
@@ -30,6 +38,26 @@
   {
     "name": "Удаление документа",
     "key": "delete_document"
+  },
+  {
+    "name": "Добавление строки документа",
+    "key": "add_rowdimension"
+  },
+  {
+    "name": "Добавление колонки документа",
+    "key": "add_columndimension"
+  },
+  {
+    "name": "Удаление строки документа",
+    "key": "delete_rowdimension"
+  },
+  {
+    "name": "Удаление колонки документа",
+    "key": "delete_columndimension"
+  },
+  {
+    "name": "Назначение объекта сборов для строки документа",
+    "key": "change_division_for_row"
   },
   {
     "name": "Добавление групп в сбор",
@@ -54,25 +82,5 @@
   {
     "name": "Изменение привилегий групп сбора",
     "key": "change_group_privileges"
-  },
-  {
-    "name": "Добавление строки документа",
-    "key": "add_row"
-  },
-  {
-    "name": "Добавление колонки документа",
-    "key": "add_column"
-  },
-  {
-    "name": "Удаление строки документа",
-    "key": "delete_row"
-  },
-  {
-    "name": "Удаление колонки документа",
-    "key": "delete_column"
-  },
-  {
-    "name": "Назначение объекта сборов для строки документа",
-    "key": "change_division_for_row"
   }
 ]
