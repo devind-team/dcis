@@ -4,7 +4,7 @@
     "key": "view_period"
   },
   {
-    "name": "Изменениe объектов сбора",
+    "name": "Изменение объектов сбора",
     "key": "change_division"
   },
   {
@@ -24,7 +24,7 @@
     "key": "edit_document"
   },
   {
-    "name": "Изменениe настроек документа",
+    "name": "Изменение настроек документа",
     "key": "change_document_settings"
   },
   {
@@ -48,11 +48,11 @@
     "key": "delete_period_group_users"
   },
   {
-    "name": "Изменениe привилегий пользователей",
+    "name": "Изменение привилегий пользователей",
     "key": "change_user_privileges"
   },
   {
-    "name": "Изменениe привилегий групп сбора",
+    "name": "Изменение привилегий групп сбора",
     "key": "change_group_privileges"
   },
   {
