@@ -10,8 +10,8 @@ import type { PropType } from '#app'
 import { computed, defineComponent, ref, useRoute, provide } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
-import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 import { usePeriodQuery } from '~/services/grapqhl/queries/dcis/periods'
+import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 
 export default defineComponent({
   components: { LeftNavigatorDriver },
