@@ -9,10 +9,9 @@
 import type { PropType } from '#app'
 import { computed, defineComponent, ref, useRoute, provide } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
-import { useCommonQuery, useI18n } from '~/composables'
-import { PeriodQuery, PeriodQueryVariables } from '~/types/graphql'
-import periodQuery from '~/gql/dcis/queries/period.graphql'
+import { useI18n } from '~/composables'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
+import { usePeriodQuery } from '~/services/grapqhl/queries/dcis/periods'
 
 export default defineComponent({
   components: { LeftNavigatorDriver },
@@ -48,12 +47,7 @@ export default defineComponent({
       loading,
       update,
       changeUpdate
-    } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
-      document: periodQuery,
-      variables: () => ({
-        periodId: route.params.periodId
-      })
-    })
+    } = usePeriodQuery(route.params.periodId)
     provide('periodUpdate', update)
     provide('changeUpdate', changeUpdate)
     const bc = computed<BreadCrumbsItem[]>(() => {
