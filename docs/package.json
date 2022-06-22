@@ -1,0 +1,17 @@
+{
+  "name": "documentation",
+  "version": "1.0.0",
+  "scripts": {
+    "docs:build": "vuepress build --clean-cache",
+    "docs:clean": "rimraf .vuepress/.temp .vuepress/.cache .vuepress/dist",
+    "docs:dev": "vuepress dev --clean-cache"
+  },
+  "devDependencies": {
+    "vuepress": "^2.0.0-beta.48"
+  },
+  "dependencies": {
+    "@vuepress/plugin-register-components": "2.0.0-beta.48",
+    "rimraf": "^3.0.2",
+    "vue": "^3.2.37"
+  }
+}
