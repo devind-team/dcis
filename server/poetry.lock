@@ -425,7 +425,7 @@ dev = ["tox", "bump2version (<1)", "sphinx (<2)", "importlib-metadata (<3)", "im
 
 [[package]]
 name = "devind-core"
-version = "0.7.0"
+version = "0.7.1"
 description = "Devind core."
 category = "main"
 optional = false
@@ -1553,7 +1553,7 @@ numpy = ">=1.17.3,<1.25.0"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.5.12"
+version = "1.6.0"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
 optional = false
@@ -2130,8 +2130,8 @@ deprecated = [
     {file = "Deprecated-1.2.13.tar.gz", hash = "sha256:43ac5335da90c31c24ba028af536a91d41d53f9e6901ddb021bcc572ce44e38d"},
 ]
 devind-core = [
-    {file = "devind_core-0.7.0-py3-none-any.whl", hash = "sha256:7a473ea34f88630be2649c5e2f969193eac87667c2a80c10d54a634cc0c20625"},
-    {file = "devind_core-0.7.0.tar.gz", hash = "sha256:13641008ae36072055979be0d1c9c6182ce1703a11aa5f4bb82074626a242e68"},
+    {file = "devind_core-0.7.1-py3-none-any.whl", hash = "sha256:ad31339c3d5ae60fde5484309e237f87f938c33e7322752f8c1116d5b710895b"},
+    {file = "devind_core-0.7.1.tar.gz", hash = "sha256:d79c93d2c186b666094d515543c76d348ad8424b4c3a23db349096f29c3fc0ce"},
 ]
 devind-dictionaries = [
     {file = "devind_dictionaries-0.4.2-py3-none-any.whl", hash = "sha256:92b96b3cc491874edf98c8611478062c34e29bf7f11333e318f58f17003ef852"},
@@ -2923,8 +2923,8 @@ scipy = [
     {file = "scipy-1.8.1.tar.gz", hash = "sha256:9e3fb1b0e896f14a85aa9a28d5f755daaeeb54c897b746df7a55ccb02b340f33"},
 ]
 sentry-sdk = [
-    {file = "sentry-sdk-1.5.12.tar.gz", hash = "sha256:259535ba66933eacf85ab46524188c84dcb4c39f40348455ce15e2c0aca68863"},
-    {file = "sentry_sdk-1.5.12-py2.py3-none-any.whl", hash = "sha256:778b53f0a6c83b1ee43d3b7886318ba86d975e686cb2c7906ccc35b334360be1"},
+    {file = "sentry-sdk-1.6.0.tar.gz", hash = "sha256:b82ad57306d5546713f15d5d70daea0408cf7f998c7566db16e0e6257e51e561"},
+    {file = "sentry_sdk-1.6.0-py2.py3-none-any.whl", hash = "sha256:ddbd191b6f4e696b7845b4d87389898ae1207981faf114f968a57363aa6be03c"},
 ]
 service-identity = [
     {file = "service-identity-21.1.0.tar.gz", hash = "sha256:6e6c6086ca271dc11b033d17c3a8bea9f24ebff920c587da090afc9519419d34"},

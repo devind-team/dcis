@@ -14,6 +14,7 @@ from apps.dcis.models import Project, Period
 from ..types import DivisionModelType, ProjectType, PeriodType
 from ...services.divisions_services import get_user_divisions
 from ...services.project_services import get_projects
+from ...services.period_services import get_periods
 
 
 class ProjectQueries(graphene.ObjectType):
@@ -35,8 +36,7 @@ class ProjectQueries(graphene.ObjectType):
     )
     periods = DjangoListField(
         PeriodType,
-        user_id=graphene.ID(required=True, description='Идентификатор пользователя'),
-        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        project_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Периоды'
     )
@@ -71,8 +71,8 @@ class ProjectQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_periods(root: Any, info: ResolveInfo, user_id: str, period_id: str, *args, **kwargs):
-        return Period.objects.filter(periodprivilege__user=from_global_id(user_id)[1]).exclude(pk=period_id).all()
+    def resolve_periods(root: Any, info: ResolveInfo, project_id: str, *args, **kwargs):
+        return get_periods(info.context.user, from_global_id(project_id)[1])
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

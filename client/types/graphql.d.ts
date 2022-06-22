@@ -3983,8 +3983,7 @@ export type QueryPeriodArgs = {
 
 /** Схема запросов данных. */
 export type QueryPeriodsArgs = {
-  periodId: Scalars['ID'];
-  userId: Scalars['ID'];
+  projectId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -5062,7 +5061,7 @@ export type LogRequestsQuery = { __typename?: 'Query', logRequests: { __typename
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> | null } | null };
 
 export type PermissionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5449,8 +5448,7 @@ export type PeriodQueryVariables = Exact<{
 export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, documents?: Array<{ __typename: 'DocumentType', id: string, version: number, comment: string, createdAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, divisions?: Array<{ __typename: 'DivisionType', id: string, objectId: number } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
 export type PeriodsQueryVariables = Exact<{
-  userId: Scalars['ID'];
-  periodId: Scalars['ID'];
+  projectId: Scalars['ID'];
 }>;
 
 export type PeriodsQuery = { __typename?: 'Query', periods: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null }> };
