@@ -425,7 +425,7 @@ dev = ["tox", "bump2version (<1)", "sphinx (<2)", "importlib-metadata (<3)", "im
 
 [[package]]
 name = "devind-core"
-version = "0.7.0"
+version = "0.7.1"
 description = "Devind core."
 category = "main"
 optional = false
@@ -2130,8 +2130,8 @@ deprecated = [
     {file = "Deprecated-1.2.13.tar.gz", hash = "sha256:43ac5335da90c31c24ba028af536a91d41d53f9e6901ddb021bcc572ce44e38d"},
 ]
 devind-core = [
-    {file = "devind_core-0.7.0-py3-none-any.whl", hash = "sha256:7a473ea34f88630be2649c5e2f969193eac87667c2a80c10d54a634cc0c20625"},
-    {file = "devind_core-0.7.0.tar.gz", hash = "sha256:13641008ae36072055979be0d1c9c6182ce1703a11aa5f4bb82074626a242e68"},
+    {file = "devind_core-0.7.1-py3-none-any.whl", hash = "sha256:ad31339c3d5ae60fde5484309e237f87f938c33e7322752f8c1116d5b710895b"},
+    {file = "devind_core-0.7.1.tar.gz", hash = "sha256:d79c93d2c186b666094d515543c76d348ad8424b4c3a23db349096f29c3fc0ce"},
 ]
 devind-dictionaries = [
     {file = "devind_dictionaries-0.4.2-py3-none-any.whl", hash = "sha256:92b96b3cc491874edf98c8611478062c34e29bf7f11333e318f58f17003ef852"},
