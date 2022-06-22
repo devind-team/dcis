@@ -16,8 +16,13 @@ def get_periods(user: User, project_id: int):
     divisions: dict[str, int] = get_user_division_ids(user, project_id)
     period_divisions_filter = Q()
     for division_name, division_values in divisions.items():
-        period_divisions_filter |= Q(project__content_type__model=division_name, division__object_id__in=division_values)
+        period_divisions_filter |= Q(
+            project__content_type__model=division_name,
+            division__object_id__in=division_values
+        )
     period_division_ids: Sequence[int] = Period.objects \
         .filter(period_divisions_filter) \
         .values_list('pk', flat=True)
-    return Period.objects.filter(pk__in=[*period_user_ids, *period_division_ids]).all()
+    return Period.objects \
+        .filter(pk__in=[*period_user_ids, *period_division_ids], project_id=project_id) \
+        .all()
