@@ -1,18 +1,30 @@
 [
   {
-    "name": "Просмотр сбора",
-    "key": "view_period"
+    "name": "Изменение периода сбора",
+    "key": "change_period"
   },
   {
-    "name": "Изменение объектов сбора",
-    "key": "change_division"
+    "name": "Изменение дивизионов периода сбора",
+    "key": "change_divisions"
   },
   {
-    "name": "Удаление сбора",
-    "key": "delete_period"
+    "name": "Изменение пользователей периода сбора",
+    "key": "change_users"
   },
   {
-    "name": "Добавить новый документ",
+    "name": "Изменение листа",
+    "key": "change_sheet"
+  },
+  {
+    "name": "Добавление строки документа",
+    "key": "add_rowdimension"
+  },
+  {
+    "name": "Удаление строки документа",
+    "key": "delete_rowdimension"
+  },
+  {
+    "name": "Добавление нового документа",
     "key": "add_document"
   },
   {
@@ -20,59 +32,11 @@
     "key": "view_document"
   },
   {
-    "name": "Редактирование документа",
-    "key": "edit_document"
-  },
-  {
-    "name": "Изменение настроек документа",
-    "key": "change_document_settings"
-  },
-  {
     "name": "Удаление документа",
     "key": "delete_document"
   },
   {
-    "name": "Добавление групп в сбор",
-    "key": "add_period_group"
-  },
-  {
-    "name": "Удаление групп из сбора",
-    "key": "delete_period_group"
-  },
-  {
-    "name": "Добавление пользователей в группу сбора",
-    "key": "add_period_group_users"
-  },
-  {
-    "name": "Удаление пользователей из группы сбора",
-    "key": "delete_period_group_users"
-  },
-  {
-    "name": "Изменение привилегий пользователей",
-    "key": "change_user_privileges"
-  },
-  {
-    "name": "Изменение привилегий групп сбора",
-    "key": "change_group_privileges"
-  },
-  {
-    "name": "Добавление строки документа",
-    "key": "add_row"
-  },
-  {
-    "name": "Добавление колонки документа",
-    "key": "add_column"
-  },
-  {
-    "name": "Удаление строки документа",
-    "key": "delete_row"
-  },
-  {
-    "name": "Удаление колонки документа",
-    "key": "delete_column"
-  },
-  {
-    "name": "Назначение объекта сборов для строки документа",
-    "key": "change_row"
+    "name": "Изменение значения ячейки документа",
+    "key": "change_value"
   }
 ]

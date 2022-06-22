@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import Set
 
 import graphene
 from django.db.models import QuerySet
@@ -11,6 +11,7 @@ from apps.core.models import User
 from devind_core.filters import UserFilterSet
 from devind_core.schema.connections.countable_connection import CountableConnection
 from devind_helpers.optimized import OptimizedDjangoObjectType
+from apps.dcis.services.divisions_services import get_user_divisions
 
 
 class UserType(OptimizedDjangoObjectType):
@@ -49,7 +50,7 @@ class UserType(OptimizedDjangoObjectType):
     @staticmethod
     def resolve_session(user: User, info: ResolveInfo) -> QuerySet:
         from devind_core.models import Session
-        token: Optional[str] = info.context.META.get('HTTP_AUTHORIZATION', None)
+        token: str | None = info.context.META.get('HTTP_AUTHORIZATION', None)
         return user.session_set.latest('created_at') \
             if token is None \
             else Session.objects.get(access_token__token=token[7:])
@@ -81,4 +82,4 @@ class UserType(OptimizedDjangoObjectType):
 
     @staticmethod
     def resolve_divisions(user: User, info: ResolveInfo):
-        return user.divisions()
+        return get_user_divisions(user)
