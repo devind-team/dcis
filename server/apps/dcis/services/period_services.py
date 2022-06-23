@@ -1,9 +1,10 @@
 from typing import Sequence
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+
 from apps.core.models import User
-from apps.dcis.models import Period
 from apps.dcis.helpers.divisions import get_user_division_ids
+from apps.dcis.models import Period, Privilege, PeriodGroup
 
 
 def get_periods(user: User, project_id: int):
@@ -26,3 +27,19 @@ def get_periods(user: User, project_id: int):
     return Period.objects \
         .filter(pk__in=[*period_user_ids, *period_division_ids], project_id=project_id) \
         .all()
+
+
+def get_user_period_privileges(user: User, period: Period) -> QuerySet[Privilege]:
+    """Получение привилегий пользователя в периоде."""
+    return Privilege.objects.filter(
+        Q(periodgroup__period=period, periodgroup__users=user) |
+        Q(periodprivilege__period=period, periodprivilege__user=user)
+    ).all()
+
+
+def get_user_group_privileges(user: User, period_group: PeriodGroup) -> QuerySet[Privilege]:
+    return Privilege.objects.filter(
+        Q(periodprivilege__user=user, periodprivilege__period_id=period_group.period_id) |
+        Q(periodgroup=period_group, periodgroup__users=user)
+    ).all()
+

@@ -67,15 +67,15 @@ import { computed, defineComponent, PropType, ref } from '#app'
 import {
   PeriodGroupType,
   PeriodType,
-  UserPrivilegesQuery,
-  UserPrivilegesQueryVariables,
+  UserGroupPrivilegesQuery,
+  UserGroupPrivilegesQueryVariables,
   UserType,
   DeleteUserFromPeriodGroupMutation,
   DeleteUserFromPeriodGroupMutationVariables,
   DeleteUserFromPeriodGroupMutationPayload
 } from '~/types/graphql'
 import { useCommonQuery, useFilters, useI18n } from '~/composables'
-import userPrivilegesQuery from '~/gql/dcis/queries/user_privileges.graphql'
+import userGroupPrivilegesQuery from '~/gql/dcis/queries/user_group_privileges.graphql'
 import deleteUserFromPeriodGroup from '~/gql/dcis/mutations/project/delete_user_from_period_group.graphql'
 import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
@@ -111,8 +111,8 @@ export default defineComponent({
       }
     })
     const options = ref({ enabled: active, fetchPolicy: 'cache-and-network' as const })
-    const { data: userPrivileges, loading, update } = useCommonQuery<UserPrivilegesQuery, UserPrivilegesQueryVariables>({
-      document: userPrivilegesQuery,
+    const { data: userPrivileges, loading, update } = useCommonQuery<UserGroupPrivilegesQuery, UserGroupPrivilegesQueryVariables>({
+      document: userGroupPrivilegesQuery,
       variables: () => ({ userId: selectUser.value?.id, periodGroupId: props.periodGroup.id }),
       options: options.value
     })
