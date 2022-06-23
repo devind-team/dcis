@@ -14,8 +14,8 @@ def get_user_divisions(user: User, project: Project | int | None = None) -> list
             all_divisions = division_model.objects.filter(Q(users=user) | Q(user=user)).all()
             divisions.extend(_get_division(all_divisions))
         return divisions
-    project = Project.objects.get(pk=project) if type(project) == int else project
-    return _get_division(project.division.objects.filter(Q(users=user) | Q(user=user)))
+    project = Project.objects.get(pk=project) if type(project) in (int, str) else project
+    return _get_division(project.division.objects.filter(Q(users=user) | Q(user=user)).all())
 
 
 def document_in_user_divisions(document: Document, user: User) -> bool:

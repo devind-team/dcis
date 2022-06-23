@@ -35,6 +35,12 @@ mutation GetToken(
       session {
         ...SessionFields
       }
+      divisions {
+        id
+        model
+        name
+        __typename
+      }
     }
   }
 }

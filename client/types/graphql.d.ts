@@ -1627,28 +1627,10 @@ export type ContentTypeType = {
   __typename?: 'ContentTypeType';
   appLabel: Scalars['String'];
   id: Scalars['ID'];
-  /** Модель, связанная с действием */
-  logentrySet: LogEntryTypeConnection;
   model: Scalars['String'];
   permissionSet: Array<PermissionType>;
   /** Тип дивизиона */
   projectSet: ProjectTypeConnection;
-};
-
-/** Тип модели Django. */
-export type ContentTypeTypeLogentrySetArgs = {
-  action_Contains?: InputMaybe<Scalars['String']>;
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  contentType_Model_Icontains?: InputMaybe<Scalars['String']>;
-  createdAt_Gt?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Lt?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  objectId_Icontains?: InputMaybe<Scalars['String']>;
-  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Тип модели Django. */
@@ -2251,28 +2233,26 @@ export type GroupTypeUserSetArgs = {
 
 /** An enumeration. */
 export type LogEntryAction =
-  /** addition */
+  /** create */
+  | 'A_0'
+  /** update */
   | 'A_1'
-  /** change */
-  | 'A_2'
-  /** deletion */
-  | 'A_3';
+  /** delete */
+  | 'A_2';
 
 /** Логирование действия пользователя. */
 export type LogEntryType = Node & {
   __typename?: 'LogEntryType';
-  /** Действие пользователя */
   action: LogEntryAction;
   /** Модель, связанная с действием */
   contentType?: Maybe<ContentTypeType>;
   /** Дата и время действия */
-  createdAt: Scalars['DateTime'];
+  createdAt?: Maybe<Scalars['DateTime']>;
   /** The ID of the object. */
   id: Scalars['ID'];
-  /** Идентификатор модели */
-  objectId?: Maybe<Scalars['String']>;
+  objectId?: Maybe<Scalars['Int']>;
   /** Измененные данные */
-  payload: Scalars['JSONString'];
+  payload?: Maybe<Scalars['String']>;
   /** Сессия пользователя */
   session?: Maybe<SessionType>;
 };
@@ -3780,10 +3760,12 @@ export type Query = {
   user?: Maybe<UserType>;
   /** Дивизионы пользователя */
   userDivisions: Array<Maybe<DivisionModelType>>;
+  /** Привилегии назначенных пользователей периодов */
+  userGroupPrivileges: Array<PrivilegeType>;
   /** Доступная информация о пользователе */
   userInformation?: Maybe<UserType>;
-  /** Привилегии назначенных пользователей периодов */
-  userPrivileges: Array<PrivilegeType>;
+  /** Привилегии пользователя для периода */
+  userPeriodPrivileges: Array<PrivilegeType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
   /** Файлы значения ячейки типа `Файл` */
@@ -3886,13 +3868,9 @@ export type QueryLogEntryArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
   contentType_Model_Icontains?: InputMaybe<Scalars['String']>;
-  createdAt_Gt?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Lt?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
-  objectId_Icontains?: InputMaybe<Scalars['String']>;
+  objectId_Icontains?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
   userId?: InputMaybe<Scalars['ID']>;
 };
@@ -4049,14 +4027,20 @@ export type QueryUserDivisionsArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryUserGroupPrivilegesArgs = {
+  periodGroupId: Scalars['ID'];
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Схема запросов данных. */
 export type QueryUserInformationArgs = {
   userId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
-export type QueryUserPrivilegesArgs = {
-  periodGroupId: Scalars['ID'];
-  userId: Scalars['ID'];
+export type QueryUserPeriodPrivilegesArgs = {
+  periodId: Scalars['ID'];
+  userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Схема запросов данных. */
@@ -4965,7 +4949,7 @@ export type GetTokenMutationVariables = Exact<{
   password: Scalars['String'];
 }>;
 
-export type GetTokenMutation = { __typename?: 'Mutation', getToken: { __typename?: 'GetTokenMutationPayload', success: boolean, accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, refreshToken?: string | null, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } };
+export type GetTokenMutation = { __typename?: 'Mutation', getToken: { __typename?: 'GetTokenMutationPayload', success: boolean, accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, refreshToken?: string | null, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> | null } | null } };
 
 export type LogoutMutationVariables = Exact<{
   sessionId: Scalars['ID'];
@@ -5032,7 +5016,7 @@ export type LogEntryQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']>;
 }>;
 
-export type LogEntryQuery = { __typename?: 'Query', logEntry: { __typename: 'LogEntryTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'LogEntryTypeEdge', node?: { __typename: 'LogEntryType', id: string, action: LogEntryAction, objectId?: string | null, payload: any, createdAt: any, session?: { __typename: 'SessionType', os: string, browser: string } | null, contentType?: { __typename: 'ContentTypeType', appLabel: string, model: string } | null } | null } | null> } };
+export type LogEntryQuery = { __typename?: 'Query', logEntry: { __typename: 'LogEntryTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'LogEntryTypeEdge', node?: { __typename: 'LogEntryType', id: string, action: LogEntryAction, objectId?: number | null, payload?: string | null, createdAt?: any | null, session?: { __typename: 'SessionType', os: string, browser: string } | null, contentType?: { __typename: 'ContentTypeType', appLabel: string, model: string } | null } | null } | null> } };
 
 export type LogEntryGeneralQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
@@ -5040,7 +5024,7 @@ export type LogEntryGeneralQueryVariables = Exact<{
   offset?: InputMaybe<Scalars['Int']>;
 }>;
 
-export type LogEntryGeneralQuery = { __typename?: 'Query', logEntry: { __typename: 'LogEntryTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'LogEntryTypeEdge', node?: { __typename: 'LogEntryType', id: string, action: LogEntryAction, objectId?: string | null, payload: any, createdAt: any, session?: { __typename: 'SessionType', os: string, browser: string, user: { __typename?: 'UserType', id: string, username: string, lastName: string, firstName: string, sirName?: string | null, email: string } } | null, contentType?: { __typename: 'ContentTypeType', appLabel: string, model: string } | null } | null } | null> } };
+export type LogEntryGeneralQuery = { __typename?: 'Query', logEntry: { __typename: 'LogEntryTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'LogEntryTypeEdge', node?: { __typename: 'LogEntryType', id: string, action: LogEntryAction, objectId?: number | null, payload?: string | null, createdAt?: any | null, session?: { __typename: 'SessionType', os: string, browser: string, user: { __typename?: 'UserType', id: string, username: string, lastName: string, firstName: string, sirName?: string | null, email: string } } | null, contentType?: { __typename: 'ContentTypeType', appLabel: string, model: string } | null } | null } | null> } };
 
 export type LogGeneralRequestsQueryVariables = Exact<{
   pageContains?: InputMaybe<Scalars['String']>;
@@ -5123,6 +5107,8 @@ export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: st
 
 export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null };
 
+export type PrivilegesFieldsFragment = { __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any };
+
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } };
 
 export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> };
@@ -5137,7 +5123,7 @@ export type AuthCbiasMutationVariables = Exact<{
   clientSecret: Scalars['String'];
 }>;
 
-export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null } | null } | null };
+export type AuthCbiasMutation = { __typename?: 'Mutation', authCbias?: { __typename: 'AuthCbiasMutationOutput', success: boolean, token?: { __typename?: 'AuthTokenInfoType', accessToken?: string | null, expiresIn?: number | null, tokenType?: string | null, scope?: string | null, redirectUris?: string | null } | null, user?: { __typename: 'UserType', birthday?: any | null, isActive: boolean, agreement?: any | null, permissions: Array<string | null>, id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, createdAt: any, session?: { __typename: 'SessionType', id: string, ip: string, browser: string, os: string, device: string, date?: any | null } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> | null } | null } | null };
 
 export type AddBudgetClassificationMutationVariables = Exact<{
   code: Scalars['String'];
@@ -5206,7 +5192,7 @@ export type AddPeriodMutationVariables = Exact<{
   multiple: Scalars['Boolean'];
 }>;
 
-export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
+export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string }> | null } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
 
 export type AddPeriodGroupMutationVariables = Exact<{
   name: Scalars['String'];
@@ -5461,7 +5447,7 @@ export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
 
-export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, periods?: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null> | null, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } };
+export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } };
 
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
@@ -5488,12 +5474,19 @@ export type UserDivisionsQueryVariables = Exact<{
 
 export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
 
-export type UserPrivilegesQueryVariables = Exact<{
+export type UserGroupPrivilegesQueryVariables = Exact<{
   periodGroupId: Scalars['ID'];
   userId: Scalars['ID'];
 }>;
 
-export type UserPrivilegesQuery = { __typename?: 'Query', userPrivileges: Array<{ __typename?: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
+export type UserGroupPrivilegesQuery = { __typename?: 'Query', userGroupPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
+
+export type UserPeriodPrivilegesQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+  userId?: InputMaybe<Scalars['ID']>;
+}>;
+
+export type UserPeriodPrivilegesQuery = { __typename?: 'Query', userPeriodPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
 
 export type ValueFilesQueryVariables = Exact<{
   documentId: Scalars['ID'];
