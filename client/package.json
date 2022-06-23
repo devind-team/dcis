@@ -19,7 +19,7 @@
     "@nuxtjs/vuetify": "^1.12.3",
     "@pinia/nuxt": "^0.1.9",
     "@vue/apollo-composable": "^4.0.0-alpha.17",
-    "@vueuse/core": "^8.7.4",
+    "@vueuse/core": "^8.7.5",
     "@vueuse/integrations": "^8.7.4",
     "accounting": "^0.4.1",
     "apexcharts": "^3.35.3",
