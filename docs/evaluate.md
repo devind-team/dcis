@@ -7,26 +7,30 @@
 Предварительной проверкой должен служить последний статус, значение которого 
 должно быть `Document.last_status.editable == True` в таблице **dcis_status.**
 
+Значение может измениться
+- `Cell.editable == True` - ячейке может быть установлено значение
+- `Cell.formula is not None` - значение ячейки устанавливается только в результате расчета формул
+
 После чего проверяется возможность редактирования по привилегиям:
 - `dcis.change_value` - пользователь обладает глобальной привилегией для изменения значения
 - `change_value` - локальная привилегия, позволяющая менять значения документа в выбранном периоде
-- `Document.object_id is None` and `Period.multiple == False` and `user_divisions in Period.divisions` - в периоде 
+- `Period.multiple == False` and `user_divisions in Period.divisions` and `Document.object_id is None` - в периоде 
   может быть только один документ с одной версией и пользователь присутствует в дивизионе
-- `Document.object_id == Period.user_division` and `Period.multiple == True` - на каждый дивизион создаются свои
+  - `Row.parent_id is None` and `Row.division_id is None` - изменение первого уровня
+  - `Row.parent_id is not None` and `Row.division_id in user_divisions` - изменение строк второго и глубже уровней,
+    при этом строка должна быть добавлена пользователем, который находиться в дивизионе
+- `Period.multiple == True` and `Document.object_id == Period.user_division` - на каждый дивизион создаются свои
   документы, в которых и происходит изменение значений
 
 > `Period.multiple` - флаг влияющий на поведение сбора. Если значения **True**, то у каждого дивизиона есть свои
-> документы с версиями. Если значение `False`, на все сборы предполагаются различные версии одного документа.
+> документы с версиями. Если значение **False**, на все сборы предполагаются различные версии одного документа.
 
-### Значение может измениться
-- `Cell.editable == True` - ячейке может быть установлено значение
-- `Cell.formula is not None` - значение ячейки устанавливается только в результате расчета формул
 
 ### Ссылки на связанные файлы
 
 - [Мутация для изменения значения ячейки](../server/apps/dcis/schema/mutations/value_mutations.py)
 - [Сервис для изменения значений](../server/apps/dcis/services/value_services.py)
-- [Привилегия для изменения значения](../server/apps/dcis/permissions/sheet_permissions.py)
+- [Привилегия для изменения значения](../server/apps/dcis/permissions/value_permissions.py)
 
 ## Изменение Cell
 
