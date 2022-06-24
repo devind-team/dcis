@@ -3668,10 +3668,10 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-2.0.0-beta.15.tgz#f08cff1b78f1c6996464dfba1fef8ec1e107617f"
   integrity sha512-S3j2+HyV2gsXZP8Wg/HA+YVXQsZ3nrXgBM9HmGAxB0ESOO50l7LWfip0f3qcw1oRlh5H3iLPkA6/f7clD2/TFA==
 
-"@tiptap/extension-underline@^2.0.0-beta.23":
-  version "2.0.0-beta.23"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-underline/-/extension-underline-2.0.0-beta.23.tgz#050a31ac55b7ad63e8abf57ac941c62e255f57b8"
-  integrity sha512-pMjFH/NpFWLd2XQQa5rG9rGVQ9mu3ygdtu6VGfJ3aAjzBiyLXDKhE4biIFWyFsr8zLpp7DjwbrmLV0UGvbG1WQ==
+"@tiptap/extension-underline@^2.0.0-beta.25":
+  version "2.0.0-beta.25"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-underline/-/extension-underline-2.0.0-beta.25.tgz#b1580b2337a6ba7add5737e886bd88c8655241f2"
+  integrity sha512-kRDdb/mF6QWzFGV3cQuLh6xyXULXaKPL/TghefoOZhwkdIWV/M3zFar5tsZO54+tbIrzxoVP6t7mO2Y5G/SLDQ==
 
 "@tiptap/starter-kit@^2.0.0-beta.185":
   version "2.0.0-beta.185"
@@ -4684,17 +4684,7 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.31.tgz#c90de7126d833dcd3a4c7534d534be2fb41faa4e"
   integrity sha512-ymN2pj6zEjiKJZbrf98UM2pfDd6F2H7ksKw7NDt/ZZ1fh5Ei39X5tABugtT03ZRlWd9imccoK0hE8hpjpU7irQ==
 
-"@vueuse/core@8.7.5":
-  version "8.7.5"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.7.5.tgz#e74a888251ea11a9d432068ce18cbdfc4f810251"
-  integrity sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==
-  dependencies:
-    "@types/web-bluetooth" "^0.0.14"
-    "@vueuse/metadata" "8.7.5"
-    "@vueuse/shared" "8.7.5"
-    vue-demi "*"
-
-"@vueuse/core@^8.7.5":
+"@vueuse/core@8.7.5", "@vueuse/core@^8.7.5":
   version "8.7.5"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.7.5.tgz#e74a888251ea11a9d432068ce18cbdfc4f810251"
   integrity sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==
