@@ -1,6 +1,8 @@
 from typing import Union, Optional, Type
+from graphql_relay import from_global_id
 from devind_helpers.orm_utils import get_object_or_none
 from apps.core.models import User
+from graphql import ResolveInfo
 
 
 def relation_division(user: User, data: dict[str, Union[str, int]]) -> None:
@@ -21,3 +23,15 @@ def relation_division(user: User, data: dict[str, Union[str, int]]) -> None:
     if division is None:
         return
     getattr(user, f'{relation[division_type]}s').add(division)
+
+
+def get_user_from_id_or_context(info: ResolveInfo, user_id: str | int | None = None) -> User:
+    """Получаем пользователя"""
+    if user_id is None:
+        return info.context.user
+    if type(user_id) == str:
+        user_id = from_global_id(user_id)[1]
+    try:
+        return User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return info.context.user

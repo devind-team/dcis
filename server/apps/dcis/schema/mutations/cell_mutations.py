@@ -21,4 +21,7 @@ class AddBudgetClassificationMutationPayload(DjangoCreateMutation):
 class CellMutations(graphene.ObjectType):
     """Мутации, связанные с ячейками."""
 
-    add_budget_classification = AddBudgetClassificationMutationPayload.Field(required=True)
+    add_budget_classification = AddBudgetClassificationMutationPayload.Field(
+        required=True,
+        description='Добавление нового КБК'
+    )

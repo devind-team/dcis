@@ -21,6 +21,12 @@ mutation AuthCbias($uid: String!, $clientId: String, $clientSecret: String!) {
       session {
         ...SessionFields
       }
+      divisions {
+        id
+        model
+        name
+        __typename
+      }
     }
     __typename
   }

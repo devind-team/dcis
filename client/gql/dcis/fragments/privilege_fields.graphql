@@ -1,0 +1,7 @@
+fragment PrivilegesFields on PrivilegeType {
+  id
+  name
+  key
+  createdAt
+  __typename
+}

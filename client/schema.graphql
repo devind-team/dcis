@@ -1516,8 +1516,6 @@ enum ConsumerActionType {
 type ContentTypeType {
   appLabel: String!
   id: ID!
-  """Модель, связанная с действием"""
-  logentrySet(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int): LogEntryTypeConnection!
   model: String!
   permissionSet: [PermissionType!]!
   """Тип дивизиона"""
@@ -2086,28 +2084,26 @@ scalar JSONString
 
 """An enumeration."""
 enum LogEntryAction {
-  """addition"""
+  """create"""
+  A_0
+  """update"""
   A_1
-  """change"""
+  """delete"""
   A_2
-  """deletion"""
-  A_3
 }
 
 """Логирование действия пользователя."""
 type LogEntryType implements Node {
-  """Действие пользователя"""
   action: LogEntryAction!
   """Модель, связанная с действием"""
   contentType: ContentTypeType
   """Дата и время действия"""
-  createdAt: DateTime!
+  createdAt: DateTime
   """The ID of the object."""
   id: ID!
-  """Идентификатор модели"""
-  objectId: String
+  objectId: Int
   """Измененные данные"""
-  payload: JSONString!
+  payload: String
   """Сессия пользователя"""
   session: SessionType
 }
@@ -3141,7 +3137,7 @@ type Query {
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
   hasSettings: Boolean!
-  logEntry(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, objectId_Icontains: String, offset: Int, userId: ID): LogEntryTypeConnection!
+  logEntry(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, first: Int, last: Int, objectId_Icontains: Int, offset: Int, userId: ID): LogEntryTypeConnection!
   logRequests(after: String, before: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, offset: Int, page_Icontains: String, userId: ID): LogRequestTypeConnection!
   """Информация обо мне"""
   me: UserType
@@ -3183,9 +3179,7 @@ type Query {
   """Периоды"""
   periods(
     """Идентификатор периода"""
-    periodId: ID!
-    """Идентификатор пользователя"""
-    userId: ID!
+    projectId: ID!
   ): [PeriodType!]!
   permissions: [PermissionType!]!
   """Привилегии"""
@@ -3249,17 +3243,24 @@ type Query {
     """Пользователь"""
     userId: ID
   ): [DivisionModelType]!
+  """Привилегии назначенных пользователей периодов"""
+  userGroupPrivileges(
+    """Идентификатор группы"""
+    periodGroupId: ID!
+    """Идентификатор пользователя"""
+    userId: ID
+  ): [PrivilegeType!]!
   """Доступная информация о пользователе"""
   userInformation(
     """Идентификатор пользователя"""
     userId: ID!
   ): UserType
-  """Привилегии назначенных пользователей периодов"""
-  userPrivileges(
-    """Идентификатор группы"""
-    periodGroupId: ID!
+  """Привилегии пользователя для периода"""
+  userPeriodPrivileges(
+    """Идентификатор периода"""
+    periodId: ID!
     """Идентификатор пользователя"""
-    userId: ID!
+    userId: ID
   ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!

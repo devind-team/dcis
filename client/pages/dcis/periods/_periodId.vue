@@ -9,9 +9,8 @@
 import type { PropType } from '#app'
 import { computed, defineComponent, ref, useRoute, provide } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
-import { useCommonQuery, useI18n } from '~/composables'
-import { PeriodQuery, PeriodQueryVariables } from '~/types/graphql'
-import periodQuery from '~/gql/dcis/queries/period.graphql'
+import { useI18n } from '~/composables'
+import { usePeriodQuery } from '~/services/grapqhl/queries/dcis/periods'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 
 export default defineComponent({
@@ -28,7 +27,13 @@ export default defineComponent({
       { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
       // { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
       { title: 'Дивизионы', to: 'dcis-periods-periodId-divisions', icon: 'briefcase-outline' },
-      { title: 'Пользователи', to: 'dcis-periods-periodId-users', icon: 'account-multiple' },
+      {
+        title: 'Пользователи',
+        to: 'dcis-periods-periodId-users',
+        icon: 'account-multiple',
+        permissions: ['dcis.add_period', 'dcis.change_period'],
+        permOr: true
+      },
       {
         title: 'Настройки',
         to: 'dcis-periods-periodId-settings',
@@ -42,12 +47,7 @@ export default defineComponent({
       loading,
       update,
       changeUpdate
-    } = useCommonQuery<PeriodQuery, PeriodQueryVariables>({
-      document: periodQuery,
-      variables: () => ({
-        periodId: route.params.periodId
-      })
-    })
+    } = usePeriodQuery(route.params.periodId)
     provide('periodUpdate', update)
     provide('changeUpdate', changeUpdate)
     const bc = computed<BreadCrumbsItem[]>(() => {
