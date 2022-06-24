@@ -1,0 +1,20 @@
+# Модуль {{ module.name }}
+{{ module.docstring }}
+# Функции
+
+| signature | Decorator  | Docstring |
+|:----------|:-----------|:----------|
+{% for function in module_function.items() %}
+|{{ function.name }}{{ function.signature }}|{{ function.decorators }}|{{ function.docstring }}|
+{% endfor %}
+
+{% for i, data in datas.items() %}
+# Класс {{ module_class.name }}
+{{ module_class.docstring }}
+## Методы
+{% for i, data in datas.items() %}
+| signature | Decorator       | Docstring        |
+|:----------|:----------------|:-----------------|
+|{{ own_member.name }}{{ own_member.signature }}|{{ own_member.decorators }}|{{ own_member.docstring }}|
+{% endfor %}
+{% endfor %}
