@@ -77,7 +77,7 @@
     "@tiptap/extension-text-style": "^2.0.0-beta.23",
     "@tiptap/extension-underline": "^2.0.0-beta.23",
     "@tiptap/starter-kit": "^2.0.0-beta.185",
-    "@tiptap/vue-2": "^2.0.0-beta.79",
+    "@tiptap/vue-2": "^2.0.0-beta.83",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.29.0",
     "core-js": "^3.23.2",
