@@ -2,6 +2,7 @@ import os
 import sys
 import django
 import pdoc
+import re
 from devind.settings import BASE_DIR
 import jinja2
 
@@ -26,9 +27,9 @@ def get_function(module_functions: list) -> list:
     for module_function in module_functions:
         function = {
             'name': module_function.name,
-            'docstring': module_function.docstring,
+            'docstring': remove_symbol(module_function.docstring),
             'decorators': module_function.decorators,
-            'signature': str(module_function.signature),
+            'signature': remove_symbol(str(module_function.signature)),
         }
         list_functions.append(function)
     return list_functions
@@ -53,13 +54,17 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
                                                           or ('__' in own_member.name)):
             methods = {
                 'name': own_member.name,
-                'signature': str(own_member.signature),
+                'signature': remove_symbol(str(own_member.signature)),
             }
             list_methods.append(methods)
     return list_methods
 
 
-for module in (pdoc.doc.Module.from_name('apps.core')).submodules:
+def remove_symbol(string: str) -> str:
+    return re.sub(' +', ' ', string.replace('\n', ''))
+
+
+for module in (pdoc.doc.Module.from_name('apps.dcis.models')).submodules:
 # for module in (pdoc.doc.Module.from_name(BASE_DIR.name)).submodules:
     begin = module
     if not ('migrations' in module.fullname):
@@ -68,27 +73,14 @@ for module in (pdoc.doc.Module.from_name('apps.core')).submodules:
                 print(mod_module.source_file)
                 if mod_module.functions:
                     functions = get_function(mod_module.functions)
+                else:
+                    functions = []
                 if mod_module.classes:
                     clazz = classes = get_class(mod_module.classes)
-                    print(clazz)
-                # print(TEMPLATE.render(module=mod_module))
-                # with open(f"./docs/{module_name}.md", "w", encoding="utf8") as f:
-                #     f.write(TEMPLATE.render(module=mod_module))
-
-
-# modules = [pdoc.Module(mod, context=context)
-#            for mod in modules]
-# pdoc.link_inheritance(context)
-#
-#
-# def recursive_htmls(mod):
-#     yield mod.name, mod.text()
-#     for submod in mod.submodules():
-#         yield from recursive_htmls(submod)
-#
-#
-# for mod in modules:
-#     for module_name, html in recursive_htmls(mod):
-#         print(html)
-#         with open(f"./docs/{module_name}.md", "w", encoding="utf8") as f:
-#             f.write(html)
+                else:
+                    clazz = []
+                # print(clazz)
+                print(TEMPLATE.render(module=mod_module, module_function=functions, module_class=clazz))
+                with open(os.path.join(BASE_DIR, 'docs', f'{mod_module.name}.md'), 'w', encoding='utf8') as f:
+                    f.write(TEMPLATE.render(TEMPLATE.render(module=mod_module, module_function=functions,
+                                                            module_class=clazz)))

@@ -1,20 +1,20 @@
 # Модуль {{ module.name }}
 {{ module.docstring }}
 # Функции
-
+{% if module_function %}
 | signature | Decorator  | Docstring |
-|:----------|:-----------|:----------|
-{% for function in module_function.items() %}
-|{{ function.name }}{{ function.signature }}|{{ function.decorators }}|{{ function.docstring }}|
-{% endfor %}
-
-{% for i, data in datas.items() %}
-# Класс {{ module_class.name }}
-{{ module_class.docstring }}
+|:----------|:-----------|:----------|{% for function in module_function %}
+|{{ function.name }}{{ function.signature }}|{{ function.decorators }}|{{ function.docstring }}|{% endfor %}
+{% endif %}
+{% if module_class %}
+{% for class in module_class %}
+# Класс {{ class.name }}
+{{ class.docstring }}
+{% if class.methods %}
 ## Методы
-{% for i, data in datas.items() %}
 | signature | Decorator       | Docstring        |
-|:----------|:----------------|:-----------------|
-|{{ own_member.name }}{{ own_member.signature }}|{{ own_member.decorators }}|{{ own_member.docstring }}|
+|:----------|:----------------|:-----------------|{% for method in class.methods %}
+|{{ method.name }}{{ method.signature }}|{{ method.decorators }}|{{ method.docstring }}|{% endfor %}
+{% endif %}
 {% endfor %}
-{% endfor %}
+{% endif %}
