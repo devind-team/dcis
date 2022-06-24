@@ -31,6 +31,7 @@ class SetValueMutation(BaseMutation):
     ) -> Sequence[CellType]:
         return []
 
+
 class ValueMutations(graphene.ObjectType):
     """Мутации, связанные с ячейками."""
     set_value = SetValueMutation.Field(required=True, description='Установление значения документа')
