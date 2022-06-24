@@ -51,6 +51,7 @@ graphene-django-cud = "^0.10.0"
 django-redis = "^5.2.0"
 django-model-utils = "^4.2.0"
 xlsx-evaluate = "^0.4.2"
+pdoc = "^12.0.2"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
