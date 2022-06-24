@@ -3567,10 +3567,10 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-heading/-/extension-heading-2.0.0-beta.26.tgz#112b14b4d488772bda36abbf7cb2bc8aba7c42f5"
   integrity sha512-nR6W/3rjnZH1Swo7tGBoYsmO6xMvu9MGq6jlm3WVHCB7B3CsrRvCkTwGjVIbKTaZC4bQfx5gvAUpQFvwuU+M5w==
 
-"@tiptap/extension-highlight@^2.0.0-beta.33":
-  version "2.0.0-beta.33"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.0.0-beta.33.tgz#530b2f9bee8cb4f03cb587f1cf5ca11a23ebfcf8"
-  integrity sha512-TXyMiCcY5a0w5UFax350xU+T79GKJw2XwJ6Punc6sY2RRRgKaEbN1ZF0JCdQhQvD1ooKImHzCRYR8Pldb0xgfg==
+"@tiptap/extension-highlight@^2.0.0-beta.35":
+  version "2.0.0-beta.35"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.0.0-beta.35.tgz#0738102b23f69f9c8ddada4f05ccb580d1d50133"
+  integrity sha512-xvEKOyuTj4mhQ8GIOItaSymJhGkWt2gGuCvmFWnTVZAaJJQOlgUTdkmayLCtwoDDP7biiuDhRJokTukGGmhUZw==
 
 "@tiptap/extension-history@^2.0.0-beta.21":
   version "2.0.0-beta.21"
@@ -4684,17 +4684,7 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.31.tgz#c90de7126d833dcd3a4c7534d534be2fb41faa4e"
   integrity sha512-ymN2pj6zEjiKJZbrf98UM2pfDd6F2H7ksKw7NDt/ZZ1fh5Ei39X5tABugtT03ZRlWd9imccoK0hE8hpjpU7irQ==
 
-"@vueuse/core@8.7.5":
-  version "8.7.5"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.7.5.tgz#e74a888251ea11a9d432068ce18cbdfc4f810251"
-  integrity sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==
-  dependencies:
-    "@types/web-bluetooth" "^0.0.14"
-    "@vueuse/metadata" "8.7.5"
-    "@vueuse/shared" "8.7.5"
-    vue-demi "*"
-
-"@vueuse/core@^8.7.5":
+"@vueuse/core@8.7.5", "@vueuse/core@^8.7.5":
   version "8.7.5"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.7.5.tgz#e74a888251ea11a9d432068ce18cbdfc4f810251"
   integrity sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==
