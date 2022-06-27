@@ -14,7 +14,7 @@ from graphql_relay import from_global_id
 
 from apps.dcis.models import Value, Cell, Document
 from apps.dcis.permissions import ChangeValue
-from apps.dcis.schema.types import CellType
+from apps.dcis.schema.types import ValueType
 from apps.dcis.services.value_services import update_or_create_value, update_or_create_file_value, \
     create_file_value_archive, get_file_value_files
 
@@ -28,7 +28,7 @@ class ChangeValueMutation(BaseMutation):
         sheet_id = graphene.ID(required=True, description='Идентификатор листа')
         value = graphene.String(required=True, description='Значение')
 
-    values = graphene.List(CellType, description='Измененные ячейки')
+    values = graphene.List(ValueType, description='Измененные ячейки')
     updated_at = graphene.DateTime(required=True, description='Дата изменения')
 
     @staticmethod
@@ -43,6 +43,7 @@ class ChangeValueMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         cell: Cell = get_object_or_404(Cell, pk=from_global_id(cell_id)[1])
+        info.context.has_object_permission(info.context, (document, cell,))
         result = update_or_create_value(
             document=document,
             cell=cell,
@@ -63,9 +64,9 @@ class ChangeFileValueMutation(BaseMutation):
         remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
 
-    values = graphene.List(CellType, description='Измененное значение')
+    values = graphene.List(ValueType, description='Измененное значение')
     updated_at = graphene.DateTime(description='Дата изменения')
-    # value_files = graphene.List(FileType, description='Измененные файлы')
+    value_files = graphene.List(FileType, description='Измененные файлы')
 
     @staticmethod
     @permission_classes((IsAuthenticated, ChangeValue,))
@@ -81,6 +82,7 @@ class ChangeFileValueMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         cell: Cell = get_object_or_404(Cell, pk=from_global_id(cell_id)[1])
+        info.context.has_object_permission(info.context, (document, cell,))
         result = update_or_create_file_value(
             user=info.context.user,
             document=document,
@@ -93,7 +95,12 @@ class ChangeFileValueMutation(BaseMutation):
         return ChangeFileValueMutation(
             values=result.values,
             updated_at=result.updated_at,
-            # value_files=get_file_value_files(result.values) - перенести в схему
+            value_files=get_file_value_files(Value.objects.get(
+                column_id=cell.column_id,
+                row_id=cell.row_id,
+                document=document,
+                sheet_id=sheet_id
+            ))
         )
 
 
