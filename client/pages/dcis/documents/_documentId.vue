@@ -61,7 +61,7 @@ export default defineComponent({
       document: sheetQuery,
       variables: () => ({
         documentId: route.params.documentId,
-        sheetId: activeDocumentLoading.value ? '' : activeDocument.value.sheets[active.value].id
+        sheetId: activeDocumentLoading.value ? undefined : activeDocument.value.sheets[active.value].id
       }),
       options: () => ({
         enabled: !activeDocumentLoading.value

@@ -17,6 +17,13 @@ from apps.dcis.models import Value, RowDimension, Document, Cell
 
 class UpdateOrCrateValueResult(NamedTuple):
     """Результат создания или обновления значения."""
+    value: Value
+    updated_at: datetime
+    created: bool
+
+
+class UpdateOrCrateValuesResult(NamedTuple):
+    """Результат создания или обновления значения."""
     values: list[Value]
     updated_at: datetime
 
@@ -27,7 +34,7 @@ def update_or_create_value(
     sheet_id: int | str,
     value: str,
     payload: Any = None
-) -> UpdateOrCrateValueResult:
+) -> UpdateOrCrateValuesResult:
     """Создание или обновление значения."""
     val, created = Value.objects.update_or_create(
         column_id=cell.column_id,
@@ -41,14 +48,15 @@ def update_or_create_value(
     )
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
-    return UpdateOrCrateValueResult(values=[val], updated_at=updated_at)
+    return UpdateOrCrateValuesResult(values=[val], updated_at=updated_at)
 
 
 def update_or_create_file_value(
     user: User,
-    document: Document,
-    cell: Cell,
+    document_id: int | str,
     sheet_id: int | str,
+    column_id: int | str,
+    row_id: int | str,
     value: str,
     remaining_files: list[int],
     new_files: list[InMemoryUploadedFile],
@@ -62,7 +70,19 @@ def update_or_create_file_value(
             deleted=True,
             user=user
         ).pk)
-    return update_or_create_value(document, cell, sheet_id, value, payload)
+    val, created = Value.objects.update_or_create(
+        column_id=column_id,
+        row_id=row_id,
+        document_id=document_id,
+        sheet_id=sheet_id,
+        defaults={
+            'value': value,
+            'payload': payload
+        }
+    )
+    updated_at = now()
+    RowDimension.objects.filter(pk=row_id).update(updated_at=updated_at)
+    return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
 
 
 def create_file_value_archive(value: Value, name: str) -> str:

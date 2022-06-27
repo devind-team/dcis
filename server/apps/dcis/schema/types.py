@@ -351,7 +351,7 @@ class RowDimensionType(graphene.ObjectType):
 class CellType(graphene.ObjectType):
     """Тип ячейки."""
 
-    id = graphene.ID(required=True, description='Идентификатор')
+    id = graphene.Int(required=True, description='Идентификатор')
     # apps.dcis.models.KindCell
     kind = graphene.String(required=True, description='Тип значения')
 
@@ -361,8 +361,8 @@ class CellType(graphene.ObjectType):
     comment = graphene.String(description='Комментарий')
     mask = graphene.String(description='Маска для ввода значений')
     tooltip = graphene.String(description='Подсказка')
-    column_id = graphene.ID(description='Идентификатор колонки')
-    row_id = graphene.ID(description='Идентификатор строки')
+    column_id = graphene.Int(description='Идентификатор колонки')
+    row_id = graphene.Int(description='Идентификатор строки')
 
     # apps.dcis.models.Style
     horizontal_align = graphene.ID(description='Горизонтальное выравнивание')
@@ -396,8 +396,11 @@ class CellType(graphene.ObjectType):
 
 class ValueType(DjangoObjectType):
     """Тип значений"""
-
+    document = graphene.Field(DocumentType, description='Документ')
     payload = graphene.String(description='Дополнительное поле')
+    sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+    column_id = graphene.Int(required=True, description='Идентификатор колонки')
+    row_id = graphene.Int(required=True, description='Идентификатор строки')
 
     class Meta:
         model = Value
@@ -408,9 +411,6 @@ class ValueType(DjangoObjectType):
             'verified',
             'error',
             'document',
-            'sheet',
-            'row',
-            'column'
         )
 
     @staticmethod
@@ -421,7 +421,7 @@ class ValueType(DjangoObjectType):
 class SheetType(graphene.ObjectType):
     """Тип листа."""
 
-    id = graphene.ID(required=True, description='Идентификатор')
+    id = graphene.Int(required=True, description='Идентификатор')
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')

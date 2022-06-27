@@ -2,9 +2,9 @@
 
 mutation ChangeFileValue(
   $documentId: ID!,
-  $sheetId: ID!,
-  $columnId: ID!,
-  $rowId: ID!,
+  $sheetId: Int!,
+  $columnId: Int!,
+  $rowId: Int!,
   $value: String!,
   $remainingFiles: [ID!]!,
   $newFiles: [Upload!]!

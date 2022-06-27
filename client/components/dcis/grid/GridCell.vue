@@ -10,11 +10,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, Ref } from '#app'
+import { computed, defineComponent, inject, PropType, Ref } from '#app'
+import { useApolloClient } from '@vue/apollo-composable'
 import {
   UpdateType,
   useChangeFileValueMutation,
-  useChangeValueMutation,
+  useChangeValueMutation, useCommonQuery,
   useUnloadFileValueArchiveMutation
 } from '~/composables'
 import {
@@ -50,6 +51,7 @@ export default defineComponent({
     active: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
+    const { client } = useApolloClient()
     const activeDocument = inject<Ref<DocumentType>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
@@ -75,7 +77,7 @@ export default defineComponent({
       computed(() => activeDocument.value.id),
       computed(() => activeSheet.value.id),
       computed(() => props.cell),
-      updateSheet
+      client
     )
 
     const changeFileValue = useChangeFileValueMutation(

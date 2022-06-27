@@ -97,7 +97,7 @@ class AddRowDimensionMutation(BaseMutation):
     """Добавление строки."""
 
     class Input:
-        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
         document_id = graphene.ID(description='Идентификатор документа')
         parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')
