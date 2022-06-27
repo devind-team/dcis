@@ -9,8 +9,8 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Document, DocumentStatus
-from apps.dcis.schema.types import DocumentType, StatusType, DocumentStatusType
-from apps.dcis.services.document_services import get_documents
+from apps.dcis.schema.types import DocumentStatusType, DocumentType, StatusType
+from apps.dcis.services.document_services import get_user_documents
 
 
 class DocumentQueries(graphene.ObjectType):
@@ -36,9 +36,8 @@ class DocumentQueries(graphene.ObjectType):
     )
 
     @staticmethod
-    def resolve_documents(root: Any, info: ResolveInfo, period_id: str, divisions_id: list[str] = []):
-        period_id: int = from_global_id(period_id)[1]
-        return get_documents(info.context.user, period_id, divisions_id)
+    def resolve_documents(root: Any, info: ResolveInfo, period_id: str, divisions_id: list[str] = None):
+        return get_user_documents(info.context.user, from_global_id(period_id)[1])
 
     @staticmethod
     def resolve_document(root, info: ResolveInfo, document_id: str, *args, **kwargs) -> Document:

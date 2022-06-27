@@ -10,11 +10,11 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.models import User
-from apps.dcis.models import Project, Period
-from ..types import DivisionModelType, ProjectType, PeriodType
+from apps.dcis.models import Period, Project
+from ..types import DivisionModelType, PeriodType, ProjectType
 from ...services.divisions_services import get_user_divisions
-from ...services.project_services import get_projects
-from ...services.period_services import get_periods
+from ...services.period_services import get_user_periods
+from ...services.project_services import get_user_projects
 
 
 class ProjectQueries(graphene.ObjectType):
@@ -62,7 +62,7 @@ class ProjectQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_projects(root: Any, info: ResolveInfo, *args, **kwargs):
-        return get_projects(info.context.user)
+        return get_user_projects(info.context.user)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -72,7 +72,7 @@ class ProjectQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_periods(root: Any, info: ResolveInfo, project_id: str, *args, **kwargs):
-        return get_periods(info.context.user, from_global_id(project_id)[1])
+        return get_user_periods(info.context.user, from_global_id(project_id)[1])
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
