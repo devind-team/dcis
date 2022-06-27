@@ -13,7 +13,7 @@ from stringcase import snakecase
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Sheet, Value
 from apps.dcis.schema.types import SheetType
-from apps.dcis.services.sheet_services import get_file_value_files
+from apps.dcis.services.value_services import get_file_value_files
 from apps.dcis.services.sheet_unload_services import SheetUploader
 
 

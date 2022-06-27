@@ -12,11 +12,11 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Value
+from apps.dcis.models import Value, Cell, Document
 from apps.dcis.permissions import ChangeValue
 from apps.dcis.schema.types import CellType
-from apps.dcis.services.sheet_services import update_or_create_value, update_or_create_file_value, get_file_value_files, \
-    create_file_value_archive
+from apps.dcis.services.value_services import update_or_create_value, update_or_create_file_value, \
+    create_file_value_archive, get_file_value_files
 
 
 class ChangeValueMutation(BaseMutation):
@@ -24,12 +24,11 @@ class ChangeValueMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Идентификатор документа')
+        cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
         sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        column_id = graphene.ID(required=True, description='Идентификатор колонки')
-        row_id = graphene.ID(required=True, description='Идентификатор строки')
         value = graphene.String(required=True, description='Значение')
 
-    value = graphene.String(required=True, description='Измененное значение')
+    values = graphene.List(CellType, description='Измененные ячейки')
     updated_at = graphene.DateTime(required=True, description='Дата изменения')
 
     @staticmethod
@@ -38,35 +37,34 @@ class ChangeValueMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         document_id: str,
+        cell_id: str,
         sheet_id: str,
-        column_id: str,
-        row_id: str,
         value: str
     ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        cell: Cell = get_object_or_404(Cell, pk=from_global_id(cell_id)[1])
         result = update_or_create_value(
-            document_id=from_global_id(document_id)[1],
+            document=document,
+            cell=cell,
             sheet_id=sheet_id,
-            column_id=column_id,
-            row_id=row_id,
             value=value
         )
-        return ChangeValueMutation(value=result.value.value, updated_at=result.updated_at)
+        return ChangeValueMutation(values=result.values, updated_at=result.updated_at)
 
 
 class ChangeFileValueMutation(BaseMutation):
     """Изменение значения ячейки типа `Файл`."""
 
     class Input:
-        document_id = graphene.ID(required=True, description='Идентификатор документа')
         sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        column_id = graphene.ID(required=True, description='Идентификатор колонки')
-        row_id = graphene.ID(required=True, description='Идентификатор строки')
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
         value = graphene.String(required=True, description='Значение')
         remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
 
-    value = graphene.String(required=True, description='Измененное значение')
-    updated_at = graphene.DateTime(required=True, description='Дата изменения')
+    values = graphene.List(CellType, description='Измененное значение')
+    updated_at = graphene.DateTime(description='Дата изменения')
     value_files = graphene.List(FileType, description='Измененные файлы')
 
     @staticmethod
@@ -74,28 +72,28 @@ class ChangeFileValueMutation(BaseMutation):
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        document_id: str,
         sheet_id: str,
-        column_id: str,
-        row_id: str,
+        document_id: str,
+        cell_id: str,
         value: str,
         remaining_files: list[str],
         new_files: list[InMemoryUploadedFile]
     ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        cell: Cell = get_object_or_404(Cell, pk=from_global_id(cell_id)[1])
         result = update_or_create_file_value(
             user=info.context.user,
-            document_id=from_global_id(document_id)[1],
+            document=document,
+            cell=cell,
             sheet_id=sheet_id,
-            column_id=column_id,
-            row_id=row_id,
             value=value,
             remaining_files=[int(from_global_id(global_id)[1]) for global_id in remaining_files],
             new_files=new_files
         )
         return ChangeFileValueMutation(
-            value=result.value.value,
+            values=result.values,
             updated_at=result.updated_at,
-            value_files=get_file_value_files(result.value)
+            # value_files=get_file_value_files(result.values) - перенести в схему
         )
 
 
