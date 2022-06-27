@@ -65,7 +65,7 @@ class ChangeFileValueMutation(BaseMutation):
 
     values = graphene.List(CellType, description='Измененное значение')
     updated_at = graphene.DateTime(description='Дата изменения')
-    value_files = graphene.List(FileType, description='Измененные файлы')
+    # value_files = graphene.List(FileType, description='Измененные файлы')
 
     @staticmethod
     @permission_classes((IsAuthenticated, ChangeValue,))
