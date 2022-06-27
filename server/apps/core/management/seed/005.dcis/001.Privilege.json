@@ -5,11 +5,15 @@
   },
   {
     "name": "Изменение дивизионов периода сбора",
-    "key": "change_divisions"
+    "key": "change_period_divisions"
   },
   {
     "name": "Изменение пользователей периода сбора",
-    "key": "change_users"
+    "key": "change_period_users"
+  },
+  {
+    "name": "Изменение настроек периода сбора",
+    "key": "change_period_settings"
   },
   {
     "name": "Изменение листа",
