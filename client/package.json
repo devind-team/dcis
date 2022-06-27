@@ -58,7 +58,7 @@
     "@tiptap/extension-font-family": "^2.0.0-beta.21",
     "@tiptap/extension-gapcursor": "^2.0.0-beta.34",
     "@tiptap/extension-hard-break": "^2.0.0-beta.30",
-    "@tiptap/extension-heading": "^2.0.0-beta.26",
+    "@tiptap/extension-heading": "^2.0.0-beta.29",
     "@tiptap/extension-highlight": "^2.0.0-beta.33",
     "@tiptap/extension-history": "^2.0.0-beta.21",
     "@tiptap/extension-image": "^2.0.0-beta.27",
