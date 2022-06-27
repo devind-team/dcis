@@ -55,7 +55,7 @@
     "@tiptap/extension-color": "^2.0.0-beta.9",
     "@tiptap/extension-document": "^2.0.0-beta.15",
     "@tiptap/extension-dropcursor": "^2.0.0-beta.25",
-    "@tiptap/extension-font-family": "^2.0.0-beta.21",
+    "@tiptap/extension-font-family": "^2.0.0-beta.24",
     "@tiptap/extension-gapcursor": "^2.0.0-beta.34",
     "@tiptap/extension-hard-break": "^2.0.0-beta.30",
     "@tiptap/extension-heading": "^2.0.0-beta.26",

@@ -3544,10 +3544,10 @@
     prosemirror-view "^1.23.6"
     tippy.js "^6.3.7"
 
-"@tiptap/extension-font-family@^2.0.0-beta.21":
-  version "2.0.0-beta.21"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-font-family/-/extension-font-family-2.0.0-beta.21.tgz#9e2e863a36a7c9ef881f6a3f984d25dcfc2a2c2e"
-  integrity sha512-5KVCtuEBf1QyZxs/IOL0CPDtB5X3rk8QdDB8fB+UlASa6c/Dq59Uo2aObGOgAWNDdY0Vd9MmuDTvnJKP2LI2Ng==
+"@tiptap/extension-font-family@^2.0.0-beta.24":
+  version "2.0.0-beta.24"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-font-family/-/extension-font-family-2.0.0-beta.24.tgz#ab6f2807474a6dbc4ca6dfa6ec342436a97ac9f9"
+  integrity sha512-R7fgyJb4X6KS2Xcr73dYDxM1NSBNIQrtHLeSa3Cfc3Y9UDqeMFUIEgYUh4sBLBi3Z8Y9D3RRMvxN1x39j5eLLA==
 
 "@tiptap/extension-gapcursor@^2.0.0-beta.34":
   version "2.0.0-beta.34"
@@ -4684,17 +4684,7 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.31.tgz#c90de7126d833dcd3a4c7534d534be2fb41faa4e"
   integrity sha512-ymN2pj6zEjiKJZbrf98UM2pfDd6F2H7ksKw7NDt/ZZ1fh5Ei39X5tABugtT03ZRlWd9imccoK0hE8hpjpU7irQ==
 
-"@vueuse/core@8.7.5":
-  version "8.7.5"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.7.5.tgz#e74a888251ea11a9d432068ce18cbdfc4f810251"
-  integrity sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==
-  dependencies:
-    "@types/web-bluetooth" "^0.0.14"
-    "@vueuse/metadata" "8.7.5"
-    "@vueuse/shared" "8.7.5"
-    vue-demi "*"
-
-"@vueuse/core@^8.7.5":
+"@vueuse/core@8.7.5", "@vueuse/core@^8.7.5":
   version "8.7.5"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.7.5.tgz#e74a888251ea11a9d432068ce18cbdfc4f810251"
   integrity sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==
