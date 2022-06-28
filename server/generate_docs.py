@@ -67,9 +67,9 @@ def remove_symbol(string: str) -> str:
 def generate_markdown(mod: pdoc.doc.Module):
     doc = Document(f'{mod.source_file.stem}')
     doc.add_header(text=f'Модуль {mod.name}', level=1)
-    doc.add_paragraph(text=f'Описание модуля {mod.docstring}')
+    doc.add_paragraph(text=f'{mod.docstring}')
     if mod.functions:
-        doc.add_header(text=f'Функции', level=1)
+        doc.add_header(text=f'Функции', level=3)
         doc.add_table(
             ['Signature', 'Decorator', 'Docstring'],
             [
@@ -81,10 +81,10 @@ def generate_markdown(mod: pdoc.doc.Module):
         )
     if mod_module.classes:
         for clazz in get_class(mod_module.classes):
-            doc.add_header(text=f"Класс {clazz['name']}", level=1)
-            doc.add_paragraph(text=f"Описание класса {clazz['docstring']}")
+            doc.add_header(text=f"Класс {clazz['name']}", level=2)
+            doc.add_paragraph(text=f"{clazz['docstring']}")
             if clazz['methods']:
-                doc.add_header(text=f'Методы', level=2)
+                doc.add_header(text=f'Методы', level=3)
                 doc.add_table(
                     ['Signature', 'Decorator', 'Docstring'],
                     [
