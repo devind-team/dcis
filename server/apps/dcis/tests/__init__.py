@@ -1,1 +1,2 @@
 from .services.divisions_services import DivisionsServicesTestCase
+from .services.project_services import GetUserProjectsTestCase
