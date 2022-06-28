@@ -1,3 +1,6 @@
-from .services.divisions_services import DivisionsServicesTestCase
-from .services.period_services import GetUserPeriodsTestCase
-from .services.project_services import GetUserProjectsTestCase
+from .services import (
+    DivisionsServicesTestCase,
+    GetUserPeriodsTestCase,
+    GetUserProjectsTestCase,
+    PrivilegeServicesTestCase,
+)

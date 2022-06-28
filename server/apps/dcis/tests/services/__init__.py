@@ -1,0 +1,4 @@
+from .divisions_services import DivisionsServicesTestCase
+from .period_services import GetUserPeriodsTestCase
+from .privilege_services import PrivilegeServicesTestCase
+from .project_services import GetUserProjectsTestCase
