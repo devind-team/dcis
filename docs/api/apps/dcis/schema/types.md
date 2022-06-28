@@ -1,22 +1,22 @@
 # Модуль types
 
-Описание модуля
 
-# Класс ProjectType
 
-Описание класса Тип модели проектов.
+## Класс ProjectType
 
-## Методы
+Тип модели проектов.
+
+### Методы
 
 | Signature                                                                                             | Decorator                                                      | Docstring |
 | :---------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- | :-------- |
 | resolve_periods( project: apps.dcis.models.project.Project, info: graphql.execution.base.ResolveInfo) | ['@staticmethod', "@resolver_hints(model_field='period_set')"] |           |
 
-# Класс PeriodType
+## Класс PeriodType
 
-Описание класса Тип периода.
+Тип периода.
 
-## Методы
+### Методы
 
 | Signature                                                                                                                  | Decorator                                                        | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :-------- |
@@ -24,99 +24,99 @@
 | resolve_divisions( period: apps.dcis.models.project.Period, info: graphql.execution.base.ResolveInfo, *args, **kwargs)     | ['@staticmethod', "@resolver_hints(model_field='')"]             |           |
 | resolve_period_groups( period: apps.dcis.models.project.Period, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='')"]             |           |
 
-# Класс DivisionType
+## Класс DivisionType
 
-Описание класса Список участвующих дивизионов в сборе.
+Список участвующих дивизионов в сборе.
 
-# Класс DivisionModelType
+## Класс DivisionModelType
 
-Описание класса Описание обобщенного типа дивизиона.
+Описание обобщенного типа дивизиона.
 
-# Класс OrganizationOriginalType
+## Класс OrganizationOriginalType
 
-Описание класса Описание списка организаций.
+Описание списка организаций.
 
-## Методы
+### Методы
 
 | Signature                                                                                                                                                                               | Decorator                                            | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :-------- |
 | resolve_departments( organization: devind_dictionaries.models.organizations.Organization, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -> django.db.models.query.QuerySet | ['@staticmethod', "@resolver_hints(model_field='')"] |           |
 
-# Класс PrivilegeType
+## Класс PrivilegeType
 
-Описание класса Описание сквозных привилегий.
+Описание сквозных привилегий.
 
-# Класс PeriodGroupType
+## Класс PeriodGroupType
 
-Описание класса Группы с содержанием привилегий.
+Группы с содержанием привилегий.
 
-## Методы
+### Методы
 
 | Signature                                                                                                                       | Decorator                                            | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------- | :-------- |
 | resolve_users( period_group: apps.dcis.models.privilege.PeriodGroup, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='')"] |           |
 
-# Класс PeriodPrivilegeType
+## Класс PeriodPrivilegeType
 
-Описание класса Тип для отдельных привилегий пользователей.
+Тип для отдельных привилегий пользователей.
 
-# Класс StatusType
+## Класс StatusType
 
-Описание класса Тип статусов документов.
+Тип статусов документов.
 
-# Класс DocumentType
+## Класс DocumentType
 
-Описание класса Тип моделей документа.
+Тип моделей документа.
 
-## Методы
+### Методы
 
 | Signature                                                                                                    | Decorator         | Docstring |
 | :----------------------------------------------------------------------------------------------------------- | :---------------- | :-------- |
 | resolve_sheets( document: apps.dcis.models.document.Document, info: graphql.execution.base.ResolveInfo)      | ['@staticmethod'] |           |
 | resolve_last_status( document: apps.dcis.models.document.Document, info: graphql.execution.base.ResolveInfo) | ['@staticmethod'] |           |
 
-# Класс DocumentStatusType
+## Класс DocumentStatusType
 
-Описание класса Тип статусов для документов.
+Тип статусов для документов.
 
-# Класс AttributeType
+## Класс AttributeType
 
-Описание класса Тип атрибутов для документов.
+Тип атрибутов для документов.
 
-## Методы
+### Методы
 
 | Signature                                                                                                                    | Decorator                                                         | Docstring |
 | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------- | :-------- |
 | resolve_children( attribute: apps.dcis.models.document.Attribute, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='attribute_set')"] |           |
 
-# Класс AttributeValueType
+## Класс AttributeValueType
 
-Описание класса Тип со значениями атрибутов.
+Тип со значениями атрибутов.
 
-# Класс ColumnDimensionType
+## Класс ColumnDimensionType
 
-Описание класса Тип колонки.
+Тип колонки.
 
-# Класс RowDimensionType
+## Класс RowDimensionType
 
-Описание класса Тип строки.
+Тип строки.
 
-# Класс CellType
+## Класс CellType
 
-Описание класса Тип ячейки.
+Тип ячейки.
 
-# Класс SheetType
+## Класс SheetType
 
-Описание класса Тип листа.
+Тип листа.
 
-# Класс LimitationType
+## Класс LimitationType
 
-Описание класса Ограничения на ячейку.
+Ограничения на ячейку.
 
-# Класс ChangedCellOption
+## Класс ChangedCellOption
 
-Описание класса Измененное свойство ячейки.
+Измененное свойство ячейки.
 
-# Класс GlobalIndicesInputType
+## Класс GlobalIndicesInputType
 
-Описание класса Индекс строки в плоской структуре.
+Индекс строки в плоской структуре.

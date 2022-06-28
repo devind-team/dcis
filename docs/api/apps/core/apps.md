@@ -1,12 +1,12 @@
 # Модуль apps
 
-Описание модуля Settings for core application.
+Settings for core application.
 
-# Класс CoreConfig
+## Класс CoreConfig
 
-Описание класса Core settings.
+Core settings.
 
-## Методы
+### Методы
 
 | Signature   | Decorator | Docstring                             |
 | :---------- | :-------- | :------------------------------------ |

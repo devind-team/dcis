@@ -1,51 +1,51 @@
 # Модуль document_mutations
 
-Описание модуля
 
-# Класс AddDocumentMutation
 
-Описание класса Добавление документа.
+## Класс AddDocumentMutation
 
-## Методы
+Добавление документа.
+
+### Методы
 
 | Signature                                                                                                                                                                                                                                                              | Decorator                                                                | Docstring                       |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- | :------------------------------ |
 | mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, comment: str, period_id: str, status_id: int, document_id: Optional[int] = None, division_id: Optional[int] = None) -> apps.dcis.schema.mutations.document_mutations.AddDocumentMutation | ['@staticmethod', '@permission_classes((IsAuthenticated, AddDocument))'] | Мутация для создания документа. |
 
-# Класс ChangeDocumentCommentMutationPayload
+## Класс ChangeDocumentCommentMutationPayload
 
-Описание класса Изменение комментария версии документа.
+Изменение комментария версии документа.
 
-# Класс AddDocumentStatusMutation
+## Класс AddDocumentStatusMutation
 
-Описание класса Добавление статуса документа.
+Добавление статуса документа.
 
-## Методы
+### Методы
 
 | Signature                                                                                                                     | Decorator                                                                      | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- | :-------- |
 | mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_id: str, status_id: int, comment: str) | ['@staticmethod', '@permission_classes((IsAuthenticated, AddDocumentStatus))'] |           |
 
-# Класс DeleteDocumentStatusMutation
+## Класс DeleteDocumentStatusMutation
 
-Описание класса Удаление статуса документа.
+Удаление статуса документа.
 
-## Методы
+### Методы
 
 | Signature                                                                                                               | Decorator                                                                         | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :-------- |
 | mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_status_id: int, *args, **kwargs) | ['@staticmethod', '@permission_classes((IsAuthenticated, DeleteDocumentStatus))'] |           |
 
-# Класс UnloadDocumentMutation
+## Класс UnloadDocumentMutation
 
-Описание класса Выгрузка документа.
+Выгрузка документа.
 
-## Методы
+### Методы
 
 | Signature                                                                                                                               | Decorator                                                    | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
 | mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_id: str, additional: Optional[list[str]] = None) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
 
-# Класс DocumentMutations
+## Класс DocumentMutations
 
-Описание класса Мутации, связанные с документами.
+Мутации, связанные с документами.

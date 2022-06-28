@@ -1,12 +1,12 @@
 # Модуль apps
 
-Описание модуля
 
-# Класс PagesConfig
 
-Описание класса Class representing a Django application and its configuration.
+## Класс PagesConfig
 
-## Методы
+Class representing a Django application and its configuration.
+
+### Методы
 
 | Signature   | Decorator | Docstring                                                          |
 | :---------- | :-------- | :----------------------------------------------------------------- |

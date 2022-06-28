@@ -1,18 +1,18 @@
 # Модуль sheet
 
-Описание модуля
 
-# Функции
+
+### Функции
 
 | Signature            | Decorator | Docstring                         |
 | :------------------- | :-------- | :-------------------------------- |
 | get_default_border() | -         | Стиль и цвет границ по умолчанию. |
 
-# Класс Style
+## Класс Style
 
-Описание класса Абстрактная модель применяемых стилей для страниц сборов.
+Абстрактная модель применяемых стилей для страниц сборов.
 
-## Методы
+### Методы
 
 | Signature                             | Decorator | Docstring                                                                                                                                                                     |
 | :------------------------------------ | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -31,22 +31,22 @@
 | get_vertical_align_display(unknown)   | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_underline_display(unknown)        | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 
-# Класс KindCell
+## Класс KindCell
 
-Описание класса Классификация ячеек.
+Классификация ячеек.
 
-## Методы
+### Методы
 
 | Signature                 | Decorator | Docstring                                                                                                                                                                     |
 | :------------------------ | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | kind(unknown)             | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
 | get_kind_display(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 
-# Класс ColumnDimension
+## Класс ColumnDimension
 
-Описание класса Модель стилей для колонки таблицы. Ссылка на оригинальный класс из openpyxl: https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.0/openpyxl/worksheet/dimensions.py
+Модель стилей для колонки таблицы. Ссылка на оригинальный класс из openpyxl: https://foss.heptapod.net/openpyxl/openpyxl/-/blob/branch/3.0/openpyxl/worksheet/dimensions.py
 
-## Методы
+### Методы
 
 | Signature                           | Decorator | Docstring                                                                                                                                                                     |
 | :---------------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -64,11 +64,11 @@
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
 | objects(unknown)                    | -         |                                                                                                                                                                               |
 
-# Класс RowDimension
+## Класс RowDimension
 
-Описание класса Модель стилей для строки таблицы. Кроме того, что таблица плоская, могут быть еще промежуточные агрегаций, они реализуются с помощью дополнительных полей. - dynamic - описывает динамическую строку - aggregation - способ агрегации дочерних строк (SUM, MIN, MAX, AVG) - parent - ссылка на родительскую строку - document - ссылка на документ. Это поле необходимо для того, чтобы к обычным строкам плоской таблицы добавлять динамические строки, которые не относятся к определенному документу, однако, должны участвовать при заполнении финальной версии документа.
+Модель стилей для строки таблицы. Кроме того, что таблица плоская, могут быть еще промежуточные агрегаций, они реализуются с помощью дополнительных полей. - dynamic - описывает динамическую строку - aggregation - способ агрегации дочерних строк (SUM, MIN, MAX, AVG) - parent - ссылка на родительскую строку - document - ссылка на документ. Это поле необходимо для того, чтобы к обычным строкам плоской таблицы добавлять динамические строки, которые не относятся к определенному документу, однако, должны участвовать при заполнении финальной версии документа.
 
-## Методы
+### Методы
 
 | Signature                           | Decorator | Docstring                                                                                                                                                                     |
 | :---------------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -89,11 +89,11 @@
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
 | objects(unknown)                    | -         |                                                                                                                                                                               |
 
-# Класс Cell
+## Класс Cell
 
-Описание класса Модель ячейки.
+Модель ячейки.
 
-## Методы
+### Методы
 
 | Signature                             | Decorator | Docstring                                                                                                                                                                     |
 | :------------------------------------ | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -110,11 +110,11 @@
 | id(unknown)                           | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
 | objects(unknown)                      | -         |                                                                                                                                                                               |
 
-# Класс Limitation
+## Класс Limitation
 
-Описание класса Накладываемые на ячейку ограничения.
+Накладываемые на ячейку ограничения.
 
-## Методы
+### Методы
 
 | Signature                      | Decorator | Docstring                                                                                                                                                                     |
 | :----------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -126,11 +126,11 @@
 | id(unknown)                    | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
 | objects(unknown)               | -         |                                                                                                                                                                               |
 
-# Класс MergedCell
+## Класс MergedCell
 
-Описание класса Модель объединенной ячейки.
+Модель объединенной ячейки.
 
-## Методы
+### Методы
 
 | Signature            | Decorator | Docstring                                                                                                             |
 | :------------------- | :-------- | :-------------------------------------------------------------------------------------------------------------------- |
@@ -142,11 +142,11 @@
 | id(unknown)          | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | objects(unknown)     | -         |                                                                                                                       |
 
-# Класс Value
+## Класс Value
 
-Описание класса Модель значения поля таблицы. Привязка значения осуществляется к дивизиону через документ, но в документе может быть несколько листов. В связи с этим добавлено поле sheet, которое точно определяет к какому листу имеет отношение таблицы.
+Модель значения поля таблицы. Привязка значения осуществляется к дивизиону через документ, но в документе может быть несколько листов. В связи с этим добавлено поле sheet, которое точно определяет к какому листу имеет отношение таблицы.
 
-## Методы
+### Методы
 
 | Signature         | Decorator | Docstring                                                                                                             |
 | :---------------- | :-------- | :-------------------------------------------------------------------------------------------------------------------- |
