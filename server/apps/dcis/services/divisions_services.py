@@ -17,10 +17,10 @@ def get_user_divisions(user: User, project: Project | int | str | None = None) -
         divisions: list[dict] = []
         for division_model in Project.DIVISION_KIND.values():
             all_divisions = division_model.objects.filter(Q(users=user) | Q(user=user)).all()
-            divisions.extend(_get_division(all_divisions))
+            divisions.extend(_get_divisions(all_divisions))
         return divisions
     project = Project.objects.get(pk=project) if type(project) in (int, str) else project
-    return _get_division(project.division.objects.filter(Q(users=user) | Q(user=user)).all())
+    return _get_divisions(project.division.objects.filter(Q(users=user) | Q(user=user)).all())
 
 
 def get_user_division_ids(user: User, project: Project | int | str | None = None) -> dict[str, int]:
@@ -40,7 +40,7 @@ def get_user_division_ids(user: User, project: Project | int | str | None = None
     return {dn: dv for dn, dv in divisions.items() if dv}
 
 
-def _get_division(instances) -> list[dict[str, int | str]]:
+def _get_divisions(instances) -> list[dict[str, int | str]]:
     """Получение списка обобщенных дивизионов.
 
     :param instances: модель дивизиона
