@@ -69,7 +69,6 @@ def generate_markdown(mod: pdoc.doc.Module):
     doc.add_header(text=f'Модуль {mod.name}', level=1)
     doc.add_paragraph(text=f'Описание модуля {mod.docstring}')
     if mod.functions:
-        module_functions = get_function(mod_module.functions)
         doc.add_header(text=f'Функции', level=1)
         doc.add_table(
             ['Signature', 'Decorator', 'Docstring'],
@@ -84,8 +83,6 @@ def generate_markdown(mod: pdoc.doc.Module):
         for clazz in get_class(mod_module.classes):
             doc.add_header(text=f"Класс {clazz['name']}", level=1)
             doc.add_paragraph(text=f"Описание класса {clazz['docstring']}")
-            t = doc.add_header(text=f'Методы1')
-            doc.add_element(t)
             if clazz['methods']:
                 doc.add_header(text=f'Методы', level=2)
                 doc.add_table(
@@ -97,13 +94,11 @@ def generate_markdown(mod: pdoc.doc.Module):
                     ],
                     [Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT]
                 )
-    doc.output_page(dump_dir=os.path.join('..', 'docs', 'api'), encoding='utf-8')
+    doc.output_page(dump_dir=os.path.join(str(mod.source_file.parent).replace('server', 'docs\\api')), encoding='utf-8')
 
 
-for module in (pdoc.doc.Module.from_name('apps.dcis.models')).submodules:
+for module in (pdoc.doc.Module.from_name('apps')).submodules:
 # for module in (pdoc.doc.Module.from_name(BASE_DIR.name)).submodules:
-    if not ('migrations' in module.fullname):
-        for mod_module in recursive_module(module):
-            if not mod_module.submodules:
-                generate_markdown(mod_module)
-
+    for mod_module in recursive_module(module):
+        if not mod_module.submodules and not ('migrations' in mod_module.fullname):
+            generate_markdown(mod_module)
