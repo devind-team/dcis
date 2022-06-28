@@ -1726,6 +1726,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "snakemd"
+version = "0.10.1"
+description = "A markdown generation library for Python."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
 name = "snowballstemmer"
 version = "2.2.0"
 description = "This package provides 29 stemmers for 28 languages generated from Snowball algorithms."
@@ -2117,7 +2125,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "acd4729892621422259c6bb90a40fdad01dda8b9d8936c4adcaa1f17aa886f04"
+content-hash = "95ec718fd54f1acffb8cc747e4a912397d800fa78e5ad54782759ed7e5971cbc"
 
 [metadata.files]
 aiohttp = [
@@ -3272,6 +3280,10 @@ singledispatch = [
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+snakemd = [
+    {file = "SnakeMD-0.10.1-py3-none-any.whl", hash = "sha256:55a12598d12b1daa9b84ddbef8faaf975b448234a975186fc0bab4e517ccd869"},
+    {file = "SnakeMD-0.10.1.tar.gz", hash = "sha256:90b15942324cdf42b5a32041424ca35e9570c0f507755b18109707fe7beef790"},
 ]
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},

@@ -54,6 +54,7 @@ xlsx-evaluate = "^0.4.2"
 Sphinx = "^5.0.2"
 docutils = "^0.18.1"
 sphinx-markdown-builder = "^0.5.5"
+SnakeMD = "^0.10.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

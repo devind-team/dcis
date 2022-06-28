@@ -4,10 +4,8 @@ import django
 import pdoc
 import re
 from devind.settings import BASE_DIR
-import jinja2
+from snakemd import Table, Document
 
-PATH_TEMPLATE = os.path.join(BASE_DIR, 'templates', 'docs.md.jinja2')
-TEMPLATE = jinja2.Template(open(PATH_TEMPLATE, encoding='utf-8').read())
 
 # sys.path.append(os.path.abspath('../server/'))  # path to your django project
 # Specify settings module
@@ -54,6 +52,8 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
                                                           or ('__' in own_member.name)):
             methods = {
                 'name': own_member.name,
+                'docstring': remove_symbol(own_member.docstring),
+                'decorators': own_member.decorators,
                 'signature': remove_symbol(str(own_member.signature)),
             }
             list_methods.append(methods)
@@ -64,23 +64,46 @@ def remove_symbol(string: str) -> str:
     return re.sub(' +', ' ', string.replace('\n', ''))
 
 
+def generate_markdown(mod: pdoc.doc.Module):
+    doc = Document(f'{mod.source_file.stem}')
+    doc.add_header(text=f'Модуль {mod.name}', level=1)
+    doc.add_paragraph(text=f'Описание модуля {mod.docstring}')
+    if mod.functions:
+        module_functions = get_function(mod_module.functions)
+        doc.add_header(text=f'Функции', level=1)
+        doc.add_table(
+            ['Signature', 'Decorator', 'Docstring'],
+            [
+                [f"{function['name']}{function['signature']}",
+                 f"{'-' if not function['decorators'] else function['decorators']}",
+                 f"{function['docstring']}"] for function in get_function(mod_module.functions)
+            ],
+            [Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT]
+        )
+    if mod_module.classes:
+        for clazz in get_class(mod_module.classes):
+            doc.add_header(text=f"Класс {clazz['name']}", level=1)
+            doc.add_paragraph(text=f"Описание класса {clazz['docstring']}")
+            t = doc.add_header(text=f'Методы1')
+            doc.add_element(t)
+            if clazz['methods']:
+                doc.add_header(text=f'Методы', level=2)
+                doc.add_table(
+                    ['Signature', 'Decorator', 'Docstring'],
+                    [
+                        [f"{method['name']}{method['signature']}",
+                         f"{'-' if not method['decorators'] else method['decorators']}",
+                         f"{method['docstring']}"] for method in clazz['methods']
+                    ],
+                    [Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT]
+                )
+    doc.output_page(dump_dir=os.path.join('..', 'docs', 'api'), encoding='utf-8')
+
+
 for module in (pdoc.doc.Module.from_name('apps.dcis.models')).submodules:
 # for module in (pdoc.doc.Module.from_name(BASE_DIR.name)).submodules:
-    begin = module
     if not ('migrations' in module.fullname):
         for mod_module in recursive_module(module):
             if not mod_module.submodules:
-                print(mod_module.source_file)
-                if mod_module.functions:
-                    functions = get_function(mod_module.functions)
-                else:
-                    functions = []
-                if mod_module.classes:
-                    clazz = classes = get_class(mod_module.classes)
-                else:
-                    clazz = []
-                # print(clazz)
-                print(TEMPLATE.render(module=mod_module, module_function=functions, module_class=clazz))
-                with open(os.path.join(BASE_DIR, 'docs', f'{mod_module.name}.md'), 'w', encoding='utf8') as f:
-                    f.write(TEMPLATE.render(TEMPLATE.render(module=mod_module, module_function=functions,
-                                                            module_class=clazz)))
+                generate_markdown(mod_module)
+
