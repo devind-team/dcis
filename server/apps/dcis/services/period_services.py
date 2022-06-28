@@ -15,6 +15,11 @@ def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[
     )
 
 
+def get_user_privileges_periods(user: User, project_id: int | str) -> QuerySet[Period]:
+    """Получение периодов, связанных с привилегиями пользователя."""
+    return Period.objects.filter(periodprivilege__user=user, project_id=project_id)
+
+
 def get_user_divisions_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     """Получение периодов, связанных с дивизионами пользователя."""
     divisions = get_user_division_ids(user, project_id)
@@ -25,11 +30,6 @@ def get_user_divisions_periods(user: User, project_id: int | str) -> QuerySet[Pe
             division__object_id__in=division_values
         )
     return Period.objects.filter(period_divisions_filter, project_id=project_id)
-
-
-def get_user_privileges_periods(user: User, project_id: int | str) -> QuerySet[Period]:
-    """Получение периодов, связанных с привилегиями пользователя."""
-    return Period.objects.filter(periodprivilege__user=user, project_id=project_id)
 
 
 def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:

@@ -34,30 +34,17 @@ class GetUserProjectsTestCase(TestCase):
             content_type=self.department_content_type
         ) for _ in range(3)]
         self.user_periods = [Period.objects.create(
-            user=self.user, project=self.user_period_projects[i]
-        ) for i in range(3)]
+            user=self.user, project=project
+        ) for project in self.user_period_projects]
 
         self.user_group_projects = [Project.objects.create(
             content_type=self.department_content_type
         ) for _ in range(3)]
-        self.user_group_periods = [Period.objects.create(project=self.user_group_projects[i]) for i in range(3)]
+        self.user_group_periods = [Period.objects.create(project=project) for project in self.user_group_projects]
         self.user_groups: list[PeriodGroup] = []
-        for i in range(3):
-            self.user_groups.append(PeriodGroup.objects.create(period=self.user_group_periods[i]))
+        for period in self.user_group_periods:
+            self.user_groups.append(PeriodGroup.objects.create(period=period))
             self.user_groups[-1].users.add(self.user)
-
-        self.department = Department.objects.create(name='Тестовый департамент', user=self.user)
-        self.department_project = Project.objects.create(content_type=self.department_content_type)
-        self.department_period = Period.objects.create(project=self.department_project)
-        self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
-
-        self.organization = Organization.objects.create(name='Тестовая организация', attributes='', user=self.user)
-        self.organization_project = Project.objects.create(content_type=self.organization_content_type)
-        self.organization_period = Period.objects.create(project=self.organization_project)
-        self.organization_division = Division.objects.create(
-            period=self.organization_period,
-            object_id=self.organization.id,
-        )
 
         self.privilege_project = Project.objects.create(content_type=self.department_content_type)
         self.privilege_period = Period.objects.create(project=self.privilege_project)
@@ -66,6 +53,19 @@ class GetUserProjectsTestCase(TestCase):
             period=self.privilege_period,
             user=self.user,
             privilege=self.privilege,
+        )
+        
+        self.department = Department.objects.create(user=self.user)
+        self.department_project = Project.objects.create(content_type=self.department_content_type)
+        self.department_period = Period.objects.create(project=self.department_project)
+        self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
+
+        self.organization = Organization.objects.create(attributes='', user=self.user)
+        self.organization_project = Project.objects.create(content_type=self.organization_content_type)
+        self.organization_period = Period.objects.create(project=self.organization_project)
+        self.organization_division = Division.objects.create(
+            period=self.organization_period,
+            object_id=self.organization.id,
         )
 
         self.extra_project = Project.objects.create(content_type=self.department_content_type)
@@ -77,18 +77,18 @@ class GetUserProjectsTestCase(TestCase):
             set(get_user_participant_projects(self.user)),
         )
 
-    def test_get_user_divisions_projects(self) -> None:
-        """Тестирование функции `get_user_divisions_projects`."""
-        self.assertSetEqual(
-            {self.department_project, self.organization_project},
-            set(get_user_divisions_projects(self.user)),
-        )
-
     def test_get_user_privileges_projects(self) -> None:
         """Тестирование функции `get_user_privileges_projects`."""
         self.assertSetEqual(
             {self.privilege_project},
             set(get_user_privileges_projects(self.user)),
+        )
+
+    def test_get_user_divisions_projects(self) -> None:
+        """Тестирование функции `get_user_divisions_projects`."""
+        self.assertSetEqual(
+            {self.department_project, self.organization_project},
+            set(get_user_divisions_projects(self.user)),
         )
 
     def test_get_user_projects_with_perm(self) -> None:

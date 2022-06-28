@@ -12,6 +12,11 @@ def get_user_participant_projects(user: User) -> QuerySet[Project]:
     return Project.objects.filter(Q(user=user) | Q(period__user=user) | Q(period__periodgroup__users=user))
 
 
+def get_user_privileges_projects(user: User) -> QuerySet[Project]:
+    """Получение проектов, связанных с привилегиями пользователя."""
+    return Project.objects.filter(period__periodprivilege__user=user)
+
+
 def get_user_divisions_projects(user: User) -> QuerySet[Project]:
     """Получение проектов, связанных с дивизионами пользователя."""
     project_filter = Q()
@@ -19,11 +24,6 @@ def get_user_divisions_projects(user: User) -> QuerySet[Project]:
     for division_name, division_values in divisions.items():
         project_filter |= Q(content_type__model=division_name, period__division__object_id__in=division_values)
     return Project.objects.filter(project_filter)
-
-
-def get_user_privileges_projects(user: User) -> QuerySet[Project]:
-    """Получение проектов, связанных с привилегиями пользователя."""
-    return Project.objects.filter(period__periodprivilege__user=user)
 
 
 def get_user_projects(user: User) -> QuerySet[Project]:
