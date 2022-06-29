@@ -6,7 +6,7 @@ from apps.dcis.services.project_services import get_user_projects
 
 
 class ViewProject(BasePermission):
-    """Пропускает пользователей, которые могут просматривать проекты."""
+    """Пропускает пользователей, которые могут просматривать проект."""
 
     @staticmethod
     def has_object_permission(context, obj: Project):

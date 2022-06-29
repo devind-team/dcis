@@ -8,7 +8,7 @@ from apps.dcis.services.privilege_services import has_privilege
 
 
 class ViewPeriod(BasePermission):
-    """Пропускает пользователей, которые могут просматривать периоды."""
+    """Пропускает пользователей, которые могут просматривать период."""
 
     @staticmethod
     def has_object_permission(context, obj: Period):
