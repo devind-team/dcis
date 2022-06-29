@@ -62,7 +62,7 @@
 | get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_kind_display(unknown)           | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         |                                                                                                                                                                               |
+| objects(unknown)                    | -         | -                                                                                                                                                                             |
 
 ## Класс RowDimension
 
@@ -87,7 +87,7 @@
 | get_next_by_updated_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         |                                                                                                                                                                               |
+| objects(unknown)                    | -         | -                                                                                                                                                                             |
 
 ## Класс Cell
 
@@ -108,7 +108,7 @@
 | get_underline_display(unknown)        | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_kind_display(unknown)             | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                           | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                      | -         |                                                                                                                                                                               |
+| objects(unknown)                      | -         | -                                                                                                                                                                             |
 
 ## Класс Limitation
 
@@ -124,7 +124,7 @@
 | get_operator_display(unknown)  | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_condition_display(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                    | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)               | -         |                                                                                                                                                                               |
+| objects(unknown)               | -         | -                                                                                                                                                                             |
 
 ## Класс MergedCell
 
@@ -140,7 +140,7 @@
 | max_row(unknown)     | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | __str__(self) -> str | -         | Return str(self).                                                                                                     |
 | id(unknown)          | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
-| objects(unknown)     | -         |                                                                                                                       |
+| objects(unknown)     | -         | -                                                                                                                     |
 
 ## Класс Value
 
@@ -155,4 +155,4 @@
 | verified(unknown) | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | error(unknown)    | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | id(unknown)       | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
-| objects(unknown)  | -         |                                                                                                                       |
+| objects(unknown)  | -         | -                                                                                                                     |

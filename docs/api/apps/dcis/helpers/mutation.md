@@ -10,5 +10,5 @@
 
 | Signature                                                | Decorator | Docstring                                                                    |
 | :------------------------------------------------------- | :-------- | :--------------------------------------------------------------------------- |
-| __init__(self, *args, **kwargs)                          | -         |                                                                              |
+| __init__(self, *args, **kwargs)                          | -         | -                                                                            |
 | add_error(self, field: str, messages: list[str]) -> None | -         | Добавление ошибки.:param field: поле ошибки:param messages: сообщения ошибки |

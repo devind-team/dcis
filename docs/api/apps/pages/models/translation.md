@@ -14,4 +14,4 @@
 | field(unknown)     | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | content(unknown)   | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | id(unknown)        | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
-| objects(unknown)   | -         |                                                                                                                       |
+| objects(unknown)   | -         | -                                                                                                                     |

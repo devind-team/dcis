@@ -10,9 +10,9 @@
 
 | Signature                                                                                                                   | Decorator                                                        | Docstring                                                    |
 | :-------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :----------------------------------------------------------- |
-| resolve_children( category: apps.pages.models.category.Category, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='category_set')"] |                                                              |
+| resolve_children( category: apps.pages.models.category.Category, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='category_set')"] | -                                                            |
 | resolve_nc( category: apps.pages.models.category.Category, info: graphql.execution.base.ResolveInfo, *args, **kwargs)       | ['@staticmethod']                                                | Вытягивает соседей если нет родителей или дочерние элементы. |
-| resolve_pages( category: apps.pages.models.category.Category, info: graphql.execution.base.ResolveInfo, *args, **kwargs)    | ['@staticmethod', "@resolver_hints(model_field='page_set')"]     |                                                              |
+| resolve_pages( category: apps.pages.models.category.Category, info: graphql.execution.base.ResolveInfo, *args, **kwargs)    | ['@staticmethod', "@resolver_hints(model_field='page_set')"]     | -                                                            |
 
 ## Класс TagType
 
@@ -26,9 +26,9 @@
 
 | Signature                                                                                                                        | Decorator                                                              | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :-------- |
-| resolve_segment_elements( kind: apps.pages.models.page_kind.PageKind, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='segmentelement_set')"] |           |
-| resolve_pages( kind: apps.pages.models.page_kind.PageKind, info: graphql.execution.base.ResolveInfo, *args, **kwargs)            | ['@staticmethod', "@resolver_hints(model_field='page_set')"]           |           |
-| resolve_name(model, info: graphql.execution.base.ResolveInfo)                                                                    | -                                                                      |           |
+| resolve_segment_elements( kind: apps.pages.models.page_kind.PageKind, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='segmentelement_set')"] | -         |
+| resolve_pages( kind: apps.pages.models.page_kind.PageKind, info: graphql.execution.base.ResolveInfo, *args, **kwargs)            | ['@staticmethod', "@resolver_hints(model_field='page_set')"]           | -         |
+| resolve_name(model, info: graphql.execution.base.ResolveInfo)                                                                    | -                                                                      | -         |
 
 ## Класс PageType
 
@@ -38,10 +38,10 @@
 
 | Signature                                                                                                                       | Decorator                                                       | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------- | :-------- |
-| resolve_sections( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                 | ['@staticmethod', "@resolver_hints(model_field='section_set')"] |           |
-| resolve_tags( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                     | ['@staticmethod', "@resolver_hints(model_field='tags')"]        |           |
-| resolve_comments( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                 | ['@staticmethod', "@resolver_hints(model_field='comment_set')"] |           |
-| resolve_preview( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -> Optional[str] | ['@staticmethod']                                               |           |
+| resolve_sections( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                 | ['@staticmethod', "@resolver_hints(model_field='section_set')"] | -         |
+| resolve_tags( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                     | ['@staticmethod', "@resolver_hints(model_field='tags')"]        | -         |
+| resolve_comments( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                 | ['@staticmethod', "@resolver_hints(model_field='comment_set')"] | -         |
+| resolve_preview( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -> Optional[str] | ['@staticmethod']                                               | -         |
 
 ## Класс SectionInterface
 
@@ -51,7 +51,7 @@ Interface Type Definition When a field can return one of a heterogeneous set of 
 
 | Signature                                                                                                | Decorator        | Docstring |
 | :------------------------------------------------------------------------------------------------------- | :--------------- | :-------- |
-| resolve_type( cls, section: apps.pages.models.section.Section, info: graphql.execution.base.ResolveInfo) | ['@classmethod'] |           |
+| resolve_type( cls, section: apps.pages.models.section.Section, info: graphql.execution.base.ResolveInfo) | ['@classmethod'] | -         |
 
 ## Класс SectionTextType
 
@@ -65,7 +65,7 @@ Interface Type Definition When a field can return one of a heterogeneous set of 
 
 | Signature                                                                                                             | Decorator         | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------- | :---------------- | :-------- |
-| resolve_files( section: apps.pages.models.section.Section, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod'] |           |
+| resolve_files( section: apps.pages.models.section.Section, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod'] | -         |
 
 ## Класс SectionGalleryType
 
@@ -75,7 +75,7 @@ Interface Type Definition When a field can return one of a heterogeneous set of 
 
 | Signature                                                                                                              | Decorator         | Docstring |
 | :--------------------------------------------------------------------------------------------------------------------- | :---------------- | :-------- |
-| resolve_images( section: apps.pages.models.section.Section, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod'] |           |
+| resolve_images( section: apps.pages.models.section.Section, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod'] | -         |
 
 ## Класс SectionUsersType
 
@@ -89,7 +89,7 @@ Interface Type Definition When a field can return one of a heterogeneous set of 
 
 | Signature                                                                                                                | Decorator                                                       | Docstring |
 | :----------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- | :-------- |
-| resolve_children( comment: apps.pages.models.comment.Comment, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='comment_set')"] |           |
+| resolve_children( comment: apps.pages.models.comment.Comment, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='comment_set')"] | -         |
 
 ## Класс SegmentType
 
@@ -99,7 +99,7 @@ Interface Type Definition When a field can return one of a heterogeneous set of 
 
 | Signature                                                                                                                | Decorator                                                              | Docstring |
 | :----------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :-------- |
-| resolve_elements( segment: apps.pages.models.segment.Segment, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='segmentelement_set')"] |           |
+| resolve_elements( segment: apps.pages.models.segment.Segment, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', "@resolver_hints(model_field='segmentelement_set')"] | -         |
 
 ## Класс SegmentElementType
 
@@ -109,4 +109,4 @@ Interface Type Definition When a field can return one of a heterogeneous set of 
 
 | Signature                                                                                                                        | Decorator         | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :-------- |
-| resolve_page_kind( element: apps.pages.models.segment.SegmentElement, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod'] |           |
+| resolve_page_kind( element: apps.pages.models.segment.SegmentElement, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod'] | -         |

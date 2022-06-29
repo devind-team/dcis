@@ -10,7 +10,7 @@
 
 | Signature                                                                               | Decorator                                                           | Docstring |
 | :-------------------------------------------------------------------------------------- | :------------------------------------------------------------------ | :-------- |
-| mutate_and_get_payload(root, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddTag])'] |           |
+| mutate_and_get_payload(root, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddTag])'] | -         |
 
 ## Класс TagMutations
 

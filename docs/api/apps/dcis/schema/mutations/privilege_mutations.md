@@ -10,7 +10,7 @@
 
 | Signature                                                                                                                     | Decorator                                                    | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: int, privileges_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: int, privileges_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс ChangeGroupUserPrivilegesMutation
 
@@ -20,7 +20,7 @@
 
 | Signature                                                                                                                                   | Decorator                                                    | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, user_id: str, privileges_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, user_id: str, privileges_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс PrivilegeMutations
 

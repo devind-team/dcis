@@ -10,7 +10,7 @@
 
 | Signature                                                                               | Decorator                                                                | Docstring |
 | :-------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload(root, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddCategory])'] |           |
+| mutate_and_get_payload(root, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddCategory])'] | -         |
 
 ## Класс ChangeCategoryMutation
 
@@ -20,7 +20,7 @@
 
 | Signature                                                                                                             | Decorator                                                                   | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, text: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeCategory])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, text: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeCategory])'] | -         |
 
 ## Класс ChangeCategoryAvatarMutation
 
@@ -30,7 +30,7 @@
 
 | Signature                                                                                                                                                               | Decorator                                                                   | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, avatar: django.core.files.uploadedfile.InMemoryUploadedFile, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeCategory])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, avatar: django.core.files.uploadedfile.InMemoryUploadedFile, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeCategory])'] | -         |
 
 ## Класс ChangeCategoryPositionMutation
 
@@ -40,7 +40,7 @@
 
 | Signature                                                                                                          | Decorator                                                                           | Docstring |
 | :----------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, categories_id: List[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeAbsoluteCategory])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, categories_id: List[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeAbsoluteCategory])'] | -         |
 
 ## Класс ChangeCategoryParentMutation
 
@@ -50,7 +50,7 @@
 
 | Signature                                                                                                                  | Decorator                                                                           | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, parent_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeAbsoluteCategory])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, parent_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeAbsoluteCategory])'] | -         |
 
 ## Класс DeleteCategoryMutation
 
@@ -60,7 +60,7 @@
 
 | Signature                                                                                                  | Decorator                                                                   | Docstring |
 | :--------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, DeleteCategory])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, category_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, DeleteCategory])'] | -         |
 
 ## Класс CategoryMutations
 

@@ -6,7 +6,7 @@
 
 | Signature                                                                                 | Decorator | Docstring |
 | :---------------------------------------------------------------------------------------- | :-------- | :-------- |
-| check_tag_names(tag_names: List[str]) -> List[devind_helpers.schema.types.ErrorFieldType] | -         |           |
+| check_tag_names(tag_names: List[str]) -> List[devind_helpers.schema.types.ErrorFieldType] | -         | -         |
 
 ## Класс AddPageMutation
 
@@ -16,7 +16,7 @@
 
 | Signature                                                                                                     | Decorator                                                            | Docstring |
 | :------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, text: Optional[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddPage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, text: Optional[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddPage])'] | -         |
 
 ## Класс ChangePageMutation
 
@@ -26,7 +26,7 @@
 
 | Signature                                                                                        | Decorator         | Docstring |
 | :----------------------------------------------------------------------------------------------- | :---------------- | :-------- |
-| get_page( info: graphql.execution.base.ResolveInfo, page_id: str) -> apps.pages.models.page.Page | ['@staticmethod'] |           |
+| get_page( info: graphql.execution.base.ResolveInfo, page_id: str) -> apps.pages.models.page.Page | ['@staticmethod'] | -         |
 
 ## Класс ChangePageAvatarMutation
 
@@ -36,7 +36,7 @@
 
 | Signature                                                                                                                                                           | Decorator                                                               | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, avatar: django.core.files.uploadedfile.InMemoryUploadedFile, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, avatar: django.core.files.uploadedfile.InMemoryUploadedFile, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] | -         |
 
 ## Класс ChangePageBooleanPropertyMutation
 
@@ -46,7 +46,7 @@
 
 | Signature                                                                                                                       | Decorator                                                               | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, field: str, value: bool, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, field: str, value: bool, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] | -         |
 
 ## Класс ChangePageTitleMutation
 
@@ -56,7 +56,7 @@
 
 | Signature                                                                                                          | Decorator                                                               | Docstring |
 | :----------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, title: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, title: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] | -         |
 
 ## Класс ChangePageTagsMutation
 
@@ -66,7 +66,7 @@
 
 | Signature                                                                                                                    | Decorator                                                               | Docstring |
 | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, tag_names: List[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, tag_names: List[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] | -         |
 
 ## Класс ChangePageCategoryMutation
 
@@ -76,7 +76,7 @@
 
 | Signature                                                                                                                      | Decorator                                              | Docstring |
 | :----------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- | :-------- |
-| mutate_and_get_payload( self, root, info: graphql.execution.base.ResolveInfo, page_id: str, category_id: int, *args, **kwargs) | ['@permission_classes([IsAuthenticated, ChangePage])'] |           |
+| mutate_and_get_payload( self, root, info: graphql.execution.base.ResolveInfo, page_id: str, category_id: int, *args, **kwargs) | ['@permission_classes([IsAuthenticated, ChangePage])'] | -         |
 
 ## Класс ChangePageKindMutation
 
@@ -86,7 +86,7 @@
 
 | Signature                                                                                                                 | Decorator                                                               | Docstring |
 | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, page_kind_id: int, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, page_kind_id: int, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangePage])'] | -         |
 
 ## Класс DeletePageMutation
 
@@ -96,7 +96,7 @@
 
 | Signature                                                                                              | Decorator                                                               | Docstring |
 | :----------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, DeletePage])'] |           |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, DeletePage])'] | -         |
 
 ## Класс PageMutations
 

@@ -10,8 +10,8 @@
 
 | Signature                                                                                                    | Decorator        | Docstring |
 | :----------------------------------------------------------------------------------------------------------- | :--------------- | :-------- |
-| validate( cls, root: Any, info: graphql.execution.base.ResolveInfo, input, *args, **kwargs)                  | ['@classmethod'] |           |
-| handle_content_type( cls, value: str, field: str, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@classmethod'] |           |
+| validate( cls, root: Any, info: graphql.execution.base.ResolveInfo, input, *args, **kwargs)                  | ['@classmethod'] | -         |
+| handle_content_type( cls, value: str, field: str, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@classmethod'] | -         |
 
 ## Класс ChangeProjectMutationPayload
 
@@ -29,7 +29,7 @@
 
 | Signature                                                                                                                                                                           | Decorator                                                              | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, name: str, project_id: str, file: django.core.files.uploadedfile.InMemoryUploadedFile, multiple: bool) | ['@staticmethod', '@permission_classes((IsAuthenticated, AddPeriod))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, name: str, project_id: str, file: django.core.files.uploadedfile.InMemoryUploadedFile, multiple: bool) | ['@staticmethod', '@permission_classes((IsAuthenticated, AddPeriod))'] | -         |
 
 ## Класс ChangePeriodMutationPayload
 
@@ -47,7 +47,7 @@
 
 | Signature                                                                                                             | Decorator                                                    | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, division_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, division_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс DeleteDivisionsMutationPayload
 
@@ -65,7 +65,7 @@
 
 | Signature                                                                                                                                           | Decorator                                                    | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, selected_period_id: str, period_groups_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, selected_period_id: str, period_groups_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс ChangePeriodGroupUsersMutation
 
@@ -75,7 +75,7 @@
 
 | Signature                                                                                                                | Decorator                                                    | Docstring |
 | :----------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, users_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, users_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс DeletePeriodGroupMutationPayload
 
@@ -89,7 +89,7 @@
 
 | Signature                                                                                                        | Decorator                                                    | Docstring |
 | :--------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, user_id: str) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, user_id: str) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс ProjectMutations
 

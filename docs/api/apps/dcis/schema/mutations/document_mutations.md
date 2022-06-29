@@ -24,7 +24,7 @@
 
 | Signature                                                                                                                     | Decorator                                                                      | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_id: str, status_id: int, comment: str) | ['@staticmethod', '@permission_classes((IsAuthenticated, AddDocumentStatus))'] |           |
+| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_id: str, status_id: int, comment: str) | ['@staticmethod', '@permission_classes((IsAuthenticated, AddDocumentStatus))'] | -         |
 
 ## Класс DeleteDocumentStatusMutation
 
@@ -34,7 +34,7 @@
 
 | Signature                                                                                                               | Decorator                                                                         | Docstring |
 | :---------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_status_id: int, *args, **kwargs) | ['@staticmethod', '@permission_classes((IsAuthenticated, DeleteDocumentStatus))'] |           |
+| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_status_id: int, *args, **kwargs) | ['@staticmethod', '@permission_classes((IsAuthenticated, DeleteDocumentStatus))'] | -         |
 
 ## Класс UnloadDocumentMutation
 
@@ -44,7 +44,7 @@
 
 | Signature                                                                                                                               | Decorator                                                    | Docstring |
 | :-------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_id: str, additional: Optional[list[str]] = None) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] |           |
+| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, document_id: str, additional: Optional[list[str]] = None) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -         |
 
 ## Класс DocumentMutations
 

@@ -14,7 +14,7 @@
 | edit(unknown)    | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | comment(unknown) | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
 | id(unknown)      | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
-| objects(unknown) | -         |                                                                                                                       |
+| objects(unknown) | -         | -                                                                                                                     |
 
 ## Класс Sheet
 
@@ -34,7 +34,7 @@
 | get_next_by_updated_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         |                                                                                                                                                                               |
+| objects(unknown)                    | -         | -                                                                                                                                                                             |
 
 ## Класс Document
 
@@ -54,7 +54,7 @@
 | get_next_by_updated_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         |                                                                                                                                                                               |
+| objects(unknown)                    | -         | -                                                                                                                                                                             |
 
 ## Класс DocumentStatus
 
@@ -69,7 +69,7 @@
 | get_next_by_created_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_previous_by_created_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         |                                                                                                                                                                               |
+| objects(unknown)                    | -         | -                                                                                                                                                                             |
 
 ## Класс Attribute
 
@@ -87,7 +87,7 @@
 | mutable(unknown)          | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
 | get_kind_display(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)               | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)          | -         |                                                                                                                                                                               |
+| objects(unknown)          | -         | -                                                                                                                                                                             |
 
 ## Класс AttributeValue
 
@@ -105,4 +105,4 @@
 | get_next_by_updated_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 | id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         |                                                                                                                                                                               |
+| objects(unknown)                    | -         | -                                                                                                                                                                             |

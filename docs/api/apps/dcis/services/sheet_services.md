@@ -27,7 +27,7 @@
 
 | Signature                                                                                                                                                      | Decorator | Docstring                                                              |
 | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :--------------------------------------------------------------------- |
-| __init__()                                                                                                                                                     | -         |                                                                        |
+| __init__()                                                                                                                                                     | -         | -                                                                      |
 | __new__( cls, field: str, value: str) -> apps.dcis.services.sheet_services.CheckCellOptions.Success | apps.dcis.services.sheet_services.CheckCellOptions.Error | -         | Create and return a new object. See help(type) for accurate signature. |
 
 ## Класс UpdateOrCrateValueResult
