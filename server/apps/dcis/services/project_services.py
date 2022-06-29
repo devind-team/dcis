@@ -19,11 +19,14 @@ def get_user_privileges_projects(user: User) -> QuerySet[Project]:
 
 def get_user_divisions_projects(user: User) -> QuerySet[Project]:
     """Получение проектов, связанных с дивизионами пользователя."""
-    project_filter = Q()
+    projects = Project.objects.none()
     divisions = get_user_division_ids(user)
     for division_name, division_values in divisions.items():
-        project_filter |= Q(content_type__model=division_name, period__division__object_id__in=division_values)
-    return Project.objects.filter(project_filter)
+        projects |= Project.objects.filter(
+            content_type__model=division_name,
+            period__division__object_id__in=division_values
+        )
+    return projects
 
 
 def get_user_projects(user: User) -> QuerySet[Project]:

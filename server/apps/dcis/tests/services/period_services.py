@@ -24,6 +24,7 @@ class GetUserPeriodsTestCase(TestCase):
         self.department_content_type = ContentType.objects.get_for_model(Department)
 
         self.user = User.objects.create(username='user', email='user@gmain.com')
+        self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
 
         self.user_is_creator_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
         self.user_project_periods = [Period.objects.create(project=self.user_is_creator_project) for _ in range(3)]
@@ -74,8 +75,15 @@ class GetUserPeriodsTestCase(TestCase):
             set(get_user_privileges_periods(self.user, self.user_is_not_creator_project.id))
         )
 
-    def test_get_user_divisions_periods_department(self) -> None:
-        """Тестирование функции `get_user_divisions_periods`."""
+    def test_get_user_divisions_periods_without_periods(self) -> None:
+        """Тестирование функции `get_user_divisions_periods` для пользователя, у которого нет периодов."""
+        self.assertQuerysetEqual(
+            Period.objects.none(),
+            get_user_divisions_periods(self.extra_user, self.user_is_not_creator_project.id)
+        )
+
+    def test_get_user_divisions_periods_with_periods(self) -> None:
+        """Тестирование функции `get_user_divisions_periods` для пользователя, у которого есть периоды."""
         self.assertSetEqual(
             {self.department_period},
             set(get_user_divisions_periods(self.user, self.user_is_not_creator_project.id))

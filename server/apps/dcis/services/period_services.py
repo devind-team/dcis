@@ -23,13 +23,14 @@ def get_user_privileges_periods(user: User, project_id: int | str) -> QuerySet[P
 def get_user_divisions_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     """Получение периодов, связанных с дивизионами пользователя."""
     divisions = get_user_division_ids(user, project_id)
-    period_divisions_filter = Q()
+    periods = Period.objects.none()
     for division_name, division_values in divisions.items():
-        period_divisions_filter |= Q(
+        periods |= Period.objects.filter(
             project__content_type__model=division_name,
-            division__object_id__in=division_values
+            division__object_id__in=division_values,
+            project_id=project_id
         )
-    return Period.objects.filter(period_divisions_filter, project_id=project_id)
+    return periods
 
 
 def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:

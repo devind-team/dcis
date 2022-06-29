@@ -25,6 +25,7 @@ class GetUserProjectsTestCase(TestCase):
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.user = User.objects.create(username='user', email='user@gmain.com')
+        self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
 
         self.user_projects = [Project.objects.create(
             user=self.user, content_type=self.department_content_type
@@ -84,8 +85,15 @@ class GetUserProjectsTestCase(TestCase):
             set(get_user_privileges_projects(self.user)),
         )
 
-    def test_get_user_divisions_projects(self) -> None:
-        """Тестирование функции `get_user_divisions_projects`."""
+    def test_get_user_divisions_projects_without_projects(self) -> None:
+        """Тестирование функции `get_user_divisions_projects` для пользователя, у которого нет проектов."""
+        self.assertQuerysetEqual(
+            Project.objects.none(),
+            get_user_divisions_projects(self.extra_user)
+        )
+
+    def test_get_user_divisions_projects_with_projects(self) -> None:
+        """Тестирование функции `get_user_divisions_projects` для пользователя, у которого есть проекты."""
         self.assertSetEqual(
             {self.department_project, self.organization_project},
             set(get_user_divisions_projects(self.user)),
