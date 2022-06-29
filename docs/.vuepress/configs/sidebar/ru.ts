@@ -1,31 +1,23 @@
 import type { SidebarConfig } from '@vuepress/theme-default'
 
-// const fs = require('fs')
-// const path = require('path')
-//
-// function getSideBar(folder, text) {
-//     const extension = ['.md']
-//     const files = fs.
-//     readdirSync(path.join(`${__dirname}/../${folder}`)).
-//     filter(
-//         (item) =>
-//             item.toLowerCase() != 'readme.md' &&
-//             fs.statSync(path.join(`${__dirname}/../${folder}`, item)).isFile() &&
-//         extension.includes(path.extname(item))
-//     )
-//     return [{text: text, children: ['', ...files]}]
-// }
+const fs = require('fs')
+const path = require('path')
 
+function getSideBar(folder, text) {
+    const extension = ['.md']
+    const files = fs.
+    readdirSync(path.join(`${__dirname}/../../../${folder}`)).
+    filter(
+        (item) =>
+            item.toLowerCase() != 'readme.md' &&
+            fs.statSync(path.join(`${__dirname}/../../../${folder}`, item)).isFile() &&
+        extension.includes(path.extname(item))
+    )
+    return [{text: text, children: [...files]}]
+}
 
 export const sidebarRu: SidebarConfig = {
-    '/docs/': [
-        {
-            text: 'Docs',
-            children: [
-                '/docs/README.md'
-            ]
-        }
-    ],
+    '/docs/': getSideBar('docs', 'Docs'),
     '/api/': [
         {
             text: 'core',
@@ -90,6 +82,5 @@ export const sidebarRu: SidebarConfig = {
                 '/api/apps/pages/validators.md',
             ]
         },
-
     ]
 }
