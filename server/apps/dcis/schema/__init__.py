@@ -1,7 +1,12 @@
 import graphene
 
-from apps.dcis.schema.mutations import CellMutations, DocumentMutations, ProjectMutations, SheetMutations, \
-    PrivilegeMutations
+from apps.dcis.schema.mutations import (
+    CellMutations,
+    DocumentMutations,
+    PrivilegeMutations,
+    ProjectMutations,
+    SheetMutations,
+)
 from apps.dcis.schema.queries import DocumentQueries, PrivilegeQueries, ProjectQueries, SheetQueries
 
 

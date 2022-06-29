@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import graphene
 from devind_helpers.decorators import permission_classes
@@ -77,10 +77,10 @@ class ProjectQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_user_divisions(
-            root: Any,
-            info: ResolveInfo,
-            user_id: Optional[str] = None,
-            project_id: Optional[str] = None
+        root: Any,
+        info: ResolveInfo,
+        user_id: str | None = None,
+        project_id: str | None = None,
     ) -> list:
         user: User = info.context.user if user_id is None else get_object_or_404(User, pk=from_global_id(user_id)[1])
         return get_user_divisions(user, project_id)

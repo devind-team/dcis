@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import graphene
 from devind_core.schema.types import FileType
@@ -38,7 +38,7 @@ class SheetQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_sheet(root: Any, info: ResolveInfo, sheet_id: str, document_id: Optional[str] = None):
+    def resolve_sheet(root: Any, info: ResolveInfo, sheet_id: str, document_id: str | None = None):
         return SheetUploader(
             sheet=get_object_or_404(Sheet, pk=sheet_id),
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import graphene
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
@@ -40,18 +38,18 @@ class AddDocumentMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, AddDocument,))
     def mutate_and_get_payload(
-            root: None,
-            info: ResolveInfo,
-            comment: str,
-            period_id: str,
-            status_id: int,
-            document_id: Optional[int] = None,
-            division_id: Optional[int] = None
+        root: None,
+        info: ResolveInfo,
+        comment: str,
+        period_id: str,
+        status_id: int,
+        document_id: int | None = None,
+        division_id: int | None = None,
     ) -> 'AddDocumentMutation':
         """Мутация для создания документа."""
         user: User = info.context.user
         period: Period = get_object_or_404(Period, pk=period_id)
-        document_id: Optional[int] = from_global_id(document_id)[1] if document_id else None
+        document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document: Document = create_new_document(
             user,
             period,
@@ -126,7 +124,7 @@ class UnloadDocumentMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: Optional[list[str]] = None):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
         if not additional:
             additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])

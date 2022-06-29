@@ -17,11 +17,9 @@ from graphql_relay import from_global_id
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Division
-from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
+from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Project
 from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType
-from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
+from apps.dcis.schema.types import DivisionType, PeriodGroupType, PeriodType, ProjectType
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 

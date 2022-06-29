@@ -1,13 +1,11 @@
 import graphene
 from devind_core.schema.types import ContentTypeType, FileType
-from devind_core.schema.types import FileType, ContentTypeType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
+from django.db.models import QuerySet
 from graphene_django import DjangoListField, DjangoObjectType
-from django.db.models import Q, QuerySet
-from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
 from stringcase import snakecase
