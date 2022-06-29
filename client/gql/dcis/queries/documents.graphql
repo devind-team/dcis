@@ -1,8 +1,8 @@
 #import "../fragments/document_fields.graphql"
 #import "../fragments/status_fields.graphql"
 
-query Documents($periodId: ID!, $divisionsId: [Int!]) {
-  documents(periodId: $periodId, divisionsId: $divisionsId) {
+query Documents($periodId: ID!) {
+  documents(periodId: $periodId) {
     totalCount
     pageInfo {
       hasNextPage

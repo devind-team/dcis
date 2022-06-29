@@ -3844,7 +3844,6 @@ export type QueryDocumentStatusesArgs = {
 export type QueryDocumentsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  divisionsId?: InputMaybe<Array<Scalars['Int']>>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -5418,7 +5417,6 @@ export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: A
 
 export type DocumentsQueryVariables = Exact<{
   periodId: Scalars['ID'];
-  divisionsId?: InputMaybe<Array<Scalars['Int']> | Scalars['Int']>;
 }>;
 
 export type DocumentsQuery = { __typename?: 'Query', documents: { __typename?: 'DocumentTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'DocumentTypeEdge', node?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } | null> } };

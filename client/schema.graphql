@@ -3125,8 +3125,6 @@ type Query {
   documents(
     after: String
     before: String
-    """Идентификаторы дивизионов"""
-    divisionsId: [Int!]
     first: Int
     last: Int
     offset: Int

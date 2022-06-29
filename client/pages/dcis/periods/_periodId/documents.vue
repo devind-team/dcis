@@ -77,7 +77,7 @@ export default defineComponent({
       changeUpdate
     } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
       document: documentsQuery,
-      variables: () => ({ periodId: route.params.periodId, divisionsId: [] })
+      variables: () => ({ periodId: route.params.periodId })
     })
 
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
