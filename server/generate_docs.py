@@ -1,3 +1,4 @@
+"""Скрипт генерирующий markdown файлы по docstring"""
 import os
 import sys
 import django
@@ -15,12 +16,14 @@ django.setup()
 
 
 def recursive_module(mod: pdoc.doc.Module):
+    """Рекурсия прохождения по всем модулям"""
     yield mod
     for submod in mod.submodules:
         yield from recursive_module(submod)
 
 
 def get_function(module_functions: list) -> list:
+    """Извлечение данных функции из модуля"""
     list_functions = []
     for module_function in module_functions:
         function = {
@@ -34,6 +37,7 @@ def get_function(module_functions: list) -> list:
 
 
 def get_class(module_classes: list) -> list:
+    """Извлечение данных класса из модуля"""
     list_classes = []
     for module_class in module_classes:
         clazz = {
@@ -46,6 +50,7 @@ def get_class(module_classes: list) -> list:
 
 
 def get_methods(module_class: pdoc.doc.Class) -> list:
+    """Извлечение данных метода класса"""
     list_methods = []
     for own_member in module_class.own_members:
         if isinstance(own_member, pdoc.doc.Function) and (own_member.name[0] != '_'
@@ -61,10 +66,12 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
 
 
 def remove_symbol(string: str) -> str:
+    """Преобразование в строку и удаление лишних символов"""
     return re.sub(' +', ' ', string.replace('\n', ''))
 
 
 def generate_markdown(mod: pdoc.doc.Module):
+    """Генерация markdown файла"""
     doc = Document(f'{mod.source_file.stem}')
     doc.add_header(text=f'Модуль {mod.name}', level=1)
     doc.add_paragraph(text=f'{mod.docstring}')
