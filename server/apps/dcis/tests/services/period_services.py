@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department, Organization
+from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
@@ -22,7 +22,6 @@ class GetUserPeriodsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.department_content_type = ContentType.objects.get_for_model(Department)
-        self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.user = User.objects.create(username='user', email='user@gmain.com')
 
@@ -51,13 +50,6 @@ class GetUserPeriodsTestCase(TestCase):
         self.department_period = Period.objects.create(project=self.user_is_not_creator_project)
         self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
 
-        self.organization = Organization.objects.create(attributes='', user=self.user)
-        self.organization_period = Period.objects.create(project=self.user_is_not_creator_project)
-        self.organization_division = Division.objects.create(
-            period=self.organization_period,
-            object_id=self.organization.id,
-        )
-
         self.extra_project = Project.objects.create(content_type=self.department_content_type)
         self.extra_period = Period.objects.create(project=self.extra_project)
 
@@ -85,25 +77,24 @@ class GetUserPeriodsTestCase(TestCase):
     def test_get_user_divisions_periods_department(self) -> None:
         """Тестирование функции `get_user_divisions_periods`."""
         self.assertSetEqual(
-            {self.department_period, self.organization_period},
+            {self.department_period},
             set(get_user_divisions_periods(self.user, self.user_is_not_creator_project.id))
         )
 
     def test_user_periods_with_perm(self) -> None:
-        """Тестирование функции `get_user_periods` при наличии разрешения `dcis.view_period` у пользователя."""
+        """Тестирование функции `get_user_periods` при наличии у пользователя разрешения `dcis.view_period`."""
         with patch.object(self.user, 'has_perm', new=Mock(return_value=True)) as mock:
             periods = get_user_periods(self.user, self.extra_project)
             mock.assert_called_once_with('dcis.view_period')
             self.assertQuerysetEqual(self.extra_project.period_set.all(), periods)
 
     def test_user_periods_without_perm(self) -> None:
-        """Тестирование функции `get_user_periods` при отсутствии разрешения `dcis.view_period` у пользователя."""
+        """Тестирование функции `get_user_periods` при отсутствии у пользователя разрешения `dcis.view_period`."""
         self.assertSetEqual(
             {
                 *self.user_periods,
                 *self.user_group_periods,
                 self.privilege_period,
-                self.organization_period,
                 self.department_period
             },
             set(get_user_periods(self.user, self.user_is_not_creator_project.id)),

@@ -54,7 +54,7 @@ class GetUserProjectsTestCase(TestCase):
             user=self.user,
             privilege=self.privilege,
         )
-        
+
         self.department = Department.objects.create(user=self.user)
         self.department_project = Project.objects.create(content_type=self.department_content_type)
         self.department_period = Period.objects.create(project=self.department_project)
@@ -92,14 +92,14 @@ class GetUserProjectsTestCase(TestCase):
         )
 
     def test_get_user_projects_with_perm(self) -> None:
-        """Тестирование функции `get_user_projects` при наличии разрешения `dcis.view_project` у пользователя."""
+        """Тестирование функции `get_user_projects` при наличии у пользователя разрешения `dcis.view_project`."""
         with patch.object(self.user, 'has_perm', new=Mock(return_value=True)) as mock:
             projects = get_user_projects(self.user)
             mock.assert_called_once_with('dcis.view_project')
             self.assertQuerysetEqual(Project.objects.all(), projects)
 
     def test_get_user_projects_without_perm(self) -> None:
-        """Тестирование функции `get_user_projects` при отсутствии разрешения `dcis.view_project` у пользователя."""
+        """Тестирование функции `get_user_projects` при отсутствии у пользователя разрешения `dcis.view_project`."""
         self.assertSetEqual(
             {
                 *self.user_projects,

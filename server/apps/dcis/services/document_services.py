@@ -27,7 +27,7 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
     """
     period = Period.objects.get(pk=period) if type(period) in (int, str) else period
     if any((
-        user.has_perm('dcis.view_period'),
+        user.has_perm('dcis.view_document'),
         has_privilege(user.id, period.id, 'view_document'),
         period.project.user_id == user.id,
         period.user_id == user.id
