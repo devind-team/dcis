@@ -75,7 +75,8 @@ def generate_markdown(mod: pdoc.doc.Module):
             [
                 [f"{function['name']}{function['signature']}",
                  f"{'-' if not function['decorators'] else function['decorators']}",
-                 f"{function['docstring']}"] for function in get_function(mod_module.functions)
+                 f"{'-' if not function['docstring'] else function['docstring']}"]
+                for function in get_function(mod_module.functions)
             ],
             [Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT]
         )
@@ -90,7 +91,8 @@ def generate_markdown(mod: pdoc.doc.Module):
                     [
                         [f"{method['name']}{method['signature']}",
                          f"{'-' if not method['decorators'] else method['decorators']}",
-                         f"{method['docstring']}"] for method in clazz['methods']
+                         f"{'-' if not method['docstring'] else method['docstring']}"]
+                        for method in clazz['methods']
                     ],
                     [Table.Align.LEFT, Table.Align.LEFT, Table.Align.LEFT]
                 )

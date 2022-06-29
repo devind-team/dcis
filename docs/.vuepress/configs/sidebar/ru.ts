@@ -1,20 +1,20 @@
 import type { SidebarConfig } from '@vuepress/theme-default'
 
-const fs = require('fs')
-const path = require('path')
-
-function getSideBar(folder, text) {
-    const extension = ['.md']
-    const files = fs.
-    readdirSync(path.join(`${__dirname}/../${folder}`)).
-    filter(
-        (item) =>
-            item.toLowerCase() != 'readme.md' &&
-            fs.statSync(path.join(`${__dirname}/../${folder}`, item)).isFile() &&
-        extension.includes(path.extname(item))
-    )
-    return [{text: text, children: ['', ...files]}]
-}
+// const fs = require('fs')
+// const path = require('path')
+//
+// function getSideBar(folder, text) {
+//     const extension = ['.md']
+//     const files = fs.
+//     readdirSync(path.join(`${__dirname}/../${folder}`)).
+//     filter(
+//         (item) =>
+//             item.toLowerCase() != 'readme.md' &&
+//             fs.statSync(path.join(`${__dirname}/../${folder}`, item)).isFile() &&
+//         extension.includes(path.extname(item))
+//     )
+//     return [{text: text, children: ['', ...files]}]
+// }
 
 
 export const sidebarRu: SidebarConfig = {
@@ -69,14 +69,14 @@ export const sidebarRu: SidebarConfig = {
                 '/api/apps/dcis/permissions/project_permissions.md',
                 '/api/apps/dcis/permissions/sheet_permissions.md',
                 '/api/apps/dcis/permissions/value_permissions.md',
-                '/api/apps/dcis/schema/',
+                // '/api/apps/dcis/schema/',
             ]
         },
         {
             text: 'notification',
             collapsible: true,
             children: [
-                '/api/apps/notification/apps.md'
+                '/api/apps/notification/readme.md'
             ]
         },
         {
