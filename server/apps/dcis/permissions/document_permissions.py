@@ -27,7 +27,7 @@ class AddDocument(BasePermission):
         return all((
             ViewPeriod.has_object_permission(context, obj),
             any((
-                context.user.has_perm('dcis.add_period'),
+                context.user.has_perm('dcis.add_document'),
                 obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project'),
                 obj.user_id == context.user.id and context.user.has_perm('dcis.add_period'),
                 has_privilege(context.user.id, obj.id, 'add_document')

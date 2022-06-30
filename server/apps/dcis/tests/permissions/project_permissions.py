@@ -1,27 +1,23 @@
 """Тесты разрешений на работу с проектами сборов."""
-from unittest.mock import patch, Mock
 
-from django.test import TestCase
+from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 
-from apps.core.models import User
-from apps.dcis.models import Project, Period
-from apps.dcis.permissions import ViewProject, ChangeProject, DeleteProject
+from apps.dcis.models import Period, Project
+from apps.dcis.permissions.project_permissions import ChangeProject, DeleteProject, ViewProject
+from .common import PermissionsTestCase
 
 
-class ProjectPermissionsTestCase(TestCase):
+class ProjectPermissionsTestCase(PermissionsTestCase):
     """Тесты разрешений на работу с проектами сборов."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
+        super().setUp()
+
         self.department_content_type = ContentType.objects.get_for_model(Department)
-
-        self.user = User.objects.create(username='user', email='user@gmail.com')
-
-        self.context_mock = Mock()
-        self.context_mock.user = self.user
 
         self.project = Project.objects.create(content_type=self.department_content_type)
 

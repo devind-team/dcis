@@ -5,9 +5,7 @@ from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
 
-from apps.core.models import User
 from apps.dcis.models import Document, Period, Project
 from apps.dcis.permissions.period_permissions import (
     AddPeriod,
@@ -18,19 +16,17 @@ from apps.dcis.permissions.period_permissions import (
     DeletePeriod,
     ViewPeriod,
 )
+from .common import PermissionsTestCase
 
 
-class PeriodPermissionsTestCase(TestCase):
+class PeriodPermissionsTestCase(PermissionsTestCase):
     """Тесты разрешений на работу с периодами проектов."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
+        super().setUp()
+
         self.department_content_type = ContentType.objects.get_for_model(Department)
-
-        self.user = User.objects.create(username='user', email='user@gmail.com')
-
-        self.context_mock = Mock()
-        self.context_mock.user = self.user
 
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
@@ -56,6 +52,7 @@ class PeriodPermissionsTestCase(TestCase):
             self.assertTrue(AddPeriod.has_object_permission(self.context_mock, self.project))
         self.assertFalse(AddPeriod.has_object_permission(self.context_mock, self.user_project))
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'):
+            self.assertFalse(AddPeriod.has_object_permission(self.context_mock, self.period))
             self.assertTrue(AddPeriod.has_object_permission(self.context_mock, self.user_project))
 
     def test_change_period(self) -> None:
