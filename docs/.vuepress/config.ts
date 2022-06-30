@@ -30,7 +30,10 @@ export default defineUserConfig({
         selectLanguageName: 'Russian',
         selectLanguageText: 'Russian',
         selectLanguageAriaLabel: 'Russian',
-        sidebar: sidebarRu
+        sidebar: sidebarRu,
+        editLinkText: 'Изменить эту страницу на GitHub',
+        lastUpdatedText: 'Последнее обновление',
+        contributorsText: 'Авторы',
       },
       '/en/': {
         navbar: navbarEn,
