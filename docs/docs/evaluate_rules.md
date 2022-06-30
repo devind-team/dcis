@@ -28,9 +28,9 @@
 
 ### Ссылки на связанные файлы
 
-- [Мутация для изменения значения ячейки](../server/apps/dcis/schema/mutations/value_mutations.py)
-- [Сервис для изменения значений](../server/apps/dcis/services/value_services.py)
-- [Привилегия для изменения значения](../server/apps/dcis/permissions/value_permissions.py)
+- [Мутация для изменения значения ячейки](../../server/apps/dcis/schema/mutations/value_mutations.py)
+- [Сервис для изменения значений](../../server/apps/dcis/services/value_services.py)
+- [Привилегия для изменения значения](../../server/apps/dcis/permissions/value_permissions.py)
 
 ## Изменение Cell
 
@@ -38,4 +38,4 @@
 
 ## Ссылки на связанные файлы:
 
-- [Кеш контейнер для хранения зависимостей](../server/apps/dcis/services/sheet_cache_service.py)
+- [Кеш контейнер для хранения зависимостей](../../server/apps/dcis/services/sheet_cache_service.py)
