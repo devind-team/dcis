@@ -1,4 +1,5 @@
 """Разрешения на работу с периодами проектов."""
+
 from devind_helpers.permissions import BasePermission
 
 from apps.dcis.models import Period, Project

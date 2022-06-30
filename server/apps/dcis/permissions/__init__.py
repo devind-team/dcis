@@ -1,4 +1,4 @@
-from .document_permissions import AddDocument, AddDocumentStatus, DeleteDocument, DeleteDocumentStatus, ViewDocument
+from .document_permissions import AddDocument, ChangeDocument, DeleteDocument, ViewDocument
 from .period_permissions import (
     AddPeriod,
     ChangePeriodDivisions,

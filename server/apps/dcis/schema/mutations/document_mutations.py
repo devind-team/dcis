@@ -9,7 +9,7 @@ from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.dcis.models import Document, DocumentStatus, Period, Status
-from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
+from apps.dcis.permissions import AddDocument
 from apps.dcis.schema.types import DocumentStatusType, DocumentType
 from apps.dcis.services.document_services import create_new_document
 from apps.dcis.services.document_unload_services import DocumentUnload
@@ -82,7 +82,7 @@ class AddDocumentStatusMutation(BaseMutation):
     document_status = graphene.Field(DocumentStatusType, description='Статус документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddDocumentStatus,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: int, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
@@ -104,7 +104,7 @@ class DeleteDocumentStatusMutation(BaseMutation):
     id = graphene.ID(required=True, description='Идентификатор статуса документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, DeleteDocumentStatus,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int, *args, **kwargs):
         delete_count, _ = DocumentStatus.objects.filter(pk=document_status_id).delete()
         return DeleteDocumentStatusMutation(success=delete_count == 1, id=document_status_id)

@@ -1,4 +1,5 @@
-"""Разрешения на работу с листами и документами."""
+"""Разрешения на работу с листами."""
+
 from devind_helpers.permissions import BasePermission
 
 from apps.dcis.models import Document, RowDimension, Sheet

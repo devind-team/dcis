@@ -1,4 +1,6 @@
-from devind_helpers.permissions import BasePermission, ModelPermission
+"""Разрешения на работу с документами периодов."""
+
+from devind_helpers.permissions import BasePermission
 
 from apps.dcis.models import Document, Period
 from apps.dcis.permissions.period_permissions import ViewPeriod
@@ -33,6 +35,25 @@ class AddDocument(BasePermission):
         ))
 
 
+class ChangeDocument(BasePermission):
+    """Пропускает пользователей, которые могут изменять документ в периоде."""
+
+    @staticmethod
+    def has_object_permission(context, obj: Document):
+        return ViewDocument.has_object_permission(context, obj) and any((
+            context.user.has_perm('dcis.change_document'),
+            all((
+                obj.period.project.user_id == context.user.id,
+                context.user.has_perm('dcis.add_project'),
+            )),
+            all((
+                obj.period.user_id == context.user.id,
+                context.user.has_perm('dcis.add_period'),
+            )),
+            has_privilege(context.user.id, obj.id, 'change_document')
+        ))
+
+
 class DeleteDocument(BasePermission):
     """Пропускает пользователей, которые могут удалять документ в периоде."""
 
@@ -50,7 +71,3 @@ class DeleteDocument(BasePermission):
             )),
             has_privilege(context.user.id, obj.id, 'delete_document')
         ))
-
-
-AddDocumentStatus = ModelPermission('dcis.add_documentstatus')
-DeleteDocumentStatus = ModelPermission('dcis.delete_documentstatus')

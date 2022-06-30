@@ -1,4 +1,5 @@
 """Разрешения на работу с проектами сборов."""
+
 from devind_helpers.permissions import BasePermission, ModelPermission
 
 from apps.dcis.models import Project
