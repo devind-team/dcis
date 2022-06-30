@@ -54,7 +54,7 @@ class ChangePeriodDivisions(ChangePeriod):
     def has_object_permission(context, obj: Period):
         if not ViewPeriod.has_object_permission(context, obj):
             return False
-        return super().has_object_permission(context, obj) or has_privilege(
+        return ChangePeriod.has_object_permission(context, obj) or has_privilege(
             context.user.id, obj.id, 'change_period_divisions'
         )
 
@@ -66,7 +66,7 @@ class ChangePeriodUsers(ChangePeriod):
     def has_object_permission(context, obj: Period):
         if not ViewPeriod.has_object_permission(context, obj):
             return False
-        return super().has_object_permission(context, obj) or has_privilege(
+        return ChangePeriod.has_object_permission(context, obj) or has_privilege(
             context.user.id, obj.id, 'change_period_users'
         )
 
@@ -78,7 +78,7 @@ class ChangePeriodSettings(ChangePeriod):
     def has_object_permission(context, obj: Period):
         if not ViewPeriod.has_object_permission(context, obj):
             return False
-        return super().has_object_permission(context, obj) or has_privilege(
+        return ChangePeriod.has_object_permission(context, obj) or has_privilege(
             context.user.id, obj.id, 'change_period_settings'
         )
 
