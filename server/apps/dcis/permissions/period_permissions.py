@@ -84,6 +84,19 @@ class ChangePeriodSettings(ChangePeriod):
         )
 
 
+class ChangePeriodSheet(BasePermission):
+    """Пропускает пользователей, которые могут изменять структуру листа."""
+
+    @staticmethod
+    def has_object_permission(context, obj: Period):
+        return ViewPeriod.has_object_permission(context, obj) and any((
+            context.user.has_perm('dcis.change_sheet'),
+            context.user.has_perm('dcis.add_project') and obj.project.user_id == context.user.id,
+            context.user.has_perm('dcis.add_period') and obj.user_id == context.user.id,
+            has_privilege(context.user.id, obj.id, 'change_sheet'),
+        ))
+
+
 class DeletePeriod(BasePermission):
     """Пропускает пользователей, которые могут удалять период в проекте."""
 

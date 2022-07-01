@@ -1,8 +1,17 @@
-from .document_permissions import AddDocument, ChangeDocument, DeleteDocument, ViewDocument
+from .document_permissions import (
+    AddChildRowDimension,
+    AddDocument,
+    ChangeDocument,
+    ChangeValue,
+    DeleteChildRowDimension,
+    DeleteDocument,
+    ViewDocument,
+)
 from .period_permissions import (
     AddPeriod,
     ChangePeriodDivisions,
     ChangePeriodSettings,
+    ChangePeriodSheet,
     ChangePeriodUsers,
     DeletePeriod,
     ViewPeriod,
@@ -16,10 +25,4 @@ from .project_permissions import (
     DeleteProject,
     ViewProject,
     ViewProject,
-)
-from .sheet_permissions import (
-    AddChildRowDimension,
-    ChangeSheet,
-    ChangeValue,
-    DeleteRowDimension,
 )
