@@ -89,10 +89,12 @@ class ChangePeriodSheet(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(context, obj) and any((
+        if not ViewPeriod.has_object_permission(context, obj):
+            return False
+        return any((
             context.user.has_perm('dcis.change_sheet'),
-            context.user.has_perm('dcis.add_project') and obj.project.user_id == context.user.id,
-            context.user.has_perm('dcis.add_period') and obj.user_id == context.user.id,
+            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project'),
+            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period'),
             has_privilege(context.user.id, obj.id, 'change_sheet'),
         ))
 

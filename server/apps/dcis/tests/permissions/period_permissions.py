@@ -4,6 +4,7 @@ from typing import Type
 from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
+from devind_helpers.permissions import BasePermission
 from django.contrib.contenttypes.models import ContentType
 
 from apps.dcis.models import Document, Period, Project
@@ -15,6 +16,7 @@ from apps.dcis.permissions.period_permissions import (
     ChangePeriodUsers,
     DeletePeriod,
     ViewPeriod,
+    ChangePeriodSheet
 )
 from .common import PermissionsTestCase
 
@@ -57,11 +59,11 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
 
     def test_change_period(self) -> None:
         """Тестирование класса `ChangePeriod`."""
-        self._test_change_period(ChangePeriod)
+        self._test_change_period(ChangePeriod, 'dcis.change_period', 'change_period')
 
     def test_change_period_divisions(self) -> None:
         """Тестирование класса `ChangePeriodDivisions.`"""
-        self._test_change_period(ChangePeriodDivisions)
+        self._test_change_period(ChangePeriodDivisions, 'dcis.change_period', 'change_period')
         with patch(
             'apps.dcis.permissions.period_permissions.ChangePeriod.has_object_permission',
             new=Mock(return_value=False),
@@ -74,7 +76,7 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
 
     def test_change_period_users(self) -> None:
         """Тестирование класса `ChangePeriodUsers`."""
-        self._test_change_period(ChangePeriodUsers)
+        self._test_change_period(ChangePeriodUsers, 'dcis.change_period', 'change_period')
         with patch(
             'apps.dcis.permissions.period_permissions.ChangePeriod.has_object_permission',
             new=Mock(return_value=False),
@@ -89,7 +91,7 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
 
     def test_change_period_settings(self) -> None:
         """Тестирование класса `ChangePeriodSettings`."""
-        self._test_change_period(ChangePeriodSettings)
+        self._test_change_period(ChangePeriodSettings, 'dcis.change_period', 'change_period')
         with patch(
             'apps.dcis.permissions.period_permissions.ChangePeriod.has_object_permission',
             new=Mock(return_value=False)
@@ -101,6 +103,10 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
                 ChangePeriodSettings.has_object_permission(self.context_mock, self.user_period_without_documents)
             )
             mock.assert_called_once_with(self.user.id, self.user_period_without_documents.id, 'change_period_settings')
+
+    def test_change_period_sheet(self) -> None:
+        """Тестирование класса `ChangePeriodSheet`."""
+        self._test_change_period(ChangePeriodSheet, 'dcis.change_sheet', 'change_sheet')
 
     def test_delete_period(self) -> None:
         """Тестирование класса `DeletePeriod`."""
@@ -122,11 +128,11 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
                         DeletePeriod.has_object_permission(self.context_mock, self.user_period_without_documents)
                     )
 
-    def _test_change_period(self, cls: Type[ChangePeriod]) -> None:
+    def _test_change_period(self, cls: Type[BasePermission], permission: str, privilege: str) -> None:
         """Тестирование разрешений на изменение периода."""
         self.assertFalse(cls.has_object_permission(self.context_mock, self.period))
         self.assertFalse(cls.has_object_permission(self.context_mock, self.user_period_without_documents))
-        with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.change_period'):
+        with patch.object(self.user, 'has_perm', new=lambda perm: perm == permission):
             self.assertTrue(cls.has_object_permission(self.context_mock, self.user_period_without_documents))
         with patch.object(
             self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'
@@ -140,4 +146,4 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             self.assertTrue(cls.has_object_permission(self.context_mock, self.user_period_without_documents))
         with patch('apps.dcis.permissions.period_permissions.has_privilege', new=Mock(return_value=True)) as mock:
             self.assertTrue(cls.has_object_permission(self.context_mock, self.user_period_without_documents))
-            mock.assert_called_once_with(self.user.id, self.user_period_without_documents.id, 'change_period')
+            mock.assert_called_once_with(self.user.id, self.user_period_without_documents.id, privilege)
