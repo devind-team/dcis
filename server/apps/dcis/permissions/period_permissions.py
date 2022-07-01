@@ -3,9 +3,9 @@
 from devind_helpers.permissions import BasePermission
 
 from apps.dcis.models import Period, Project
-from apps.dcis.permissions.project_permissions import ViewProject
 from apps.dcis.services.period_services import get_user_periods
 from apps.dcis.services.privilege_services import has_privilege
+from .project_permissions import ViewProject
 
 
 class ViewPeriod(BasePermission):

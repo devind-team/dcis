@@ -6,13 +6,16 @@ from apps.dcis.models import Document, RowDimension, Sheet
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
+from .period_permissions import ViewPeriod
+from .document_permissions import ViewDocument
+
 
 class ChangeSheet(BasePermission):
     """Пропускает пользователей, которые могут изменять структуру листа."""
 
     @staticmethod
     def has_object_permission(context, obj: Sheet):
-        return any((
+        return ViewPeriod.has_object_permission(context, obj.period) and any((
             context.user.has_perm('dcis.add_project') and obj.period.project.user_id == context.user.id,
             context.user.has_perm('dcis.add_period') and obj.period.user_id == context.user.id,
             context.user.has_perm('dcis.change_sheet'),
@@ -25,6 +28,8 @@ class ChangeValue(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Document):
+        if not ViewDocument.has_object_permission(context, obj):
+            return False
         division_ids = [division['id'] for division in get_user_divisions(context.user, obj.period.project)]
         return any((
             context.user.has_perm('dcis.change_value'),
@@ -39,7 +44,7 @@ class AddChildRowDimension(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: RowDimension):
-        return obj.document and obj.dynamic and any((
+        return obj.document and obj.dynamic and ViewDocument.has_object_permission(context, obj.document) and any((
             context.user.has_perm('dcis.add_rowdimension'),
             has_privilege(context.user.id, obj.document.period.id, 'add_rowdimension')
         ))
@@ -50,7 +55,9 @@ class DeleteRowDimension(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: RowDimension):
-        return obj.rowdimension_set.count() == 0 and any((
+        return ViewPeriod.has_object_permission(
+            context, obj.sheet.period
+        ) and obj.rowdimension_set.count() == 0 and any((
             context.user.has_perm('dcis.delete_rowdimension'),
             has_privilege(context.user.id, obj.document.period.id, 'delete_rowdimension'),
             obj.user_id == context.user.id

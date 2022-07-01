@@ -3,9 +3,9 @@
 from devind_helpers.permissions import BasePermission
 
 from apps.dcis.models import Document, Period
-from apps.dcis.permissions.period_permissions import ViewPeriod
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.privilege_services import has_privilege
+from .period_permissions import ViewPeriod
 
 
 class ViewDocument(BasePermission):
