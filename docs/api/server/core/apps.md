@@ -8,6 +8,6 @@ Core settings.
 
 ### Методы
 
-| Signature   | Decorator | Docstring                             |
-| :---------- | :-------- | :------------------------------------ |
-| ready(self) | -         | Start function when core app started. |
+| Сигнатура   | Декораторы | Описание                              |
+| :---------- | :--------- | :------------------------------------ |
+| ready(self) | -          | Start function when core app started. |

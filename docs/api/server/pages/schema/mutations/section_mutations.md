@@ -8,9 +8,9 @@
 
 ### Методы
 
-| Signature                                                                                                                                                                      | Decorator         | Docstring |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :-------- |
-| get_page( page_id: str, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -> Tuple[apps.pages.models.page.Page, devind_helpers.schema.mutations.BaseMutation] | ['@staticmethod'] | -         |
+| Сигнатура                                                                                                                                                                      | Декораторы        | Описание |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :------- |
+| get_page( page_id: str, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -> Tuple[apps.pages.models.page.Page, devind_helpers.schema.mutations.BaseMutation] | ['@staticmethod'] | -        |
 
 ## Класс AddSectionTextMutation
 
@@ -18,9 +18,9 @@
 
 ### Методы
 
-| Signature                                                                                              | Decorator                                                               | Docstring |
-| :----------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddSection])'] | -         |
+| Сигнатура                                                                                              | Декораторы                                                              | Описание |
+| :----------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddSection])'] | -        |
 
 ## Класс AddSectionGalleryMutation
 
@@ -28,9 +28,9 @@
 
 ### Методы
 
-| Signature                                                                                                                                                                 | Decorator                                                               | Docstring |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, images: List[django.core.files.uploadedfile.InMemoryUploadedFile], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddSection])'] | -         |
+| Сигнатура                                                                                                                                                                 | Декораторы                                                              | Описание |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, images: List[django.core.files.uploadedfile.InMemoryUploadedFile], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddSection])'] | -        |
 
 ## Класс AddSectionFilesMutation
 
@@ -38,9 +38,9 @@
 
 ### Методы
 
-| Signature                                                                                                                                                                | Decorator                                                               | Docstring |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, files: list[django.core.files.uploadedfile.InMemoryUploadedFile], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddSection])'] | -         |
+| Сигнатура                                                                                                                                                                | Декораторы                                                              | Описание |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, page_id: str, files: list[django.core.files.uploadedfile.InMemoryUploadedFile], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddSection])'] | -        |
 
 ## Класс ChangeSectionMutation
 
@@ -48,9 +48,9 @@
 
 ### Методы
 
-| Signature                                                                                                                                                                                  | Decorator         | Docstring |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :-------- |
-| get_section( section_id: int, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -> Tuple[apps.pages.models.section.Section, devind_helpers.schema.mutations.BaseMutation] | ['@staticmethod'] | -         |
+| Сигнатура                                                                                                                                                                                  | Декораторы        | Описание |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :------- |
+| get_section( section_id: int, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -> Tuple[apps.pages.models.section.Section, devind_helpers.schema.mutations.BaseMutation] | ['@staticmethod'] | -        |
 
 ## Класс ChangeSectionTextMutation
 
@@ -58,9 +58,9 @@
 
 ### Методы
 
-| Signature                                                                                                            | Decorator                                                                  | Docstring |
-| :------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: int, text: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeSection])'] | -         |
+| Сигнатура                                                                                                            | Декораторы                                                                 | Описание |
+| :------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: int, text: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeSection])'] | -        |
 
 ## Класс ChangeSectionGalleryMutation
 
@@ -68,9 +68,9 @@
 
 ### Методы
 
-| Signature                                                                                                                                                                                                          | Decorator                                                                  | Docstring |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: int, text: str, new_images: List[django.core.files.uploadedfile.InMemoryUploadedFile], old_images: List[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeSection])'] | -         |
+| Сигнатура                                                                                                                                                                                                          | Декораторы                                                                 | Описание |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: int, text: str, new_images: List[django.core.files.uploadedfile.InMemoryUploadedFile], old_images: List[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeSection])'] | -        |
 
 ## Класс ChangeSectionFilesMutation
 
@@ -78,9 +78,9 @@
 
 ### Методы
 
-| Signature                                                                                                                                                                                                        | Decorator                                                                  | Docstring |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: int, text: str, new_files: list[django.core.files.uploadedfile.InMemoryUploadedFile], old_files: list[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeSection])'] | -         |
+| Сигнатура                                                                                                                                                                                                        | Декораторы                                                                 | Описание |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: int, text: str, new_files: list[django.core.files.uploadedfile.InMemoryUploadedFile], old_files: list[str], *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, ChangeSection])'] | -        |
 
 ## Класс DeleteSectionMutation
 
@@ -88,9 +88,9 @@
 
 ### Методы
 
-| Signature                                                                                                 | Decorator                                                                  | Docstring |
-| :-------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :-------- |
-| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, DeleteSection])'] | -         |
+| Сигнатура                                                                                                 | Декораторы                                                                 | Описание |
+| :-------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root, info: graphql.execution.base.ResolveInfo, section_id: str, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, DeleteSection])'] | -        |
 
 ## Класс SectionMutations
 

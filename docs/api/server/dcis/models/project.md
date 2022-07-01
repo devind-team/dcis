@@ -4,9 +4,9 @@
 
 ### Функции
 
-| Signature                      | Decorator | Docstring |
-| :----------------------------- | :-------- | :-------- |
-| default_content_type(instance) | -         | -         |
+| Сигнатура                      | Декораторы | Описание |
+| :----------------------------- | :--------- | :------- |
+| default_content_type(instance) | -          | -        |
 
 ## Класс Project
 
@@ -14,21 +14,12 @@
 
 ### Методы
 
-| Signature                           | Decorator | Docstring                                                                                                                                                                     |
-| :---------------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name(unknown)                       | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| short(unknown)                      | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| description(unknown)                | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| visibility(unknown)                 | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| archive(unknown)                    | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| created_at(unknown)                 | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| updated_at(unknown)                 | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| get_next_by_created_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_previous_by_created_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_next_by_updated_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         | -                                                                                                                                                                             |
+| Сигнатура                           | Декораторы | Описание                                                                                                                                                                      |
+| :---------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| get_next_by_created_at(unknown)     | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_previous_by_created_at(unknown) | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_next_by_updated_at(unknown)     | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_previous_by_updated_at(unknown) | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 
 ## Класс Period
 
@@ -36,32 +27,14 @@
 
 ### Методы
 
-| Signature                           | Decorator | Docstring                                                                                                                                                                     |
-| :---------------------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name(unknown)                       | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| status(unknown)                     | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| multiple(unknown)                   | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| privately(unknown)                  | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| start(unknown)                      | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| expiration(unknown)                 | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| created_at(unknown)                 | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| updated_at(unknown)                 | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| get_status_display(unknown)         | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_next_by_created_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_previous_by_created_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_next_by_updated_at(unknown)     | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| get_previous_by_updated_at(unknown) | -         | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
-| id(unknown)                         | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed.                                                         |
-| objects(unknown)                    | -         | -                                                                                                                                                                             |
+| Сигнатура                           | Декораторы | Описание                                                                                                                                                                      |
+| :---------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| get_status_display(unknown)         | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_next_by_created_at(unknown)     | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_previous_by_created_at(unknown) | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_next_by_updated_at(unknown)     | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
+| get_previous_by_updated_at(unknown) | -          | Method descriptor with partial application of the given argumentsand keywords.Supports wrapping existing descriptors and handles non-descriptorcallables as instance methods. |
 
 ## Класс Division
 
 Участвующие в сборах подразделения. Реализация будет осуществляться для двух дивизионов: - Department - департамент - Organization - организации Связь к дивизионам или департамента обеспечивается через content_object
-
-### Методы
-
-| Signature          | Decorator | Docstring                                                                                                             |
-| :----------------- | :-------- | :-------------------------------------------------------------------------------------------------------------------- |
-| object_id(unknown) | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
-| id(unknown)        | -         | A wrapper for a deferred-loading field. When the value is read from thisobject the first time, the query is executed. |
-| objects(unknown)   | -         | -                                                                                                                     |

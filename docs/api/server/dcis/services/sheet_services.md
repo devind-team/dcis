@@ -4,7 +4,7 @@
 
 ### Функции
 
-| Signature                                                                                                                                                                                                                                                                                                                   | Decorator               | Docstring                                                                                                                                                               |
+| Сигнатура                                                                                                                                                                                                                                                                                                                   | Декораторы              | Описание                                                                                                                                                                |
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | rename_sheet( sheet: apps.dcis.models.document.Sheet, name: str) -> tuple[apps.dcis.models.document.Sheet, list[apps.dcis.models.sheet.Cell]]                                                                                                                                                                               | ['@transaction.atomic'] | Переименование листа с учетом формул.sheet.name -> name:param sheet - лист:param name - новое имя листа                                                                 |
 | change_column_dimension( column_dimension: apps.dcis.models.sheet.ColumnDimension, width: int | None, fixed: bool, hidden: bool, kind: str) -> apps.dcis.models.sheet.ColumnDimension                                                                                                                                       | -                       | Изменение колонки.                                                                                                                                                      |
@@ -25,10 +25,10 @@
 
 ### Методы
 
-| Signature                                                                                                                                                      | Decorator | Docstring                                                              |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :--------------------------------------------------------------------- |
-| __init__()                                                                                                                                                     | -         | -                                                                      |
-| __new__( cls, field: str, value: str) -> apps.dcis.services.sheet_services.CheckCellOptions.Success | apps.dcis.services.sheet_services.CheckCellOptions.Error | -         | Create and return a new object. See help(type) for accurate signature. |
+| Сигнатура                                                                                                                                                      | Декораторы | Описание                                                               |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :--------------------------------------------------------------------- |
+| __init__()                                                                                                                                                     | -          | -                                                                      |
+| __new__( cls, field: str, value: str) -> apps.dcis.services.sheet_services.CheckCellOptions.Success | apps.dcis.services.sheet_services.CheckCellOptions.Error | -          | Create and return a new object. See help(type) for accurate signature. |
 
 ## Класс UpdateOrCrateValueResult
 
@@ -36,9 +36,9 @@
 
 ### Методы
 
-| Signature                                                                                          | Decorator | Docstring                                                                   |
-| :------------------------------------------------------------------------------------------------- | :-------- | :-------------------------------------------------------------------------- |
-| __init__( _cls, value: apps.dcis.models.sheet.Value, updated_at: datetime.datetime, created: bool) | -         | Create new instance of UpdateOrCrateValueResult(value, updated_at, created) |
-| __new__( _cls, value: apps.dcis.models.sheet.Value, updated_at: datetime.datetime, created: bool)  | -         | Create new instance of UpdateOrCrateValueResult(value, updated_at, created) |
-| __repr__(self)                                                                                     | -         | Return a nicely formatted representation string                             |
-| __getnewargs__(self)                                                                               | -         | Return self as a plain tuple. Used by copy and pickle.                      |
+| Сигнатура                                                                                          | Декораторы | Описание                                                                    |
+| :------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------------------------------------------- |
+| __init__( _cls, value: apps.dcis.models.sheet.Value, updated_at: datetime.datetime, created: bool) | -          | Create new instance of UpdateOrCrateValueResult(value, updated_at, created) |
+| __new__( _cls, value: apps.dcis.models.sheet.Value, updated_at: datetime.datetime, created: bool)  | -          | Create new instance of UpdateOrCrateValueResult(value, updated_at, created) |
+| __repr__(self)                                                                                     | -          | Return a nicely formatted representation string                             |
+| __getnewargs__(self)                                                                               | -          | Return self as a plain tuple. Used by copy and pickle.                      |

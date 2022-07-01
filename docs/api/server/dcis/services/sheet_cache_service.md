@@ -4,12 +4,12 @@
 
 ### Функции
 
-| Signature                                                                                                 | Decorator | Docstring                               |
-| :-------------------------------------------------------------------------------------------------------- | :-------- | :-------------------------------------- |
-| save_to_cache( formula_dependency: apps.dcis.services.sheet_cache_service.FormulaDependencyCache) -> bool | -         | Сохраняем структуру зависимостей в кеш. |
-| get_from_cache( sheet_id: int) -> Optional[apps.dcis.services.sheet_cache_service.FormulaDependencyCache] | -         | Забираем структуру из кеша.             |
-| delete_from_cache(sheet_id: int) -> bool                                                                  | -         | Удаление структуры из кеша.             |
-| dependency_formula(formula: str) -> list[str]                                                             | -         | Возвращает зависимость токенов.         |
+| Сигнатура                                                                                                 | Декораторы | Описание                                |
+| :-------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------- |
+| save_to_cache( formula_dependency: apps.dcis.services.sheet_cache_service.FormulaDependencyCache) -> bool | -          | Сохраняем структуру зависимостей в кеш. |
+| get_from_cache( sheet_id: int) -> Optional[apps.dcis.services.sheet_cache_service.FormulaDependencyCache] | -          | Забираем структуру из кеша.             |
+| delete_from_cache(sheet_id: int) -> bool                                                                  | -          | Удаление структуры из кеша.             |
+| dependency_formula(formula: str) -> list[str]                                                             | -          | Возвращает зависимость токенов.         |
 
 ## Класс FormulaDependencyCache
 
@@ -17,11 +17,11 @@
 
 ### Методы
 
-| Signature                                                                                                                                                        | Decorator | Docstring           |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :------------------ |
-| __init__( self, sheet_name: str, sheet_id: Optional[int] = None, dependency: dict[str, dict[str, int]] = <factory>, inversion: dict[str, list[str]] = <factory>) | -         | -                   |
-| __repr__(self)                                                                                                                                                   | -         | Return repr(self).  |
-| __eq__(self, other)                                                                                                                                              | -         | Return self==value. |
+| Сигнатура                                                                                                                                                        | Декораторы | Описание            |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------ |
+| __init__( self, sheet_name: str, sheet_id: Optional[int] = None, dependency: dict[str, dict[str, int]] = <factory>, inversion: dict[str, list[str]] = <factory>) | -          | -                   |
+| __repr__(self)                                                                                                                                                   | -          | Return repr(self).  |
+| __eq__(self, other)                                                                                                                                              | -          | Return self==value. |
 
 ## Класс FormulaContainerCache
 
@@ -29,7 +29,7 @@
 
 ### Методы
 
-| Signature                                                                    | Decorator        | Docstring                                                                                                                                                                                             |
+| Сигнатура                                                                    | Декораторы       | Описание                                                                                                                                                                                              |
 | :--------------------------------------------------------------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | __init__(self, name: str, sheet_id: NoneType = None)                         | -                | -                                                                                                                                                                                                     |
 | recalculate_dependency(self, coordinate: str) -> tuple[list[str], list[str]] | -                | Рассчитываем значения связанных ячеек.Нужно вычислить какие ячейки необходимо пересчитать и какие ячейкии какие данные нужны. - relation - выбираемые ячейки - recalculation - пересчитываемые ячейки |
