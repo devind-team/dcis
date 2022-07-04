@@ -22,13 +22,11 @@ class ChangeProject(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Project):
-        return all((
-            ViewProject.has_object_permission(context, obj),
-            context.user.has_perm('dcis.change_project') or all((
-                obj.user_id == context.user.id,
-                context.user.has_perm('dcis.add_project'),
-            )),
-        ))
+        return ViewProject.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.change_project') or (
+                obj.user_id == context.user.id and context.user.has_perm('dcis.add_project')
+            )
+        )
 
 
 class DeleteProject(BasePermission):
@@ -36,11 +34,10 @@ class DeleteProject(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Project):
-        return all((
-            ViewProject.has_object_permission(context, obj),
-            context.user.has_perm('dcis.delete_project') or all((
-                obj.user_id == context.user.id,
-                context.user.has_perm('dcis.add_project'),
-                obj.period_set.count() == 0,
-            )),
-        ))
+        return ViewProject.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.delete_project') or (
+                obj.user_id == context.user.id and
+                context.user.has_perm('dcis.add_project') and
+                obj.period_set.count() == 0
+            )
+        )

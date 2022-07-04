@@ -13,10 +13,10 @@ class ViewPeriod(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Period):
-        return all((
-            ViewProject.has_object_permission(context, obj.project),
-            obj in get_user_periods(context.user, obj.project.id),
-        ))
+        return ViewProject.has_object_permission(context, obj.project) and obj in get_user_periods(
+            context.user,
+            obj.project.id
+        )
 
 
 class AddPeriod(BasePermission):
@@ -24,13 +24,12 @@ class AddPeriod(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Project):
-        return all((
-            ViewProject.has_object_permission(context, obj),
-            any((
-                context.user.has_perm('dcis.add_period'),
-                obj.user_id == context.user.id and context.user.has_perm('dcis.add_project'),
-            ))
-        ))
+        return ViewProject.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.add_period') or (
+                obj.user_id == context.user.id and
+                context.user.has_perm('dcis.add_project')
+            )
+        )
 
 
 class ChangePeriod(BasePermission):
@@ -40,12 +39,12 @@ class ChangePeriod(BasePermission):
     def has_object_permission(context, obj: Period):
         if not ViewPeriod.has_object_permission(context, obj):
             return False
-        return any((
-            context.user.has_perm('dcis.change_period'),
-            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project'),
-            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period'),
+        return (
+            context.user.has_perm('dcis.change_period') or
+            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project') or
+            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period') or
             has_privilege(context.user.id, obj.id, 'change_period')
-        ))
+        )
 
 
 class ChangePeriodDivisions(ChangePeriod):
@@ -91,12 +90,12 @@ class ChangePeriodSheet(BasePermission):
     def has_object_permission(context, obj: Period):
         if not ViewPeriod.has_object_permission(context, obj):
             return False
-        return any((
-            context.user.has_perm('dcis.change_sheet'),
-            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project'),
-            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period'),
-            has_privilege(context.user.id, obj.id, 'change_sheet'),
-        ))
+        return (
+            context.user.has_perm('dcis.change_sheet') or
+            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project') or
+            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period') or
+            has_privilege(context.user.id, obj.id, 'change_sheet')
+        )
 
 
 class DeletePeriod(BasePermission):
@@ -104,16 +103,14 @@ class DeletePeriod(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(context, obj) and any((
-            context.user.has_perm('dcis.delete_period'),
-            all((
-                obj.project.user_id == context.user.id,
-                context.user.has_perm('dcis.add_project'),
-                obj.document_set.count() == 0,
-            )),
-            all((
-                obj.user_id == context.user.id,
-                context.user.has_perm('dcis.add_period'),
-                obj.document_set.count() == 0,
-            )),
-        ))
+        return ViewPeriod.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.delete_period') or (
+                obj.project.user_id == context.user.id and
+                context.user.has_perm('dcis.add_project') and
+                obj.document_set.count() == 0
+            ) or (
+                obj.user_id == context.user.id and
+                context.user.has_perm('dcis.add_period') and
+                obj.document_set.count() == 0
+            )
+        )

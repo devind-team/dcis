@@ -16,10 +16,10 @@ class ViewDocument(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Document):
-        return all((
-            ViewPeriod.has_object_permission(context, obj.period),
-            obj in get_user_documents(context.user, obj.period),
-        ))
+        return (
+            ViewPeriod.has_object_permission(context, obj.period) and
+            obj in get_user_documents(context.user, obj.period)
+        )
 
 
 class AddDocument(BasePermission):
@@ -27,15 +27,12 @@ class AddDocument(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Period):
-        return all((
-            ViewPeriod.has_object_permission(context, obj),
-            any((
-                context.user.has_perm('dcis.add_document'),
-                obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project'),
-                obj.user_id == context.user.id and context.user.has_perm('dcis.add_period'),
-                has_privilege(context.user.id, obj.id, 'add_document')
-            ))
-        ))
+        return ViewPeriod.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.add_document') or
+            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project') or
+            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period') or
+            has_privilege(context.user.id, obj.id, 'add_document')
+        )
 
 
 class ChangeDocument(BasePermission):
@@ -43,18 +40,13 @@ class ChangeDocument(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Document):
-        return ViewDocument.has_object_permission(context, obj) and any((
-            context.user.has_perm('dcis.change_document'),
-            all((
-                obj.period.project.user_id == context.user.id,
-                context.user.has_perm('dcis.add_project'),
-            )),
-            all((
-                obj.period.user_id == context.user.id,
-                context.user.has_perm('dcis.add_period'),
-            )),
-            has_privilege(context.user.id, obj.id, 'change_document')
-        ))
+        return ViewDocument.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.change_document') or (
+                obj.period.project.user_id == context.user.id and context.user.has_perm('dcis.add_project')
+            ) or (
+                obj.period.user_id == context.user.id and context.user.has_perm('dcis.add_period')
+            ) or has_privilege(context.user.id, obj.id, 'change_document')
+        )
 
 
 class DeleteDocument(BasePermission):
@@ -62,18 +54,13 @@ class DeleteDocument(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Document):
-        return ViewDocument.has_object_permission(context, obj) and any((
-            context.user.has_perm('dcis.delete_document'),
-            all((
-                obj.period.project.user_id == context.user.id,
-                context.user.has_perm('dcis.add_project'),
-            )),
-            all((
-                obj.period.user_id == context.user.id,
-                context.user.has_perm('dcis.add_period'),
-            )),
-            has_privilege(context.user.id, obj.id, 'delete_document')
-        ))
+        return ViewDocument.has_object_permission(context, obj) and (
+            context.user.has_perm('dcis.delete_document') or (
+                obj.period.project.user_id == context.user.id and context.user.has_perm('dcis.add_project')
+            ) or (
+                obj.period.user_id == context.user.id and context.user.has_perm('dcis.add_period')
+            ) or has_privilege(context.user.id, obj.id, 'delete_document')
+        )
 
 
 class ChangeValue(BasePermission):
@@ -86,29 +73,25 @@ class ChangeValue(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Obj):
-        if not all((
-            ViewDocument.has_object_permission(context, obj.document),
-            obj.cell.editable,
+        if not (
+            ViewDocument.has_object_permission(context, obj.document) and
+            obj.cell.editable and
             obj.cell.formula is None
-        )):
+        ):
             return False
         if ChangePeriodSheet.has_object_permission(context, obj.document.period):
             return True
         division_ids = [division['id'] for division in get_user_divisions(context.user, obj.document.period.project)]
-        return any((
-            context.user.has_perm('dcis.change_value'),
-            has_privilege(context.user.id, obj.document.period.id, 'change_value'),
-            obj.document.period.multiple and obj.document.object_id in division_ids,
-            all((
-                not obj.document.period.multiple,
-                obj.cell.row.parent_id is None,
-            )),
-            all((
-                not obj.document.period.multiple,
-                obj.cell.row.parent_id is not None,
-                obj.cell.row.object_id in division_ids,
-            ))
-        ))
+        return (
+            context.user.has_perm('dcis.change_value') or
+            has_privilege(context.user.id, obj.document.period.id, 'change_value') or
+            obj.document.period.multiple and obj.document.object_id in division_ids or
+            not obj.document.period.multiple and obj.cell.row.parent_id is None or (
+                not obj.document.period.multiple and
+                obj.cell.row.parent_id is not None and
+                obj.cell.row.object_id in division_ids
+            )
+        )
 
 
 class AddChildRowDimension(BasePermission):
@@ -116,16 +99,15 @@ class AddChildRowDimension(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: RowDimension):
-        return all((
-            obj.document,
-            obj.dynamic,
-            ViewDocument.has_object_permission(context, obj.document),
-            any((
-                ChangePeriodSheet.has_object_permission(context, obj.document.period),
-                context.user.has_perm('dcis.add_rowdimension'),
+        return (
+            obj.document is not None and
+            obj.dynamic and
+            ViewDocument.has_object_permission(context, obj.document) and (
+                ChangePeriodSheet.has_object_permission(context, obj.document.period) or
+                context.user.has_perm('dcis.add_rowdimension') or
                 has_privilege(context.user.id, obj.document.period.id, 'add_rowdimension')
-            ))
-        ))
+            )
+        )
 
 
 class DeleteChildRowDimension(BasePermission):
@@ -133,14 +115,13 @@ class DeleteChildRowDimension(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: RowDimension):
-        return all((
-            obj.document,
-            obj.rowdimension_set.count() == 0,
-            ViewDocument.has_object_permission(context, obj.document),
-            any((
-                ChangePeriodSheet.has_object_permission(context, obj.document.period),
-                context.user.has_perm('dcis.delete_rowdimension'),
-                has_privilege(context.user.id, obj.document.period.id, 'delete_rowdimension'),
+        return (
+            obj.document is not None and
+            obj.rowdimension_set.count() == 0 and
+            ViewDocument.has_object_permission(context, obj.document) and (
+                ChangePeriodSheet.has_object_permission(context, obj.document.period) or
+                context.user.has_perm('dcis.delete_rowdimension') or
+                has_privilege(context.user.id, obj.document.period.id, 'delete_rowdimension') or
                 obj.user_id == context.user.id
-            ))
-        ))
+            )
+        )
