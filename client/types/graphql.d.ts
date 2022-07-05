@@ -3624,6 +3624,10 @@ export type ProjectType = Node & {
   __typename?: 'ProjectType';
   /** Архив */
   archive: Scalars['Boolean'];
+  /** Может ли пользователь изменять проект */
+  canChange: Scalars['Boolean'];
+  /** Может ли пользователь удалять проект */
+  canDelete: Scalars['Boolean'];
   /** Дивизион: Department, Organizations */
   contentType: ContentTypeType;
   /** Дата создания */
@@ -3724,7 +3728,7 @@ export type Query = {
   pageKinds: Array<PageKindType>;
   /** Страницы */
   pages: PageTypeConnection;
-  /** Информация по периоду */
+  /** Период */
   period: PeriodType;
   /** Периоды */
   periods: Array<PeriodType>;
@@ -3737,8 +3741,9 @@ export type Query = {
   profiles: Array<ProfileType>;
   /** Значение профиля пользователя */
   profilesValue: Array<ProfileValueType>;
-  /** Получение информации по проекту */
+  /** Проект */
   project: ProjectType;
+  /** Проекты */
   projects?: Maybe<ProjectTypeConnection>;
   region?: Maybe<RegionType>;
   regions?: Maybe<Array<RegionType>>;
@@ -5445,7 +5450,7 @@ export type ProjectQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
 
-export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } };
+export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', canChange: boolean, canDelete: boolean, id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } };
 
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;

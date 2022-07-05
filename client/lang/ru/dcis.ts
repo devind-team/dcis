@@ -59,23 +59,35 @@ export default {
     }
   },
   projects: {
+    tableHeaders: {
+      name: '@:name',
+      description: 'Описание',
+      createdAt: 'Дата добавления'
+    },
+    links: {
+      periods: 'Периоды',
+      settings: '@:settings'
+    },
     addProject: {
+      buttonText: 'Добавить проект',
       header: 'Добавление проекта',
       name: 'Название проекта',
       short: 'Сокращенное название проекта',
       description: 'Описание проекта',
       visibility: 'Видимость',
       department: 'Департаменты',
-      organization: 'Организации',
-      buttonText: 'Добавить проект'
+      organization: 'Организации'
     },
     changeProject: {
       header: 'Настройки проекта',
       archive: 'Архивировать',
-      delete: '@:delete',
-      save: '@:save',
+      save: '@:save'
+    },
+    deleteProject: {
+      header: 'Удаление проекта',
+      warning: 'Проект нельзя восстановить.',
       deleteItemName: 'проект',
-      warning: 'Проект нельзя восстановить.'
+      delete: '@:delete'
     }
   },
   periods: {

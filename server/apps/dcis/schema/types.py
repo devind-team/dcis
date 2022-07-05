@@ -11,14 +11,15 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.core.schema import UserType
-from apps.dcis.services.sheet_unload_services import SheetUploader
-from ..helpers.info_fields import get_fields
-from ..models import (
+from apps.dcis.helpers.info_fields import get_fields
+from apps.dcis.models import (
     Attribute, AttributeValue, Division,
     Document, DocumentStatus, Limitation,
     Period, PeriodGroup, PeriodPrivilege,
     Privilege, Project, Status,
 )
+from apps.dcis.services.sheet_unload_services import SheetUploader
+from apps.dcis.permissions import ChangeProject, DeleteProject
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -27,6 +28,9 @@ class ProjectType(OptimizedDjangoObjectType):
     periods = graphene.List(lambda: PeriodType, description='Периоды')
     user = graphene.Field(UserType, description='Пользователь')
     content_type = graphene.Field(ContentTypeType, required=True, description='Дивизион: Department, Organizations')
+
+    can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять проект')
+    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять проект')
 
     class Meta:
         model = Project
@@ -51,8 +55,16 @@ class ProjectType(OptimizedDjangoObjectType):
 
     @staticmethod
     @resolver_hints(model_field='period_set')
-    def resolve_periods(project: Project, info: ResolveInfo):
+    def resolve_periods(project: Project, info: ResolveInfo) -> QuerySet[Period]:
         return project.period_set.all()
+
+    @staticmethod
+    def resolve_can_change(project: Project, info: ResolveInfo) -> bool:
+        return ChangeProject.has_object_permission(info.context, project)
+
+    @staticmethod
+    def resolve_can_delete(project: Project, info: ResolveInfo) -> bool:
+        return DeleteProject.has_object_permission(info.context, project)
 
 
 class PeriodType(DjangoObjectType):

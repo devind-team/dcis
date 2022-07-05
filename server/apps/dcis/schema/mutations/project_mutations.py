@@ -4,6 +4,7 @@ import graphene
 from devind_core.models import File
 from devind_dictionaries.models import Department
 from devind_helpers.decorators import permission_classes
+from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
@@ -18,7 +19,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Project
-from apps.dcis.permissions import AddPeriod
+from apps.dcis.permissions import AddPeriod, ChangeProject, DeleteProject
 from apps.dcis.schema.types import DivisionType, PeriodGroupType, PeriodType, ProjectType
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
@@ -58,9 +59,13 @@ class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
         model = Project
         login_required = True
         exclude_fields = ('content_type', 'object_id',)
-        permissions = ('dcis.change_project',)
 
     project = graphene.Field(ProjectType, description='Измененный проект')
+
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Project) -> None:
+        if not ChangeProject.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
 
 
 class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
@@ -69,7 +74,11 @@ class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
     class Meta:
         model = Project
         login_required = True
-        permissions = ('dcis.delete_project',)
+
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: Project) -> None:
+        if not DeleteProject.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
 
 
 class AddPeriodMutation(BaseMutation):

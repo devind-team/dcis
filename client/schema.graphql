@@ -3014,6 +3014,10 @@ input ProjectNameFilterInputType {
 type ProjectType implements Node {
   """Архив"""
   archive: Boolean!
+  """Может ли пользователь изменять проект"""
+  canChange: Boolean!
+  """Может ли пользователь удалять проект"""
+  canDelete: Boolean!
   """Дивизион: Department, Organizations"""
   contentType: ContentTypeType!
   """Дата создания"""
@@ -3169,7 +3173,7 @@ type Query {
   pageKinds: [PageKindType!]!
   """Страницы"""
   pages(after: String, before: String, category_Id: ID, first: Int, kind_Id: ID, last: Int, offset: Int, title_Icontains: String): PageTypeConnection!
-  """Информация по периоду"""
+  """Период"""
   period(
     """Идентификатор периода"""
     periodId: ID!
@@ -3194,11 +3198,12 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID!
   ): [ProfileValueType!]!
-  """Получение информации по проекту"""
+  """Проект"""
   project(
     """Идентификатор проекта"""
     projectId: ID!
   ): ProjectType!
+  """Проекты"""
   projects(
     after: String
     before: String

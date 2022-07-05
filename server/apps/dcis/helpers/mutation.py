@@ -25,5 +25,4 @@ class DjangoCudBaseMutation(DjangoCudBase):
         :param field: поле ошибки
         :param messages: сообщения ошибки
         """
-
         self.errors.append(ErrorFieldType(field=field, messages=messages))
