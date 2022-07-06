@@ -17,11 +17,11 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                        | Декораторы | Описание            |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------ |
-| __init__( self, sheet_name: str, sheet_id: Optional[int] = None, dependency: dict[str, dict[str, int]] = <factory>, inversion: dict[str, list[str]] = <factory>) | -          | -                   |
-| __repr__(self)                                                                                                                                                   | -          | Return repr(self).  |
-| __eq__(self, other)                                                                                                                                              | -          | Return self==value. |
+| Сигнатура                                                                                                                                                    | Декораторы | Описание            |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------ |
+| __init__( self, sheet_name: str, sheet_id: Optional[int] = None, dependency: dict[str, dict[str, int]] = factory, inversion: dict[str, list[str]] = factory) | -          | -                   |
+| __repr__(self)                                                                                                                                               | -          | Return repr(self).  |
+| __eq__(self, other)                                                                                                                                          | -          | Return self==value. |
 
 ## Класс FormulaContainerCache
 
