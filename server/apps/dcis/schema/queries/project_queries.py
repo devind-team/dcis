@@ -60,7 +60,9 @@ class ProjectQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated, ViewProject))
     def resolve_project(root: Any, info: ResolveInfo, project_id: str) -> Project:
-        return get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        info.context.check_object_permissions(info.context, project)
+        return project
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -70,7 +72,9 @@ class ProjectQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated, ViewPeriod))
     def resolve_period(root: Any, info: ResolveInfo, period_id: str) -> Period:
-        return get_object_or_404(Period, pk=from_global_id(period_id)[1])
+        period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
+        info.context.check_object_permissions(info.context, period)
+        return period
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
