@@ -13,10 +13,10 @@ from apps.dcis.permissions.period_permissions import (
     ChangePeriod,
     ChangePeriodDivisions,
     ChangePeriodSettings,
+    ChangePeriodSheet,
     ChangePeriodUsers,
     DeletePeriod,
     ViewPeriod,
-    ChangePeriodSheet
 )
 from .common import PermissionsTestCase
 
@@ -65,20 +65,22 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
         """Тестирование класса `ChangePeriodDivisions.`"""
         self._test_change_period(ChangePeriodDivisions, 'dcis.change_period', 'change_period')
         with patch(
-            'apps.dcis.permissions.period_permissions.ChangePeriod.has_object_permission',
+            'apps.dcis.permissions.period_permissions.ChangePeriodBase.has_object_permission',
             new=Mock(return_value=False),
         ), patch(
             'apps.dcis.permissions.period_permissions.has_privilege',
             new=Mock(return_value=True),
         ) as mock:
-            self.assertTrue(ChangePeriodDivisions.has_object_permission(self.context_mock, self.user_period_without_documents))
+            self.assertTrue(
+                ChangePeriodDivisions.has_object_permission(self.context_mock, self.user_period_without_documents)
+            )
             mock.assert_called_once_with(self.user.id, self.user_period_without_documents.id, 'change_period_divisions')
 
     def test_change_period_users(self) -> None:
         """Тестирование класса `ChangePeriodUsers`."""
         self._test_change_period(ChangePeriodUsers, 'dcis.change_period', 'change_period')
         with patch(
-            'apps.dcis.permissions.period_permissions.ChangePeriod.has_object_permission',
+            'apps.dcis.permissions.period_permissions.ChangePeriodBase.has_object_permission',
             new=Mock(return_value=False),
         ), patch(
             'apps.dcis.permissions.period_permissions.has_privilege',
@@ -93,7 +95,7 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
         """Тестирование класса `ChangePeriodSettings`."""
         self._test_change_period(ChangePeriodSettings, 'dcis.change_period', 'change_period')
         with patch(
-            'apps.dcis.permissions.period_permissions.ChangePeriod.has_object_permission',
+            'apps.dcis.permissions.period_permissions.ChangePeriodBase.has_object_permission',
             new=Mock(return_value=False)
         ), patch(
             'apps.dcis.permissions.period_permissions.has_privilege',

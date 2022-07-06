@@ -20,17 +20,17 @@ from apps.dcis.models import (
     Privilege, Project, Status,
 )
 from apps.dcis.permissions import (
-    AddDocument,
-    AddPeriod,
-    ChangePeriodDivisions,
-    ChangePeriodSettings,
-    ChangePeriodSheet,
-    ChangePeriodUsers,
-    ChangeProject,
-    DeletePeriod,
-    DeleteProject,
-    ChangeDocument,
-    DeleteDocument
+    AddDocumentBase,
+    AddPeriodBase,
+    ChangeDocumentBase,
+    ChangePeriodDivisionsBase,
+    ChangePeriodSettingsBase,
+    ChangePeriodSheetBase,
+    ChangePeriodUsersBase,
+    ChangeProjectBase,
+    DeleteDocumentBase,
+    DeletePeriodBase,
+    DeleteProjectBase,
 )
 from apps.dcis.services.sheet_unload_services import SheetUploader
 
@@ -74,15 +74,15 @@ class ProjectType(OptimizedDjangoObjectType):
 
     @staticmethod
     def resolve_can_change(project: Project, info: ResolveInfo) -> bool:
-        return ChangeProject.has_object_permission(info.context, project)
+        return ChangeProjectBase.has_object_permission(info.context, project)
 
     @staticmethod
     def resolve_can_delete(project: Project, info: ResolveInfo) -> bool:
-        return DeleteProject.has_object_permission(info.context, project)
+        return DeleteProjectBase.has_object_permission(info.context, project)
 
     @staticmethod
     def resolve_can_add_period(project: Project, info: ResolveInfo) -> bool:
-        return AddPeriod.has_object_permission(info.context, project)
+        return AddPeriodBase.has_object_permission(info.context, project)
 
 
 class PeriodType(DjangoObjectType):
@@ -150,27 +150,27 @@ class PeriodType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodDivisions.has_object_permission(info.context, period)
+        return ChangePeriodDivisionsBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodUsers.has_object_permission(info.context, period)
+        return ChangePeriodUsersBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodSettings.has_object_permission(info.context, period)
+        return ChangePeriodSettingsBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_change_sheet(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodSheet.has_object_permission(info.context, period)
+        return ChangePeriodSheetBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
-        return DeletePeriod.has_object_permission(info.context, period)
+        return DeletePeriodBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocument.has_object_permission(info.context, period)
+        return AddDocumentBase.has_object_permission(info.context, period)
 
 
 class DivisionType(OptimizedDjangoObjectType):
@@ -321,11 +321,11 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
-        return ChangeDocument.has_object_permission(info.context, document)
+        return ChangeDocumentBase.has_object_permission(info.context, document)
 
     @staticmethod
     def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
-        return DeleteDocument.has_object_permission(info.context, document)
+        return DeleteDocumentBase.has_object_permission(info.context, document)
 
 
 class DocumentStatusType(DjangoObjectType):
