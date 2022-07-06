@@ -10,6 +10,7 @@ from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
 from stringcase import snakecase
 
+from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import (
@@ -18,8 +19,20 @@ from apps.dcis.models import (
     Period, PeriodGroup, PeriodPrivilege,
     Privilege, Project, Status,
 )
+from apps.dcis.permissions import (
+    AddDocument,
+    AddPeriod,
+    ChangePeriodDivisions,
+    ChangePeriodSettings,
+    ChangePeriodSheet,
+    ChangePeriodUsers,
+    ChangeProject,
+    DeletePeriod,
+    DeleteProject,
+    ChangeDocument,
+    DeleteDocument
+)
 from apps.dcis.services.sheet_unload_services import SheetUploader
-from apps.dcis.permissions import ChangeProject, DeleteProject
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -31,6 +44,7 @@ class ProjectType(OptimizedDjangoObjectType):
 
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять проект')
     can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять проект')
+    can_add_period = graphene.Boolean(required=True, description='Может ли пользователь добавлять периоды в проект')
 
     class Meta:
         model = Project
@@ -66,17 +80,44 @@ class ProjectType(OptimizedDjangoObjectType):
     def resolve_can_delete(project: Project, info: ResolveInfo) -> bool:
         return DeleteProject.has_object_permission(info.context, project)
 
+    @staticmethod
+    def resolve_can_add_period(project: Project, info: ResolveInfo) -> bool:
+        return AddPeriod.has_object_permission(info.context, project)
+
 
 class PeriodType(DjangoObjectType):
     """Тип периода."""
 
     user = graphene.Field(UserType, required=True, description='Пользователь')
     project = graphene.Field(ProjectType, description='Проект')
-    methodical_support = DjangoListField(FileType)
-    # Нужно будет отфильтровать в зависимости от прав пользователя
-    documents = graphene.List(lambda: DocumentType, description='Собираемые документов')
+    methodical_support = DjangoListField(FileType, description='Методическая поддержка')
     divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
+
+    can_change_divisions = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять дивизионы периода'
+    )
+    can_change_users = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять пользователей периода'
+    )
+    can_change_settings = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять настройки периода'
+    )
+    can_change_sheet = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять структуру листа периода'
+    )
+    can_delete = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь удалять период'
+    )
+    can_add_document = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь добавлять документы в период'
+    )
 
     class Meta:
         model = Period
@@ -93,15 +134,9 @@ class PeriodType(DjangoObjectType):
             'user',
             'period_groups',
             'project',
-            'methodical_support',
-            'documents',
+            'methodical_support'
         )
         convert_choices_to_enum = False
-
-    @staticmethod
-    @resolver_hints(model_field='document_set')
-    def resolve_documents(period: Period, info: ResolveInfo, *args, **kwargs):
-        return period.document_set.all()
 
     @staticmethod
     @resolver_hints(model_field='')
@@ -112,6 +147,30 @@ class PeriodType(DjangoObjectType):
     @resolver_hints(model_field='')
     def resolve_period_groups(period: Period, info: ResolveInfo, *args, **kwargs):
         return period.periodgroup_set.all()
+
+    @staticmethod
+    def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
+        return ChangePeriodDivisions.has_object_permission(info.context, period)
+
+    @staticmethod
+    def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
+        return ChangePeriodUsers.has_object_permission(info.context, period)
+
+    @staticmethod
+    def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
+        return ChangePeriodSettings.has_object_permission(info.context, period)
+
+    @staticmethod
+    def resolve_can_change_sheet(period: Period, info: ResolveInfo) -> bool:
+        return ChangePeriodSheet.has_object_permission(info.context, period)
+
+    @staticmethod
+    def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
+        return DeletePeriod.has_object_permission(info.context, period)
+
+    @staticmethod
+    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
+        return AddDocument.has_object_permission(info.context, period)
 
 
 class DivisionType(OptimizedDjangoObjectType):
@@ -191,7 +250,7 @@ class PeriodGroupType(DjangoObjectType):
 
     @staticmethod
     @resolver_hints(model_field='')
-    def resolve_users(period_group: PeriodGroup, info: ResolveInfo, *args, **kwargs):
+    def resolve_users(period_group: PeriodGroup, info: ResolveInfo, *args, **kwargs) -> QuerySet[User]:
         return period_group.users.all()
 
 
@@ -222,6 +281,9 @@ class DocumentType(DjangoObjectType):
     sheets = graphene.List(lambda: SheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
+    can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
+    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять документ')
+
     class Meta:
         model = Document
         interfaces = (graphene.relay.Node,)
@@ -240,7 +302,7 @@ class DocumentType(DjangoObjectType):
         connection_class = CountableConnection
 
     @staticmethod
-    def resolve_sheets(document: Document, info: ResolveInfo):
+    def resolve_sheets(document: Document, info: ResolveInfo) -> list[dict] | dict:
         return [
             SheetUploader(
                 sheet=sheet,
@@ -251,11 +313,19 @@ class DocumentType(DjangoObjectType):
         ]
 
     @staticmethod
-    def resolve_last_status(document: Document, info: ResolveInfo):
+    def resolve_last_status(document: Document, info: ResolveInfo) -> DocumentStatus | None:
         try:
             return document.documentstatus_set.latest('created_at')
         except DocumentStatus.DoesNotExist:
             return None
+
+    @staticmethod
+    def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
+        return ChangeDocument.has_object_permission(info.context, document)
+
+    @staticmethod
+    def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
+        return DeleteDocument.has_object_permission(info.context, document)
 
 
 class DocumentStatusType(DjangoObjectType):
