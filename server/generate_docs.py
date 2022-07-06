@@ -84,7 +84,7 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
 
 def remove_symbol(string: str) -> str:
     """Преобразование в строку и удаление лишних символов."""
-    return re.sub(' +', ' ', string.replace('\n', ''))
+    return re.sub(' +', ' ', string.replace('\n', '')).replace('<factory>', 'factory')
 
 
 def generate_markdown(mod: pdoc.doc.Module):
@@ -128,7 +128,7 @@ def generate_markdown(mod: pdoc.doc.Module):
 
 def main() -> None:
     """Скрипт генерирующий markdown файлы по docstring."""
-    for module in (pdoc.doc.Module.from_name('apps.dcis.models')).submodules:
+    for module in (pdoc.doc.Module.from_name('apps')).submodules:
         for mod_module in recursive_module(module):
             if not mod_module.submodules and not ('migrations' in mod_module.fullname):
                 generate_markdown(mod_module)
