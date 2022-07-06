@@ -63,7 +63,11 @@ export default defineComponent({
 
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
-      { text: 'Настройка объектов сбора', to: localePath({ name: 'dcis-periods-periodId-divisions' }), exact: true }
+      {
+        text: 'Настройка объектов сбора',
+        to: localePath({ name: 'dcis-periods-periodId-divisions' }),
+        exact: true
+      }
     ]))
     const { t } = useI18n()
     const headers: DataTableHeader[] = [
@@ -107,14 +111,11 @@ export default defineComponent({
       }
     })
     const periodUpdate: any = inject('periodUpdate')
-    /**
-     * Обновление после добавления объектов
-     * @param cache
-     * @param result
-     */
     const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
       periodUpdate(
-        cache, result, (dataCache, { data: { changeDivisions: { errors, divisions } } }: ChangeDivisionsMutationResult
+        cache,
+        result,
+        (dataCache, { data: { changeDivisions: { errors, divisions } } }: ChangeDivisionsMutationResult
         ) => {
           if (!errors.length) {
             dataCache.period.divisions = divisions
@@ -122,7 +123,17 @@ export default defineComponent({
           return dataCache
         })
     }
-    return { bc, headers, changeDivisionsUpdate, filterDivisions, loading, divisions, search, items, deleteDivisionMutate }
+    return {
+      bc,
+      headers,
+      changeDivisionsUpdate,
+      filterDivisions,
+      loading,
+      divisions,
+      search,
+      items,
+      deleteDivisionMutate
+    }
   }
 })
 </script>

@@ -1931,6 +1931,10 @@ type DocumentStatusType {
 
 """Тип моделей документа."""
 type DocumentType implements Node {
+  """Может ли пользователь изменять документ"""
+  canChange: Boolean!
+  """Может ли пользователь удалять документ"""
+  canDelete: Boolean!
   """Комментарий"""
   comment: String!
   """Дата создания"""
@@ -2882,15 +2886,26 @@ type PeriodGroupType {
 
 """Тип периода."""
 type PeriodType {
+  """Может ли пользователь добавлять документы в период"""
+  canAddDocument: Boolean!
+  """Может ли пользователь изменять дивизионы периода"""
+  canChangeDivisions: Boolean!
+  """Может ли пользователь изменять настройки периода"""
+  canChangeSettings: Boolean!
+  """Может ли пользователь изменять структуру листа периода"""
+  canChangeSheet: Boolean!
+  """Может ли пользователь изменять пользователей периода"""
+  canChangeUsers: Boolean!
+  """Может ли пользователь удалять период"""
+  canDelete: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
   divisions: [DivisionType]
-  """Собираемые документов"""
-  documents: [DocumentType]
   """Дата окончания"""
   expiration: Date
   id: ID!
+  """Методическая поддержка"""
   methodicalSupport: [FileType!]
   """Множественное заполнение"""
   multiple: Boolean!
@@ -3014,6 +3029,8 @@ input ProjectNameFilterInputType {
 type ProjectType implements Node {
   """Архив"""
   archive: Boolean!
+  """Может ли пользователь добавлять периоды в проект"""
+  canAddPeriod: Boolean!
   """Может ли пользователь изменять проект"""
   canChange: Boolean!
   """Может ли пользователь удалять проект"""

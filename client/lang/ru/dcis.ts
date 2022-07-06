@@ -59,6 +59,7 @@ export default {
     }
   },
   projects: {
+    name: '@:dcis.home',
     tableHeaders: {
       name: '@:name',
       description: 'Описание',
@@ -91,8 +92,39 @@ export default {
     }
   },
   periods: {
+    name: 'Периоды',
+    tableHeaders: {
+      name: '@:name',
+      status: 'Статус',
+      createdAt: 'Дата добавления'
+    },
+    links: {
+      documents: 'Документы',
+      divisions: 'Дивизионы',
+      users: 'Пользователи',
+      settings: '@:settings'
+    },
+    addPeriod: {
+      buttonText: 'Добавить период',
+      header: 'Добавление периода',
+      name: 'Название периода',
+      file: 'Файл с формой сбора',
+      multiple: 'Множественное заполнение'
+    },
+    divisions: {
+      header: 'Дивизионы',
+      changeForm: {
+        header: 'Изменение дивизионов',
+        divisionName: 'Название дивизиона',
+        buttonText: '@:change'
+      },
+      add: 'Добавить дивизионы',
+      id: 'Идентификатор',
+      action: 'Действия',
+      createdAt: 'Дата создания',
+      shownOf: 'Показано записей:'
+    },
     header: 'Настройки периода',
-    name: 'Наименование периода',
     status: 'Статус проекта',
     multiple: 'Множественное заполнение',
     privately: 'Приватность полей',
@@ -106,13 +138,6 @@ export default {
       copyGroups: 'Копировать из сбора',
       save: '@:save',
       deleteItemName: 'период'
-    },
-    addPeriod: {
-      header: 'Добавление периода',
-      name: 'Название периода',
-      file: 'Файл с формой сбора',
-      multiple: 'Множественное заполнение',
-      buttonText: 'Добавить период'
     },
     addPeriodGroup: {
       header: 'Добавление группы периода',
@@ -151,18 +176,6 @@ export default {
       createdAt: 'Дата создания',
       alert: 'Не заданы привилегии сбора или группы'
     },
-    divisions: {
-      change: 'Изменить дивизионы',
-      header: 'Настройка дивизионов',
-      add: 'Добавить дивизионы',
-      id: 'Идентификатор',
-      action: 'Действия',
-      formHeader: 'Изменение дивизионов',
-      buttonText: '@:add',
-      name: 'Название объекта',
-      createdAt: 'Дата создания',
-      shownOf: 'Показано записей:'
-    },
     statuses: {
       open: 'Открыто',
       close: 'Закрыто',
@@ -172,17 +185,32 @@ export default {
     deleteWarning: 'Период нельзя восстановить.'
   },
   documents: {
-    add: {
-      header: 'Создать новый документ',
+    name: 'Документы',
+    version: 'Версия {version}',
+    tableHeaders: {
+      version: 'Версия',
+      comment: 'Комментарий',
+      createdAt: 'Дата добавления',
+      lastStatus: 'Статус'
+    },
+    tableItems: {
+      version: '@:dcis.documents.version',
+      statusAssigned: 'Назначен: {assigned}'
+    },
+    addDocument: {
+      buttonText: 'Добавить документ',
+      header: 'Добавление документа',
       comment: 'Комментарий',
       status: 'Статус',
-      lastDocument: 'Значения из документа'
+      lastDocument: 'Значения из документа',
+      version: '@:dcis.documents.version'
     },
     status: {
-      name: 'Статус документа',
-      header: 'Назначение статуса',
-      buttonText: '@:add',
-      comment: 'Комментарий'
+      header: 'Добавление статуса',
+      subheader: '@:dcis.documents.version',
+      status: 'Статус',
+      comment: 'Комментарий',
+      buttonText: '@:add'
     },
     unloading: {
       name: 'Выгрузить документ',

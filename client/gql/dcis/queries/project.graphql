@@ -6,6 +6,7 @@ query Project($projectId: ID!) {
     ...ProjectFields
     canChange
     canDelete
+    canAddPeriod
     user {
       ...UserFields
     }

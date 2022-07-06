@@ -4,6 +4,8 @@
       v-card-title
         v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
         slot(name="header")
+      v-card-subtitle
+        slot(name="subheader")
       v-card-text
         slot
 </template>

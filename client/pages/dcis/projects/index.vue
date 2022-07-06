@@ -3,7 +3,7 @@
     wave-container
       h2 {{ divisions }}
     v-card
-      v-card-title {{ $t('dcis.home') }}
+      v-card-title {{ $t('dcis.projects.name') }}
         template(v-if="hasPerm('dcis.add_project')")
           v-spacer
           add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
