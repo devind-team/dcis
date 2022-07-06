@@ -95,14 +95,15 @@ class AddPeriodMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, AddPeriod,))
     def mutate_and_get_payload(
-            root: Any,
-            info: ResolveInfo,
-            name: str,
-            project_id: str,
-            file: InMemoryUploadedFile,
-            multiple: bool
+        root: Any,
+        info: ResolveInfo,
+        name: str,
+        project_id: str,
+        file: InMemoryUploadedFile,
+        multiple: bool
     ):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        info.context.check_object_permissions(info.context, project)
         period: Period = Period.objects.create(
             name=name,
             user=info.context.user,
@@ -128,7 +129,6 @@ class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
         login_required = True
         exclude_fields = ('project', 'methodical_support',)
         optional_fields = ('start', 'expiration', 'user',)
-        permissions = ('dcis.change_period',)
 
     period = graphene.Field(PeriodType, description='Измененный период')
 

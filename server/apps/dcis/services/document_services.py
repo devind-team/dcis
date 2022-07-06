@@ -48,7 +48,7 @@ def create_new_document(
     document_id: int | None = None,
     division_id: int | None = None
 ) -> Document:
-    """Создание нового документа.
+    """Добавление нового документа.
 
         user - пользователь, который создает документ
         period_id - собираемый период
@@ -69,7 +69,7 @@ def create_new_document(
         period=period
     )
     document.documentstatus_set.create(
-        comment='Документ создан',
+        comment='Документ добавлен',
         user=user,
         status=status
     )
