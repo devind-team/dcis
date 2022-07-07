@@ -20,7 +20,9 @@ from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Project
 from apps.dcis.permissions import AddPeriod, ChangeProject, DeleteProject
-from apps.dcis.schema.types import DivisionType, PeriodGroupType, PeriodType, ProjectType
+from apps.dcis.permissions.period_permissions import ChangePeriodDivisions
+from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, ProjectType
+from apps.dcis.services.divisions_services import get_divisions
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
@@ -142,32 +144,43 @@ class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
         permissions = ('dcis.delete_period',)
 
 
-class ChangeDivisionsMutation(BaseMutation):
-    """Мутация на изменение дивизионов."""
+class AddDivisionsMutation(BaseMutation):
+    """Мутация на добавление дивизионов в период."""
 
     class Input:
-        period_id = graphene.ID(required=True, description='Идентификатор текущего периода')
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
         division_ids = graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы дивизионов')
 
-    divisions = graphene.List(DivisionType, required=True, description='Новые дивизионы')
+    divisions = graphene.List(DivisionModelType, required=True, description='Новые дивизионы')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ChangePeriodDivisions,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
-        divisions_list = Division.objects.bulk_create([
+        info.context.check_object_permissions(info.context, period)
+        division_links = Division.objects.bulk_create([
             Division(period=period, object_id=division_id) for division_id in division_ids
         ])
-        return ChangeDivisionsMutation(divisions=period.division_set.all())
+        divisions = period.project.division.objects.filter(pk__in=[link.object_id for link in division_links])
+        return AddDivisionsMutation(divisions=get_divisions(divisions))
 
 
-class DeleteDivisionsMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
-    """Мутация на удаление объекта из периода."""
+class DeleteDivisionMutation(BaseMutation):
+    """Мутация на удаление дивизиона из периода."""
 
-    class Meta:
-        model = Division
-        login_required = True
-        permissions = ('dcis.delete_division',)
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        division_id = graphene.ID(required=True, description='Идентификатор дивизиона')
+
+    delete_id = graphene.ID(required=True, description='Идентификатор удаленного дивизиона')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangePeriodDivisions,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_id: str):
+        period = get_object_or_404(Period, pk=period_id)
+        info.context.check_object_permissions(info.context, period)
+        Division.objects.get(period_id=period_id, object_id=division_id).delete()
+        return DeleteDivisionMutation(delete_id=division_id)
 
 
 class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
@@ -192,7 +205,13 @@ class CopyPeriodGroupMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, selected_period_id: str, period_groups_ids: list[str]):
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        selected_period_id: str,
+        period_groups_ids: list[str]
+    ):
         selected_period = get_object_or_404(Period, pk=selected_period_id)
         period = get_object_or_404(Period, pk=period_id)
         period_groups: list[PeriodGroup] = []
@@ -266,8 +285,8 @@ class ProjectMutations(graphene.ObjectType):
     add_period = AddPeriodMutation.Field(required=True)
     change_period = ChangePeriodMutationPayload.Field(required=True)
     delete_period = DeletePeriodMutationPayload.Field(required=True)
-    change_divisions = ChangeDivisionsMutation.Field(required=True)
-    delete_division = DeleteDivisionsMutationPayload.Field(required=True)
+    add_divisions = AddDivisionsMutation.Field(required=True)
+    delete_division = DeleteDivisionMutation.Field(required=True)
 
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
     copy_period_groups = CopyPeriodGroupMutation.Field(required=True)

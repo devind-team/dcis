@@ -1,5 +1,5 @@
 <template lang="pug">
-  left-navigator-container(@update-drawer="$emit('update-drawer')" :bread-crumbs="breadCrumbs")
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
     template(#header) {{ t('dcis.documents.name') }}
       template(v-if="period.canAddDocument")
         v-spacer

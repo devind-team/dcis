@@ -89,6 +89,25 @@ type AddCategoryMutationPayload {
   success: Boolean!
 }
 
+input AddDivisionsMutationInput {
+  clientMutationId: String
+  """Идентификаторы дивизионов"""
+  divisionIds: [ID!]
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация на добавление дивизионов в период."""
+type AddDivisionsMutationPayload {
+  clientMutationId: String
+  """Новые дивизионы"""
+  divisions: [DivisionModelType]!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDocumentMutationInput {
   clientMutationId: String
   """Комментарий"""
@@ -791,25 +810,6 @@ type ChangeColumnDimensionMutationPayload {
   updatedAt: DateTime!
   """Ширина колонки"""
   width: Int
-}
-
-input ChangeDivisionsMutationInput {
-  clientMutationId: String
-  """Идентификаторы дивизионов"""
-  divisionIds: [ID!]
-  """Идентификатор текущего периода"""
-  periodId: ID!
-}
-
-"""Мутация на изменение дивизионов."""
-type ChangeDivisionsMutationPayload {
-  clientMutationId: String
-  """Новые дивизионы"""
-  divisions: [DivisionType]!
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
 }
 
 """Изменение комментария версии документа."""
@@ -1615,14 +1615,21 @@ type DeleteCategoryMutationPayload {
   success: Boolean!
 }
 
-"""Мутация на удаление объекта из периода."""
-type DeleteDivisionsMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+input DeleteDivisionMutationInput {
+  clientMutationId: String
+  """Идентификатор дивизиона"""
+  divisionId: ID!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация на удаление дивизиона из периода."""
+type DeleteDivisionMutationPayload {
+  clientMutationId: String
+  """Идентификатор удаленного дивизиона"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -1864,16 +1871,6 @@ type DivisionModelType {
   model: String!
   """Название дивизиона"""
   name: String!
-}
-
-"""Список участвующих дивизионов в сборе."""
-type DivisionType implements Node {
-  """The ID of the object."""
-  id: ID!
-  """Идентификатор дивизиона"""
-  objectId: Int!
-  """Период"""
-  period: PeriodType!
 }
 
 """Debugging information for the current query."""
@@ -2204,6 +2201,8 @@ type Mutation {
   addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
+  """Мутация на добавление дивизионов в период."""
+  addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
   """Добавление статуса документа."""
@@ -2248,8 +2247,6 @@ type Mutation {
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
-  """Мутация на изменение дивизионов."""
-  changeDivisions(input: ChangeDivisionsMutationInput!): ChangeDivisionsMutationPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
@@ -2314,8 +2311,8 @@ type Mutation {
   copyPeriodGroups(input: CopyPeriodGroupMutationInput!): CopyPeriodGroupMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
-  """Мутация на удаление объекта из периода."""
-  deleteDivision(id: ID!): DeleteDivisionsMutationPayload!
+  """Мутация на удаление дивизиона из периода."""
+  deleteDivision(input: DeleteDivisionMutationInput!): DeleteDivisionMutationPayload!
   """Удаление статуса документа."""
   deleteDocumentStatus(input: DeleteDocumentStatusMutationInput!): DeleteDocumentStatusMutationPayload!
   """Мутация для полного удаления файла"""
@@ -2901,7 +2898,7 @@ type PeriodType {
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
-  divisions: [DivisionType]
+  divisions: [DivisionModelType]
   """Дата окончания"""
   expiration: Date
   id: ID!
@@ -3127,11 +3124,6 @@ type Query {
     districtId: Int!
   ): DistrictType
   districts: [DistrictType!]
-  """Дивизионы"""
-  divisions(
-    """Идентификатор периода"""
-    periodId: ID!
-  ): [DivisionModelType]
   """Документ"""
   document(
     """Идентификатор документа"""
@@ -3220,6 +3212,11 @@ type Query {
     """Идентификатор проекта"""
     projectId: ID!
   ): ProjectType!
+  """Возможные дивизионы проекта"""
+  projectDivisions(
+    """Идентификатор проекта"""
+    projectId: ID!
+  ): [DivisionModelType]
   """Проекты"""
   projects(
     after: String

@@ -1,5 +1,6 @@
-#import "../fragments/project_fields.graphql"
 #import "../fragments/period_fields.graphql"
+#import "../fragments/project_fields.graphql"
+#import "../fragments/division_model_fields.graphql"
 #import "../../core/fragments/user_fields.graphql"
 
 query Period($periodId: ID!) {
@@ -35,9 +36,7 @@ query Period($periodId: ID!) {
       __typename
     }
     divisions {
-      id
-      objectId
-      __typename
+      ...DivisionModelFields
     }
   }
 }

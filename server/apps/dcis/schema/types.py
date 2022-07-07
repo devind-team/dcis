@@ -32,6 +32,7 @@ from apps.dcis.permissions import (
     DeletePeriodBase,
     DeleteProjectBase,
 )
+from apps.dcis.services.divisions_services import get_divisions
 from apps.dcis.services.sheet_unload_services import SheetUploader
 
 
@@ -91,7 +92,7 @@ class PeriodType(DjangoObjectType):
     user = graphene.Field(UserType, required=True, description='Пользователь')
     project = graphene.Field(ProjectType, description='Проект')
     methodical_support = DjangoListField(FileType, description='Методическая поддержка')
-    divisions = graphene.List(lambda: DivisionType, description='Участвующие дивизионы')
+    divisions = graphene.List(lambda: DivisionModelType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
 
     can_change_divisions = graphene.Boolean(
@@ -139,13 +140,15 @@ class PeriodType(DjangoObjectType):
         convert_choices_to_enum = False
 
     @staticmethod
-    @resolver_hints(model_field='')
-    def resolve_divisions(period: Period, info: ResolveInfo, *args, **kwargs):
-        return period.division_set.all()
+    @resolver_hints(model_field='division_set')
+    def resolve_divisions(period: Period, info: ResolveInfo) -> list[dict[str, int | str]]:
+        return get_divisions(period.project.division.objects.filter(
+            pk__in=period.division_set.values_list('object_id', flat=True)
+        ))
 
     @staticmethod
-    @resolver_hints(model_field='')
-    def resolve_period_groups(period: Period, info: ResolveInfo, *args, **kwargs):
+    @resolver_hints(model_field='periodgroup_set')
+    def resolve_period_groups(period: Period, info: ResolveInfo):
         return period.periodgroup_set.all()
 
     @staticmethod
@@ -171,23 +174,6 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
         return AddDocumentBase.has_object_permission(info.context, period)
-
-
-class DivisionType(OptimizedDjangoObjectType):
-    """Список участвующих дивизионов в сборе."""
-
-    period = graphene.Field(PeriodType, required=True, description='Период')
-
-    class Meta:
-        model = Division
-        interfaces = (graphene.relay.Node,)
-        fields = ('id', 'period', 'object_id',)
-        filter_fields = {
-            'id': ('exact',),
-            'period': ('in', 'exact',),
-            'object_id': ('in', 'exact',)
-        }
-        connection_class = CountableConnection
 
 
 class DivisionModelType(graphene.ObjectType):

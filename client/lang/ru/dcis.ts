@@ -112,17 +112,21 @@ export default {
       multiple: 'Множественное заполнение'
     },
     divisions: {
-      header: 'Дивизионы',
-      changeForm: {
-        header: 'Изменение дивизионов',
-        divisionName: 'Название дивизиона',
-        buttonText: '@:change'
+      name: 'Дивизионы',
+      addDivisions: {
+        buttonText: 'Добавить дивизионы',
+        header: 'Добавление дивизионов',
+        name: '@:name'
       },
-      add: 'Добавить дивизионы',
-      id: 'Идентификатор',
-      action: 'Действия',
-      createdAt: 'Дата создания',
-      shownOf: 'Показано записей:'
+      tableHeaders: {
+        name: '@:name',
+        actions: '@:actions'
+      },
+      deleteDivision: {
+        tooltip: '@:delete',
+        itemName: 'дивизион'
+      },
+      shownOf: 'Показано записей: {count}'
     },
     header: 'Настройки периода',
     status: 'Статус проекта',

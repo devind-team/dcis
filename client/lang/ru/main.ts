@@ -29,6 +29,7 @@ export default {
   copy: 'Скопировать',
   id: '#',
   name: 'Название',
+  actions: 'Действия',
   archive: 'Архив',
   properties: 'Свойства',
   user: 'Пользователь',
