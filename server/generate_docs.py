@@ -24,13 +24,14 @@ def recursive_module(mod: pdoc.doc.Module):
 
 def get_function(module_functions: list) -> list:
     """Извлечение данных функции из модуля."""
+    t = module_functions
     list_functions = []
     for module_function in module_functions:
         function = {
             'name': module_function.name,
             'docstring': remove_symbol(module_function.docstring),
             'decorators': [re.sub('@', '', decorator) for decorator in module_function.decorators],
-            'signature': remove_symbol(str(module_function.signature)),
+            'signature': remove_symbol(str(module_function.signature)).replace('|', '&#124;'),
         }
         list_functions.append(function)
     return list_functions
@@ -84,7 +85,7 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
 
 def remove_symbol(string: str) -> str:
     """Преобразование в строку и удаление лишних символов."""
-    return re.sub(' +', ' ', string.replace('\n', '')).replace('<factory>', 'factory')
+    return re.sub(' +', ' ', string.replace('\n', '')).replace('<', '&#60;').replace('>', '&#62;')
 
 
 def generate_markdown(mod: pdoc.doc.Module):
@@ -128,7 +129,7 @@ def generate_markdown(mod: pdoc.doc.Module):
 
 def main() -> None:
     """Скрипт генерирующий markdown файлы по docstring."""
-    for module in (pdoc.doc.Module.from_name('apps')).submodules:
+    for module in (pdoc.doc.Module.from_name('apps.core.services')).submodules:
         for mod_module in recursive_module(module):
             if not mod_module.submodules and not ('migrations' in mod_module.fullname):
                 generate_markdown(mod_module)
