@@ -11,9 +11,10 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from graphql_relay import from_global_id
+from devind_helpers.schema.types import ErrorFieldType
 
 from apps.dcis.models import Value, Cell, Document
-from apps.dcis.permissions import ChangeValue
+from apps.dcis.permissions import can_change_value
 from apps.dcis.schema.types import ValueType
 from apps.dcis.services.value_services import update_or_create_value, update_or_create_file_value, \
     create_file_value_archive, get_file_value_files
@@ -32,7 +33,7 @@ class ChangeValueMutation(BaseMutation):
     updated_at = graphene.DateTime(required=True, description='Дата изменения')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeValue,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -43,7 +44,8 @@ class ChangeValueMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        info.context.check_object_permissions(info.context, (document, cell,))
+        if not can_change_value(info.context, document, cell):
+            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', ['Ошибка доступа'])])
         result = update_or_create_value(
             document=document,
             cell=cell,

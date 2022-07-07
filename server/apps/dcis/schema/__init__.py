@@ -6,6 +6,7 @@ from apps.dcis.schema.mutations import (
     PrivilegeMutations,
     ProjectMutations,
     SheetMutations,
+    ValueMutations,
 )
 from apps.dcis.schema.queries import DocumentQueries, PrivilegeQueries, ProjectQueries, SheetQueries
 
@@ -28,6 +29,7 @@ class Mutation(
     DocumentMutations,
     SheetMutations,
     PrivilegeMutations,
+    ValueMutations,
     graphene.ObjectType,
 ):
     """Мутации приложения dcis."""

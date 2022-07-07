@@ -6,7 +6,6 @@ from .document_permissions import (
     DeleteDocument,
     ViewDocument,
 )
-from .value_permissions import ChangeValue
 from .period_permissions import (
     AddPeriod,
     ChangePeriodDivisions,
@@ -26,3 +25,4 @@ from .project_permissions import (
     ViewProject,
     ViewProject,
 )
+from .value_permissions import can_change_value

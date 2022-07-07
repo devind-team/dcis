@@ -587,7 +587,7 @@ type CellType {
   """Объединение колонок"""
   colspan: Int!
   """Идентификатор колонки"""
-  columnId: Int
+  columnId: ID
   """Комментарий"""
   comment: String
   """Редактируемая ячейка"""
@@ -613,7 +613,7 @@ type CellType {
   """Связанные с объединением позиции в плоской структуре"""
   relatedGlobalPositions: [String!]!
   """Идентификатор строки"""
-  rowId: Int
+  rowId: ID
   """Объединение строк"""
   rowspan: Int!
   """Размер шрифта"""

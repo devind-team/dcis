@@ -22,10 +22,13 @@ from apps.dcis.services.sheet_services import (
     change_cells_option,
     change_column_dimension,
     change_row_dimension,
-    create_file_value_archive,
     delete_row_dimension,
-    get_file_value_files,
     rename_sheet,
+
+)
+from apps.dcis.services.value_services import (
+    create_file_value_archive,
+    get_file_value_files,
     update_or_create_file_value,
     update_or_create_value,
 )
@@ -103,7 +106,7 @@ class AddRowDimensionMutation(BaseMutation):
     """Добавление строки."""
 
     class Input:
-        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
         document_id = graphene.ID(description='Идентификатор документа')
         parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')
@@ -248,123 +251,6 @@ class ChangeCellsOptionMutation(BaseMutation):
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 
-class ChangeValueMutation(BaseMutation):
-    """Изменение значения ячейки."""
-
-    class Input:
-        document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        column_id = graphene.ID(required=True, description='Идентификатор колонки')
-        row_id = graphene.ID(required=True, description='Идентификатор строки')
-        value = graphene.String(required=True, description='Значение')
-
-    value = graphene.String(required=True, description='Измененное значение')
-    updated_at = graphene.DateTime(required=True, description='Дата изменения')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(
-        root: Any,
-        info: ResolveInfo,
-        document_id: str,
-        sheet_id: str,
-        column_id: str,
-        row_id: str,
-        value: str
-    ):
-        result = update_or_create_value(
-            document_id=from_global_id(document_id)[1],
-            sheet_id=sheet_id,
-            column_id=column_id,
-            row_id=row_id,
-            value=value
-        )
-        return ChangeValueMutation(value=result.value.value, updated_at=result.updated_at)
-
-
-class ChangeFileValueMutation(BaseMutation):
-    """Изменение значения ячейки типа `Файл`."""
-
-    class Input:
-        document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        column_id = graphene.ID(required=True, description='Идентификатор колонки')
-        row_id = graphene.ID(required=True, description='Идентификатор строки')
-        value = graphene.String(required=True, description='Значение')
-        remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
-        new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
-
-    value = graphene.String(required=True, description='Измененное значение')
-    updated_at = graphene.DateTime(required=True, description='Дата изменения')
-    value_files = graphene.List(FileType, description='Измененные файлы')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(
-        root: Any,
-        info: ResolveInfo,
-        document_id: str,
-        sheet_id: str,
-        column_id: str,
-        row_id: str,
-        value: str,
-        remaining_files: list[str],
-        new_files: list[InMemoryUploadedFile]
-    ):
-        result = update_or_create_file_value(
-            user=info.context.user,
-            document_id=from_global_id(document_id)[1],
-            sheet_id=sheet_id,
-            column_id=column_id,
-            row_id=row_id,
-            value=value,
-            remaining_files=[int(from_global_id(global_id)[1]) for global_id in remaining_files],
-            new_files=new_files
-        )
-        return ChangeFileValueMutation(
-            value=result.value.value,
-            updated_at=result.updated_at,
-            value_files=get_file_value_files(result.value)
-        )
-
-
-class UnloadFileValueArchiveMutation(BaseMutation):
-    """Выгрузка архива значения ячейки типа `Файл`."""
-
-    class Input:
-        document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        column_id = graphene.ID(required=True, description='Идентификатор колонки')
-        row_id = graphene.ID(required=True, description='Идентификатор строки')
-        name = graphene.String(required=True, description='Название архива')
-
-    src = graphene.String(description='Ссылка на сгенерированный архив')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(
-        root: Any,
-        info: ResolveInfo,
-        document_id: str,
-        sheet_id: str,
-        column_id: str,
-        row_id: str,
-        name: str
-    ):
-        return UnloadFileValueArchiveMutation(
-            src=create_file_value_archive(
-                value=get_object_or_404(
-                    Value,
-                    document_id=from_global_id(document_id)[1],
-                    sheet_id=sheet_id,
-                    column_id=column_id,
-                    row_id=row_id
-                ),
-                name=name
-            )
-        )
-
-
 class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
@@ -377,13 +263,3 @@ class SheetMutations(graphene.ObjectType):
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
 
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
-
-    change_value = ChangeValueMutation.Field(required=True, description='Изменение значения ячейки')
-    change_file_value = ChangeFileValueMutation.Field(
-        required=True,
-        description='Изменение значения ячейки типа `Файл`'
-    )
-    unload_file_value_archive = UnloadFileValueArchiveMutation.Field(
-        required=True,
-        description='Выгрузка архива значения ячейки типа `Файл`'
-    )

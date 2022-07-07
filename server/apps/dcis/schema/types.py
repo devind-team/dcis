@@ -1,3 +1,5 @@
+import json
+
 import graphene
 from devind_core.schema.types import ContentTypeType, FileType
 from devind_dictionaries.models import Organization
@@ -17,7 +19,7 @@ from apps.dcis.models import (
     Attribute, AttributeValue, Division,
     Document, DocumentStatus, Limitation,
     Period, PeriodGroup, PeriodPrivilege,
-    Privilege, Project, Status,
+    Privilege, Project, Status, Value,
 )
 from apps.dcis.permissions import (
     AddDocument,
@@ -431,8 +433,11 @@ class RowDimensionType(graphene.ObjectType):
 class CellType(graphene.ObjectType):
     """Тип ячейки."""
 
-    id = graphene.ID(required=True, description='Идентификатор')
+    id = graphene.Int(required=True, description='Идентификатор')
+    # apps.dcis.models.KindCell
     kind = graphene.String(required=True, description='Тип значения')
+
+    # apps.dcis.models.Cell
     editable = graphene.Boolean(required=True, description='Редактируемая ячейка')
     formula = graphene.String(description='Формула')
     comment = graphene.String(description='Комментарий')
@@ -451,6 +456,8 @@ class CellType(graphene.ObjectType):
     background = graphene.String(required=True, description='Цвет фона')
     border_style = graphene.JSONString(required=True, description='Стили границ')
     border_color = graphene.JSONString(required=True, description='Цвет границ')
+
+    # Расчетные значения
     position = graphene.String(required=True, description='Позиция относительно родительской строки')
     global_position = graphene.String(required=True, description='Позиция в плоской структуре')
     related_global_positions = graphene.List(
@@ -460,15 +467,41 @@ class CellType(graphene.ObjectType):
     )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
+
+    # От Value
     value = graphene.String(description='Значение')
     verified = graphene.Boolean(required=True, description='Валидно ли поле')
     error = graphene.String(description='Текст ошибки')
 
 
+class ValueType(DjangoObjectType):
+    """Тип значений"""
+    document = graphene.Field(DocumentType, description='Документ')
+    payload = graphene.String(description='Дополнительное поле')
+    sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+    column_id = graphene.Int(required=True, description='Идентификатор колонки')
+    row_id = graphene.Int(required=True, description='Идентификатор строки')
+
+    class Meta:
+        model = Value
+        fields = (
+            'id',
+            'value',
+            'payload',
+            'verified',
+            'error',
+            'document',
+        )
+
+    @staticmethod
+    def resolve_payload(value: Value, info: ResolveInfo) -> str:
+        return json.dumps(value.payload) if value.payload is not None else None
+
+
 class SheetType(graphene.ObjectType):
     """Тип листа."""
 
-    id = graphene.ID(required=True, description='Идентификатор')
+    id = graphene.Int(required=True, description='Идентификатор')
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
