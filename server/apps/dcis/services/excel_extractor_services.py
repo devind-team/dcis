@@ -184,7 +184,10 @@ class ExcelExtractor:
 
     def _parse_rows_dimension(self, holder: DimensionHolder) -> dict[int, BuildRowDimension]:
         """Парсинг имеющихся строк."""
-        return {row.index: BuildRowDimension(row.height, self.__border_style(row)) for index, row in holder.items()}
+        return {
+            row.index: BuildRowDimension(int(row.height * 1.2), self.__border_style(row))
+            for index, row in holder.items()
+        }
 
     @staticmethod
     def __border_style(dimension: Union[OpenpyxlRowDimension, OpenpyxlColumnDimension, Cell, MergedCell]) -> BuildStyle:
