@@ -1,18 +1,20 @@
 """Файл, содержащий сервисы для изменения значений ячеек."""
+from datetime import datetime
 from os import path
 from pathlib import Path
-from datetime import datetime
 from typing import Any, cast, NamedTuple
 from zipfile import ZipFile
 
+
+from django.db.models import QuerySet
 from devind_core.models import File
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
 from django.utils.timezone import now
 
 from apps.core.models import User
-from apps.dcis.models import Value, RowDimension, Document, Cell
+from apps.dcis.models import Value, Sheet, RowDimension, Document, Cell
+from apps.dcis.helpers.cell import get_dependency_cells, resolve_cells, resolve_values
 
 
 class UpdateOrCrateValueResult(NamedTuple):
@@ -46,9 +48,25 @@ def update_or_create_value(
             'payload': payload
         }
     )
+    values = recalculate_cells(document, val)
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
-    return UpdateOrCrateValuesResult(values=[val], updated_at=updated_at)
+    return UpdateOrCrateValuesResult(values=values, updated_at=updated_at)
+
+
+def recalculate_cells(document: Document, value: Value) -> list[Value]:
+    """Пересчитываем значения ячеек в зависимости от новых."""
+    sheets: list[Sheet] = document.sheets.all()
+    dependency_cells, inversion_cells = get_dependency_cells(sheets, value)
+    # cells, values = resolve_formula(sheets, {*dependency_cells, *inversion_cells})
+    # state: dict[str, str | int | float] = resolve_cells_state()
+    # evaluate_values: dict[str, str | int | float] = evaluate_sheet(state)
+    # values = update_values(sheets, evaluate_values)
+    # return values
+
+    cells: QuerySet[Cell] = resolve_cells(sheets, {*dependency_cells, *inversion_cells})
+    values: QuerySet[Value] = resolve_values(cells, document)
+    return []
 
 
 def update_or_create_file_value(

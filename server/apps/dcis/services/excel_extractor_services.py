@@ -15,7 +15,7 @@ from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
 from xlsx_evaluate import Evaluator, ModelCompiler
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
-from .sheet_cache_service import FormulaContainerCache
+from apps.dcis.helpers.sheet_cache import FormulaContainerCache
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 
 
