@@ -5,11 +5,31 @@
   },
   {
     "name": "Изменение дивизионов периода сбора",
-    "key": "change_divisions"
+    "key": "change_period_divisions"
   },
   {
     "name": "Изменение пользователей периода сбора",
-    "key": "change_users"
+    "key": "change_period_users"
+  },
+  {
+    "name": "Изменение настроек периода сбора",
+    "key": "change_period_settings"
+  },
+  {
+    "name": "Просмотр документа",
+    "key": "view_document"
+  },
+  {
+    "name": "Добавление документа",
+    "key": "add_document"
+  },
+  {
+    "name": "Изменение документа",
+    "key": "change_document"
+  },
+  {
+    "name": "Удаление документа",
+    "key": "delete_document"
   },
   {
     "name": "Изменение листа",
@@ -22,18 +42,6 @@
   {
     "name": "Удаление строки документа",
     "key": "delete_rowdimension"
-  },
-  {
-    "name": "Добавление нового документа",
-    "key": "add_document"
-  },
-  {
-    "name": "Просмотр документа",
-    "key": "view_document"
-  },
-  {
-    "name": "Удаление документа",
-    "key": "delete_document"
   },
   {
     "name": "Изменение значения ячейки документа",

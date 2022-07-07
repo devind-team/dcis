@@ -1,11 +1,13 @@
 <template lang="pug">
   left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    template(#header) Периоды
-      template(v-if="hasPerm('dcis.add_period')")
+    template(#header) {{ t('dcis.periods.name') }}
+      template(v-if="project.canAddPeriod")
         v-spacer
         add-period(:update="addPeriodUpdate" :project="project")
           template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") Добавить сбор
+            v-btn(v-on="on" color="primary") {{ t('dcis.periods.addPeriod.buttonText') }}
+    template(#subheader)
+      template(v-if="periods") {{ $t('shownOf', { count: periods.length, totalCount: periods.length }) }}
     v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
       template(#item.name="{ item }")
         nuxt-link(
@@ -18,10 +20,10 @@
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
-import type { Ref, PropType } from '#app'
+import type { PropType } from '#app'
 import { defineComponent, onMounted, ref, useRoute, useRouter, toRef } from '#app'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
-import { HasPermissionFnType, useAuthStore } from '~/stores'
+import { useAuthStore } from '~/stores'
 import { ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -45,17 +47,16 @@ export default defineComponent({
     const { localePath } = useI18n()
     const { defaultClient } = useApolloHelpers()
 
-    const hasPerm: Ref<HasPermissionFnType> = toRef(authStore, 'hasPerm')
-    const name: Ref<string> = ref<string>('')
-    const file: Ref<File | null> = ref<File | null>(null)
+    const hasPerm = toRef(authStore, 'hasPerm')
+    const name = ref<string>('')
+    const file = ref<File | null>(null)
     const statuses = Object.fromEntries(
       ['preparation', 'open', 'close'].map(e => ([e, t(`dcis.periods.statuses.${e}`) as string]))
     )
     const headers: DataTableHeader[] = [
-      { text: '#', value: 'id' },
-      { text: 'Название', value: 'name' },
-      { text: 'Статус', value: 'status' },
-      { text: 'Дата добавления', value: 'createdAt' }
+      { text: t('dcis.periods.tableHeaders.name') as string, value: 'name' },
+      { text: t('dcis.periods.tableHeaders.status') as string, value: 'status' },
+      { text: t('dcis.periods.tableHeaders.createdAt') as string, value: 'createdAt' }
     ]
     const {
       data: periods,
@@ -64,19 +65,26 @@ export default defineComponent({
       update
     } = usePeriodsQuery(route.params.projectId)
 
-    const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => addUpdate(cache, result, 'period')
+    const addPeriodUpdate = (
+      cache: DataProxy,
+      result: AddPeriodMutationResult
+    ) => addUpdate(cache, result, 'period')
 
     onMounted(() => {
       if (route.query.periodId) {
-        update(defaultClient.cache, { data: { deletePeriod: { id: route.query.periodId } } }, (cacheData, { data: { deletePeriod: { id: periodId } } }) => {
-          cacheData.periods = cacheData.periods.filter(period => period.id !== periodId)
-          return cacheData
-        })
+        update(
+          defaultClient.cache,
+          { data: { deletePeriod: { id: route.query.periodId } } },
+          (cacheData, { data: { deletePeriod: { id: periodId } } }
+          ) => {
+            cacheData.periods = cacheData.periods.filter(period => period.id !== periodId)
+            return cacheData
+          })
         router.push(localePath({ name: 'dcis-projects-projectId-periods', params: route.params }))
       }
     })
 
-    return { name, file, headers, hasPerm, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
+    return { t, name, file, headers, hasPerm, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>

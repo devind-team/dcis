@@ -1,18 +1,18 @@
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from pathlib import PosixPath
-from typing import Iterator, Union, Optional
+from typing import Iterator
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, WHITE
 from openpyxl.utils.cell import column_index_from_string, get_column_letter
 from openpyxl.worksheet.dimensions import (
+    ColumnDimension as OpenpyxlColumnDimension,
     DimensionHolder,
     RowDimension as OpenpyxlRowDimension,
-    ColumnDimension as OpenpyxlColumnDimension
 )
 from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
-from xlsx_evaluate import ModelCompiler, Evaluator
+from xlsx_evaluate import Evaluator, ModelCompiler
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from .sheet_cache_service import FormulaContainerCache
@@ -56,10 +56,10 @@ class BuildCell(BuildStyle):
     column_id: int
     row_id: int
     kind: str
-    coordinate: Optional[str] = None
-    formula: Optional[str] = None
-    comment: Optional[str] = None
-    default: Optional[str] = None
+    coordinate: str | None = None
+    formula: str | None = None
+    comment: str | None = None
+    default: str | None = None
     border_color: dict[str, str] = None
 
 
@@ -190,7 +190,7 @@ class ExcelExtractor:
         }
 
     @staticmethod
-    def __border_style(dimension: Union[OpenpyxlRowDimension, OpenpyxlColumnDimension, Cell, MergedCell]) -> BuildStyle:
+    def __border_style(dimension: OpenpyxlRowDimension | OpenpyxlColumnDimension | Cell | MergedCell) -> BuildStyle:
         """for p in ('top', 'bottom', 'left', 'right', 'diagonal', 'diagonalDown', 'diagonalUp',)"""
         return BuildStyle(
             dimension.alignment.horizontal,
@@ -222,7 +222,7 @@ class ExcelExtractor:
             color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
         return color
 
-    def _parse_cells(self, wb: Workbook, rows: Iterator[tuple[Union[OpenpyxlCell, OpenpyxlMergedCell]]]) -> list[BuildCell]:
+    def _parse_cells(self, wb: Workbook, rows: Iterator[tuple[OpenpyxlCell | OpenpyxlMergedCell]]) -> list[BuildCell]:
         """Парсинг ячеек.
 
         Переданный параметр rows представляет собой матрицу.
@@ -231,7 +231,7 @@ class ExcelExtractor:
         cells: list[BuildCell] = []
         for row in rows:
             for cell in row:
-                border_color: dict[str, Union[int, str]] = {
+                border_color: dict[str, int | str] = {
                     positional: self.__color_transform(wb, getattr(cell.border, positional).color)
                     for positional in ('top', 'bottom', 'left', 'right', 'diagonal')
                 }

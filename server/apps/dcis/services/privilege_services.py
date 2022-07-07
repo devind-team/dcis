@@ -1,4 +1,4 @@
-"""Модуль для работы с привилегиями."""
+"""Модуль, отвечающий за работу с привилегиями."""
 
 from apps.dcis.models import PeriodGroup, PeriodPrivilege
 

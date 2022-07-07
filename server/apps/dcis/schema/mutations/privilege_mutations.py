@@ -9,7 +9,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.models import User
-from apps.dcis.models import PeriodGroup, PeriodPrivilege, Privilege, Period
+from apps.dcis.models import Period, PeriodGroup, PeriodPrivilege, Privilege
 from apps.dcis.schema.types import PrivilegeType
 
 
@@ -46,7 +46,13 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str, user_id: str, privileges_ids: list[str]):
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_group_id: str,
+        user_id: str,
+        privileges_ids: list[str]
+    ):
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
         period = get_object_or_404(Period, pk=period_group.period.id)
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
@@ -59,7 +65,9 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
             if privilege_id not in privileges:
                 PeriodPrivilege.objects.create(user=user, period=period, privilege_id=privilege_id)
         user_privileges = Privilege.objects.filter(periodprivilege__user=user, periodprivilege__period=period)
-        return ChangePeriodGroupPrivilegesMutation(privileges=user_privileges | Privilege.objects.filter(periodgroup=period_group).all())
+        return ChangePeriodGroupPrivilegesMutation(
+            privileges=user_privileges | Privilege.objects.filter(periodgroup=period_group).all()
+        )
 
 
 class PrivilegeMutations(graphene.ObjectType):

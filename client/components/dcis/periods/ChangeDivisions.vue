@@ -1,8 +1,8 @@
 <template lang="pug">
   mutation-modal-form(
     @close="close"
-    :header="String($t('dcis.periods.divisions.formHeader'))"
-    :button-text="String($t('dcis.periods.divisions.buttonText'))"
+    :header="String($t('dcis.periods.divisions.changeForm.header'))"
+    :button-text="String($t('dcis.periods.divisions.changeForm.buttonText'))"
     :mutation="changeDivisions"
     :update="changeDivisionsUpdate"
     :variables="{ periodId: period.id, divisionIds: selectedDivisions.map(e => e.id) }"
@@ -55,13 +55,8 @@ export default defineComponent({
     const divisionsListId = ref<string[]>([])
     const selectedDivisions = ref<DepartmentType[] | OrganizationType[]>([])
     const headers: DataTableHeader[] = [
-      { text: t('dcis.periods.divisions.name') as string, value: 'name' }
+      { text: t('dcis.periods.divisions.changeForm.divisionName') as string, value: 'name' }
     ]
-    /**
-     * Обновление после добавления объектов
-     * @param cache
-     * @param result
-     */
     const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
       const { success } = result.data.changeDivisions
       if (success) {

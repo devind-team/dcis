@@ -8,16 +8,34 @@
     :update="addPeriodUpdate"
     mutation-name="addPeriod"
     i18n-path="dcis.projects.addPeriod"
-    persistent
     @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
-      validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.name'))" rules="required|min:3|max:250")
-        v-text-field(v-model="name" :label="$t('dcis.periods.addPeriod.name')" :error-messages="errors" :success="valid" autofocus)
-      validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.file'))" rules="required")
-        v-file-input(v-model="file" :label="$t('dcis.periods.addPeriod.file')" :error-messages="errors" :success="valid")
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="String($t('dcis.periods.addPeriod.name'))"
+        rules="required|min:3|max:250"
+      )
+        v-text-field(
+          v-model="name"
+          :label="$t('dcis.periods.addPeriod.name')"
+          :error-messages="errors"
+          :success="valid"
+          autofocus
+        )
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="String($t('dcis.periods.addPeriod.file'))"
+        rules="required"
+      )
+        v-file-input(
+          v-model="file"
+          :label="$t('dcis.periods.addPeriod.file')"
+          :error-messages="errors"
+          :success="valid"
+        )
       v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
 </template>
 

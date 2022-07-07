@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from os.path import join
-from typing import Optional, Type
+from typing import Type
 
 from django.conf import settings
 from django.db.models import Q
@@ -90,7 +90,7 @@ class DocumentUnload:
             for build_row in build_rows:
                 column_index: int = 1
                 for column in columns:
-                    cell: Optional[BuildCell] = build_cells.get(f'{column.pk}:{build_row.row.pk}')
+                    cell: BuildCell | None = build_cells.get(f'{column.pk}:{build_row.row.pk}')
                     if cell:
                         work_sheet.cell(row_index, column_index, cell.value)
                         work_sheet.cell(row_index, column_index).alignment = cell.alignment
@@ -132,7 +132,7 @@ class DocumentUnload:
         workbook.save(self.path)
         return posixpath.relpath(self.path, settings.BASE_DIR)
 
-    def _build_rows(self, rows: list[RowDimension], parent_id: Optional[Type[int]] = None) -> list[BuildRow]:
+    def _build_rows(self, rows: list[RowDimension], parent_id: Type[int] | None = None) -> list[BuildRow]:
         """Функция собирает все строки, включая дочерние в плоский массив."""
         date_format: str = '%H:%M %d.%m.%Y'
         build_rows: list[BuildRow] = []
@@ -157,7 +157,7 @@ class DocumentUnload:
             build_mc[merge_cell.max_row].append(merge_cell)
         return build_mc
 
-    def _division_info(self, user: Optional[User]) -> tuple[str, str]:
+    def _division_info(self, user: User | None) -> tuple[str, str]:
         """Функция возвращает название дивизиона и начальника этого дивизиона.
 
         Возвращать информацию можно только из моделей для которых указаны поля:

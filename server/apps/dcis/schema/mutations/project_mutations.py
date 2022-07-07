@@ -4,6 +4,7 @@ import graphene
 from devind_core.models import File
 from devind_dictionaries.models import Department
 from devind_helpers.decorators import permission_classes
+from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
@@ -17,11 +18,9 @@ from graphql_relay import from_global_id
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
-from apps.dcis.models import Division
-from apps.dcis.models import Project, Period, PeriodGroup, PeriodPrivilege
-from apps.dcis.permissions import AddPeriod
-from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType, DivisionType
-from apps.dcis.schema.types import PeriodGroupType, ProjectType, PeriodType
+from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Project
+from apps.dcis.permissions import AddPeriod, ChangeProject, DeleteProject
+from apps.dcis.schema.types import DivisionType, PeriodGroupType, PeriodType, ProjectType
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.validators import ProjectValidator
 
@@ -60,9 +59,13 @@ class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
         model = Project
         login_required = True
         exclude_fields = ('content_type', 'object_id',)
-        permissions = ('dcis.change_project',)
 
     project = graphene.Field(ProjectType, description='Измененный проект')
+
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Project) -> None:
+        if not ChangeProject.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
 
 
 class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
@@ -71,7 +74,11 @@ class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
     class Meta:
         model = Project
         login_required = True
-        permissions = ('dcis.delete_project',)
+
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: Project) -> None:
+        if not DeleteProject.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
 
 
 class AddPeriodMutation(BaseMutation):
@@ -88,14 +95,15 @@ class AddPeriodMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, AddPeriod,))
     def mutate_and_get_payload(
-            root: Any,
-            info: ResolveInfo,
-            name: str,
-            project_id: str,
-            file: InMemoryUploadedFile,
-            multiple: bool
+        root: Any,
+        info: ResolveInfo,
+        name: str,
+        project_id: str,
+        file: InMemoryUploadedFile,
+        multiple: bool
     ):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        info.context.check_object_permissions(info.context, project)
         period: Period = Period.objects.create(
             name=name,
             user=info.context.user,
@@ -121,7 +129,6 @@ class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
         login_required = True
         exclude_fields = ('project', 'methodical_support',)
         optional_fields = ('start', 'expiration', 'user',)
-        permissions = ('dcis.change_period',)
 
     period = graphene.Field(PeriodType, description='Измененный период')
 

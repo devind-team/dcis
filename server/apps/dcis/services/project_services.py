@@ -1,31 +1,44 @@
-from typing import Sequence
+"""Модуль, отвечающий за работу с проектами."""
 
-from django.db.models import QuerySet, Q
+from django.db.models import Q, QuerySet
+
 from apps.core.models import User
 from apps.dcis.models import Project
-from apps.dcis.helpers.divisions import get_user_division_ids
+from apps.dcis.services.divisions_services import get_user_division_ids
 
 
-def get_projects(user: User) -> QuerySet:
+def get_user_participant_projects(user: User) -> QuerySet[Project]:
+    """Получение проектов, в которых пользователь непосредственно участвует."""
+    return Project.objects.filter(Q(user=user) | Q(period__user=user) | Q(period__periodgroup__users=user))
+
+
+def get_user_privileges_projects(user: User) -> QuerySet[Project]:
+    """Получение проектов, связанных с привилегиями пользователя."""
+    return Project.objects.filter(period__periodprivilege__user=user)
+
+
+def get_user_divisions_projects(user: User) -> QuerySet[Project]:
+    """Получение проектов, связанных с дивизионами пользователя."""
+    projects = Project.objects.none()
+    divisions = get_user_division_ids(user)
+    for division_name, division_values in divisions.items():
+        projects |= Project.objects.filter(
+            content_type__model=division_name,
+            period__division__object_id__in=division_values
+        )
+    return projects
+
+
+def get_user_projects(user: User) -> QuerySet[Project]:
     """Получение проектов пользователя.
 
     Пользователь видит проект:
-    - привилегия dcis.view_project - получаются все привилегии
-    - пользователь создал этот проект
-    - пользователь участвует в проекте
-    - пользователь добавлен в настройки пользователей
+      - пользователь обладает глобальной привилегией dcis.view_project
+      - пользователь участвует в проекте
+        (создал проект, или создал один из периодов проекта, или состоит в группе одного из периодов проекта)
+      - пользователь имеет привилегию для одного из периодов проекта
+      - пользователь состоит в дивизионе, который участвует в проекте
     """
     if user.has_perm('dcis.view_project'):
         return Project.objects.all()
-    # 1. Пользователь создал проекты или участвует
-    project_users_id: Sequence[int] = Project.objects\
-        .filter(Q(user=user) | Q(period__periodgroup__users=user))\
-        .values_list('pk', flat=True)
-    # 2. Пользователь участвует в дивизионах
-    divisions: dict[str, str | int] = get_user_division_ids(user)
-    project_filter = Q()
-    for division_name, division_values in divisions.items():
-        project_filter |= Q(content_type__model=division_name, period__division__object_id__in=division_values)
-    project_divisions_id: Sequence[int] = Project.objects.filter(project_filter).values_list('pk', flat=True)
-    return Project.objects.filter(pk__in=[*project_users_id, *project_divisions_id])
-
+    return get_user_participant_projects(user) | get_user_privileges_projects(user) | get_user_divisions_projects(user)
