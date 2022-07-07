@@ -2,11 +2,11 @@ from .document_permissions import (
     AddChildRowDimension,
     AddDocument,
     ChangeDocument,
-    ChangeValue,
     DeleteChildRowDimension,
     DeleteDocument,
     ViewDocument,
 )
+from .value_permissions import ChangeValue
 from .period_permissions import (
     AddPeriod,
     ChangePeriodDivisions,

@@ -1,11 +1,8 @@
 """Разрешения на работу с документами периодов."""
 
-from dataclasses import dataclass
-
 from devind_helpers.permissions import BasePermission
 
-from apps.dcis.models import Cell, Document, Period, RowDimension
-from apps.dcis.services.divisions_services import get_user_divisions
+from apps.dcis.models import Document, Period, RowDimension
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import ViewPeriod, ChangePeriodSheet
@@ -60,37 +57,6 @@ class DeleteDocument(BasePermission):
             ) or (
                 obj.period.user_id == context.user.id and context.user.has_perm('dcis.add_period')
             ) or has_privilege(context.user.id, obj.id, 'delete_document')
-        )
-
-
-class ChangeValue(BasePermission):
-    """Пропускает пользователей, которые могут изменять значение ячейки в документе."""
-
-    @dataclass
-    class Obj:
-        document: Document
-        cell: Cell
-
-    @staticmethod
-    def has_object_permission(context, obj: Obj):
-        if not (
-            ViewDocument.has_object_permission(context, obj.document) and
-            obj.cell.editable and
-            obj.cell.formula is None
-        ):
-            return False
-        if ChangePeriodSheet.has_object_permission(context, obj.document.period):
-            return True
-        division_ids = [division['id'] for division in get_user_divisions(context.user, obj.document.period.project)]
-        return (
-            context.user.has_perm('dcis.change_value') or
-            has_privilege(context.user.id, obj.document.period.id, 'change_value') or
-            obj.document.period.multiple and obj.document.object_id in division_ids or
-            not obj.document.period.multiple and obj.cell.row.parent_id is None or (
-                not obj.document.period.multiple and
-                obj.cell.row.parent_id is not None and
-                obj.cell.row.object_id in division_ids
-            )
         )
 
 

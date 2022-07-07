@@ -13,10 +13,10 @@ from apps.dcis.permissions.document_permissions import (
     ChangeDocument,
     DeleteDocument,
     ViewDocument,
-    ChangeValue,
     AddChildRowDimension,
     DeleteChildRowDimension
 )
+from ...permissions import ChangeValue
 from .common import PermissionsTestCase
 
 
