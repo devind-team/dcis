@@ -29,7 +29,7 @@ def get_function(module_functions: list) -> list:
         function = {
             'name': module_function.name,
             'docstring': remove_symbol(module_function.docstring),
-            'decorators': module_function.decorators,
+            'decorators': [re.sub('@', '', decorator) for decorator in module_function.decorators],
             'signature': remove_symbol(str(module_function.signature)),
         }
         list_functions.append(function)
@@ -53,7 +53,7 @@ def is_method(member: pdoc.doc.Doc) -> bool:
     return isinstance(member, pdoc.doc.Function) and not any((
         isinstance(member.obj, DeferredAttribute),
         isinstance(member.obj, ManagerDescriptor),
-    ))
+    )) and str(member.signature) != '(unknown)'
 
 
 def is_magic(attr_name: str) -> bool:
@@ -75,7 +75,7 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
             methods = {
                 'name': own_member.name,
                 'docstring': remove_symbol(own_member.docstring),
-                'decorators': own_member.decorators,
+                'decorators': [re.sub('@', '', decorator) for decorator in own_member.decorators],
                 'signature': remove_symbol(str(own_member.signature)),
             }
             list_methods.append(methods)
