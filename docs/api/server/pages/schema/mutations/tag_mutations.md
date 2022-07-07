@@ -8,9 +8,9 @@
 
 ### Методы
 
-| Сигнатура                                                                               | Декораторы                                                          | Описание |
-| :-------------------------------------------------------------------------------------- | :------------------------------------------------------------------ | :------- |
-| mutate_and_get_payload(root, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@staticmethod', '@permission_classes([IsAuthenticated, AddTag])'] | -        |
+| Сигнатура                                                                               | Декораторы                                                        | Описание |
+| :-------------------------------------------------------------------------------------- | :---------------------------------------------------------------- | :------- |
+| mutate_and_get_payload(root, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['staticmethod', 'permission_classes([IsAuthenticated, AddTag])'] | -        |
 
 ## Класс TagMutations
 

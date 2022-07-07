@@ -8,11 +8,11 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                                      | Декораторы          | Описание                        |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------ | :------------------------------ |
-| unload_data(self) -> Union[list[dict], dict]                                                                                                                                                   | ['@abstractmethod'] | Выгрузка данных.                |
-| unload(self) -> Union[list[dict], dict]                                                                                                                                                        | -                   | Выгрузка данных с учетом кеша.  |
-| unload_raw_data( cls, objects: Union[django.db.models.query.QuerySet, Sequence[django.db.models.base.Model]], fields: Sequence[str], properties: Optional[Sequence[str]] = None) -> list[dict] | ['@classmethod']    | Выгрузка необработанных данных. |
+| Сигнатура                                                                                                                                                                                      | Декораторы         | Описание                        |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- | :------------------------------ |
+| unload_data(self) -> Union[list[dict], dict]                                                                                                                                                   | ['abstractmethod'] | Выгрузка данных.                |
+| unload(self) -> Union[list[dict], dict]                                                                                                                                                        | -                  | Выгрузка данных с учетом кеша.  |
+| unload_raw_data( cls, objects: Union[django.db.models.query.QuerySet, Sequence[django.db.models.base.Model]], fields: Sequence[str], properties: Optional[Sequence[str]] = None) -> list[dict] | ['classmethod']    | Выгрузка необработанных данных. |
 
 ## Класс SheetColumnsUnloader
 

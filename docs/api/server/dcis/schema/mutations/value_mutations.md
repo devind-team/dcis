@@ -8,9 +8,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                              | Декораторы                                                               | Описание |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: str, column_id: str, row_id: str, value: str) | ['@staticmethod', '@permission_classes((IsAuthenticated, ChangeValue))'] | -        |
+| Сигнатура                                                                                                                                              | Декораторы                                                             | Описание |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: str, column_id: str, row_id: str, value: str) | ['staticmethod', 'permission_classes((IsAuthenticated, ChangeValue))'] | -        |
 
 ## Класс ChangeFileValueMutation
 
@@ -18,9 +18,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                                                                                                | Декораторы                                                               | Описание |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: str, column_id: str, row_id: str, value: str, remaining_files: list[str], new_files: list[django.core.files.uploadedfile.InMemoryUploadedFile]) | ['@staticmethod', '@permission_classes((IsAuthenticated, ChangeValue))'] | -        |
+| Сигнатура                                                                                                                                                                                                                                                | Декораторы                                                             | Описание |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: str, column_id: str, row_id: str, value: str, remaining_files: list[str], new_files: list[django.core.files.uploadedfile.InMemoryUploadedFile]) | ['staticmethod', 'permission_classes((IsAuthenticated, ChangeValue))'] | -        |
 
 ## Класс UnloadFileValueArchiveMutation
 
@@ -28,9 +28,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                             | Декораторы                                                   | Описание |
-| :---------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: str, column_id: str, row_id: str, name: str) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -        |
+| Сигнатура                                                                                                                                             | Декораторы                                                 | Описание |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: str, column_id: str, row_id: str, name: str) | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
 
 ## Класс ValueMutations
 

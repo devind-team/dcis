@@ -8,10 +8,10 @@
 
 ### Методы
 
-| Сигнатура                                                                                                    | Декораторы       | Описание |
-| :----------------------------------------------------------------------------------------------------------- | :--------------- | :------- |
-| validate( cls, root: Any, info: graphql.execution.base.ResolveInfo, input, *args, **kwargs)                  | ['@classmethod'] | -        |
-| handle_content_type( cls, value: str, field: str, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['@classmethod'] | -        |
+| Сигнатура                                                                                                    | Декораторы      | Описание |
+| :----------------------------------------------------------------------------------------------------------- | :-------------- | :------- |
+| validate( cls, root: Any, info: graphql.execution.base.ResolveInfo, input, *args, **kwargs)                  | ['classmethod'] | -        |
+| handle_content_type( cls, value: str, field: str, info: graphql.execution.base.ResolveInfo, *args, **kwargs) | ['classmethod'] | -        |
 
 ## Класс ChangeProjectMutationPayload
 
@@ -27,9 +27,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                           | Декораторы                                                             | Описание |
-| :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, name: str, project_id: str, file: django.core.files.uploadedfile.InMemoryUploadedFile, multiple: bool) | ['@staticmethod', '@permission_classes((IsAuthenticated, AddPeriod))'] | -        |
+| Сигнатура                                                                                                                                                                           | Декораторы                                                           | Описание |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, name: str, project_id: str, file: django.core.files.uploadedfile.InMemoryUploadedFile, multiple: bool) | ['staticmethod', 'permission_classes((IsAuthenticated, AddPeriod))'] | -        |
 
 ## Класс ChangePeriodMutationPayload
 
@@ -45,9 +45,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                             | Декораторы                                                   | Описание |
-| :-------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, division_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -        |
+| Сигнатура                                                                                                             | Декораторы                                                 | Описание |
+| :-------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, division_ids: list[str]) | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
 
 ## Класс DeleteDivisionsMutationPayload
 
@@ -63,9 +63,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                           | Декораторы                                                   | Описание |
-| :-------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, selected_period_id: str, period_groups_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -        |
+| Сигнатура                                                                                                                                           | Декораторы                                                 | Описание |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, selected_period_id: str, period_groups_ids: list[str]) | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
 
 ## Класс ChangePeriodGroupUsersMutation
 
@@ -73,9 +73,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                | Декораторы                                                   | Описание |
-| :----------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, users_ids: list[str]) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -        |
+| Сигнатура                                                                                                                | Декораторы                                                 | Описание |
+| :----------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, users_ids: list[str]) | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
 
 ## Класс DeletePeriodGroupMutationPayload
 
@@ -87,9 +87,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                        | Декораторы                                                   | Описание |
-| :--------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :------- |
-| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, user_id: str) | ['@staticmethod', '@permission_classes((IsAuthenticated,))'] | -        |
+| Сигнатура                                                                                                        | Декораторы                                                 | Описание |
+| :--------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, period_group_id: str, user_id: str) | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
 
 ## Класс ProjectMutations
 
