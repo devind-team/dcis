@@ -17,14 +17,6 @@ class ChangeSheet(BasePermission):
         ))
 
 
-class ChangeValue(BasePermission):
-    """Пропускает пользователей, которые могут изменять значение ячейки в документе."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Document):
-        return context.user.has_perm('dcis.change_value') or document_in_user_divisions(obj, context.user)
-
-
 class AddChildRowDimension(BasePermission):
     """Пропускает пользователей, которые могут добавлять дочерние строки к строке."""
 

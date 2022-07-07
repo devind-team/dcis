@@ -13,7 +13,7 @@ from stringcase import snakecase
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Sheet, Value
 from apps.dcis.schema.types import SheetType
-from apps.dcis.services.sheet_services import get_file_value_files
+from apps.dcis.services.value_services import get_file_value_files
 from apps.dcis.services.sheet_unload_services import SheetUploader
 
 
@@ -22,7 +22,7 @@ class SheetQueries(graphene.ObjectType):
 
     sheet = graphene.Field(
         SheetType,
-        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        sheet_id=graphene.Int(required=True, description='Идентификатор листа'),
         document_id=graphene.ID(description='Идентификатор документа'),
         required=True,
         description='Выгрузка листа'
@@ -30,9 +30,9 @@ class SheetQueries(graphene.ObjectType):
     value_files = DjangoListField(
         FileType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
-        column_id=graphene.ID(required=True, description='Идентификатор колонки'),
-        row_id=graphene.ID(required=True, description='Идентификатор строки'),
+        sheet_id=graphene.Int(required=True, description='Идентификатор листа'),
+        column_id=graphene.Int(required=True, description='Идентификатор колонки'),
+        row_id=graphene.Int(required=True, description='Идентификатор строки'),
         description='Файлы значения ячейки типа `Файл`'
     )
 

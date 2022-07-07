@@ -1,4 +1,4 @@
-mutation UnloadFileValueArchive($documentId: ID!, $sheetId: ID!, $columnId: ID!, $rowId: ID!, $name: String!) {
+mutation UnloadFileValueArchive($documentId: ID!, $sheetId: Int!, $columnId: Int!, $rowId: Int!, $name: String!) {
   unloadFileValueArchive(input: {
     documentId: $documentId,
     sheetId: $sheetId,
