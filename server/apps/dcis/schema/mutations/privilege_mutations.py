@@ -13,27 +13,6 @@ from apps.dcis.models import Period, PeriodGroup, PeriodPrivilege, Privilege
 from apps.dcis.schema.types import PrivilegeType
 
 
-class ChangePeriodGroupPrivilegesMutation(BaseMutation):
-    """Мутация на изменение привилегий группы."""
-
-    class Input:
-        period_group_id = graphene.Int(required=True, description='Идентификатор группы периода')
-        privileges_ids = graphene.List(graphene.NonNull(graphene.ID), description='Привилегии')
-
-    privileges = graphene.List(PrivilegeType, required=True, description='Привилегии группы')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: int, privileges_ids: list[str]):
-        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        privileges: list[Privilege] = []
-        for privilege_id in privileges_ids:
-            privilege = get_object_or_404(Privilege, pk=privilege_id)
-            privileges.append(privilege)
-        period_group.privileges.set(privileges)
-        return ChangePeriodGroupPrivilegesMutation(privileges=privileges)
-
-
 class ChangeGroupUserPrivilegesMutation(BaseMutation):
     """Мутация на изменение привилегий пользователя."""
 
@@ -65,7 +44,7 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
             if privilege_id not in privileges:
                 PeriodPrivilege.objects.create(user=user, period=period, privilege_id=privilege_id)
         user_privileges = Privilege.objects.filter(periodprivilege__user=user, periodprivilege__period=period)
-        return ChangePeriodGroupPrivilegesMutation(
+        return ChangeGroupUserPrivilegesMutation(
             privileges=user_privileges | Privilege.objects.filter(periodgroup=period_group).all()
         )
 
@@ -73,5 +52,4 @@ class ChangeGroupUserPrivilegesMutation(BaseMutation):
 class PrivilegeMutations(graphene.ObjectType):
     """Список мутация привилегий."""
 
-    change_period_group_privileges = ChangePeriodGroupPrivilegesMutation.Field(required=True)
     change_group_users_privileges = ChangeGroupUserPrivilegesMutation.Field(required=True)

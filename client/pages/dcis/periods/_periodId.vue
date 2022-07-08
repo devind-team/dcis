@@ -35,6 +35,11 @@ export default defineComponent({
         icon: 'briefcase-outline'
       },
       {
+        title: t('dcis.periods.links.groups') as string,
+        to: 'dcis-periods-periodId-groups',
+        icon: 'account-group'
+      },
+      {
         title: t('dcis.periods.links.users') as string,
         to: 'dcis-periods-periodId-users',
         icon: 'account-multiple'

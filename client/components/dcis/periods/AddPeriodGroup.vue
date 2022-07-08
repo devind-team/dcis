@@ -1,29 +1,28 @@
 <template lang="pug">
   mutation-modal-form(
-    @close="close"
-    :header="String($t('dcis.periods.actions.addGroup'))"
+    :header="String($t('dcis.periods.groups.addGroup.header'))"
     :subheader="period.name"
-    :button-text="String($t('dcis.periods.addPeriodGroup.buttonText'))"
-    :mutation="addPeriodGroup"
+    :button-text="String($t('dcis.periods.groups.addGroup.buttonText'))"
+    :mutation="addPeriodGroupMutation"
     :variables="{ name, periodId: period.id }"
     :update="addPeriodGroupUpdate"
     mutation-name="addPeriodGroup"
     errors-in-alert
-    persistent
+    @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
       validation-provider(
-        :name="String($t('dcis.periods.addPeriodGroup.name'))"
-        rules="required|min:2"
         v-slot="{ errors, valid }"
-        )
+        :name="String($t('dcis.periods.groups.addGroup.name'))"
+        rules="required|min:2"
+      )
         v-text-field(
           v-model="name"
-          :label="$t('dcis.periods.addPeriodGroup.name')"
-          :success="valid"
+          :label="$t('dcis.periods.groups.addGroup.name')"
           :error-messages="errors"
+          :success="valid"
           autofocus
         )
 </template>
@@ -32,12 +31,12 @@
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
-import { AddPeriodGroupMutationPayload, PeriodGroupType, PeriodType } from '~/types/graphql'
-import addPeriodGroup from '~/gql/dcis/mutations/project/add_period_group.graphql'
+import { AddPeriodGroupMutationPayload, PeriodType } from '~/types/graphql'
+import addPeriodGroupMutation from '~/gql/dcis/mutations/project/add_period_group.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
-export type AddPeriodGroupMutationResult = { data: { addPeriodGroup: AddPeriodGroupMutationPayload } }
-type UpdateFunction = (cache: DataProxy | any, result: AddPeriodGroupMutationPayload | any) => DataProxy | any
+export type AddPeriodGroupMutationResult = { data: { addPeriodGroup: Required<AddPeriodGroupMutationPayload> } }
+type UpdateFunction = (cache: DataProxy, result: AddPeriodGroupMutationResult) => DataProxy
 
 export default defineComponent({
   components: { MutationModalForm },
@@ -47,7 +46,6 @@ export default defineComponent({
   },
   setup (props) {
     const name = ref<string>('')
-    const selectGroup = ref<PeriodGroupType | null>(null)
 
     /**
      * Обновление после добавления группы
@@ -55,20 +53,18 @@ export default defineComponent({
      * @param result
      */
     const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
-      const { success } = result.data.addPeriodGroup
-      if (success) {
+      if (result.data.addPeriodGroup.success) {
         props.update(cache, result)
       }
     }
 
     const close = () => {
       name.value = ''
-      selectGroup.value = null
     }
+
     return {
       name,
-      selectGroup,
-      addPeriodGroup,
+      addPeriodGroupMutation,
       addPeriodGroupUpdate,
       close
     }

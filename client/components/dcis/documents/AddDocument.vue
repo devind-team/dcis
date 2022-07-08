@@ -1,9 +1,10 @@
 <template lang="pug">
   mutation-modal-form(
+    :header="String($t('dcis.documents.addDocument.header'))"
+    :subheader="period.name"
+    :button-text="String($t('dcis.documents.addDocument.buttonText'))"
     :mutation="require('~/gql/dcis/mutations/document/add_document.graphql')"
     :variables="variables"
-    :header="String($t('dcis.documents.addDocument.header'))"
-    :button-text="String($t('dcis.documents.addDocument.buttonText'))"
     :update="update"
     mutation-name="addDocument"
     i18n-path="dcis.documents.addDocument"

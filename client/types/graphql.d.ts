@@ -1198,8 +1198,8 @@ export type ChangePasswordMutationPayload = {
 export type ChangePeriodGroupPrivilegesMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор группы периода */
-  periodGroupId: Scalars['Int'];
-  /** Привилегии */
+  periodGroupId: Scalars['ID'];
+  /** Идентификаторы привилегий */
   privilegesIds?: InputMaybe<Array<Scalars['ID']>>;
 };
 
@@ -1648,20 +1648,20 @@ export type ContentTypeTypeProjectSetArgs = {
 export type CopyPeriodGroupMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Выбранные группы */
-  periodGroupsIds?: InputMaybe<Array<Scalars['ID']>>;
+  periodGroupIds: Array<Scalars['ID']>;
   /** Идентификатор текущего периода */
   periodId: Scalars['ID'];
   /** Идентификатор выбранного периода */
   selectedPeriodId: Scalars['ID'];
 };
 
-/** Мутация на перенос группы с пользователями из другого сбора. */
+/** Мутация на перенос группы с пользователями из другого периода. */
 export type CopyPeriodGroupMutationPayload = {
   __typename?: 'CopyPeriodGroupMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
-  /** Группы сбора */
+  /** Новые группы периода */
   periodGroups: Array<Maybe<PeriodGroupType>>;
   /** Успех мутации */
   success: Scalars['Boolean'];
@@ -1832,7 +1832,7 @@ export type DeletePageMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Мутация на удаление группы сбора. */
+/** Мутация на удаление группы периода. */
 export type DeletePeriodGroupMutationPayload = {
   __typename?: 'DeletePeriodGroupMutationPayload';
   deletedId?: Maybe<Scalars['ID']>;
@@ -2463,7 +2463,7 @@ export type Mutation = {
   changeValue: ChangeValueMutationPayload;
   /** Подтверждение кода. */
   confirmEmail: ConfirmEmailMutationPayload;
-  /** Мутация на перенос группы с пользователями из другого сбора. */
+  /** Мутация на перенос группы с пользователями из другого периода. */
   copyPeriodGroups: CopyPeriodGroupMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
@@ -2481,7 +2481,7 @@ export type Mutation = {
   deletePage: DeletePageMutationPayload;
   /** Мутация на удаление периода. */
   deletePeriod: DeletePeriodMutationPayload;
-  /** Мутация на удаление группы сбора. */
+  /** Мутация на удаление группы периода. */
   deletePeriodGroup: DeletePeriodGroupMutationPayload;
   /** Мутация для удаления записи профиля. */
   deleteProfile: DeleteProfileMutationPayload;
@@ -3696,8 +3696,6 @@ export type Query = {
   activeBudgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Статистика активности */
   activeStatistics: ActiveStatisticsType;
-  /** Дополнительные личные привилегии */
-  additionalPrivileges: Array<PrivilegeType>;
   /** Приложения */
   applications: Array<ApplicationType>;
   budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
@@ -3778,12 +3776,10 @@ export type Query = {
   user?: Maybe<UserType>;
   /** Дивизионы пользователя */
   userDivisions: Array<Maybe<DivisionModelType>>;
-  /** Привилегии назначенных пользователей периодов */
-  userGroupPrivileges: Array<PrivilegeType>;
+  /** Отдельные привилегии пользователя для периода */
+  userIndividualPrivileges: Array<PrivilegeType>;
   /** Доступная информация о пользователе */
   userInformation?: Maybe<UserType>;
-  /** Привилегии пользователя для периода */
-  userPeriodPrivileges: Array<PrivilegeType>;
   /** Пользователи приложения */
   users: UserTypeConnection;
   /** Файлы значения ячейки типа `Файл` */
@@ -3798,12 +3794,6 @@ export type QueryActiveBudgetClassificationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-};
-
-/** Схема запросов данных. */
-export type QueryAdditionalPrivilegesArgs = {
-  periodId: Scalars['ID'];
-  userId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -4044,20 +4034,14 @@ export type QueryUserDivisionsArgs = {
 };
 
 /** Схема запросов данных. */
-export type QueryUserGroupPrivilegesArgs = {
-  periodGroupId: Scalars['ID'];
+export type QueryUserIndividualPrivilegesArgs = {
+  periodId: Scalars['ID'];
   userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Схема запросов данных. */
 export type QueryUserInformationArgs = {
   userId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryUserPeriodPrivilegesArgs = {
-  periodId: Scalars['ID'];
-  userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Схема запросов данных. */
@@ -5187,13 +5171,6 @@ export type UnloadDocumentMutationVariables = Exact<{
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
-export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
-  periodGroupId: Scalars['Int'];
-  privilegesIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
-}>;
-
-export type ChangePeriodGroupPrivilegesMutation = { __typename?: 'Mutation', changePeriodGroupPrivileges: { __typename: 'ChangePeriodGroupPrivilegesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } | null> } };
-
 export type ChangeGroupUserPrivilegesMutationVariables = Exact<{
   userId: Scalars['ID'];
   periodGroupId: Scalars['ID'];
@@ -5247,6 +5224,13 @@ export type ChangePeriodMutationVariables = Exact<{
 
 export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } | null } };
 
+export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
+  periodGroupId: Scalars['ID'];
+  privilegesIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
+}>;
+
+export type ChangePeriodGroupPrivilegesMutation = { __typename?: 'Mutation', changePeriodGroupPrivileges: { __typename: 'ChangePeriodGroupPrivilegesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } | null> } };
+
 export type ChangePeriodGroupUsersMutationVariables = Exact<{
   periodGroupId: Scalars['Int'];
   usersIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
@@ -5268,7 +5252,7 @@ export type ChangeProjectMutation = { __typename?: 'Mutation', changeProject: { 
 export type CopyPeriodGroupsMutationVariables = Exact<{
   periodId: Scalars['ID'];
   selectedPeriodId: Scalars['ID'];
-  periodGroupIds?: InputMaybe<Array<Scalars['ID']> | Scalars['ID']>;
+  periodGroupIds: Array<Scalars['ID']> | Scalars['ID'];
 }>;
 
 export type CopyPeriodGroupsMutation = { __typename?: 'Mutation', copyPeriodGroups: { __typename?: 'CopyPeriodGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, periodGroups: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> } };
@@ -5397,13 +5381,6 @@ export type ActiveBudgetClassificationsQueryVariables = Exact<{
 
 export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBudgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
 
-export type AdditionalPrivilegesQueryVariables = Exact<{
-  periodId: Scalars['ID'];
-  userId: Scalars['ID'];
-}>;
-
-export type AdditionalPrivilegesQuery = { __typename?: 'Query', additionalPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
-
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
@@ -5491,19 +5468,12 @@ export type UserDivisionsQueryVariables = Exact<{
 
 export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
 
-export type UserGroupPrivilegesQueryVariables = Exact<{
-  periodGroupId: Scalars['ID'];
-  userId: Scalars['ID'];
-}>;
-
-export type UserGroupPrivilegesQuery = { __typename?: 'Query', userGroupPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
-
-export type UserPeriodPrivilegesQueryVariables = Exact<{
+export type UserIndividualPrivilegesQueryVariables = Exact<{
   periodId: Scalars['ID'];
   userId?: InputMaybe<Scalars['ID']>;
 }>;
 
-export type UserPeriodPrivilegesQuery = { __typename?: 'Query', userPeriodPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
+export type UserIndividualPrivilegesQuery = { __typename?: 'Query', userIndividualPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
 
 export type ValueFilesQueryVariables = Exact<{
   documentId: Scalars['ID'];

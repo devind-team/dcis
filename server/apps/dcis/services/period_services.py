@@ -54,17 +54,6 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     )
 
 
-def get_user_period_privileges(user: User, period: Period) -> QuerySet[Privilege]:
-    """Получение привилегий пользователя в периоде."""
-    return Privilege.objects.filter(
-        Q(periodgroup__period=period, periodgroup__users=user) |
-        Q(periodprivilege__period=period, periodprivilege__user=user)
-    )
-
-
-def get_user_group_privileges(user: User, period_group: PeriodGroup) -> QuerySet[Privilege]:
-    """Получение привилегий пользователя в группе периода."""
-    return Privilege.objects.filter(
-        Q(periodprivilege__user=user, periodprivilege__period_id=period_group.period_id) |
-        Q(periodgroup=period_group, periodgroup__users=user)
-    )
+def get_user_individual_privileges(user: User, period: Period) -> QuerySet[Privilege]:
+    """Получение отдельных привилегий пользователя в периоде."""
+    return Privilege.objects.filter(periodprivilege__period=period, periodprivilege__user=user)

@@ -1107,8 +1107,8 @@ type ChangePasswordMutationPayload {
 input ChangePeriodGroupPrivilegesMutationInput {
   clientMutationId: String
   """Идентификатор группы периода"""
-  periodGroupId: Int!
-  """Привилегии"""
+  periodGroupId: ID!
+  """Идентификаторы привилегий"""
   privilegesIds: [ID!]
 }
 
@@ -1525,19 +1525,19 @@ type ContentTypeType {
 input CopyPeriodGroupMutationInput {
   clientMutationId: String
   """Выбранные группы"""
-  periodGroupsIds: [ID!]
+  periodGroupIds: [ID!]!
   """Идентификатор текущего периода"""
   periodId: ID!
   """Идентификатор выбранного периода"""
   selectedPeriodId: ID!
 }
 
-"""Мутация на перенос группы с пользователями из другого сбора."""
+"""Мутация на перенос группы с пользователями из другого периода."""
 type CopyPeriodGroupMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Группы сбора"""
+  """Новые группы периода"""
   periodGroups: [PeriodGroupType]!
   """Успех мутации"""
   success: Boolean!
@@ -1714,7 +1714,7 @@ type DeletePageMutationPayload {
   success: Boolean!
 }
 
-"""Мутация на удаление группы сбора."""
+"""Мутация на удаление группы периода."""
 type DeletePeriodGroupMutationPayload {
   deletedId: ID
   deletedInputId: ID
@@ -2307,7 +2307,7 @@ type Mutation {
   changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
-  """Мутация на перенос группы с пользователями из другого сбора."""
+  """Мутация на перенос группы с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupMutationInput!): CopyPeriodGroupMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
@@ -2325,7 +2325,7 @@ type Mutation {
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация на удаление периода."""
   deletePeriod(id: ID!): DeletePeriodMutationPayload!
-  """Мутация на удаление группы сбора."""
+  """Мутация на удаление группы периода."""
   deletePeriodGroup(id: ID!): DeletePeriodGroupMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
@@ -3092,13 +3092,6 @@ type Query {
   ): BudgetClassificationTypeConnection
   """Статистика активности"""
   activeStatistics: ActiveStatisticsType!
-  """Дополнительные личные привилегии"""
-  additionalPrivileges(
-    """Идентификатор периода"""
-    periodId: ID!
-    """Идентификатор пользователя"""
-    userId: ID!
-  ): [PrivilegeType!]!
   """Приложения"""
   applications: [ApplicationType!]!
   budgetClassifications(
@@ -3260,10 +3253,10 @@ type Query {
     """Пользователь"""
     userId: ID
   ): [DivisionModelType]!
-  """Привилегии назначенных пользователей периодов"""
-  userGroupPrivileges(
-    """Идентификатор группы"""
-    periodGroupId: ID!
+  """Отдельные привилегии пользователя для периода"""
+  userIndividualPrivileges(
+    """Идентификатор периода"""
+    periodId: ID!
     """Идентификатор пользователя"""
     userId: ID
   ): [PrivilegeType!]!
@@ -3272,13 +3265,6 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID!
   ): UserType
-  """Привилегии пользователя для периода"""
-  userPeriodPrivileges(
-    """Идентификатор периода"""
-    periodId: ID!
-    """Идентификатор пользователя"""
-    userId: ID
-  ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
   """Файлы значения ячейки типа `Файл`"""

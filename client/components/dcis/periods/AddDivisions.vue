@@ -1,6 +1,7 @@
 <template lang="pug">
   mutation-modal-form(
     :header="String($t('dcis.periods.divisions.addDivisions.header'))"
+    :subheader="period.name"
     :button-text="String($t('dcis.periods.divisions.addDivisions.buttonText'))"
     :mutation="addDivisions"
     :update="addDivisionsUpdate"

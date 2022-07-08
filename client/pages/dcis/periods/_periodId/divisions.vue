@@ -36,8 +36,8 @@
               template(#default="{ on: onMenu }")
                 v-tooltip(bottom)
                   template(#activator="{ on: onTooltip }")
-                    v-btn(v-on="{ ...onMenu, ...onTooltip }" icon)
-                      v-icon(color="error") mdi-delete
+                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="error" icon)
+                      v-icon mdi-delete
                   span {{ $t('dcis.periods.divisions.deleteDivision.tooltip') }}
 </template>
 

@@ -101,6 +101,7 @@ export default {
     links: {
       documents: 'Документы',
       divisions: 'Дивизионы',
+      groups: 'Группы',
       users: 'Пользователи',
       settings: '@:settings'
     },
@@ -128,6 +129,31 @@ export default {
       },
       shownOf: 'Показано записей: {count}'
     },
+    groups: {
+      name: 'Группы',
+      addGroup: {
+        buttonText: 'Добавить группу',
+        header: 'Добавление группы',
+        name: 'Название группы'
+      },
+      copyGroups: {
+        buttonText: 'Импортировать группы',
+        header: 'Импорт групп из другого периода',
+        period: 'Период',
+        groups: 'Группы'
+      },
+      deleteGroup: {
+        tooltip: '@:delete',
+        itemName: 'группу'
+      },
+      privileges: {
+        tableHeaders: {
+          name: 'Название привилегии',
+          key: 'Ключ'
+        }
+      }
+    },
+    users: {},
     header: 'Настройки периода',
     status: 'Статус проекта',
     multiple: 'Множественное заполнение',
@@ -136,25 +162,10 @@ export default {
     expiration: 'Дата окончания периода',
     deleteItemName: 'период',
     actions: {
-      addGroup: 'Добавить группу',
       delete: '@:delete',
       deleteGroup: 'Удалить группу',
-      copyGroups: 'Копировать из сбора',
       save: '@:save',
       deleteItemName: 'период'
-    },
-    addPeriodGroup: {
-      header: 'Добавление группы периода',
-      name: 'Название группы периода',
-      groups: 'Пользователи и привилегии из другой группы',
-      buttonText: '@:add'
-    },
-    copyPeriodGroups: {
-      header: 'Импорт групп из сбора',
-      name: 'Название группы периода',
-      groups: 'Группы',
-      period: 'Период',
-      buttonText: '@:add'
     },
     changePeriodUsers: {
       header: 'Добавление пользователей',
@@ -165,20 +176,6 @@ export default {
       users: 'Пользователи',
       jobPost: 'Должность',
       division: 'Объект сбора'
-    },
-    changePrivileges: {
-      groupHeader: 'Изменениe привилегий',
-      userHeader: 'Добавление привилегий пользователю',
-      buttonChangeText: '@:change',
-      buttonAddText: '@:add',
-      change: 'Изменить привилегии',
-      add: 'Добавить привилегии',
-      deleteUser: 'Удалить из группы',
-      name: 'Описание привилегии',
-      privileges: 'Привилегии пользователя',
-      key: 'Ключ',
-      createdAt: 'Дата создания',
-      alert: 'Не заданы привилегии сбора или группы'
     },
     statuses: {
       open: 'Открыто',
