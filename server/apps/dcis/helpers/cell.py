@@ -1,6 +1,6 @@
 """Вспомогательный модуль для расчета формул."""
 from collections import defaultdict
-from typing import Iterable
+from typing import Iterable, TypedDict
 
 from django.db.models import QuerySet, Q
 from openpyxl.utils.cell import get_column_letter, column_index_from_string
@@ -41,28 +41,78 @@ def get_dependency_cells(sheets: list[Sheet], value: Value) -> tuple[list[str], 
     return dependency_cells, inversion_cells
 
 
-def resolve_cells(sheets: Iterable[Sheet], cells: set[str]) -> QuerySet[Cell]:
+def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) -> tuple[QuerySet[Cell], QuerySet[Value]]:
     """Получаем строки в зависимости от координат."""
     sheet_mapping: dict[str, int] = {sheet.name: sheet.pk for sheet in sheets}
     sheet_cells: defaultdict[int, list[tuple[int, int]]] = defaultdict(list)
     for cell in cells:
         sheet_name, column_letter, row = parse_coordinate(cell)
         sheet_cells[sheet_mapping[sheet_name]].append((column_index_from_string(column_letter), row,))
-    query_filter = Q()
+
+    cells_query_filter = Q()
+    values_query_filter = Q()
     for sheet_id, coordinates in sheet_cells.items():
         for column_index, row_index in coordinates:
-            query_filter |= Q(
+            cells_query_filter |= Q(
                 column__sheet_id=sheet_id,
                 column__index=column_index,
                 row__index=row_index,
                 row__parent__isnull=True
             )
-    return Cell.objects.filter(query_filter).select_related('row', 'column').all()
+            values_query_filter |= Q(
+                column__sheet_id=sheet_id,
+                document=document,
+                column__index=column_index,
+                row__index=row_index
+            )
+    related: list[str] = ['row', 'column', 'column__sheet']
+    cells: QuerySet[Cell] = Cell.objects.filter(cells_query_filter) \
+        .select_related(*related).all()
+    values: QuerySet[Value] = Value.objects.filter(values_query_filter)\
+        .select_related(*related).all()
+    return cells, values
 
 
-def resolve_values(cells: Iterable[Cell], document: Document) -> QuerySet[Value]:
-    """Получаем значения ячеек."""
-    ...
+class ValueState(TypedDict):
+    """Результативное состояние для расчета новых значений по формулам."""
+    value: int | float | str | None
+    cell: Cell
+
+
+def resolve_evaluate_state(
+        sheet: Sheet,
+        cells: Iterable[Cell],
+        values: Iterable[Value],
+        inversion_cells: list[str]
+) -> dict[str, ValueState]:
+    """Строим массив для расчета.
+
+        - sheet - лист расчета;
+        - cells - массив ячеек для расчета;
+        - values - массив уже существующих значений, для расчета новых значений ячейки;
+        - inversion_cells - ячейки от которых зависит расчет;
+
+    Построение массива для расчета новых значений ячеек.
+    {
+        'A1': {
+            value: '', # Значение или формула
+            cell: cell, # Значение ячейки для которой ведем расчет
+        },
+    }
+    """
+    state: dict[str, ValueState] = {}
+    values_state: dict[str, str] = {get_coordinate(v.column.sheet, v): v.value.strip() for v in values}
+    cell: Cell
+    for cell in cells:
+        coord: str = get_coordinate(cell.column.sheet, cell)
+        coordinate: str = f'{get_column_letter(cell.column.index)}{cell.row.index}' \
+            if sheet.name == cell.column.sheet.name \
+            else coord
+        value: str = cell.formula \
+            if cell.formula and coord in inversion_cells \
+            else values_state.get(coordinate, cell.default)
+        state[coordinate] = {'value': value, 'cell': cell}
+    return state
 
 
 def get_coordinate(sheet: Sheet, vc: Value | Cell) -> str:

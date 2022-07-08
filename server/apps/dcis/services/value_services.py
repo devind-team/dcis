@@ -14,7 +14,7 @@ from django.utils.timezone import now
 
 from apps.core.models import User
 from apps.dcis.models import Value, Sheet, RowDimension, Document, Cell
-from apps.dcis.helpers.cell import get_dependency_cells, resolve_cells, resolve_values
+from apps.dcis.helpers.cell import get_dependency_cells, resolve_cells, resolve_evaluate_state
 
 
 class UpdateOrCrateValueResult(NamedTuple):
@@ -56,16 +56,17 @@ def update_or_create_value(
 
 def recalculate_cells(document: Document, value: Value) -> list[Value]:
     """Пересчитываем значения ячеек в зависимости от новых."""
+    from pprint import pprint
     sheets: list[Sheet] = document.sheets.all()
     dependency_cells, inversion_cells = get_dependency_cells(sheets, value)
-    # cells, values = resolve_formula(sheets, {*dependency_cells, *inversion_cells})
+    cells, values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
+    state = resolve_evaluate_state(value.sheet, cells, values, inversion_cells)
+    pprint(state)
+
     # state: dict[str, str | int | float] = resolve_cells_state()
     # evaluate_values: dict[str, str | int | float] = evaluate_sheet(state)
     # values = update_values(sheets, evaluate_values)
     # return values
-
-    cells: QuerySet[Cell] = resolve_cells(sheets, {*dependency_cells, *inversion_cells})
-    values: QuerySet[Value] = resolve_values(cells, document)
     return []
 
 
