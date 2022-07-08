@@ -1,0 +1,60 @@
+[
+  {
+    "model": "devind_core.Setting",
+    "pk": 1,
+    "fields": {
+      "key": "APP_NAME",
+      "readonly": true,
+      "value": "Информационная система сбора данных"
+    }
+  },
+  {
+    "model": "devind_core.Setting",
+    "pk": 2,
+    "fields": {
+      "key": "APP_ICON",
+      "readonly": true,
+      "kind_value": 1,
+      "value": "/icon.png"
+    }
+  },
+  {
+    "model": "devind_core.Setting",
+    "pk": 3,
+    "fields": {
+      "key": "APP_EMAIL",
+      "readonly": true,
+      "value": "admin@cbias.ru"
+    }
+  },
+  {
+    "model": "devind_core.Setting",
+    "pk": 4,
+    "fields": {
+      "key": "USER_PUBLIC",
+      "readonly": false,
+      "kind_value": 4,
+      "value": "false"
+    }
+  },
+  {
+    "model": "devind_core.Setting",
+    "pk": 5,
+    "fields": {
+      "key": "NOTIFICATION_EMAIL",
+      "readonly": false,
+      "kind_value": 4,
+      "value": "true"
+    }
+  },
+  {
+    "model": "devind_core.Setting",
+    "pk": 6,
+    "fields": {
+      "key": "NOTIFICATION_PUSH",
+      "readonly": false,
+      "kind_value": 4,
+      "value": "true"
+    }
+  }
+]
