@@ -38,9 +38,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                               | Декораторы                                         | Описание |
-| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------- | :------- |
-| resolve_departments( organization: devind_dictionaries.models.organizations.Organization, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -> django.db.models.query.QuerySet | ['staticmethod', "resolver_hints(model_field='')"] | -        |
+| Сигнатура                                                                                                                                                                                   | Декораторы                                         | Описание |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------- | :------- |
+| resolve_departments( organization: devind_dictionaries.models.organizations.Organization, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -&#62; django.db.models.query.QuerySet | ['staticmethod', "resolver_hints(model_field='')"] | -        |
 
 ## Класс PrivilegeType
 

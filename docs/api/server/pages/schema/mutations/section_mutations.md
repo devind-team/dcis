@@ -8,9 +8,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                      | Декораторы       | Описание |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- | :------- |
-| get_page( page_id: str, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -> Tuple[apps.pages.models.page.Page, devind_helpers.schema.mutations.BaseMutation] | ['staticmethod'] | -        |
+| Сигнатура                                                                                                                                                                          | Декораторы       | Описание |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- | :------- |
+| get_page( page_id: str, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -&#62; Tuple[apps.pages.models.page.Page, devind_helpers.schema.mutations.BaseMutation] | ['staticmethod'] | -        |
 
 ## Класс AddSectionTextMutation
 
@@ -48,9 +48,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                                  | Декораторы       | Описание |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- | :------- |
-| get_section( section_id: int, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -> Tuple[apps.pages.models.section.Section, devind_helpers.schema.mutations.BaseMutation] | ['staticmethod'] | -        |
+| Сигнатура                                                                                                                                                                                      | Декораторы       | Описание |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- | :------- |
+| get_section( section_id: int, base_mutation: Type[devind_helpers.schema.mutations.BaseMutation]) -&#62; Tuple[apps.pages.models.section.Section, devind_helpers.schema.mutations.BaseMutation] | ['staticmethod'] | -        |
 
 ## Класс ChangeSectionTextMutation
 

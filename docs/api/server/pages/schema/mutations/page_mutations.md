@@ -4,9 +4,9 @@
 
 ### Функции
 
-| Сигнатура                                                                                 | Декораторы | Описание |
-| :---------------------------------------------------------------------------------------- | :--------- | :------- |
-| check_tag_names(tag_names: List[str]) -> List[devind_helpers.schema.types.ErrorFieldType] | -          | -        |
+| Сигнатура                                                                                     | Декораторы | Описание |
+| :-------------------------------------------------------------------------------------------- | :--------- | :------- |
+| check_tag_names(tag_names: List[str]) -&#62; List[devind_helpers.schema.types.ErrorFieldType] | -          | -        |
 
 ## Класс AddPageMutation
 
@@ -24,9 +24,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                        | Декораторы       | Описание |
-| :----------------------------------------------------------------------------------------------- | :--------------- | :------- |
-| get_page( info: graphql.execution.base.ResolveInfo, page_id: str) -> apps.pages.models.page.Page | ['staticmethod'] | -        |
+| Сигнатура                                                                                            | Декораторы       | Описание |
+| :--------------------------------------------------------------------------------------------------- | :--------------- | :------- |
+| get_page( info: graphql.execution.base.ResolveInfo, page_id: str) -&#62; apps.pages.models.page.Page | ['staticmethod'] | -        |
 
 ## Класс ChangePageAvatarMutation
 

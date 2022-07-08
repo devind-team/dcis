@@ -8,9 +8,9 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                                                                                                              | Декораторы                                                             | Описание                        |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :------------------------------ |
-| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, comment: str, period_id: str, status_id: int, document_id: Optional[int] = None, division_id: Optional[int] = None) -> apps.dcis.schema.mutations.document_mutations.AddDocumentMutation | ['staticmethod', 'permission_classes((IsAuthenticated, AddDocument))'] | Мутация для создания документа. |
+| Сигнатура                                                                                                                                                                                                                                                                  | Декораторы                                                             | Описание                        |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :------------------------------ |
+| mutate_and_get_payload( root: None, info: graphql.execution.base.ResolveInfo, comment: str, period_id: str, status_id: int, document_id: Optional[int] = None, division_id: Optional[int] = None) -&#62; apps.dcis.schema.mutations.document_mutations.AddDocumentMutation | ['staticmethod', 'permission_classes((IsAuthenticated, AddDocument))'] | Мутация для создания документа. |
 
 ## Класс ChangeDocumentCommentMutationPayload
 

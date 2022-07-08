@@ -36,12 +36,12 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                       | Декораторы                                                    | Описание |
-| :------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------ | :------- |
-| resolve_sections( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                 | ['staticmethod', "resolver_hints(model_field='section_set')"] | -        |
-| resolve_tags( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                     | ['staticmethod', "resolver_hints(model_field='tags')"]        | -        |
-| resolve_comments( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                 | ['staticmethod', "resolver_hints(model_field='comment_set')"] | -        |
-| resolve_preview( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -> Optional[str] | ['staticmethod']                                              | -        |
+| Сигнатура                                                                                                                           | Декораторы                                                    | Описание |
+| :---------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------ | :------- |
+| resolve_sections( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                     | ['staticmethod', "resolver_hints(model_field='section_set')"] | -        |
+| resolve_tags( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                         | ['staticmethod', "resolver_hints(model_field='tags')"]        | -        |
+| resolve_comments( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                     | ['staticmethod', "resolver_hints(model_field='comment_set')"] | -        |
+| resolve_preview( page: apps.pages.models.page.Page, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -&#62; Optional[str] | ['staticmethod']                                              | -        |
 
 ## Класс SectionInterface
 
