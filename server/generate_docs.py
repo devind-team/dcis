@@ -77,7 +77,7 @@ def get_methods(module_class: pdoc.doc.Class) -> list:
                 'name': own_member.name,
                 'docstring': remove_symbol(own_member.docstring),
                 'decorators': [re.sub('@', '', decorator) for decorator in own_member.decorators],
-                'signature': remove_symbol(str(own_member.signature)),
+                'signature': remove_symbol(str(own_member.signature)).replace('|', '&#124;'),
             }
             list_methods.append(methods)
     return list_methods
@@ -129,7 +129,7 @@ def generate_markdown(mod: pdoc.doc.Module):
 
 def main() -> None:
     """Скрипт генерирующий markdown файлы по docstring."""
-    for module in (pdoc.doc.Module.from_name('apps.core.services')).submodules:
+    for module in (pdoc.doc.Module.from_name('apps')).submodules:
         for mod_module in recursive_module(module):
             if not mod_module.submodules and not ('migrations' in mod_module.fullname):
                 generate_markdown(mod_module)
