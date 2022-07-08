@@ -32,7 +32,7 @@
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
     "vue-apexcharts": "^1.6.2",
-    "vuetify": "^2.6.6"
+    "vuetify": "^2.6.7"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
