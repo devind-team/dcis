@@ -153,7 +153,23 @@ export default {
         }
       }
     },
-    users: {},
+    users: {
+      name: 'Пользователи',
+      tableHeaders: {
+        avatar: 'Аватар',
+        fullname: 'ФИО',
+        username: 'Логин',
+        email: 'Email',
+        actions: 'Действия'
+      },
+      tooltips: {
+        changeGroups: 'Изменить группы',
+        changePrivileges: 'Изменить привилегии'
+      },
+      addUser: {
+        buttonText: 'Добавить пользователя'
+      }
+    },
     header: 'Настройки периода',
     status: 'Статус проекта',
     multiple: 'Множественное заполнение',

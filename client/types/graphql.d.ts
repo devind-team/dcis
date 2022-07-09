@@ -3739,6 +3739,8 @@ export type Query = {
   pages: PageTypeConnection;
   /** Период */
   period: PeriodType;
+  /** Пользователи, связанные периодом */
+  periodUsers: Array<UserType>;
   /** Периоды */
   periods: Array<PeriodType>;
   permissions: Array<PermissionType>;
@@ -3774,8 +3776,8 @@ export type Query = {
   tags: TagTypeConnection;
   /** Информация о указанном пользователе */
   user?: Maybe<UserType>;
-  /** Дивизионы пользователя */
-  userDivisions: Array<Maybe<DivisionModelType>>;
+  /** Привилегии пользователя в группе периода */
+  userGroupPrivileges: Array<PrivilegeType>;
   /** Отдельные привилегии пользователя для периода */
   userIndividualPrivileges: Array<PrivilegeType>;
   /** Доступная информация о пользователе */
@@ -3962,6 +3964,11 @@ export type QueryPeriodArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryPeriodUsersArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
 export type QueryPeriodsArgs = {
   projectId: Scalars['ID'];
 };
@@ -4028,8 +4035,8 @@ export type QueryUserArgs = {
 };
 
 /** Схема запросов данных. */
-export type QueryUserDivisionsArgs = {
-  projectId?: InputMaybe<Scalars['ID']>;
+export type QueryUserGroupPrivilegesArgs = {
+  periodGroupId: Scalars['ID'];
   userId?: InputMaybe<Scalars['ID']>;
 };
 
@@ -5421,6 +5428,12 @@ export type PeriodQueryVariables = Exact<{
 
 export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', canChangeDivisions: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, canAddDocument: boolean, id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, divisions?: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null } };
 
+export type PeriodUsersQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type PeriodUsersQuery = { __typename?: 'Query', periodUsers: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> };
+
 export type PeriodsQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
@@ -5461,16 +5474,16 @@ export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type StatusesQuery = { __typename?: 'Query', statuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
 
-export type UserDivisionsQueryVariables = Exact<{
+export type UserGroupPrivilegesQueryVariables = Exact<{
   userId?: InputMaybe<Scalars['ID']>;
-  projectId?: InputMaybe<Scalars['ID']>;
+  periodGroupId: Scalars['ID'];
 }>;
 
-export type UserDivisionsQuery = { __typename?: 'Query', userDivisions: Array<{ __typename: 'DivisionModelType', id: number, model: string, name: string } | null> };
+export type UserGroupPrivilegesQuery = { __typename?: 'Query', userGroupPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
 
 export type UserIndividualPrivilegesQueryVariables = Exact<{
-  periodId: Scalars['ID'];
   userId?: InputMaybe<Scalars['ID']>;
+  periodId: Scalars['ID'];
 }>;
 
 export type UserIndividualPrivilegesQuery = { __typename?: 'Query', userIndividualPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
