@@ -3,7 +3,7 @@
     template(#header) {{ $t('dcis.periods.divisions.name') }}
       template(v-if="period.canChangeDivisions")
         v-spacer
-        add-divisions(
+        add-period-divisions(
           :period="period"
           :divisions="filterDivisions"
           :loading="loading"
@@ -17,7 +17,7 @@
       v-col.text-right.pr-5(
         cols="12"
         md="4"
-      ) {{ $t('dcis.periods.divisions.shownOf', { count: period.divisions.length }) }}
+      ) {{ $t('shownOf', { count: divisionsCount, totalCount: period.divisions.length }) }}
     v-card(flat)
       v-card-text
         v-data-table(
@@ -27,6 +27,7 @@
           :loading="loading"
           disable-pagination
           hide-default-footer
+          @pagination="pagination"
         )
           template(#item.actions="{ item }")
             delete-menu(
@@ -43,9 +44,9 @@
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { computed, defineComponent, inject } from '#app'
+import { computed, defineComponent, inject, ref } from '#app'
 import { DataProxy } from 'apollo-cache'
-import { DataTableHeader } from 'vuetify'
+import { DataPagination, DataTableHeader } from 'vuetify'
 import { useMutation } from '@vue/apollo-composable'
 import {
   PeriodType,
@@ -59,7 +60,7 @@ import {
 import { BreadCrumbsItem } from '~/types/devind'
 import { UpdateType, useCommonQuery, useDebounceSearch, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import AddDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddDivisions.vue'
+import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import divisionsQuery from '~/gql/dcis/queries/project_divisions.graphql'
 import deleteDivisionMutation from '~/gql/dcis/mutations/project/delete_division.graphql'
@@ -67,7 +68,7 @@ import deleteDivisionMutation from '~/gql/dcis/mutations/project/delete_division
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AddDivisions, DeleteMenu },
+  components: { LeftNavigatorContainer, AddPeriodDivisions, DeleteMenu },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
@@ -75,7 +76,12 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+
     const { search } = useDebounceSearch()
+    const divisionsCount = ref<number>(props.period.divisions.length)
+    const pagination = (pagination: DataPagination) => {
+      divisionsCount.value = pagination.itemsLength
+    }
 
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
@@ -156,6 +162,8 @@ export default defineComponent({
 
     return {
       search,
+      divisionsCount,
+      pagination,
       bc,
       headers,
       loading,

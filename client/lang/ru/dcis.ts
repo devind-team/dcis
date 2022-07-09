@@ -126,8 +126,7 @@ export default {
       deleteDivision: {
         tooltip: '@:delete',
         itemName: 'дивизион'
-      },
-      shownOf: 'Показано записей: {count}'
+      }
     },
     groups: {
       name: 'Группы',

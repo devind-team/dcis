@@ -10,7 +10,7 @@
       v-col.text-right.pr-5(
         cols="12"
         md="4"
-      ) {{ $t('shownOf', { count: userCount, totalCount: users.length }) }}
+      ) {{ $t('shownOf', { count: usersCount, totalCount: users.length }) }}
     v-card(flat)
       v-card-text
         v-data-table(
@@ -110,9 +110,9 @@ export default defineComponent({
     )
 
     const { search } = useDebounceSearch()
-    const userCount = ref<number>(0)
+    const usersCount = ref<number>(0)
     const pagination = (pagination: DataPagination) => {
-      userCount.value = pagination.itemsLength
+      usersCount.value = pagination.itemsLength
     }
 
     return {
@@ -122,7 +122,7 @@ export default defineComponent({
       usersLoading,
       users,
       search,
-      userCount,
+      usersCount,
       pagination
     }
   }

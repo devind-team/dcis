@@ -20,10 +20,10 @@
         :headers="headers"
         :items="divisions"
         :loading="loading"
-        :items-per-page="33"
-        :search.sync="search"
+        :search="search"
         item-key="id"
         show-select
+        disable-pagination
         hide-default-footer
       )
 </template>
