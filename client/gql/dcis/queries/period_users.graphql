@@ -1,0 +1,7 @@
+#import "../../core/fragments/user_fields.graphql"
+
+query PeriodUsers($periodId: ID!) {
+  periodUsers(periodId: $periodId) {
+    ...UserFields
+  }
+}

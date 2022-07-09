@@ -3180,6 +3180,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
+  """Пользователи, связанные периодом"""
+  periodUsers(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [UserType!]!
   """Периоды"""
   periods(
     """Идентификатор периода"""
@@ -3246,13 +3251,13 @@ type Query {
   tags(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): TagTypeConnection!
   """Информация о указанном пользователе"""
   user(userId: ID!): UserType
-  """Дивизионы пользователя"""
-  userDivisions(
-    """Идентификатор проекта"""
-    projectId: ID
-    """Пользователь"""
+  """Привилегии пользователя в группе периода"""
+  userGroupPrivileges(
+    """Идентификатор группы периода"""
+    periodGroupId: ID!
+    """Идентификатор пользователя"""
     userId: ID
-  ): [DivisionModelType]!
+  ): [PrivilegeType!]!
   """Отдельные привилегии пользователя для периода"""
   userIndividualPrivileges(
     """Идентификатор периода"""

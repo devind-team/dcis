@@ -3,7 +3,7 @@
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Period, PeriodGroup, Privilege
+from apps.dcis.models import Period, Privilege
 from apps.dcis.services.divisions_services import get_user_division_ids
 
 
@@ -54,6 +54,27 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     )
 
 
-def get_user_individual_privileges(user: User, period: Period) -> QuerySet[Privilege]:
+def get_period_users(period: Period | int | str) -> QuerySet[User]:
+    """Получение пользователей, связанных с периодом."""
+    period = Period.objects.get(pk=period) if type(period) in (int, str) else period
+    divisions = period.project.division.objects.filter(
+        pk__in=period.division_set.values_list('object_id', flat=True)
+    )
+    return User.objects.filter(
+        Q(project__period__id=period.id) |
+        Q(period__id=period.id) |
+        Q(periodgroup__period__id=period.id) |
+        Q(pk__in=[*divisions.values_list('user_id', flat=True), *divisions.values_list('users__id', flat=True)]) |
+        Q(periodgroup__period__id=period.id) |
+        Q(periodprivilege__period__id=period.id)
+    ).distinct()
+
+
+def get_user_group_privileges(user_id: int | str, period_group_id: int | str) -> QuerySet[Privilege]:
+    """Получение привилегий пользователя в группе периода."""
+    return Privilege.objects.filter(periodgroup__users__id=user_id, periodgroup__id=period_group_id)
+
+
+def get_user_individual_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
     """Получение отдельных привилегий пользователя в периоде."""
-    return Privilege.objects.filter(periodprivilege__period=period, periodprivilege__user=user)
+    return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)

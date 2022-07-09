@@ -7,14 +7,13 @@ from apps.dcis.schema.mutations import (
     ProjectMutations,
     SheetMutations,
 )
-from apps.dcis.schema.queries import DocumentQueries, PrivilegeQueries, ProjectQueries, SheetQueries
+from apps.dcis.schema.queries import DocumentQueries, PeriodQueries, ProjectQueries
 
 
 class Query(
     DocumentQueries,
-    PrivilegeQueries,
+    PeriodQueries,
     ProjectQueries,
-    SheetQueries,
     graphene.ObjectType,
 ):
     """Запросы приложения dcis."""

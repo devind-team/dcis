@@ -1,7 +1,0 @@
-#import "../fragments/division_model_fields.graphql"
-
-query UserDivisions($userId: ID, $projectId: ID) {
-  userDivisions (userId: $userId, projectId: $projectId) {
-    ...DivisionModelFields
-  }
-}
