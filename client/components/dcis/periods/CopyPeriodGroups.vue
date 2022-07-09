@@ -57,7 +57,7 @@
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { computed, defineComponent, PropType, ref } from '#app'
-import copyPeriodGroupsMutation from '~/gql/dcis/mutations/project/copy_period_groups.graphql'
+import copyPeriodGroupsMutation from '~/gql/dcis/mutations/period/copy_period_groups.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import {
   PeriodType,

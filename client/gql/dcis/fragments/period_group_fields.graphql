@@ -1,0 +1,18 @@
+#import "../../core/fragments/user_fields.graphql"
+
+fragment PeriodGroupFields on PeriodGroupType {
+  id
+  name
+  createdAt
+  users {
+    ...UserFields
+  }
+  privileges {
+    id
+    name
+    key
+    createdAt
+    __typename
+  }
+  __typename
+}

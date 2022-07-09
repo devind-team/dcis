@@ -17,21 +17,6 @@ mutation AddPeriod($name: String!, $projectId: ID!, $file: Upload!, $multiple: B
       canChangeSheet
       canDelete
       canAddDocument
-      periodGroups {
-        id
-        name
-        createdAt
-        users {
-          ...UserFields
-        }
-        privileges {
-          id
-          name
-          key
-          __typename
-        }
-        __typename
-      }
     }
     __typename
   }

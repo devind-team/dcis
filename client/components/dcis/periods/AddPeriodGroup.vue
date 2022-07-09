@@ -5,7 +5,7 @@
     :button-text="String($t('dcis.periods.groups.addGroup.buttonText'))"
     :mutation="addPeriodGroupMutation"
     :variables="{ name, periodId: period.id }"
-    :update="addPeriodGroupUpdate"
+    :update="update"
     mutation-name="addPeriodGroup"
     errors-in-alert
     @close="close"
@@ -32,7 +32,7 @@ import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
 import { AddPeriodGroupMutationPayload, PeriodType } from '~/types/graphql'
-import addPeriodGroupMutation from '~/gql/dcis/mutations/project/add_period_group.graphql'
+import addPeriodGroupMutation from '~/gql/dcis/mutations/period/add_period_group.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddPeriodGroupMutationResult = { data: { addPeriodGroup: Required<AddPeriodGroupMutationPayload> } }
@@ -44,19 +44,8 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true },
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
-  setup (props) {
+  setup () {
     const name = ref<string>('')
-
-    /**
-     * Обновление после добавления группы
-     * @param cache
-     * @param result
-     */
-    const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
-      if (result.data.addPeriodGroup.success) {
-        props.update(cache, result)
-      }
-    }
 
     const close = () => {
       name.value = ''
@@ -65,7 +54,6 @@ export default defineComponent({
     return {
       name,
       addPeriodGroupMutation,
-      addPeriodGroupUpdate,
       close
     }
   }

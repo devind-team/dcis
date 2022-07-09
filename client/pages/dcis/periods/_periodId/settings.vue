@@ -2,7 +2,7 @@
   bread-crumbs(:items="bc")
     apollo-mutation(
       v-slot="{ mutate, loading, error }"
-      :mutation="require('~/gql/dcis/mutations/project/change_period.graphql')"
+      :mutation="require('~/gql/dcis/mutations/period/change_period.graphql')"
       :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
       :update="changePeriodUpdate"
       tag
@@ -81,7 +81,7 @@
         v-card-actions
           apollo-mutation(
             v-slot="{ mutate }"
-            :mutation="require('~/gql/dcis/mutations/project/delete_period.graphql')"
+            :mutation="require('~/gql/dcis/mutations/period/delete_period.graphql')"
             :variables="{ id: period.id}"
             @done="deletePeriodDone"
             tag

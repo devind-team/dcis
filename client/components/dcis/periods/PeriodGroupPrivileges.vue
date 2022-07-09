@@ -25,7 +25,7 @@ import {
   ChangePeriodGroupPrivilegesMutationVariables
 } from '~/types/graphql'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
-import changePeriodGroupPrivilegesMutation from '~/gql/dcis/mutations/project/change_period_group_privileges.graphql'
+import changePeriodGroupPrivilegesMutation from '~/gql/dcis/mutations/period/change_period_group_privileges.graphql'
 
 export type ChangePeriodGroupPrivilegesMutationResult = {
   data?: { changePeriodGroupPrivileges: ChangePeriodGroupPrivilegesMutationPayload }

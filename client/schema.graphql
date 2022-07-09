@@ -1123,25 +1123,6 @@ type ChangePeriodGroupPrivilegesMutationPayload {
   success: Boolean!
 }
 
-input ChangePeriodGroupUsersMutationInput {
-  clientMutationId: String
-  """Идентификатор группы периода"""
-  periodGroupId: Int!
-  """Пользователи"""
-  usersIds: [ID!]
-}
-
-"""Мутация на добавление пользователей в группу."""
-type ChangePeriodGroupUsersMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-  """Измененная пользователи группы"""
-  users: [UserType]!
-}
-
 """Мутация на изменение настроек периода."""
 type ChangePeriodMutationPayload {
   """Ошибки мутации"""
@@ -1342,6 +1323,27 @@ type ChangeUserGroupsMutationPayload {
   success: Boolean!
 }
 
+input ChangeUserPeriodGroupsMutationInput {
+  clientMutationId: String
+  """Идентификаторы групп пользователя в периоде"""
+  periodGroupIds: [ID!]
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация на изменение групп пользователя в периоде."""
+type ChangeUserPeriodGroupsMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Группы пользователя"""
+  periodGroups: [PeriodGroupType]!
+  """Успех мутации"""
+  success: Boolean!
+  """Пользователь"""
+  user: UserType!
+}
+
 input ChangeUserPropsMutationInput {
   """Дата рождения"""
   birthday: Date!
@@ -1522,7 +1524,7 @@ type ContentTypeType {
   projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
 }
 
-input CopyPeriodGroupMutationInput {
+input CopyPeriodGroupsMutationInput {
   clientMutationId: String
   """Выбранные группы"""
   periodGroupIds: [ID!]!
@@ -1532,8 +1534,8 @@ input CopyPeriodGroupMutationInput {
   selectedPeriodId: ID!
 }
 
-"""Мутация на перенос группы с пользователями из другого периода."""
-type CopyPeriodGroupMutationPayload {
+"""Мутация на перенос групп с пользователями из другого периода."""
+type CopyPeriodGroupsMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -2281,8 +2283,6 @@ type Mutation {
   changePeriod(id: ID!, input: UpdatePeriodInput!): ChangePeriodMutationPayload!
   """Мутация на изменение привилегий группы."""
   changePeriodGroupPrivileges(input: ChangePeriodGroupPrivilegesMutationInput!): ChangePeriodGroupPrivilegesMutationPayload!
-  """Мутация на добавление пользователей в группу."""
-  changePeriodGroupUsers(input: ChangePeriodGroupUsersMutationInput!): ChangePeriodGroupUsersMutationPayload!
   """Мутация на изменение значения профиля."""
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""
@@ -2301,14 +2301,16 @@ type Mutation {
   changeSettings(input: ChangeSettingsMutationInput!): ChangeSettingsMutationPayload!
   """Мутация для изменения групп конкретного пользователя."""
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
+  """Мутация на изменение групп пользователя в периоде."""
+  changeUserPeriodGroups(input: ChangeUserPeriodGroupsMutationInput!): ChangeUserPeriodGroupsMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
   changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
-  """Мутация на перенос группы с пользователями из другого периода."""
-  copyPeriodGroups(input: CopyPeriodGroupMutationInput!): CopyPeriodGroupMutationPayload!
+  """Мутация на перенос групп с пользователями из другого периода."""
+  copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Мутация на удаление дивизиона из периода."""

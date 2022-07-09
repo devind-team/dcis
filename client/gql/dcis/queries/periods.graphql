@@ -1,23 +1,7 @@
 #import "../fragments/period_fields.graphql"
-#import "../../core/fragments/user_fields.graphql"
 
 query Periods($projectId: ID!) {
   periods(projectId: $projectId) {
     ...PeriodFields
-    periodGroups {
-      id
-      name
-      createdAt
-      users {
-        ...UserFields
-      }
-      privileges {
-        id
-        name
-        key
-        __typename
-      }
-      __typename
-    }
   }
 }

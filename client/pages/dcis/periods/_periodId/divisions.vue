@@ -63,7 +63,7 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import divisionsQuery from '~/gql/dcis/queries/project_divisions.graphql'
-import deleteDivisionMutation from '~/gql/dcis/mutations/project/delete_division.graphql'
+import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
 
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
 

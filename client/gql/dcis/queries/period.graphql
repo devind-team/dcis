@@ -19,22 +19,6 @@ query Period($periodId: ID!) {
     user {
       ...UserFields
     }
-    periodGroups {
-      id
-      name
-      createdAt
-      users {
-        ...UserFields
-      }
-      privileges {
-        id
-        name
-        key
-        createdAt
-        __typename
-      }
-      __typename
-    }
     divisions {
       ...DivisionModelFields
     }

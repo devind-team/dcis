@@ -162,11 +162,18 @@ export default {
         actions: 'Действия'
       },
       tooltips: {
-        changeGroups: 'Изменить группы',
         changePrivileges: 'Изменить привилегии'
       },
       addUser: {
         buttonText: 'Добавить пользователя'
+      },
+      changeGroups: {
+        buttonText: 'Изменить группы',
+        header: 'Изменение групп пользователя',
+        tooltip: '@:dcis.periods.users.changeGroups.buttonText',
+        tableHeaders: {
+          name: 'Название группы'
+        }
       }
     },
     header: 'Настройки периода',

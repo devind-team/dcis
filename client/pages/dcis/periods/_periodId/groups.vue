@@ -58,7 +58,7 @@ import {
   DeletePeriodGroupMutation,
   DeletePeriodGroupMutationVariables, PeriodQuery
 } from '~/types/graphql'
-import deletePeriodGroupMutation from '~/gql/dcis/mutations/project/delete_period_group.graphql'
+import deletePeriodGroupMutation from '~/gql/dcis/mutations/period/delete_period_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import PeriodGroupPrivileges, {
   ChangePeriodGroupPrivilegesMutationResult
@@ -96,39 +96,45 @@ export default defineComponent({
      * @param cache
      * @param result
      */
-    const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => periodUpdate(
-      cache,
-      result,
-      (dataCache, { data: { addPeriodGroup: { errors, periodGroup } } }: AddPeriodGroupMutationResult) => {
-        if (!errors.length) {
-          dataCache.period.periodGroups = [
-            periodGroup,
-            ...dataCache.period.periodGroups
-          ] as PeriodQuery['period']['periodGroups']
-        }
-        return dataCache
-      })
+    const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
+      periodUpdate(
+        cache,
+        result,
+        (dataCache, { data: { addPeriodGroup: { errors, periodGroup } } }: AddPeriodGroupMutationResult) => {
+          if (!errors.length) {
+            dataCache.period.periodGroups = [
+              periodGroup,
+              ...dataCache.period.periodGroups
+            ] as PeriodQuery['period']['periodGroups']
+          }
+          return dataCache
+        })
+      return cache
+    }
 
     /**
      * Обновление после копирования групп
      * @param cache
      * @param result
      */
-    const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => periodUpdate(
-      cache,
-      result,
-      (
-        dataCache,
-        { data: { copyPeriodGroups: { errors, periodGroups } } }: CopyPeriodGroupsMutationResult
-      ) => {
-        if (!errors.length) {
-          dataCache.period.periodGroups = [
-            ...dataCache.period.periodGroups,
-            ...periodGroups
-          ] as PeriodQuery['period']['periodGroups']
-        }
-        return dataCache
-      })
+    const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => {
+      periodUpdate(
+        cache,
+        result,
+        (
+          dataCache,
+          { data: { copyPeriodGroups: { errors, periodGroups } } }: CopyPeriodGroupsMutationResult
+        ) => {
+          if (!errors.length) {
+            dataCache.period.periodGroups = [
+              ...dataCache.period.periodGroups,
+              ...periodGroups
+            ] as PeriodQuery['period']['periodGroups']
+          }
+          return dataCache
+        })
+      return cache
+    }
 
     /**
      * Обновление после изменения привилегий группы
@@ -138,20 +144,23 @@ export default defineComponent({
     const changePeriodGroupPrivilegesUpdate = (
       cache: DataProxy,
       result: ChangePeriodGroupPrivilegesMutationResult
-    ) => periodUpdate(
-      cache,
-      result,
-      (
-        dataCache,
-        { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult
-      ) => {
-        if (!errors.length) {
-          const group = dataCache.period.periodGroups
-            .find(g => g.id === selectedGroup.value.id)
-          group.privileges = privileges as PeriodQuery['period']['periodGroups'][0]['privileges']
-        }
-        return dataCache
-      })
+    ) => {
+      periodUpdate(
+        cache,
+        result,
+        (
+          dataCache,
+          { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult
+        ) => {
+          if (!errors.length) {
+            const group = dataCache.period.periodGroups
+              .find(g => g.id === selectedGroup.value.id)
+            group.privileges = privileges as PeriodQuery['period']['periodGroups'][0]['privileges']
+          }
+          return dataCache
+        })
+      return cache
+    }
 
     /**
      * Удаление группы

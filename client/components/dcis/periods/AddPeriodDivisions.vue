@@ -3,9 +3,9 @@
     :header="String($t('dcis.periods.divisions.addDivisions.header'))"
     :subheader="period.name"
     :button-text="String($t('dcis.periods.divisions.addDivisions.buttonText'))"
-    :mutation="addDivisions"
-    :update="addDivisionsUpdate"
+    :mutation="addDivisionsMutation"
     :variables="{ periodId: period.id, divisionIds: selectedDivisions.map(e => e.id) }"
+    :update="addDivisionsUpdate"
     width="50vw"
     mutation-name="addDivisions"
     errors-in-alert
@@ -39,7 +39,7 @@ import {
 } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import { useDebounceSearch, useI18n } from '~/composables'
-import addDivisions from '~/gql/dcis/mutations/project/add_divisions.graphql'
+import addDivisionsMutation from '~/gql/dcis/mutations/period/add_divisions.graphql'
 
 export type ChangeDivisionsMutationResult = { data: { addDivisions: AddDivisionsMutationPayload } }
 type UpdateFunction = (cache: DataProxy | any, result: AddDivisionsMutationPayload | any) => DataProxy | any
@@ -74,7 +74,7 @@ export default defineComponent({
       search.value = ''
     }
 
-    return { addDivisions, search, selectedDivisions, headers, addDivisionsUpdate, close }
+    return { addDivisionsMutation, search, selectedDivisions, headers, addDivisionsUpdate, close }
   }
 })
 </script>

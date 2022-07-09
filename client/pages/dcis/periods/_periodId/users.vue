@@ -24,11 +24,13 @@
           template(#item.avatar="{ item }")
             avatar-dialog(:item="item")
           template(#item.actions="{ item }")
-            v-tooltip(bottom)
-              template(#activator="{ on }")
-                v-btn(v-on="on" color="success" icon)
-                  v-icon mdi-book-edit
-              span {{ $t('dcis.periods.users.tooltips.changeGroups') }}
+            change-user-period-groups(:period="period" :user="item" :update="changeUserPeriodGroupsUpdate")
+              template(#activator="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
+                      v-icon mdi-book-edit
+                  span {{ $t('dcis.periods.users.changeGroups.tooltip') }}
             v-tooltip(bottom)
               template(#activator="{ on }")
                 v-btn(v-on="on" color="success" icon)
@@ -37,24 +39,31 @@
 </template>
 
 <script lang="ts">
+import { DataProxy } from 'apollo-cache'
 import { DataTableHeader, DataPagination } from 'vuetify'
-import { computed, PropType } from '#app'
+import { PropType } from '#app'
+import { UpdateType } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   UserType,
   UserFieldsFragment,
   PeriodType,
+  PeriodGroupType,
+  PeriodQuery,
   PeriodUsersQuery,
   PeriodQueryVariables
 } from '~/types/graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
+import ChangeUserPeriodGroups, {
+  ChangeUserPeriodGroupsMutationResult
+} from '~/components/dcis/periods/ChangeUserPeriodGroups.vue'
 import periodUsers from '~/gql/dcis/queries/period_users.graphql'
 
 type ExtendedUserType = UserFieldsFragment & { fullname: string }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AvatarDialog },
+  components: { LeftNavigatorContainer, AvatarDialog, ChangeUserPeriodGroups },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -115,6 +124,36 @@ export default defineComponent({
       usersCount.value = pagination.itemsLength
     }
 
+    const periodUpdate: UpdateType<PeriodQuery> = inject('periodUpdate')
+
+    const changeUserPeriodGroupsUpdate = (
+      cache: DataProxy,
+      result: ChangeUserPeriodGroupsMutationResult
+    ) => {
+      periodUpdate(
+        cache,
+        result,
+        (
+          dataCache,
+          { data: { changeUserPeriodGroups: { errors, user, periodGroups } } }: ChangeUserPeriodGroupsMutationResult
+        ) => {
+          if (!errors.length) {
+            for (const periodGroup of dataCache.period.periodGroups) {
+              const isUserPeriodGroup = !!periodGroups.find((group: PeriodGroupType) => group.id === periodGroup.id)
+              if (isUserPeriodGroup) {
+                if (!periodGroup.users.find((u: UserFieldsFragment) => u.id === user.id)) {
+                  periodGroup.users.push(user as UserFieldsFragment)
+                }
+              } else {
+                periodGroup.users = periodGroup.users.filter((u: UserFieldsFragment) => u.id !== user.id)
+              }
+            }
+          }
+          return dataCache
+        })
+      return cache
+    }
+
     return {
       getUserFullName,
       bc,
@@ -123,7 +162,8 @@ export default defineComponent({
       users,
       search,
       usersCount,
-      pagination
+      pagination,
+      changeUserPeriodGroupsUpdate
     }
   }
 })
