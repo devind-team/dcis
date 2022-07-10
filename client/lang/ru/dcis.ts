@@ -162,7 +162,12 @@ export default {
         actions: 'Действия'
       },
       addUser: {
-        buttonText: 'Добавить пользователя'
+        buttonText: 'Добавить пользователя',
+        header: 'Добавление пользователя',
+        user: 'Пользователь',
+        groups: 'Группы',
+        privileges: 'Привилегии',
+        userExistWarning: 'Пользователь уже состоит в периоде'
       },
       changeGroups: {
         buttonText: 'Изменить группы',

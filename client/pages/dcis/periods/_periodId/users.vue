@@ -3,7 +3,9 @@
     template(#header) {{ $t('dcis.periods.users.name') }}
       template(v-if="period.canChangeUsers")
         v-spacer
-        v-btn(color="primary") {{ $t('dcis.periods.users.addUser.buttonText') }}
+        add-period-user(:period="period" :period-users="periodUsers" :update="addPeriodUserUpdate")
+          template(#activator="{ on }")
+            v-btn(v-on="on" color="primary") {{ $t('dcis.periods.users.addUser.buttonText') }}
     v-row(align="center")
       v-col(cols="12" md="8")
         v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
@@ -51,22 +53,32 @@ import {
   UserFieldsFragment,
   PeriodType,
   PeriodGroupType,
+  PeriodGroupFieldsFragment,
   PeriodQuery,
   PeriodUsersQuery,
   PeriodQueryVariables
 } from '~/types/graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AvatarDialog from '~/components/users/AvatarDialog.vue'
+import AddPeriodUser, {
+  AddPeriodUserMutationResult
+} from '~/components/dcis/periods/AddPeriodUser.vue'
 import ChangeUserPeriodGroups, {
   ChangeUserPeriodGroupsMutationResult
 } from '~/components/dcis/periods/ChangeUserPeriodGroups.vue'
 import ChangeUserPeriodPrivileges from '~/components/dcis/periods/ChangeUserPeriodPrivileges.vue'
-import periodUsers from '~/gql/dcis/queries/period_users.graphql'
+import periodUsersQuery from '~/gql/dcis/queries/period_users.graphql'
 
 type ExtendedUserType = UserFieldsFragment & { fullname: string }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AvatarDialog, ChangeUserPeriodGroups, ChangeUserPeriodPrivileges },
+  components: {
+    LeftNavigatorContainer,
+    AvatarDialog,
+    AddPeriodUser,
+    ChangeUserPeriodGroups,
+    ChangeUserPeriodPrivileges
+  },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -109,15 +121,18 @@ export default defineComponent({
       return result
     })
 
-    const { data: usersData, loading: usersLoading } = useCommonQuery<PeriodUsersQuery, PeriodQueryVariables>({
-      document: periodUsers,
+    const { data: periodUsers, loading: usersLoading, update: periodUsersUpdate } = useCommonQuery<
+      PeriodUsersQuery,
+      PeriodQueryVariables
+    >({
+      document: periodUsersQuery,
       variables: () => ({
         periodId: props.period.id
       })
     })
     const users = computed<ExtendedUserType[]>(() =>
-      usersData.value
-        ? usersData.value.map(user => ({ ...user, fullname: getUserFullName(user as UserType) }))
+      periodUsers.value
+        ? periodUsers.value.map(user => ({ ...user, fullname: getUserFullName(user as UserType) }))
         : []
     )
 
@@ -157,16 +172,57 @@ export default defineComponent({
       return cache
     }
 
+    const addPeriodUserUpdate = (
+      cache: DataProxy,
+      result: AddPeriodUserMutationResult
+    ) => {
+      if (!result.data.changeUserPeriodGroups.errors.length && !result.data.changeUserPeriodPrivileges.errors.length) {
+        periodUsersUpdate(
+          cache,
+          result,
+          (
+            dataCache,
+            { data: { changeUserPeriodGroups: { user } } }
+          ) => {
+            dataCache.periodUsers.push(user as UserFieldsFragment)
+            dataCache.periodUsers.sort((u1: UserFieldsFragment, u2: UserFieldsFragment) =>
+              new Date(u2.createdAt).getTime() - new Date(u1.createdAt).getTime()
+            )
+            return dataCache
+          }
+        )
+        periodUpdate(
+          cache,
+          result,
+          (
+            dataCache,
+            { data: { changeUserPeriodGroups: { user, periodGroups } } }
+          ) => {
+            for (const userPeriodGroup of periodGroups) {
+              const periodGroup = dataCache.period.periodGroups.find((periodGroup: PeriodGroupFieldsFragment) =>
+                periodGroup.id === userPeriodGroup.id
+              )
+              periodGroup.users.push(user as UserFieldsFragment)
+            }
+            return dataCache
+          }
+        )
+      }
+      return cache
+    }
+
     return {
       getUserFullName,
       bc,
       headers,
       usersLoading,
+      periodUsers,
       users,
       search,
       usersCount,
       pagination,
-      changeUserPeriodGroupsUpdate
+      changeUserPeriodGroupsUpdate,
+      addPeriodUserUpdate
     }
   }
 })

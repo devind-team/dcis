@@ -28,7 +28,6 @@
           item-value="id"
           item-text="name"
           return-object
-          hide-no-data
           hide-selected
         )
       validation-provider(
@@ -49,7 +48,6 @@
           chips
           deletable-chips
           multiple
-          hide-no-data
           hide-selected
         )
 </template>
@@ -64,12 +62,12 @@ import {
   PeriodsQuery,
   PeriodsQueryVariables,
   CopyPeriodGroupsMutationVariables,
-  CopyPeriodGroupMutationPayload
+  CopyPeriodGroupsMutationPayload
 } from '~/types/graphql'
 import periodsQuery from '~/gql/dcis/queries/periods.graphql'
 import { useCommonQuery } from '~/composables'
 
-export type CopyPeriodGroupsMutationResult = { data: { copyPeriodGroups: CopyPeriodGroupMutationPayload } }
+export type CopyPeriodGroupsMutationResult = { data: { copyPeriodGroups: CopyPeriodGroupsMutationPayload } }
 type UpdateFunction = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => DataProxy
 
 export default defineComponent({

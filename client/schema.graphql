@@ -913,27 +913,6 @@ type ChangeGroupPermissionsMutationPayload {
   success: Boolean!
 }
 
-input ChangeGroupUserPrivilegesMutationInput {
-  clientMutationId: String
-  """Идентификатор группы периода"""
-  periodGroupId: ID!
-  """Привилегии"""
-  privilegesIds: [ID!]
-  """Идентификатор группы периода"""
-  userId: ID!
-}
-
-"""Мутация на изменение привилегий пользователя."""
-type ChangeGroupUserPrivilegesMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Привилегии пользователя"""
-  privileges: [PrivilegeType]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
 input ChangeNotificationMutationInput {
   clientMutationId: String
   """Название поля"""
@@ -1348,7 +1327,7 @@ input ChangeUserPeriodPrivilegesInput {
   clientMutationId: String
   """Идентификатор периода"""
   periodId: ID!
-  """Идентификаторы привилегий"""
+  """Идентификаторы привилегий пользователя в периоде"""
   privilegesIds: [ID!]
   """Идентификатор пользователя"""
   userId: ID!
@@ -1363,6 +1342,8 @@ type ChangeUserPeriodPrivilegesPayload {
   privileges: [PrivilegeType]!
   """Успех мутации"""
   success: Boolean!
+  """Пользователь"""
+  user: UserType!
 }
 
 input ChangeUserPropsMutationInput {
@@ -2261,8 +2242,6 @@ type Mutation {
   changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
   """Мутация для изменения привилегий группы."""
   changeGroupPermissions(input: ChangeGroupPermissionsMutationInput!): ChangeGroupPermissionsMutationPayload!
-  """Мутация на изменение привилегий пользователя."""
-  changeGroupUsersPrivileges(input: ChangeGroupUserPrivilegesMutationInput!): ChangeGroupUserPrivilegesMutationPayload!
   """Изменение свойств уведомления"""
   changeNotification(input: ChangeNotificationMutationInput!): ChangeNotificationMutationPayload!
   """Изменение свойств уведомлений"""

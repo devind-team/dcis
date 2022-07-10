@@ -243,8 +243,12 @@ class ChangeUserPeriodPrivileges(BaseMutation):
     class Input:
         user_id = graphene.ID(required=True, description='Идентификатор пользователя')
         period_id = graphene.ID(required=True, description='Идентификатор периода')
-        privileges_ids = graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы привилегий')
+        privileges_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            description='Идентификаторы привилегий пользователя в периоде'
+        )
 
+    user = graphene.Field(UserType, required=True, description='Пользователь')
     privileges = graphene.List(PrivilegeType, required=True, description='Привилегии пользователя в периоде')
 
     @staticmethod
@@ -252,14 +256,14 @@ class ChangeUserPeriodPrivileges(BaseMutation):
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_id: str, privileges_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
         info.context.check_object_permissions(info.context, period)
-        user_id = from_global_id(user_id)[1]
-        PeriodPrivilege.objects.filter(period_id=period.id, user_id=user_id).delete()
+        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
+        PeriodPrivilege.objects.filter(period_id=period.id, user_id=user.id).delete()
         privileges: list[Privilege] = []
         for privileges_id in privileges_ids:
             privilege = get_object_or_404(Privilege, pk=privileges_id)
-            PeriodPrivilege.objects.create(period_id=period.id, user_id=user_id, privilege=privilege)
+            PeriodPrivilege.objects.create(period_id=period.id, user_id=user.id, privilege=privilege)
             privileges.append(privilege)
-        return ChangeUserPeriodPrivileges(privileges=privileges)
+        return ChangeUserPeriodPrivileges(user=user, privileges=privileges)
 
 
 class PeriodMutations(graphene.ObjectType):

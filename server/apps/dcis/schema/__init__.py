@@ -3,7 +3,6 @@ import graphene
 from apps.dcis.schema.mutations import (
     CellMutations,
     DocumentMutations,
-    PrivilegeMutations,
     ProjectMutations,
     PeriodMutations,
     SheetMutations,
@@ -26,7 +25,6 @@ class Mutation(
     CellMutations,
     DocumentMutations,
     PeriodMutations,
-    PrivilegeMutations,
     ProjectMutations,
     SheetMutations,
     graphene.ObjectType,
