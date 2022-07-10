@@ -70,11 +70,6 @@ def get_period_users(period: Period | int | str) -> QuerySet[User]:
     ).distinct()
 
 
-def get_user_group_privileges(user_id: int | str, period_group_id: int | str) -> QuerySet[Privilege]:
-    """Получение привилегий пользователя в группе периода."""
-    return Privilege.objects.filter(periodgroup__users__id=user_id, periodgroup__id=period_group_id)
-
-
-def get_user_individual_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
+def get_user_period_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
     """Получение отдельных привилегий пользователя в периоде."""
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)

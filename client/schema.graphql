@@ -1344,6 +1344,27 @@ type ChangeUserPeriodGroupsMutationPayload {
   user: UserType!
 }
 
+input ChangeUserPeriodPrivilegesInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+  """Идентификаторы привилегий"""
+  privilegesIds: [ID!]
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация на изменение отдельных привилегий пользователя в периоде."""
+type ChangeUserPeriodPrivilegesPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Привилегии пользователя в периоде"""
+  privileges: [PrivilegeType]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeUserPropsMutationInput {
   """Дата рождения"""
   birthday: Date!
@@ -1808,25 +1829,6 @@ type DeleteSessionsMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input DeleteUserFromPeriodGroupMutationInput {
-  clientMutationId: String
-  """Идентификатор группы периода"""
-  periodGroupId: Int!
-  """Идентификатор пользователя"""
-  userId: ID!
-}
-
-"""Мутация на удаление пользователя из группы."""
-type DeleteUserFromPeriodGroupMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Идентификатор удаленного пользователя"""
-  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -2303,6 +2305,8 @@ type Mutation {
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация на изменение групп пользователя в периоде."""
   changeUserPeriodGroups(input: ChangeUserPeriodGroupsMutationInput!): ChangeUserPeriodGroupsMutationPayload!
+  """Мутация на изменение отдельных привилегий пользователя в периоде."""
+  changeUserPeriodPrivileges(input: ChangeUserPeriodPrivilegesInput!): ChangeUserPeriodPrivilegesPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
@@ -2339,8 +2343,6 @@ type Mutation {
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
   deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
-  """Мутация на удаление пользователя из группы."""
-  deleteUserFromPeriodGroup(input: DeleteUserFromPeriodGroupMutationInput!): DeleteUserFromPeriodGroupMutationPayload!
   """Мутация для получения токена авторизации."""
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
@@ -3260,18 +3262,18 @@ type Query {
     """Идентификатор пользователя"""
     userId: ID
   ): [PrivilegeType!]!
-  """Отдельные привилегии пользователя для периода"""
-  userIndividualPrivileges(
-    """Идентификатор периода"""
-    periodId: ID!
-    """Идентификатор пользователя"""
-    userId: ID
-  ): [PrivilegeType!]!
   """Доступная информация о пользователе"""
   userInformation(
     """Идентификатор пользователя"""
     userId: ID!
   ): UserType
+  """Отдельные привилегии пользователя для периода"""
+  userPeriodPrivileges(
+    """Идентификатор периода"""
+    periodId: ID!
+    """Идентификатор пользователя"""
+    userId: ID
+  ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
   """Файлы значения ячейки типа `Файл`"""

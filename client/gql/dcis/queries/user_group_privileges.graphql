@@ -1,7 +1,0 @@
-#import "../fragments/privilege_fields.graphql"
-
-query UserGroupPrivileges($userId: ID, $periodGroupId: ID!) {
-  userGroupPrivileges(userId: $userId, periodGroupId: $periodGroupId) {
-    ...PrivilegesFields
-  }
-}

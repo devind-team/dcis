@@ -31,11 +31,13 @@
                     v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
                       v-icon mdi-book-edit
                   span {{ $t('dcis.periods.users.changeGroups.tooltip') }}
-            v-tooltip(bottom)
-              template(#activator="{ on }")
-                v-btn(v-on="on" color="success" icon)
-                  v-icon mdi-clipboard-edit
-              span {{ $t('dcis.periods.users.tooltips.changePrivileges') }}
+            change-user-period-privileges(:period="period" :user="item")
+              template(#activator="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
+                      v-icon mdi-clipboard-edit
+                  span {{ $t('dcis.periods.users.changePrivileges.tooltip') }}
 </template>
 
 <script lang="ts">
@@ -58,12 +60,13 @@ import AvatarDialog from '~/components/users/AvatarDialog.vue'
 import ChangeUserPeriodGroups, {
   ChangeUserPeriodGroupsMutationResult
 } from '~/components/dcis/periods/ChangeUserPeriodGroups.vue'
+import ChangeUserPeriodPrivileges from '~/components/dcis/periods/ChangeUserPeriodPrivileges.vue'
 import periodUsers from '~/gql/dcis/queries/period_users.graphql'
 
 type ExtendedUserType = UserFieldsFragment & { fullname: string }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AvatarDialog, ChangeUserPeriodGroups },
+  components: { LeftNavigatorContainer, AvatarDialog, ChangeUserPeriodGroups, ChangeUserPeriodPrivileges },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }

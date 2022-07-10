@@ -15,13 +15,12 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Period, PeriodGroup, Privilege, Sheet, Value
+from apps.dcis.models import Period, Privilege, Sheet, Value
 from apps.dcis.permissions import ViewPeriod
 from apps.dcis.schema.types import PeriodType, PrivilegeType, SheetType
 from apps.dcis.services.period_services import (
     get_period_users,
-    get_user_group_privileges,
-    get_user_individual_privileges,
+    get_user_period_privileges,
     get_user_periods,
 )
 from apps.dcis.services.sheet_services import get_file_value_files
@@ -63,7 +62,7 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Привилегии пользователя в группе периода'
     )
-    user_individual_privileges = DjangoListField(
+    user_period_privileges = DjangoListField(
         PrivilegeType,
         user_id=graphene.ID(default_value=None, description='Идентификатор пользователя'),
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
@@ -113,20 +112,7 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated, ViewPeriod,))
-    def resolve_user_group_privileges(
-        root,
-        info: ResolveInfo,
-        user_id: str | None,
-        period_group_id: str
-    ) -> QuerySet[Privilege]:
-        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        info.context.check_object_permissions(info.context, period_group.period)
-        user = get_user_from_id_or_context(info, user_id)
-        return get_user_group_privileges(user.id, period_group.id)
-
-    @staticmethod
-    @permission_classes((IsAuthenticated, ViewPeriod,))
-    def resolve_user_individual_privileges(
+    def resolve_user_period_privileges(
         root,
         info: ResolveInfo,
         user_id: str | None,
@@ -135,7 +121,7 @@ class PeriodQueries(graphene.ObjectType):
         period = get_object_or_404(Period, pk=period_id)
         info.context.check_object_permissions(info.context, period)
         user = get_user_from_id_or_context(info, user_id)
-        return get_user_individual_privileges(user.id, period.id)
+        return get_user_period_privileges(user.id, period.id)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

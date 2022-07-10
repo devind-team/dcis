@@ -161,9 +161,6 @@ export default {
         email: 'Email',
         actions: 'Действия'
       },
-      tooltips: {
-        changePrivileges: 'Изменить привилегии'
-      },
       addUser: {
         buttonText: 'Добавить пользователя'
       },
@@ -173,6 +170,14 @@ export default {
         tooltip: '@:dcis.periods.users.changeGroups.buttonText',
         tableHeaders: {
           name: 'Название группы'
+        }
+      },
+      changePrivileges: {
+        buttonText: 'Изменить привилегии',
+        header: 'Изменение привилегий пользователя',
+        tooltip: '@:dcis.periods.users.changePrivileges.buttonText',
+        tableHeaders: {
+          name: 'Название привилегии'
         }
       }
     },
