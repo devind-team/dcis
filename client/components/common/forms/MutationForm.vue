@@ -52,7 +52,7 @@ export default defineComponent({
   components: { MutationResultAlert },
   inheritAttrs: false,
   props: {
-    mutationName: { type: String, required: true },
+    mutationName: { type: [String, Array], required: true },
     errorsInAlert: { type: Boolean, default: false },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
@@ -89,7 +89,8 @@ export default defineComponent({
 
     const setFormErrors = (errors: ErrorFieldType[], showInAlert: boolean = false): void => {
       if (showInAlert) {
-        const errorString: string = errors.reduce((a: string, c: ErrorFieldType) => a.concat(c.messages.join(', ')), '')
+        const errorString: string = errors.reduce((a: string, c: ErrorFieldType) =>
+          a ? `${a}, ${c.messages.join(', ')}` : c.messages.join(', '), '')
         setError(errorString, 'BusinessLogicError')
       } else {
         validationObserver.value.setErrors(errors.reduce(
@@ -103,12 +104,24 @@ export default defineComponent({
     }
 
     const mutationDone = (result: any): void => {
-      const { success, errors, table } = result.data[props.mutationName]
-      if (success) {
-        setSuccess()
+      const mutationNames = (Array.isArray(props.mutationName) ? props.mutationName : [props.mutationName]) as string[]
+      const mutationsErrors: ErrorFieldType[] = []
+      for (const mutationName of mutationNames) {
+        const { success, errors, table } = result.data[mutationName]
+        if (!success) {
+          const tableErrors = table ? { table, errors } : null
+          if (tableErrors) {
+            setTableErrors(tableErrors)
+            return
+          } else {
+            mutationsErrors.push(...errors)
+          }
+        }
+      }
+      if (mutationsErrors.length) {
+        setFormErrors(mutationsErrors, props.errorsInAlert)
       } else {
-        const tableErrors = table ? { table, errors } : null
-        tableErrors ? setTableErrors(tableErrors) : setFormErrors(errors, props.errorsInAlert)
+        setSuccess()
       }
     }
 

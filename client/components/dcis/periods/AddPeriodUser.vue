@@ -7,7 +7,7 @@
     :mutation="addPeriodUserMutation"
     :variables="variables"
     :update="update"
-    mutation-name="changeUserPeriodGroups"
+    :mutation-name="['changeUserPeriodGroups', 'changeUserPeriodPrivileges']"
     errors-in-alert
     @close="close"
   )

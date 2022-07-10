@@ -52,7 +52,7 @@ export default defineComponent({
   components: { MutationForm },
   inheritAttrs: false,
   props: {
-    mutationName: { type: String, required: true },
+    mutationName: { type: [String, Array], required: true },
     successClose: { type: Boolean, default: true },
     errorsInAlert: { type: Boolean, default: false },
     fullscreen: { type: Boolean, default: false },
@@ -75,7 +75,12 @@ export default defineComponent({
     const mutationListeners: ComputedRef = computed(() => (
       Object.assign({}, vm.$listeners, {
         done (result: any) {
-          const { success } = result.data[props.mutationName]
+          const mutationNames = (
+            Array.isArray(props.mutationName)
+              ? props.mutationName
+              : [props.mutationName]
+          ) as string[]
+          const success = mutationNames.every((mutationName: string) => result.data[mutationName].success)
           if (success && props.successClose) {
             close()
           }
