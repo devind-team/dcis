@@ -14,16 +14,17 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import (
-    Attribute, AttributeValue, Division,
-    Document, DocumentStatus, Limitation,
-    Period, PeriodGroup, PeriodPrivilege,
-    Privilege, Project, Status,
+    Attribute, AttributeValue, Document,
+    DocumentStatus, Limitation, Period,
+    PeriodGroup, PeriodPrivilege, Privilege,
+    Project, Status,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
     AddPeriodBase,
     ChangeDocumentBase,
     ChangePeriodDivisionsBase,
+    ChangePeriodGroupsBase,
     ChangePeriodSettingsBase,
     ChangePeriodSheetBase,
     ChangePeriodUsersBase,
@@ -99,6 +100,10 @@ class PeriodType(DjangoObjectType):
         required=True,
         description='Может ли пользователь изменять дивизионы периода'
     )
+    can_change_groups = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять группы периода'
+    )
     can_change_users = graphene.Boolean(
         required=True,
         description='Может ли пользователь изменять пользователей периода'
@@ -154,6 +159,10 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
         return ChangePeriodDivisionsBase.has_object_permission(info.context, period)
+
+    @staticmethod
+    def resolve_can_change_groups(period: Period, info: ResolveInfo) -> bool:
+        return ChangePeriodGroupsBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:

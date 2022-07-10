@@ -7,6 +7,7 @@ query Period($periodId: ID!) {
   period(periodId: $periodId) {
     ...PeriodFields
     canChangeDivisions
+    canChangeGroups
     canChangeUsers
     canChangeSettings
     canChangeSheet

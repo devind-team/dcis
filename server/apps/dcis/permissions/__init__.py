@@ -18,6 +18,8 @@ from .period_permissions import (
     AddPeriodBase,
     ChangePeriodDivisions,
     ChangePeriodDivisionsBase,
+    ChangePeriodGroups,
+    ChangePeriodGroupsBase,
     ChangePeriodSettings,
     ChangePeriodSettingsBase,
     ChangePeriodSheet,

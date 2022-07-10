@@ -2870,6 +2870,8 @@ type PeriodType {
   canAddDocument: Boolean!
   """Может ли пользователь изменять дивизионы периода"""
   canChangeDivisions: Boolean!
+  """Может ли пользователь изменять группы периода"""
+  canChangeGroups: Boolean!
   """Может ли пользователь изменять настройки периода"""
   canChangeSettings: Boolean!
   """Может ли пользователь изменять структуру листа периода"""

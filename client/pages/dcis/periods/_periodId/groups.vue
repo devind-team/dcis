@@ -13,6 +13,7 @@
               )
                 v-list-item-content {{ item.name }}
                 delete-menu(
+                  v-if="period.canChangeGroups"
                   :item-name="String($t('dcis.periods.groups.deleteGroup.itemName'))"
                   @confirm="deletePeriodGroup({ id: item.id })"
                 )
@@ -28,10 +29,10 @@
         template(v-if="selectedGroup")
           period-group-privileges(
             :group="selectedGroup"
-            :can-change="period.canChangeUsers"
+            :can-change="period.canChangeGroups"
             :update="changePeriodGroupPrivilegesUpdate"
           )
-        v-row(v-else-if="period.canChangeUsers")
+        v-row(v-else-if="period.canChangeGroups")
           v-col
             add-period-group(:period="period" :update="addPeriodGroupUpdate")
               template(#activator="{ on }")

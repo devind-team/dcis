@@ -8,6 +8,10 @@
     "key": "change_period_divisions"
   },
   {
+    "name": "Изменение групп периода сбора",
+    "key": "change_period_groups"
+  },
+  {
     "name": "Изменение пользователей периода сбора",
     "key": "change_period_users"
   },

@@ -17,8 +17,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
-from apps.dcis.permissions import AddPeriod, ChangePeriodUsers
-from apps.dcis.permissions.period_permissions import ChangePeriodDivisions, ViewPeriod
+from apps.dcis.permissions import AddPeriod, ChangePeriodDivisions, ChangePeriodGroups, ChangePeriodUsers, ViewPeriod
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
 from apps.dcis.services.divisions_services import get_divisions
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
@@ -135,7 +134,7 @@ class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation)
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, input: Any) -> None:
         period = get_object_or_404(Period, pk=input.period)
-        if not ChangePeriodUsers.has_object_permission(info.context, period):
+        if not ChangePeriodGroups.has_object_permission(info.context, period):
             raise PermissionDenied('Ошибка доступа')
 
 
@@ -150,7 +149,7 @@ class CopyPeriodGroupsMutation(BaseMutation):
     period_groups = graphene.List(PeriodGroupType, required=True, description='Новые группы периода')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodUsers))
+    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -186,7 +185,7 @@ class ChangePeriodGroupPrivilegesMutation(BaseMutation):
     privileges = graphene.List(PrivilegeType, required=True, description='Привилегии группы')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodUsers,))
+    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: int, privileges_ids: list[str]):
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
         info.context.check_object_permissions(info.context, period_group.period)
@@ -207,7 +206,7 @@ class DeletePeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutati
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: PeriodGroup) -> None:
-        if not ChangePeriodUsers.has_object_permission(info.context, obj.period):
+        if not ChangePeriodGroups.has_object_permission(info.context, obj.period):
             raise PermissionDenied('Ошибка доступа')
 
 

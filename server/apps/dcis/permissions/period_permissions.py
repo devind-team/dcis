@@ -91,6 +91,30 @@ class ChangePeriodDivisions(BasePermission):
         )
 
 
+class ChangePeriodGroupsBase(BasePermission):
+    """Пропускает пользователей, которые могут изменять группы периода, без проверки возможности просмотра."""
+
+    @staticmethod
+    def has_object_permission(context, obj: Period):
+        return ChangePeriodBase.has_object_permission(
+            context, obj
+        ) or has_privilege(
+            context.user.id, obj.id, 'change_period_groups'
+        )
+
+
+class ChangePeriodGroups(BasePermission):
+    """Пропускает пользователей, которые могут просматривать период и изменять в нем группы."""
+
+    @staticmethod
+    def has_object_permission(context, obj: Period):
+        return ViewPeriod.has_object_permission(
+            context, obj
+        ) and ChangePeriodGroupsBase.has_object_permission(
+            context, obj
+        )
+
+
 class ChangePeriodUsersBase(BasePermission):
     """Пропускает пользователей, которые могут изменять пользователей периода, без проверки возможности просмотра."""
 
