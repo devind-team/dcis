@@ -7,6 +7,7 @@
       v-bind="$attrs"
       :mutation-name="mutationName"
       :errors-in-alert="errorsInAlert"
+      :show-success="showSuccess"
       :header="header"
       :subheader="subheader"
       :button-text="buttonText"
@@ -55,6 +56,7 @@ export default defineComponent({
     mutationName: { type: [String, Array], required: true },
     successClose: { type: Boolean, default: true },
     errorsInAlert: { type: Boolean, default: false },
+    showSuccess: { type: Boolean, default: true },
     fullscreen: { type: Boolean, default: false },
     persistent: { type: Boolean, default: false },
     canMinimize: { type: Boolean, default: false },

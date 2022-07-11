@@ -8,9 +8,9 @@
     validation-observer(v-slot="{ handleSubmit, invalid }" ref="validationObserver" slim)
       form(@submit.prevent="handleSubmit(mutate)")
         v-card(:flat="flat")
-          v-card-title
+          v-card-title(v-if="header")
             slot(name="header" :header="header") {{ header }}
-          v-card-subtitle
+          v-card-subtitle(v-if="subheader")
             slot(name="subheader" :subheader="subheader")
               span {{ subheader }}
           v-card-text
@@ -54,6 +54,7 @@ export default defineComponent({
   props: {
     mutationName: { type: [String, Array], required: true },
     errorsInAlert: { type: Boolean, default: false },
+    showSuccess: { type: Boolean, default: true },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
     buttonText: { type: String, default: '' },
@@ -120,7 +121,7 @@ export default defineComponent({
       }
       if (mutationsErrors.length) {
         setFormErrors(mutationsErrors, props.errorsInAlert)
-      } else {
+      } else if (props.showSuccess) {
         setSuccess()
       }
     }
