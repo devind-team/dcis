@@ -5001,7 +5001,7 @@
     regenerator-runtime "^0.13.9"
     systemjs "^6.12.1"
 
-"@vue/apollo-composable@^4.0.0-alpha.17":
+"@vue/apollo-composable@^4.0.0-alpha.18":
   version "4.0.0-alpha.18"
   resolved "https://registry.yarnpkg.com/@vue/apollo-composable/-/apollo-composable-4.0.0-alpha.18.tgz#e79fbea5bc4477bf6e305a52c5a2c41a030a27eb"
   integrity sha512-AasMZnAOG9fH+vcnQu6C3eyBMWXCsjdF0Njh7gGzQYBdo/CG9g9OKtrmHizq5AbgR2KJe/0RHE9yLBj7SZrcdQ==
