@@ -1,0 +1,16 @@
+[
+  {
+    "model": "pages.PageKind",
+    "pk": 1,
+    "fields": {
+      "name": "Новости"
+    }
+  },
+  {
+    "model": "pages.PageKind",
+    "pk": 2,
+    "fields": {
+      "name": "События"
+    }
+  }
+]

@@ -416,3 +416,12 @@ yarn run dev
     ```
     sudo service nginx restart
     ```
+
+## Генерация API сервера
+
+В папке docs:
+```shell
+sphinx-apidoc -o . ..
+make markdown # Для генерации md файлов
+make html # Для генерации html файлов
+```

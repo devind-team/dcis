@@ -304,7 +304,7 @@ input AddRowDimensionMutationInput {
   """Идентификатор родительской строки"""
   parentId: ID
   """Идентификатор листа"""
-  sheetId: ID!
+  sheetId: Int!
 }
 
 """Добавление строки."""
@@ -606,7 +606,7 @@ type CellType {
   """Объединение колонок"""
   colspan: Int!
   """Идентификатор колонки"""
-  columnId: ID
+  columnId: Int
   """Комментарий"""
   comment: String
   """Редактируемая ячейка"""
@@ -620,7 +620,7 @@ type CellType {
   """Горизонтальное выравнивание"""
   horizontalAlign: ID
   """Идентификатор"""
-  id: ID!
+  id: Int!
   """Курсив"""
   italic: Boolean!
   """Тип значения"""
@@ -632,7 +632,7 @@ type CellType {
   """Связанные с объединением позиции в плоской структуре"""
   relatedGlobalPositions: [String!]!
   """Идентификатор строки"""
-  rowId: ID
+  rowId: Int
   """Объединение строк"""
   rowspan: Int!
   """Размер шрифта"""
@@ -841,7 +841,7 @@ type ChangeFileMutationPayload {
 input ChangeFileValueMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
-  columnId: ID!
+  columnId: Int!
   """Идентификатор документа"""
   documentId: ID!
   """Новые файлы"""
@@ -849,9 +849,9 @@ input ChangeFileValueMutationInput {
   """Оставшиеся файлы"""
   remainingFiles: [ID!]!
   """Идентификатор строки"""
-  rowId: ID!
+  rowId: Int!
   """Идентификатор листа"""
-  sheetId: ID!
+  sheetId: Int!
   """Значение"""
   value: String!
 }
@@ -1374,15 +1374,13 @@ type ChangeUserPropsMutationPayload {
 }
 
 input ChangeValueMutationInput {
+  """Идентификатор ячейки"""
+  cellId: Int!
   clientMutationId: String
-  """Идентификатор колонки"""
-  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
-  """Идентификатор строки"""
-  rowId: ID!
   """Идентификатор листа"""
-  sheetId: ID!
+  sheetId: Int!
   """Значение"""
   value: String!
 }
@@ -1396,8 +1394,8 @@ type ChangeValueMutationPayload {
   success: Boolean!
   """Дата изменения"""
   updatedAt: DateTime!
-  """Измененное значение"""
-  value: String!
+  """Измененные ячейки"""
+  values: [ValueType]
 }
 
 """Измененное свойство ячейки."""
@@ -2182,7 +2180,7 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
-  """Мутация для добавления КБК в словарь."""
+  """Добавление нового КБК"""
   addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
@@ -3228,7 +3226,7 @@ type Query {
     """Идентификатор документа"""
     documentId: ID
     """Идентификатор листа"""
-    sheetId: ID!
+    sheetId: Int!
   ): SheetType!
   """Статусы"""
   statuses: [StatusType!]
@@ -3260,13 +3258,13 @@ type Query {
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор колонки"""
-    columnId: ID!
+    columnId: Int!
     """Идентификатор документа"""
     documentId: ID!
     """Идентификатор строки"""
-    rowId: ID!
+    rowId: Int!
     """Идентификатор листа"""
-    sheetId: ID!
+    sheetId: Int!
   ): [FileType!]
 }
 
@@ -3682,7 +3680,7 @@ type SheetType {
   """Дата добавления"""
   createdAt: DateTime!
   """Идентификатор"""
-  id: ID!
+  id: Int!
   """Наименование"""
   name: String!
   """Период"""
@@ -3812,15 +3810,15 @@ type UnloadDocumentMutationPayload {
 input UnloadFileValueArchiveMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
-  columnId: ID!
+  columnId: Int!
   """Идентификатор документа"""
   documentId: ID!
   """Название архива"""
   name: String!
   """Идентификатор строки"""
-  rowId: ID!
+  rowId: Int!
   """Идентификатор листа"""
-  sheetId: ID!
+  sheetId: Int!
 }
 
 """Выгрузка архива значения ячейки типа `Файл`."""
@@ -3958,4 +3956,25 @@ type UserTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: UserType
+}
+
+"""Тип значений"""
+type ValueType {
+  """Идентификатор колонки"""
+  columnId: Int!
+  """Документ"""
+  document: DocumentType
+  """Текст ошибки"""
+  error: String
+  id: ID!
+  """Дополнительное поле"""
+  payload: String
+  """Идентификатор строки"""
+  rowId: Int!
+  """Идентификатор листа"""
+  sheetId: Int!
+  """Значение"""
+  value: String!
+  """Валидно ли поле"""
+  verified: Boolean!
 }

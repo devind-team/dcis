@@ -1,0 +1,364 @@
+[
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 1,
+    "fields": {
+      "name": "Группа поддержки",
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 2,
+    "fields": {
+      "name": "Департамент государственной молодежной политики и социальных проектов в сфере высшего образования",
+      "code": 2,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 3,
+    "fields": {
+      "name": "Департамент государственной политики в сфере высшего образования",
+      "code": 3,
+      "minister": 1330,
+      "user": 58,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 4,
+    "fields": {
+      "name": "Департамент международного сотрудничества",
+      "code": 4,
+      "minister": 1327,
+      "user": 1321,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 5,
+    "fields": {
+      "name": "Департамент государственной научной и научно-технической политики",
+      "code": 5,
+      "minister": 1328,
+      "user": 941,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 6,
+    "fields": {
+      "name": "Департамент аттестации научных и научно-педагогических работников",
+      "code": 6,
+      "user": 180,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 7,
+    "fields": {
+      "name": "Департамент научно-технических программ",
+      "code": 7,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 8,
+    "fields": {
+      "name": "Департамент стратегического развития",
+      "code": 8,
+      "minister": 1328,
+      "user": 529,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 9,
+    "fields": {
+      "name": "Департамент координации деятельности научных организаций",
+      "code": 9,
+      "minister": 1328,
+      "user": 255,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 10,
+    "fields": {
+      "name": "Департамент координации деятельности организаций в сфере сельскохозяйственных наук",
+      "code": 10,
+      "minister": 1328,
+      "user": 306,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 11,
+    "fields": {
+      "name": "Департамент информационных технологий в сфере науки и высшего образования Российской Федерации",
+      "code": 11,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 12,
+    "fields": {
+      "name": "Юридический департамент",
+      "code": 12,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 13,
+    "fields": {
+      "name": "Департамент правового обеспечения деятельности Министерства",
+      "code": 13,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 14,
+    "fields": {
+      "name": "Административный департамент",
+      "code": 14,
+      "user": 426,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 15,
+    "fields": {
+      "name": "Финансовый департамент",
+      "code": 15,
+      "minister": 1329,
+      "user": 471,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 16,
+    "fields": {
+      "name": "Департамент проектной деятельности",
+      "code": 16,
+      "minister": 12,
+      "user": 527,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 17,
+    "fields": {
+      "name": "Департамент экономической политики",
+      "code": 17,
+      "minister": 12,
+      "user": 935,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 18,
+    "fields": {
+      "name": "Департамент управления имуществом",
+      "code": 18,
+      "user": 625,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 19,
+    "fields": {
+      "name": "Департамент бюджетных инвестиций",
+      "code": 19,
+      "minister": 676,
+      "user": 949,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 20,
+    "fields": {
+      "name": "Департамент кадровой политики",
+      "code": 20,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 21,
+    "fields": {
+      "name": "Департамент управления делами",
+      "code": 21,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 22,
+    "fields": {
+      "name": "Контрольно-ревизионный департамент",
+      "code": 22,
+      "user": 942,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 23,
+    "fields": {
+      "name": "Департамент инноваций и перспективных исследований",
+      "code": 23,
+      "minister": 1328,
+      "user": 849,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 24,
+    "fields": {
+      "name": "Департамент конкурсных процедур и государственных контрактов",
+      "code": 24,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 25,
+    "fields": {
+      "name": "Отдел мобилизационной подготовки и гражданской обороны",
+      "code": 25,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 26,
+    "fields": {
+      "name": "Отдел по защите государственной тайны",
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 27,
+    "fields": {
+      "name": "Департамент координации деятельности образовательных организаций",
+      "code": 26,
+      "minister": 1330,
+      "user": 932,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 28,
+    "fields": {
+      "name": "Департамент информационной политики",
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 29,
+    "fields": {
+      "name": "Департамент цифрового развития",
+      "code": 29,
+      "minister": 1329,
+      "user": 1326,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 30,
+    "fields": {
+      "name": "Департамент координации информационной и просветительской деятельности",
+      "code": 28,
+      "minister": 937,
+      "user": 934,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 31,
+    "fields": {
+      "name": "Департамент государственной молодежной политики и воспитательной деятельности",
+      "code": 27,
+      "minister": 1332,
+      "user": 28,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 32,
+    "fields": {
+      "name": "Департамент государственной службы и кадровой политики",
+      "minister": 1331,
+      "user": 943,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "devind_dictionaries.Department",
+    "pk": 33,
+    "fields": {
+      "name": "Правовой департамент",
+      "user": 1265,
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "updated_at": "2021-01-01T12:00:00.000Z"
+    }
+  }
+]
