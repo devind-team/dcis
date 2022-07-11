@@ -105,6 +105,11 @@ export default {
       users: 'Пользователи',
       settings: '@:settings'
     },
+    statuses: {
+      preparation: 'Подготовка',
+      open: 'Открыто',
+      close: 'Закрыто'
+    },
     addPeriod: {
       buttonText: 'Добавить период',
       header: 'Добавление периода',
@@ -116,11 +121,6 @@ export default {
       header: 'Настройки периода',
       name: 'Название периода',
       status: 'Статус проекта',
-      statusItems: {
-        preparation: 'Подготовка',
-        open: 'Заполнение',
-        close: 'Сбор закрыт'
-      },
       start: 'Дата начала периода',
       expiration: 'Дата окончания периода',
       multiple: 'Множественное заполнение',

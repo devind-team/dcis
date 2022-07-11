@@ -161,9 +161,9 @@ export default defineComponent({
 
     const successUpdate = ref<boolean>(false)
     const statusItems: StatusItems[] = [
-      { name: t('dcis.periods.changePeriod.statusItems.preparation') as string, value: 'preparation' },
-      { name: t('dcis.periods.changePeriod.statusItems.open') as string, value: 'open' },
-      { name: t('dcis.periods.changePeriod.statusItems.close') as string, value: 'close' }
+      { name: t('dcis.periods.statuses.preparation') as string, value: 'preparation' },
+      { name: t('dcis.periods.statuses.open') as string, value: 'open' },
+      { name: t('dcis.periods.statuses.close') as string, value: 'close' }
     ]
     const status = ref<string>(props.period.status)
 
