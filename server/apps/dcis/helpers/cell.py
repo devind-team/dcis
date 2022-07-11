@@ -1,7 +1,9 @@
 """Вспомогательный модуль для расчета формул."""
 from collections import defaultdict
 from typing import Iterable, TypedDict
+from itertools import groupby
 
+from xlsx_evaluate import ModelCompiler, Model, Evaluator
 from django.db.models import QuerySet, Q
 from openpyxl.utils.cell import get_column_letter, column_index_from_string
 from openpyxl.utils.cell import coordinate_from_string
@@ -9,21 +11,26 @@ from apps.dcis.models import Cell, Document, Sheet, Value
 from .sheet_cache import FormulaContainerCache
 
 
-def get_dependency_cells(sheets: list[Sheet], value: Value) -> tuple[list[str], list[str]]:
+def get_dependency_cells(
+        sheet_containers: list[FormulaContainerCache],
+        value: Value
+) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
     Возвращается кортеж:
         - dependency - список зависимых ячеек, даже если там формула, она забирается как значение.
         - inversion - список связных ячеек, которые нужно пересчитать
+        - sheet_containers - последовательность расчета листов
     """
     dependency_cells: list[str] = []
     inversion_cells: list[str] = []
+    sequence_evaluate: list[str] = []
     cells: list[str] = [f'{value.sheet.name}!{get_column_letter(value.column.index)}{value.row.index}']
-    sheet_containers: list[FormulaContainerCache] = [FormulaContainerCache.get(sheet) for sheet in sheets]
 
     while cells:
         cell = cells.pop()
         sheet_name, column_letter, row_index = parse_coordinate(cell)
+        sequence_evaluate.append(sheet_name)
         sheet_container: FormulaContainerCache
         for sheet_container in sheet_containers:
             coordinate: str = f'{column_letter}{row_index}' if sheet_name == sheet_container.sheet_name else cell
@@ -38,7 +45,7 @@ def get_dependency_cells(sheets: list[Sheet], value: Value) -> tuple[list[str], 
             dependency_cells.extend(dependency)
             inversion_cells.extend(inversions)
             cells.extend(inversions)
-    return dependency_cells, inversion_cells
+    return dependency_cells, inversion_cells, [el for el, _ in groupby(sequence_evaluate)]
 
 
 def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) -> tuple[QuerySet[Cell], QuerySet[Value]]:
@@ -76,11 +83,11 @@ def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) 
 class ValueState(TypedDict):
     """Результативное состояние для расчета новых значений по формулам."""
     value: int | float | str | None
+    formula: str | None
     cell: Cell
 
 
 def resolve_evaluate_state(
-        sheet: Sheet,
         cells: Iterable[Cell],
         values: Iterable[Value],
         inversion_cells: list[str]
@@ -105,13 +112,40 @@ def resolve_evaluate_state(
     cell: Cell
     for cell in cells:
         coord: str = get_coordinate(cell.column.sheet, cell)
-        coordinate: str = f'{get_column_letter(cell.column.index)}{cell.row.index}' \
-            if sheet.name == cell.column.sheet.name \
-            else coord
-        value: str = cell.formula \
-            if cell.formula and coord in inversion_cells \
-            else values_state.get(coordinate, cell.default)
-        state[coordinate] = {'value': value, 'cell': cell}
+        coordinate: str = f'{get_column_letter(cell.column.index)}{cell.row.index}'
+        state[coord]: ValueState = {
+            'value': values_state.get(coordinate, cell.default),
+            'formula': cell.formula if cell.formula and coord in inversion_cells  else None,
+            'cell': cell
+        }
+    return state
+
+
+def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
+    """Рассчитываем новые значения определенным образом.
+
+    Для текущего листа, например, "Лист1"
+      - все значения этого листа приводим к относительному виду
+        - Лист1!B2 -> B2
+        - Лист2!С4 -> Лист2!С4
+      - все формулы не из текущего листа заменяем значениями
+      - все формулы текущего листа рассчитываем и обновляем результаты
+    """
+    for sheet_name in sequence_evaluate:
+        input_state: dict[str, str | int | float | None] = {}
+        cell_name: str
+        cell_state: ValueState
+        for cell_name, cell_state in state.items():
+            sn, column, row = parse_coordinate(cell_name)
+            if sn == sheet_name:
+                input_state[f'{column}{row}'] = cell_state['formula'] if cell_state['formula'] else cell_state['value']
+            else:
+                input_state[cell_name] = cell_state.get('value', None)
+        compiler: ModelCompiler = ModelCompiler()
+        model: Model = compiler.read_and_parse_dict(input_dict=input_state, default_sheet=sheet_name)
+        evaluator = Evaluator(model)
+        for formula in model.formulae:
+            state[formula]['value'] = str(evaluator.evaluate(formula))
     return state
 
 
