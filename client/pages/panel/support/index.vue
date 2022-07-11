@@ -1,20 +1,20 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    mutation-form(
-      :header="String($t('support.header'))"
-      :mutation="require('~/gql/core/mutations/support/support_submit.graphql')"
-      :variables="{ topic, text, files }"
-      :button-text="String($t('send'))"
-      :successMessage="String($t('support.successMessage'))"
-      mutation-name="supportSubmit"
-      errors-in-alert
-    )
-      template(#form)
-        validation-provider(:name="String($t('support.topic'))" rules="required|min:2|max:50" v-slot="{ errors, valid }")
-          v-text-field.mb-5(v-model="topic" :label="$t('support.topic')" :error-messages="errors" :success="valid" clearable counter )
-        validation-provider(:name="String($t('support.text'))" rules="required|min:2|max:500" v-slot="{ errors, valid }")
-          v-textarea(v-model="text" :label="$t('support.text')" :error-messages="errors" :success="valid" counter clearable)
-        v-file-input(v-model="files" :label="$t('support.file')" truncate-length="25" multiple show-size)
+bread-crumbs(:items="bc")
+  mutation-form(
+    :header="String($t('support.header'))"
+    :mutation="require('~/gql/core/mutations/support/support_submit.graphql')"
+    :variables="{ topic, text, files }"
+    :button-text="String($t('send'))"
+    :successMessage="String($t('support.successMessage'))"
+    mutation-name="supportSubmit"
+    errors-in-alert
+  )
+    template(#form)
+      validation-provider(:name="String($t('support.topic'))" rules="required|min:2|max:50" v-slot="{ errors, valid }")
+        v-text-field.mb-5(v-model="topic" :label="$t('support.topic')" :error-messages="errors" :success="valid" clearable counter )
+      validation-provider(:name="String($t('support.text'))" rules="required|min:2|max:500" v-slot="{ errors, valid }")
+        v-textarea(v-model="text" :label="$t('support.text')" :error-messages="errors" :success="valid" counter clearable)
+      v-file-input(v-model="files" :label="$t('support.file')" truncate-length="25" multiple show-size)
 </template>
 
 <script lang="ts">

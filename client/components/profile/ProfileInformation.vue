@@ -1,33 +1,33 @@
 <template lang="pug">
-  apollo-query(
-    v-slot="{ result: { loading, error, data } }"
-    :query="require('~/gql/core/queries/profile_information.graphql')"
-    :variables="{ userId: viewUser.id }"
-    tag
+apollo-query(
+  v-slot="{ result: { loading, error, data } }"
+  :query="require('~/gql/core/queries/profile_information.graphql')"
+  :variables="{ userId: viewUser.id }"
+  tag
+)
+  v-progress-circular.ma-auto(v-if="loading" indeterminate color="primary")
+  v-alert(v-else-if="error" type="error") {{ error }}
+  v-expansion-panels(
+    v-else-if="data"
+    :value="data.profileInformation.filter(p => p.available.length).map((k, i) => i)"
+    flat multiple tile
   )
-    v-progress-circular.ma-auto(v-if="loading" indeterminate color="primary")
-    v-alert(v-else-if="error" type="error") {{ error }}
-    v-expansion-panels(
-      v-else-if="data"
-      :value="data.profileInformation.filter(p => p.available.length).map((k, i) => i)"
-      flat multiple tile
-    )
-      v-expansion-panel(v-for="profile in data.profileInformation.filter(p => p.available.length)" :key="profile.id")
-        v-expansion-panel-header {{ profile.name }}
-        v-expansion-panel-content
-          v-data-table(
-            :headers="headers"
-            :items="profile.available"
-            hide-default-header
-            hide-default-footer
-            disable-pagination
-          )
-            template(#item.value="{ item }")
-              template(v-if="kindTypes[item.kind] === 'bool'")
-                | {{ item.value.value === 'true' ? $t('yes') : $t('no') }}
-              template(v-else-if="kindTypes[item.kind] === 'choice'")
-                | {{ choicesTypes[item.code].find(x => x.value === item.value.value).text }}
-              span(v-else) {{ item.value.value }}
+    v-expansion-panel(v-for="profile in data.profileInformation.filter(p => p.available.length)" :key="profile.id")
+      v-expansion-panel-header {{ profile.name }}
+      v-expansion-panel-content
+        v-data-table(
+          :headers="headers"
+          :items="profile.available"
+          hide-default-header
+          hide-default-footer
+          disable-pagination
+        )
+          template(#item.value="{ item }")
+            template(v-if="kindTypes[item.kind] === 'bool'")
+              | {{ item.value.value === 'true' ? $t('yes') : $t('no') }}
+            template(v-else-if="kindTypes[item.kind] === 'choice'")
+              | {{ choicesTypes[item.code].find(x => x.value === item.value.value).text }}
+            span(v-else) {{ item.value.value }}
 </template>
 
 <script lang="ts">

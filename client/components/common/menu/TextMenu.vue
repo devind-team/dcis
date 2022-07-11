@@ -1,17 +1,17 @@
 <template lang="pug">
-  v-menu(v-model="active" :close-on-content-click="false" bottom)
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-card
-      v-card-text
-        v-textarea(v-if="multiline" v-model="text" clearable)
-          template(v-slot:append-outer)
-            v-btn(color="success" icon @click="update")
-              v-icon mdi-check
-        v-text-field(v-else v-model="text" clearable @keyup.enter="update")
-          template(v-slot:append-outer)
-            v-btn(color="success" icon @click="update")
-              v-icon mdi-check
+v-menu(v-model="active" :close-on-content-click="false" bottom)
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-card
+    v-card-text
+      v-textarea(v-if="multiline" v-model="text" clearable)
+        template(v-slot:append-outer)
+          v-btn(color="success" icon @click="update")
+            v-icon mdi-check
+      v-text-field(v-else v-model="text" clearable @keyup.enter="update")
+        template(v-slot:append-outer)
+          v-btn(color="success" icon @click="update")
+            v-icon mdi-check
 </template>
 
 <script lang="ts">

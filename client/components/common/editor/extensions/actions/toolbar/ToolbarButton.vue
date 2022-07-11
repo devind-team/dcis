@@ -1,9 +1,9 @@
 <template lang="pug">
-  v-tooltip(v-if="isVisible(editor)" top)
-    template(#activator="{ on }")
-      v-btn(v-on="on" :disabled="isDisabled(editor)" :class="{ 'v-btn--active': isActive(editor) }" @click="onClick(editor)" icon)
-        v-icon {{icon}}
-    span {{$t(`common.richTextEditor.${tooltip}`)}}
+v-tooltip(v-if="isVisible(editor)" top)
+  template(#activator="{ on }")
+    v-btn(v-on="on" :disabled="isDisabled(editor)" :class="{ 'v-btn--active': isActive(editor) }" @click="onClick(editor)" icon)
+      v-icon {{icon}}
+  span {{$t(`common.richTextEditor.${tooltip}`)}}
 </template>
 
 <script lang="ts">

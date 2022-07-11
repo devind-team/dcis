@@ -1,14 +1,14 @@
 <template lang="pug">
-  v-row(style="position:relative")
-    v-col
-      p.text-h5.text-center {{section.text}}
-      image-gallery(:images="section.images.map(e => `/${e.src}`)")
-      section-action(
-        v-if="hasPerm(['pages.change_section', 'pages.delete_section'], true) || editSection"
-        :section="section"
-        :edit-section="editSection"
-        :update-delete-section="updateDeleteSection"
-      )
+v-row(style="position:relative")
+  v-col
+    p.text-h5.text-center {{section.text}}
+    image-gallery(:images="section.images.map(e => `/${e.src}`)")
+    section-action(
+      v-if="hasPerm(['pages.change_section', 'pages.delete_section'], true) || editSection"
+      :section="section"
+      :edit-section="editSection"
+      :update-delete-section="updateDeleteSection"
+    )
 </template>
 
 <script lang="ts">

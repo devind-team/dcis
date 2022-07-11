@@ -1,26 +1,26 @@
 <template lang="pug">
-  v-navigation-drawer(
-    :value="active"
-    :permanent="$vuetify.breakpoint.mdAndUp"
-    :temporary="$vuetify.breakpoint.smAndDown"
-    :clipped="$vuetify.breakpoint.mdAndUp"
-    :mini-variant="$vuetify.breakpoint.mdAndUp"
-    :expand-on-hover="$vuetify.breakpoint.mdAndUp"
-    fixed
-    app
-    @input="$emit('change', $event)"
-  )
-    v-list
-      template(v-for="item in items")
-        v-list-item(
-          v-if="item.permissions === undefined || item.permissions && hasPerm(item.permissions)"
-          :to="localePath({ name: item.to, params: item.params })"
-          link
-        )
-          v-list-item-icon
-            v-icon mdi-{{ item.icon }}
-          v-list-item-content
-            v-list-item-title {{ item.title }}
+v-navigation-drawer(
+  :value="active"
+  :permanent="$vuetify.breakpoint.mdAndUp"
+  :temporary="$vuetify.breakpoint.smAndDown"
+  :clipped="$vuetify.breakpoint.mdAndUp"
+  :mini-variant="$vuetify.breakpoint.mdAndUp"
+  :expand-on-hover="$vuetify.breakpoint.mdAndUp"
+  fixed
+  app
+  @input="$emit('change', $event)"
+)
+  v-list
+    template(v-for="item in items")
+      v-list-item(
+        v-if="item.permissions === undefined || item.permissions && hasPerm(item.permissions)"
+        :to="localePath({ name: item.to, params: item.params })"
+        link
+      )
+        v-list-item-icon
+          v-icon mdi-{{ item.icon }}
+        v-list-item-content
+          v-list-item-title {{ item.title }}
 </template>
 
 <script lang="ts">

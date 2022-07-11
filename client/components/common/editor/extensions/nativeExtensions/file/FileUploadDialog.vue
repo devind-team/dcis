@@ -1,44 +1,44 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="$t('common.richTextEditor.fileUpload')"
-    :button-text="$t('common.richTextEditor.file')"
-    :mutation="require('~/gql/core/mutations/file/add_file.graphql')"
-    :variables="{ userId: user.id, files: [file] }"
-    @done="onFileUploaded"
-    mutation-name="addFile"
-  )
-    template(#activator="{ on }")
-      v-tooltip(top)
-        template(#activator="{ on: onTooltip }")
-          v-btn(v-on="{ ...on, ...onTooltip }" icon)
-            v-icon {{icon}}
-        span {{$t('common.richTextEditor.file')}}
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="$t('common.richTextEditor.fileLabelField')"
-        rules="required"
+mutation-modal-form(
+  :header="$t('common.richTextEditor.fileUpload')"
+  :button-text="$t('common.richTextEditor.file')"
+  :mutation="require('~/gql/core/mutations/file/add_file.graphql')"
+  :variables="{ userId: user.id, files: [file] }"
+  @done="onFileUploaded"
+  mutation-name="addFile"
+)
+  template(#activator="{ on }")
+    v-tooltip(top)
+      template(#activator="{ on: onTooltip }")
+        v-btn(v-on="{ ...on, ...onTooltip }" icon)
+          v-icon {{icon}}
+      span {{$t('common.richTextEditor.file')}}
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="$t('common.richTextEditor.fileLabelField')"
+      rules="required"
+    )
+      v-text-field(
+        :label="$t('common.richTextEditor.fileLabelField')"
+        v-model="fileLabel"
+        :success="valid"
+        :error-messages="errors"
+        clearable
       )
-        v-text-field(
-          :label="$t('common.richTextEditor.fileLabelField')"
-          v-model="fileLabel"
-          :success="valid"
-          :error-messages="errors"
-          clearable
-        )
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="$t('common.richTextEditor.fileField')"
-        rules="required"
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="$t('common.richTextEditor.fileField')"
+      rules="required"
+    )
+      v-file-input(
+        :label="$t('common.richTextEditor.fileField')"
+        v-model="file"
+        :success="valid"
+        :error-messages="errors"
+        @change="onFileChanged"
+        clearable
       )
-        v-file-input(
-          :label="$t('common.richTextEditor.fileField')"
-          v-model="file"
-          :success="valid"
-          :error-messages="errors"
-          @change="onFileChanged"
-          clearable
-        )
 </template>
 <script lang="ts">
 import { defineComponent, PropType, ref, toRefs } from '#app'

@@ -1,14 +1,14 @@
 <template lang="pug">
-  node-view-wrapper
-    span.image-view(draggable="true" data-drag-handle)
-      div.image-view__body(:class="{'image-view__body--focused': selected, 'image-view__body--resizing': isResizing}")
-        img.image-view__body__image.ma-0(
-          :src="node.attrs.src"
-          :style="`width: ${width}px; height: ${height}px;`"
-          @click="selectImage")
-        div.image-resizer(v-show="selected || isResizing")
-          span.image-resizer__handler(v-for="direction in resizeDirections" :key="direction"
-            :class="`image-resizer__handler--${direction}`" @mousedown="onMouseDown($event, direction)")
+node-view-wrapper
+  span.image-view(draggable="true" data-drag-handle)
+    div.image-view__body(:class="{'image-view__body--focused': selected, 'image-view__body--resizing': isResizing}")
+      img.image-view__body__image.ma-0(
+        :src="node.attrs.src"
+        :style="`width: ${width}px; height: ${height}px;`"
+        @click="selectImage")
+      div.image-resizer(v-show="selected || isResizing")
+        span.image-resizer__handler(v-for="direction in resizeDirections" :key="direction"
+          :class="`image-resizer__handler--${direction}`" @mousedown="onMouseDown($event, direction)")
 </template>
 
 <script lang="ts">

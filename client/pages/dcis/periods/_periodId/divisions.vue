@@ -1,45 +1,45 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.divisions.name') }}
-      template(v-if="period.canChangeDivisions")
-        v-spacer
-        add-period-divisions(
-          :period="period"
-          :divisions="filterDivisions"
-          :loading="loading"
-          :update="addDivisionsUpdate"
-        )
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.addDivisions.buttonText') }}
-    v-row(align="center")
-      v-col(cols="12" md="8")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right.pr-5(
-        cols="12"
-        md="4"
-      ) {{ $t('shownOf', { count: divisionsCount, totalCount: period.divisions.length }) }}
-    v-card(flat)
-      v-card-text
-        v-data-table(
-          :headers="headers"
-          :items="period.divisions"
-          :search="search"
-          :loading="loading"
-          disable-pagination
-          hide-default-footer
-          @pagination="pagination"
-        )
-          template(#item.actions="{ item }")
-            delete-menu(
-              :item-name="String($t('dcis.periods.divisions.deleteDivision.itemName'))"
-              @confirm="deleteDivision({ periodId: period.id, divisionId: item.id })"
-            )
-              template(#default="{ on: onMenu }")
-                v-tooltip(bottom)
-                  template(#activator="{ on: onTooltip }")
-                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="error" icon)
-                      v-icon mdi-delete
-                  span {{ $t('dcis.periods.divisions.deleteDivision.tooltip') }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.divisions.name') }}
+    template(v-if="period.canChangeDivisions")
+      v-spacer
+      add-period-divisions(
+        :period="period"
+        :divisions="filterDivisions"
+        :loading="loading"
+        :update="addDivisionsUpdate"
+      )
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.addDivisions.buttonText') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(
+      cols="12"
+      md="4"
+    ) {{ $t('shownOf', { count: divisionsCount, totalCount: period.divisions.length }) }}
+  v-card(flat)
+    v-card-text
+      v-data-table(
+        :headers="headers"
+        :items="period.divisions"
+        :search="search"
+        :loading="loading"
+        disable-pagination
+        hide-default-footer
+        @pagination="pagination"
+      )
+        template(#item.actions="{ item }")
+          delete-menu(
+            :item-name="String($t('dcis.periods.divisions.deleteDivision.itemName'))"
+            @confirm="deleteDivision({ periodId: period.id, divisionId: item.id })"
+          )
+            template(#default="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" color="error" icon)
+                    v-icon mdi-delete
+                span {{ $t('dcis.periods.divisions.deleteDivision.tooltip') }}
 </template>
 
 <script lang="ts">

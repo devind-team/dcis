@@ -1,9 +1,9 @@
 <template lang="pug">
-  viewer(:images="images" :options="options")
-    template(#default="scope")
-      div.row
-        div.column(v-for="(chunk, i) in getChunks(scope.images)" :key="i")
-          img(v-for="(image, j) in chunk" :src="image" :key="j")
+viewer(:images="images" :options="options")
+  template(#default="scope")
+    div.row
+      div.column(v-for="(chunk, i) in getChunks(scope.images)" :key="i")
+        img(v-for="(image, j) in chunk" :src="image" :key="j")
 </template>
 
 <script lang="ts">

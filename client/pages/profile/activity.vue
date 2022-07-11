@@ -1,27 +1,27 @@
 <template lang="pug">
-  v-card
-    v-card-title {{ $t('profile.activity.name') }}
-      v-spacer
-      .caption {{ $t('shownOf', { count, totalCount }) }}
-    v-card-text
-      v-row
-        v-col
-          v-data-table(
-            :headers="headers"
-            :items="logEntry"
-            :loading="loading"
-            dense disable-pagination hide-default-footer)
-            template(v-slot:item.action="{ item }") {{ $t('profile.activity.record') }} {{ action[item.action] }}
-            template(v-slot:item.contentType="{ item }") {{ item.contentType.appLabel }}.{{ item.contentType.model }}
-            template(v-slot:item.session="{ item }") {{ item.session.os }}/{{ item.session.browser }}
-            template(v-slot:item.createdAt="{ item }") {{ $filters.dateTimeHM(item.createdAt) }}
-            template(v-slot:item.info="{ item }")
-              v-menu(bottom)
-                template(v-slot:activator="{ on }")
-                  v-btn(v-on="on" icon)
-                    v-icon mdi-information-outline
-                v-card
-                  v-card-text #[pre {{ parseFromJson(item.payload) }}]
+v-card
+  v-card-title {{ $t('profile.activity.name') }}
+    v-spacer
+    .caption {{ $t('shownOf', { count, totalCount }) }}
+  v-card-text
+    v-row
+      v-col
+        v-data-table(
+          :headers="headers"
+          :items="logEntry"
+          :loading="loading"
+          dense disable-pagination hide-default-footer)
+          template(v-slot:item.action="{ item }") {{ $t('profile.activity.record') }} {{ action[item.action] }}
+          template(v-slot:item.contentType="{ item }") {{ item.contentType.appLabel }}.{{ item.contentType.model }}
+          template(v-slot:item.session="{ item }") {{ item.session.os }}/{{ item.session.browser }}
+          template(v-slot:item.createdAt="{ item }") {{ $filters.dateTimeHM(item.createdAt) }}
+          template(v-slot:item.info="{ item }")
+            v-menu(bottom)
+              template(v-slot:activator="{ on }")
+                v-btn(v-on="on" icon)
+                  v-icon mdi-information-outline
+              v-card
+                v-card-text #[pre {{ parseFromJson(item.payload) }}]
 </template>
 
 <script lang="ts">

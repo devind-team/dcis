@@ -1,19 +1,19 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
-    template(#header) {{ $t('panel.permissions') }}
-    v-row(align="center")
-      v-col(cols="12" md="8")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right(cols="12" md="4") {{ $t('panel.ac.permissions.shownOf', { count: permissions && permissions.length }) }}.
-    v-data-table(
-      :headers="headers"
-      :items="permissions"
-      :loading="loading"
-      :search="search"
-      dense disable-pagination
-      hide-default-footer
-    )
-      template(#item.contentType="{ item }") {{ item.contentType.appLabel }} / {{ item.contentType.model }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
+  template(#header) {{ $t('panel.permissions') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right(cols="12" md="4") {{ $t('panel.ac.permissions.shownOf', { count: permissions && permissions.length }) }}.
+  v-data-table(
+    :headers="headers"
+    :items="permissions"
+    :loading="loading"
+    :search="search"
+    dense disable-pagination
+    hide-default-footer
+  )
+    template(#item.contentType="{ item }") {{ item.contentType.appLabel }} / {{ item.contentType.model }}
 </template>
 
 <script lang="ts">

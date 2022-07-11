@@ -1,8 +1,8 @@
 <template lang="pug">
-  v-card
-    v-card-title {{ page.title }}
-    v-card-text
-      page-sections(:page="page")
+v-card
+  v-card-title {{ page.title }}
+  v-card-text
+    page-sections(:page="page")
 </template>
 
 <script lang="ts">

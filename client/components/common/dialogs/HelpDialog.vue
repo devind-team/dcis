@@ -1,13 +1,13 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="800")
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-card
-      v-card-title {{ text }}
-        v-spacer
-        v-btn(@click="close" icon)
-          v-icon mdi-close
-      v-card-text Вывод инструкции в переработке! [{{ doc }}]
+v-dialog(v-model="active" width="800")
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-card
+    v-card-title {{ text }}
+      v-spacer
+      v-btn(@click="close" icon)
+        v-icon mdi-close
+    v-card-text Вывод инструкции в переработке! [{{ doc }}]
 </template>
 
 <script lang="ts">

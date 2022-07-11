@@ -1,11 +1,11 @@
 <template lang="pug">
-  v-sheet(height="200" style="cursor:pointer; border:dashed; border-color: gray;")
-    v-container(fill-height)
-      v-row(justify="center")
-        v-icon(v-show="!dragover && !error" size="70") mdi-cloud-upload-outline
-        v-icon(v-show="dragover && !error" size="70") mdi-arrow-collapse-down
-        v-icon(v-show="error" size="70") mdi-minus-circle
-      v-row(justify="center") {{ $t('common.dropFileUpload.dropOrClick') }}
+v-sheet(height="200" style="cursor:pointer; border:dashed; border-color: gray;")
+  v-container(fill-height)
+    v-row(justify="center")
+      v-icon(v-show="!dragover && !error" size="70") mdi-cloud-upload-outline
+      v-icon(v-show="dragover && !error" size="70") mdi-arrow-collapse-down
+      v-icon(v-show="error" size="70") mdi-minus-circle
+    v-row(justify="center") {{ $t('common.dropFileUpload.dropOrClick') }}
 </template>
 
 <script lang="ts">

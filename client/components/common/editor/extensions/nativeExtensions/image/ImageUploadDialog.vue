@@ -1,31 +1,31 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="$t('common.richTextEditor.imageUpload')"
-    :button-text="$t('common.richTextEditor.image.image')"
-    :mutation="require('~/gql/core/mutations/file/add_file.graphql')"
-    :variables="{ userId: user.id, files: [image] }"
-    @done="onImageUploaded"
-    mutation-name="addFile"
-  )
-    template(#activator="{ on }")
-      v-tooltip(top)
-        template(#activator="{ on: onTooltip }")
-          v-btn(v-on="{ ...on, ...onTooltip }" icon)
-            v-icon {{icon}}
-        span {{$t('common.richTextEditor.image.image')}}
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="$t('common.richTextEditor.imageField')"
-        rules="required"
+mutation-modal-form(
+  :header="$t('common.richTextEditor.imageUpload')"
+  :button-text="$t('common.richTextEditor.image.image')"
+  :mutation="require('~/gql/core/mutations/file/add_file.graphql')"
+  :variables="{ userId: user.id, files: [image] }"
+  @done="onImageUploaded"
+  mutation-name="addFile"
+)
+  template(#activator="{ on }")
+    v-tooltip(top)
+      template(#activator="{ on: onTooltip }")
+        v-btn(v-on="{ ...on, ...onTooltip }" icon)
+          v-icon {{icon}}
+      span {{$t('common.richTextEditor.image.image')}}
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="$t('common.richTextEditor.imageField')"
+      rules="required"
+    )
+      v-file-input(
+        :label="$t('common.richTextEditor.imageField')"
+        v-model="image"
+        :success="valid"
+        :error-messages="errors"
+        clearable
       )
-        v-file-input(
-          :label="$t('common.richTextEditor.imageField')"
-          v-model="image"
-          :success="valid"
-          :error-messages="errors"
-          clearable
-        )
 </template>
 
 <script lang="ts">

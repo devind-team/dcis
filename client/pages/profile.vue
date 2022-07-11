@@ -1,7 +1,7 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    two-columns(:links="links")
-      nuxt-child
+bread-crumbs(:items="bc")
+  two-columns(:links="links")
+    nuxt-child
 </template>
 
 <script lang="ts">

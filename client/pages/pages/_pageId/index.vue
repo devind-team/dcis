@@ -1,15 +1,15 @@
 <template lang="pug">
-  page-container(v-if="!loading" :bread-crumbs="bc" :category="page && page.category")
-    template(#header)
-      .text-h4.text-md-h2 {{ loading ? $t('loading') : page.title }}
-    category-pages(v-if="!loading" :category="page.category")
-      v-card.pa-3
-        page-sections(:page="page")
-          template(#actions)
-            page-actions(
-              v-if="hasPerm(['pages.add_section', 'pages.change_page', 'pages.delete_page'], true)"
-              :page="page"
-            )
+page-container(v-if="!loading" :bread-crumbs="bc" :category="page && page.category")
+  template(#header)
+    .text-h4.text-md-h2 {{ loading ? $t('loading') : page.title }}
+  category-pages(v-if="!loading" :category="page.category")
+    v-card.pa-3
+      page-sections(:page="page")
+        template(#actions)
+          page-actions(
+            v-if="hasPerm(['pages.add_section', 'pages.change_page', 'pages.delete_page'], true)"
+            :page="page"
+          )
   v-row(v-else)
     v-col.text-center #[v-progress-circular(color="primary" indeterminate)]
 </template>

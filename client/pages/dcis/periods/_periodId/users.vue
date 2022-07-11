@@ -1,46 +1,46 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.users.name') }}
-      template(v-if="period.canChangeUsers")
-        v-spacer
-        add-period-user(:period="period" :period-users="periodUsers" :update="addPeriodUserUpdate")
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ $t('dcis.periods.users.addUser.buttonText') }}
-    v-row(align="center")
-      v-col(cols="12" md="8")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right.pr-5(
-        cols="12"
-        md="4"
-      ) {{ $t('shownOf', { count: usersCount, totalCount: users.length }) }}
-    v-card(flat)
-      v-card-text
-        v-data-table(
-          :headers="headers"
-          :items="users"
-          :search="search"
-          :loading="loading"
-          disable-pagination
-          hide-default-footer
-          @pagination="pagination"
-        )
-          template(#item.avatar="{ item }")
-            avatar-dialog(:item="item")
-          template(#item.actions="{ item }")
-            change-user-period-groups(:period="period" :user="item" :update="changeUserPeriodGroupsUpdate")
-              template(#activator="{ on: onMenu }")
-                v-tooltip(bottom)
-                  template(#activator="{ on: onTooltip }")
-                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
-                      v-icon mdi-book-edit
-                  span {{ $t('dcis.periods.users.changeGroups.tooltip') }}
-            change-user-period-privileges(:period="period" :user="item")
-              template(#activator="{ on: onMenu }")
-                v-tooltip(bottom)
-                  template(#activator="{ on: onTooltip }")
-                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
-                      v-icon mdi-clipboard-edit
-                  span {{ $t('dcis.periods.users.changePrivileges.tooltip') }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.users.name') }}
+    template(v-if="period.canChangeUsers")
+      v-spacer
+      add-period-user(:period="period" :period-users="periodUsers" :update="addPeriodUserUpdate")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.users.addUser.buttonText') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(
+      cols="12"
+      md="4"
+    ) {{ $t('shownOf', { count: usersCount, totalCount: users.length }) }}
+  v-card(flat)
+    v-card-text
+      v-data-table(
+        :headers="headers"
+        :items="users"
+        :search="search"
+        :loading="loading"
+        disable-pagination
+        hide-default-footer
+        @pagination="pagination"
+      )
+        template(#item.avatar="{ item }")
+          avatar-dialog(:item="item")
+        template(#item.actions="{ item }")
+          change-user-period-groups(:period="period" :user="item" :update="changeUserPeriodGroupsUpdate")
+            template(#activator="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
+                    v-icon mdi-book-edit
+                span {{ $t('dcis.periods.users.changeGroups.tooltip') }}
+          change-user-period-privileges(:period="period" :user="item")
+            template(#activator="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
+                    v-icon mdi-clipboard-edit
+                span {{ $t('dcis.periods.users.changePrivileges.tooltip') }}
 </template>
 
 <script lang="ts">

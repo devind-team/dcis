@@ -1,6 +1,6 @@
 <template lang="pug">
-  bread-crumbs(:items="bc" fluid)
-    cards-navigator(:items="cards")
+bread-crumbs(:items="bc" fluid)
+  cards-navigator(:items="cards")
 </template>
 
 <script lang="ts">

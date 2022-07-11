@@ -1,48 +1,48 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('panel.ac.users.name') }}
-    v-row(align="center")
-      v-col(cols="12" md="6")
-        add-users-menu(v-if="hasPerm('core.add_user')" :update="updateUsers")
-          template(#default="{ on }")
-            v-btn(v-on="on" color="primary")
-              v-icon(left) mdi-account-multiple-plus
-              | {{ $t('panel.ac.users.addUsers') }}
-      v-col.text-right(cols="12" md="6")
-        unload-users-menu
-          template(#default="{ on }")
-            v-btn(v-on="on" color="success" @click="")
-              v-icon(left) mdi-upload
-              | {{ $t('panel.ac.users.unloadUsers') }}
-    v-row(align="center")
-      v-col(cols="12" md="6")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.caption.text-right(cols="12" md="6") {{ $t('shownOf', { count, totalCount }) }}
-    v-data-table(
-      :headers="headers"
-      :items="users"
-      :loading="loading"
-      hide-default-footer
-      disable-pagination
-    )
-      template(#item.avatar="{ item }")
-        avatar-dialog(:item="item")
-      template(#item.name="{ item }") {{ getUserFullName(item) }}
-      template(#item.groups="{ item }")
-        change-group-dialog(
-          :user="item"
-          :groups="groups"
-          @update="args => updateGroups(item, ...args)"
-        )
-          template(#default="{ on: onDialog }")
-            v-tooltip(bottom)
-              template(#activator="{ on: onTooltip }")
-                div(
-                  v-on="{ ...onDialog, ...onTooltip }"
-                  style="cursor: pointer"
-                ) {{ item.groups.length ? item.groups.map(e => e.name).join(', ') : $t('panel.ac.users.changeGroups.noGroups') }}
-              span {{ $t('panel.ac.users.change') }}
-      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('panel.ac.users.name') }}
+  v-row(align="center")
+    v-col(cols="12" md="6")
+      add-users-menu(v-if="hasPerm('core.add_user')" :update="updateUsers")
+        template(#default="{ on }")
+          v-btn(v-on="on" color="primary")
+            v-icon(left) mdi-account-multiple-plus
+            | {{ $t('panel.ac.users.addUsers') }}
+    v-col.text-right(cols="12" md="6")
+      unload-users-menu
+        template(#default="{ on }")
+          v-btn(v-on="on" color="success" @click="")
+            v-icon(left) mdi-upload
+            | {{ $t('panel.ac.users.unloadUsers') }}
+  v-row(align="center")
+    v-col(cols="12" md="6")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.caption.text-right(cols="12" md="6") {{ $t('shownOf', { count, totalCount }) }}
+  v-data-table(
+    :headers="headers"
+    :items="users"
+    :loading="loading"
+    hide-default-footer
+    disable-pagination
+  )
+    template(#item.avatar="{ item }")
+      avatar-dialog(:item="item")
+    template(#item.name="{ item }") {{ getUserFullName(item) }}
+    template(#item.groups="{ item }")
+      change-group-dialog(
+        :user="item"
+        :groups="groups"
+        @update="args => updateGroups(item, ...args)"
+      )
+        template(#default="{ on: onDialog }")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip }")
+              div(
+                v-on="{ ...onDialog, ...onTooltip }"
+                style="cursor: pointer"
+              ) {{ item.groups.length ? item.groups.map(e => e.name).join(', ') : $t('panel.ac.users.changeGroups.noGroups') }}
+            span {{ $t('panel.ac.users.change') }}
+    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">

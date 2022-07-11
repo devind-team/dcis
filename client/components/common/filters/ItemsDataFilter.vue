@@ -1,79 +1,79 @@
 <template lang="pug">
-  base-data-filter(
-    :message="message"
-    :message-container-class="messageContainerClass"
-    :message-container-close="!!selectedItems.length"
-    :title="title"
-    :modal="modal"
-    :max-width="maxWidth"
-    :max-height="maxHeight"
-    @clear="clear"
-    @close="close"
-    @reset="reset"
-    @apply="apply"
-  )
-    template(#message="message")
-      slot(name="message" v-bind="message")
-    template(#title="title")
-      slot(name="title" v-bind="title")
-    template(#subtitle)
-      slot(name="subtitle")
-    template(#fixed-content)
-      slot(name="search" :search-label="searchLabel" :search-function="searchFunction" :on="searchOn")
-        v-card-text.flex-shrink-0(v-if="searchFunction")
-          v-text-field(
-            v-model="search"
-            :label="searchLabel"
-            prepend-icon="mdi-magnify"
-            hide-details
-            clearable
+base-data-filter(
+  :message="message"
+  :message-container-class="messageContainerClass"
+  :message-container-close="!!selectedItems.length"
+  :title="title"
+  :modal="modal"
+  :max-width="maxWidth"
+  :max-height="maxHeight"
+  @clear="clear"
+  @close="close"
+  @reset="reset"
+  @apply="apply"
+)
+  template(#message="message")
+    slot(name="message" v-bind="message")
+  template(#title="title")
+    slot(name="title" v-bind="title")
+  template(#subtitle)
+    slot(name="subtitle")
+  template(#fixed-content)
+    slot(name="search" :search-label="searchLabel" :search-function="searchFunction" :on="searchOn")
+      v-card-text.flex-shrink-0(v-if="searchFunction")
+        v-text-field(
+          v-model="search"
+          :label="searchLabel"
+          prepend-icon="mdi-magnify"
+          hide-details
+          clearable
+        )
+  template(#item-content)
+    slot(
+      name="items"
+      :items="items"
+      :searchItems="searchItems"
+      :item-key="itemKey"
+      :multiple="multiple"
+      :has-select-all="hasSelectAll"
+      :get-name="getName"
+      :get-selected="getSelected"
+      :set-selected="setSelected"
+    )
+      template(v-if="multiple")
+        v-checkbox.my-2(
+          v-if="hasSelectAll && searchItems.length"
+          v-model="allSelected"
+          :label="$t('common.filters.itemsDataFilter.selectAll')"
+          hide-details
+        )
+        template(v-for="item in searchItems")
+          slot(
+            name="item"
+            :item="item"
+            :get-name="getName"
+            :is-selected="getSelected(item)"
+            :change="setSelected.bind(this, item)"
           )
-    template(#item-content)
-      slot(
-        name="items"
-        :items="items"
-        :searchItems="searchItems"
-        :item-key="itemKey"
-        :multiple="multiple"
-        :has-select-all="hasSelectAll"
-        :get-name="getName"
-        :get-selected="getSelected"
-        :set-selected="setSelected"
-      )
-        template(v-if="multiple")
-          v-checkbox.my-2(
-            v-if="hasSelectAll && searchItems.length"
-            v-model="allSelected"
-            :label="$t('common.filters.itemsDataFilter.selectAll')"
-            hide-details
+            v-checkbox.my-2(
+              :key="item[itemKey]"
+              :input-value="getSelected(item)"
+              :label="getName(item)"
+              hide-details
+              @change="setSelected(item, $event)"
+            )
+      v-radio-group.my-2(v-else v-model="tempValue" hide-details)
+        template(v-for="item in searchItems")
+          slot(
+            name="item"
+            :item="item"
+            :get-name="getName"
+            :is-selected="getSelected(item)"
+            :change="setSelected.bind(this, item)"
           )
-          template(v-for="item in searchItems")
-            slot(
-              name="item"
-              :item="item"
-              :get-name="getName"
-              :is-selected="getSelected(item)"
-              :change="setSelected.bind(this, item)"
-            )
-              v-checkbox.my-2(
-                :key="item[itemKey]"
-                :input-value="getSelected(item)"
-                :label="getName(item)"
-                hide-details
-                @change="setSelected(item, $event)"
-              )
-        v-radio-group.my-2(v-else v-model="tempValue" hide-details)
-          template(v-for="item in searchItems")
-            slot(
-              name="item"
-              :item="item"
-              :get-name="getName"
-              :is-selected="getSelected(item)"
-              :change="setSelected.bind(this, item)"
-            )
-              v-radio(:key="item[itemKey]" :value="item" :label="getName(item)")
-    template(#actions="actions")
-      slot(name="actions" v-bind="actions")
+            v-radio(:key="item[itemKey]" :value="item" :label="getName(item)")
+  template(#actions="actions")
+    slot(name="actions" v-bind="actions")
 </template>
 
 <script lang="ts">

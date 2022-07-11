@@ -1,12 +1,12 @@
 <template lang="pug">
-  v-row(v-if="!loading")
-    v-col(v-for="chart in charts" :key="chart" cols="12" sm="4")
-      .caption {{ labels[chart] }}
-      client-only
-        apex-chart(
-          type="donut"
-          :options="statistics[chart].options"
-          :series="statistics[chart].series")
+v-row(v-if="!loading")
+  v-col(v-for="chart in charts" :key="chart" cols="12" sm="4")
+    .caption {{ labels[chart] }}
+    client-only
+      apex-chart(
+        type="donut"
+        :options="statistics[chart].options"
+        :series="statistics[chart].series")
 </template>
 
 <script lang="ts">

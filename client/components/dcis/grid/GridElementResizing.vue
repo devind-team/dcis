@@ -1,11 +1,11 @@
 <template lang="pug">
-  v-alert.grid__element-resizing.font-weight-medium.px-1.py-0(
-    v-show="elementResizing.visible"
-    :style="style"
-    dense
-    outlined
-  ) {{ message }}
-    span.primary--text {{ elementResizing.size }}
+v-alert.grid__element-resizing.font-weight-medium.px-1.py-0(
+  v-show="elementResizing.visible"
+  :style="style"
+  dense
+  outlined
+) {{ message }}
+  span.primary--text {{ elementResizing.size }}
 </template>
 
 <script lang="ts">

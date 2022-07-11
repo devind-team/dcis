@@ -1,25 +1,25 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="600")
-    template(#activator="{ on, attrs }")
-      slot(name="activator" :on="on" :attrs="attrs")
-    v-card
-      v-card-title {{ $t('dcis.documents.unloading.name') }}
-        v-spacer
-        v-btn(@click="close" icon)
-          v-icon mdi-close
-      v-card-subtitle {{ $t('dcis.documents.unloading.additional') }}
-      v-card-text
-        v-checkbox(
-          v-for="param in params"
-          v-model="additional"
-          :key="param"
-          :label="$t(`dcis.documents.unloading.${param}`)"
-          :value="param"
-          dense
-        )
-      v-card-actions
-        v-spacer
-        v-btn(@click="mutate({ documentId, additional })" :loading="loading" color="primary") {{ $t('dcis.documents.unloading.unload') }}
+v-dialog(v-model="active" width="600")
+  template(#activator="{ on, attrs }")
+    slot(name="activator" :on="on" :attrs="attrs")
+  v-card
+    v-card-title {{ $t('dcis.documents.unloading.name') }}
+      v-spacer
+      v-btn(@click="close" icon)
+        v-icon mdi-close
+    v-card-subtitle {{ $t('dcis.documents.unloading.additional') }}
+    v-card-text
+      v-checkbox(
+        v-for="param in params"
+        v-model="additional"
+        :key="param"
+        :label="$t(`dcis.documents.unloading.${param}`)"
+        :value="param"
+        dense
+      )
+    v-card-actions
+      v-spacer
+      v-btn(@click="mutate({ documentId, additional })" :loading="loading" color="primary") {{ $t('dcis.documents.unloading.unload') }}
 </template>
 
 <script lang="ts">
