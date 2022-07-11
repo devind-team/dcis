@@ -29,6 +29,7 @@ export default {
   copy: 'Copy',
   id: '#',
   name: 'Name',
+  actions: 'Actions',
   archive: 'Archive',
   properties: 'Properties',
   user: 'User',

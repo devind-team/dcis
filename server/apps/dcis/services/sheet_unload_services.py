@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Optional, Sequence, Union
+from typing import Sequence
 
 from django.db.models import Model, Q, QuerySet
 from openpyxl.utils import column_index_from_string, get_column_letter
@@ -12,14 +12,14 @@ class DataUnloader(ABC):
     """Выгрузчик данных."""
 
     def __init__(self) -> None:
-        self.data: Optional[Union[list[dict], dict]] = None
+        self.data: list[dict] | dict | None = None
 
     @abstractmethod
-    def unload_data(self) -> Union[list[dict], dict]:
+    def unload_data(self) -> list[dict] | dict:
         """Выгрузка данных."""
         ...
 
-    def unload(self) -> Union[list[dict], dict]:
+    def unload(self) -> list[dict] | dict:
         """Выгрузка данных с учетом кеша."""
         if self.data is not None:
             return self.data
@@ -29,9 +29,9 @@ class DataUnloader(ABC):
     @classmethod
     def unload_raw_data(
         cls,
-        objects: Union[QuerySet, Sequence[Model]],
+        objects:QuerySet | Sequence[Model],
         fields: Sequence[str],
-        properties: Optional[Sequence[str]] = None
+        properties: Sequence[str] | None = None
     ) -> list[dict]:
         """Выгрузка необработанных данных."""
         if properties is not None:
@@ -47,7 +47,7 @@ class DataUnloader(ABC):
         return [cls._model_to_dict(obj, fields=fields) for obj in objects]
 
     @staticmethod
-    def _model_to_dict(instance: Model, fields: Optional[Sequence[str]] = None) -> dict:
+    def _model_to_dict(instance: Model, fields: Sequence[str] | None = None) -> dict:
         """Преобразование модели в словарь."""
         return {k: v for k, v in instance.__dict__.items() if k in fields}
 
@@ -55,11 +55,11 @@ class DataUnloader(ABC):
 class SheetColumnsUnloader(DataUnloader):
     """Выгрузчик колонок листа."""
 
-    def __init__(self, columns: Union[QuerySet[ColumnDimension], Sequence[ColumnDimension]]) -> None:
+    def __init__(self, columns: QuerySet[ColumnDimension] | Sequence[ColumnDimension]) -> None:
         super().__init__()
         self.columns = columns
 
-    def unload_data(self) -> Union[list[dict], dict]:
+    def unload_data(self) -> list[dict] | dict:
         """Выгрузка колонок листа."""
         columns = self.unload_raw_data(self.columns, self._column_fields)
         for column in columns:
@@ -79,10 +79,10 @@ class SheetRowsUploader(DataUnloader):
     def __init__(
         self,
         columns_unloader: SheetColumnsUnloader,
-        rows: Union[QuerySet[RowDimension], Sequence[RowDimension]],
-        cells: Union[QuerySet[Cell], Sequence[Cell]],
-        merged_cells: Union[QuerySet[MergedCell], Sequence[MergedCell]],
-        values: Union[QuerySet[Value], Sequence[Value]]
+        rows: QuerySet[RowDimension] | Sequence[RowDimension],
+        cells: QuerySet[Cell] | Sequence[Cell],
+        merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
+        values: QuerySet[Value] | Sequence[Value]
     ) -> None:
         super().__init__()
         self.columns_unloader = columns_unloader
@@ -91,7 +91,7 @@ class SheetRowsUploader(DataUnloader):
         self.merged_cells = merged_cells
         self.values = values
 
-    def unload_data(self) -> Union[list[dict], dict]:
+    def unload_data(self) -> list[dict] | dict:
         """Выгрузка строк листа."""
         rows = self._unload_raw_rows()
         cells = self._unload_raw_cells()
@@ -205,7 +205,7 @@ class SheetRowsUploader(DataUnloader):
                 cls._add_row_names(row['children'])
 
     @classmethod
-    def _get_row_name(cls, row: dict, indices: Optional[list[int]] = None) -> str:
+    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
         """Получение имени строки."""
         indices = indices or []
         if row['parent'] is not None:
@@ -326,10 +326,10 @@ class SheetPartialRowsUploader(SheetRowsUploader):
     def __init__(
         self,
         columns_unloader: SheetColumnsUnloader,
-        rows: Union[QuerySet[RowDimension], Sequence[RowDimension]],
-        cells: Union[QuerySet[Cell], Sequence[Cell]],
-        merged_cells: Union[QuerySet[MergedCell], Sequence[MergedCell]],
-        values: Union[QuerySet[Value], Sequence[Value]],
+        rows: QuerySet[RowDimension] | Sequence[RowDimension],
+        cells: QuerySet[Cell] | Sequence[Cell],
+        merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
+        values: QuerySet[Value] | Sequence[Value],
         rows_global_indices_map: dict[dict]
     ) -> None:
         super().__init__(
@@ -341,7 +341,7 @@ class SheetPartialRowsUploader(SheetRowsUploader):
         )
         self.rows_global_indices_map = rows_global_indices_map
 
-    def unload_data(self) -> Union[list[dict], dict]:
+    def unload_data(self) -> list[dict] | dict:
         """Частичная выгрузка строк листа."""
         rows = self._unload_raw_rows()
         cells = self._unload_raw_cells()
@@ -388,13 +388,13 @@ class SheetPartialRowsUploader(SheetRowsUploader):
 class SheetUploader(DataUnloader):
     """Выгрузчик листа."""
 
-    def __init__(self, sheet: Sheet, fields: Sequence[str], document_id: Optional[Union[int, str]] = None) -> None:
+    def __init__(self, sheet: Sheet, fields: Sequence[str], document_id: int | str | None = None) -> None:
         super().__init__()
         self.sheet = sheet
         self.fields = fields
         self.document_id = document_id
 
-    def unload_data(self) -> Union[list[dict], dict]:
+    def unload_data(self) -> list[dict] | dict:
         """Выгрузка листа."""
         sheet = self._model_to_dict(
             self.sheet,

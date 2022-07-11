@@ -4,6 +4,9 @@
 query Project($projectId: ID!) {
   project(projectId: $projectId) {
     ...ProjectFields
+    canChange
+    canDelete
+    canAddPeriod
     user {
       ...UserFields
     }

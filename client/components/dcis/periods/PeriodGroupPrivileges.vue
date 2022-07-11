@@ -1,154 +1,105 @@
 <template lang="pug">
-mutation-modal-form(
-  :header="formHeader"
-  :subheader="itemName"
-  :button-text="buttonText"
-  :mutation="user ? changeGroupUsersPrivileges : changePeriodGroupPrivileges"
-  :update="user ? changeUsersPrivilegesUpdate : changeGroupPrivilegesUpdate"
-  :variables="formVariables"
-  :mutation-name="mutationName"
-  errors-in-alert
-  persistent
-)
-  template(#activator="{ on }")
-    slot(name="activator" :on="on")
-  template(#form)
-    v-data-table(
-      v-model="selectPrivileges"
-      :headers="headers"
-      :items="items"
-      :loading="loading"
-      item-key="id"
-      disable-pagination
-      show-select
-      hide-default-footer
-    )
+  mutation-form(
+    v-if="canChange"
+    :button-text="String($t('dcis.periods.groups.changePrivileges.buttonText'))"
+    :mutation="changePeriodGroupPrivilegesMutation"
+    :variables="variables"
+    :update="update"
+    :show-success="false"
+    mutation-name="changePeriodGroupPrivileges"
+    errors-in-alert
+    flat
+  )
+    template(#form)
+      v-data-table(
+        v-model="privileges"
+        :headers="headers"
+        :items="allPrivileges"
+        :loading="loading"
+        show-select
+        hide-default-footer
+      )
+  v-data-table(
+    v-else
+    :headers="headers"
+    :items="group.privileges"
+    hide-default-footer
+  )
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
-import { computed, defineComponent, inject, PropType, ref } from '#app'
+import { PropType } from '#app'
 import {
-  AdditionalPrivilegesQuery,
-  AdditionalPrivilegesQueryVariables,
-  ChangeGroupUserPrivilegesMutationPayload,
-  ChangePeriodGroupPrivilegesMutationPayload,
   PeriodGroupType,
-  PeriodType,
+  PrivilegeType,
   PrivilegesQuery,
   PrivilegesQueryVariables,
-  PrivilegeType,
-  UserType
+  ChangePeriodGroupPrivilegesMutationPayload,
+  ChangePeriodGroupPrivilegesMutationVariables
 } from '~/types/graphql'
-import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
-import { useCommonQuery, useFilters, useI18n } from '~/composables'
+import MutationForm from '~/components/common/forms/MutationForm.vue'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
-import additionalPrivilegesQuery from '~/gql/dcis/queries/additional_privileges.graphql'
-import changePeriodGroupPrivileges from '~/gql/dcis/mutations/privelege/change_period_group_privileges.graphql'
-import changeGroupUsersPrivileges from '~/gql/dcis/mutations/privelege/change_user_privileges.graphql'
+import changePeriodGroupPrivilegesMutation from '~/gql/dcis/mutations/period/change_period_group_privileges.graphql'
 
-export type ChangePeriodGroupPrivilegesMutationResult = { data: { changePeriodGroupPrivileges: ChangePeriodGroupPrivilegesMutationPayload } }
-export type ChangeGroupUsersPrivilegesMutationResult = { data: { changeGroupUsersPrivileges: ChangeGroupUserPrivilegesMutationPayload } }
-type UpdateFunction = (cache: DataProxy | any, result: ChangeGroupUserPrivilegesMutationPayload | any) => DataProxy | any
+export type ChangePeriodGroupPrivilegesMutationResult = {
+  data?: { changePeriodGroupPrivileges: ChangePeriodGroupPrivilegesMutationPayload }
+}
+type UpdateFunction = (
+  cache: DataProxy | any,
+  result: ChangePeriodGroupPrivilegesMutationResult
+) => DataProxy
 
 export default defineComponent({
-  components: { MutationModalForm },
+  components: { MutationForm },
   props: {
-    activeQuery: { type: Boolean as PropType<boolean>, default: false },
-    periodGroup: { type: Object as PropType<PeriodGroupType>, required: true },
-    period: { type: Object as PropType<PeriodType>, default: null },
-    user: { type: Object as PropType<UserType>, default: null },
-    userPrivileges: { type: Array as PropType<PrivilegeType[]>, default: null },
-    update: { type: Function as PropType<UpdateFunction>, default: () => null }
+    group: { type: Object as PropType<PeriodGroupType>, required: true },
+    canChange: { type: Boolean, required: true },
+    update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
     const { t } = useI18n()
-    const { getUserFullName } = useFilters()
 
-    const activeQuery = ref<boolean>(props.activeQuery)
-    const options = ref({ enabled: activeQuery })
-    const { data: privileges, loading } = useCommonQuery<PrivilegesQuery, PrivilegesQueryVariables>({
-      document: privilegesQuery
-    })
-    const { data: additionalPrivileges } = useCommonQuery<AdditionalPrivilegesQuery, AdditionalPrivilegesQueryVariables>({
-      document: additionalPrivilegesQuery,
-      variables: { periodId: props.period?.id, userId: props.user?.id },
-      options: props.user ? options.value : { enabled: false }
-    })
-    const privilegesListId = ref<string[]>([])
-    const selectPrivileges = computed<PrivilegeType[]>({
-      get: (): PrivilegeType[] => props.user ? additionalPrivileges.value?.map((e: PrivilegeType) => e) : props.periodGroup.privileges,
-      set: (value: PrivilegeType[]) => {
-        privilegesListId.value = value.map((e: PrivilegeType) => e.id)
-      }
-    })
-    const items = computed<PrivilegeType[]>(() => props.user
-      ? privileges.value.filter((privilege: PrivilegeType) => !props.periodGroup.privileges.map((p: PrivilegeType) => p.id).includes(privilege.id))
-      : privileges.value.map((privilege: PrivilegeType) => privilege)
-    )
-    const itemName = computed<string>(() => (props.user ? getUserFullName(props.user) : props.periodGroup.name))
-    const mutationName = computed<string>(() => (props.user ? 'changeGroupUsersPrivileges' : 'changePeriodGroupPrivileges'))
-    const formVariables = computed<{ periodGroupId: string, privilegesIds: string[], userId?: string }>(() => {
-      if (props.user) {
-        return { periodGroupId: props.periodGroup.id, userId: props.user.id, privilegesIds: privilegesListId.value }
-      } else {
-        return { periodGroupId: props.periodGroup.id, privilegesIds: privilegesListId.value }
-      }
-    })
-    const formHeader = computed<string>(() => (props.user
-      ? t('dcis.periods.changePrivileges.userHeader') as string
-      : t('dcis.periods.changePrivileges.groupHeader') as string)
-    )
-    const headers = computed<DataTableHeader[]>(() => ([
-      { text: t('dcis.periods.changePrivileges.name') as string, value: 'name' },
-      { text: t('dcis.periods.changePrivileges.key') as string, value: 'key' }
-    ]))
-    const buttonText = computed<string>(() => (props.user
-      ? t('dcis.periods.changePrivileges.buttonAddText') as string
-      : t('dcis.periods.changePrivileges.buttonChangeText') as string)
-    )
-    const periodGroupPrivilegesUpdate: any = inject('periodGroupPrivilegesUpdate')
+    const headers: DataTableHeader[] = [
+      { text: t('dcis.periods.groups.changePrivileges.tableHeaders.name') as string, value: 'name' },
+      { text: t('dcis.periods.groups.changePrivileges.tableHeaders.key') as string, value: 'key' }
+    ]
 
-    /**
-     * Обновление после изменения привилегий группы
-     * @param cache
-     * @param result
-     */
-    const changeGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
-      const { errors } = result.data.changePeriodGroupPrivileges
-      if (!errors.length) {
-        periodGroupPrivilegesUpdate(cache, result)
+    const { data: allPrivileges, loading } = useCommonQuery<
+      PrivilegesQuery,
+      PrivilegesQueryVariables
+    >({
+      document: privilegesQuery,
+      options: computed(() => ({ enabled: props.canChange }))
+    })
+    const getPrivileges = () => {
+      if (!allPrivileges.value) {
+        return []
       }
+      return allPrivileges.value.filter((privilege: PrivilegeType) =>
+        props.group.privileges.find((groupPrivilege: PrivilegeType) => privilege.id === groupPrivilege.id))
     }
+    const privileges = ref<PrivilegeType[]>(getPrivileges())
+    watch(() => props.group, () => {
+      privileges.value = getPrivileges()
+    })
+    watch(allPrivileges, () => {
+      privileges.value = getPrivileges()
+    })
 
-    /**
-     * Обновление после изменения привилегий пользователя
-     * @param cache
-     * @param result
-     */
-    const changeUsersPrivilegesUpdate = (cache: DataProxy, result: ChangeGroupUsersPrivilegesMutationResult) => {
-      const { success } = result.data.changeGroupUsersPrivileges
-      if (success) {
-        props.update(cache, result)
-      }
-    }
+    const variables = computed<ChangePeriodGroupPrivilegesMutationVariables>(() => ({
+      periodGroupId: props.group.id,
+      privilegesIds: privileges.value.map((privilege: PrivilegeType) => privilege.id)
+    }))
+
     return {
+      changePeriodGroupPrivilegesMutation,
       headers,
-      items,
-      itemName,
-      formHeader,
-      privileges,
-      buttonText,
-      additionalPrivileges,
+      allPrivileges,
       loading,
-      selectPrivileges,
-      formVariables,
-      mutationName,
-      changePeriodGroupPrivileges,
-      changeGroupUsersPrivileges,
-      changeGroupPrivilegesUpdate,
-      changeUsersPrivilegesUpdate
+      privileges,
+      variables
     }
   }
 })

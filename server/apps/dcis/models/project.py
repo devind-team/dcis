@@ -1,4 +1,4 @@
-from typing import cast, Type, Union
+from typing import Type, cast
 
 from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
@@ -15,7 +15,7 @@ def default_content_type(instance):
 class Project(models.Model):
     """Проект сборов."""
 
-    DIVISION_KIND: dict[str, Type[Union[Department, Organization]]] = {
+    DIVISION_KIND: dict[str, Type[Department] | Type[Organization]] = {
         'department': Department,
         'organization': Organization
     }
@@ -42,7 +42,7 @@ class Project(models.Model):
         ordering = ('-created_at',)
 
     @property
-    def division(self) -> Type[Union[Department, Organization]]:
+    def division(self) -> Type[Department] | Type[Organization]:
         return self.DIVISION_KIND.get(cast(str, self.content_type.model), Department)
 
 

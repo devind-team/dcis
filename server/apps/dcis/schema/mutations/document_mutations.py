@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Any
 
 import graphene
 from devind_helpers.decorators import permission_classes
+from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
@@ -11,7 +12,7 @@ from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.dcis.models import Document, DocumentStatus, Period, Status
-from apps.dcis.permissions import AddDocument, AddDocumentStatus, DeleteDocumentStatus
+from apps.dcis.permissions import AddDocument, ChangeDocument
 from apps.dcis.schema.types import DocumentStatusType, DocumentType
 from apps.dcis.services.document_services import create_new_document
 from apps.dcis.services.document_unload_services import DocumentUnload
@@ -40,18 +41,19 @@ class AddDocumentMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, AddDocument,))
     def mutate_and_get_payload(
-            root: None,
-            info: ResolveInfo,
-            comment: str,
-            period_id: str,
-            status_id: int,
-            document_id: Optional[int] = None,
-            division_id: Optional[int] = None
+        root: None,
+        info: ResolveInfo,
+        comment: str,
+        period_id: str,
+        status_id: int,
+        document_id: int | None = None,
+        division_id: int | None = None,
     ) -> 'AddDocumentMutation':
-        """Мутация для создания документа."""
+        """Мутация для добавления документа."""
         user: User = info.context.user
         period: Period = get_object_or_404(Period, pk=period_id)
-        document_id: Optional[int] = from_global_id(document_id)[1] if document_id else None
+        info.context.check_object_permissions(info.context, period)
+        document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document: Document = create_new_document(
             user,
             period,
@@ -70,7 +72,11 @@ class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
         model = Document
         login_required = True
         only_fields = ('comment',)
-        permissions = ('dcis.change_period', 'dcis.change_document',)
+
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Document) -> None:
+        if not ChangeDocument.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -84,9 +90,10 @@ class AddDocumentStatusMutation(BaseMutation):
     document_status = graphene.Field(DocumentStatusType, description='Статус документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddDocumentStatus,))
+    @permission_classes((IsAuthenticated, ChangeDocument))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: int, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        info.context.check_object_permissions(info.context, document)
         status: Status = get_object_or_404(Status, pk=status_id)
         document_status = DocumentStatus.objects.create(
             status=status,
@@ -106,10 +113,12 @@ class DeleteDocumentStatusMutation(BaseMutation):
     id = graphene.ID(required=True, description='Идентификатор статуса документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, DeleteDocumentStatus,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int, *args, **kwargs):
-        delete_count, _ = DocumentStatus.objects.filter(pk=document_status_id).delete()
-        return DeleteDocumentStatusMutation(success=delete_count == 1, id=document_status_id)
+    @permission_classes((IsAuthenticated, ChangeDocument,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
+        status = get_object_or_404(DocumentStatus, pk=document_status_id)
+        info.context.check_object_permissions(info.context, status.document)
+        status.delete()
+        return DeleteDocumentStatusMutation(id=document_status_id)
 
 
 class UnloadDocumentMutation(BaseMutation):
@@ -126,7 +135,7 @@ class UnloadDocumentMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: Optional[list[str]] = None):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
         if not additional:
             additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])

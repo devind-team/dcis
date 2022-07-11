@@ -1,6 +1,6 @@
 """Конвертер theme types цветов в rgb hex."""
 
-from colorsys import rgb_to_hls, hls_to_rgb
+from colorsys import hls_to_rgb, rgb_to_hls
 
 RGBMAX = 0xff  # Corresponds to 255
 HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
