@@ -1,8 +1,8 @@
 """Описание сигналов для записи изменений в моделях."""
-from auditlog.registry import auditlog
-from django.contrib.auth.models import Group
-from devind_core.models import File
 from .models import User
+from auditlog.registry import auditlog
+from devind_core.models import File
+from django.contrib.auth.models import Group
 
 
 auditlog.register(User)
