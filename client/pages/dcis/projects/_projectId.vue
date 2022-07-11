@@ -1,8 +1,8 @@
 <template lang="pug">
-  div
-    left-navigator-driver(v-model="drawer" :items="links")
-    v-progress-circular(v-if="loading" color="primary" indeterminate)
-    nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :project="project")
+div
+  left-navigator-driver(v-model="drawer" :items="links")
+  v-progress-circular(v-if="loading" color="primary" indeterminate)
+  nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :project="project")
 </template>
 
 <script lang="ts">

@@ -1,47 +1,47 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.periods.changePeriodUsers.header'))"
-    :button-text="String($t('dcis.periods.changePeriodUsers.buttonText'))"
-    :mutation="changePeriodGroupUsers"
-    :variables="formVariables"
-    :update="changePeriodGroupUsersUpdate"
-    mutation-name="changePeriodGroupUsers"
-    errors-in-alert
-    persistent
-    @close="close"
-    @done="selectUsers = []"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="$t('dcis.periods.changePeriodUsers.users')"
-        rules="required"
+mutation-modal-form(
+  :header="String($t('dcis.periods.changePeriodUsers.header'))"
+  :button-text="String($t('dcis.periods.changePeriodUsers.buttonText'))"
+  :mutation="changePeriodGroupUsers"
+  :variables="formVariables"
+  :update="changePeriodGroupUsersUpdate"
+  mutation-name="changePeriodGroupUsers"
+  errors-in-alert
+  persistent
+  @close="close"
+  @done="selectUsers = []"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="$t('dcis.periods.changePeriodUsers.users')"
+      rules="required"
+    )
+      v-combobox(
+        v-model="selectUsers"
+        :search-input.sync="search"
+        :loading="loading"
+        :items="allUsers"
+        :label="$t('dcis.periods.changePeriodUsers.users')"
+        :filter="filterInputUsers"
+        :success="valid"
+        :error-messages="errors"
+        multiple
+        return-object
+        item-text="text"
+        item-value="value"
+        hide-selected
+        clearable
       )
-        v-combobox(
-          v-model="selectUsers"
-          :search-input.sync="search"
-          :loading="loading"
-          :items="allUsers"
-          :label="$t('dcis.periods.changePeriodUsers.users')"
-          :filter="filterInputUsers"
-          :success="valid"
-          :error-messages="errors"
-          multiple
-          return-object
-          item-text="text"
-          item-value="value"
-          hide-selected
-          clearable
-        )
-          template(#selection="{ item }")
-            v-chip.ma-1(
-              v-model="item"
-              :key="item.id"
-              close
-              @click:close="selectUsers.splice(selectUsers.indexOf(item), 1)"
-            ) {{ item.text }}
+        template(#selection="{ item }")
+          v-chip.ma-1(
+            v-model="item"
+            :key="item.id"
+            close
+            @click:close="selectUsers.splice(selectUsers.indexOf(item), 1)"
+          ) {{ item.text }}
 </template>
 
 <script lang="ts">

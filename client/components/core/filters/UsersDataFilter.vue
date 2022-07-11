@@ -1,27 +1,27 @@
 <template lang="pug">
-  component(
-    :is="users ? 'ItemsDataFilter' : 'QueryDataFilter'"
-    v-model="selectedValue"
-    v-bind="$attrs"
-    v-on="$listeners"
-    :items="users"
-    :title="title"
-    :no-filtration-message="noFiltrationMessage"
-    :multiple-message-function="multipleMessageFunction"
-    :get-name="$getUserName"
-    :search-function="searchUser"
-  )
-    template(#item="{ item, getName, isSelected, change }")
-      .d-flex.my-1.align-center
-        v-checkbox.my-0.py-0(
-          :key="item.id"
-          :input-value="isSelected"
-          :label="getName(item)"
-          hide-details
-          style="width: 210px"
-          @change="change"
-        )
-        avatar-dialog(:item="item" size="40")
+component(
+  :is="users ? 'ItemsDataFilter' : 'QueryDataFilter'"
+  v-model="selectedValue"
+  v-bind="$attrs"
+  v-on="$listeners"
+  :items="users"
+  :title="title"
+  :no-filtration-message="noFiltrationMessage"
+  :multiple-message-function="multipleMessageFunction"
+  :get-name="$getUserName"
+  :search-function="searchUser"
+)
+  template(#item="{ item, getName, isSelected, change }")
+    .d-flex.my-1.align-center
+      v-checkbox.my-0.py-0(
+        :key="item.id"
+        :input-value="isSelected"
+        :label="getName(item)"
+        hide-details
+        style="width: 210px"
+        @change="change"
+      )
+      avatar-dialog(:item="item" size="40")
 </template>
 
 <script lang="ts">

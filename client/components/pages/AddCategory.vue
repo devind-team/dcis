@@ -1,41 +1,41 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="close"
-    :mutation="require('~/gql/pages/mutations/category/add_category.graphql')"
-    :variables="{ avatar, text, parentId: category && category.id }"
-    :header="String($t('pages.category.addDialog.header'))"
-    :button-text="String($t('pages.category.addDialog.add'))"
-    :update="update"
-    mutation-name="addCategory"
-  )
-    template(#activator="{ on }")
-      slot(:on="on")
-        v-card(v-on="on" style="border: 1px rgba(0, 0, 0, 0.12) dashed" ripple outlined)
-          v-card-text.text-center
-            v-icon mdi-plus
-            | {{ $t('pages.category.addCardHeader') }}
-    template(#form)
-      validation-provider(:name="String($t('pages.category.addDialog.avatar'))" tag="div" v-slot="{ errors, valid }")
-        v-file-input(
-          v-model="avatar"
-          :label="$t('pages.category.addDialog.avatar')"
-          :error-messages="errors"
-          :success="valid"
-          prepend-icon="mdi-camera"
-          show-size
-        )
-      validation-provider(
-        :name="String($t('pages.category.addDialog.text'))"
-        rules="required|min:3|max:1023"
-        v-slot="{ errors, valid }"
+mutation-modal-form(
+  @close="close"
+  :mutation="require('~/gql/pages/mutations/category/add_category.graphql')"
+  :variables="{ avatar, text, parentId: category && category.id }"
+  :header="String($t('pages.category.addDialog.header'))"
+  :button-text="String($t('pages.category.addDialog.add'))"
+  :update="update"
+  mutation-name="addCategory"
+)
+  template(#activator="{ on }")
+    slot(:on="on")
+      v-card(v-on="on" style="border: 1px rgba(0, 0, 0, 0.12) dashed" ripple outlined)
+        v-card-text.text-center
+          v-icon mdi-plus
+          | {{ $t('pages.category.addCardHeader') }}
+  template(#form)
+    validation-provider(:name="String($t('pages.category.addDialog.avatar'))" tag="div" v-slot="{ errors, valid }")
+      v-file-input(
+        v-model="avatar"
+        :label="$t('pages.category.addDialog.avatar')"
+        :error-messages="errors"
+        :success="valid"
+        prepend-icon="mdi-camera"
+        show-size
       )
-        v-text-field(
-          v-model="text"
-          :label="$t('pages.category.addDialog.text')"
-          :error-messages="errors"
-          :success="valid"
-          autofocus
-        )
+    validation-provider(
+      :name="String($t('pages.category.addDialog.text'))"
+      rules="required|min:3|max:1023"
+      v-slot="{ errors, valid }"
+    )
+      v-text-field(
+        v-model="text"
+        :label="$t('pages.category.addDialog.text')"
+        :error-messages="errors"
+        :success="valid"
+        autofocus
+      )
 </template>
 
 <script lang="ts">

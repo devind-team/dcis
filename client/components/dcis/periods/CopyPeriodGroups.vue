@@ -1,40 +1,40 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.periods.actions.copyGroups'))"
-    :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
-    :mutation="copyPeriodGroups"
-    :variables="{ periodId: period.id, selectedPeriodId: selectPeriod && selectPeriod.id, periodGroupIds: selectGroups }"
-    :update="copyPeriodGroupsUpdate"
-    mutation-name="copyPeriodGroups"
-    errors-in-alert
-    persistent
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      v-autocomplete(
-        v-model="selectPeriod"
-        :label="String($t('dcis.periods.copyPeriodGroups.period'))"
-        :items="periods"
-        :loading="loading"
-        item-text="name"
-        item-value="id"
-        return-object
-        hide-no-data
-        hide-selected
-      )
-      v-autocomplete(
-        v-model="selectGroups"
-        :label="String($t('dcis.periods.copyPeriodGroups.groups'))"
-        :items="selectPeriod ? periods.find(e => e.id === selectPeriod.id).periodGroups : []"
-        :loading="loading"
-        :disabled="!selectPeriod"
-        item-text="name"
-        item-value="id"
-        multiple
-        hide-no-data
-        hide-selected
-      )
+mutation-modal-form(
+  :header="String($t('dcis.periods.actions.copyGroups'))"
+  :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
+  :mutation="copyPeriodGroups"
+  :variables="{ periodId: period.id, selectedPeriodId: selectPeriod && selectPeriod.id, periodGroupIds: selectGroups }"
+  :update="copyPeriodGroupsUpdate"
+  mutation-name="copyPeriodGroups"
+  errors-in-alert
+  persistent
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    v-autocomplete(
+      v-model="selectPeriod"
+      :label="String($t('dcis.periods.copyPeriodGroups.period'))"
+      :items="periods"
+      :loading="loading"
+      item-text="name"
+      item-value="id"
+      return-object
+      hide-no-data
+      hide-selected
+    )
+    v-autocomplete(
+      v-model="selectGroups"
+      :label="String($t('dcis.periods.copyPeriodGroups.groups'))"
+      :items="selectPeriod ? periods.find(e => e.id === selectPeriod.id).periodGroups : []"
+      :loading="loading"
+      :disabled="!selectPeriod"
+      item-text="name"
+      item-value="id"
+      multiple
+      hide-no-data
+      hide-selected
+    )
 </template>
 
 <script lang="ts">

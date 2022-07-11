@@ -1,89 +1,89 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    apollo-mutation(
-      v-slot="{ mutate, loading, error }"
-      :mutation="require('~/gql/dcis/mutations/project/change_project.graphql')"
-      :variables="{ id: project.id, name,  short, description, visibility, archive }"
-      :update="changeProjectUpdate"
-      tag
-    )
-      v-card
-        v-card-title
-          v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
-          | {{ $t('dcis.projects.changeProject.header') }}
-        v-card-subtitle {{ project.name }}
-        validation-observer(v-slot="{ handleSubmit, invalid }" tag="div")
-          form(@submit.prevent="handleSubmit(mutate)")
-            v-card-text
-              v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess') }}
-              v-alert(type="error" :value="!!error" dismissible) {{ $t('mutationBusinessLogicError', { error: error }) }}
-              validation-provider(
-                v-slot="{ errors, valid }"
-                :name="String($t('dcis.projects.addProject.name'))"
-                rules="required|min:3|max:250"
-              )
-                v-text-field(
-                  v-model="name"
-                  :label="$t('dcis.projects.addProject.name')"
-                  :error-messages="errors" :success="valid"
-                  counter
-                )
-              validation-provider(
-                v-slot="{ errors, valid }"
-                :name="String($t('dcis.projects.addProject.short'))"
-                rules="required|min:3|max:30"
-              )
-                v-text-field(
-                  v-model="short"
-                  :label="$t('dcis.projects.addProject.short')"
-                  :error-messages="errors"
-                  :success="valid"
-                  counter
-                )
-              validation-provider(
-                v-slot="{ errors, valid }"
-                :name="String($t('dcis.projects.addProject.description'))"
-                rules="required|min:3|max:1023"
-              )
-                v-textarea(
-                  v-model="description"
-                  :label="$t('dcis.projects.addProject.description')"
-                  :error-messages="errors"
-                  :success="valid"
-                  counter
-                )
-              v-row
-                v-col(cols="12" md="2")
-                  v-checkbox(v-model="visibility" :label="$t('dcis.projects.addProject.visibility')")
-                v-col(cols="12" md="10")
-                  v-checkbox(v-model="archive" :label="$t('dcis.projects.changeProject.archive')")
-            v-card-actions
-              v-btn(
-                v-if="project.user && project.user.id === user.id || hasPerm('dcis.change_project')"
-                :disabled="invalid"
-                :loading="loading"
-                type="submit"
-                color="success"
-              ) {{ $t('dcis.projects.changeProject.save') }}
-        v-divider
-        v-card-title Удаление проекта
-        v-card-text
-          v-alert(type="warning") {{ $t('dcis.projects.changeProject.warning') }}
-        v-card-actions
-          apollo-mutation(
-            v-slot="{ mutate }"
-            :mutation="require('~/gql/dcis/mutations/project/delete_project.graphql')"
-            :variables="{ id: project.id}"
-            @done="deleteProjectDone"
-            tag
-          )
-            delete-menu(
-              v-if="project.user && project.user.id === user.id || hasPerm('dcis.delete_project')"
-              v-slot="{ on }"
-              :itemName="String($t('dcis.projects.changeProject.deleteItemName'))"
-              @confirm="mutate"
+bread-crumbs(:items="bc")
+  apollo-mutation(
+    v-slot="{ mutate, loading, error }"
+    :mutation="require('~/gql/dcis/mutations/project/change_project.graphql')"
+    :variables="{ id: project.id, name,  short, description, visibility, archive }"
+    :update="changeProjectUpdate"
+    tag
+  )
+    v-card
+      v-card-title
+        v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
+        | {{ $t('dcis.projects.changeProject.header') }}
+      v-card-subtitle {{ project.name }}
+      validation-observer(v-slot="{ handleSubmit, invalid }" tag="div")
+        form(@submit.prevent="handleSubmit(mutate)")
+          v-card-text
+            v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess') }}
+            v-alert(type="error" :value="!!error" dismissible) {{ $t('mutationBusinessLogicError', { error: error }) }}
+            validation-provider(
+              v-slot="{ errors, valid }"
+              :name="String($t('dcis.projects.addProject.name'))"
+              rules="required|min:3|max:250"
             )
-              v-btn(v-on="on" color="error") {{ $t('dcis.projects.changeProject.delete') }}
+              v-text-field(
+                v-model="name"
+                :label="$t('dcis.projects.addProject.name')"
+                :error-messages="errors" :success="valid"
+                counter
+              )
+            validation-provider(
+              v-slot="{ errors, valid }"
+              :name="String($t('dcis.projects.addProject.short'))"
+              rules="required|min:3|max:30"
+            )
+              v-text-field(
+                v-model="short"
+                :label="$t('dcis.projects.addProject.short')"
+                :error-messages="errors"
+                :success="valid"
+                counter
+              )
+            validation-provider(
+              v-slot="{ errors, valid }"
+              :name="String($t('dcis.projects.addProject.description'))"
+              rules="required|min:3|max:1023"
+            )
+              v-textarea(
+                v-model="description"
+                :label="$t('dcis.projects.addProject.description')"
+                :error-messages="errors"
+                :success="valid"
+                counter
+              )
+            v-row
+              v-col(cols="12" md="2")
+                v-checkbox(v-model="visibility" :label="$t('dcis.projects.addProject.visibility')")
+              v-col(cols="12" md="10")
+                v-checkbox(v-model="archive" :label="$t('dcis.projects.changeProject.archive')")
+          v-card-actions
+            v-btn(
+              v-if="project.user && project.user.id === user.id || hasPerm('dcis.change_project')"
+              :disabled="invalid"
+              :loading="loading"
+              type="submit"
+              color="success"
+            ) {{ $t('dcis.projects.changeProject.save') }}
+      v-divider
+      v-card-title Удаление проекта
+      v-card-text
+        v-alert(type="warning") {{ $t('dcis.projects.changeProject.warning') }}
+      v-card-actions
+        apollo-mutation(
+          v-slot="{ mutate }"
+          :mutation="require('~/gql/dcis/mutations/project/delete_project.graphql')"
+          :variables="{ id: project.id}"
+          @done="deleteProjectDone"
+          tag
+        )
+          delete-menu(
+            v-if="project.user && project.user.id === user.id || hasPerm('dcis.delete_project')"
+            v-slot="{ on }"
+            :itemName="String($t('dcis.projects.changeProject.deleteItemName'))"
+            @confirm="mutate"
+          )
+            v-btn(v-on="on" color="error") {{ $t('dcis.projects.changeProject.delete') }}
 </template>
 
 <script lang="ts">

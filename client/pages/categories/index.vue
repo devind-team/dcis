@@ -1,50 +1,50 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    v-data-iterator(:items="categories" disable-pagination hide-default-footer)
-      template(v-slot:default="{ items }")
-        v-row
-          v-col(v-for="category in items" :key="category.id" cols="12" sm="6" md="4" lg="4")
-            v-card
-              v-img(v-if="category.avatar" :src="`/${category.avatar}`" height="250")
-              v-card-actions
-                v-btn(
-                  :to="localePath({ name: 'categories-categoryId', params: { categoryId: category.id } })"
-                  text
-                ) {{ category.text }}
-                template(v-if="hasPerm(['pages.add_category', 'pages.change_category', 'pages.delete_category'], true)")
-                  v-spacer
-                  category-action(
-                    :category="category"
-                    :addCategoryUpdate="addCategoryUpdate"
-                    :changeCategoryUpdate="changeCategoryUpdate"
-                    :deleteCategoryUpdate="deleteCategoryUpdate"
-                    add
-                  )
-              v-card-text
-                v-list
-                  v-list-item(
-                    v-for="cat in category.children"
-                    :key="cat.id"
-                    :to="localePath({ name: 'categories-categoryId', params: { categoryId: cat.id } })"
-                    exact
-                  )
-                    v-list-item-avatar(v-if="cat.avatar")
-                      v-img(:src="`/${cat.avatar}`")
-                    v-list-item-content
-                      v-list-item-title {{ cat.text }}
-                    v-list-item-action(v-if="hasPerm(['pages.change_category', 'pages.delete_category'], true)")
-                      category-action(
-                        :category="cat"
-                        :changeCategoryUpdate="changeCategoryUpdate"
-                        :deleteCategoryUpdate="deleteCategoryUpdate"
-                        icon="mdi-dots-vertical")
-          v-col(v-if="hasPerm('pages.add_category')" key="addCategory" cols="12" sm="6" md="4" lg="4")
-            add-category(:update="addCategoryUpdate")
-      template(#no-data)
-        v-row
-          v-col(v-if="hasPerm('pages.add_category')")
-            add-category(:update="addCategoryUpdate")
-          v-col(v-else) {{ $t('pages.category.noCategories') }}
+bread-crumbs(:items="bc")
+  v-data-iterator(:items="categories" disable-pagination hide-default-footer)
+    template(v-slot:default="{ items }")
+      v-row
+        v-col(v-for="category in items" :key="category.id" cols="12" sm="6" md="4" lg="4")
+          v-card
+            v-img(v-if="category.avatar" :src="`/${category.avatar}`" height="250")
+            v-card-actions
+              v-btn(
+                :to="localePath({ name: 'categories-categoryId', params: { categoryId: category.id } })"
+                text
+              ) {{ category.text }}
+              template(v-if="hasPerm(['pages.add_category', 'pages.change_category', 'pages.delete_category'], true)")
+                v-spacer
+                category-action(
+                  :category="category"
+                  :addCategoryUpdate="addCategoryUpdate"
+                  :changeCategoryUpdate="changeCategoryUpdate"
+                  :deleteCategoryUpdate="deleteCategoryUpdate"
+                  add
+                )
+            v-card-text
+              v-list
+                v-list-item(
+                  v-for="cat in category.children"
+                  :key="cat.id"
+                  :to="localePath({ name: 'categories-categoryId', params: { categoryId: cat.id } })"
+                  exact
+                )
+                  v-list-item-avatar(v-if="cat.avatar")
+                    v-img(:src="`/${cat.avatar}`")
+                  v-list-item-content
+                    v-list-item-title {{ cat.text }}
+                  v-list-item-action(v-if="hasPerm(['pages.change_category', 'pages.delete_category'], true)")
+                    category-action(
+                      :category="cat"
+                      :changeCategoryUpdate="changeCategoryUpdate"
+                      :deleteCategoryUpdate="deleteCategoryUpdate"
+                      icon="mdi-dots-vertical")
+        v-col(v-if="hasPerm('pages.add_category')" key="addCategory" cols="12" sm="6" md="4" lg="4")
+          add-category(:update="addCategoryUpdate")
+    template(#no-data)
+      v-row
+        v-col(v-if="hasPerm('pages.add_category')")
+          add-category(:update="addCategoryUpdate")
+        v-col(v-else) {{ $t('pages.category.noCategories') }}
 </template>
 
 <script lang="ts">

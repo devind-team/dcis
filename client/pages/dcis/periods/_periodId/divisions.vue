@@ -1,30 +1,30 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc"  @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.divisions.header') }}
-    change-divisions(
-      :period="period"
-      :divisions="filterDivisions"
-      :loading="loading"
-      :update="changeDivisionsUpdate"
-    )
-      template(#activator="{ on }")
-        v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.add') }}
-    v-row(align="center")
-      v-col(cols="12" md="8")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right.pr-5(cols="12" md="4") {{ $t('dcis.periods.divisions.shownOf') }} {{ items.length }}
-    v-card(flat)
-      v-card-text
-        v-data-table(
-          :headers="headers"
-          :items="items"
-          :search.sync="search"
-          :loading="loading"
-          disable-pagination
-          hide-default-footer
-        )
-          template(#item.action="{ item }")
-            a(@click="deleteDivisionMutate(item.id)" style="color: #FF5252") {{ $t('dcis.periods.actions.delete') }}
+left-navigator-container(:bread-crumbs="bc"  @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.divisions.header') }}
+  change-divisions(
+    :period="period"
+    :divisions="filterDivisions"
+    :loading="loading"
+    :update="changeDivisionsUpdate"
+  )
+    template(#activator="{ on }")
+      v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.add') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(cols="12" md="4") {{ $t('dcis.periods.divisions.shownOf') }} {{ items.length }}
+  v-card(flat)
+    v-card-text
+      v-data-table(
+        :headers="headers"
+        :items="items"
+        :search.sync="search"
+        :loading="loading"
+        disable-pagination
+        hide-default-footer
+      )
+        template(#item.action="{ item }")
+          a(@click="deleteDivisionMutate(item.id)" style="color: #FF5252") {{ $t('dcis.periods.actions.delete') }}
 </template>
 
 <script lang="ts">

@@ -1,21 +1,21 @@
 <template lang="pug">
-  v-expansion-panels(:value="Object.keys(settingsTree).map((k, i) => i)" flat multiple tile)
-    v-expansion-panel(v-for="(values, key) in settingsTree" :key="key")
-      v-expansion-panel-header {{ $t(`profile.settings.${key}`) }}
-      v-expansion-panel-content
-        v-data-table(
-          :headers="headers"
-          :items="values"
-          hide-default-footer
-          disable-pagination)
-          template(#item.key="{ item }") {{ $t(`profile.settings.${item.key}`) }}
-          template(#item.value="{ item }")
-            v-switch(
-              v-if="kindTypes[item.kindValue] === 'bool'"
-              :key="item.key"
-              @change="(e) => changeSettingValue(item.key, e)"
-              :input-value="item.value" true-value="true" false-value="false")
-            template(v-else) {{ item.value }}
+v-expansion-panels(:value="Object.keys(settingsTree).map((k, i) => i)" flat multiple tile)
+  v-expansion-panel(v-for="(values, key) in settingsTree" :key="key")
+    v-expansion-panel-header {{ $t(`profile.settings.${key}`) }}
+    v-expansion-panel-content
+      v-data-table(
+        :headers="headers"
+        :items="values"
+        hide-default-footer
+        disable-pagination)
+        template(#item.key="{ item }") {{ $t(`profile.settings.${item.key}`) }}
+        template(#item.value="{ item }")
+          v-switch(
+            v-if="kindTypes[item.kindValue] === 'bool'"
+            :key="item.key"
+            @change="(e) => changeSettingValue(item.key, e)"
+            :input-value="item.value" true-value="true" false-value="false")
+          template(v-else) {{ item.value }}
 </template>
 
 <script lang="ts">

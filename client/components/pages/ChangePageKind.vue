@@ -1,36 +1,36 @@
 <template lang="pug">
-  v-dialog(v-model="drawer" width="600")
-    template(#activator="{ on }")
-      slot(:on="on")
-    apollo-mutation(
-      :mutation="require('~/gql/pages/mutations/page/change_page_kind.graphql')"
-      :variables="{ pageId: page.id, pageKindId }"
-      @done="changePageKindDone"
-      v-slot="{ mutate, loading, error }"
-    )
-      form(@submit.prevent="mutate()")
-        v-card
-          v-card-title {{ $t('pages.page.changeKind.header') }}
-            v-spacer
-            v-btn(@click="close" icon)
-              v-icon mdi-close
-          v-card-text
-            v-alert(type="error" :value="!!error" dismissible) {{ error }}
-            v-select(
-              v-model="pageKindId"
-              :items="pageKindList"
-              :label="$t('pages.page.changeKind.kind')"
-              :loading="$apollo.queries.pageKinds.loading"
-              item-text="name"
-              item-value="id"
-            )
-          v-card-actions
-            v-spacer
-            v-btn(
-              :loading="loading"
-              type="submit"
-              color="primary"
-            ) {{ $t('pages.page.changeKind.change') }}
+v-dialog(v-model="drawer" width="600")
+  template(#activator="{ on }")
+    slot(:on="on")
+  apollo-mutation(
+    :mutation="require('~/gql/pages/mutations/page/change_page_kind.graphql')"
+    :variables="{ pageId: page.id, pageKindId }"
+    @done="changePageKindDone"
+    v-slot="{ mutate, loading, error }"
+  )
+    form(@submit.prevent="mutate()")
+      v-card
+        v-card-title {{ $t('pages.page.changeKind.header') }}
+          v-spacer
+          v-btn(@click="close" icon)
+            v-icon mdi-close
+        v-card-text
+          v-alert(type="error" :value="!!error" dismissible) {{ error }}
+          v-select(
+            v-model="pageKindId"
+            :items="pageKindList"
+            :label="$t('pages.page.changeKind.kind')"
+            :loading="$apollo.queries.pageKinds.loading"
+            item-text="name"
+            item-value="id"
+          )
+        v-card-actions
+          v-spacer
+          v-btn(
+            :loading="loading"
+            type="submit"
+            color="primary"
+          ) {{ $t('pages.page.changeKind.change') }}
 </template>
 
 <script lang="ts">

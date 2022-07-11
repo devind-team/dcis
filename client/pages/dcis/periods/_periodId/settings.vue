@@ -1,98 +1,98 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    apollo-mutation(
-      v-slot="{ mutate, loading, error }"
-      :mutation="require('~/gql/dcis/mutations/project/change_period.graphql')"
-      :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
-      :update="changePeriodUpdate"
-      tag
-    )
-      v-card
-        v-card-title
-          v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
-          | {{ $t('dcis.periods.header') }}
-        v-card-subtitle {{ period.name }}
-        validation-observer(v-slot="{ handleSubmit, invalid }")
-          form(@submit.prevent="handleSubmit(mutate)")
-            v-card-text
-              v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
-              v-alert(type="error" :value="!!error" dismissible) {{ $t('mutationBusinessLogicError', { error: error }) }}
-              validation-provider(
-                v-slot="{ errors, valid }"
-                :name="String($t('dcis.periods.name'))"
-                rules="required|min:3|max:250"
-              )
-                v-text-field(
-                  v-model="name"
-                  :label="$t('dcis.periods.name')"
-                  :error-messages="errors" :success="valid"
-                  counter
-                )
-              v-autocomplete(v-model="status" :items="items" label="Статус" item-text="name" item-value="value" success)
-              v-menu(
-                v-model="chooseStart"
-                :close-on-content-click="false"
-                bottom max-width="290px"
-                transition="scale-transition"
-                min-width="290px"
-              )
-                template(v-slot:activator="{ on }")
-                  v-text-field(
-                    v-on="on"
-                    v-model="start"
-                    :label="$t('dcis.periods.start')"
-                    success
-                    readonly
-                  )
-                v-date-picker(v-model="start" @input="chooseStart = false")
-              v-menu(
-                v-model="chooseExpiration"
-                :close-on-content-click="false"
-                bottom max-width="290px"
-                transition="scale-transition"
-                min-width="290px"
-              )
-                template(v-slot:activator="{ on }")
-                  v-text-field(
-                    v-on="on"
-                    v-model="expiration"
-                    :label="$t('dcis.periods.expiration')"
-                    success
-                    readonly
-                  )
-                v-date-picker(v-model="expiration" @input="chooseExpiration = false")
-              v-row
-                v-col(cols="12" md="6")
-                  v-checkbox(v-model="multiple" :label="$t('dcis.periods.multiple')")
-                v-col(cols="12" md="6")
-                  v-checkbox(v-model="privately" :label="$t('dcis.periods.privately')")
-            v-card-actions
-              v-btn(
-                v-if="period.user && period.user.id === user.id || hasPerm('dcis.change_period')"
-                :disabled="invalid"
-                :loading="loading"
-                type="submit"
-                color="success"
-              ) {{$t('dcis.periods.actions.save')}}
-        v-divider
-        v-card-title {{ $t('dcis.periods.delete') }}
-        v-card-text
-          v-alert(type="warning") {{ $t('dcis.periods.deleteWarning') }}
-        v-card-actions
-          apollo-mutation(
-            v-slot="{ mutate }"
-            :mutation="require('~/gql/dcis/mutations/project/delete_period.graphql')"
-            :variables="{ id: period.id}"
-            @done="deletePeriodDone"
-            tag
-          )
-            delete-menu(
-              v-if="period.user && period.user.id === user.id || hasPerm('dcis.delete_period')"
-              v-slot="{ on }"
-              :itemName="String($t('dcis.periods.deleteItemName'))"
-              @confirm="mutate"
+bread-crumbs(:items="bc")
+  apollo-mutation(
+    v-slot="{ mutate, loading, error }"
+    :mutation="require('~/gql/dcis/mutations/project/change_period.graphql')"
+    :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
+    :update="changePeriodUpdate"
+    tag
+  )
+    v-card
+      v-card-title
+        v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
+        | {{ $t('dcis.periods.header') }}
+      v-card-subtitle {{ period.name }}
+      validation-observer(v-slot="{ handleSubmit, invalid }")
+        form(@submit.prevent="handleSubmit(mutate)")
+          v-card-text
+            v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
+            v-alert(type="error" :value="!!error" dismissible) {{ $t('mutationBusinessLogicError', { error: error }) }}
+            validation-provider(
+              v-slot="{ errors, valid }"
+              :name="String($t('dcis.periods.name'))"
+              rules="required|min:3|max:250"
             )
-              v-btn(v-on="on" color="error") {{ $t('dcis.periods.actions.delete') }}
+              v-text-field(
+                v-model="name"
+                :label="$t('dcis.periods.name')"
+                :error-messages="errors" :success="valid"
+                counter
+              )
+            v-autocomplete(v-model="status" :items="items" label="Статус" item-text="name" item-value="value" success)
+            v-menu(
+              v-model="chooseStart"
+              :close-on-content-click="false"
+              bottom max-width="290px"
+              transition="scale-transition"
+              min-width="290px"
+            )
+              template(v-slot:activator="{ on }")
+                v-text-field(
+                  v-on="on"
+                  v-model="start"
+                  :label="$t('dcis.periods.start')"
+                  success
+                  readonly
+                )
+              v-date-picker(v-model="start" @input="chooseStart = false")
+            v-menu(
+              v-model="chooseExpiration"
+              :close-on-content-click="false"
+              bottom max-width="290px"
+              transition="scale-transition"
+              min-width="290px"
+            )
+              template(v-slot:activator="{ on }")
+                v-text-field(
+                  v-on="on"
+                  v-model="expiration"
+                  :label="$t('dcis.periods.expiration')"
+                  success
+                  readonly
+                )
+              v-date-picker(v-model="expiration" @input="chooseExpiration = false")
+            v-row
+              v-col(cols="12" md="6")
+                v-checkbox(v-model="multiple" :label="$t('dcis.periods.multiple')")
+              v-col(cols="12" md="6")
+                v-checkbox(v-model="privately" :label="$t('dcis.periods.privately')")
+          v-card-actions
+            v-btn(
+              v-if="period.user && period.user.id === user.id || hasPerm('dcis.change_period')"
+              :disabled="invalid"
+              :loading="loading"
+              type="submit"
+              color="success"
+            ) {{$t('dcis.periods.actions.save')}}
+      v-divider
+      v-card-title {{ $t('dcis.periods.delete') }}
+      v-card-text
+        v-alert(type="warning") {{ $t('dcis.periods.deleteWarning') }}
+      v-card-actions
+        apollo-mutation(
+          v-slot="{ mutate }"
+          :mutation="require('~/gql/dcis/mutations/project/delete_period.graphql')"
+          :variables="{ id: period.id}"
+          @done="deletePeriodDone"
+          tag
+        )
+          delete-menu(
+            v-if="period.user && period.user.id === user.id || hasPerm('dcis.delete_period')"
+            v-slot="{ on }"
+            :itemName="String($t('dcis.periods.deleteItemName'))"
+            @confirm="mutate"
+          )
+            v-btn(v-on="on" color="error") {{ $t('dcis.periods.actions.delete') }}
 </template>
 
 <script lang="ts">

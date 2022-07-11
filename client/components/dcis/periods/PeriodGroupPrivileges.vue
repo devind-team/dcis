@@ -1,28 +1,28 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="formHeader"
-    :subheader="itemName"
-    :button-text="buttonText"
-    :mutation="user ? changeGroupUsersPrivileges : changePeriodGroupPrivileges"
-    :update="user ? changeUsersPrivilegesUpdate : changeGroupPrivilegesUpdate"
-    :variables="formVariables"
-    :mutation-name="mutationName"
-    errors-in-alert
-    persistent
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      v-data-table(
-        v-model="selectPrivileges"
-        :headers="headers"
-        :items="items"
-        :loading="loading"
-        item-key="id"
-        disable-pagination
-        show-select
-        hide-default-footer
-      )
+mutation-modal-form(
+  :header="formHeader"
+  :subheader="itemName"
+  :button-text="buttonText"
+  :mutation="user ? changeGroupUsersPrivileges : changePeriodGroupPrivileges"
+  :update="user ? changeUsersPrivilegesUpdate : changeGroupPrivilegesUpdate"
+  :variables="formVariables"
+  :mutation-name="mutationName"
+  errors-in-alert
+  persistent
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    v-data-table(
+      v-model="selectPrivileges"
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      item-key="id"
+      disable-pagination
+      show-select
+      hide-default-footer
+    )
 </template>
 
 <script lang="ts">

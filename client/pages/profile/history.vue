@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-card
-    v-card-title {{ $t('profile.history.name') }}
-      v-spacer
-      .caption {{ $t('shownOf', { count, totalCount }) }}
-    v-card-text
-      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-row
-        v-col
-          v-data-table(
-            :headers="headers"
-            :items="logRequests"
-            :loading="loading"
-            dense
-            disable-pagination
-            hide-default-footer
-          )
-            template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
-            template(#item.time="{ item }") {{ item.time.toFixed(3) }} с.
+v-card
+  v-card-title {{ $t('profile.history.name') }}
+    v-spacer
+    .caption {{ $t('shownOf', { count, totalCount }) }}
+  v-card-text
+    v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-row
+      v-col
+        v-data-table(
+          :headers="headers"
+          :items="logRequests"
+          :loading="loading"
+          dense
+          disable-pagination
+          hide-default-footer
+        )
+          template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+          template(#item.time="{ item }") {{ item.time.toFixed(3) }} с.
 </template>
 
 <script lang="ts">

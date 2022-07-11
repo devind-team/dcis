@@ -1,11 +1,11 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs" :fluid="fluid")
-    v-card
-      v-card-title
-        v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
-        slot(name="header")
-      v-card-text
-        slot
+bread-crumbs(:items="breadCrumbs" :fluid="fluid")
+  v-card
+    v-card-title
+      v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
+      slot(name="header")
+    v-card-text
+      slot
 </template>
 
 <script lang="ts">

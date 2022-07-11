@@ -1,19 +1,19 @@
 <template lang="pug">
-  v-menu(v-model="active" bottom close-on-content-click)
-    template(#activator="{ on, attrs }")
-      slot(:on="on" :attrs="attrs")
-    v-list(dense)
-      grid-column-settings(
-        :column="column"
-        :get-column-width="getColumnWidth"
-        @close="active = false"
-      )
-        template(#activator="{ on }")
-          v-list-item(v-on="on")
-            v-list-item-icon
-              v-icon mdi-cog
-            v-list-item-content
-              v-list-item-title {{ t('dcis.grid.columnControl.properties') }}
+v-menu(v-model="active" bottom close-on-content-click)
+  template(#activator="{ on, attrs }")
+    slot(:on="on" :attrs="attrs")
+  v-list(dense)
+    grid-column-settings(
+      :column="column"
+      :get-column-width="getColumnWidth"
+      @close="active = false"
+    )
+      template(#activator="{ on }")
+        v-list-item(v-on="on")
+          v-list-item-icon
+            v-icon mdi-cog
+          v-list-item-content
+            v-list-item-title {{ t('dcis.grid.columnControl.properties') }}
 </template>
 
 <script lang="ts">

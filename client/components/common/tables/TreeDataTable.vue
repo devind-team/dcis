@@ -1,50 +1,50 @@
 <template lang="pug">
-  v-data-table(
-    ref="dataTable"
-    v-bind="{ ...$attrs, headers, items: expandedItems, search, loading }"
-    v-on="$listeners"
-    :sort-by.sync="sortBy"
-    @current-items="items => $emit('items', items, expandedItems, flatItems)"
-  )
-    template(v-if="isTree && hasChildren" v-slot:[headerSlotName])
-      .inline-block
-        .d-flex.align-baseline.h-full
-          .tree-data-table__expand-block.tree-data-table__expand-block-header
-          | {{ headers[0].text }}
-    template(#body="bodyScope")
-      tbody
-        tr.v-data-table__empty-wrapper(v-if="bodyScope.items.length === 0 && loading")
-          td(v-bind="colspanAttrs") {{ loadingText }}
-        tr.v-data-table__empty-wrapper(v-else-if="bodyScope.items.length === 0")
-          td(v-bind="colspanAttrs") {{ noDataText }}
-        tr(
-          v-else
-          v-for="item in bodyScope.items"
-          :class="[item.itemClass]"
-          @click="$emit('click:row', item)"
-          @contextmenu="$emit('contextmenu:row', $event)"
-          @dbclick="$emit('dblclick:row', $event)"
+v-data-table(
+  ref="dataTable"
+  v-bind="{ ...$attrs, headers, items: expandedItems, search, loading }"
+  v-on="$listeners"
+  :sort-by.sync="sortBy"
+  @current-items="items => $emit('items', items, expandedItems, flatItems)"
+)
+  template(v-if="isTree && hasChildren" v-slot:[headerSlotName])
+    .inline-block
+      .d-flex.align-baseline.h-full
+        .tree-data-table__expand-block.tree-data-table__expand-block-header
+        | {{ headers[0].text }}
+  template(#body="bodyScope")
+    tbody
+      tr.v-data-table__empty-wrapper(v-if="bodyScope.items.length === 0 && loading")
+        td(v-bind="colspanAttrs") {{ loadingText }}
+      tr.v-data-table__empty-wrapper(v-else-if="bodyScope.items.length === 0")
+        td(v-bind="colspanAttrs") {{ noDataText }}
+      tr(
+        v-else
+        v-for="item in bodyScope.items"
+        :class="[item.itemClass]"
+        @click="$emit('click:row', item)"
+        @contextmenu="$emit('contextmenu:row', $event)"
+        @dbclick="$emit('dblclick:row', $event)"
+      )
+        td(:class="getTdClasses(bodyScope.headers[0])" :width="bodyScope.headers[0].width")
+          .d-flex.align-center.h-full
+            v-icon.v-data-table__expand-icon(
+              v-if="item.children && item.children.length && isTree"
+              :class="{ 'v-data-table__expand-icon--active': bodyScope.isExpanded(item) }"
+              :style="getExpandStyle(item)"
+              @click="expand(bodyScope.expand, item)"
+            ) {{ $vuetify.icons.values.expand }}
+            .tree-data-table__expand-block(v-else-if="isTree && hasChildren" :style="getExpandStyle(item)")
+            | {{ item[bodyScope.headers[0].value] }}
+        td(
+          v-for="(header, headerIndex) in getHeadersTail(bodyScope.headers)"
+          :width="header.width"
+          :class="getTdClasses(header)"
         )
-          td(:class="getTdClasses(bodyScope.headers[0])" :width="bodyScope.headers[0].width")
-            .d-flex.align-center.h-full
-              v-icon.v-data-table__expand-icon(
-                v-if="item.children && item.children.length && isTree"
-                :class="{ 'v-data-table__expand-icon--active': bodyScope.isExpanded(item) }"
-                :style="getExpandStyle(item)"
-                @click="expand(bodyScope.expand, item)"
-              ) {{ $vuetify.icons.values.expand }}
-              .tree-data-table__expand-block(v-else-if="isTree && hasChildren" :style="getExpandStyle(item)")
-              | {{ item[bodyScope.headers[0].value] }}
-          td(
-            v-for="(header, headerIndex) in getHeadersTail(bodyScope.headers)"
-            :width="header.width"
-            :class="getTdClasses(header)"
-          )
-            slot(:name="`item.${header.value}`" v-bind="getItemScope(bodyScope, item, headerIndex)")
-              | {{ getObjectValueByPath(item, header.value) }}
-    slot(v-for="slot in Object.keys($slots)" :name="slot" :slot="slot")
-    template(v-for="slot in outerSlotNames" v-slot:[slot]="scope")
-      slot(v-bind="scope" :name="slot")
+          slot(:name="`item.${header.value}`" v-bind="getItemScope(bodyScope, item, headerIndex)")
+            | {{ getObjectValueByPath(item, header.value) }}
+  slot(v-for="slot in Object.keys($slots)" :name="slot" :slot="slot")
+  template(v-for="slot in outerSlotNames" v-slot:[slot]="scope")
+    slot(v-bind="scope" :name="slot")
 </template>
 
 <script lang="ts">

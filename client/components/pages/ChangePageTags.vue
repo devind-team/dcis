@@ -1,43 +1,43 @@
 <template lang="pug">
-  mutation-modal-form(
-    @done="changePageTagsDone"
-    :mutation="require('~/gql/pages/mutations/page/change_page_tags.graphql')"
-    :variables="{ pageId: page.id, tagNames }"
-    :header="$t('pages.page.changeTags.header')"
-    :button-text="$t('pages.page.changeTags.change')"
-    mutation-name="changePageTags"
-    i18n-path="pages.page.changeTags"
-  )
-    template(#activator="{ on }")
-      slot(:on="on")
-    template(#form)
-      validation-provider(
-        :name="$t('pages.page.changeTags.tags')"
-        :rules="tagAutocompleteFocus ? 'required|min:1|max:255' : ''"
-        :detect-input="false"
-        mode="passive"
-        v-slot="{ validate, errors }"
+mutation-modal-form(
+  @done="changePageTagsDone"
+  :mutation="require('~/gql/pages/mutations/page/change_page_tags.graphql')"
+  :variables="{ pageId: page.id, tagNames }"
+  :header="$t('pages.page.changeTags.header')"
+  :button-text="$t('pages.page.changeTags.change')"
+  mutation-name="changePageTags"
+  i18n-path="pages.page.changeTags"
+)
+  template(#activator="{ on }")
+    slot(:on="on")
+  template(#form)
+    validation-provider(
+      :name="$t('pages.page.changeTags.tags')"
+      :rules="tagAutocompleteFocus ? 'required|min:1|max:255' : ''"
+      :detect-input="false"
+      mode="passive"
+      v-slot="{ validate, errors }"
+    )
+      v-autocomplete(
+        v-model="tagNames"
+        :items="tagList"
+        :label="$t('pages.page.changeTags.tags')"
+        :loading="loading"
+        :search-input.sync="newTagName"
+        :error-messages="errors"
+        item-text="name"
+        item-value="name"
+        multiple
+        chips
+        small-chips
+        deletable-chips
+        flat
+        dense
+        @update:search-input="updateSearchInput(errors, validate)"
+        @focus="tagAutocompleteFocus = true"
+        @blur="tagAutocompleteFocus = false"
+        @keydown.enter="addTag(validate, $event)"
       )
-        v-autocomplete(
-          v-model="tagNames"
-          :items="tagList"
-          :label="$t('pages.page.changeTags.tags')"
-          :loading="loading"
-          :search-input.sync="newTagName"
-          :error-messages="errors"
-          item-text="name"
-          item-value="name"
-          multiple
-          chips
-          small-chips
-          deletable-chips
-          flat
-          dense
-          @update:search-input="updateSearchInput(errors, validate)"
-          @focus="tagAutocompleteFocus = true"
-          @blur="tagAutocompleteFocus = false"
-          @keydown.enter="addTag(validate, $event)"
-        )
 </template>
 
 <script lang="ts">

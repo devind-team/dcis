@@ -1,62 +1,62 @@
 <template lang="pug">
-  v-card(v-if="periodGroup" flat)
-    v-navigation-drawer(
-      v-model="active"
-      width="40vw"
-      app
-      right
-      bottom
-      temporary
-    )
-      v-card.ma-2.transparent(v-if="selectUser" flat)
-        v-card-subtitle.text-h6.text-center {{ $t('dcis.periods.changePrivileges.privileges') }} {{ getUserFullName(selectUser) }}
+v-card(v-if="periodGroup" flat)
+  v-navigation-drawer(
+    v-model="active"
+    width="40vw"
+    app
+    right
+    bottom
+    temporary
+  )
+    v-card.ma-2.transparent(v-if="selectUser" flat)
+      v-card-subtitle.text-h6.text-center {{ $t('dcis.periods.changePrivileges.privileges') }} {{ getUserFullName(selectUser) }}
+      v-divider
+      v-card-text(v-if="userPrivileges")
+        v-data-table.transparent(
+          :headers="additionalHeaders"
+          :loading="loading"
+          :items="userPrivileges"
+          hide-default-footer
+          disable-pagination
+        )
         v-divider
-        v-card-text(v-if="userPrivileges")
-          v-data-table.transparent(
-            :headers="additionalHeaders"
-            :loading="loading"
-            :items="userPrivileges"
-            hide-default-footer
-            disable-pagination
+        v-card-actions.d-flex.flex-wrap.justify-center
+          period-group-privileges(
+            :period-group="periodGroup"
+            :period="period"
+            :user="selectUser"
+            :user-privileges="userPrivileges"
+            :update="changeGroupUsersPrivilegesUpdate"
+            :active-query="active"
           )
-          v-divider
-          v-card-actions.d-flex.flex-wrap.justify-center
-            period-group-privileges(
-              :period-group="periodGroup"
-              :period="period"
-              :user="selectUser"
-              :user-privileges="userPrivileges"
-              :update="changeGroupUsersPrivilegesUpdate"
-              :active-query="active"
-            )
-              template(#activator="{ on }")
-                v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.add') }}
-            v-spacer
-            delete-menu(
-              :itemName="getUserFullName(selectUser)"
-              @confirm="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: Number(periodGroup.id) }).then()"
-            )
-              template(#default="{ on }")
-                v-btn(v-on="on" color="error") {{ $t('dcis.periods.changePrivileges.deleteUser') }}
-    v-card-actions
-      period-group-privileges(:period-group="periodGroup" :key="periodGroup.id" active-query)
-        template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
-      v-spacer
-      add-period-group-users(:period-group="periodGroup" active-query)
-        template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
-    v-card-text
-      v-data-table(
-        :headers="headers"
-        :items="periodGroup.users"
-        disable-pagination
-        hide-default-footer
-      )
-        template(#item.avatar="{ item }")
-          avatar-dialog(:item="item")
-        template(#item.name="{ item }")
-          a(@click="selectedUser(item.id)") {{ getUserFullName(item) }}
+            template(#activator="{ on }")
+              v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.add') }}
+          v-spacer
+          delete-menu(
+            :itemName="getUserFullName(selectUser)"
+            @confirm="deleteUserFromPeriodGroupMutate({ userId: selectUser.id, periodGroupId: Number(periodGroup.id) }).then()"
+          )
+            template(#default="{ on }")
+              v-btn(v-on="on" color="error") {{ $t('dcis.periods.changePrivileges.deleteUser') }}
+  v-card-actions
+    period-group-privileges(:period-group="periodGroup" :key="periodGroup.id" active-query)
+      template(#activator="{ on }")
+        v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePrivileges.change') }}
+    v-spacer
+    add-period-group-users(:period-group="periodGroup" active-query)
+      template(#activator="{ on }")
+        v-btn(v-on="on" color="primary") {{ $t('dcis.periods.changePeriodUsers.addUsers') }}
+  v-card-text
+    v-data-table(
+      :headers="headers"
+      :items="periodGroup.users"
+      disable-pagination
+      hide-default-footer
+    )
+      template(#item.avatar="{ item }")
+        avatar-dialog(:item="item")
+      template(#item.name="{ item }")
+        a(@click="selectedUser(item.id)") {{ getUserFullName(item) }}
 </template>
 
 <script lang="ts">

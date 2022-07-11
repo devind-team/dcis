@@ -1,31 +1,31 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="close"
-    :header="String($t('dcis.periods.actions.addGroup'))"
-    :subheader="period.name"
-    :button-text="String($t('dcis.periods.addPeriodGroup.buttonText'))"
-    :mutation="addPeriodGroup"
-    :variables="{ name, periodId: period.id }"
-    :update="addPeriodGroupUpdate"
-    mutation-name="addPeriodGroup"
-    errors-in-alert
-    persistent
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        :name="String($t('dcis.periods.addPeriodGroup.name'))"
-        rules="required|min:2"
-        v-slot="{ errors, valid }"
-        )
-        v-text-field(
-          v-model="name"
-          :label="$t('dcis.periods.addPeriodGroup.name')"
-          :success="valid"
-          :error-messages="errors"
-          autofocus
-        )
+mutation-modal-form(
+  @close="close"
+  :header="String($t('dcis.periods.actions.addGroup'))"
+  :subheader="period.name"
+  :button-text="String($t('dcis.periods.addPeriodGroup.buttonText'))"
+  :mutation="addPeriodGroup"
+  :variables="{ name, periodId: period.id }"
+  :update="addPeriodGroupUpdate"
+  mutation-name="addPeriodGroup"
+  errors-in-alert
+  persistent
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      :name="String($t('dcis.periods.addPeriodGroup.name'))"
+      rules="required|min:2"
+      v-slot="{ errors, valid }"
+      )
+      v-text-field(
+        v-model="name"
+        :label="$t('dcis.periods.addPeriodGroup.name')"
+        :success="valid"
+        :error-messages="errors"
+        autofocus
+      )
 </template>
 
 <script lang="ts">

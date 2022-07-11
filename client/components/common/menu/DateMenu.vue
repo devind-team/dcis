@@ -1,8 +1,8 @@
 <template lang="pug">
-  v-menu(v-model="active" :close-on-content-click="false" bottom)
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-date-picker(v-model="date" @change="update")
+v-menu(v-model="active" :close-on-content-click="false" bottom)
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-date-picker(v-model="date" @change="update")
 </template>
 
 <script lang="ts">

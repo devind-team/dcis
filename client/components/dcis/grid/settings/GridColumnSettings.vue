@@ -1,34 +1,34 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="$emit('close')"
-    :header="String(t('dcis.grid.columnSettings.header'))"
-    :subheader="String(t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
-    :mutation="changeColumnDimensionMutation"
-    :variables="variables"
-    :optimistic-response="optimisticResponse"
-    :update="update"
-    :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
-    i18n-path="dcis.grid.columnSettings"
-    mutation-name="changeColumnDimension"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String(t('dcis.grid.columnSettings.width'))"
-        rules="required|integer|min_value:0"
+mutation-modal-form(
+  @close="$emit('close')"
+  :header="String(t('dcis.grid.columnSettings.header'))"
+  :subheader="String(t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
+  :mutation="changeColumnDimensionMutation"
+  :variables="variables"
+  :optimistic-response="optimisticResponse"
+  :update="update"
+  :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
+  i18n-path="dcis.grid.columnSettings"
+  mutation-name="changeColumnDimension"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String(t('dcis.grid.columnSettings.width'))"
+      rules="required|integer|min_value:0"
+    )
+      v-text-field(
+        v-model="width"
+        :error-messages="errors"
+        :success="valid"
+        :label="t('dcis.grid.columnSettings.width')"
       )
-        v-text-field(
-          v-model="width"
-          :error-messages="errors"
-          :success="valid"
-          :label="t('dcis.grid.columnSettings.width')"
-        )
-      v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" success)
-      //- В разработке
-      v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')" success)
-      v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" success)
+    v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" success)
+    //- В разработке
+    v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')" success)
+    v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" success)
 </template>
 
 <script lang="ts">

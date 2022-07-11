@@ -1,32 +1,32 @@
 <template lang="pug">
-  left-navigator-container(@update-drawer="$emit('update-drawer')" :bread-crumbs="breadCrumbs")
-    template(#header) {{ period.name }}
-      template(v-if="hasPerm('dcis.add_document')")
-        v-spacer
-        add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
+left-navigator-container(@update-drawer="$emit('update-drawer')" :bread-crumbs="breadCrumbs")
+  template(#header) {{ period.name }}
+    template(v-if="hasPerm('dcis.add_document')")
+      v-spacer
+      add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") Создать новый документ
+  v-row
+    v-col(cols="12" sm="9")
+    v-col.text-right(cols="12" sm="3") {{ $t('shownOf', { totalCount, count }) }}
+  v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
+    template(#item.version="{ item }")
+      nuxt-link(
+        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+      ) Версия {{ item.version }}
+    template(#item.comment="{ item }")
+      template(v-if="item.comment")
+        text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+          a(v-on="on") {{ item.comment }}
+    template(#item.lastStatus="{ item }")
+      template(v-if="item.lastStatus")
+        document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="update" :document="item")
           template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") Создать новый документ
-    v-row
-      v-col(cols="12" sm="9")
-      v-col.text-right(cols="12" sm="3") {{ $t('shownOf', { totalCount, count }) }}
-    v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.version="{ item }")
-        nuxt-link(
-          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) Версия {{ item.version }}
-      template(#item.comment="{ item }")
-        template(v-if="item.comment")
-          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
-            a(v-on="on") {{ item.comment }}
-      template(#item.lastStatus="{ item }")
-        template(v-if="item.lastStatus")
-          document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="update" :document="item")
-            template(#activator="{ on }")
-              a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-          strong(v-else) {{ item.lastStatus.status.name }}.
-          div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
-          .font-italic {{ item.lastStatus.comment }}
-      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+        strong(v-else) {{ item.lastStatus.status.name }}.
+        div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
+        .font-italic {{ item.lastStatus.comment }}
+    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">

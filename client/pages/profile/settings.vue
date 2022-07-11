@@ -1,30 +1,30 @@
 <template lang="pug">
-  v-card
-    v-card-title {{ $t('profile.settings.index') }}
-      v-spacer
-      apollo-mutation(
-        v-slot="{ mutate, loading }"
-        :mutation="require('~/gql/core/mutations/settings/reset_settings')"
-        :variables="{ userId: this.user.id }"
-        :update="resetUpdate"
-        tag
-      )
-        v-tooltip(bottom)
-          template(#activator="{ on }")
-            v-btn(v-on="on" @click="mutate" :loading="loading" type="submit" icon)
-              v-icon mdi-backup-restore
-          span {{ $t('profile.settings.reset') }}
-    v-card-text(v-if="!loading")
-      v-alert(type="success" :value="successReset") {{ $t('mutationReset')}}
-      v-alert(type="error" :value="error" dismissible) {{ error }}
-      v-row
-        v-col(cols="12" md="3") {{ $t('profile.settings.personal') }}
-        v-col(cols="12" md="9")
-          settings-form(:settings="settings.filter(e => !e.readonly)" :changeSettingValue="changeSettingValue")
-      v-row(v-if="hasPerm('devind_core.change_setting')")
-        v-col(cols="12" md="3") {{ $t('profile.settings.site') }}
-        v-col(cols="12" md="9")
-          settings-form(:settings="settings.filter(e => e.readonly)" :changeSettingValue="changeSettingValue")
+v-card
+  v-card-title {{ $t('profile.settings.index') }}
+    v-spacer
+    apollo-mutation(
+      v-slot="{ mutate, loading }"
+      :mutation="require('~/gql/core/mutations/settings/reset_settings')"
+      :variables="{ userId: this.user.id }"
+      :update="resetUpdate"
+      tag
+    )
+      v-tooltip(bottom)
+        template(#activator="{ on }")
+          v-btn(v-on="on" @click="mutate" :loading="loading" type="submit" icon)
+            v-icon mdi-backup-restore
+        span {{ $t('profile.settings.reset') }}
+  v-card-text(v-if="!loading")
+    v-alert(type="success" :value="successReset") {{ $t('mutationReset')}}
+    v-alert(type="error" :value="error" dismissible) {{ error }}
+    v-row
+      v-col(cols="12" md="3") {{ $t('profile.settings.personal') }}
+      v-col(cols="12" md="9")
+        settings-form(:settings="settings.filter(e => !e.readonly)" :changeSettingValue="changeSettingValue")
+    v-row(v-if="hasPerm('devind_core.change_setting')")
+      v-col(cols="12" md="3") {{ $t('profile.settings.site') }}
+      v-col(cols="12" md="9")
+        settings-form(:settings="settings.filter(e => e.readonly)" :changeSettingValue="changeSettingValue")
 </template>
 
 <script lang="ts">

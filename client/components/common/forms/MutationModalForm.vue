@@ -1,43 +1,43 @@
 <template lang="pug">
-  v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="persistent" scrollable)
-    template(#activator="{ on }")
-      slot(name="activator" :on="on" :close="close")
-    mutation-form(
-      ref="mutationForm"
-      v-bind="$attrs"
-      :mutation-name="mutationName"
-      :errors-in-alert="errorsInAlert"
-      :header="header"
-      :subheader="subheader"
-      :button-text="buttonText"
-      :i18n-path="i18nPath"
-      :hide-alert-timeout="hideAlertTimeout"
-      v-on="mutationListeners"
-    )
-      template(#header)
-        slot(name="header" :header="header")
-          span {{ header }}
+v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="persistent" scrollable)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on" :close="close")
+  mutation-form(
+    ref="mutationForm"
+    v-bind="$attrs"
+    :mutation-name="mutationName"
+    :errors-in-alert="errorsInAlert"
+    :header="header"
+    :subheader="subheader"
+    :button-text="buttonText"
+    :i18n-path="i18nPath"
+    :hide-alert-timeout="hideAlertTimeout"
+    v-on="mutationListeners"
+  )
+    template(#header)
+      slot(name="header" :header="header")
+        span {{ header }}
+      v-spacer
+      v-btn(v-if="canMinimize" @click="active = false" icon)
+        v-icon mdi-minus
+      v-btn(@click="close" icon)
+        v-icon mdi-close
+    template(#subheader)
+      slot(name="subheader" :subheader="subheader") {{ subheader }}
+    template(#form)
+      slot(name="form")
+    template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
+      slot(
+        name="actions"
+        :button-text="buttonText"
+        :invalid="invalid"
+        :loading="loading"
+        :set-form-errors="setFormErrors"
+        :set-error="setError"
+        :set-success="setSuccess"
+      )
         v-spacer
-        v-btn(v-if="canMinimize" @click="active = false" icon)
-          v-icon mdi-minus
-        v-btn(@click="close" icon)
-          v-icon mdi-close
-      template(#subheader)
-        slot(name="subheader" :subheader="subheader") {{ subheader }}
-      template(#form)
-        slot(name="form")
-      template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
-        slot(
-          name="actions"
-          :button-text="buttonText"
-          :invalid="invalid"
-          :loading="loading"
-          :set-form-errors="setFormErrors"
-          :set-error="setError"
-          :set-success="setSuccess"
-        )
-          v-spacer
-          v-btn(:disabled="invalid" :loading="loading" type="submit" color="primary") {{ buttonText }}
+        v-btn(:disabled="invalid" :loading="loading" type="submit" color="primary") {{ buttonText }}
 </template>
 
 <script lang="ts">

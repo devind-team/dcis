@@ -1,90 +1,90 @@
 <template lang="pug">
-  mutation-form(
-    @done="addPageDone"
-    :mutation="require('~/gql/pages/mutations/page/add_page.graphql')"
-    :variables="{ avatar, parallax, title, signature, kindId, hide, priority, categoryId: category.id, tagNames, text }"
-    :header="`${$t('pages.page.add.category')}: ${category.text}`"
-    :button-text="String($t('pages.page.add.add'))"
-    mutation-name="addPage"
-    i18n-path="pages.page.add"
-  )
-    template(#form)
-      validation-provider(:name="String($t('pages.page.add.avatar'))" v-slot="{ errors, valid }")
-        v-file-input(
-          v-model="avatar"
-          :label="$t('pages.page.add.avatar')"
-          :error-messages="errors"
-          :success="valid"
-          prepend-icon="mdi-camera"
-          show-size
-        )
-      validation-provider(
-        :name="String($t('pages.page.add.title'))"
-        rules="required|min:3|max:1023"
-        v-slot="{ errors, valid }"
+mutation-form(
+  @done="addPageDone"
+  :mutation="require('~/gql/pages/mutations/page/add_page.graphql')"
+  :variables="{ avatar, parallax, title, signature, kindId, hide, priority, categoryId: category.id, tagNames, text }"
+  :header="`${$t('pages.page.add.category')}: ${category.text}`"
+  :button-text="String($t('pages.page.add.add'))"
+  mutation-name="addPage"
+  i18n-path="pages.page.add"
+)
+  template(#form)
+    validation-provider(:name="String($t('pages.page.add.avatar'))" v-slot="{ errors, valid }")
+      v-file-input(
+        v-model="avatar"
+        :label="$t('pages.page.add.avatar')"
+        :error-messages="errors"
+        :success="valid"
+        prepend-icon="mdi-camera"
+        show-size
       )
-        v-text-field(
-          v-model="title"
-          :label="$t('pages.page.add.title')"
-          :error-messages="errors"
-          :success="valid"
-          clearable
-        )
-      v-select(
-        v-model="kindId"
-        :items="pageKindList"
-        :label="$t('pages.page.add.kind')"
-        :loading="pageKindsLoading"
+    validation-provider(
+      :name="String($t('pages.page.add.title'))"
+      rules="required|min:3|max:1023"
+      v-slot="{ errors, valid }"
+    )
+      v-text-field(
+        v-model="title"
+        :label="$t('pages.page.add.title')"
+        :error-messages="errors"
+        :success="valid"
+        clearable
+      )
+    v-select(
+      v-model="kindId"
+      :items="pageKindList"
+      :label="$t('pages.page.add.kind')"
+      :loading="pageKindsLoading"
+      item-text="name"
+      item-value="id"
+    )
+    v-row
+      v-col(cols="4")
+        v-checkbox(v-model="parallax" :label="$t('pages.page.add.parallax')")
+      v-col(cols="4")
+        v-checkbox(v-model="hide" :label="$t('pages.page.add.hide')")
+      v-col(cols="4")
+        v-checkbox(v-model="priority" :label="$t('pages.page.add.priority')")
+    validation-provider(
+      :name="String($t('pages.page.add.tags'))"
+      :detect-input="false"
+      mode="passive"
+      v-slot="{ validate, errors }"
+    )
+      v-autocomplete(
+        v-model="tagNames"
+        :items="tagList"
+        :label="$t('pages.page.add.tags')"
+        :loading="tagLoading"
+        :search-input.sync="newTagName"
+        :error-messages="errors"
         item-text="name"
-        item-value="id"
+        item-value="name"
+        multiple
+        chips
+        small-chips
+        deletable-chips
+        flat
+        dense
+        @update:search-input="updateSearchInput(errors, validate)"
+        @keydown.enter="addTag(validate, $event)"
       )
-      v-row
-        v-col(cols="4")
-          v-checkbox(v-model="parallax" :label="$t('pages.page.add.parallax')")
-        v-col(cols="4")
-          v-checkbox(v-model="hide" :label="$t('pages.page.add.hide')")
-        v-col(cols="4")
-          v-checkbox(v-model="priority" :label="$t('pages.page.add.priority')")
-      validation-provider(
-        :name="String($t('pages.page.add.tags'))"
-        :detect-input="false"
-        mode="passive"
-        v-slot="{ validate, errors }"
+    v-checkbox(v-model="addSignature" :label="$t('pages.page.add.signature')")
+    validation-provider(
+      v-if="addSignature"
+      v-slot="{ errors, valid }"
+      :name="String($t('pages.page.add.signature'))"
+      rules="min:2|max:100"
+    )
+      v-text-field(
+        v-model="signature"
+        :label="$t('pages.page.add.signature')"
+        :error-messages="errors"
+        :success="valid"
+        clearable
       )
-        v-autocomplete(
-          v-model="tagNames"
-          :items="tagList"
-          :label="$t('pages.page.add.tags')"
-          :loading="tagLoading"
-          :search-input.sync="newTagName"
-          :error-messages="errors"
-          item-text="name"
-          item-value="name"
-          multiple
-          chips
-          small-chips
-          deletable-chips
-          flat
-          dense
-          @update:search-input="updateSearchInput(errors, validate)"
-          @keydown.enter="addTag(validate, $event)"
-        )
-      v-checkbox(v-model="addSignature" :label="$t('pages.page.add.signature')")
-      validation-provider(
-        v-if="addSignature"
-        v-slot="{ errors, valid }"
-        :name="String($t('pages.page.add.signature'))"
-        rules="min:2|max:100"
-      )
-        v-text-field(
-          v-model="signature"
-          :label="$t('pages.page.add.signature')"
-          :error-messages="errors"
-          :success="valid"
-          clearable
-        )
-      v-checkbox(v-model="addText" :label="$t('pages.page.add.text')")
-      rich-text-editor(v-if="addText" v-model="text")
+    v-checkbox(v-model="addText" :label="$t('pages.page.add.text')")
+    rich-text-editor(v-if="addText" v-model="text")
 </template>
 
 <script lang="ts">

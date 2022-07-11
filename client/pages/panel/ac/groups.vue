@@ -1,48 +1,48 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')"  fluid)
-    template(#header) {{ $t('panel.groups') }}
-    v-row
-      v-col(cols="12" md="4")
-        v-row(no-gutters align="center")
-          v-col(cols="12" md="8").caption {{ $t('panel.ac.groups.name') }}
-          v-col.text-right(cols="12" md="4")
-            add-group-dialog
-        v-list
-          v-list-item-group(v-model="selectGroup" color="primary")
-            v-list-item(v-for="group in groups" :key="group.id")
-              v-list-item-content {{ group.name }} ({{ group.id }})
-              v-list-item-action(v-if="hasPerm('auth.change_group')")
-                text-menu(:value="group.name" @update="changeGroupName(group, $event)")
-                  template(v-slot:default="{ on: onMenu }")
-                    v-tooltip(bottom)
-                      template(v-slot:activator="{ on: onTooltip }")
-                        v-btn(@click.stop="" v-on="{ ...onMenu, ...onTooltip }" icon)
-                          v-icon mdi-pencil
-                      span {{ $t('panel.ac.groups.change') }}
-              v-list-item-action(v-if="hasPerm('auth.delete_group')")
-                delete-menu(@confirm="deleteGroupMutate({ groupId: Number(group.id) }).then")
-                  template(v-slot:default="{ on: onMenu }")
-                    v-tooltip(bottom)
-                      template(v-slot:activator="{ on: onTooltip }")
-                        v-btn(@click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
-                          v-icon mdi-delete
-                      span {{ $t('panel.ac.groups.deleteGroup') }}
-      v-col(cols="12" md="8")
-        .caption {{ $t('panel.ac.permissions.name') }}
-        v-row(align="center")
-          v-col(cols="12" md="8")
-            v-text-field(v-model="searchPermissions" :label="$t('search')" prepend-icon="mdi-magnify")
-          v-col.text-right(cols="12" md="4")
-            .caption(v-if="selectedGroup") {{ $t('panel.ac.groups.tagged', { count: selectPermissions.length, totalCount: permissions && permissions.length }) }}
-        v-data-table(
-          :value="selectPermissions"
-          @input="changeGroupPermission"
-          :search="searchPermissions"
-          :headers="permissionHeaders"
-          :items="permissions"
-          :show-select="selectedGroup"
-          dense disable-pagination hide-default-footer)
-          template(v-slot:item.contentType="{ item }") {{ item.contentType.appLabel }} / {{ item.contentType.model }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')"  fluid)
+  template(#header) {{ $t('panel.groups') }}
+  v-row
+    v-col(cols="12" md="4")
+      v-row(no-gutters align="center")
+        v-col(cols="12" md="8").caption {{ $t('panel.ac.groups.name') }}
+        v-col.text-right(cols="12" md="4")
+          add-group-dialog
+      v-list
+        v-list-item-group(v-model="selectGroup" color="primary")
+          v-list-item(v-for="group in groups" :key="group.id")
+            v-list-item-content {{ group.name }} ({{ group.id }})
+            v-list-item-action(v-if="hasPerm('auth.change_group')")
+              text-menu(:value="group.name" @update="changeGroupName(group, $event)")
+                template(v-slot:default="{ on: onMenu }")
+                  v-tooltip(bottom)
+                    template(v-slot:activator="{ on: onTooltip }")
+                      v-btn(@click.stop="" v-on="{ ...onMenu, ...onTooltip }" icon)
+                        v-icon mdi-pencil
+                    span {{ $t('panel.ac.groups.change') }}
+            v-list-item-action(v-if="hasPerm('auth.delete_group')")
+              delete-menu(@confirm="deleteGroupMutate({ groupId: Number(group.id) }).then")
+                template(v-slot:default="{ on: onMenu }")
+                  v-tooltip(bottom)
+                    template(v-slot:activator="{ on: onTooltip }")
+                      v-btn(@click.stop="" v-on="{...onMenu, ...onTooltip}" icon)
+                        v-icon mdi-delete
+                    span {{ $t('panel.ac.groups.deleteGroup') }}
+    v-col(cols="12" md="8")
+      .caption {{ $t('panel.ac.permissions.name') }}
+      v-row(align="center")
+        v-col(cols="12" md="8")
+          v-text-field(v-model="searchPermissions" :label="$t('search')" prepend-icon="mdi-magnify")
+        v-col.text-right(cols="12" md="4")
+          .caption(v-if="selectedGroup") {{ $t('panel.ac.groups.tagged', { count: selectPermissions.length, totalCount: permissions && permissions.length }) }}
+      v-data-table(
+        :value="selectPermissions"
+        @input="changeGroupPermission"
+        :search="searchPermissions"
+        :headers="permissionHeaders"
+        :items="permissions"
+        :show-select="selectedGroup"
+        dense disable-pagination hide-default-footer)
+        template(v-slot:item.contentType="{ item }") {{ item.contentType.appLabel }} / {{ item.contentType.model }}
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
 <template lang="pug">
-  nuxt-child(:breadCrumbs="breadCrumbs")
+nuxt-child(:breadCrumbs="breadCrumbs")
 </template>
 
 <script lang="ts">

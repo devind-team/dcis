@@ -1,27 +1,27 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="close"
-    :mutation="require('~/gql/dcis/mutations/document/add_document.graphql')"
-    :variables="variables"
-    :header="String($t('dcis.documents.add.header'))"
-    :button-text="String($t('add'))"
-    :update="update"
-    i18n-path="dcis.documents.add"
-    mutation-name="addDocument"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(:name="String($t('dcis.documents.add.comment'))" rules="required" v-slot="{ errors, valid }")
-        v-text-field(v-model="comment" :error-messages="errors" :success="valid" :label="$t('dcis.documents.add.comment')" autofocus)
-      validation-provider(:name="String($t('dcis.documents.add.status'))" rules="required" v-slot="{ errors, valid }")
-        v-combobox(v-model="status" :items="statuses" :label="$t('dcis.documents.add.status')" item-text="name" item-value="id")
-      v-combobox(v-if="documents.length" v-model="document" :items="documents" :label="$t('dcis.documents.add.lastDocument')" clearable)
-        template(#selection="{ item }") Версия {{ item.version }}
-        template(#item="{ item }")
-          v-list-item-content
-            v-list-item-title Версия {{ item.version }}
-            v-list-item-subtitle {{ item.comment }}
+mutation-modal-form(
+  @close="close"
+  :mutation="require('~/gql/dcis/mutations/document/add_document.graphql')"
+  :variables="variables"
+  :header="String($t('dcis.documents.add.header'))"
+  :button-text="String($t('add'))"
+  :update="update"
+  i18n-path="dcis.documents.add"
+  mutation-name="addDocument"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(:name="String($t('dcis.documents.add.comment'))" rules="required" v-slot="{ errors, valid }")
+      v-text-field(v-model="comment" :error-messages="errors" :success="valid" :label="$t('dcis.documents.add.comment')" autofocus)
+    validation-provider(:name="String($t('dcis.documents.add.status'))" rules="required" v-slot="{ errors, valid }")
+      v-combobox(v-model="status" :items="statuses" :label="$t('dcis.documents.add.status')" item-text="name" item-value="id")
+    v-combobox(v-if="documents.length" v-model="document" :items="documents" :label="$t('dcis.documents.add.lastDocument')" clearable)
+      template(#selection="{ item }") Версия {{ item.version }}
+      template(#item="{ item }")
+        v-list-item-content
+          v-list-item-title Версия {{ item.version }}
+          v-list-item-subtitle {{ item.comment }}
 </template>
 
 <script lang="ts">

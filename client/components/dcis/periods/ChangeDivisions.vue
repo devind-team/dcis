@@ -1,31 +1,31 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="close"
-    :header="String($t('dcis.periods.divisions.formHeader'))"
-    :button-text="String($t('dcis.periods.divisions.buttonText'))"
-    :mutation="changeDivisions"
-    :update="changeDivisionsUpdate"
-    :variables="{ periodId: period.id, divisionIds: selectedDivisions.map(e => e.id) }"
-    width="50vw"
-    mutation-name="changeDivisions"
-    errors-in-alert
-    persistent
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-data-table(
-        v-model="selectedDivisions"
-        :headers="headers"
-        :items="divisions"
-        :loading="loading"
-        :items-per-page="33"
-        :search.sync="search"
-        item-key="id"
-        show-select
-        hide-default-footer
-      )
+mutation-modal-form(
+  @close="close"
+  :header="String($t('dcis.periods.divisions.formHeader'))"
+  :button-text="String($t('dcis.periods.divisions.buttonText'))"
+  :mutation="changeDivisions"
+  :update="changeDivisionsUpdate"
+  :variables="{ periodId: period.id, divisionIds: selectedDivisions.map(e => e.id) }"
+  width="50vw"
+  mutation-name="changeDivisions"
+  errors-in-alert
+  persistent
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-data-table(
+      v-model="selectedDivisions"
+      :headers="headers"
+      :items="divisions"
+      :loading="loading"
+      :items-per-page="33"
+      :search.sync="search"
+      item-key="id"
+      show-select
+      hide-default-footer
+    )
 </template>
 
 <script lang="ts">

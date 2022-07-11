@@ -1,25 +1,25 @@
 <template lang="pug">
-  mutation-form(
-    :mutation="require('~/gql/pages/mutations/section/add_section_text.graphql')"
-    :variables="{ pageId: page.id, text }"
-    :update="addSectionDone"
-    :button-text="$t('pages.section.add')"
-    mutation-name="addSectionText"
-    i18n-path="pages.section.names"
-  )
-    template(#form)
-      validation-provider(:name="$t('pages.section.names.text')" rules="required|min:10" v-slot="{ errors }" tag="div")
-        rich-text-editor(v-model="text")
-        .error--text {{ errors[0] || '' }}
-    template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
-      v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
-      v-spacer
-      v-btn(
-        :disabled="invalid"
-        :loading="loading"
-        type="submit"
-        color="primary"
-      ) {{ buttonText }}
+mutation-form(
+  :mutation="require('~/gql/pages/mutations/section/add_section_text.graphql')"
+  :variables="{ pageId: page.id, text }"
+  :update="addSectionDone"
+  :button-text="$t('pages.section.add')"
+  mutation-name="addSectionText"
+  i18n-path="pages.section.names"
+)
+  template(#form)
+    validation-provider(:name="$t('pages.section.names.text')" rules="required|min:10" v-slot="{ errors }" tag="div")
+      rich-text-editor(v-model="text")
+      .error--text {{ errors[0] || '' }}
+  template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
+    v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
+    v-spacer
+    v-btn(
+      :disabled="invalid"
+      :loading="loading"
+      type="submit"
+      color="primary"
+    ) {{ buttonText }}
 </template>
 
 <script lang="ts">

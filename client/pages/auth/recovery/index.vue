@@ -1,21 +1,21 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    v-row
-      v-col.mx-auto(lg="4" md="6" cols="12")
-        v-alert(v-if="success" type="success") {{ $t('auth.successSendEmail') }}
-        mutation-form(
-          @done="recoveryPasswordDone"
-          v-else
-          :mutation="require('~/gql/core/mutations/user/recovery_password.graphql')"
-          :variables="{ email }"
-          :header="String($t('auth.recoveryTitle'))"
-          :button-text="String($t('auth.restoreAccess'))"
-          i18n-path="auth"
-          mutation-name="recoveryPassword"
-        )
-          template(#form)
-            validation-provider(:name="String($t('auth.email'))" rules="required|email" v-slot="{ errors, valid }")
-              v-text-field(v-model="email" :label="$t('auth.email')" prepend-icon="mdi-email" :error-messages="errors" :success="valid" clearable)
+bread-crumbs(:items="breadCrumbs")
+  v-row
+    v-col.mx-auto(lg="4" md="6" cols="12")
+      v-alert(v-if="success" type="success") {{ $t('auth.successSendEmail') }}
+      mutation-form(
+        @done="recoveryPasswordDone"
+        v-else
+        :mutation="require('~/gql/core/mutations/user/recovery_password.graphql')"
+        :variables="{ email }"
+        :header="String($t('auth.recoveryTitle'))"
+        :button-text="String($t('auth.restoreAccess'))"
+        i18n-path="auth"
+        mutation-name="recoveryPassword"
+      )
+        template(#form)
+          validation-provider(:name="String($t('auth.email'))" rules="required|email" v-slot="{ errors, valid }")
+            v-text-field(v-model="email" :label="$t('auth.email')" prepend-icon="mdi-email" :error-messages="errors" :success="valid" clearable)
 </template>
 
 <script lang="ts">

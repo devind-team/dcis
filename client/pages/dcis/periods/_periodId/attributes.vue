@@ -1,6 +1,6 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) Атрибуты
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) Атрибуты
 </template>
 
 <script lang="ts">

@@ -1,40 +1,40 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t(`dictionaries.${queryName}.header`) }}
-    v-row(align="center")
-      v-col(cols="12" md="6")
-        v-text-field(
-          v-if="isRelayQuery"
-          v-model="relaySearch"
-          :placeholder="$t('search')"
-          prepend-icon="mdi-magnify"
-          clearable
-        )
-        v-text-field(
-          v-else
-          v-model="search"
-          :placeholder="$t('search')"
-          prepend-icon="mdi-magnify"
-          clearable
-        )
-      v-col.text-right.pr-5(cols="12" md="6") {{ countText }}
-    v-row
-      v-col
-        v-data-table(
-          :headers="tableHeaders"
-          :items="items"
-          :loading="result.loading.value"
-          :search="!isRelayQuery ? search : undefined"
-          dense
-          disable-pagination
-          hide-default-footer
-        )
-          template(#item.id="{ item }") {{ isRelayQuery ? $fromGlobalId(item.id).id : item.id }}
-          template(v-for="headerValue in booleanHeadersValues" v-slot:[`item.${headerValue}`]="{ item }")
-            | {{ getObjectValueByPathFunc(item, headerValue) ? $t('yes') : $t('no') }}
-          slot(v-for="slot in Object.keys($slots)" :name="slot" :slot="slot")
-          template(v-for="slot in tableSlotNames" v-slot:[slot]="scope")
-            slot(v-bind="scope" :name="slot")
+left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t(`dictionaries.${queryName}.header`) }}
+  v-row(align="center")
+    v-col(cols="12" md="6")
+      v-text-field(
+        v-if="isRelayQuery"
+        v-model="relaySearch"
+        :placeholder="$t('search')"
+        prepend-icon="mdi-magnify"
+        clearable
+      )
+      v-text-field(
+        v-else
+        v-model="search"
+        :placeholder="$t('search')"
+        prepend-icon="mdi-magnify"
+        clearable
+      )
+    v-col.text-right.pr-5(cols="12" md="6") {{ countText }}
+  v-row
+    v-col
+      v-data-table(
+        :headers="tableHeaders"
+        :items="items"
+        :loading="result.loading.value"
+        :search="!isRelayQuery ? search : undefined"
+        dense
+        disable-pagination
+        hide-default-footer
+      )
+        template(#item.id="{ item }") {{ isRelayQuery ? $fromGlobalId(item.id).id : item.id }}
+        template(v-for="headerValue in booleanHeadersValues" v-slot:[`item.${headerValue}`]="{ item }")
+          | {{ getObjectValueByPathFunc(item, headerValue) ? $t('yes') : $t('no') }}
+        slot(v-for="slot in Object.keys($slots)" :name="slot" :slot="slot")
+        template(v-for="slot in tableSlotNames" v-slot:[slot]="scope")
+          slot(v-bind="scope" :name="slot")
 </template>
 
 <script lang="ts">

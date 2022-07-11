@@ -1,42 +1,42 @@
 <template lang="pug">
-  tbody
-    tr(v-for="row in activeSheet.rows" :key="row.id")
-      td.grid__cell_row-name(
-        :class="getRowNameCellClass(row)"
-        @mouseenter="mouseenterRowName(row)"
-        @mousemove="mousemoveRowName(row, $event)"
-        @mouseleave="mouseleaveRowName"
-        @mousedown="mousedownRowName(row, $event)"
-        @mouseup="mouseupRowName"
+tbody
+  tr(v-for="row in activeSheet.rows" :key="row.id")
+    td.grid__cell_row-name(
+      :class="getRowNameCellClass(row)"
+      @mouseenter="mouseenterRowName(row)"
+      @mousemove="mousemoveRowName(row, $event)"
+      @mouseleave="mouseleaveRowName"
+      @mousedown="mousedownRowName(row, $event)"
+      @mouseup="mouseupRowName"
+    )
+      grid-row-control(
+        v-slot="{ on, attrs }"
+        :row="row"
+        :can-delete="rootCount !== 1 || !!row.parent"
+        :get-row-height="getRowHeight"
+        :clear-selection="clearSelection"
       )
-        grid-row-control(
-          v-slot="{ on, attrs }"
-          :row="row"
-          :can-delete="rootCount !== 1 || !!row.parent"
-          :get-row-height="getRowHeight"
-          :clear-selection="clearSelection"
-        )
-          div(
-            v-bind="attrs"
-            :style="{ height: `${getRowHeight(row)}px` }"
-            @contextmenu.prevent="on.click"
-          ) {{ row.name }}
-      td(
-        v-for="cell in row.cells"
-        :key="cell.id"
-        :colspan="cell.colspan"
-        :rowspan="cell.rowspan"
-        :style="getCellStyle(cell)"
-        @mousedown="mousedownCell(cell)"
-        @mouseenter="mouseenterCell(cell)"
-        @mouseup="mouseupCell(cell)"
+        div(
+          v-bind="attrs"
+          :style="{ height: `${getRowHeight(row)}px` }"
+          @contextmenu.prevent="on.click"
+        ) {{ row.name }}
+    td(
+      v-for="cell in row.cells"
+      :key="cell.id"
+      :colspan="cell.colspan"
+      :rowspan="cell.rowspan"
+      :style="getCellStyle(cell)"
+      @mousedown="mousedownCell(cell)"
+      @mouseenter="mouseenterCell(cell)"
+      @mouseup="mouseupCell(cell)"
+    )
+      grid-cell(
+        :style="getCellContentStyle(row, cell)"
+        :cell="cell"
+        :active="!!activeCell && activeCell.id === cell.id"
+        @clear-active="setActiveCell(null)"
       )
-        grid-cell(
-          :style="getCellContentStyle(row, cell)"
-          :cell="cell"
-          :active="!!activeCell && activeCell.id === cell.id"
-          @clear-active="setActiveCell(null)"
-        )
 </template>
 
 <script lang="ts">

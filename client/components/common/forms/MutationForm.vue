@@ -1,37 +1,37 @@
 <template lang="pug">
-  apollo-mutation(
-    v-slot="{ mutate, loading }"
-    v-bind="$attrs"
-    v-on="mutationListeners"
-    tag
-  )
-    validation-observer(v-slot="{ handleSubmit, invalid }" ref="validationObserver" slim)
-      form(@submit.prevent="handleSubmit(mutate)")
-        v-card(:flat="flat")
-          v-card-title
-            slot(name="header" :header="header") {{ header }}
-          v-card-subtitle
-            slot(name="subheader" :subheader="subheader")
-              span {{ subheader }}
-          v-card-text
-            mutation-result-alert(
-              ref="mutationResultAlert"
-              :hide-timeout="hideAlertTimeout"
-              :success-message="successMessage"
-            )
-            slot(name="form")
-          v-card-actions
-            slot(
-              name="actions"
-              :button-text="buttonText"
-              :invalid="invalid"
-              :loading="loading"
-              :set-form-errors="setFormErrors"
-              :set-error="setError"
-              :set-success="setSuccess"
-            )
-              v-spacer
-              v-btn(:disabled="invalid" :loading="loading" type="submit" color="primary") {{ buttonText }}
+apollo-mutation(
+  v-slot="{ mutate, loading }"
+  v-bind="$attrs"
+  v-on="mutationListeners"
+  tag
+)
+  validation-observer(v-slot="{ handleSubmit, invalid }" ref="validationObserver" slim)
+    form(@submit.prevent="handleSubmit(mutate)")
+      v-card(:flat="flat")
+        v-card-title
+          slot(name="header" :header="header") {{ header }}
+        v-card-subtitle
+          slot(name="subheader" :subheader="subheader")
+            span {{ subheader }}
+        v-card-text
+          mutation-result-alert(
+            ref="mutationResultAlert"
+            :hide-timeout="hideAlertTimeout"
+            :success-message="successMessage"
+          )
+          slot(name="form")
+        v-card-actions
+          slot(
+            name="actions"
+            :button-text="buttonText"
+            :invalid="invalid"
+            :loading="loading"
+            :set-form-errors="setFormErrors"
+            :set-error="setError"
+            :set-success="setSuccess"
+          )
+            v-spacer
+            v-btn(:disabled="invalid" :loading="loading" type="submit" color="primary") {{ buttonText }}
 </template>
 
 <script lang="ts">

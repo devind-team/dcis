@@ -1,31 +1,31 @@
 <template lang="pug">
-  v-data-iterator(:items="pages" :loading="loading" disable-pagination hide-default-footer)
-    template(#header v-if="allowSearch")
-      v-row(align="center")
-        v-col(cols="12" md="8")
-          v-text-field(v-model="search" :label="$t('search')" prepend-icon="mdi-magnify" clearable)
-        v-col.text-right(v-if="!loading && totalCount" cols="12" md="4")
-          | {{ $t('pages.components.pageView.showOf', { count, totalCount }) }}
-          v-btn-toggle.ml-2(v-model="view")
-            v-btn(value="grid")
-              v-icon mdi-view-grid
-            v-btn(value="card")
-              v-icon mdi-view-list
-    template(#default="{ items }")
-      v-row
-        v-col(v-if="allowAdd" cols="12")
-          add-page-card(:category="category")
-      slot(:items="items" :view="view")
-    template(#footer)
-      v-row(v-if="loading")
-        v-col.text-center #[v-progress-circular(color="primary" indeterminate)]
-    template(#no-data)
-      .font-italic(v-if="search && search.length") {{ $t('pages.components.pageView.noResults') }}
-      v-row(v-else)
-        v-col
-          v-alert(type="info") {{ $t('pages.components.pageView.noPages') }}
-        v-col(v-if="allowAdd" v-bind="breakPointsGrid")
-          add-page-card(:category="category")
+v-data-iterator(:items="pages" :loading="loading" disable-pagination hide-default-footer)
+  template(#header v-if="allowSearch")
+    v-row(align="center")
+      v-col(cols="12" md="8")
+        v-text-field(v-model="search" :label="$t('search')" prepend-icon="mdi-magnify" clearable)
+      v-col.text-right(v-if="!loading && totalCount" cols="12" md="4")
+        | {{ $t('pages.components.pageView.showOf', { count, totalCount }) }}
+        v-btn-toggle.ml-2(v-model="view")
+          v-btn(value="grid")
+            v-icon mdi-view-grid
+          v-btn(value="card")
+            v-icon mdi-view-list
+  template(#default="{ items }")
+    v-row
+      v-col(v-if="allowAdd" cols="12")
+        add-page-card(:category="category")
+    slot(:items="items" :view="view")
+  template(#footer)
+    v-row(v-if="loading")
+      v-col.text-center #[v-progress-circular(color="primary" indeterminate)]
+  template(#no-data)
+    .font-italic(v-if="search && search.length") {{ $t('pages.components.pageView.noResults') }}
+    v-row(v-else)
+      v-col
+        v-alert(type="info") {{ $t('pages.components.pageView.noPages') }}
+      v-col(v-if="allowAdd" v-bind="breakPointsGrid")
+        add-page-card(:category="category")
 </template>
 
 <script lang="ts">

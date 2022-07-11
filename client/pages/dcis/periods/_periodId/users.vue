@@ -1,39 +1,39 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ period.name }}
-    v-row
-      template(v-if="period.periodGroups.length")
-        v-col(cols="12" md="4" sm="4")
-          v-subheader Группы
-          v-list
-            v-list-item-group(v-model="selectGroup" color="primary")
-              v-list-item(
-                v-for="item in period.periodGroups"
-                :key="item.id"
-                :value="item"
-              )
-                v-list-item-content {{ item.name }}
-                delete-menu(@confirm="deletePeriodGroupMutate({ id: item.id }).then()")
-                  template(#default="{ on }")
-                    v-list-item-action(v-on="on")
-                      v-btn(icon)
-                        v-icon mdi-delete
-        v-divider(vertical)
-      v-col(v-bind="period.periodGroups.length ? { md: 8, sm: 6 } : { }" cols="12")
-        period-group-users(v-if="selectGroup" :period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
-        v-row(v-else)
-          v-col
-            add-period-group(:period="period" :update="addPeriodGroupUpdate")
-              template(#activator="{ on }")
-                v-card.period-users-card-add(v-on="on" flat)
-                  v-icon(large) mdi-plus-circle-outline
-                  .title {{ $t('dcis.periods.actions.addGroup') }}
-          v-col
-            copy-period-groups(:period="period" active-query)
-              template(#activator="{ on }")
-                v-card.period-users-card-add(v-on="on" flat)
-                  v-icon(large) mdi-import
-                  .title {{ $t('dcis.periods.actions.copyGroups') }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ period.name }}
+  v-row
+    template(v-if="period.periodGroups.length")
+      v-col(cols="12" md="4" sm="4")
+        v-subheader Группы
+        v-list
+          v-list-item-group(v-model="selectGroup" color="primary")
+            v-list-item(
+              v-for="item in period.periodGroups"
+              :key="item.id"
+              :value="item"
+            )
+              v-list-item-content {{ item.name }}
+              delete-menu(@confirm="deletePeriodGroupMutate({ id: item.id }).then()")
+                template(#default="{ on }")
+                  v-list-item-action(v-on="on")
+                    v-btn(icon)
+                      v-icon mdi-delete
+      v-divider(vertical)
+    v-col(v-bind="period.periodGroups.length ? { md: 8, sm: 6 } : { }" cols="12")
+      period-group-users(v-if="selectGroup" :period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
+      v-row(v-else)
+        v-col
+          add-period-group(:period="period" :update="addPeriodGroupUpdate")
+            template(#activator="{ on }")
+              v-card.period-users-card-add(v-on="on" flat)
+                v-icon(large) mdi-plus-circle-outline
+                .title {{ $t('dcis.periods.actions.addGroup') }}
+        v-col
+          copy-period-groups(:period="period" active-query)
+            template(#activator="{ on }")
+              v-card.period-users-card-add(v-on="on" flat)
+                v-icon(large) mdi-import
+                .title {{ $t('dcis.periods.actions.copyGroups') }}
 </template>
 
 <script lang="ts">

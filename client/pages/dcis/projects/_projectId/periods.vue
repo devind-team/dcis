@@ -1,18 +1,18 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    template(#header) Периоды
-      template(v-if="hasPerm('dcis.add_period')")
-        v-spacer
-        add-period(:update="addPeriodUpdate" :project="project")
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") Добавить сбор
-    v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.name="{ item }")
-        nuxt-link(
-          :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
-        ) {{ item.name }}
-      template(#item.status="{ item }") {{ statuses[item.status] }}
-      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  template(#header) Периоды
+    template(v-if="hasPerm('dcis.add_period')")
+      v-spacer
+      add-period(:update="addPeriodUpdate" :project="project")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") Добавить сбор
+  v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
+    template(#item.name="{ item }")
+      nuxt-link(
+        :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
+      ) {{ item.name }}
+    template(#item.status="{ item }") {{ statuses[item.status] }}
+    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">

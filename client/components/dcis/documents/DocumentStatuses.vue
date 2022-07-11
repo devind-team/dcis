@@ -1,40 +1,40 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="close"
-    :header="String($t('dcis.documents.status.header'))"
-    :subheader="`Версия ${ document.version }`"
-    :button-text="String($t('dcis.documents.status.buttonText'))"
-    :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
-    :variables="{ documentId: document.id, statusId: status && status.id, comment }"
-    :update="addDocumentStatusUpdate"
-    mutation-name="addDocumentStatus"
-    i18n-path="dcis.documents.status"
-    persistent
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      v-list(two-line dense)
-        v-list-item(v-for="item in documentStatuses" :key="item.id")
-          v-list-item-content
-            v-list-item-title {{ item.status.name }}
-            v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
-            v-list-item-subtitle {{ getUserName(item.user) }}
-          v-list-item-content
-            v-list-item-subtitle.font-italic {{ item.comment }}
-          v-list-item-action(v-if="documentStatuses.length > 1 && hasPerm('dcis.delete_documentstatus')" )
-            v-btn(@click="deleteDocumentStatus({ documentStatusId: item.id }).then()" icon)
-              v-icon(color="error") mdi-close-circle
-      v-divider
-      v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
-      v-combobox(
-        v-model="status"
-        :items="statuses"
-        :label="$t('dcis.documents.status.name')"
-        item-text="name"
-        item-value="id"
-        success
-      )
+mutation-modal-form(
+  @close="close"
+  :header="String($t('dcis.documents.status.header'))"
+  :subheader="`Версия ${ document.version }`"
+  :button-text="String($t('dcis.documents.status.buttonText'))"
+  :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
+  :variables="{ documentId: document.id, statusId: status && status.id, comment }"
+  :update="addDocumentStatusUpdate"
+  mutation-name="addDocumentStatus"
+  i18n-path="dcis.documents.status"
+  persistent
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    v-list(two-line dense)
+      v-list-item(v-for="item in documentStatuses" :key="item.id")
+        v-list-item-content
+          v-list-item-title {{ item.status.name }}
+          v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
+          v-list-item-subtitle {{ getUserName(item.user) }}
+        v-list-item-content
+          v-list-item-subtitle.font-italic {{ item.comment }}
+        v-list-item-action(v-if="documentStatuses.length > 1 && hasPerm('dcis.delete_documentstatus')" )
+          v-btn(@click="deleteDocumentStatus({ documentStatusId: item.id }).then()" icon)
+            v-icon(color="error") mdi-close-circle
+    v-divider
+    v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
+    v-combobox(
+      v-model="status"
+      :items="statuses"
+      :label="$t('dcis.documents.status.name')"
+      item-text="name"
+      item-value="id"
+      success
+    )
 </template>
 
 <script lang="ts">

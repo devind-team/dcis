@@ -1,11 +1,11 @@
 <template lang="pug">
-  universal-dictionary(
-    @update-drawer="$emit('update-drawer')"
-    :bread-crumbs="bc"
-    :query="require('~/gql/core/queries/profiles.graphql')"
-    :headers="['id', 'name', 'code', 'position', 'kind']"
-    query-name="profiles"
-  )
+universal-dictionary(
+  @update-drawer="$emit('update-drawer')"
+  :bread-crumbs="bc"
+  :query="require('~/gql/core/queries/profiles.graphql')"
+  :headers="['id', 'name', 'code', 'position', 'kind']"
+  query-name="profiles"
+)
 </template>
 
 <script lang="ts">

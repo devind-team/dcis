@@ -1,10 +1,10 @@
 <template lang="pug">
-  v-app
-    navigation(v-model="drawer")
-    app-bar(v-model="drawer")
-    v-main
-      nuxt
-    footer-component(v-if="footer")
+v-app
+  navigation(v-model="drawer")
+  app-bar(v-model="drawer")
+  v-main
+    nuxt
+  footer-component(v-if="footer")
 </template>
 
 <script lang="ts">

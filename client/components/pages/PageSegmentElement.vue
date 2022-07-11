@@ -1,10 +1,10 @@
 <template lang="pug">
-  v-col(cols="12" :md="segmentElement.width")
-    v-card(v-if="view[segmentElement.view] === 'card'")
-      v-card-title {{ segmentElement.pageKind.name }}
-      slot(:pages="segmentElement.pageKind.pages" :represent="represent[segmentElement.represent]")
-    template(v-else)
-      slot(:pages="segmentElement.pageKind.pages" :represent="represent[segmentElement.represent]")
+v-col(cols="12" :md="segmentElement.width")
+  v-card(v-if="view[segmentElement.view] === 'card'")
+    v-card-title {{ segmentElement.pageKind.name }}
+    slot(:pages="segmentElement.pageKind.pages" :represent="represent[segmentElement.represent]")
+  template(v-else)
+    slot(:pages="segmentElement.pageKind.pages" :represent="represent[segmentElement.represent]")
 </template>
 
 <script lang="ts">

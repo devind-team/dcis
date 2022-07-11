@@ -1,7 +1,7 @@
 <template lang="pug">
-  nuxt-child(v-if="!loading" :breadCrumbs="bc" :category="category")
-  v-row(v-else)
-    v-col.text-center #[v-progress-circular(color="primary" indeterminate)]
+nuxt-child(v-if="!loading" :breadCrumbs="bc" :category="category")
+v-row(v-else)
+  v-col.text-center #[v-progress-circular(color="primary" indeterminate)]
 </template>
 
 <script lang="ts">

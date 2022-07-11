@@ -1,27 +1,27 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
-    template(#header) {{ $t('profile.activity.name') }}
-    v-row(align="center")
-      v-col(cols="12" md="8")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right.pr-5(cols="12" md="4") {{ $t('panel.ac.activity.shownOf', { count, totalCount }) }}
-    v-data-table(
-      :headers="headers"
-      :items="logEntry"
-      :loading="loading"
-      dense disable-pagination hide-default-footer disable-filtering)
-      template(v-slot:item.user="{ item }") {{ item.session.user.lastName }} {{ item.session.user.firstName }} {{ item.session.user.sirName }}
-      template(v-slot:item.action="{ item }") {{ $t('panel.ac.activity.record') }} {{ action[item.action] }}
-      template(v-slot:item.contentType="{ item }") {{ item.contentType.appLabel }}.{{ item.contentType.model }}
-      template(v-slot:item.session="{ item }") {{ item.session.os }}/{{ item.session.browser }}
-      template(v-slot:item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
-      template(v-slot:item.info="{ item }")
-        v-menu(bottom)
-          template(v-slot:activator="{ on }")
-            v-btn(v-on="on" icon)
-              v-icon mdi-information-outline
-          v-card
-            v-card-text #[pre {{ parseFromJson(item.payload) }}]
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
+  template(#header) {{ $t('profile.activity.name') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(cols="12" md="4") {{ $t('panel.ac.activity.shownOf', { count, totalCount }) }}
+  v-data-table(
+    :headers="headers"
+    :items="logEntry"
+    :loading="loading"
+    dense disable-pagination hide-default-footer disable-filtering)
+    template(v-slot:item.user="{ item }") {{ item.session.user.lastName }} {{ item.session.user.firstName }} {{ item.session.user.sirName }}
+    template(v-slot:item.action="{ item }") {{ $t('panel.ac.activity.record') }} {{ action[item.action] }}
+    template(v-slot:item.contentType="{ item }") {{ item.contentType.appLabel }}.{{ item.contentType.model }}
+    template(v-slot:item.session="{ item }") {{ item.session.os }}/{{ item.session.browser }}
+    template(v-slot:item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+    template(v-slot:item.info="{ item }")
+      v-menu(bottom)
+        template(v-slot:activator="{ on }")
+          v-btn(v-on="on" icon)
+            v-icon mdi-information-outline
+        v-card
+          v-card-text #[pre {{ parseFromJson(item.payload) }}]
 </template>
 
 <script lang="ts">
