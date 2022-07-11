@@ -1,4 +1,4 @@
-mutation ChangePeriodGroupPrivileges($periodGroupId: Int!, $privilegesIds: [ID!]) {
+mutation ChangePeriodGroupPrivileges($periodGroupId: ID!, $privilegesIds: [ID!]) {
   changePeriodGroupPrivileges( input: {
     periodGroupId: $periodGroupId,
     privilegesIds: $privilegesIds

@@ -1,7 +1,0 @@
-query Divisions($periodId: ID!) {
-  divisions(periodId: $periodId) {
-    id
-    name
-    __typename
-  }
-}

@@ -11,22 +11,13 @@ mutation AddPeriod($name: String!, $projectId: ID!, $file: Upload!, $multiple: B
     }
     period {
       ...PeriodFields
-      periodGroups {
-      id
-      name
-      createdAt
-      users {
-        ...UserFields
-      }
-      privileges {
-        id
-        name
-        key
-        __typename
-      }
-      __typename
-    }
-      __typename
+      canChangeDivisions
+      canChangeGroups
+      canChangeUsers
+      canChangeSettings
+      canChangeSheet
+      canDelete
+      canAddDocument
     }
     __typename
   }

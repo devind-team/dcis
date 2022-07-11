@@ -1,102 +1,129 @@
 <template lang="pug">
   mutation-modal-form(
-    :header="String($t('dcis.periods.actions.copyGroups'))"
-    :button-text="String($t('dcis.periods.copyPeriodGroups.buttonText'))"
-    :mutation="copyPeriodGroups"
-    :variables="{ periodId: period.id, selectedPeriodId: selectPeriod && selectPeriod.id, periodGroupIds: selectGroups }"
+    :header="String($t('dcis.periods.groups.copyGroups.header'))"
+    :subheader="period.name"
+    :button-text="String($t('dcis.periods.groups.copyGroups.buttonText'))"
+    :mutation="copyPeriodGroupsMutation"
+    :variables="variables"
     :update="copyPeriodGroupsUpdate"
     mutation-name="copyPeriodGroups"
     errors-in-alert
-    persistent
+    @close="close"
   )
     template(#activator="{ on }")
       slot(name="activator" :on="on")
     template(#form)
-      v-autocomplete(
-        v-model="selectPeriod"
-        :label="String($t('dcis.periods.copyPeriodGroups.period'))"
-        :items="periods"
-        :loading="loading"
-        item-text="name"
-        item-value="id"
-        return-object
-        hide-no-data
-        hide-selected
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="String($t('dcis.periods.groups.copyGroups.period'))"
+        rules="required"
       )
-      v-autocomplete(
-        v-model="selectGroups"
-        :label="String($t('dcis.periods.copyPeriodGroups.groups'))"
-        :items="selectPeriod ? periods.find(e => e.id === selectPeriod.id).periodGroups : []"
-        :loading="loading"
-        :disabled="!selectPeriod"
-        item-text="name"
-        item-value="id"
-        multiple
-        hide-no-data
-        hide-selected
+        v-autocomplete(
+          v-model="selectedPeriod"
+          :label="$t('dcis.periods.groups.copyGroups.period')"
+          :items="periodItems"
+          :loading="loading"
+          :error-messages="errors"
+          :success="valid"
+          item-value="id"
+          item-text="name"
+          return-object
+          hide-selected
+        )
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="String($t('dcis.periods.groups.copyGroups.groups'))"
+        rules="required"
       )
+        v-autocomplete(
+          v-model="selectedGroupIds"
+          :label="$t('dcis.periods.groups.copyGroups.groups')"
+          :items="selectedPeriod ? periods.find(e => e.id === selectedPeriod.id).periodGroups : []"
+          :loading="loading"
+          :disabled="!selectedPeriod"
+          :error-messages="errors"
+          :success="valid"
+          item-value="id"
+          item-text="name"
+          chips
+          deletable-chips
+          multiple
+          hide-selected
+        )
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { defineComponent, inject, PropType, ref, toRef } from '#app'
-import copyPeriodGroups from '~/gql/dcis/mutations/project/copy_period_groups.graphql'
+import { computed, defineComponent, PropType, ref } from '#app'
+import copyPeriodGroupsMutation from '~/gql/dcis/mutations/period/copy_period_groups.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import {
   PeriodType,
   PeriodsQuery,
   PeriodsQueryVariables,
-  PeriodGroupType,
-  CopyPeriodGroupMutationPayload
+  CopyPeriodGroupsMutationVariables,
+  CopyPeriodGroupsMutationPayload
 } from '~/types/graphql'
 import periodsQuery from '~/gql/dcis/queries/periods.graphql'
-import { useAuthStore } from '~/stores'
 import { useCommonQuery } from '~/composables'
 
-export type CopyPeriodGroupsMutationResult = { data: { copyPeriodGroups: CopyPeriodGroupMutationPayload } }
+export type CopyPeriodGroupsMutationResult = { data: { copyPeriodGroups: CopyPeriodGroupsMutationPayload } }
+type UpdateFunction = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => DataProxy
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
-    activeQuery: { type: Boolean, default: false }
+    update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
-    const authStore = useAuthStore()
-
-    const user = toRef(authStore, 'user')
-    const selectPeriod = ref<PeriodType | null>(null)
-    const selectGroups = ref<PeriodGroupType[] | null>(null)
-
-    const options = ref({ enabled: props.activeQuery })
     const { data: periods, loading } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
       document: periodsQuery,
       variables: () => ({
-        userId: user.value.id,
-        periodId: props.period.id
-      }),
-      options: options.value
+        projectId: props.period.project.id
+      })
     })
-    const periodGroupsUpdate: any = inject('copyPeriodGroupsUpdate')
+
+    const periodItems = computed<PeriodsQuery['periods']>(() => periods.value
+      ? periods.value.filter(period => period.id !== props.period.id)
+      : []
+    )
+
+    const selectedPeriod = ref<PeriodType | null>(null)
+    const selectedGroupIds = ref<string[] | null>(null)
+
+    const variables = computed<CopyPeriodGroupsMutationVariables>(() => ({
+      periodId: props.period.id,
+      selectedPeriodId: selectedPeriod.value?.id,
+      periodGroupIds: selectedGroupIds.value
+    }))
 
     /**
-     * Обновление после добавления пользователей в группу
+     * Обновление после копирования групп
      * @param cache
      * @param result
      */
     const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => {
-      const { success } = result.data.copyPeriodGroups
-      if (success) {
-        periodGroupsUpdate(cache, result)
+      if (result.data.copyPeriodGroups.success) {
+        props.update(cache, result)
       }
     }
+
+    const close = () => {
+      selectedPeriod.value = null
+      selectedGroupIds.value = null
+    }
+
     return {
-      selectPeriod,
-      selectGroups,
-      copyPeriodGroups,
-      copyPeriodGroupsUpdate,
       periods,
-      loading
+      loading,
+      periodItems,
+      copyPeriodGroupsMutation,
+      selectedPeriod,
+      selectedGroupIds,
+      variables,
+      copyPeriodGroupsUpdate,
+      close
     }
   }
 })

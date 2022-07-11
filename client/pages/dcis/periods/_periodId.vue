@@ -2,7 +2,7 @@
   div
     left-navigator-driver(v-model="drawer" :items="links")
     v-progress-circular(v-if="loading" color="primary" indeterminate)
-    nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :period="period")
+    nuxt-child(v-else :breadCrumbs="bc" :period="period" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">
@@ -20,28 +20,10 @@ export default defineComponent({
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
   setup (props) {
-    const { localePath } = useI18n()
+    const { t, localePath } = useI18n()
+
     const route = useRoute()
-    const drawer = ref<boolean>(false)
-    const links = computed<LinksType[]>(() => ([
-      { title: 'Документ', to: 'dcis-periods-periodId-documents', icon: 'file-table-box-multiple-outline' },
-      // { title: 'Атрибуты', to: 'dcis-periods-periodId-attributes', icon: 'format-list-text', permissions: 'core.view_experimental' },
-      { title: 'Дивизионы', to: 'dcis-periods-periodId-divisions', icon: 'briefcase-outline' },
-      {
-        title: 'Пользователи',
-        to: 'dcis-periods-periodId-users',
-        icon: 'account-multiple',
-        permissions: ['dcis.add_period', 'dcis.change_period'],
-        permOr: true
-      },
-      {
-        title: 'Настройки',
-        to: 'dcis-periods-periodId-settings',
-        icon: 'cogs',
-        permissions: ['dcis.change_period', 'dcis.delete_period'],
-        permOr: true
-      }
-    ]))
+
     const {
       data: period,
       loading,
@@ -50,6 +32,41 @@ export default defineComponent({
     } = usePeriodQuery(route.params.periodId)
     provide('periodUpdate', update)
     provide('changeUpdate', changeUpdate)
+
+    const drawer = ref<boolean>(false)
+    const links = computed<LinksType[]>(() => {
+      const result: LinksType[] = [
+        {
+          title: t('dcis.periods.links.documents') as string,
+          to: 'dcis-periods-periodId-documents',
+          icon: 'file-table-box-multiple-outline'
+        },
+        {
+          title: t('dcis.periods.links.divisions') as string,
+          to: 'dcis-periods-periodId-divisions',
+          icon: 'briefcase-outline'
+        },
+        {
+          title: t('dcis.periods.links.groups') as string,
+          to: 'dcis-periods-periodId-groups',
+          icon: 'account-group'
+        },
+        {
+          title: t('dcis.periods.links.users') as string,
+          to: 'dcis-periods-periodId-users',
+          icon: 'account-multiple'
+        }
+      ]
+      if (!loading.value && (period.value.canChangeSettings || period.value.canDelete)) {
+        result.push({
+          title: t('dcis.periods.links.settings') as string,
+          to: 'dcis-periods-periodId-settings',
+          icon: 'cogs'
+        })
+      }
+      return result
+    })
+
     const bc = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs
@@ -58,13 +75,17 @@ export default defineComponent({
         ...props.breadCrumbs,
         {
           text: period.value.project.name,
-          to: localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: period.value.project.id } }),
+          to: localePath({
+            name: 'dcis-projects-projectId-periods',
+            params: { projectId: period.value.project.id }
+          }),
           exact: true
         },
         { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId-documents' }), exact: true }
       ]
     })
-    return { bc, drawer, links, period, loading }
+
+    return { period, loading, drawer, links, bc }
   }
 })
 </script>

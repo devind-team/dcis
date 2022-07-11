@@ -1,0 +1,19 @@
+#import "../../fragments/privilege_fields.graphql"
+
+mutation ChangeUserPeriodPrivileges($userId: ID!, $periodId: ID!, $privilegesIds: [ID!]!) {
+  changeUserPeriodPrivileges(input: {
+    userId: $userId,
+    periodId: $periodId,
+    privilegesIds: $privilegesIds
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    privileges {
+      ...PrivilegesFields
+    }
+  }
+}

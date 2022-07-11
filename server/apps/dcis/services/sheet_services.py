@@ -9,7 +9,7 @@ from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
-from apps.dcis.models import RowDimension, Sheet, Value, Period
+from apps.dcis.models import Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 

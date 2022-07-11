@@ -1,6 +1,6 @@
 from django.db import models
-from apps.core.models import User
 
+from apps.core.models import User
 from .project import Period
 
 

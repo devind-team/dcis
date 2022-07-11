@@ -1,30 +1,30 @@
 <template lang="pug">
-  left-navigator-container(@update-drawer="$emit('update-drawer')" :bread-crumbs="breadCrumbs")
-    template(#header) {{ period.name }}
-      template(v-if="hasPerm('dcis.add_document')")
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+    template(#header) {{ t('dcis.documents.name') }}
+      template(v-if="period.canAddDocument")
         v-spacer
         add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
           template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") Создать новый документ
-    v-row
-      v-col(cols="12" sm="9")
-      v-col.text-right(cols="12" sm="3") {{ $t('shownOf', { totalCount, count }) }}
+            v-btn(v-on="on" color="primary") {{ t('dcis.documents.addDocument.buttonText') }}
+    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
     v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
       template(#item.version="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) Версия {{ item.version }}
+        ) {{ t('dcis.documents.tableItems.version', { version: item.version }) }}
       template(#item.comment="{ item }")
         template(v-if="item.comment")
-          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
-            a(v-on="on") {{ item.comment }}
+          template(v-if="item.canChange")
+            text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+              a(v-on="on") {{ item.comment }}
+          template(v-else) {{ item.comment }}
       template(#item.lastStatus="{ item }")
         template(v-if="item.lastStatus")
-          document-statuses(v-if="hasPerm('dcis.add_documentstatus')" :update="update" :document="item")
+          document-statuses(v-if="item.canChange" :update="update" :document="item")
             template(#activator="{ on }")
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
           strong(v-else) {{ item.lastStatus.status.name }}.
-          div Назначен: {{ dateTimeHM(item.lastStatus.createdAt) }}
+          div {{ t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
           .font-italic {{ item.lastStatus.comment }}
       template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
@@ -36,17 +36,15 @@ import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
 import { defineComponent, toRef, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/stores'
-import { useFilters } from '~/composables'
+import { useFilters, useI18n } from '~/composables'
+import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
-  ChangeDocumentCommentMutation,
-  ChangeDocumentCommentMutationVariables,
-  DocumentsQuery,
-  DocumentsQueryVariables,
   DocumentType,
-  PeriodType
+  PeriodType,
+  ChangeDocumentCommentMutation,
+  ChangeDocumentCommentMutationVariables
 } from '~/types/graphql'
-import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
@@ -61,6 +59,8 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
+    const { t } = useI18n()
+
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
@@ -75,10 +75,7 @@ export default defineComponent({
       update,
       addUpdate,
       changeUpdate
-    } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
-      document: documentsQuery,
-      variables: () => ({ periodId: route.params.periodId, divisionsId: [] })
-    })
+    } = useDocumentsQuery(route.params.periodId)
 
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
       if (!result.data.addDocument.errors.length) {
@@ -86,7 +83,10 @@ export default defineComponent({
       }
     }
 
-    const { mutate: ChangeDocumentCommentMutate } = useMutation<ChangeDocumentCommentMutation, ChangeDocumentCommentMutationVariables>(
+    const { mutate: ChangeDocumentCommentMutate } = useMutation<
+      ChangeDocumentCommentMutation,
+      ChangeDocumentCommentMutationVariables
+    >(
       changeDocumentCommentMutation,
       {
         update: (cache, result) => {
@@ -101,13 +101,14 @@ export default defineComponent({
       ChangeDocumentCommentMutate({ documentId: document.id, comment })
     }
     const headers: DataTableHeader[] = [
-      { text: 'Версия', value: 'version' },
-      { text: 'Комментарий', value: 'comment' },
-      { text: 'Дата создания', value: 'createdAt' },
-      { text: 'Статус', value: 'lastStatus' }
+      { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
+      { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
+      { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
+      { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
     ]
 
     return {
+      t,
       documents,
       loading,
       headers,

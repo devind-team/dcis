@@ -1,0 +1,3 @@
+from .document_permissions import DocumentPermissionsTestCase
+from .period_permissions import PeriodPermissionsTestCase
+from .project_permissions import ProjectPermissionsTestCase

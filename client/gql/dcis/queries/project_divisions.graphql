@@ -1,0 +1,7 @@
+#import "../fragments/division_model_fields.graphql"
+
+query ProjectDivisions($projectId: ID!) {
+  projectDivisions(projectId: $projectId) {
+    ...DivisionModelFields
+  }
+}

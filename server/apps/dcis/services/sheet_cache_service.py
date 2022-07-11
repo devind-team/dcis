@@ -26,21 +26,18 @@
 Используем django адаптер: https://docs.djangoproject.com/en/4.0/topics/cache/
 """
 
-from typing import Optional, Sequence
-from dataclasses import dataclass, field
 from collections import Counter, defaultdict
-
-from xlsx_evaluate.parser import FormulaParser
-from xlsx_evaluate.functions.xl import flatten
-from xlsx_evaluate.utils import resolve_ranges
+from dataclasses import dataclass, field
+from typing import Sequence
 
 from django.core.cache import cache
-from jsonpickle import encode, decode
-
+from jsonpickle import decode, encode
 from openpyxl.utils.cell import get_column_letter
+from xlsx_evaluate.functions.xl import flatten
+from xlsx_evaluate.parser import FormulaParser
+from xlsx_evaluate.utils import resolve_ranges
 
-from apps.dcis.models import Sheet, Cell
-
+from apps.dcis.models import Cell, Sheet
 
 KEY_TEMPLATE = 'cache.sheet.%s'
 
@@ -56,7 +53,7 @@ class FormulaDependencyCache:
     """
     sheet_name: str
 
-    sheet_id: Optional[int] = None
+    sheet_id: int | None = None
 
     dependency: dict[str, dict[str, int]] = field(default_factory=lambda: defaultdict(dict))
     inversion: dict[str, list[str]] = field(default_factory=lambda: defaultdict(list))
@@ -71,7 +68,7 @@ def save_to_cache(formula_dependency: FormulaDependencyCache) -> bool:
     return cache.set(formula_dependency.key, encode(formula_dependency))
 
 
-def get_from_cache(sheet_id: int) -> Optional[FormulaDependencyCache]:
+def get_from_cache(sheet_id: int) -> FormulaDependencyCache | None:
     """Забираем структуру из кеша."""
     result = cache.get(KEY_TEMPLATE % sheet_id)
     return None if result is None else decode(result)
@@ -92,7 +89,7 @@ def dependency_formula(formula: str) -> list[str]:
 class FormulaContainerCache:
     """Контейнер для упрощения работы с кешом."""
 
-    def __init__(self, name: str, sheet_id: Optional[None] = None):
+    def __init__(self, name: str, sheet_id: int | None = None):
         self.sheet_dependency = FormulaDependencyCache(name)
         self.sheet_id = sheet_id
 
@@ -105,11 +102,11 @@ class FormulaContainerCache:
         self.sheet_dependency.sheet_name = value
 
     @property
-    def sheet_id(self) -> Optional[int]:
+    def sheet_id(self) -> int | None:
         return self.sheet_dependency.sheet_id
 
     @sheet_id.setter
-    def sheet_id(self, value: Optional[int]):
+    def sheet_id(self, value: int | None):
         self.sheet_dependency.sheet_id = value
 
     def recalculate_dependency(self, coordinate: str) -> tuple[list[str], list[str]]:
@@ -127,8 +124,8 @@ class FormulaContainerCache:
             next_coord: str = stack_coordinates.pop()
             recalculation.append(next_coord)
             # Нужно предусмотреть работу с листами
-            relation_dep: Optional[Counter] = self.sheet_dependency.dependency.get(next_coord)
-            relation_inversion: Optional[list[str]] = self.sheet_dependency.inversion.get(next_coord)
+            relation_dep: Counter | None = self.sheet_dependency.dependency.get(next_coord)
+            relation_inversion: list[str] | None = self.sheet_dependency.inversion.get(next_coord)
             relation = [*relation, *(relation_dep.keys() if relation_dep else [])]
             stack_coordinates = [*stack_coordinates, *(relation_inversion if relation_inversion else [])]
 
@@ -203,7 +200,7 @@ class FormulaContainerCache:
         }
         return self
 
-    def save(self, sheet_id: Optional[int] = None) -> bool:
+    def save(self, sheet_id: int | None = None) -> bool:
         if sheet_id is not None:
             self.sheet_id = sheet_id
         return save_to_cache(self.sheet_dependency)
