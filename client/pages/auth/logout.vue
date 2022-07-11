@@ -1,9 +1,9 @@
 <template lang="pug">
-  v-container
-    v-row
-      v-col
-        v-progress-linear(indeterminate)
-        v-alert(type="info" text) {{ $t('auth.logout.loggingOut') }}
+v-container
+  v-row
+    v-col
+      v-progress-linear(indeterminate)
+      v-alert(type="info" text) {{ $t('auth.logout.loggingOut') }}
 </template>
 
 <script lang="ts">

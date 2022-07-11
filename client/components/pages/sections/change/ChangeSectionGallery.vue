@@ -1,44 +1,44 @@
 <template lang="pug">
-  mutation-form(
-    :mutation="require('~/gql/pages/mutations/section/change_section_gallery.graphql')"
-    :variables="{ sectionId: section.id, text: section.text, newImages: files, oldImages: oldImages.map(x => x.id) }"
-    :update="changeSectionDone"
-    :button-text="String($t('pages.section.change'))"
-    mutation-name="changeSectionGallery"
-    i18n-path="pages.section.names"
-  )
-    template(#form)
-      validation-provider(:name="$t('pages.section.names.text')" rules="min:5" v-slot="{ errors }" tag="div")
-        v-text-field(v-model="section.text" :label="$t('pages.section.names.text')" :error-messages="errors")
-      drop-file-upload(type="image" @files-selected="onFilesSelected")
-      v-simple-table(v-show="preview.length || oldImages.length")
-        template(#default)
-          thead
-            tr
-              th {{$t('pages.components.sectionGallery.images')}}
-              th.text-right {{$t('pages.components.sectionGallery.actions')}}
-          tbody
-            tr(v-for="(image) in oldImages" :key="image.id")
-              td
-                img(width="50" :src="`/${image.src}`")
-              td
-                v-btn(@click="onOldImageRemove(image)" icon)
-                  v-icon mdi-delete
-            tr(v-for="(image, i) in preview" :key="i")
-              td
-                img(width="50" :src="image")
-              td
-                v-btn(@click="onImageRemove(i)" icon)
-                  v-icon mdi-delete
-    template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
-      v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
-      v-spacer
-      v-btn(
-        :disabled="invalid || !files.length && !oldImages.length"
-        :loading="loading"
-        type="submit"
-        color="primary"
-      ) {{ buttonText }}
+mutation-form(
+  :mutation="require('~/gql/pages/mutations/section/change_section_gallery.graphql')"
+  :variables="{ sectionId: section.id, text: section.text, newImages: files, oldImages: oldImages.map(x => x.id) }"
+  :update="changeSectionDone"
+  :button-text="String($t('pages.section.change'))"
+  mutation-name="changeSectionGallery"
+  i18n-path="pages.section.names"
+)
+  template(#form)
+    validation-provider(:name="$t('pages.section.names.text')" rules="min:5" v-slot="{ errors }" tag="div")
+      v-text-field(v-model="section.text" :label="$t('pages.section.names.text')" :error-messages="errors")
+    drop-file-upload(type="image" @files-selected="onFilesSelected")
+    v-simple-table(v-show="preview.length || oldImages.length")
+      template(#default)
+        thead
+          tr
+            th {{$t('pages.components.sectionGallery.images')}}
+            th.text-right {{$t('pages.components.sectionGallery.actions')}}
+        tbody
+          tr(v-for="(image) in oldImages" :key="image.id")
+            td
+              img(width="50" :src="`/${image.src}`")
+            td
+              v-btn(@click="onOldImageRemove(image)" icon)
+                v-icon mdi-delete
+          tr(v-for="(image, i) in preview" :key="i")
+            td
+              img(width="50" :src="image")
+            td
+              v-btn(@click="onImageRemove(i)" icon)
+                v-icon mdi-delete
+  template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
+    v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
+    v-spacer
+    v-btn(
+      :disabled="invalid || !files.length && !oldImages.length"
+      :loading="loading"
+      type="submit"
+      color="primary"
+    ) {{ buttonText }}
 </template>
 
 <script lang="ts">

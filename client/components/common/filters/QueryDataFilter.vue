@@ -1,65 +1,65 @@
 <template lang="pug">
-  apollo-query(
-    v-slot="{ result: { data, loading } }"
-    v-bind="$attrs"
-    v-on="$listeners"
-    :variables="queryVariables"
-    notify-on-network-status-change
-    tag
+apollo-query(
+  v-slot="{ result: { data, loading } }"
+  v-bind="$attrs"
+  v-on="$listeners"
+  :variables="queryVariables"
+  notify-on-network-status-change
+  tag
+)
+  items-data-filter(
+    v-model="sv"
+    :items="data || []"
+    :item-key="itemKey"
+    :modal="modal"
+    :multiple="multiple"
+    :has-select-all="hasSelectAll"
+    :message-container-class="messageContainerClass"
+    :title="title"
+    :max-width="maxWidth"
+    :max-height="maxHeight"
+    :no-filtration-message="noFiltrationMessage"
+    :multiple-message-function="multipleMessageFunction"
+    :search-label="searchLabel"
+    :search-function="searchType === 'client' ? searchFunction : undefined"
+    :get-name="getName"
+    @clear="$emit('clear')"
+    @close="$emit('close')"
+    @reset="$emit('reset')"
+    @apply="$emit('apply')"
   )
-    items-data-filter(
-      v-model="sv"
-      :items="data || []"
-      :item-key="itemKey"
-      :modal="modal"
-      :multiple="multiple"
-      :has-select-all="hasSelectAll"
-      :message-container-class="messageContainerClass"
-      :title="title"
-      :max-width="maxWidth"
-      :max-height="maxHeight"
-      :no-filtration-message="noFiltrationMessage"
-      :multiple-message-function="multipleMessageFunction"
-      :search-label="searchLabel"
-      :search-function="searchType === 'client' ? searchFunction : undefined"
-      :get-name="getName"
-      @clear="$emit('clear')"
-      @close="$emit('close')"
-      @reset="$emit('reset')"
-      @apply="$emit('apply')"
-    )
-      template(#message="message")
-        slot(name="message" v-bind="message")
-      template(#title="title")
-        slot(name="title" v-bind="title")
-      template(#subtitle)
-        slot(name="subtitle")
-      template(#search="{ searchLabel, searchFunction, on }")
-        slot(
-          name="search"
-          :search-label="searchLabel"
-          :search-function="searchFunction"
-          :on="on"
-          :loading="loading"
-          :search-type="searchType"
-          :search-key="searchKey"
-        )
-          v-card-text.flex-shrink-0(v-if="searchType")
-            v-text-field(
-              v-model="search"
-              v-on="on"
-              :label="searchLabel"
-              :loading="loading"
-              prepend-icon="mdi-magnify"
-              hide-details
-              clearable
-            )
-      template(#items="items")
-        slot(name="items" v-bind="items")
-      template(#item="item")
-        slot(name="item" v-bind="item")
-      template(#actions="actions")
-        slot(name="actions" v-bind="actions")
+    template(#message="message")
+      slot(name="message" v-bind="message")
+    template(#title="title")
+      slot(name="title" v-bind="title")
+    template(#subtitle)
+      slot(name="subtitle")
+    template(#search="{ searchLabel, searchFunction, on }")
+      slot(
+        name="search"
+        :search-label="searchLabel"
+        :search-function="searchFunction"
+        :on="on"
+        :loading="loading"
+        :search-type="searchType"
+        :search-key="searchKey"
+      )
+        v-card-text.flex-shrink-0(v-if="searchType")
+          v-text-field(
+            v-model="search"
+            v-on="on"
+            :label="searchLabel"
+            :loading="loading"
+            prepend-icon="mdi-magnify"
+            hide-details
+            clearable
+          )
+    template(#items="items")
+      slot(name="items" v-bind="items")
+    template(#item="item")
+      slot(name="item" v-bind="item")
+    template(#actions="actions")
+      slot(name="actions" v-bind="actions")
 </template>
 
 <script lang="ts">

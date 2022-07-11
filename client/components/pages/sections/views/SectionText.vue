@@ -1,13 +1,13 @@
 <template lang="pug">
-  v-row(no-gutters style="position: relative")
-    v-col
-      editor-typography(:html="section.text")
-      section-action(
-        v-if="hasPerm(['pages.change_section', 'pages.delete_section'], true) || editSection"
-        :section="section"
-        :edit-section="editSection"
-        :update-delete-section="updateDeleteSection"
-      )
+v-row(no-gutters style="position: relative")
+  v-col
+    editor-typography(:html="section.text")
+    section-action(
+      v-if="hasPerm(['pages.change_section', 'pages.delete_section'], true) || editSection"
+      :section="section"
+      :edit-section="editSection"
+      :update-delete-section="updateDeleteSection"
+    )
 </template>
 
 <script lang="ts">

@@ -1,35 +1,35 @@
 <template lang="pug">
-  v-dialog(v-model="active" fullscreen)
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-card
-      v-card-title {{ $t('common.dialogs.errorValidateDialog.title') }}
-        v-spacer
-        v-btn(@click="active = false" icon)
-          v-icon mdi-close
-      v-card-text
-        v-text-field(v-model="search" :label="$t('common.dialogs.errorValidateDialog.search')" clearable)
-        v-data-table(
-          :headers="headers"
-          :items="items"
-          :search="search"
-          disable-pagination
-          hide-default-footer
-          disable-sort
-        )
-          template(#item="{ item, index }")
-            tr(:style="{ background: !!errorMessages[item.index] ? '#ffE0E0' : '#f0faeb' }")
-              td(:key="`index${item.index}`") {{ item.index + 2 }}
-              td(
-                v-for="header in table.headers"
-                :key="`${header}${index}`"
-                :class="{ 'error_validate_dialog__cell_error': errorMessages[item.index] && !!errorMessages[item.index][header] }"
-              )
-                v-tooltip(v-if="errorMessages[item.index] && !!errorMessages[item.index][header]" bottom)
-                  template(#activator="{ on }")
-                    .w-full.h-full.d-flex.align-center(v-on="on") {{ item[header] }}
-                  span {{ errorMessages[item.index][header].join('. ') }}
-                span(v-else) {{ item[header] }}
+v-dialog(v-model="active" fullscreen)
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-card
+    v-card-title {{ $t('common.dialogs.errorValidateDialog.title') }}
+      v-spacer
+      v-btn(@click="active = false" icon)
+        v-icon mdi-close
+    v-card-text
+      v-text-field(v-model="search" :label="$t('common.dialogs.errorValidateDialog.search')" clearable)
+      v-data-table(
+        :headers="headers"
+        :items="items"
+        :search="search"
+        disable-pagination
+        hide-default-footer
+        disable-sort
+      )
+        template(#item="{ item, index }")
+          tr(:style="{ background: !!errorMessages[item.index] ? '#ffE0E0' : '#f0faeb' }")
+            td(:key="`index${item.index}`") {{ item.index + 2 }}
+            td(
+              v-for="header in table.headers"
+              :key="`${header}${index}`"
+              :class="{ 'error_validate_dialog__cell_error': errorMessages[item.index] && !!errorMessages[item.index][header] }"
+            )
+              v-tooltip(v-if="errorMessages[item.index] && !!errorMessages[item.index][header]" bottom)
+                template(#activator="{ on }")
+                  .w-full.h-full.d-flex.align-center(v-on="on") {{ item[header] }}
+                span {{ errorMessages[item.index][header].join('. ') }}
+              span(v-else) {{ item[header] }}
 </template>
 
 <script lang="ts">

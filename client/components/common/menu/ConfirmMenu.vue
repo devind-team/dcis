@@ -1,13 +1,13 @@
 <template lang="pug">
-  v-menu(v-model="active" bottom)
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-card
-      v-card-text {{ text }}
-      v-card-actions
-        v-btn(:color="yesColor" @click="confirm") {{ $t('common.menu.confirmMenu.yes') }}
-        v-spacer
-        v-btn(:color="noColor" @click="cancel") {{ $t('common.menu.confirmMenu.no') }}
+v-menu(v-model="active" bottom)
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-card
+    v-card-text {{ text }}
+    v-card-actions
+      v-btn(:color="yesColor" @click="confirm") {{ $t('common.menu.confirmMenu.yes') }}
+      v-spacer
+      v-btn(:color="noColor" @click="cancel") {{ $t('common.menu.confirmMenu.no') }}
 </template>
 
 <script lang="ts">

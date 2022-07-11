@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-btn(@click="subscribe" outlined color="success") {{ t('subscribe') }}
+v-btn(@click="subscribe" outlined color="success") {{ t('subscribe') }}
 </template>
 
 <script lang="ts">

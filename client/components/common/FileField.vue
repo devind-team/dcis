@@ -1,16 +1,16 @@
 <template lang="pug">
-  v-file-input(v-bind="$attrs" v-on="$listeners" v-model="computedValue")
-    template(#selection v-if="existFileVisible")
-      | {{ existingFile.name ? existingFile.name : basename(existingFile.src) }}
-    template(#append-outer v-if="existFileVisible")
-      v-tooltip(bottom)
-        template(#activator="{ on }")
-          v-btn(v-on="on" :href="`/${existingFile.src}`" target="_blank" icon small)
-            v-icon mdi-download
-        span {{ $t('common.fileField.open') }}
-    slot(v-for="slot in Object.keys($slots)" :name="slot" :slot="slot")
-    template(v-for="slot in outerSlotNames" v-slot:[slot]="scope")
-      slot(v-bind="scope" :name="slot")
+v-file-input(v-bind="$attrs" v-on="$listeners" v-model="computedValue")
+  template(#selection v-if="existFileVisible")
+    | {{ existingFile.name ? existingFile.name : basename(existingFile.src) }}
+  template(#append-outer v-if="existFileVisible")
+    v-tooltip(bottom)
+      template(#activator="{ on }")
+        v-btn(v-on="on" :href="`/${existingFile.src}`" target="_blank" icon small)
+          v-icon mdi-download
+      span {{ $t('common.fileField.open') }}
+  slot(v-for="slot in Object.keys($slots)" :name="slot" :slot="slot")
+  template(v-for="slot in outerSlotNames" v-slot:[slot]="scope")
+    slot(v-bind="scope" :name="slot")
 </template>
 
 <script lang="ts">

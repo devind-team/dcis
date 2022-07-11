@@ -1,60 +1,60 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.projects.addProject.header'))"
-    :button-text="String($t('dcis.projects.addProject.buttonText'))"
-    :mutation="addProjectMutation"
-    :variables="{ name, short, description, visibility, user: user.id, contentType: division }"
-    :update="addProjectUpdate"
-    mutation-name="addProject"
-    i18n-path="dcis.projects.addProject"
-    @close="close"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.projects.addProject.name'))"
-        rules="required|min:3|max:250"
+mutation-modal-form(
+  :header="String($t('dcis.projects.addProject.header'))"
+  :button-text="String($t('dcis.projects.addProject.buttonText'))"
+  :mutation="addProjectMutation"
+  :variables="{ name, short, description, visibility, user: user.id, contentType: division }"
+  :update="addProjectUpdate"
+  mutation-name="addProject"
+  i18n-path="dcis.projects.addProject"
+  @close="close"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.projects.addProject.name'))"
+      rules="required|min:3|max:250"
+    )
+      v-text-field(
+        v-model="name"
+        :label="$t('dcis.projects.addProject.name')"
+        :error-messages="errors"
+        :success="valid"
+        autofocus
       )
-        v-text-field(
-          v-model="name"
-          :label="$t('dcis.projects.addProject.name')"
-          :error-messages="errors"
-          :success="valid"
-          autofocus
-        )
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.projects.addProject.short'))"
-        rules="required|min:3|max:30"
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.projects.addProject.short'))"
+      rules="required|min:3|max:30"
+    )
+      v-text-field(
+        v-model="short"
+        :label="$t('dcis.projects.addProject.short')"
+        :error-messages="errors"
+        :success="valid"
+        counter
       )
-        v-text-field(
-          v-model="short"
-          :label="$t('dcis.projects.addProject.short')"
-          :error-messages="errors"
-          :success="valid"
-          counter
-        )
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.projects.addProject.description'))"
-        rules="required|min:3|max:1023"
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.projects.addProject.description'))"
+      rules="required|min:3|max:1023"
+    )
+      v-textarea(
+        v-model="description"
+        :label="$t('dcis.projects.addProject.description')"
+        :error-messages="errors"
+        :success="valid"
       )
-        v-textarea(
-          v-model="description"
-          :label="$t('dcis.projects.addProject.description')"
-          :error-messages="errors"
-          :success="valid"
-        )
-      v-radio-group(v-model="division" row)
-        v-radio(
-          v-for="availableDivision in availableDivisions"
-          :key="availableDivision"
-          :label="$t(`dcis.projects.addProject.${availableDivision}`)"
-          :value="availableDivision"
-        )
-      v-checkbox(v-model="visibility" :label="$t('dcis.projects.addProject.visibility')")
+    v-radio-group(v-model="division" row)
+      v-radio(
+        v-for="availableDivision in availableDivisions"
+        :key="availableDivision"
+        :label="$t(`dcis.projects.addProject.${availableDivision}`)"
+        :value="availableDivision"
+      )
+    v-checkbox(v-model="visibility" :label="$t('dcis.projects.addProject.visibility')")
 </template>
 
 <script lang="ts">

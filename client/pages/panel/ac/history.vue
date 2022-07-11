@@ -1,22 +1,22 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
-    template(#header) {{ $t('profile.history.name') }}
-    v-row(align="center")
-      v-col(cols="12" md="8")
-        v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right.pr-5(cols="12" md="4") {{ $t('panel.ac.history.shownOf', { count, totalCount }) }}
-    v-data-table(
-      :headers="headers"
-      :items="logRequests"
-      :loading="loading"
-      dense disable-pagination hide-default-footer)
-      template(v-slot:item.user="{ item }")
-        v-tooltip(bottom)
-          template(v-slot:activator="{ on }")
-            span(v-on="on") {{ item.session.user.lastName }} {{ item.session.user.firstName }} {{ item.session.user.sirName }}
-          span {{ item.session.user.username }} / {{ item.session.user.email }}
-      template(v-slot:item.createdAt="{ item }") {{ $filters.dateTimeHM(item.createdAt) }}
-      template(v-slot:item.time="{ item }") {{ item.time.toFixed(3) }} с.
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
+  template(#header) {{ $t('profile.history.name') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(cols="12" md="4") {{ $t('panel.ac.history.shownOf', { count, totalCount }) }}
+  v-data-table(
+    :headers="headers"
+    :items="logRequests"
+    :loading="loading"
+    dense disable-pagination hide-default-footer)
+    template(v-slot:item.user="{ item }")
+      v-tooltip(bottom)
+        template(v-slot:activator="{ on }")
+          span(v-on="on") {{ item.session.user.lastName }} {{ item.session.user.firstName }} {{ item.session.user.sirName }}
+        span {{ item.session.user.username }} / {{ item.session.user.email }}
+    template(v-slot:item.createdAt="{ item }") {{ $filters.dateTimeHM(item.createdAt) }}
+    template(v-slot:item.time="{ item }") {{ item.time.toFixed(3) }} с.
 </template>
 
 <script lang="ts">

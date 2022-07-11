@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-menu(v-if="isVisible(editor)")
-    template(#activator="{ on }")
-      v-tooltip(top)
-        template(#activator="{ on: onTooltip }")
-          v-btn(v-on="{ ...on, ...onTooltip }" :disabled="isDisabled(editor)" :class="{ 'v-btn--active': isActive(editor) }" icon)
-            v-icon {{icon}}
-        span {{$t(`common.richTextEditor.${tooltip}`)}}
-    v-card
-      v-card-text
-        v-color-picker.swatches(
-          v-model="highlightColor"
-          :swatches="defaultSwatches"
-          @input="onColorChanged"
-          show-swatches
-          hide-canvas
-          hide-sliders
-          hide-inputs
-        )
+v-menu(v-if="isVisible(editor)")
+  template(#activator="{ on }")
+    v-tooltip(top)
+      template(#activator="{ on: onTooltip }")
+        v-btn(v-on="{ ...on, ...onTooltip }" :disabled="isDisabled(editor)" :class="{ 'v-btn--active': isActive(editor) }" icon)
+          v-icon {{icon}}
+      span {{$t(`common.richTextEditor.${tooltip}`)}}
+  v-card
+    v-card-text
+      v-color-picker.swatches(
+        v-model="highlightColor"
+        :swatches="defaultSwatches"
+        @input="onColorChanged"
+        show-swatches
+        hide-canvas
+        hide-sliders
+        hide-inputs
+      )
 </template>
 <script lang="ts">
 import { defineComponent, PropType, ref } from '#app'

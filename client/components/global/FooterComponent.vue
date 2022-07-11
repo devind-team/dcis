@@ -1,25 +1,25 @@
 <template lang="pug">
-  v-footer(padless)
-    v-container
-      v-row
-        v-col.d-flex.flex-column.justify-space-between(cols="12" md="9")
-          nuxt-link.caption(to="/instructions/Сборы_временная инструкция.docx" target="_blank")
-            | Инструкция.
-          a.caption(href="https://www.cbias.ru/sso_app/support.spf" target="_blank")
-            | Обращение в службу технической поддержки.
-        v-col(cols="12" md="3")
-          v-list(width="280" style="background: inherit;" dense)
-            theme-color(v-slot="{ on }")
-              v-list-item(v-on="on")
-                v-list-item-icon
-                  v-icon mdi-theme-light-dark
-                v-list-item-content
-                  v-list-item-title {{ $t('index.theme.change') }}
-      v-row
-        v-col(cols="12")
-          .body-2.gray-text &copy; {{ $t('index.rights') }}. {{ new Date().getFullYear() }}
-    v-btn(v-show="upVisible" @click="$vuetify.goTo(0)" size="small" fab fixed bottom right color="primary")
-      v-icon mdi-chevron-up
+v-footer(padless)
+  v-container
+    v-row
+      v-col.d-flex.flex-column.justify-space-between(cols="12" md="9")
+        nuxt-link.caption(to="/instructions/Сборы_временная инструкция.docx" target="_blank")
+          | Инструкция.
+        a.caption(href="https://www.cbias.ru/sso_app/support.spf" target="_blank")
+          | Обращение в службу технической поддержки.
+      v-col(cols="12" md="3")
+        v-list(width="280" style="background: inherit;" dense)
+          theme-color(v-slot="{ on }")
+            v-list-item(v-on="on")
+              v-list-item-icon
+                v-icon mdi-theme-light-dark
+              v-list-item-content
+                v-list-item-title {{ $t('index.theme.change') }}
+    v-row
+      v-col(cols="12")
+        .body-2.gray-text &copy; {{ $t('index.rights') }}. {{ new Date().getFullYear() }}
+  v-btn(v-show="upVisible" @click="$vuetify.goTo(0)" size="small" fab fixed bottom right color="primary")
+    v-icon mdi-chevron-up
 </template>
 
 <script lang="ts">

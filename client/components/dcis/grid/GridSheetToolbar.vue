@@ -1,51 +1,51 @@
 <template lang="pug">
-  v-row
-    v-col.my-2.d-flex.align-center
-      v-btn-toggle(v-model="formatting" multiple)
-        v-btn(:disabled="disabled" value="strong" height="40")
-          v-icon mdi-format-bold
-        v-btn(:disabled="disabled" value="italic" height="40")
-          v-icon mdi-format-italic
-        v-btn(:disabled="disabled" value="underline" height="40")
-          v-icon mdi-format-underline
-        v-btn(:disabled="disabled" value="strike" height="40")
-          v-icon mdi-format-strikethrough
-      v-btn-toggle.mx-1(v-model="horizontalAlign")
-        v-btn(:disabled="disabled" value="left" height="40")
-          v-icon mdi-format-align-left
-        v-btn(:disabled="disabled" value="center" height="40")
-          v-icon mdi-format-align-center
-        v-btn(:disabled="disabled" value="right" height="40")
-          v-icon mdi-format-align-right
-      v-btn-toggle.mx-1(v-model="verticalAlign")
-        v-btn(:disabled="disabled" value="top" height="40")
-          v-icon mdi-format-align-top
-        v-btn(:disabled="disabled" value="middle" height="40")
-          v-icon mdi-format-align-middle
-        v-btn(:disabled="disabled" value="bottom" height="40")
-          v-icon mdi-format-align-bottom
-      v-combobox.mx-1.shrink(
-        v-model="size"
-        :label="t('dcis.grid.sheetToolbar.fontSize')"
-        :items="sizes"
-        :disabled="disabled"
-        style="width: 170px"
-        filled
-        outlined
-        hide-details
-        dense
-      )
-      v-combobox.ml-1.shrink(
-        v-model="kind"
-        :label="t('dcis.grid.sheetToolbar.kind')"
-        :items="kinds"
-        :disabled="disabled"
-        style="width: 170px"
-        filled
-        outlined
-        hide-details
-        dense
-      )
+v-row
+  v-col.my-2.d-flex.align-center
+    v-btn-toggle(v-model="formatting" multiple)
+      v-btn(:disabled="disabled" value="strong" height="40")
+        v-icon mdi-format-bold
+      v-btn(:disabled="disabled" value="italic" height="40")
+        v-icon mdi-format-italic
+      v-btn(:disabled="disabled" value="underline" height="40")
+        v-icon mdi-format-underline
+      v-btn(:disabled="disabled" value="strike" height="40")
+        v-icon mdi-format-strikethrough
+    v-btn-toggle.mx-1(v-model="horizontalAlign")
+      v-btn(:disabled="disabled" value="left" height="40")
+        v-icon mdi-format-align-left
+      v-btn(:disabled="disabled" value="center" height="40")
+        v-icon mdi-format-align-center
+      v-btn(:disabled="disabled" value="right" height="40")
+        v-icon mdi-format-align-right
+    v-btn-toggle.mx-1(v-model="verticalAlign")
+      v-btn(:disabled="disabled" value="top" height="40")
+        v-icon mdi-format-align-top
+      v-btn(:disabled="disabled" value="middle" height="40")
+        v-icon mdi-format-align-middle
+      v-btn(:disabled="disabled" value="bottom" height="40")
+        v-icon mdi-format-align-bottom
+    v-combobox.mx-1.shrink(
+      v-model="size"
+      :label="t('dcis.grid.sheetToolbar.fontSize')"
+      :items="sizes"
+      :disabled="disabled"
+      style="width: 170px"
+      filled
+      outlined
+      hide-details
+      dense
+    )
+    v-combobox.ml-1.shrink(
+      v-model="kind"
+      :label="t('dcis.grid.sheetToolbar.kind')"
+      :items="kinds"
+      :disabled="disabled"
+      style="width: 170px"
+      filled
+      outlined
+      hide-details
+      dense
+    )
 </template>
 
 <script lang="ts">

@@ -1,24 +1,24 @@
 <template lang="pug">
-  v-row
-    v-col(v-if="segment.name" cols="12" :class="`text-${align[segment.align]}`")
-      .text-h4.text-md-h2 {{ segment.name }}
-    page-segment-element(
-      v-slot="{ represent, pages }"
-      v-for="el in segment.elements"
-      :key="el.id"
-      :segment-element="el"
+v-row
+  v-col(v-if="segment.name" cols="12" :class="`text-${align[segment.align]}`")
+    .text-h4.text-md-h2 {{ segment.name }}
+  page-segment-element(
+    v-slot="{ represent, pages }"
+    v-for="el in segment.elements"
+    :key="el.id"
+    :segment-element="el"
+  )
+    template(v-if="pages.length")
+      page-grid(v-if="represent === 'grid'" :pages="pages")
+      page-card(v-else-if="represent === 'card'" :pages="pages")
+      page-list(v-else-if="represent === 'list'" :pages="pages")
+      page-slider(v-else-if="represent === 'slider'" :pages="pages")
+      v-alert(v-else type="info") {{ $t('pages.components.pageSegment.noType', { represent }) }}
+    v-alert(
+      v-else
+      type="info"
+      v-html="$t('pages.components.pageSegment.noPages', { sectionNumber: el.pageKind.name })"
     )
-      template(v-if="pages.length")
-        page-grid(v-if="represent === 'grid'" :pages="pages")
-        page-card(v-else-if="represent === 'card'" :pages="pages")
-        page-list(v-else-if="represent === 'list'" :pages="pages")
-        page-slider(v-else-if="represent === 'slider'" :pages="pages")
-        v-alert(v-else type="info") {{ $t('pages.components.pageSegment.noType', { represent }) }}
-      v-alert(
-        v-else
-        type="info"
-        v-html="$t('pages.components.pageSegment.noPages', { sectionNumber: el.pageKind.name })"
-      )
 </template>
 
 <script lang="ts">

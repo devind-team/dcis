@@ -1,85 +1,85 @@
 <template lang="pug">
-  mutation-modal-form(
-    ref="form"
-    :header="String($t('dcis.periods.users.addUser.header'))"
-    :subheader="period.name"
-    :button-text="String($t('dcis.periods.users.addUser.buttonText'))"
-    :mutation="addPeriodUserMutation"
-    :variables="variables"
-    :update="update"
-    :mutation-name="['changeUserPeriodGroups', 'changeUserPeriodPrivileges']"
-    errors-in-alert
-    @close="close"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.periods.users.addUser.user'))"
-        rules="required"
+mutation-modal-form(
+  ref="form"
+  :header="String($t('dcis.periods.users.addUser.header'))"
+  :subheader="period.name"
+  :button-text="String($t('dcis.periods.users.addUser.buttonText'))"
+  :mutation="addPeriodUserMutation"
+  :variables="variables"
+  :update="update"
+  :mutation-name="['changeUserPeriodGroups', 'changeUserPeriodPrivileges']"
+  errors-in-alert
+  @close="close"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.users.addUser.user'))"
+      rules="required"
+    )
+      v-autocomplete(
+        v-model="userId"
+        :label="$t('dcis.periods.users.addUser.user')"
+        :items="users"
+        :loading="usersLoading"
+        :search-input.sync="usersSearch"
+        :error-messages="errors"
+        :success="valid"
+        item-value="id"
+        no-filter
       )
-        v-autocomplete(
-          v-model="userId"
-          :label="$t('dcis.periods.users.addUser.user')"
-          :items="users"
-          :loading="usersLoading"
-          :search-input.sync="usersSearch"
-          :error-messages="errors"
-          :success="valid"
-          item-value="id"
-          no-filter
-        )
-          template(#selection="{ item }") {{ getUserFullName(item) }}
-          template(#item="{ item }")
-            v-list-item-avatar
-              avatar-menu(:user="item")
-            v-list-item-content
-              v-list-item-title {{ getUserFullName(item) }}
-            v-list-item-action(v-if="periodUsers.find((user) => user.id === item.id)")
-              v-tooltip(bottom)
-                template(#activator="{ on }")
-                  v-icon(v-on="on" color="red") mdi-alert
-                span {{ $t('dcis.periods.users.addUser.userExistWarning') }}
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.periods.users.addUser.groups'))"
-        vid="groups"
-        :rules="{ required_if: { target: 'privileges', values: [''] } }"
+        template(#selection="{ item }") {{ getUserFullName(item) }}
+        template(#item="{ item }")
+          v-list-item-avatar
+            avatar-menu(:user="item")
+          v-list-item-content
+            v-list-item-title {{ getUserFullName(item) }}
+          v-list-item-action(v-if="periodUsers.find((user) => user.id === item.id)")
+            v-tooltip(bottom)
+              template(#activator="{ on }")
+                v-icon(v-on="on" color="red") mdi-alert
+              span {{ $t('dcis.periods.users.addUser.userExistWarning') }}
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.users.addUser.groups'))"
+      vid="groups"
+      :rules="{ required_if: { target: 'privileges', values: [''] } }"
+    )
+      v-autocomplete(
+        v-model="periodGroupIds"
+        :label="$t('dcis.periods.users.addUser.groups')"
+        :items="period.periodGroups"
+        :error-messages="errors"
+        :success="valid"
+        item-value="id"
+        item-text="name"
+        chips
+        deletable-chips
+        multiple
+        hide-selected
       )
-        v-autocomplete(
-          v-model="periodGroupIds"
-          :label="$t('dcis.periods.users.addUser.groups')"
-          :items="period.periodGroups"
-          :error-messages="errors"
-          :success="valid"
-          item-value="id"
-          item-text="name"
-          chips
-          deletable-chips
-          multiple
-          hide-selected
-        )
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.periods.users.addUser.privileges'))"
-        vid="privileges"
-        :rules="{ required_if: { target: 'groups', values: [''] } }"
-      )
-       v-autocomplete(
-         v-model="privilegeIds"
-         :label="$t('dcis.periods.users.addUser.privileges')"
-         :items="privileges"
-         :loading="privilegesLoading"
-         :error-messages="errors"
-         :success="valid"
-         item-value="id"
-         item-text="name"
-         chips
-         deletable-chips
-         multiple
-         hide-selected
-       )
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.users.addUser.privileges'))"
+      vid="privileges"
+      :rules="{ required_if: { target: 'groups', values: [''] } }"
+    )
+     v-autocomplete(
+       v-model="privilegeIds"
+       :label="$t('dcis.periods.users.addUser.privileges')"
+       :items="privileges"
+       :loading="privilegesLoading"
+       :error-messages="errors"
+       :success="valid"
+       item-value="id"
+       item-text="name"
+       chips
+       deletable-chips
+       multiple
+       hide-selected
+     )
 </template>
 
 <script lang="ts">

@@ -1,14 +1,14 @@
 <template lang="pug">
-  v-card
-    v-card-title {{ $t('profile.me.profile') }} {{ $getUserFullName(user) }}
-    v-card-subtitle {{ $t('profile.me.registrationDate') }} {{ date(user.createdAt) }}
-    v-card-text
-      v-row
-        v-col(cols="12" md="3") {{ $t('profile.me.userAvatar') }}
-        v-col(cols="12" md="9")
-          avatar-view(:user="user")
-      basic-information(:user="user")
-      additional-information(:viewUser="user")
+v-card
+  v-card-title {{ $t('profile.me.profile') }} {{ $getUserFullName(user) }}
+  v-card-subtitle {{ $t('profile.me.registrationDate') }} {{ date(user.createdAt) }}
+  v-card-text
+    v-row
+      v-col(cols="12" md="3") {{ $t('profile.me.userAvatar') }}
+      v-col(cols="12" md="9")
+        avatar-view(:user="user")
+    basic-information(:user="user")
+    additional-information(:viewUser="user")
 </template>
 
 <script lang="ts">

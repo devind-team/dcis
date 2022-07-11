@@ -1,46 +1,46 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.documents.status.header'))"
-    :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
-    :button-text="String($t('dcis.documents.status.buttonText'))"
-    :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
-    :variables="{ documentId: document.id, statusId: status && status.id, comment }"
-    :update="addDocumentStatusUpdate"
-    mutation-name="addDocumentStatus"
-    i18n-path="dcis.documents.status"
-    @close="close"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      v-list(two-line dense)
-        v-list-item(v-for="item in documentStatuses" :key="item.id")
-          v-list-item-content
-            v-list-item-title {{ item.status.name }}
-            v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
-            v-list-item-subtitle {{ getUserName(item.user) }}
-          v-list-item-content
-            v-list-item-subtitle.font-italic {{ item.comment }}
-          v-list-item-action(v-if="documentStatuses.length > 1 && hasPerm('dcis.delete_documentstatus')" )
-            v-btn(@click="deleteDocumentStatus({ documentStatusId: item.id }).then()" icon)
-              v-icon(color="error") mdi-close-circle
-      v-divider
-      v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.documents.status.status'))"
-        rules="required"
+mutation-modal-form(
+  :header="String($t('dcis.documents.status.header'))"
+  :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
+  :button-text="String($t('dcis.documents.status.buttonText'))"
+  :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
+  :variables="{ documentId: document.id, statusId: status && status.id, comment }"
+  :update="addDocumentStatusUpdate"
+  mutation-name="addDocumentStatus"
+  i18n-path="dcis.documents.status"
+  @close="close"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    v-list(two-line dense)
+      v-list-item(v-for="item in documentStatuses" :key="item.id")
+        v-list-item-content
+          v-list-item-title {{ item.status.name }}
+          v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
+          v-list-item-subtitle {{ getUserName(item.user) }}
+        v-list-item-content
+          v-list-item-subtitle.font-italic {{ item.comment }}
+        v-list-item-action(v-if="documentStatuses.length > 1 && hasPerm('dcis.delete_documentstatus')" )
+          v-btn(@click="deleteDocumentStatus({ documentStatusId: item.id }).then()" icon)
+            v-icon(color="error") mdi-close-circle
+    v-divider
+    v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.documents.status.status'))"
+      rules="required"
+    )
+      v-select(
+        v-model="status"
+        :error-messages="errors"
+        :success="valid"
+        :items="statuses"
+        :label="$t('dcis.documents.status.status')"
+        item-text="name"
+        item-value="id"
+        return-object
       )
-        v-select(
-          v-model="status"
-          :error-messages="errors"
-          :success="valid"
-          :items="statuses"
-          :label="$t('dcis.documents.status.status')"
-          item-text="name"
-          item-value="id"
-          return-object
-        )
 </template>
 
 <script lang="ts">

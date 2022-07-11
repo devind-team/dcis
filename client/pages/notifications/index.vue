@@ -1,14 +1,14 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    v-row
-      v-col.mx-auto(md="8")
-        v-card
-          v-card-title {{ $t('notifications.name') }}
-            v-spacer
-            notifications-menu(:notifications="notifications")
-          v-card-text
-            mutation-result-alert(ref="mutationResultAlert")
-            notifications-view(:notifications="notifications")
+bread-crumbs(:items="breadCrumbs")
+  v-row
+    v-col.mx-auto(md="8")
+      v-card
+        v-card-title {{ $t('notifications.name') }}
+          v-spacer
+          notifications-menu(:notifications="notifications")
+        v-card-text
+          mutation-result-alert(ref="mutationResultAlert")
+          notifications-view(:notifications="notifications")
 </template>
 
 <script lang="ts">

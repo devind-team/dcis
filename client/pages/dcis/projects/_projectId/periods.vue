@@ -1,20 +1,20 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ t('dcis.periods.name') }}
-      template(v-if="project.canAddPeriod")
-        v-spacer
-        add-period(:update="addPeriodUpdate" :project="project")
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ t('dcis.periods.addPeriod.buttonText') }}
-    template(#subheader)
-      template(v-if="periods") {{ $t('shownOf', { count: periods.length, totalCount: periods.length }) }}
-    v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.name="{ item }")
-        nuxt-link(
-          :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
-        ) {{ item.name }}
-      template(#item.status="{ item }") {{ statuses[item.status] }}
-      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ t('dcis.periods.name') }}
+    template(v-if="project.canAddPeriod")
+      v-spacer
+      add-period(:update="addPeriodUpdate" :project="project")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ t('dcis.periods.addPeriod.buttonText') }}
+  template(#subheader)
+    template(v-if="periods") {{ $t('shownOf', { count: periods.length, totalCount: periods.length }) }}
+  v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
+    template(#item.name="{ item }")
+      nuxt-link(
+        :to="localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: toGlobalId('PeriodType', item.id) } })"
+      ) {{ item.name }}
+    template(#item.status="{ item }") {{ statuses[item.status] }}
+    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">

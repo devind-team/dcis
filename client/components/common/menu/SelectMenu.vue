@@ -1,13 +1,13 @@
 <template lang="pug">
-  v-menu(v-model="active" :close-on-content-click="false" bottom)
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-card
-      v-card-text
-        v-select(v-model="lValue" v-bind="$attrs")
-          template(v-slot:append-outer)
-            v-btn(color="success" icon @click="update")
-              v-icon mdi-check
+v-menu(v-model="active" :close-on-content-click="false" bottom)
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-card
+    v-card-text
+      v-select(v-model="lValue" v-bind="$attrs")
+        template(v-slot:append-outer)
+          v-btn(color="success" icon @click="update")
+            v-icon mdi-check
 </template>
 
 <script lang="ts">

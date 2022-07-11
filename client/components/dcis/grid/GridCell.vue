@@ -1,12 +1,12 @@
 <template lang="pug">
-  .grid__cell-content(:class="contentClasses")
-    component(
-      v-if="active && cell.editable && !cell.formula"
-      v-bind="cellProps"
-      v-on="cellListeners"
-      :is="`GridCell${cellKind}`"
-    )
-    template(v-else) {{ cell.value }}
+.grid__cell-content(:class="contentClasses")
+  component(
+    v-if="active && cell.editable && !cell.formula"
+    v-bind="cellProps"
+    v-on="cellListeners"
+    :is="`GridCell${cellKind}`"
+  )
+  template(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">

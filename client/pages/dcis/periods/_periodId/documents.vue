@@ -1,32 +1,32 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ t('dcis.documents.name') }}
-      template(v-if="period.canAddDocument")
-        v-spacer
-        add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
+left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ t('dcis.documents.name') }}
+    template(v-if="period.canAddDocument")
+      v-spacer
+      add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ t('dcis.documents.addDocument.buttonText') }}
+  template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
+  v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
+    template(#item.version="{ item }")
+      nuxt-link(
+        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+      ) {{ t('dcis.documents.tableItems.version', { version: item.version }) }}
+    template(#item.comment="{ item }")
+      template(v-if="item.comment")
+        template(v-if="item.canChange")
+          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+            a(v-on="on") {{ item.comment }}
+        template(v-else) {{ item.comment }}
+    template(#item.lastStatus="{ item }")
+      template(v-if="item.lastStatus")
+        document-statuses(v-if="item.canChange" :update="update" :document="item")
           template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ t('dcis.documents.addDocument.buttonText') }}
-    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-    v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.version="{ item }")
-        nuxt-link(
-          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) {{ t('dcis.documents.tableItems.version', { version: item.version }) }}
-      template(#item.comment="{ item }")
-        template(v-if="item.comment")
-          template(v-if="item.canChange")
-            text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
-              a(v-on="on") {{ item.comment }}
-          template(v-else) {{ item.comment }}
-      template(#item.lastStatus="{ item }")
-        template(v-if="item.lastStatus")
-          document-statuses(v-if="item.canChange" :update="update" :document="item")
-            template(#activator="{ on }")
-              a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-          strong(v-else) {{ item.lastStatus.status.name }}.
-          div {{ t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
-          .font-italic {{ item.lastStatus.comment }}
-      template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+        strong(v-else) {{ item.lastStatus.status.name }}.
+        div {{ t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
+        .font-italic {{ item.lastStatus.comment }}
+    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">

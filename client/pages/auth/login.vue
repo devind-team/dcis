@@ -1,51 +1,51 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    v-row
-      v-col.mx-auto(cols="12" sm="4" md="4")
-        mutation-form(
-          @done="tokenDone"
-          :mutation="require('~/gql/core/mutations/user/get_token.graphql')"
-          :variables="variables"
-          :header="String($t('auth.login.signIn'))"
-          i18n-path="auth.login"
-          mutation-name="getToken"
-        )
-          template(#form)
-            validation-provider(
-              v-slot="{ errors, valid }"
-              :name="String($t('auth.login.username'))"
-              rules="required|min:2|max:50"
+bread-crumbs(:items="breadCrumbs")
+  v-row
+    v-col.mx-auto(cols="12" sm="4" md="4")
+      mutation-form(
+        @done="tokenDone"
+        :mutation="require('~/gql/core/mutations/user/get_token.graphql')"
+        :variables="variables"
+        :header="String($t('auth.login.signIn'))"
+        i18n-path="auth.login"
+        mutation-name="getToken"
+      )
+        template(#form)
+          validation-provider(
+            v-slot="{ errors, valid }"
+            :name="String($t('auth.login.username'))"
+            rules="required|min:2|max:50"
+          )
+            v-text-field(
+              v-model="username"
+              :label="$t('auth.login.username')"
+              :error-messages="errors"
+              :success="valid"
             )
-              v-text-field(
-                v-model="username"
-                :label="$t('auth.login.username')"
-                :error-messages="errors"
-                :success="valid"
-              )
-            validation-provider(
-              v-slot="{ errors, valid }"
-              :name="String($t('auth.login.password'))"
-              rules="required|min:8"
+          validation-provider(
+            v-slot="{ errors, valid }"
+            :name="String($t('auth.login.password'))"
+            rules="required|min:8"
+          )
+            v-text-field(
+              v-model="password"
+              @click:append="hiddenPassword = !hiddenPassword"
+              :label="$t('auth.login.password')"
+              :error-messages="errors"
+              :success="valid"
+              :append-icon="hiddenPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              :type="hiddenPassword ? 'password' : 'text'"
+              autocomplete="on"
             )
-              v-text-field(
-                v-model="password"
-                @click:append="hiddenPassword = !hiddenPassword"
-                :label="$t('auth.login.password')"
-                :error-messages="errors"
-                :success="valid"
-                :append-icon="hiddenPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                :type="hiddenPassword ? 'password' : 'text'"
-                autocomplete="on"
-              )
-          template(#actions="{ invalid, loading }")
-            v-btn(
-              :loading="loading"
-              :disabled="invalid"
-              type="submit"
-              color="success"
-            ) {{ $t('auth.login.enter') }}
-            v-spacer
-            nuxt-link(:to="localePath({ name: 'auth-recovery' })") {{ $t('auth.login.forgotPassword') }}
+        template(#actions="{ invalid, loading }")
+          v-btn(
+            :loading="loading"
+            :disabled="invalid"
+            type="submit"
+            color="success"
+          ) {{ $t('auth.login.enter') }}
+          v-spacer
+          nuxt-link(:to="localePath({ name: 'auth-recovery' })") {{ $t('auth.login.forgotPassword') }}
 </template>
 
 <script lang="ts">

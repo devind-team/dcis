@@ -1,8 +1,8 @@
 <template lang="pug">
-  v-row(v-if="!loading")
-    v-col(cols="12" sm="12")
-      client-only
-        apex-chart(type="area" height="450" :options="settings.options" :series="settings.series")
+v-row(v-if="!loading")
+  v-col(cols="12" sm="12")
+    client-only
+      apex-chart(type="area" height="450" :options="settings.options" :series="settings.series")
 </template>
 
 <script lang="ts">

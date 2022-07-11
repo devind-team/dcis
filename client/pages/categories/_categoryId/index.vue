@@ -1,18 +1,18 @@
 <template lang="pug">
-  page-container(:bread-crumbs="breadCrumbs" :category="category")
-    template(#header)
-      .text-h4.text-md-h2 {{ category.text }}
-    template(#default)
-      category-pages(:category="category")
-        page-view(
-          v-slot="{ items, view }"
-          :category="category"
-          :allow-add="hasPerm('pages.add_page')"
-          allow-search
-          allow-loading
-        )
-          page-card(v-if="view === 'card'" :pages="items")
-          page-grid(v-else :pages="items")
+page-container(:bread-crumbs="breadCrumbs" :category="category")
+  template(#header)
+    .text-h4.text-md-h2 {{ category.text }}
+  template(#default)
+    category-pages(:category="category")
+      page-view(
+        v-slot="{ items, view }"
+        :category="category"
+        :allow-add="hasPerm('pages.add_page')"
+        allow-search
+        allow-loading
+      )
+        page-card(v-if="view === 'card'" :pages="items")
+        page-grid(v-else :pages="items")
 </template>
 
 <script lang="ts">

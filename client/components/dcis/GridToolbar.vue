@@ -1,18 +1,18 @@
 <template lang="pug">
-  v-toolbar(height="100" elevation="2")
-    .d-flex.flex-column(style="width: 100%")
-      .d-flex.align-center
-        v-toolbar-title.mr-1 {{ document.comment }}
-        v-tooltip(bottom)
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="success" fab small icon)
-              v-icon mdi-download
-          span {{ t('download') }}
-      .d-flex.align-center
-        v-btn-toggle.mt-2(v-model="activeSheetIndex" dense)
-          v-btn(v-for="sheet in document.sheets" :key="sheet.id") {{ sheet.name }}
-        v-spacer
-        v-btn(color="primary") {{ t('dcis.grid.toolbar.addRow') }}
+v-toolbar(height="100" elevation="2")
+  .d-flex.flex-column(style="width: 100%")
+    .d-flex.align-center
+      v-toolbar-title.mr-1 {{ document.comment }}
+      v-tooltip(bottom)
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="success" fab small icon)
+            v-icon mdi-download
+        span {{ t('download') }}
+    .d-flex.align-center
+      v-btn-toggle.mt-2(v-model="activeSheetIndex" dense)
+        v-btn(v-for="sheet in document.sheets" :key="sheet.id") {{ sheet.name }}
+      v-spacer
+      v-btn(color="primary") {{ t('dcis.grid.toolbar.addRow') }}
 </template>
 
 <script lang="ts">

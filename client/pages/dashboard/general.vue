@@ -1,10 +1,10 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
-    template(#header) {{ $t('dashboard.general.name') }}
-    .body-1 {{ $t('dashboard.general.activity') }}
-    active-statistics
-    .body-1 {{ $t('dashboard.general.clientDeviceStatistics') }}
-    request-statistics
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')" fluid)
+  template(#header) {{ $t('dashboard.general.name') }}
+  .body-1 {{ $t('dashboard.general.activity') }}
+  active-statistics
+  .body-1 {{ $t('dashboard.general.clientDeviceStatistics') }}
+  request-statistics
 </template>
 
 <script lang="ts">

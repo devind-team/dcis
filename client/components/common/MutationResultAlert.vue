@@ -1,18 +1,18 @@
 <template lang="pug">
-  div
-    template(v-if="error")
-      v-alert(v-if="error.value.type === 'BusinessLogicError'" type="error" color="orange")
-        | {{ $t('common.mutationResultAlert.mutationBusinessLogicError', { error: error.value.message }) }}
-      v-alert(v-else-if="error.value.type === 'GraphQLError'" type="error")
-        | {{ $t('common.mutationResultAlert.mutationGraphQLError', { error: error.value.message }) }}
-      v-alert(v-else type="error") {{ $t('common.mutationResultAlert.mutationNetworkError', { error: error.value.message }) }}
-    error-validate-dialog(v-else-if="tableErrors" v-slot="{ on: onDialog }" v-bind="tableErrors")
-      v-tooltip(bottom)
-        template(#activator="{ on: onTooltip }")
-          v-alert(v-on="{ ...onDialog, ...onTooltip }" type="error" style="cursor: pointer")
-            | {{ $t('common.mutationResultAlert.tableMutationErrors') }}
-        span {{ $t('common.mutationResultAlert.showDetails') }}
-    v-alert(v-else-if="success" type="success") {{ successMessage }}
+div
+  template(v-if="error")
+    v-alert(v-if="error.value.type === 'BusinessLogicError'" type="error" color="orange")
+      | {{ $t('common.mutationResultAlert.mutationBusinessLogicError', { error: error.value.message }) }}
+    v-alert(v-else-if="error.value.type === 'GraphQLError'" type="error")
+      | {{ $t('common.mutationResultAlert.mutationGraphQLError', { error: error.value.message }) }}
+    v-alert(v-else type="error") {{ $t('common.mutationResultAlert.mutationNetworkError', { error: error.value.message }) }}
+  error-validate-dialog(v-else-if="tableErrors" v-slot="{ on: onDialog }" v-bind="tableErrors")
+    v-tooltip(bottom)
+      template(#activator="{ on: onTooltip }")
+        v-alert(v-on="{ ...onDialog, ...onTooltip }" type="error" style="cursor: pointer")
+          | {{ $t('common.mutationResultAlert.tableMutationErrors') }}
+      span {{ $t('common.mutationResultAlert.showDetails') }}
+  v-alert(v-else-if="success" type="success") {{ successMessage }}
 </template>
 
 <script lang="ts">

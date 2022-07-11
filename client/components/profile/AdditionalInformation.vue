@@ -1,79 +1,79 @@
 <template lang="pug">
-  v-card(
-    v-if="!profilesValueLoading && !profilesLoading"
-    flat
-  )
-    v-row(v-for="profile in profiles" :key="profile.id")
-      v-col(cols="12" md="3") {{ profile.name }}
-      v-col(cols="12" md="9")
-        v-data-table(
-          :headers="headers"
-          :items="profile.children"
-          hide-default-footer
-          disable-pagination
-        )
-          template(#item.value="{ item }")
-            template(v-if="pvs[item.code]")
-              template(v-if="pvs[item.code].kind === 'bool'")
-                | {{ pvs[item.code].value === 'true' ? $t('yes') : $t('no') }}
-              template(v-else-if="pvs[item.code].kind === 'choice'")
-                | {{ choicesTypes[item.code].find(x => x.value === pvs[item.code].value).text }}
-              span(v-else) {{ pvs[item.code].value }}
-              v-tooltip(v-if="change" bottom)
-                template(#activator="{ on }")
-                  v-btn(v-on="on" icon @click="changeProfileVisibility(pvs[item.code])")
-                    v-icon mdi-{{ pvs[item.code].visibility ? 'eye' : 'eye-off' }}
-                span {{pvs[item.code].visibility ? $t('profile.visible') : $t('profile.invisible')}}
-            span.font-italic(v-else) {{ $t('notFilled') }}
-            template(v-if="change")
-              text-menu(
-                v-if="kindTypes[item.kind] === 'text'"
-                :value="pvs[item.code] ? pvs[item.code].value : ''"
-                @update="changeProfileValue(item, $event)"
-                multiline
-              )
-                template(v-slot:default="{ on: onMenu }")
-                  v-tooltip(bottom)
-                    template(#activator="{ on: onTooltip }")
-                      v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
-                        v-icon mdi-pencil
-                    span {{ $t('change') }}
-              date-menu(
-                v-else-if="kindTypes[item.kind] === 'date'"
-                :value="pvs[item.code] ? pvs[item.code].value : ''"
-                @update="changeProfileValue(item, $event)"
-              )
-                template(v-slot:default="{ on: onMenu }")
-                  v-tooltip(bottom)
-                    template(#activator="{ on: onTooltip }")
-                      v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
-                        v-icon mdi-pencil
-                    span {{ $t('change') }}
-              select-menu(
-                v-else-if="kindTypes[item.kind] === 'bool'"
-                :items="boolTypes"
-                :value="pvs[item.code] ? pvs[item.code].value : 'true'"
-                @update="changeProfileValue(item, $event)"
-              )
-                template(v-slot:default="{ on: onMenu }")
-                  v-tooltip(bottom)
-                    template(#activator="{ on: onTooltip }")
-                      v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
-                        v-icon mdi-pencil
-                    span {{ $t('change') }}
-              select-menu(
-                v-else-if="kindTypes[item.kind] === 'choice'"
-                :items="choicesTypes[item.code]"
-                :value="pvs[item.code] ? pvs[item.code].value : choicesTypes[item.code][0].value"
-                @update="changeProfileValue(item, $event)"
-              )
-                template(v-slot:default="{ on: onMenu }")
-                  v-tooltip(bottom)
-                    template(#activator="{ on: onTooltip }")
-                      v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
-                        v-icon mdi-pencil
-                    span {{ $t('change') }}
-  v-progress-circular(v-else color="primary" indeterminate)
+v-card(
+  v-if="!profilesValueLoading && !profilesLoading"
+  flat
+)
+  v-row(v-for="profile in profiles" :key="profile.id")
+    v-col(cols="12" md="3") {{ profile.name }}
+    v-col(cols="12" md="9")
+      v-data-table(
+        :headers="headers"
+        :items="profile.children"
+        hide-default-footer
+        disable-pagination
+      )
+        template(#item.value="{ item }")
+          template(v-if="pvs[item.code]")
+            template(v-if="pvs[item.code].kind === 'bool'")
+              | {{ pvs[item.code].value === 'true' ? $t('yes') : $t('no') }}
+            template(v-else-if="pvs[item.code].kind === 'choice'")
+              | {{ choicesTypes[item.code].find(x => x.value === pvs[item.code].value).text }}
+            span(v-else) {{ pvs[item.code].value }}
+            v-tooltip(v-if="change" bottom)
+              template(#activator="{ on }")
+                v-btn(v-on="on" icon @click="changeProfileVisibility(pvs[item.code])")
+                  v-icon mdi-{{ pvs[item.code].visibility ? 'eye' : 'eye-off' }}
+              span {{pvs[item.code].visibility ? $t('profile.visible') : $t('profile.invisible')}}
+          span.font-italic(v-else) {{ $t('notFilled') }}
+          template(v-if="change")
+            text-menu(
+              v-if="kindTypes[item.kind] === 'text'"
+              :value="pvs[item.code] ? pvs[item.code].value : ''"
+              @update="changeProfileValue(item, $event)"
+              multiline
+            )
+              template(v-slot:default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
+                      v-icon mdi-pencil
+                  span {{ $t('change') }}
+            date-menu(
+              v-else-if="kindTypes[item.kind] === 'date'"
+              :value="pvs[item.code] ? pvs[item.code].value : ''"
+              @update="changeProfileValue(item, $event)"
+            )
+              template(v-slot:default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
+                      v-icon mdi-pencil
+                  span {{ $t('change') }}
+            select-menu(
+              v-else-if="kindTypes[item.kind] === 'bool'"
+              :items="boolTypes"
+              :value="pvs[item.code] ? pvs[item.code].value : 'true'"
+              @update="changeProfileValue(item, $event)"
+            )
+              template(v-slot:default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
+                      v-icon mdi-pencil
+                  span {{ $t('change') }}
+            select-menu(
+              v-else-if="kindTypes[item.kind] === 'choice'"
+              :items="choicesTypes[item.code]"
+              :value="pvs[item.code] ? pvs[item.code].value : choicesTypes[item.code][0].value"
+              @update="changeProfileValue(item, $event)"
+            )
+              template(v-slot:default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{...onMenu, ...onTooltip }" left icon)
+                      v-icon mdi-pencil
+                  span {{ $t('change') }}
+v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">

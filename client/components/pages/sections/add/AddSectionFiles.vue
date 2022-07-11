@@ -1,37 +1,37 @@
 <template lang="pug">
-  mutation-form(
-    :mutation="require('~/gql/pages/mutations/section/add_section_files.graphql')"
-    :variables="{ pageId: page.id, text, files }"
-    :button-text="String($t('pages.section.add'))"
-    :update="addSectionDone"
-    mutation-name="addSectionFiles"
-    i18n-path="pages.section.names"
-  )
-    template(#form)
-      validation-provider(:name="$t('pages.section.names.text')" rules="min:10" v-slot="{ errors }" tag="div")
-        v-text-field(v-model="text" :label="$t('pages.section.names.text')" :error-messages="errors")
-      drop-file-upload(@files-selected="onFilesSelected")
-      v-simple-table(v-show="files.length")
-        template(#default)
-          thead
-            tr
-              th {{$t('pages.section.names.files')}}
-              th.text-right {{$t('pages.components.sectionGallery.actions')}}
-          tbody
-            tr(v-for="(file, i) in files" :key="i")
-              td {{file.name}}
-              td
-                v-btn(@click="onFileRemove(i)" icon)
-                  v-icon mdi-delete
-    template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
-      v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
-      v-spacer
-      v-btn(
-        :disabled="invalid || !files.length"
-        :loading="loading"
-        type="submit"
-        color="primary"
-      ) {{ buttonText }}
+mutation-form(
+  :mutation="require('~/gql/pages/mutations/section/add_section_files.graphql')"
+  :variables="{ pageId: page.id, text, files }"
+  :button-text="String($t('pages.section.add'))"
+  :update="addSectionDone"
+  mutation-name="addSectionFiles"
+  i18n-path="pages.section.names"
+)
+  template(#form)
+    validation-provider(:name="$t('pages.section.names.text')" rules="min:10" v-slot="{ errors }" tag="div")
+      v-text-field(v-model="text" :label="$t('pages.section.names.text')" :error-messages="errors")
+    drop-file-upload(@files-selected="onFilesSelected")
+    v-simple-table(v-show="files.length")
+      template(#default)
+        thead
+          tr
+            th {{$t('pages.section.names.files')}}
+            th.text-right {{$t('pages.components.sectionGallery.actions')}}
+        tbody
+          tr(v-for="(file, i) in files" :key="i")
+            td {{file.name}}
+            td
+              v-btn(@click="onFileRemove(i)" icon)
+                v-icon mdi-delete
+  template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
+    v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
+    v-spacer
+    v-btn(
+      :disabled="invalid || !files.length"
+      :loading="loading"
+      type="submit"
+      color="primary"
+    ) {{ buttonText }}
 </template>
 
 <script lang="ts">

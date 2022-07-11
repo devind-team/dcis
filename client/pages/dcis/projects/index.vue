@@ -1,22 +1,22 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    wave-container
-      h2 {{ divisions }}
-    v-card
-      v-card-title {{ $t('dcis.projects.name') }}
-        template(v-if="hasPerm('dcis.add_project')")
-          v-spacer
-          add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
-            template(#activator="{ on }")
-              v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
-      v-card-subtitle {{ $t('shownOf', { count, totalCount }) }}
-      v-card-text
-        v-data-table(:headers="headers" :items="projects" :loading="loading" disable-pagination hide-default-footer)
-          template(#item.name="{ item }")
-            nuxt-link(
-              :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
-            ) {{ item.name }}
-          template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+bread-crumbs(:items="breadCrumbs")
+  wave-container
+    h2 {{ divisions }}
+  v-card
+    v-card-title {{ $t('dcis.projects.name') }}
+      template(v-if="hasPerm('dcis.add_project')")
+        v-spacer
+        add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
+          template(#activator="{ on }")
+            v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
+    v-card-subtitle {{ $t('shownOf', { count, totalCount }) }}
+    v-card-text
+      v-data-table(:headers="headers" :items="projects" :loading="loading" disable-pagination hide-default-footer)
+        template(#item.name="{ item }")
+          nuxt-link(
+            :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
+          ) {{ item.name }}
+        template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
 </template>
 
 <script lang="ts">

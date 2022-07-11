@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-progress-circular(indeterminate color="primary" )
+v-progress-circular(indeterminate color="primary" )
 </template>
 
 <script lang="ts">

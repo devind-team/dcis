@@ -1,27 +1,27 @@
 <template lang="pug">
-  v-menu(v-model="active" transition="scale-transition" origin="top left")
-    template(v-slot:activator="{ on }")
-      v-btn(v-on="on" icon absolute top right)
-        v-icon mdi-dots-horizontal
-    v-list
-      v-list-item(
-        v-if="hasPerm('pages.change_section') || editSection"
-        :to="localePath({ name: 'pages-pageId-section-sectionId', params: { sectionId: String(section.id) } })"
-      )
-        v-list-item-icon #[v-icon mdi-file-document-edit-outline]
-        v-list-item-content
-          v-list-item-title {{ $t('pages.components.sectionTextAction.changeText') }}
-      apollo-mutation(
-        :mutation="require('~/gql/pages/mutations/section/delete_section.graphql')"
-        :variables="{ sectionId: section.id }"
-        :update="updateDeleteSection"
-      )
-        template(v-slot="{ mutate }")
-          delete-menu(v-slot="{ on }" @confirm="mutate" @cancel="active = false" item-name="секцию")
-            v-list-item(v-on="on")
-              v-list-item-icon #[v-icon mdi-delete]
-              v-list-item-content
-                v-list-item-title {{ $t('pages.components.sectionTextAction.delete') }}
+v-menu(v-model="active" transition="scale-transition" origin="top left")
+  template(v-slot:activator="{ on }")
+    v-btn(v-on="on" icon absolute top right)
+      v-icon mdi-dots-horizontal
+  v-list
+    v-list-item(
+      v-if="hasPerm('pages.change_section') || editSection"
+      :to="localePath({ name: 'pages-pageId-section-sectionId', params: { sectionId: String(section.id) } })"
+    )
+      v-list-item-icon #[v-icon mdi-file-document-edit-outline]
+      v-list-item-content
+        v-list-item-title {{ $t('pages.components.sectionTextAction.changeText') }}
+    apollo-mutation(
+      :mutation="require('~/gql/pages/mutations/section/delete_section.graphql')"
+      :variables="{ sectionId: section.id }"
+      :update="updateDeleteSection"
+    )
+      template(v-slot="{ mutate }")
+        delete-menu(v-slot="{ on }" @confirm="mutate" @cancel="active = false" item-name="секцию")
+          v-list-item(v-on="on")
+            v-list-item-icon #[v-icon mdi-delete]
+            v-list-item-content
+              v-list-item-title {{ $t('pages.components.sectionTextAction.delete') }}
 </template>
 
 <script lang="ts">

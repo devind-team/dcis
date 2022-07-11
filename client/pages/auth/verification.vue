@@ -1,49 +1,49 @@
 <template lang="pug">
-  bread-crumbs(:items="breadCrumbs")
-    v-row(justify="center")
-      v-col(cols="12" sm="10" md="8" lg="6")
-        .text-h4.mb-2 {{ $t('user.verification.title') }}
-        v-stepper(v-model="step" vertical)
-          v-stepper-step(:complete="step > 1" step="1") {{ $t('user.verification.email') }}
-          v-stepper-content(step="1")
-            mutation-form(
-              @done="requestCodeDone"
-              :mutation="require('~/gql/core/mutations/user/request_code.graphql')"
-              :variables="{ email }"
-              mutation-name="requestCode"
-              i18n-path="user.verification"
-              button-text="Отправить код"
-            )
-              template(#form)
-                validation-provider(v-slot="{ errors, valid }" :name="String($t('user.verification.email'))" rules="required|email")
-                  v-text-field(
-                    v-model="email"
-                    :label="$t('user.verification.email')"
-                    :error-messages="errors"
-                    :success="valid"
-                    clearable
-                  )
-          v-stepper-step(:complete="step > 2" step="2") {{ $t('user.verification.code') }}
-          v-stepper-content(step="2")
-            mutation-form(
-              @done="confirmEmailDone"
-              :mutation="require('~/gql/core/mutations/user/confirm_email.graphql')"
-              :variables="{ email, code }"
-              mutation-name="confirmEmail"
-              i18n-path="user.verification"
-            )
-              template(#form)
-                validation-provider(v-slot="{ errors, valid }" :name="String($t('user.verification.code'))" rules="required")
-                  v-text-field(v-model="code" :label="$t('user.verification.code')" :error-messages="errors" :success="valid" clearable)
-              template(#actions="{ invalid, loading }")
-                v-btn(type="submit" :disabled="invalid" :loading="loading" color="success") {{ $t('user.verification.confirm') }}
-                v-spacer
-                a(@click="reRequestCode") {{ time > 0 ? $t('user.verification.reRequestCodeTimer', { time }) : $t('user.verification.reRequestCode') }}
-          v-stepper-step(:complete="step > 3" step="3") {{ $t('user.verification.confirmSuccess') }}
-          v-stepper-content(step="3")
-            v-card
-              v-card-text
-                v-alert(type="success") {{ $t('user.verification.confirmText', { email }) }}
+bread-crumbs(:items="breadCrumbs")
+  v-row(justify="center")
+    v-col(cols="12" sm="10" md="8" lg="6")
+      .text-h4.mb-2 {{ $t('user.verification.title') }}
+      v-stepper(v-model="step" vertical)
+        v-stepper-step(:complete="step > 1" step="1") {{ $t('user.verification.email') }}
+        v-stepper-content(step="1")
+          mutation-form(
+            @done="requestCodeDone"
+            :mutation="require('~/gql/core/mutations/user/request_code.graphql')"
+            :variables="{ email }"
+            mutation-name="requestCode"
+            i18n-path="user.verification"
+            button-text="Отправить код"
+          )
+            template(#form)
+              validation-provider(v-slot="{ errors, valid }" :name="String($t('user.verification.email'))" rules="required|email")
+                v-text-field(
+                  v-model="email"
+                  :label="$t('user.verification.email')"
+                  :error-messages="errors"
+                  :success="valid"
+                  clearable
+                )
+        v-stepper-step(:complete="step > 2" step="2") {{ $t('user.verification.code') }}
+        v-stepper-content(step="2")
+          mutation-form(
+            @done="confirmEmailDone"
+            :mutation="require('~/gql/core/mutations/user/confirm_email.graphql')"
+            :variables="{ email, code }"
+            mutation-name="confirmEmail"
+            i18n-path="user.verification"
+          )
+            template(#form)
+              validation-provider(v-slot="{ errors, valid }" :name="String($t('user.verification.code'))" rules="required")
+                v-text-field(v-model="code" :label="$t('user.verification.code')" :error-messages="errors" :success="valid" clearable)
+            template(#actions="{ invalid, loading }")
+              v-btn(type="submit" :disabled="invalid" :loading="loading" color="success") {{ $t('user.verification.confirm') }}
+              v-spacer
+              a(@click="reRequestCode") {{ time > 0 ? $t('user.verification.reRequestCodeTimer', { time }) : $t('user.verification.reRequestCode') }}
+        v-stepper-step(:complete="step > 3" step="3") {{ $t('user.verification.confirmSuccess') }}
+        v-stepper-content(step="3")
+          v-card
+            v-card-text
+              v-alert(type="success") {{ $t('user.verification.confirmText', { email }) }}
 </template>
 
 <script lang="ts">

@@ -1,7 +1,7 @@
 <template lang="pug">
-  bread-crumbs(:items="bc" fluid)
-    .text-h4.text-md-h2.mb-7 {{ $t('pages.newsFeed') }}
-    page-grid(:pages="[]" allow-loading)
+bread-crumbs(:items="bc" fluid)
+  .text-h4.text-md-h2.mb-7 {{ $t('pages.newsFeed') }}
+  page-grid(:pages="[]" allow-loading)
 </template>
 
 <script lang="ts">

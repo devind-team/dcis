@@ -1,8 +1,8 @@
 <template lang="pug">
-  page-container(:bread-crumbs="breadCrumbs" :category="category")
-    template(#header)
-      .text-h4.text-md-h2.mb-2 {{ $t('pages.page.add.header') }}
-    add-page(:category="category")
+page-container(:bread-crumbs="breadCrumbs" :category="category")
+  template(#header)
+    .text-h4.text-md-h2.mb-2 {{ $t('pages.page.add.header') }}
+  add-page(:category="category")
 </template>
 
 <script lang="ts">

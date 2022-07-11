@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-menu(v-if="isVisible(editor)")
-    template(#activator="{ on }")
-      v-tooltip(v-if="isVisible(editor)" top)
-        template(#activator="{ on: onTooltip }")
-          v-btn(v-on="{...on, ...onTooltip}"
-            :disabled="isDisabled(editor)"
-            :class="{ 'v-btn--active': isActive(editor) }"
-            @click="() => item = null"
-            icon)
-            v-icon {{icon}}
-        span {{$t(`common.richTextEditor.${tooltip}`)}}
-    v-card
-      v-card-text
-        v-list
-          v-list-item-group(v-model="item" @change="onChange")
-            v-list-item(v-for="item in items" :key="item.value")
-              v-list-item-content
-                v-list-item-title {{item.text}}
+v-menu(v-if="isVisible(editor)")
+  template(#activator="{ on }")
+    v-tooltip(v-if="isVisible(editor)" top)
+      template(#activator="{ on: onTooltip }")
+        v-btn(v-on="{...on, ...onTooltip}"
+          :disabled="isDisabled(editor)"
+          :class="{ 'v-btn--active': isActive(editor) }"
+          @click="() => item = null"
+          icon)
+          v-icon {{icon}}
+      span {{$t(`common.richTextEditor.${tooltip}`)}}
+  v-card
+    v-card-text
+      v-list
+        v-list-item-group(v-model="item" @change="onChange")
+          v-list-item(v-for="item in items" :key="item.value")
+            v-list-item-content
+              v-list-item-title {{item.text}}
 </template>
 
 <script lang="ts">

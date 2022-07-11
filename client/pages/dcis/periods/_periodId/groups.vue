@@ -1,50 +1,50 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.groups.name') }}
-    v-row
-      template(v-if="period.periodGroups.length")
-        v-col(cols="12" md="4" sm="4")
-          v-list
-            v-list-item-group(v-model="selectedGroup" color="primary")
-              v-list-item(
-                v-for="item in period.periodGroups"
-                :key="item.id"
-                :value="item"
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.groups.name') }}
+  v-row
+    template(v-if="period.periodGroups.length")
+      v-col(cols="12" md="4" sm="4")
+        v-list
+          v-list-item-group(v-model="selectedGroup" color="primary")
+            v-list-item(
+              v-for="item in period.periodGroups"
+              :key="item.id"
+              :value="item"
+            )
+              v-list-item-content {{ item.name }}
+              delete-menu(
+                v-if="period.canChangeGroups"
+                :item-name="String($t('dcis.periods.groups.deleteGroup.itemName'))"
+                @confirm="deletePeriodGroup({ id: item.id })"
               )
-                v-list-item-content {{ item.name }}
-                delete-menu(
-                  v-if="period.canChangeGroups"
-                  :item-name="String($t('dcis.periods.groups.deleteGroup.itemName'))"
-                  @confirm="deletePeriodGroup({ id: item.id })"
-                )
-                  template(#default="{ on: onMenu }")
-                    v-tooltip(bottom)
-                      template(#activator="{ on: onTooltip }")
-                        v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
-                          v-btn(color="error" icon)
-                            v-icon mdi-delete
-                      span {{ $t('dcis.periods.groups.deleteGroup.tooltip') }}
-        v-divider(vertical)
-      v-col(v-bind="period.periodGroups.length ? { md: 8, sm: 6 } : { }" cols="12")
-        period-group-privileges(
-          v-if="selectedGroup"
-          :group="selectedGroup"
-          :can-change="period.canChangeGroups"
-          :update="changePeriodGroupPrivilegesUpdate"
-        )
-        v-row(v-else-if="period.canChangeGroups")
-          v-col
-            add-period-group(:period="period" :update="addPeriodGroupUpdate")
-              template(#activator="{ on }")
-                v-card.period-groups__card-add(v-on="on" flat)
-                  v-icon(large) mdi-plus-circle-outline
-                  .title {{ $t('dcis.periods.groups.addGroup.buttonText') }}
-          v-col
-            copy-period-groups(:period="period" :update="copyPeriodGroupsUpdate")
-              template(#activator="{ on }")
-                v-card.period-groups__card-add(v-on="on" flat)
-                  v-icon(large) mdi-import
-                  .title {{ $t('dcis.periods.groups.copyGroups.buttonText') }}
+                template(#default="{ on: onMenu }")
+                  v-tooltip(bottom)
+                    template(#activator="{ on: onTooltip }")
+                      v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
+                        v-btn(color="error" icon)
+                          v-icon mdi-delete
+                    span {{ $t('dcis.periods.groups.deleteGroup.tooltip') }}
+      v-divider(vertical)
+    v-col(v-bind="period.periodGroups.length ? { md: 8, sm: 6 } : { }" cols="12")
+      period-group-privileges(
+        v-if="selectedGroup"
+        :group="selectedGroup"
+        :can-change="period.canChangeGroups"
+        :update="changePeriodGroupPrivilegesUpdate"
+      )
+      v-row(v-else-if="period.canChangeGroups")
+        v-col
+          add-period-group(:period="period" :update="addPeriodGroupUpdate")
+            template(#activator="{ on }")
+              v-card.period-groups__card-add(v-on="on" flat)
+                v-icon(large) mdi-plus-circle-outline
+                .title {{ $t('dcis.periods.groups.addGroup.buttonText') }}
+        v-col
+          copy-period-groups(:period="period" :update="copyPeriodGroupsUpdate")
+            template(#activator="{ on }")
+              v-card.period-groups__card-add(v-on="on" flat)
+                v-icon(large) mdi-import
+                .title {{ $t('dcis.periods.groups.copyGroups.buttonText') }}
 </template>
 
 <script lang="ts">

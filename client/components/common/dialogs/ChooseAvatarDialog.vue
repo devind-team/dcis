@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="600")
-    template(#activator="{ on }")
-      slot(:on="on")
-    v-card
-      v-card-title {{ $t('common.dialogs.chooseAvatarDialog.chooseAvatar') }}
-        v-spacer
-        v-btn(icon @click="active=false")
-          v-icon mdi-close
-      v-card-text
-        v-file-input(
-          v-model="avatar"
-          :label="$t('common.dialogs.chooseAvatarDialog.avatar')"
-          prepend-icon="mdi-camera"
-          show-size
-        )
-      v-card-actions
-        v-spacer
-        v-btn(color="primary" @click="changeAvatar") {{ text }}
+v-dialog(v-model="active" width="600")
+  template(#activator="{ on }")
+    slot(:on="on")
+  v-card
+    v-card-title {{ $t('common.dialogs.chooseAvatarDialog.chooseAvatar') }}
+      v-spacer
+      v-btn(icon @click="active=false")
+        v-icon mdi-close
+    v-card-text
+      v-file-input(
+        v-model="avatar"
+        :label="$t('common.dialogs.chooseAvatarDialog.avatar')"
+        prepend-icon="mdi-camera"
+        show-size
+      )
+    v-card-actions
+      v-spacer
+      v-btn(color="primary" @click="changeAvatar") {{ text }}
 </template>
 
 <script lang="ts">

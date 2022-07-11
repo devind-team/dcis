@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-row(style="position:relative")
-    v-col
-      p.text-h5.text-center {{section.text}}
-      v-data-iterator(:items="section.files" disable-pagination hide-default-footer)
-        template(#header)
-          v-sheet(v-html="section.text")
-        template(#default="{ items }")
-          v-list
-            v-list-item(v-for="file in items" :key="file.id" :href="`/${file.src}`" target="_blank")
-              v-list-item-content
-                v-list-item-title {{ file.name }}
-                v-list-item-subtitle {{ (file.size / 1024).toFixed(2) }} {{ $t('pages.components.sectionFiles.mb') }}
-      section-action(
-        v-if="hasPerm(['pages.change_section', 'pages.delete_section'], true) || editSection"
-        :section="section"
-        :edit-section="editSection"
-        :update-delete-section="updateDeleteSection"
-      )
+v-row(style="position:relative")
+  v-col
+    p.text-h5.text-center {{section.text}}
+    v-data-iterator(:items="section.files" disable-pagination hide-default-footer)
+      template(#header)
+        v-sheet(v-html="section.text")
+      template(#default="{ items }")
+        v-list
+          v-list-item(v-for="file in items" :key="file.id" :href="`/${file.src}`" target="_blank")
+            v-list-item-content
+              v-list-item-title {{ file.name }}
+              v-list-item-subtitle {{ (file.size / 1024).toFixed(2) }} {{ $t('pages.components.sectionFiles.mb') }}
+    section-action(
+      v-if="hasPerm(['pages.change_section', 'pages.delete_section'], true) || editSection"
+      :section="section"
+      :edit-section="editSection"
+      :update-delete-section="updateDeleteSection"
+    )
 </template>
 
 <script lang="ts">

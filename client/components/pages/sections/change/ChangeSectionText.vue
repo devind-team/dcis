@@ -1,17 +1,17 @@
 <template lang="pug">
-  mutation-form(
-    :mutation="require('~/gql/pages/mutations/section/change_section_text.graphql')"
-    :variables="{ sectionId: section.id, text }"
-    :update="addSectionUpdate"
-    :button-text="String($t('pages.section.change'))"
-    mutation-name="changeSectionText"
-    i18n-path="pages.section.names"
-  )
-    template(#form)
-      validation-provider(:name="String($t('pages.section.names.text'))" rules="required|min:10" v-slot="{ errors }" tag="div")
-        rich-text-editor(v-model="text")
-        .error--text {{ errors[0] || '' }}
-      v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
+mutation-form(
+  :mutation="require('~/gql/pages/mutations/section/change_section_text.graphql')"
+  :variables="{ sectionId: section.id, text }"
+  :update="addSectionUpdate"
+  :button-text="String($t('pages.section.change'))"
+  mutation-name="changeSectionText"
+  i18n-path="pages.section.names"
+)
+  template(#form)
+    validation-provider(:name="String($t('pages.section.names.text'))" rules="required|min:10" v-slot="{ errors }" tag="div")
+      rich-text-editor(v-model="text")
+      .error--text {{ errors[0] || '' }}
+    v-checkbox(v-model="toPage" :label="$t('pages.section.toPage')")
 </template>
 
 <script lang="ts">
