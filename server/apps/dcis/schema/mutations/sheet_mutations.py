@@ -10,13 +10,9 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
 
-from apps.dcis.models import Cell, ColumnDimension, RowDimension, Sheet, Value
-from apps.dcis.permissions import ChangePeriodSheet
-from apps.dcis.schema.types import CellType, ChangedCellOption, GlobalIndicesInputType, RowDimensionType, SheetType
-
 from apps.dcis.models import Cell, ColumnDimension, RowDimension, Sheet
+from apps.dcis.permissions import ChangePeriodSheet
 from apps.dcis.schema.types import SheetType, CellType, ChangedCellOption, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.permissions import ChangeSheet
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
     add_row_dimension,
@@ -24,10 +20,7 @@ from apps.dcis.services.sheet_services import (
     change_column_dimension,
     change_row_dimension,
     delete_row_dimension,
-    get_file_value_files,
     rename_sheet,
-    update_or_create_file_value,
-    update_or_create_value,
 )
 
 

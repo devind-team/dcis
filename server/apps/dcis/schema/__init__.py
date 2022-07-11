@@ -6,7 +6,6 @@ from apps.dcis.schema.mutations import (
     ProjectMutations,
     PeriodMutations,
     SheetMutations,
-    PrivilegeMutations,
     ValueMutations
 )
 from apps.dcis.schema.queries import DocumentQueries, PeriodQueries, ProjectQueries
@@ -14,14 +13,13 @@ from apps.dcis.schema.queries import DocumentQueries, PeriodQueries, ProjectQuer
 
 class Query(
     DocumentQueries,
-    PrivilegeQueries,
+    PeriodQueries,
     ProjectQueries,
-    SheetQueries,
     graphene.ObjectType,
 ):
     """Запросы приложения dcis."""
 
-    pass
+    ...
 
 
 class Mutation(
@@ -30,10 +28,9 @@ class Mutation(
     PeriodMutations,
     ProjectMutations,
     SheetMutations,
-    PrivilegeMutations,
     ValueMutations,
     graphene.ObjectType,
 ):
     """Мутации приложения dcis."""
 
-    pass
+    ...
