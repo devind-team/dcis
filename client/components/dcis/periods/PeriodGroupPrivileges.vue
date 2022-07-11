@@ -1,18 +1,34 @@
 <template lang="pug">
+  mutation-form(
+    v-if="canChange"
+    :button-text="String($t('dcis.periods.groups.changePrivileges.buttonText'))"
+    :mutation="changePeriodGroupPrivilegesMutation"
+    :variables="variables"
+    :update="update"
+    :show-success="false"
+    mutation-name="changePeriodGroupPrivileges"
+    errors-in-alert
+    flat
+  )
+    template(#form)
+      v-data-table(
+        v-model="privileges"
+        :headers="headers"
+        :items="allPrivileges"
+        :loading="loading"
+        show-select
+        hide-default-footer
+      )
   v-data-table(
-    v-model="privileges"
-    :key="group.id"
+    v-else
     :headers="headers"
-    :items="allPrivileges"
-    :loading="loading"
-    :show-select="canChange"
+    :items="group.privileges"
     hide-default-footer
   )
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { useMutation } from '@vue/apollo-composable'
 import { DataTableHeader } from 'vuetify'
 import { PropType } from '#app'
 import {
@@ -20,10 +36,10 @@ import {
   PrivilegeType,
   PrivilegesQuery,
   PrivilegesQueryVariables,
-  ChangePeriodGroupPrivilegesMutation,
   ChangePeriodGroupPrivilegesMutationPayload,
   ChangePeriodGroupPrivilegesMutationVariables
 } from '~/types/graphql'
+import MutationForm from '~/components/common/forms/MutationForm.vue'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
 import changePeriodGroupPrivilegesMutation from '~/gql/dcis/mutations/period/change_period_group_privileges.graphql'
 
@@ -36,6 +52,7 @@ type UpdateFunction = (
 ) => DataProxy
 
 export default defineComponent({
+  components: { MutationForm },
   props: {
     group: { type: Object as PropType<PeriodGroupType>, required: true },
     canChange: { type: Boolean, required: true },
@@ -45,45 +62,45 @@ export default defineComponent({
     const { t } = useI18n()
 
     const headers: DataTableHeader[] = [
-      { text: t('dcis.periods.groups.privileges.tableHeaders.name') as string, value: 'name' },
-      { text: t('dcis.periods.groups.privileges.tableHeaders.key') as string, value: 'key' }
+      { text: t('dcis.periods.groups.changePrivileges.tableHeaders.name') as string, value: 'name' },
+      { text: t('dcis.periods.groups.changePrivileges.tableHeaders.key') as string, value: 'key' }
     ]
 
-    const { data: allPrivileges, loading: privilegesLoading } = useCommonQuery<
+    const { data: allPrivileges, loading } = useCommonQuery<
       PrivilegesQuery,
       PrivilegesQueryVariables
     >({
-      document: privilegesQuery
+      document: privilegesQuery,
+      options: computed(() => ({ enabled: props.canChange }))
+    })
+    const getPrivileges = () => {
+      if (!allPrivileges.value) {
+        return []
+      }
+      return allPrivileges.value.filter((privilege: PrivilegeType) =>
+        props.group.privileges.find((groupPrivilege: PrivilegeType) => privilege.id === groupPrivilege.id))
+    }
+    const privileges = ref<PrivilegeType[]>(getPrivileges())
+    watch(() => props.group, () => {
+      privileges.value = getPrivileges()
+    })
+    watch(allPrivileges, () => {
+      privileges.value = getPrivileges()
     })
 
-    const { mutate: changePrivileges, loading: changePrivilegesLoading } = useMutation<
-      ChangePeriodGroupPrivilegesMutation,
-      ChangePeriodGroupPrivilegesMutationVariables
-    >(
-      changePeriodGroupPrivilegesMutation, {
-        update: props.update
-      }
-    )
+    const variables = computed<ChangePeriodGroupPrivilegesMutationVariables>(() => ({
+      periodGroupId: props.group.id,
+      privilegesIds: privileges.value.map((privilege: PrivilegeType) => privilege.id)
+    }))
 
-    const privileges = computed<PrivilegeType[]>({
-      get () {
-        if (!allPrivileges.value) {
-          return []
-        }
-        return allPrivileges.value.filter((privilege: PrivilegeType) =>
-          props.group.privileges.find((groupPrivilege: PrivilegeType) => privilege.id === groupPrivilege.id))
-      },
-      async set (value: PrivilegeType[]) {
-        await changePrivileges({
-          periodGroupId: props.group.id,
-          privilegesIds: value.map((privilege: PrivilegeType) => privilege.id)
-        })
-      }
-    })
-
-    const loading = computed<boolean>(() => privilegesLoading.value || changePrivilegesLoading.value)
-
-    return { headers, allPrivileges, changePrivileges, privileges, loading }
+    return {
+      changePeriodGroupPrivilegesMutation,
+      headers,
+      allPrivileges,
+      loading,
+      privileges,
+      variables
+    }
   }
 })
 </script>

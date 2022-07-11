@@ -145,7 +145,8 @@ export default {
         tooltip: '@:delete',
         itemName: 'группу'
       },
-      privileges: {
+      changePrivileges: {
+        buttonText: 'Изменить привилегии',
         tableHeaders: {
           name: 'Название привилегии',
           key: 'Ключ'

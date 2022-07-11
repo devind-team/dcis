@@ -26,12 +26,12 @@
                       span {{ $t('dcis.periods.groups.deleteGroup.tooltip') }}
         v-divider(vertical)
       v-col(v-bind="period.periodGroups.length ? { md: 8, sm: 6 } : { }" cols="12")
-        template(v-if="selectedGroup")
-          period-group-privileges(
-            :group="selectedGroup"
-            :can-change="period.canChangeGroups"
-            :update="changePeriodGroupPrivilegesUpdate"
-          )
+        period-group-privileges(
+          v-if="selectedGroup"
+          :group="selectedGroup"
+          :can-change="period.canChangeGroups"
+          :update="changePeriodGroupPrivilegesUpdate"
+        )
         v-row(v-else-if="period.canChangeGroups")
           v-col
             add-period-group(:period="period" :update="addPeriodGroupUpdate")

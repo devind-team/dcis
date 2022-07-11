@@ -4,7 +4,7 @@
     :header="String($t('dcis.periods.users.changePrivileges.header'))"
     :subheader="period.name"
     :button-text="String($t('dcis.periods.users.changePrivileges.buttonText'))"
-    :mutation="changeUserPeriodPrivileges"
+    :mutation="changeUserPeriodPrivilegesMutation"
     :variables="variables"
     :update="update"
     mutation-name="changeUserPeriodPrivileges"
@@ -44,7 +44,7 @@ import {
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
 import userPeriodPrivilegesQuery from '~/gql/dcis/queries/user_period_privileges.graphql'
-import changeUserPeriodPrivileges from '~/gql/dcis/mutations/period/change_user_period_privilges.graphql'
+import changeUserPeriodPrivilegesMutation from '~/gql/dcis/mutations/period/change_user_period_privilges.graphql'
 
 type ChangeUserPeriodPrivilegesMutationResult = {
   data: { changeUserPeriodPrivileges: ChangeUserPeriodPrivilegesPayload }
@@ -98,7 +98,7 @@ export default defineComponent({
     const loading = computed<boolean>(() => allPrivilegesLoading.value || userPeriodPrivilegesLoading.value)
 
     const privileges = ref<PrivilegesFieldsFragment[]>([])
-    watch(() => userPeriodPrivileges.value, (value: PrivilegesFieldsFragment[]) => {
+    watch(userPeriodPrivileges, (value: PrivilegesFieldsFragment[]) => {
       privileges.value = value
     })
 
@@ -136,7 +136,7 @@ export default defineComponent({
 
     return {
       form,
-      changeUserPeriodPrivileges,
+      changeUserPeriodPrivilegesMutation,
       headers,
       allPrivileges,
       loading,
