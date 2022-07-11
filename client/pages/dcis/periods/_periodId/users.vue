@@ -19,6 +19,7 @@
           :headers="headers"
           :items="users"
           :search="search"
+          :loading="loading"
           disable-pagination
           hide-default-footer
           @pagination="pagination"
@@ -45,7 +46,7 @@
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader, DataPagination } from 'vuetify'
-import { PropType } from '#app'
+import { PropType, ref } from '#app'
 import { UpdateType } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -121,7 +122,7 @@ export default defineComponent({
       return result
     })
 
-    const { data: periodUsers, loading: usersLoading, update: periodUsersUpdate } = useCommonQuery<
+    const { data: periodUsers, loading, update: periodUsersUpdate } = useCommonQuery<
       PeriodUsersQuery,
       PeriodQueryVariables
     >({
@@ -136,7 +137,7 @@ export default defineComponent({
         : []
     )
 
-    const { search } = useDebounceSearch()
+    const search = ref<string>('')
     const usersCount = ref<number>(0)
     const pagination = (pagination: DataPagination) => {
       usersCount.value = pagination.itemsLength
@@ -215,7 +216,7 @@ export default defineComponent({
       getUserFullName,
       bc,
       headers,
-      usersLoading,
+      loading,
       periodUsers,
       users,
       search,

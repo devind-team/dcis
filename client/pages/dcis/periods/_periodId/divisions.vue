@@ -23,7 +23,7 @@
         v-data-table(
           :headers="headers"
           :items="period.divisions"
-          :search.sync="search"
+          :search="search"
           :loading="loading"
           disable-pagination
           hide-default-footer
@@ -58,7 +58,7 @@ import {
   ProjectDivisionsQueryVariables, DivisionModelType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { UpdateType, useCommonQuery, useDebounceSearch, useI18n } from '~/composables'
+import { UpdateType, useCommonQuery, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
@@ -77,7 +77,7 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
 
-    const { search } = useDebounceSearch()
+    const search = ref<string>('')
     const divisionsCount = ref<number>(props.period.divisions.length)
     const pagination = (pagination: DataPagination) => {
       divisionsCount.value = pagination.itemsLength
