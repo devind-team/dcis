@@ -1,30 +1,30 @@
 <template lang="pug">
-  mutation-form(
-    v-if="canChange"
-    :button-text="String($t('dcis.periods.groups.changePrivileges.buttonText'))"
-    :mutation="changePeriodGroupPrivilegesMutation"
-    :variables="variables"
-    :update="update"
-    :show-success="false"
-    mutation-name="changePeriodGroupPrivileges"
-    errors-in-alert
-    flat
-  )
-    template(#form)
-      v-data-table(
-        v-model="privileges"
-        :headers="headers"
-        :items="allPrivileges"
-        :loading="loading"
-        show-select
-        hide-default-footer
-      )
-  v-data-table(
-    v-else
-    :headers="headers"
-    :items="group.privileges"
-    hide-default-footer
-  )
+mutation-form(
+  v-if="canChange"
+  :button-text="String($t('dcis.periods.groups.changePrivileges.buttonText'))"
+  :mutation="changePeriodGroupPrivilegesMutation"
+  :variables="variables"
+  :update="update"
+  :show-success="false"
+  mutation-name="changePeriodGroupPrivileges"
+  errors-in-alert
+  flat
+)
+  template(#form)
+    v-data-table(
+      v-model="privileges"
+      :headers="headers"
+      :items="allPrivileges"
+      :loading="loading"
+      show-select
+      hide-default-footer
+    )
+v-data-table(
+  v-else
+  :headers="headers"
+  :items="group.privileges"
+  hide-default-footer
+)
 </template>
 
 <script lang="ts">

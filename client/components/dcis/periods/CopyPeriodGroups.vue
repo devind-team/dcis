@@ -1,55 +1,55 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.periods.groups.copyGroups.header'))"
-    :subheader="period.name"
-    :button-text="String($t('dcis.periods.groups.copyGroups.buttonText'))"
-    :mutation="copyPeriodGroupsMutation"
-    :variables="variables"
-    :update="copyPeriodGroupsUpdate"
-    mutation-name="copyPeriodGroups"
-    errors-in-alert
-    @close="close"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.periods.groups.copyGroups.period'))"
-        rules="required"
+mutation-modal-form(
+  :header="String($t('dcis.periods.groups.copyGroups.header'))"
+  :subheader="period.name"
+  :button-text="String($t('dcis.periods.groups.copyGroups.buttonText'))"
+  :mutation="copyPeriodGroupsMutation"
+  :variables="variables"
+  :update="copyPeriodGroupsUpdate"
+  mutation-name="copyPeriodGroups"
+  errors-in-alert
+  @close="close"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.groups.copyGroups.period'))"
+      rules="required"
+    )
+      v-autocomplete(
+        v-model="selectedPeriod"
+        :label="$t('dcis.periods.groups.copyGroups.period')"
+        :items="periodItems"
+        :loading="loading"
+        :error-messages="errors"
+        :success="valid"
+        item-value="id"
+        item-text="name"
+        return-object
+        hide-selected
       )
-        v-autocomplete(
-          v-model="selectedPeriod"
-          :label="$t('dcis.periods.groups.copyGroups.period')"
-          :items="periodItems"
-          :loading="loading"
-          :error-messages="errors"
-          :success="valid"
-          item-value="id"
-          item-text="name"
-          return-object
-          hide-selected
-        )
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.periods.groups.copyGroups.groups'))"
-        rules="required"
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.groups.copyGroups.groups'))"
+      rules="required"
+    )
+      v-autocomplete(
+        v-model="selectedGroupIds"
+        :label="$t('dcis.periods.groups.copyGroups.groups')"
+        :items="selectedPeriod ? periods.find(e => e.id === selectedPeriod.id).periodGroups : []"
+        :loading="loading"
+        :disabled="!selectedPeriod"
+        :error-messages="errors"
+        :success="valid"
+        item-value="id"
+        item-text="name"
+        chips
+        deletable-chips
+        multiple
+        hide-selected
       )
-        v-autocomplete(
-          v-model="selectedGroupIds"
-          :label="$t('dcis.periods.groups.copyGroups.groups')"
-          :items="selectedPeriod ? periods.find(e => e.id === selectedPeriod.id).periodGroups : []"
-          :loading="loading"
-          :disabled="!selectedPeriod"
-          :error-messages="errors"
-          :success="valid"
-          item-value="id"
-          item-text="name"
-          chips
-          deletable-chips
-          multiple
-          hide-selected
-        )
 </template>
 
 <script lang="ts">

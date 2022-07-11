@@ -1,27 +1,27 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.periods.users.changeGroups.header'))"
-    :subheader="period.name"
-    :button-text="String($t('dcis.periods.users.changeGroups.buttonText'))"
-    :mutation="changeUserPeriodGroupsMutation"
-    :variables="variables"
-    :update="update"
-    mutation-name="changeUserPeriodGroups"
-    errors-in-alert
-    @close="close"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      v-data-table(
-        v-model="userGroups"
-        :headers="headers"
-        :items="period.periodGroups"
-        item-key="id"
-        show-select
-        disable-pagination
-        hide-default-footer
-      )
+mutation-modal-form(
+  :header="String($t('dcis.periods.users.changeGroups.header'))"
+  :subheader="period.name"
+  :button-text="String($t('dcis.periods.users.changeGroups.buttonText'))"
+  :mutation="changeUserPeriodGroupsMutation"
+  :variables="variables"
+  :update="update"
+  mutation-name="changeUserPeriodGroups"
+  errors-in-alert
+  @close="close"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    v-data-table(
+      v-model="userGroups"
+      :headers="headers"
+      :items="period.periodGroups"
+      item-key="id"
+      show-select
+      disable-pagination
+      hide-default-footer
+    )
 </template>
 
 <script lang="ts">
