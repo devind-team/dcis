@@ -1,0 +1,18 @@
+[
+  {
+    "model": "oauth2_provider.Application",
+    "pk": 1,
+    "fields": {
+      "client_id": "764pjo0fKKZcDt4J2fjwSGIodkcPl4T5cwfYC9zp",
+      "client_secret": "gjEFxyxtqNMxX3GcBTX9AHkJOMOz123Wa4hG4F5SesDljWWSxII97eiVlTD8uRjrF88CzsSy8d52myXOr7NZWIRzRxuGRYZLWC7rDD8h4REeqtNt8OX9TXkxaoOvWPZH",
+      "authorization_grant_type": "password",
+      "client_type": "confidential",
+      "redirect_uris": "/auth/login",
+      "name": "Клиентское web-приложение",
+      "algorithm": "",
+      "created": "2021-01-01T12:00:00.000Z",
+      "updated": "2021-01-01T12:00:00.000Z",
+      "user_id": 1
+    }
+  }
+]

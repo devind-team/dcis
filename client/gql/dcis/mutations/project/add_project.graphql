@@ -1,7 +1,19 @@
 #import "../../fragments/project_fields.graphql"
 
-mutation AddProject($name: String!, $short: String!, $description: String!, $visibility: Boolean = false, $contentType: String!) {
-  addProject(input: {name: $name, short: $short, description: $description, visibility: $visibility, contentType: $contentType}) {
+mutation AddProject(
+  $name: String!,
+  $short: String!,
+  $description: String!,
+  $visibility: Boolean = false,
+  $contentType: String!
+) {
+  addProject(input: {
+    name: $name,
+    short: $short,
+    description: $description,
+    visibility: $visibility,
+    contentType: $contentType
+  }) {
     success
     errors {
       field
@@ -10,6 +22,9 @@ mutation AddProject($name: String!, $short: String!, $description: String!, $vis
     }
     project {
       ...ProjectFields
+      canChange
+      canDelete
+      canAddPeriod
     }
     __typename
   }

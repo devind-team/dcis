@@ -21,30 +21,9 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+
     const route = useRoute()
-    const drawer = ref<boolean>(false)
-    const links = computed<LinksType[]>(() => ([
-      {
-        title: t('dcis.periods.links.documents') as string,
-        to: 'dcis-periods-periodId-documents',
-        icon: 'file-table-box-multiple-outline'
-      },
-      {
-        title: t('dcis.periods.links.divisions') as string,
-        to: 'dcis-periods-periodId-divisions',
-        icon: 'briefcase-outline'
-      },
-      {
-        title: t('dcis.periods.links.users') as string,
-        to: 'dcis-periods-periodId-users',
-        icon: 'account-multiple'
-      },
-      {
-        title: t('dcis.periods.links.settings') as string,
-        to: 'dcis-periods-periodId-settings',
-        icon: 'cogs'
-      }
-    ]))
+
     const {
       data: period,
       loading,
@@ -53,6 +32,41 @@ export default defineComponent({
     } = usePeriodQuery(route.params.periodId)
     provide('periodUpdate', update)
     provide('changeUpdate', changeUpdate)
+
+    const drawer = ref<boolean>(false)
+    const links = computed<LinksType[]>(() => {
+      const result: LinksType[] = [
+        {
+          title: t('dcis.periods.links.documents') as string,
+          to: 'dcis-periods-periodId-documents',
+          icon: 'file-table-box-multiple-outline'
+        },
+        {
+          title: t('dcis.periods.links.divisions') as string,
+          to: 'dcis-periods-periodId-divisions',
+          icon: 'briefcase-outline'
+        },
+        {
+          title: t('dcis.periods.links.groups') as string,
+          to: 'dcis-periods-periodId-groups',
+          icon: 'account-group'
+        },
+        {
+          title: t('dcis.periods.links.users') as string,
+          to: 'dcis-periods-periodId-users',
+          icon: 'account-multiple'
+        }
+      ]
+      if (!loading.value && (period.value.canChangeSettings || period.value.canDelete)) {
+        result.push({
+          title: t('dcis.periods.links.settings') as string,
+          to: 'dcis-periods-periodId-settings',
+          icon: 'cogs'
+        })
+      }
+      return result
+    })
+
     const bc = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs
@@ -70,7 +84,8 @@ export default defineComponent({
         { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId-documents' }), exact: true }
       ]
     })
-    return { bc, drawer, links, period, loading }
+
+    return { period, loading, drawer, links, bc }
   }
 })
 </script>

@@ -44,7 +44,7 @@ import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
 import { AddPeriodMutationPayload, ProjectType } from '~/types/graphql'
-import addPeriod from '~/gql/dcis/mutations/project/add_period.graphql'
+import addPeriod from '~/gql/dcis/mutations/period/add_period.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddPeriodMutationResult = { data: { addPeriod: AddPeriodMutationPayload } }

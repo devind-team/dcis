@@ -1,5 +1,5 @@
 <template lang="pug">
-  left-navigator-container(@update-drawer="$emit('update-drawer')" :bread-crumbs="breadCrumbs")
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
     template(#header) {{ t('dcis.documents.name') }}
       template(v-if="period.canAddDocument")
         v-spacer
@@ -37,16 +37,14 @@ import type { PropType } from '#app'
 import { defineComponent, toRef, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useI18n } from '~/composables'
+import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   DocumentType,
   PeriodType,
-  DocumentsQuery,
-  DocumentsQueryVariables,
   ChangeDocumentCommentMutation,
   ChangeDocumentCommentMutationVariables
 } from '~/types/graphql'
-import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
@@ -77,10 +75,7 @@ export default defineComponent({
       update,
       addUpdate,
       changeUpdate
-    } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
-      document: documentsQuery,
-      variables: () => ({ periodId: route.params.periodId })
-    })
+    } = useDocumentsQuery(route.params.periodId)
 
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
       if (!result.data.addDocument.errors.length) {

@@ -7,16 +7,17 @@ from devind_dictionaries.models import Department
 from devind_helpers.permissions import BasePermission
 from django.contrib.contenttypes.models import ContentType
 
-from apps.dcis.models import Document, Period, Project, RowDimension, ColumnDimension, Sheet, Cell
+from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet
 from apps.dcis.permissions.document_permissions import (
+    AddChildRowDimension,
     AddDocument,
     ChangeDocument,
+    ChangeValue,
+    ChangeValueBase,
+    DeleteChildRowDimension,
     DeleteDocument,
     ViewDocument,
-    AddChildRowDimension,
-    DeleteChildRowDimension
 )
-from ...permissions import ChangeValue
 from .common import PermissionsTestCase
 
 
@@ -69,7 +70,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             dynamic=True,
         )
         self.column_dimensions = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 6)]
-        self.not_editable_cell_obj = ChangeValue.Obj(
+        self.not_editable_cell_obj = ChangeValueBase.Obj(
             document=self.user_document,
             cell=Cell.objects.create(
                 row=self.row_dimension,
@@ -77,7 +78,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 editable=False,
             ),
         )
-        self.formula_cell_obj = ChangeValue.Obj(
+        self.formula_cell_obj = ChangeValueBase.Obj(
             document=self.user_document,
             cell=Cell.objects.create(
                 row=self.row_dimension,
@@ -85,15 +86,15 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 formula='0',
             ),
         )
-        self.cell_obj = ChangeValue.Obj(
+        self.cell_obj = ChangeValueBase.Obj(
             document=self.document,
             cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[2]),
         )
-        self.child_cell_obj = ChangeValue.Obj(
+        self.child_cell_obj = ChangeValueBase.Obj(
             document=self.user_document,
             cell=Cell.objects.create(row=self.document_row_dimension_child, column=self.column_dimensions[3])
         )
-        self.user_cell_obj = ChangeValue.Obj(
+        self.user_cell_obj = ChangeValueBase.Obj(
             document=self.user_document,
             cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[4]),
         )

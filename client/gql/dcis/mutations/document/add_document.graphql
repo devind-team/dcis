@@ -17,6 +17,7 @@ mutation AddDocument($comment: String!, $periodId: Int!, $statusId: Int!, $docum
     }
     document {
       ...DocumentFields
+      canChange
       lastStatus {
         id
         comment

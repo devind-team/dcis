@@ -10,7 +10,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Document, DocumentStatus
+from apps.dcis.models import Document, DocumentStatus, Status
 from apps.dcis.permissions import ViewDocument
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, StatusType
 from apps.dcis.services.document_services import get_user_documents
@@ -48,6 +48,11 @@ class DocumentQueries(graphene.ObjectType):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
         return document
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_statuses(root, info: ResolveInfo) -> QuerySet[Status]:
+        return Status.objects.all()
 
     @staticmethod
     @permission_classes((IsAuthenticated, ViewDocument,))

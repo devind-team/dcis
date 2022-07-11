@@ -24,7 +24,12 @@ export default defineComponent({
 
     const route = useRoute()
 
-    const { data: project, loading, update, changeUpdate } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
+    const {
+      data: project,
+      loading,
+      update,
+      changeUpdate
+    } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
       document: projectQuery,
       variables: () => ({
         projectId: route.params.projectId
@@ -64,7 +69,7 @@ export default defineComponent({
       ]
     })
 
-    return { bc, drawer, links, project, loading }
+    return { project, loading, drawer, links, bc }
   }
 })
 </script>

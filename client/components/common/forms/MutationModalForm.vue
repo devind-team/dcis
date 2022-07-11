@@ -7,6 +7,7 @@
       v-bind="$attrs"
       :mutation-name="mutationName"
       :errors-in-alert="errorsInAlert"
+      :show-success="showSuccess"
       :header="header"
       :subheader="subheader"
       :button-text="buttonText"
@@ -52,9 +53,10 @@ export default defineComponent({
   components: { MutationForm },
   inheritAttrs: false,
   props: {
-    mutationName: { type: String, required: true },
+    mutationName: { type: [String, Array], required: true },
     successClose: { type: Boolean, default: true },
     errorsInAlert: { type: Boolean, default: false },
+    showSuccess: { type: Boolean, default: true },
     fullscreen: { type: Boolean, default: false },
     persistent: { type: Boolean, default: false },
     canMinimize: { type: Boolean, default: false },
@@ -75,7 +77,12 @@ export default defineComponent({
     const mutationListeners: ComputedRef = computed(() => (
       Object.assign({}, vm.$listeners, {
         done (result: any) {
-          const { success } = result.data[props.mutationName]
+          const mutationNames = (
+            Array.isArray(props.mutationName)
+              ? props.mutationName
+              : [props.mutationName]
+          ) as string[]
+          const success = mutationNames.every((mutationName: string) => result.data[mutationName].success)
           if (success && props.successClose) {
             close()
           }

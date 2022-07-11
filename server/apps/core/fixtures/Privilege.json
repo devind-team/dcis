@@ -1,0 +1,92 @@
+[
+  {
+    "model": "dcis.Privilege",
+    "pk": 1,
+    "fields": {
+      "name": "Изменение периода сбора",
+      "key": "change_period",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 2,
+    "fields": {
+      "name": "Изменение дивизионов периода сбора",
+      "key": "change_divisions",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 3,
+    "fields": {
+      "name": "Изменение пользователей периода сбора",
+      "key": "change_users",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 4,
+    "fields": {
+      "name": "Изменение листа",
+      "key": "change_sheet",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 5,
+    "fields": {
+      "name": "Добавление строки документа",
+      "key": "add_rowdimension",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 6,
+    "fields": {
+      "name": "Удаление строки документа",
+      "key": "delete_rowdimension",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 7,
+    "fields": {
+      "name": "Добавление нового документа",
+      "key": "add_document",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 8,
+    "fields": {
+      "name": "Просмотр документа",
+      "key": "view_document",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 9,
+    "fields": {
+      "name": "Удаление документа",
+      "key": "delete_document",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 10,
+    "fields": {
+      "name": "Изменение значения ячейки документа",
+      "key": "change_value",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  }
+]

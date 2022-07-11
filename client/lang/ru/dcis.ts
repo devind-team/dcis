@@ -87,7 +87,7 @@ export default {
     deleteProject: {
       header: 'Удаление проекта',
       warning: 'Проект нельзя восстановить.',
-      deleteItemName: 'проект',
+      itemName: 'проект',
       delete: '@:delete'
     }
   },
@@ -101,8 +101,14 @@ export default {
     links: {
       documents: 'Документы',
       divisions: 'Дивизионы',
+      groups: 'Группы',
       users: 'Пользователи',
       settings: '@:settings'
+    },
+    statuses: {
+      preparation: 'Подготовка',
+      open: 'Открыто',
+      close: 'Закрыто'
     },
     addPeriod: {
       buttonText: 'Добавить период',
@@ -111,78 +117,97 @@ export default {
       file: 'Файл с формой сбора',
       multiple: 'Множественное заполнение'
     },
+    changePeriod: {
+      header: 'Настройки периода',
+      name: 'Название периода',
+      status: 'Статус проекта',
+      start: 'Дата начала периода',
+      expiration: 'Дата окончания периода',
+      multiple: 'Множественное заполнение',
+      privately: 'Приватность полей',
+      save: '@:save'
+    },
+    deletePeriod: {
+      header: 'Удаление периода',
+      warning: 'Период нельзя восстановить.',
+      itemName: 'период',
+      delete: '@:delete'
+    },
     divisions: {
-      header: 'Дивизионы',
-      changeForm: {
-        header: 'Изменение дивизионов',
-        divisionName: 'Название дивизиона',
-        buttonText: '@:change'
+      name: 'Дивизионы',
+      addDivisions: {
+        buttonText: 'Добавить дивизионы',
+        header: 'Добавление дивизионов',
+        name: '@:name'
       },
-      add: 'Добавить дивизионы',
-      id: 'Идентификатор',
-      action: 'Действия',
-      createdAt: 'Дата создания',
-      shownOf: 'Показано записей:'
+      tableHeaders: {
+        name: '@:name',
+        actions: '@:actions'
+      },
+      deleteDivision: {
+        tooltip: '@:delete',
+        itemName: 'дивизион'
+      }
     },
-    header: 'Настройки периода',
-    status: 'Статус проекта',
-    multiple: 'Множественное заполнение',
-    privately: 'Приватность полей',
-    start: 'Дата начала периода',
-    expiration: 'Дата окончания периода',
-    deleteItemName: 'период',
-    actions: {
-      addGroup: 'Добавить группу',
-      delete: '@:delete',
-      deleteGroup: 'Удалить группу',
-      copyGroups: 'Копировать из сбора',
-      save: '@:save',
-      deleteItemName: 'период'
+    groups: {
+      name: 'Группы',
+      addGroup: {
+        buttonText: 'Добавить группу',
+        header: 'Добавление группы',
+        name: 'Название группы'
+      },
+      copyGroups: {
+        buttonText: 'Импортировать группы',
+        header: 'Импорт групп из другого периода',
+        period: 'Период',
+        groups: 'Группы'
+      },
+      deleteGroup: {
+        tooltip: '@:delete',
+        itemName: 'группу'
+      },
+      changePrivileges: {
+        buttonText: 'Изменить привилегии',
+        tableHeaders: {
+          name: 'Название привилегии',
+          key: 'Ключ'
+        }
+      }
     },
-    addPeriodGroup: {
-      header: 'Добавление группы периода',
-      name: 'Название группы периода',
-      groups: 'Пользователи и привилегии из другой группы',
-      buttonText: '@:add'
-    },
-    copyPeriodGroups: {
-      header: 'Импорт групп из сбора',
-      name: 'Название группы периода',
-      groups: 'Группы',
-      period: 'Период',
-      buttonText: '@:add'
-    },
-    changePeriodUsers: {
-      header: 'Добавление пользователей',
-      buttonText: '@:add',
-      addUsers: 'Добавить пользователей',
-      avatar: 'Аватар',
-      name: 'ФИО',
-      users: 'Пользователи',
-      jobPost: 'Должность',
-      division: 'Объект сбора'
-    },
-    changePrivileges: {
-      groupHeader: 'Изменениe привилегий',
-      userHeader: 'Добавление привилегий пользователю',
-      buttonChangeText: '@:change',
-      buttonAddText: '@:add',
-      change: 'Изменить привилегии',
-      add: 'Добавить привилегии',
-      deleteUser: 'Удалить из группы',
-      name: 'Описание привилегии',
-      privileges: 'Привилегии пользователя',
-      key: 'Ключ',
-      createdAt: 'Дата создания',
-      alert: 'Не заданы привилегии сбора или группы'
-    },
-    statuses: {
-      open: 'Открыто',
-      close: 'Закрыто',
-      preparation: 'Подготовка'
-    },
-    delete: 'Удаление периода',
-    deleteWarning: 'Период нельзя восстановить.'
+    users: {
+      name: 'Пользователи',
+      tableHeaders: {
+        avatar: 'Аватар',
+        fullname: 'ФИО',
+        username: 'Логин',
+        email: 'Email',
+        actions: 'Действия'
+      },
+      addUser: {
+        buttonText: 'Добавить пользователя',
+        header: 'Добавление пользователя',
+        user: 'Пользователь',
+        groups: 'Группы',
+        privileges: 'Привилегии',
+        userExistWarning: 'Пользователь уже состоит в периоде'
+      },
+      changeGroups: {
+        buttonText: 'Изменить группы',
+        header: 'Изменение групп пользователя',
+        tooltip: '@:dcis.periods.users.changeGroups.buttonText',
+        tableHeaders: {
+          name: 'Название группы'
+        }
+      },
+      changePrivileges: {
+        buttonText: 'Изменить привилегии',
+        header: 'Изменение привилегий пользователя',
+        tooltip: '@:dcis.periods.users.changePrivileges.buttonText',
+        tableHeaders: {
+          name: 'Название привилегии'
+        }
+      }
+    }
   },
   documents: {
     name: 'Документы',

@@ -1,138 +1,175 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc"  @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.divisions.header') }}
-    change-divisions(
-      :period="period"
-      :divisions="filterDivisions"
-      :loading="loading"
-      :update="changeDivisionsUpdate"
-    )
-      template(#activator="{ on }")
-        v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.add') }}
+  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+    template(#header) {{ $t('dcis.periods.divisions.name') }}
+      template(v-if="period.canChangeDivisions")
+        v-spacer
+        add-period-divisions(
+          :period="period"
+          :divisions="filterDivisions"
+          :loading="loading"
+          :update="addDivisionsUpdate"
+        )
+          template(#activator="{ on }")
+            v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.addDivisions.buttonText') }}
     v-row(align="center")
       v-col(cols="12" md="8")
         v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right.pr-5(cols="12" md="4") {{ $t('dcis.periods.divisions.shownOf') }} {{ items.length }}
+      v-col.text-right.pr-5(
+        cols="12"
+        md="4"
+      ) {{ $t('shownOf', { count: divisionsCount, totalCount: period.divisions.length }) }}
     v-card(flat)
       v-card-text
         v-data-table(
           :headers="headers"
-          :items="items"
-          :search.sync="search"
+          :items="period.divisions"
+          :search="search"
           :loading="loading"
           disable-pagination
           hide-default-footer
+          @pagination="pagination"
         )
-          template(#item.action="{ item }")
-            a(@click="deleteDivisionMutate(item.id)" style="color: #FF5252") {{ $t('dcis.periods.actions.delete') }}
+          template(#item.actions="{ item }")
+            delete-menu(
+              :item-name="String($t('dcis.periods.divisions.deleteDivision.itemName'))"
+              @confirm="deleteDivision({ periodId: period.id, divisionId: item.id })"
+            )
+              template(#default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-btn(v-on="{ ...onMenu, ...onTooltip }" color="error" icon)
+                      v-icon mdi-delete
+                  span {{ $t('dcis.periods.divisions.deleteDivision.tooltip') }}
 </template>
 
 <script lang="ts">
-import type { ComputedRef, PropType } from '#app'
-import { computed, defineComponent, inject } from '#app'
+import type { PropType } from '#app'
+import { computed, defineComponent, inject, ref } from '#app'
 import { DataProxy } from 'apollo-cache'
-import { DataTableHeader } from 'vuetify'
+import { DataPagination, DataTableHeader } from 'vuetify'
 import { useMutation } from '@vue/apollo-composable'
 import {
+  PeriodType,
+  PeriodQuery,
   DeleteDivisionMutation,
   DeleteDivisionMutationVariables,
-  DeleteDivisionsMutationPayload,
-  DivisionsQuery,
-  DivisionsQueryVariables,
-  PeriodType
+  DeleteDivisionMutationPayload,
+  ProjectDivisionsQuery,
+  ProjectDivisionsQueryVariables, DivisionModelType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useCommonQuery, useDebounceSearch, useI18n } from '~/composables'
+import { UpdateType, useCommonQuery, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import ChangeDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/ChangeDivisions.vue'
-import divisionsQuery from '~/gql/dcis/queries/divisions.graphql'
-import deleteDivision from '~/gql/dcis/mutations/project/delete_division.graphql'
+import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
+import divisionsQuery from '~/gql/dcis/queries/project_divisions.graphql'
+import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
 
-export type DeleteDivisionMutationResult = { data: { deleteDivision: DeleteDivisionsMutationPayload } }
+export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, ChangeDivisions },
+  components: { LeftNavigatorContainer, AddPeriodDivisions, DeleteMenu },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
   setup (props) {
-    const { localePath } = useI18n()
-    const { search } = useDebounceSearch()
+    const { t, localePath } = useI18n()
 
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const search = ref<string>('')
+    const divisionsCount = ref<number>(props.period.divisions.length)
+    const pagination = (pagination: DataPagination) => {
+      divisionsCount.value = pagination.itemsLength
+    }
+
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
-        text: 'Настройка объектов сбора',
+        text: t('dcis.periods.divisions.name') as string,
         to: localePath({ name: 'dcis-periods-periodId-divisions' }),
         exact: true
       }
     ]))
-    const { t } = useI18n()
-    const headers: DataTableHeader[] = [
-      { text: t('dcis.periods.divisions.id') as string, value: 'id', width: '10vw' },
-      { text: t('dcis.periods.divisions.name') as string, value: 'name' },
-      { text: t('dcis.periods.divisions.action') as string, value: 'action', width: '10vw' }
-    ]
-    const { mutate: DeleteDivisionMutation } = useMutation<DeleteDivisionMutation, DeleteDivisionMutationVariables>(
-      deleteDivision,
+
+    const headers = computed(() => {
+      const result: DataTableHeader[] = [
+        {
+          text: t('dcis.periods.divisions.tableHeaders.name') as string,
+          value: 'name'
+        }
+      ]
+      if (props.period.canChangeDivisions) {
+        result.push({
+          text: t('dcis.periods.divisions.tableHeaders.actions') as string,
+          value: 'actions',
+          align: 'center',
+          sortable: false,
+          filterable: false
+        })
+      }
+      return result
+    })
+
+    const { data: projectDivisions, loading } = useCommonQuery<
+      ProjectDivisionsQuery,
+      ProjectDivisionsQueryVariables
+    >({
+      document: divisionsQuery,
+      variables: { projectId: props.period.project.id }
+    })
+
+    const filterDivisions = computed<DivisionModelType[]>(() => {
+      if (projectDivisions.value) {
+        return projectDivisions.value.filter(division =>
+          !props.period.divisions.map(periodDivision => periodDivision.id).includes(division.id))
+      }
+      return []
+    })
+
+    const periodUpdate: UpdateType<PeriodQuery> = inject('periodUpdate')
+
+    const addDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => periodUpdate(
+      cache,
+      result,
+      (dataCache, { data: { addDivisions: { success, divisions } } }: ChangeDivisionsMutationResult) => {
+        if (success) {
+          dataCache.period.divisions = (
+            [...dataCache.period.divisions, ...divisions] as Required<DivisionModelType>[]
+          ).sort((d1: DivisionModelType, d2: DivisionModelType) => d1.name.localeCompare(d2.name))
+        }
+        return dataCache
+      })
+
+    const { mutate: deleteDivision } = useMutation<
+      DeleteDivisionMutation,
+      DeleteDivisionMutationVariables
+    >(
+      deleteDivisionMutation,
       {
         update: (cache, result) => periodUpdate(
-          cache, result, (dataCache, { data: { deleteDivision: { errors, deletedId } } }: DeleteDivisionMutationResult
-          ) => {
-            if (!errors.length) {
-              dataCache.period.divisions = dataCache.period.divisions.filter((e: any) => e.id !== deletedId)
+          cache,
+          result,
+          (dataCache, { data: { deleteDivision: { success, deleteId } } }: DeleteDivisionMutationResult) => {
+            if (success) {
+              dataCache.period.divisions = dataCache.period.divisions
+                .filter((division: DivisionModelType) => String(division.id) !== deleteId)
             }
             return dataCache
-          })
-      })
-    const deleteDivisionMutate = (divisionId: string): void => {
-      DeleteDivisionMutation({ id: props.period.divisions.find(e => e.objectId === Number(divisionId)).id })
-    }
-    const { data: divisions, loading } = useCommonQuery<DivisionsQuery, DivisionsQueryVariables>({
-      document: divisionsQuery,
-      variables: { periodId: props.period.id }
-    })
-    const items = computed<any>(() => {
-      if (divisions.value) {
-        return divisions.value.filter(division =>
-          props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
-      } else {
-        return []
-      }
-    })
-    const filterDivisions = computed<any>(() => {
-      if (divisions.value) {
-        return divisions.value.filter(division =>
-          !props.period.divisions.map(periodDivision => periodDivision.objectId).includes(Number(division.id)))
-      } else {
-        return []
-      }
-    })
-    const periodUpdate: any = inject('periodUpdate')
-    const changeDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
-      periodUpdate(
-        cache,
-        result,
-        (dataCache, { data: { changeDivisions: { errors, divisions } } }: ChangeDivisionsMutationResult
-        ) => {
-          if (!errors.length) {
-            dataCache.period.divisions = divisions
           }
-          return dataCache
-        })
-    }
+        )
+      })
+
     return {
+      search,
+      divisionsCount,
+      pagination,
       bc,
       headers,
-      changeDivisionsUpdate,
-      filterDivisions,
       loading,
-      divisions,
-      search,
-      items,
-      deleteDivisionMutate
+      filterDivisions,
+      addDivisionsUpdate,
+      deleteDivision
     }
   }
 })
