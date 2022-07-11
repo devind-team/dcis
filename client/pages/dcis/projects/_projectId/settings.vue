@@ -64,7 +64,6 @@
                     v-checkbox(v-model="archive" :label="t('dcis.projects.changeProject.archive')")
               v-card-actions
                 v-btn(
-                  v-if="project.user && project.user.id === user.id || hasPerm('dcis.change_project')"
                   :disabled="invalid"
                   :loading="loading"
                   type="submit"
@@ -84,9 +83,8 @@
               tag
             )
               delete-menu(
-                v-if="project.user && project.user.id === user.id || hasPerm('dcis.delete_project')"
                 v-slot="{ on }"
-                :itemName="String(t('dcis.projects.deleteProject.deleteItemName'))"
+                :itemName="String(t('dcis.projects.deleteProject.itemName'))"
                 @confirm="mutate"
               )
                 v-btn(v-on="on" color="error") {{ t('dcis.projects.deleteProject.delete') }}
@@ -95,19 +93,16 @@
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { promiseTimeout } from '@vueuse/core'
-import type { ComputedRef, PropType, Ref } from '#app'
-import { computed, defineComponent, toRefs, useRoute, useRouter, ref, inject } from '#app'
+import type { PropType } from '#app'
+import { computed, defineComponent, useRoute, useRouter, ref, inject, useNuxt2Meta } from '#app'
 import {
-  ChangeProjectMutationPayload,
-  DeleteProjectMutationPayload,
   ProjectType,
-  UserType
+  ChangeProjectMutationPayload,
+  DeleteProjectMutationPayload
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import { useI18n } from '~/composables'
-import type { HasPermissionFnType } from '~/stores'
-import { useAuthStore } from '~/stores'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 type ChangeProjectResultMutation = { data: { changeProject: ChangeProjectMutationPayload } }
@@ -122,6 +117,8 @@ export default defineComponent({
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
   setup (props) {
+    useNuxt2Meta({ title: props.project.name })
+
     const { t, localePath } = useI18n()
 
     const router = useRouter()
@@ -131,12 +128,9 @@ export default defineComponent({
       router.push(localePath({ name: 'dcis-projects-projectId-periods' }))
     }
 
-    const authStore = useAuthStore()
-    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
-
     const changeUpdate: ChangeProjectUpdateType = inject<ChangeProjectUpdateType>('changeUpdate')
 
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
         text: t('dcis.projects.links.settings') as string,
@@ -144,12 +138,12 @@ export default defineComponent({
         exact: true
       }
     ]))
-    const name: Ref<string> = ref<string>(props.project.name)
-    const short: Ref<string> = ref<string>(props.project.short)
-    const description: Ref<string> = ref<string>(props.project.description)
-    const visibility: Ref<boolean> = ref<boolean>(props.project.visibility)
-    const archive: Ref<boolean> = ref<boolean>(props.project.archive)
-    const successUpdate: Ref<boolean> = ref<boolean>(false)
+    const name = ref<string>(props.project.name)
+    const short = ref<string>(props.project.short)
+    const description = ref<string>(props.project.description)
+    const visibility = ref<boolean>(props.project.visibility)
+    const archive = ref<boolean>(props.project.archive)
+    const successUpdate = ref<boolean>(false)
 
     const changeProjectUpdate = (cache: DataProxy, result: ChangeProjectResultMutation) => {
       const { success } = result.data.changeProject
@@ -175,8 +169,6 @@ export default defineComponent({
       visibility,
       archive,
       successUpdate,
-      user,
-      hasPerm,
       changeProjectUpdate,
       deleteProjectDone
     }

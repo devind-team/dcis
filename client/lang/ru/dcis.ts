@@ -87,7 +87,7 @@ export default {
     deleteProject: {
       header: 'Удаление проекта',
       warning: 'Проект нельзя восстановить.',
-      deleteItemName: 'проект',
+      itemName: 'проект',
       delete: '@:delete'
     }
   },
@@ -111,6 +111,27 @@ export default {
       name: 'Название периода',
       file: 'Файл с формой сбора',
       multiple: 'Множественное заполнение'
+    },
+    changePeriod: {
+      header: 'Настройки периода',
+      name: 'Название периода',
+      status: 'Статус проекта',
+      statusItems: {
+        preparation: 'Подготовка',
+        open: 'Заполнение',
+        close: 'Сбор закрыт'
+      },
+      start: 'Дата начала периода',
+      expiration: 'Дата окончания периода',
+      multiple: 'Множественное заполнение',
+      privately: 'Приватность полей',
+      save: '@:save'
+    },
+    deletePeriod: {
+      header: 'Удаление периода',
+      warning: 'Период нельзя восстановить.',
+      itemName: 'период',
+      delete: '@:delete'
     },
     divisions: {
       name: 'Дивизионы',
@@ -186,37 +207,7 @@ export default {
           name: 'Название привилегии'
         }
       }
-    },
-    header: 'Настройки периода',
-    status: 'Статус проекта',
-    multiple: 'Множественное заполнение',
-    privately: 'Приватность полей',
-    start: 'Дата начала периода',
-    expiration: 'Дата окончания периода',
-    deleteItemName: 'период',
-    actions: {
-      delete: '@:delete',
-      deleteGroup: 'Удалить группу',
-      save: '@:save',
-      deleteItemName: 'период'
-    },
-    changePeriodUsers: {
-      header: 'Добавление пользователей',
-      buttonText: '@:add',
-      addUsers: 'Добавить пользователей',
-      avatar: 'Аватар',
-      name: 'ФИО',
-      users: 'Пользователи',
-      jobPost: 'Должность',
-      division: 'Объект сбора'
-    },
-    statuses: {
-      open: 'Открыто',
-      close: 'Закрыто',
-      preparation: 'Подготовка'
-    },
-    delete: 'Удаление периода',
-    deleteWarning: 'Период нельзя восстановить.'
+    }
   },
   documents: {
     name: 'Документы',

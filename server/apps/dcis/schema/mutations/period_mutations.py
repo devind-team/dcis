@@ -17,7 +17,14 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
-from apps.dcis.permissions import AddPeriod, ChangePeriodDivisions, ChangePeriodGroups, ChangePeriodUsers, ViewPeriod
+from apps.dcis.permissions import (
+    AddPeriod,
+    ChangePeriodDivisions,
+    ChangePeriodGroups,
+    ChangePeriodSettings,
+    ChangePeriodUsers,
+    ViewPeriod,
+)
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
 from apps.dcis.services.divisions_services import get_divisions
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
@@ -74,6 +81,11 @@ class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     period = graphene.Field(PeriodType, description='Измененный период')
 
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Period) -> None:
+        if not ChangePeriodSettings.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
+
 
 class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
     """Мутация на удаление периода."""
@@ -81,7 +93,11 @@ class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
     class Meta:
         model = Period
         login_required = True
-        permissions = ('dcis.delete_period',)
+
+    @classmethod
+    def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: Period) -> None:
+        if not ChangePeriodSettings.has_object_permission(info.context, obj):
+            raise PermissionDenied('Ошибка доступа')
 
 
 class AddDivisionsMutation(BaseMutation):
