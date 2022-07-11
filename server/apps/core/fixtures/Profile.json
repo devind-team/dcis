@@ -1,0 +1,71 @@
+[
+  {
+    "model": "devind_core.Profile",
+    "pk": 1,
+    "fields": {
+      "name": "Общая информация",
+      "code": "general",
+      "position": 0
+    }
+  },
+  {
+    "model": "devind_core.Profile",
+    "pk": 2,
+    "fields": {
+      "name": "Идентификатор uuid4",
+      "code": "uuid",
+      "position": 0,
+      "parent": 1
+    }
+  },
+  {
+    "model": "devind_core.Profile",
+    "pk": 3,
+    "fields": {
+      "name": "Занимаемая должность",
+      "code": "post",
+      "position": 1,
+      "parent": 1
+    }
+  },
+  {
+    "model": "devind_core.Profile",
+    "pk": 4,
+    "fields": {
+       "name": "Внешний телефон",
+      "code": "external_phone",
+      "position": 2,
+      "parent": 1
+    }
+  },
+  {
+    "model": "devind_core.Profile",
+    "pk": 5,
+    "fields": {
+      "name": "Внутренний телефон",
+      "code": "internal_phone",
+      "position": 3,
+      "parent": 1
+    }
+  },
+  {
+    "model": "devind_core.Profile",
+    "pk": 6,
+    "fields": {
+      "name": "Адрес",
+      "code": "address",
+      "position": 4,
+      "parent": 1
+    }
+  },
+  {
+    "model": "devind_core.Profile",
+    "pk": 7,
+    "fields": {
+      "name": "Аудитория",
+      "code": "room",
+      "position": 5,
+      "parent": 1
+    }
+  }
+]
