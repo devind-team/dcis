@@ -148,6 +148,4 @@ class PeriodQueries(graphene.ObjectType):
             column_id=column_id,
             row_id=row_id
         ).first()
-        if value is not None:
-            return get_file_value_files(value)
-        return []
+        return get_file_value_files(value) if value is not None else []

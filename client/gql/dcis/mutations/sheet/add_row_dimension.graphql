@@ -1,7 +1,7 @@
 #import "../../fragments/row_dimension_fields.graphql"
 
 mutation AddRowDimension(
-  $sheetId: Int!,
+  $sheetId: ID!,
   $documentId: ID,
   $parentId: ID,
   $index: Int!,

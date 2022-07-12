@@ -109,6 +109,14 @@ class FormulaContainerCache:
     def sheet_id(self, value: int | None):
         self.sheet_dependency.sheet_id = value
 
+    @property
+    def dependency(self) -> dict[str, dict[str, int]]:
+        return self.sheet_dependency.dependency
+
+    @property
+    def inversion(self) -> dict[str, list[str]]:
+        return self.sheet_dependency.inversion
+
     def recalculate_dependency(self, coordinate: str) -> tuple[list[str], list[str]]:
         """Рассчитываем значения связанных ячеек.
 

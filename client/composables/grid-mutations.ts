@@ -463,7 +463,7 @@ export function updateRowDimension (
 
 export function useChangeCellsOptionMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<number>,
+  sheetId: Ref<string>,
   updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<
@@ -478,7 +478,7 @@ export function useChangeCellsOptionMutation (
           }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
         ) => {
           for (const option of changedOptions) {
-            const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === parseInt(option.cellId))
+            const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === option.cellId)
             if (cell.kind === 'fl' && option.field === 'kind' && option.value !== 'fl') {
               try {
                 const variables: ValueFilesQueryVariables = {
@@ -522,7 +522,7 @@ export function useChangeCellsOptionMutation (
 
 export const useChangeValueMutation = (
   documentId: Ref<string | null>,
-  sheetId: Ref<number>,
+  sheetId: Ref<string>,
   cell: Ref<CellType>,
   client: ApolloClient<SheetQuery>
 ) => {
@@ -532,9 +532,9 @@ export const useChangeValueMutation = (
   >(changeValueMutation)
   return async (value: string) => {
     await mutate({
-      documentId: documentId.value,
-      sheetId: sheetId.value,
-      cellId: cell.value.id,
+      documentId: unref(documentId),
+      sheetId: unref(sheetId),
+      cellId: unref(cell.value).id,
       value
     }, {
       update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
@@ -545,27 +545,27 @@ export const useChangeValueMutation = (
             a[v.sheetId].push(v)
             return a
           }, {})
-          try {
-            // Читаем все sheet для которых пришли ответные данные изменение ячеек
-            for (const [sid, vs] of Object.entries(sheetValue)) {
+          // Читаем все sheet для которых пришли ответные данные изменение ячеек
+          for (const [sid, vs] of Object.entries(sheetValue)) {
+            try {
               const data = client.readQuery<SheetQuery, SheetQueryVariables>({
                 query: sheetQuery,
                 variables: {
                   documentId: unref(documentId),
-                  sheetId: +sid
+                  sheetId: sid
                 }
               })
               updateValues(data, vs, updatedAt)
               client.writeQuery<SheetQuery, SheetQueryVariables>({
                 query: sheetQuery,
                 variables: {
-                  documentId: unref(documentId.value),
-                  sheetId: +sid
+                  documentId: unref(documentId),
+                  sheetId: sid
                 },
                 data
               })
-            }
-          } catch { }
+            } catch { }
+          }
         }
       },
       optimisticResponse: {
@@ -595,7 +595,7 @@ export const useChangeValueMutation = (
 
 export function useChangeFileValueMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<number>,
+  sheetId: Ref<string>,
   cell: Ref<CellType>,
   updateSheet: Ref<UpdateType<SheetQuery>>,
   updateFiles: UpdateType<ValueFilesQuery>
@@ -606,8 +606,8 @@ export function useChangeFileValueMutation (
   >(changeFileValueMutation)
   return async function (value: string, remainingFiles: string[], newFiles: File[]) {
     await mutate({
-      documentId: documentId.value,
-      sheetId: sheetId.value,
+      documentId: unref(documentId),
+      sheetId: unref(sheetId),
       columnId: cell.value.columnId,
       rowId: cell.value.rowId,
       value,
@@ -668,7 +668,7 @@ const updateValues = (data: SheetQuery, values: ValueType[], updatedAt: string):
 
 export function useUnloadFileValueArchiveMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<number>,
+  sheetId: Ref<string>,
   cell: Ref<CellType>
 ) {
   const { mutate } = useMutation<
@@ -676,12 +676,13 @@ export function useUnloadFileValueArchiveMutation (
     UnloadFileValueArchiveMutationVariables
   >(unloadFileValueArchiveMutation)
   return async function (): Promise<string> {
+    const { columnId, rowId, position } = unref(cell)
     const { data: { unloadFileValueArchive: { src } } } = await mutate({
-      documentId: documentId.value,
-      sheetId: sheetId.value,
-      columnId: cell.value.columnId,
-      rowId: cell.value.rowId,
-      name: cell.value.position
+      documentId: unref(documentId),
+      sheetId: unref(sheetId),
+      columnId,
+      rowId,
+      name: position
     })
     return src
   }
