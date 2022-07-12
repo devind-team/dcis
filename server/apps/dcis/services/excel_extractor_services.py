@@ -282,7 +282,9 @@ class ExcelExtractor:
             evaluator = Evaluator(evaluate_model)
             for cell in sheet.cells:
                 if cell.formula:
-                    cell.default = str(evaluator.evaluate(self.coordinate(sheet.name, cell.column_id, cell.row_id)))
+                    coordinate: str = self.coordinate(sheet.name, cell.column_id, cell.row_id)
+                    cell.default = str(evaluator.evaluate(coordinate))
+                    cells_values[coordinate] = cell.default
                     sheet.cache_container.add_formula(cell.coordinate, cell.formula)
         return sheets
 
