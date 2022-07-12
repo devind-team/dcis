@@ -1,24 +1,42 @@
 <template lang="pug">
-  mutation-modal-form(
-    :header="String($t('dcis.periods.addPeriod.header'))"
-    :subheader="project.name"
-    :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
-    :mutation="addPeriod"
-    :variables="{ name, file, projectId: project.id, multiple }"
-    :update="addPeriodUpdate"
-    mutation-name="addPeriod"
-    i18n-path="dcis.projects.addPeriod"
-    persistent
-    @close="close"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.name'))" rules="required|min:3|max:250")
-        v-text-field(v-model="name" :label="$t('dcis.periods.addPeriod.name')" :error-messages="errors" :success="valid" autofocus)
-      validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.periods.addPeriod.file'))" rules="required")
-        v-file-input(v-model="file" :label="$t('dcis.periods.addPeriod.file')" :error-messages="errors" :success="valid")
-      v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
+mutation-modal-form(
+  :header="String($t('dcis.periods.addPeriod.header'))"
+  :subheader="project.name"
+  :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
+  :mutation="addPeriod"
+  :variables="{ name, file, projectId: project.id, multiple }"
+  :update="addPeriodUpdate"
+  mutation-name="addPeriod"
+  i18n-path="dcis.projects.addPeriod"
+  @close="close"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.addPeriod.name'))"
+      rules="required|min:3|max:250"
+    )
+      v-text-field(
+        v-model="name"
+        :label="$t('dcis.periods.addPeriod.name')"
+        :error-messages="errors"
+        :success="valid"
+        autofocus
+      )
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.periods.addPeriod.file'))"
+      rules="required"
+    )
+      v-file-input(
+        v-model="file"
+        :label="$t('dcis.periods.addPeriod.file')"
+        :error-messages="errors"
+        :success="valid"
+      )
+    v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
 </template>
 
 <script lang="ts">
@@ -26,7 +44,7 @@ import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
 import { AddPeriodMutationPayload, ProjectType } from '~/types/graphql'
-import addPeriod from '~/gql/dcis/mutations/project/add_period.graphql'
+import addPeriod from '~/gql/dcis/mutations/period/add_period.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddPeriodMutationResult = { data: { addPeriod: AddPeriodMutationPayload } }

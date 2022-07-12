@@ -1,7 +1,7 @@
 <template lang="pug">
-  v-row
-    v-col.text-center
-      v-progress-circular(color="primary" size="50" indeterminate)
+v-row
+  v-col.text-center
+    v-progress-circular(color="primary" size="50" indeterminate)
 </template>
 
 <script lang="ts">

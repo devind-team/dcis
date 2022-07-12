@@ -1,0 +1,21 @@
+#import "../../fragments/value_fields.graphql"
+
+mutation ChangeValue($documentId: ID!, $sheetId: Int!, $cellId: Int!, $value: String!) {
+  changeValue(input: {
+    documentId: $documentId,
+    sheetId: $sheetId,
+    cellId: $cellId,
+    value: $value
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    values {
+      ...ValueFields
+    }
+    updatedAt
+  }
+}

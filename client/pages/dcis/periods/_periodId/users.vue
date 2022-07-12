@@ -1,202 +1,230 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ period.name }}
-    v-row
-      template(v-if="period.periodGroups.length")
-        v-col(cols="12" md="4" sm="4")
-          v-subheader Группы
-          v-list
-            v-list-item-group(v-model="selectGroup" color="primary")
-              v-list-item(
-                v-for="item in period.periodGroups"
-                :key="item.id"
-                :value="item"
-              )
-                v-list-item-content {{ item.name }}
-                delete-menu(@confirm="deletePeriodGroupMutate({ id: item.id }).then()")
-                  template(#default="{ on }")
-                    v-list-item-action(v-on="on")
-                      v-btn(icon)
-                        v-icon mdi-delete
-        v-divider(vertical)
-      v-col(v-bind="period.periodGroups.length ? { md: 8, sm: 6 } : { }" cols="12")
-        period-group-users(v-if="selectGroup" :period-group="selectGroup" :period="period" :update="deleteUserFromPeriodGroupUpdate")
-        v-row(v-else)
-          v-col
-            add-period-group(:period="period" :update="addPeriodGroupUpdate")
-              template(#activator="{ on }")
-                v-card.period-users-card-add(v-on="on" flat)
-                  v-icon(large) mdi-plus-circle-outline
-                  .title {{ $t('dcis.periods.actions.addGroup') }}
-          v-col
-            copy-period-groups(:period="period" active-query)
-              template(#activator="{ on }")
-                v-card.period-users-card-add(v-on="on" flat)
-                  v-icon(large) mdi-import
-                  .title {{ $t('dcis.periods.actions.copyGroups') }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.users.name') }}
+    template(v-if="period.canChangeUsers")
+      v-spacer
+      add-period-user(:period="period" :period-users="periodUsers" :update="addPeriodUserUpdate")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.users.addUser.buttonText') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(
+      cols="12"
+      md="4"
+    ) {{ $t('shownOf', { count: usersCount, totalCount: users.length }) }}
+  v-card(flat)
+    v-card-text
+      v-data-table(
+        :headers="headers"
+        :items="users"
+        :search="search"
+        :loading="loading"
+        disable-pagination
+        hide-default-footer
+        @pagination="pagination"
+      )
+        template(#item.avatar="{ item }")
+          avatar-dialog(:item="item")
+        template(#item.actions="{ item }")
+          change-user-period-groups(:period="period" :user="item" :update="changeUserPeriodGroupsUpdate")
+            template(#activator="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
+                    v-icon mdi-book-edit
+                span {{ $t('dcis.periods.users.changeGroups.tooltip') }}
+          change-user-period-privileges(:period="period" :user="item")
+            template(#activator="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" color="success" icon)
+                    v-icon mdi-clipboard-edit
+                span {{ $t('dcis.periods.users.changePrivileges.tooltip') }}
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
-import { useMutation } from '@vue/apollo-composable'
-import { ComputedRef, inject, PropType, ref, provide, computed, defineComponent, useNuxt2Meta } from '#app'
-import { useI18n } from '~/composables'
+import { DataTableHeader, DataPagination } from 'vuetify'
+import { PropType, ref } from '#app'
+import { UpdateType } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
-  PeriodGroupType,
+  UserType,
+  UserFieldsFragment,
   PeriodType,
-  DeletePeriodGroupMutation,
-  DeletePeriodGroupMutationVariables,
-  UserType
+  PeriodGroupType,
+  PeriodGroupFieldsFragment,
+  PeriodQuery,
+  PeriodUsersQuery,
+  PeriodQueryVariables
 } from '~/types/graphql'
-import deletePeriodGroup from '~/gql/dcis/mutations/project/delete_period_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import PeriodGroupUsers, { DeleteUserFromPeriodGroupMutationResult } from '~/components/dcis/periods/PeriodGroupUsers.vue'
-import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
-import AddPeriodGroup, { AddPeriodGroupMutationResult } from '~/components/dcis/periods/AddPeriodGroup.vue'
-import CopyPeriodGroups, { CopyPeriodGroupsMutationResult } from '~/components/dcis/periods/CopyPeriodGroups.vue'
-import { ChangePeriodGroupUsersMutationResult } from '~/components/dcis/periods/AddPeriodGroupUsers.vue'
-import { ChangePeriodGroupPrivilegesMutationResult } from '~~/components/dcis/periods/PeriodGroupPrivileges.vue'
+import AvatarDialog from '~/components/users/AvatarDialog.vue'
+import AddPeriodUser, {
+  AddPeriodUserMutationResult
+} from '~/components/dcis/periods/AddPeriodUser.vue'
+import ChangeUserPeriodGroups, {
+  ChangeUserPeriodGroupsMutationResult
+} from '~/components/dcis/periods/ChangeUserPeriodGroups.vue'
+import ChangeUserPeriodPrivileges from '~/components/dcis/periods/ChangeUserPeriodPrivileges.vue'
+import periodUsersQuery from '~/gql/dcis/queries/period_users.graphql'
 
-export type DeletePeriodGroupMutationResult = { data: DeletePeriodGroupMutation }
+type ExtendedUserType = UserFieldsFragment & { fullname: string }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, PeriodGroupUsers, AddPeriodGroup, CopyPeriodGroups, DeleteMenu },
-  middleware: 'auth',
+  components: {
+    LeftNavigatorContainer,
+    AvatarDialog,
+    AddPeriodUser,
+    ChangeUserPeriodGroups,
+    ChangeUserPeriodPrivileges
+  },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const { localePath } = useI18n()
-    useNuxt2Meta({ title: props.period.name })
+    const { t, localePath } = useI18n()
+    const { getUserFullName } = useFilters()
 
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
-      { text: 'Пользователи', to: localePath({ name: 'dcis-periods-periodId-users' }), exact: true }
+      {
+        text: t('dcis.periods.users.name') as string,
+        to: localePath({ name: 'dcis-periods-periodId-users' }),
+        exact: true
+      }
     ]))
-    const selectGroup = ref<PeriodGroupType | null | undefined>(null)
-    const periodUpdate: any = inject('periodUpdate')
 
-    /**
-     *  Обновление после добавления группы
-     * @param cache
-     * @param result
-     */
-    const addPeriodGroupUpdate = (cache: DataProxy, result: AddPeriodGroupMutationResult) => {
-      periodUpdate(cache, result, (dataCache, { data: { addPeriodGroup: { errors, periodGroup } } }: AddPeriodGroupMutationResult) => {
-        if (!errors.length) {
-          dataCache.period.periodGroups = [periodGroup, ...dataCache.period.periodGroups]
-        }
-        return dataCache
-      })
-    }
-
-    /**
-     * Обновление после добавления пользователей
-     * @param cache
-     * @param result
-     */
-    const changePeriodGroupUsersUpdate = (cache: DataProxy, result: ChangePeriodGroupUsersMutationResult) => {
-      periodUpdate(
-        cache, result, (dataCache, { data: { changePeriodGroupUsers: { errors, users } } }: ChangePeriodGroupUsersMutationResult
-        ) => {
-          if (!errors.length) {
-            dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id).users = users
-          }
-          return dataCache
+    const headers = computed<DataTableHeader[]>(() => {
+      const result: DataTableHeader[] = [
+        {
+          text: t('dcis.periods.users.tableHeaders.avatar') as string,
+          value: 'avatar',
+          align: 'center',
+          sortable: false,
+          filterable: false
+        },
+        { text: t('dcis.periods.users.tableHeaders.fullname') as string, value: 'fullname' },
+        { text: t('dcis.periods.users.tableHeaders.username') as string, value: 'username' },
+        { text: t('dcis.periods.users.tableHeaders.email') as string, value: 'email' }
+      ]
+      if (props.period.canChangeUsers) {
+        result.push({
+          text: t('dcis.periods.users.tableHeaders.actions') as string,
+          value: 'actions',
+          align: 'center',
+          sortable: false,
+          filterable: false
         })
-    }
-
-    /**
-     *  Обновление после добавления групп из другого сбора
-     * @param cache
-     * @param result
-     */
-    const copyPeriodGroupsUpdate = (cache: DataProxy, result: CopyPeriodGroupsMutationResult) => {
-      periodUpdate(
-        cache, result, (dataCache, { data: { copyPeriodGroups: { success, periodGroups } } }: CopyPeriodGroupsMutationResult
-        ) => {
-          if (success) {
-            dataCache.period.periodGroups.push(...periodGroups)
-          }
-          return dataCache
-        })
-    }
-
-    /**
-     * Обновление после изменения привилегий группы
-     * @param cache
-     * @param result
-     */
-    const changePeriodGroupPrivilegesUpdate = (cache: DataProxy, result: ChangePeriodGroupPrivilegesMutationResult) => {
-      periodUpdate(
-        cache, result, (dataCache, { data: { changePeriodGroupPrivileges: { errors, privileges } } }: ChangePeriodGroupPrivilegesMutationResult
-        ) => {
-          if (!errors.length) {
-            const periodGroup: any = dataCache.period.periodGroups.find((e: any) => e.id === selectGroup.value.id)
-            periodGroup.privileges = privileges
-          }
-          return dataCache
-        })
-    }
-
-    /**
-     * Обновление после удаления группы
-     */
-    const { mutate: deletePeriodGroupMutate } = useMutation<DeletePeriodGroupMutation, DeletePeriodGroupMutationVariables>(deletePeriodGroup, {
-      update: (cache, result) => periodUpdate(
-        cache,
-        result,
-        (dataCache, { data: { deletePeriodGroup: { errors, deletedId } } }: DeletePeriodGroupMutationResult) => {
-          if (!errors.length) {
-            dataCache.period.periodGroups = dataCache.period.periodGroups.filter((e: any) => e.id !== deletedId)
-            selectGroup.value = null
-          }
-          return dataCache
-        }
-      )
+      }
+      return result
     })
 
-    /**
-     * Обновление после удаления пользователя из группы
-     * @param cache
-     * @param result
-     */
-    const deleteUserFromPeriodGroupUpdate = (cache: DataProxy, result: DeleteUserFromPeriodGroupMutationResult) => {
+    const { data: periodUsers, loading, update: periodUsersUpdate } = useCommonQuery<
+      PeriodUsersQuery,
+      PeriodQueryVariables
+    >({
+      document: periodUsersQuery,
+      variables: () => ({
+        periodId: props.period.id
+      })
+    })
+    const users = computed<ExtendedUserType[]>(() =>
+      periodUsers.value
+        ? periodUsers.value.map(user => ({ ...user, fullname: getUserFullName(user as UserType) }))
+        : []
+    )
+
+    const search = ref<string>('')
+    const usersCount = ref<number>(0)
+    const pagination = (pagination: DataPagination) => {
+      usersCount.value = pagination.itemsLength
+    }
+
+    const periodUpdate: UpdateType<PeriodQuery> = inject('periodUpdate')
+
+    const changeUserPeriodGroupsUpdate = (
+      cache: DataProxy,
+      result: ChangeUserPeriodGroupsMutationResult
+    ) => {
       periodUpdate(
-        cache, result, (dataCache, { data: { deleteUserFromPeriodGroup: { errors, id } } }: DeleteUserFromPeriodGroupMutationResult
+        cache,
+        result,
+        (
+          dataCache,
+          { data: { changeUserPeriodGroups: { errors, user, periodGroups } } }: ChangeUserPeriodGroupsMutationResult
         ) => {
           if (!errors.length) {
-            const selectedPeriodGroup: any = dataCache.period.periodGroups.find((e: PeriodGroupType) => e.id === selectGroup.value.id)
-            selectedPeriodGroup.users = selectedPeriodGroup.users.filter((e: UserType) => e.id !== id)
+            for (const periodGroup of dataCache.period.periodGroups) {
+              const isUserPeriodGroup = !!periodGroups.find((group: PeriodGroupType) => group.id === periodGroup.id)
+              if (isUserPeriodGroup) {
+                if (!periodGroup.users.find((u: UserFieldsFragment) => u.id === user.id)) {
+                  periodGroup.users.push(user as UserFieldsFragment)
+                }
+              } else {
+                periodGroup.users = periodGroup.users.filter((u: UserFieldsFragment) => u.id !== user.id)
+              }
+            }
           }
           return dataCache
         })
+      return cache
     }
 
-    provide('periodGroupUsersUpdate', changePeriodGroupUsersUpdate)
-    provide('periodGroupPrivilegesUpdate', changePeriodGroupPrivilegesUpdate)
-    provide('copyPeriodGroupsUpdate', copyPeriodGroupsUpdate)
+    const addPeriodUserUpdate = (
+      cache: DataProxy,
+      result: AddPeriodUserMutationResult
+    ) => {
+      if (!result.data.changeUserPeriodGroups.errors.length && !result.data.changeUserPeriodPrivileges.errors.length) {
+        periodUsersUpdate(
+          cache,
+          result,
+          (
+            dataCache,
+            { data: { changeUserPeriodGroups: { user } } }
+          ) => {
+            dataCache.periodUsers.push(user as UserFieldsFragment)
+            dataCache.periodUsers.sort((u1: UserFieldsFragment, u2: UserFieldsFragment) =>
+              new Date(u2.createdAt).getTime() - new Date(u1.createdAt).getTime()
+            )
+            return dataCache
+          }
+        )
+        periodUpdate(
+          cache,
+          result,
+          (
+            dataCache,
+            { data: { changeUserPeriodGroups: { user, periodGroups } } }
+          ) => {
+            for (const userPeriodGroup of periodGroups) {
+              const periodGroup = dataCache.period.periodGroups.find((periodGroup: PeriodGroupFieldsFragment) =>
+                periodGroup.id === userPeriodGroup.id
+              )
+              periodGroup.users.push(user as UserFieldsFragment)
+            }
+            return dataCache
+          }
+        )
+      }
+      return cache
+    }
 
     return {
+      getUserFullName,
       bc,
-      selectGroup,
-      addPeriodGroupUpdate,
-      changePeriodGroupUsersUpdate,
-      changePeriodGroupPrivilegesUpdate,
-      deletePeriodGroupMutate,
-      deleteUserFromPeriodGroupUpdate
+      headers,
+      loading,
+      periodUsers,
+      users,
+      search,
+      usersCount,
+      pagination,
+      changeUserPeriodGroupsUpdate,
+      addPeriodUserUpdate
     }
   }
 })
 </script>
-
-<style lang="sass">
-.period-users-card-add
-  padding: 20px 0
-  border: 1px dashed lightgray !important
-  display: flex
-  text-align: center
-  flex-flow: column
-</style>

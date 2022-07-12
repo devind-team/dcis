@@ -1,12 +1,11 @@
 <template lang="pug">
-  div
-    left-navigator-driver(v-model="drawer" :items="links")
-    v-progress-circular(v-if="loading" color="primary" indeterminate)
-    nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :project="project")
+div
+  left-navigator-driver(v-model="drawer" :items="links")
+  v-progress-circular(v-if="loading" color="primary" indeterminate)
+  nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :project="project")
 </template>
 
 <script lang="ts">
-import type { Ref, ComputedRef } from '#app'
 import { computed, defineComponent, PropType, provide, ref, useRoute } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useCommonQuery, useI18n } from '~/composables'
@@ -21,20 +20,16 @@ export default defineComponent({
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
   setup (props) {
-    const { localePath } = useI18n()
+    const { t, localePath } = useI18n()
+
     const route = useRoute()
-    const drawer: Ref<boolean> = ref<boolean>(false)
-    const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
-      { title: 'Периоды', to: 'dcis-projects-projectId-periods', icon: 'file-table-box-multiple-outline' },
-      {
-        title: 'Настройки',
-        to: 'dcis-projects-projectId-settings',
-        icon: 'cogs',
-        permissions: ['dcis.change_project', 'dcis.delete_project'],
-        permOr: true
-      }
-    ]))
-    const { data: project, loading, update, changeUpdate } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
+
+    const {
+      data: project,
+      loading,
+      update,
+      changeUpdate
+    } = useCommonQuery<ProjectQuery, ProjectQueryVariables>({
       document: projectQuery,
       variables: () => ({
         projectId: route.params.projectId
@@ -42,7 +37,25 @@ export default defineComponent({
     })
     provide('projectUpdate', update)
     provide('changeUpdate', changeUpdate)
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => {
+
+    const drawer = ref<boolean>(false)
+    const links = computed<LinksType[]>(() => {
+      const result: LinksType[] = [{
+        title: t('dcis.projects.links.periods') as string,
+        to: 'dcis-projects-projectId-periods',
+        icon: 'file-table-box-multiple-outline'
+      }]
+      if (!loading.value && (project.value.canChange || project.value.canDelete)) {
+        result.push({
+          title: t('dcis.projects.links.settings') as string,
+          to: 'dcis-projects-projectId-settings',
+          icon: 'cogs'
+        })
+      }
+      return result
+    })
+
+    const bc = computed<BreadCrumbsItem[]>(() => {
       if (loading.value) {
         return props.breadCrumbs
       }
@@ -55,7 +68,8 @@ export default defineComponent({
         }
       ]
     })
-    return { bc, drawer, links, project, loading }
+
+    return { project, loading, drawer, links, bc }
   }
 })
 </script>

@@ -1,19 +1,19 @@
 <template lang="pug">
-  v-row
-    v-col(v-bind="breakPointsLeftGrid")
-      slot
-    v-col(v-if="showLeft" v-show="$vuetify.breakpoint.mdAndUp" v-bind="breakPointsRightGrid")
-      v-card.mt-0
-        v-card-text.pa-0
-          v-list
-            v-list-item(
-              v-for="cat in category.nc"
-              :key="cat.id"
-              :to="localePath({ name: 'categories-categoryId', params: { categoryId: cat.id } })"
-              :class="{'v-list-item--active': activeCategories.map(e => e.id).includes(cat.id) }"
-            )
-              v-list-item-content
-                v-list-item-title {{ cat.text }}
+v-row
+  v-col(v-bind="breakPointsLeftGrid")
+    slot
+  v-col(v-if="showLeft" v-show="$vuetify.breakpoint.mdAndUp" v-bind="breakPointsRightGrid")
+    v-card.mt-0
+      v-card-text.pa-0
+        v-list
+          v-list-item(
+            v-for="cat in category.nc"
+            :key="cat.id"
+            :to="localePath({ name: 'categories-categoryId', params: { categoryId: cat.id } })"
+            :class="{'v-list-item--active': activeCategories.map(e => e.id).includes(cat.id) }"
+          )
+            v-list-item-content
+              v-list-item-title {{ cat.text }}
 </template>
 
 <script lang="ts">

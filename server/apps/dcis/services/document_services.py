@@ -1,18 +1,43 @@
-"""Модуль работы с документами."""
+"""Модуль, отвечающий за работу с документами."""
 
-from typing import Optional, Type, Union
+from typing import Type
 
 from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
-from django.db.models import Max
+from django.db.models import Max, QuerySet
 
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.services.divisions_services import get_user_divisions
+from apps.dcis.services.privilege_services import has_privilege
 
 
-def get_documents(user: User, period_id: int, divisions_id):
-    """Получение документов в зависимости от прав."""
-    period: Period = get_object_or_404(Period, pk=period_id)
-    return Document.objects.filter(period=period)
+def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Document]:
+    """Получение документов пользователя для периода.
+
+    Пользователь видит период документ:
+      - пользователь обладает глобальной привилегией dcis.view_document
+      - пользователь создал проект документа
+      - пользователь создал период документа
+      - период создан с множественным типом сбора, и
+        пользователь добавлен в закрепленный за документом дивизион
+      - период создан с единичным типом сбора, и
+        пользователь добавлен в закрепленный за одной из строк документа дивизион
+      - пользователь обладает локальной привилегией view_document,
+        позволяющей просматривать все документы конкретного периода
+    """
+    period = Period.objects.get(pk=period) if type(period) in (int, str) else period
+    if any((
+        user.has_perm('dcis.view_document'),
+        has_privilege(user.id, period.id, 'view_document'),
+        period.project.user_id == user.id,
+        period.user_id == user.id
+    )):
+        return Document.objects.filter(period_id=period.id)
+    division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
+    if period.multiple:
+        return Document.objects.filter(object_id__in=division_ids)
+    else:
+        return Document.objects.filter(rowdimension__object_id__in=division_ids)
 
 
 def create_new_document(
@@ -20,10 +45,10 @@ def create_new_document(
     period: Period,
     status_id: int,
     comment: str,
-    document_id: Optional[int] = None,
-    division_id: Optional[int] = None
+    document_id: int | None = None,
+    division_id: int | None = None
 ) -> Document:
-    """Создание нового документа.
+    """Добавление нового документа.
 
         user - пользователь, который создает документ
         period_id - собираемый период
@@ -31,8 +56,8 @@ def create_new_document(
         object_id - идентификатор дивизиона
     """
     status: Status = get_object_or_404(Status, pk=status_id)
-    latest_document: Optional[Document] = get_object_or_none(Document, pk=document_id)
-    max_version: Optional[int] = Document.objects.filter(
+    latest_document: Document | None = get_object_or_none(Document, pk=document_id)
+    max_version: int | None = Document.objects.filter(
         period=period,
         object_id=division_id
     ).aggregate(version=Max('version'))['version']
@@ -44,7 +69,7 @@ def create_new_document(
         period=period
     )
     document.documentstatus_set.create(
-        comment='Документ создан',
+        comment='Документ добавлен',
         user=user,
         status=status
     )
@@ -52,7 +77,7 @@ def create_new_document(
     for sheet in period.sheet_set.all():
         document.sheets.add(sheet)
         if latest_document is not None:
-            rows_transform: dict[Union[int, Type[int]], int] = {}
+            rows_transform: dict[int | Type[int], int] = {}
             parent_rows: list[int] = sheet.rowdimension_set \
                 .filter(parent__isnull=True) \
                 .values_list('id', flat=True)
@@ -118,8 +143,8 @@ def transfer_rows(
 def transfer_limitations(
     cell_original: int,
     cell: int,
-    parent_id_original: Optional[int] = None,
-    parent_id: Optional[int] = None
+    parent_id_original: int | None = None,
+    parent_id: int | None = None
 ) -> None:
     """Рекурсивно переносим ограничения ячеек.
 

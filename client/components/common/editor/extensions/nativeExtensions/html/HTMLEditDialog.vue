@@ -1,22 +1,22 @@
 <template lang="pug">
-  v-dialog(v-model="isDialog")
-    template(#activator="{ on }")
-      v-tooltip(top)
-        template(#activator="{ on: onTooltip, attrs }")
-          v-btn(v-on="{ ...on, ...onTooltip }" v-bind="attrs" icon)
-            v-icon {{icon}}
-        span {{$t(`common.richTextEditor.html.${tooltip}`)}}
-    form(@submit.prevent="onInsert")
-      v-card
-        v-card-title {{$t(`common.richTextEditor.html.${tooltip}`)}}
-          v-spacer
-          v-btn(@click="isDialog=false" icon)
-            v-icon mdi-close
-        v-card-text
-          v-textarea(v-model="content" auto-grow)
-        v-card-actions
-          v-spacer
-          v-btn(type="submit" color="primary") {{ $t(`common.richTextEditor.html.${tooltip}`) }}
+v-dialog(v-model="isDialog")
+  template(#activator="{ on }")
+    v-tooltip(top)
+      template(#activator="{ on: onTooltip, attrs }")
+        v-btn(v-on="{ ...on, ...onTooltip }" v-bind="attrs" icon)
+          v-icon {{icon}}
+      span {{$t(`common.richTextEditor.html.${tooltip}`)}}
+  form(@submit.prevent="onInsert")
+    v-card
+      v-card-title {{$t(`common.richTextEditor.html.${tooltip}`)}}
+        v-spacer
+        v-btn(@click="isDialog=false" icon)
+          v-icon mdi-close
+      v-card-text
+        v-textarea(v-model="content" auto-grow)
+      v-card-actions
+        v-spacer
+        v-btn(type="submit" color="primary") {{ $t(`common.richTextEditor.html.${tooltip}`) }}
 </template>
 
 <script lang="ts">

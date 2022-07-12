@@ -1,17 +1,17 @@
 <template lang="pug">
-  v-menu(v-model="menu" :close-on-content-click="false" bottom)
-    template(#activator="{ on }")
-      v-btn.mr-5(v-on="on" icon text)
-        v-badge(:value="newNotificationsLength" :content="newNotificationsLength" overlap)
-          v-icon mdi-bell
-    v-card(max-width="600" min-width="500")
-      v-card-title {{ $t('notifications.name') }}
-        v-spacer
-        nuxt-link.caption(:to="localePath({ name: 'notifications' })" @click.native="menu = false")
-          | {{ $t('notifications.all') }}
-      v-card-text(style="max-height: 500px; overflow-y: auto")
-        mutation-result-alert(ref="mutationResultAlert")
-        notifications-view(:notifications="notifications" @open="menu = false")
+v-menu(v-model="menu" :close-on-content-click="false" bottom)
+  template(#activator="{ on }")
+    v-btn.mr-5(v-on="on" icon text)
+      v-badge(:value="newNotificationsLength" :content="newNotificationsLength" overlap)
+        v-icon mdi-bell
+  v-card(max-width="600" min-width="500")
+    v-card-title {{ $t('notifications.name') }}
+      v-spacer
+      nuxt-link.caption(:to="localePath({ name: 'notifications' })" @click.native="menu = false")
+        | {{ $t('notifications.all') }}
+    v-card-text(style="max-height: 500px; overflow-y: auto")
+      mutation-result-alert(ref="mutationResultAlert")
+      notifications-view(:notifications="notifications" @open="menu = false")
 </template>
 
 <script lang="ts">

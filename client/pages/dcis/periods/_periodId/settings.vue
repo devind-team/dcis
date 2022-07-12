@@ -1,34 +1,46 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    apollo-mutation(
-      v-slot="{ mutate, loading, error }"
-      :mutation="require('~/gql/dcis/mutations/project/change_period.graphql')"
-      :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
-      :update="changePeriodUpdate"
-      tag
-    )
-      v-card
+bread-crumbs(:items="bc")
+  apollo-mutation(
+    v-slot="{ mutate, loading, error }"
+    :mutation="require('~/gql/dcis/mutations/period/change_period.graphql')"
+    :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
+    :update="changePeriodUpdate"
+    tag
+  )
+    v-card
+      template(v-if="period.canChangeSettings")
         v-card-title
           v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
-          | {{ $t('dcis.periods.header') }}
+          | {{ $t('dcis.periods.changePeriod.header') }}
         v-card-subtitle {{ period.name }}
         validation-observer(v-slot="{ handleSubmit, invalid }")
           form(@submit.prevent="handleSubmit(mutate)")
             v-card-text
               v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
-              v-alert(type="error" :value="!!error" dismissible) {{ $t('mutationBusinessLogicError', { error: error }) }}
+              v-alert(
+                type="error"
+                :value="!!error"
+                dismissible
+              ) {{ $t('mutationBusinessLogicError', { error: error }) }}
               validation-provider(
                 v-slot="{ errors, valid }"
-                :name="String($t('dcis.periods.name'))"
+                :name="String($t('dcis.periods.changePeriod.name'))"
                 rules="required|min:3|max:250"
               )
                 v-text-field(
                   v-model="name"
-                  :label="$t('dcis.periods.name')"
+                  :label="$t('dcis.periods.changePeriod.name')"
                   :error-messages="errors" :success="valid"
                   counter
                 )
-              v-autocomplete(v-model="status" :items="items" label="Статус" item-text="name" item-value="value" success)
+              v-autocomplete(
+                v-model="status"
+                :items="statusItems"
+                :label="$t('dcis.periods.changePeriod.status')"
+                item-text="name"
+                item-value="value"
+                success
+              )
               v-menu(
                 v-model="chooseStart"
                 :close-on-content-click="false"
@@ -36,11 +48,11 @@
                 transition="scale-transition"
                 min-width="290px"
               )
-                template(v-slot:activator="{ on }")
+                template(#activator="{ on }")
                   v-text-field(
                     v-on="on"
                     v-model="start"
-                    :label="$t('dcis.periods.start')"
+                    :label="$t('dcis.periods.changePeriod.start')"
                     success
                     readonly
                   )
@@ -52,62 +64,59 @@
                 transition="scale-transition"
                 min-width="290px"
               )
-                template(v-slot:activator="{ on }")
+                template(#activator="{ on }")
                   v-text-field(
                     v-on="on"
                     v-model="expiration"
-                    :label="$t('dcis.periods.expiration')"
+                    :label="$t('dcis.periods.changePeriod.expiration')"
                     success
                     readonly
                   )
                 v-date-picker(v-model="expiration" @input="chooseExpiration = false")
               v-row
                 v-col(cols="12" md="6")
-                  v-checkbox(v-model="multiple" :label="$t('dcis.periods.multiple')")
+                  v-checkbox(v-model="multiple" :label="$t('dcis.periods.changePeriod.multiple')")
                 v-col(cols="12" md="6")
-                  v-checkbox(v-model="privately" :label="$t('dcis.periods.privately')")
+                  v-checkbox(v-model="privately" :label="$t('dcis.periods.changePeriod.privately')")
             v-card-actions
               v-btn(
-                v-if="period.user && period.user.id === user.id || hasPerm('dcis.change_period')"
                 :disabled="invalid"
                 :loading="loading"
                 type="submit"
                 color="success"
-              ) {{$t('dcis.periods.actions.save')}}
-        v-divider
-        v-card-title {{ $t('dcis.periods.delete') }}
+              ) {{$t('dcis.periods.changePeriod.save')}}
+      v-divider(v-if="period.canChangeSettings && period.canDelete")
+      template(v-if="period.canDelete")
+        v-card-title {{ $t('dcis.periods.deletePeriod.header') }}
         v-card-text
-          v-alert(type="warning") {{ $t('dcis.periods.deleteWarning') }}
+          v-alert(type="warning") {{ $t('dcis.periods.deletePeriod.warning') }}
         v-card-actions
           apollo-mutation(
             v-slot="{ mutate }"
-            :mutation="require('~/gql/dcis/mutations/project/delete_period.graphql')"
+            :mutation="require('~/gql/dcis/mutations/period/delete_period.graphql')"
             :variables="{ id: period.id}"
             @done="deletePeriodDone"
             tag
           )
             delete-menu(
-              v-if="period.user && period.user.id === user.id || hasPerm('dcis.delete_period')"
               v-slot="{ on }"
-              :itemName="String($t('dcis.periods.deleteItemName'))"
+              :itemName="String($t('dcis.periods.deletePeriod.itemName'))"
               @confirm="mutate"
             )
-              v-btn(v-on="on" color="error") {{ $t('dcis.periods.actions.delete') }}
+              v-btn(v-on="on" color="error") {{ $t('dcis.periods.deletePeriod.delete') }}
 </template>
 
 <script lang="ts">
 import { promiseTimeout } from '@vueuse/core'
 import { DataProxy } from 'apollo-cache'
-import type { Ref, ComputedRef, PropType } from '#app'
-import { computed, defineComponent, ref, toRefs, useNuxt2Meta, useRouter, inject } from '#app'
+import type { PropType } from '#app'
+import { computed, defineComponent, ref, useNuxt2Meta, useRouter, inject } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
-  ChangePeriodMutationPayload,
-  DeletePeriodMutationPayload,
   PeriodType,
-  UserType
+  ChangePeriodMutationPayload,
+  DeletePeriodMutationPayload
 } from '~/types/graphql'
-import { HasPermissionFnType, useAuthStore } from '~/stores'
 import { useI18n } from '~/composables'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
@@ -129,35 +138,42 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const authStore = useAuthStore()
-    const { localePath } = useI18n()
-    const router = useRouter()
-    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
-
     useNuxt2Meta({ title: props.period.name })
+
+    const { t, localePath } = useI18n()
+
+    const router = useRouter()
+
+    if (!(props.period.canChangeSettings || props.period.canDelete)) {
+      router.push(localePath({ name: 'dcis-periods-periodId-documents' }))
+    }
 
     const changeUpdate: ChangePeriodUpdateType = inject<ChangePeriodUpdateType>('changeUpdate')
 
-    const name: Ref<string> = ref<string>(props.period.name)
-    const multiple: Ref<boolean> = ref<boolean>(props.period.multiple)
-    const privately: Ref<boolean> = ref<boolean>(props.period.privately)
-    const start: Ref<string> = ref<string>(props.period.start)
-    const expiration: Ref<string> = ref<string>(props.period.expiration)
+    const name = ref<string>(props.period.name)
+    const multiple = ref<boolean>(props.period.multiple)
+    const privately = ref<boolean>(props.period.privately)
+    const start = ref<string>(props.period.start)
+    const expiration = ref<string>(props.period.expiration)
 
-    const chooseStart: Ref<boolean> = ref<boolean>(false)
-    const chooseExpiration: Ref<boolean> = ref<boolean>(false)
+    const chooseStart = ref<boolean>(false)
+    const chooseExpiration = ref<boolean>(false)
 
-    const successUpdate: Ref<boolean> = ref<boolean>(false)
-    const items: StatusItems[] = [
-      { name: 'Подготовка', value: 'preparation' },
-      { name: 'Заполнение', value: 'open' },
-      { name: 'Сбор закрыт', value: 'close' }
+    const successUpdate = ref<boolean>(false)
+    const statusItems: StatusItems[] = [
+      { name: t('dcis.periods.statuses.preparation') as string, value: 'preparation' },
+      { name: t('dcis.periods.statuses.open') as string, value: 'open' },
+      { name: t('dcis.periods.statuses.close') as string, value: 'close' }
     ]
-    const status: Ref<string> = ref<string>(props.period.status)
+    const status = ref<string>(props.period.status)
 
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
-      { text: 'Настройки', to: localePath({ name: 'dcis-periods-periodId-settings' }), exact: true }
+      {
+        text: t('dcis.periods.links.settings') as string,
+        to: localePath({ name: 'dcis-periods-periodId-settings' }),
+        exact: true
+      }
     ]))
 
     const changePeriodUpdate = (cache: DataProxy, result: ChangePeriodResultMutation) => {
@@ -187,12 +203,10 @@ export default defineComponent({
       start,
       expiration,
       status,
-      user,
-      items,
+      statusItems,
       chooseStart,
       chooseExpiration,
       successUpdate,
-      hasPerm,
       changePeriodUpdate,
       deletePeriodDone
     }

@@ -1,25 +1,25 @@
 <template lang="pug">
-  thead
-    tr
-      th(
-        :class="{ 'grid__header_all_selected': allCellsSelected }"
-        :style="{ width: `${rowNameColumnWidth}px` }"
-        @click="selectAllCells"
-      )
-        div
-      th(
-        v-for="column in activeSheet.columns"
-        :key="column.id"
-        :class="getHeaderClass(column)"
-        :style="{ 'width': `${getColumnWidth(column)}px` }"
-        @mouseenter="mouseenterColumnName(column)"
-        @mousemove="mousemoveColumnName(column, $event)"
-        @mouseleave="mouseleaveColumnName"
-        @mousedown="mousedownColumnName(column, $event)"
-        @mouseup="mouseupColumnName"
-      )
-        grid-column-control(v-slot="{ on, attrs }" :column="column" :get-column-width="getColumnWidth")
-          div(v-bind="attrs" @contextmenu.prevent="on.click") {{ column.name }}
+thead
+  tr
+    th(
+      :class="{ 'grid__header_all_selected': allCellsSelected }"
+      :style="{ width: `${rowNameColumnWidth}px` }"
+      @click="selectAllCells"
+    )
+      div
+    th(
+      v-for="column in activeSheet.columns"
+      :key="column.id"
+      :class="getHeaderClass(column)"
+      :style="{ 'width': `${getColumnWidth(column)}px` }"
+      @mouseenter="mouseenterColumnName(column)"
+      @mousemove="mousemoveColumnName(column, $event)"
+      @mouseleave="mouseleaveColumnName"
+      @mousedown="mousedownColumnName(column, $event)"
+      @mouseup="mouseupColumnName"
+    )
+      grid-column-control(v-slot="{ on, attrs }" :column="column" :get-column-width="getColumnWidth")
+        div(v-bind="attrs" @contextmenu.prevent="on.click") {{ column.name }}
 </template>
 
 <script lang="ts">

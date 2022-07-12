@@ -1,43 +1,43 @@
 <template lang="pug">
-  component(
-    v-model="active"
-    :is="modal ? 'v-dialog' : 'v-menu'"
-    :max-width="maxWidth"
-    :close-on-content-click="false"
-    bottom
-    scrollable
-  )
-    template(#activator="{ on }")
-      slot(
-        name="message"
-        :on="on"
-        :message="message"
-        :container-class="messageContainerClass"
-      )
-        v-chip(
-          v-on="on"
-          :class="messageContainerClass"
-          :close="messageContainerClose"
-          @click:close="$emit('clear')"
-        ) {{ message }}
-    v-card.d-flex.flex-column(:max-height="maxHeight")
-      v-card-title
-        slot(name="title" :title="title")
-          span {{ title }}
-          template(v-if="modal")
-            v-spacer
-            v-btn(@click="close" icon)
-              v-icon mdi-close
-      v-card-subtitle
-        slot(name="subtitle")
-      slot(name="fixed-content")
-      v-card-text.flex-grow-1.overflow-auto
-        slot(name="item-content")
-      v-card-actions
-        slot(name="actions")
-          v-btn.mr-2(color="warning" @click="reset") {{ $t('common.filters.baseDataFilter.reset') }}
+component(
+  v-model="active"
+  :is="modal ? 'v-dialog' : 'v-menu'"
+  :max-width="maxWidth"
+  :close-on-content-click="false"
+  bottom
+  scrollable
+)
+  template(#activator="{ on }")
+    slot(
+      name="message"
+      :on="on"
+      :message="message"
+      :container-class="messageContainerClass"
+    )
+      v-chip(
+        v-on="on"
+        :class="messageContainerClass"
+        :close="messageContainerClose"
+        @click:close="$emit('clear')"
+      ) {{ message }}
+  v-card.d-flex.flex-column(:max-height="maxHeight")
+    v-card-title
+      slot(name="title" :title="title")
+        span {{ title }}
+        template(v-if="modal")
           v-spacer
-          v-btn.ml-2(color="primary" @click="apply") {{ $t('common.filters.baseDataFilter.apply') }}
+          v-btn(@click="close" icon)
+            v-icon mdi-close
+    v-card-subtitle
+      slot(name="subtitle")
+    slot(name="fixed-content")
+    v-card-text.flex-grow-1.overflow-auto
+      slot(name="item-content")
+    v-card-actions
+      slot(name="actions")
+        v-btn.mr-2(color="warning" @click="reset") {{ $t('common.filters.baseDataFilter.reset') }}
+        v-spacer
+        v-btn.ml-2(color="primary" @click="apply") {{ $t('common.filters.baseDataFilter.apply') }}
 </template>
 
 <script lang="ts">

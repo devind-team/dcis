@@ -1,27 +1,27 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="$emit('close')"
-    :mutation="require('~/gql/pages/mutations/category/change_category.graphql')"
-    :variables="{ categoryId: category.id, text }"
-    :update="update"
-    :header="String($t('pages.components.editCategory.changeCategory'))"
-    :button-text="String($t('pages.components.editCategory.change'))"
-    mutation-name="changeCategory"
-  )
-    template(#activator="{ on }")
-      slot(:on="on")
-    template(#form)
-      ValidationProvider(
-        :name="String($t('pages.category.addDialog.text'))"
-        rules="required|min:3|max:1023"
-        v-slot="{ errors, valid }"
+mutation-modal-form(
+  @close="$emit('close')"
+  :mutation="require('~/gql/pages/mutations/category/change_category.graphql')"
+  :variables="{ categoryId: category.id, text }"
+  :update="update"
+  :header="String($t('pages.components.editCategory.changeCategory'))"
+  :button-text="String($t('pages.components.editCategory.change'))"
+  mutation-name="changeCategory"
+)
+  template(#activator="{ on }")
+    slot(:on="on")
+  template(#form)
+    ValidationProvider(
+      :name="String($t('pages.category.addDialog.text'))"
+      rules="required|min:3|max:1023"
+      v-slot="{ errors, valid }"
+    )
+      v-text-field(
+        v-model="text"
+        :label="$t('pages.category.addDialog.text')"
+        :error-messages="errors"
+        :success="valid"
       )
-        v-text-field(
-          v-model="text"
-          :label="$t('pages.category.addDialog.text')"
-          :error-messages="errors"
-          :success="valid"
-        )
 </template>
 
 <script lang="ts">

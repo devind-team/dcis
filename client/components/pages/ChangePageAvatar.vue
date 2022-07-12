@@ -1,32 +1,32 @@
 <template lang="pug">
-  mutation-modal-form(
-    @done="changePageAvatarDone"
-    :mutation="require('~/gql/pages/mutations/page/change_page_avatar.graphql')"
-    :variables="{ pageId: page.id, avatar }"
-    :header="$t('pages.page.changeAvatar.header')"
-    :button-text="buttonText"
-    mutation-name="changePageAvatar"
-    i18n-path="pages.page.changeAvatar"
-  )
-    template(#activator="{ on }")
-      slot(:on="on")
-    template(#form)
-      v-img.mb-4(v-if="avatar || page.avatar" :src="avatarSrc" height="450")
-      v-file-input(
-        v-model="avatar"
-        :label="$t('pages.page.changeAvatar.avatar')"
-        prepend-icon="mdi-camera"
-        show-size
-        @change="setAvatarSrc"
-      )
-    template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
-      v-spacer
-      v-btn(
-        :disabled="invalid || !(avatar || page.avatar)"
-        :loading="loading"
-        type="submit"
-        color="primary"
-      ) {{ buttonText }}
+mutation-modal-form(
+  @done="changePageAvatarDone"
+  :mutation="require('~/gql/pages/mutations/page/change_page_avatar.graphql')"
+  :variables="{ pageId: page.id, avatar }"
+  :header="$t('pages.page.changeAvatar.header')"
+  :button-text="buttonText"
+  mutation-name="changePageAvatar"
+  i18n-path="pages.page.changeAvatar"
+)
+  template(#activator="{ on }")
+    slot(:on="on")
+  template(#form)
+    v-img.mb-4(v-if="avatar || page.avatar" :src="avatarSrc" height="450")
+    v-file-input(
+      v-model="avatar"
+      :label="$t('pages.page.changeAvatar.avatar')"
+      prepend-icon="mdi-camera"
+      show-size
+      @change="setAvatarSrc"
+    )
+  template(#actions="{ invalid, loading, buttonText, setFormErrors, setError, setSuccess }")
+    v-spacer
+    v-btn(
+      :disabled="invalid || !(avatar || page.avatar)"
+      :loading="loading"
+      type="submit"
+      color="primary"
+    ) {{ buttonText }}
 </template>
 
 <script lang="ts">

@@ -1,13 +1,13 @@
 <template lang="pug">
-  confirm-menu(
-    @confirm="$emit('confirm')"
-    @cancel="$emit('cancel')"
-    :text="String($t('common.menu.deleteMenu.text', { itemName }))"
-    yes-color="error"
-    no-color="success"
-  )
-    template(#default="{ on }")
-      slot(:on="on")
+confirm-menu(
+  @confirm="$emit('confirm')"
+  @cancel="$emit('cancel')"
+  :text="String($t('common.menu.deleteMenu.text', { itemName }))"
+  yes-color="error"
+  no-color="success"
+)
+  template(#default="{ on }")
+    slot(:on="on")
 </template>
 
 <script lang="ts">

@@ -1,18 +1,18 @@
 <template lang="pug">
-  v-menu(v-model="active" bottom close-on-content-click)
-    template(#activator="{ on, attrs }")
-      slot(:on="on" :attrs="attrs")
-    v-list(dense)
-      rename-dialog(
-        v-slot="{ on, attrs }"
-        @apply="renameSheet"
-        :n="sheet.name"
-        :label="String($t('dcis.grid.sheet.rename'))"
-      )
-        v-list-item(v-on="on" v-bind="attrs")
-          v-list-item-icon  #[v-icon mdi-pencil]
-          v-list-item-content
-            v-list-item-content {{ $t('dcis.grid.sheet.rename') }}
+v-menu(v-model="active" bottom close-on-content-click)
+  template(#activator="{ on, attrs }")
+    slot(:on="on" :attrs="attrs")
+  v-list(dense)
+    rename-dialog(
+      v-slot="{ on, attrs }"
+      @apply="renameSheet"
+      :n="sheet.name"
+      :label="String($t('dcis.grid.sheet.rename'))"
+    )
+      v-list-item(v-on="on" v-bind="attrs")
+        v-list-item-icon  #[v-icon mdi-pencil]
+        v-list-item-content
+          v-list-item-content {{ $t('dcis.grid.sheet.rename') }}
 </template>
 
 <script lang="ts">

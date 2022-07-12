@@ -1,7 +1,7 @@
 <template lang="pug">
-  div
-    left-navigator-driver(v-model="active" :items="links")
-    nuxt-child(@update-drawer="active = !active" :key="$route.fullPath" :breadCrumbs="bc")
+div
+  left-navigator-driver(v-model="active" :items="links")
+  nuxt-child(@update-drawer="active = !active" :key="$route.fullPath" :breadCrumbs="bc")
 </template>
 
 <script lang="ts">

@@ -1,35 +1,36 @@
 import graphene
 
-from apps.dcis.schema.mutations import CellMutations, \
-    DocumentMutations, \
-    ProjectMutations, \
-    SheetMutations, \
-    PrivilegeMutations, \
+from apps.dcis.schema.mutations import (
+    CellMutations,
+    DocumentMutations,
+    ProjectMutations,
+    PeriodMutations,
+    SheetMutations,
     ValueMutations
-from apps.dcis.schema.queries import DocumentQueries, PrivilegeQueries, ProjectQueries, SheetQueries
+)
+from apps.dcis.schema.queries import DocumentQueries, PeriodQueries, ProjectQueries
 
 
 class Query(
     DocumentQueries,
-    PrivilegeQueries,
+    PeriodQueries,
     ProjectQueries,
-    SheetQueries,
     graphene.ObjectType,
 ):
     """Запросы приложения dcis."""
 
-    pass
+    ...
 
 
 class Mutation(
     CellMutations,
-    ProjectMutations,
     DocumentMutations,
+    PeriodMutations,
+    ProjectMutations,
     SheetMutations,
-    PrivilegeMutations,
     ValueMutations,
     graphene.ObjectType,
 ):
     """Мутации приложения dcis."""
 
-    pass
+    ...

@@ -1,9 +1,9 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    .text-h4.text-md-h2.mb-7 {{ page.title }}
-    change-section-text(v-if="section.kind === sectionKind.TEXT" :section="section" @done="updateSection")
-    change-section-gallery(v-else-if="section.kind === sectionKind.GALLERY" :section="section" @done="updateSection")
-    change-section-files(v-else-if="section.kind === sectionKind.FILES" :section="section" @done="updateSection")
+bread-crumbs(:items="bc")
+  .text-h4.text-md-h2.mb-7 {{ page.title }}
+  change-section-text(v-if="section.kind === sectionKind.TEXT" :section="section" @done="updateSection")
+  change-section-gallery(v-else-if="section.kind === sectionKind.GALLERY" :section="section" @done="updateSection")
+  change-section-files(v-else-if="section.kind === sectionKind.FILES" :section="section" @done="updateSection")
 </template>
 
 <script lang="ts">

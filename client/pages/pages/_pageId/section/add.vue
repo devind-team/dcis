@@ -1,9 +1,9 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    .text-h4.text-md-h2.mb-7 {{ page.title }}
-    add-section-text(v-if="$route.query.kind==='text'" :page="page" @done="updatePage")
-    add-section-gallery(v-else-if="$route.query.kind==='gallery'" :page="page" @done="updatePage")
-    add-section-files(v-else-if="$route.query.kind==='files'" :page="page" @done="updatePage")
+bread-crumbs(:items="bc")
+  .text-h4.text-md-h2.mb-7 {{ page.title }}
+  add-section-text(v-if="$route.query.kind==='text'" :page="page" @done="updatePage")
+  add-section-gallery(v-else-if="$route.query.kind==='gallery'" :page="page" @done="updatePage")
+  add-section-files(v-else-if="$route.query.kind==='files'" :page="page" @done="updatePage")
 </template>
 
 <script lang="ts">

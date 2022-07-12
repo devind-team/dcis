@@ -1,5 +1,5 @@
 <template lang="pug">
-  nuxt-child(:breadCrumbs="bc" :key="this.$route.params.notification_id || 'index'")
+nuxt-child(:breadCrumbs="bc" :key="this.$route.params.notification_id || 'index'")
 </template>
 
 <script lang="ts">

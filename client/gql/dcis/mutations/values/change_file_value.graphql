@@ -1,0 +1,28 @@
+#import "../../../core/fragments/file_fields.graphql"
+
+mutation ChangeFileValue(
+  $documentId: ID!,
+  $sheetId: Int!,
+  $columnId: Int!,
+  $rowId: Int!,
+  $value: String!,
+  $remainingFiles: [ID!]!,
+  $newFiles: [Upload!]!
+) {
+  changeFileValue(input: {
+    documentId: $documentId,
+    sheetId: $sheetId,
+    columnId: $columnId,
+    rowId: $rowId,
+    value: $value
+    remainingFiles: $remainingFiles,
+    newFiles: $newFiles
+  }) {
+    success
+    value
+    updatedAt
+    valueFiles {
+      ...FileFields
+    }
+  }
+}

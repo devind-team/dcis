@@ -1,16 +1,16 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="400")
-    template(#activator="{ on, attrs }")
-      slot(:on="on" :attrs="attrs")
-    v-card
-      v-card-title {{ label }}
-      v-card-subtitle {{ n }}
-      v-card-text
-        v-text-field(v-model="current")
-      v-card-actions
-        v-btn(@click="close") {{ $t('cancel') }}
-        v-spacer
-        v-btn(@click="apply" color="primary") {{ $t('apply') }}
+v-dialog(v-model="active" width="400")
+  template(#activator="{ on, attrs }")
+    slot(:on="on" :attrs="attrs")
+  v-card
+    v-card-title {{ label }}
+    v-card-subtitle {{ n }}
+    v-card-text
+      v-text-field(v-model="current")
+    v-card-actions
+      v-btn(@click="close") {{ $t('cancel') }}
+      v-spacer
+      v-btn(@click="apply" color="primary") {{ $t('apply') }}
 </template>
 
 <script lang="ts">

@@ -1,7 +1,7 @@
 <template lang="pug">
-  .d-flex.flex-column.align-center
-    avatar-dialog(:item="user" size="200")
-    v-btn(color="success" @click="selectAvatar").mt-3 {{ $t('ac.users.components.avatarView.changeAvatar') }}
+.d-flex.flex-column.align-center
+  avatar-dialog(:item="user" size="200")
+  v-btn(color="success" @click="selectAvatar").mt-3 {{ $t('ac.users.components.avatarView.changeAvatar') }}
 </template>
 
 <script lang="ts">

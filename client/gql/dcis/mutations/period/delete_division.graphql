@@ -1,0 +1,12 @@
+mutation DeleteDivision($periodId: ID!, $divisionId: ID!) {
+  deleteDivision(input: { periodId: $periodId, divisionId: $divisionId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    deleteId
+    __typename
+  }
+}

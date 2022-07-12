@@ -1,11 +1,18 @@
-#import "../fragments/project_fields.graphql"
 #import "../fragments/period_fields.graphql"
-#import "../fragments/status_fields.graphql"
+#import "../fragments/project_fields.graphql"
+#import "../fragments/division_model_fields.graphql"
 #import "../../core/fragments/user_fields.graphql"
 
 query Period($periodId: ID!) {
   period(periodId: $periodId) {
     ...PeriodFields
+    canChangeDivisions
+    canChangeGroups
+    canChangeUsers
+    canChangeSettings
+    canChangeSheet
+    canDelete
+    canAddDocument
     project {
       ...ProjectFields
       __typename
@@ -13,42 +20,8 @@ query Period($periodId: ID!) {
     user {
       ...UserFields
     }
-    documents {
-      id
-      version
-      comment
-      createdAt
-      __typename
-      lastStatus {
-        id
-        comment
-        createdAt
-        __typename
-        status {
-          ...StatusFields
-        }
-      }
-    }
-    periodGroups {
-      id
-      name
-      createdAt
-      users {
-        ...UserFields
-      }
-      privileges {
-        id
-        name
-        key
-        createdAt
-        __typename
-      }
-      __typename
-    }
     divisions {
-      id
-      objectId
-      __typename
+      ...DivisionModelFields
     }
   }
 }

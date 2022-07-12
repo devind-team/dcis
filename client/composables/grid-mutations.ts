@@ -1,7 +1,7 @@
 import { useMutation } from '@vue/apollo-composable'
-import { DataProxy } from '@apollo/client'
+import { ApolloClient, DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
-import { Ref } from '#app'
+import { Ref, unref } from '#app'
 import { UpdateType } from '~/composables/query-common'
 import {
   SheetQuery,
@@ -13,6 +13,7 @@ import {
   ColumnDimensionType,
   ColumnDimensionFieldsFragment,
   CellType,
+  ValueType,
   CellFieldsFragment,
   GlobalIndicesInputType,
   AddRowDimensionMutation,
@@ -30,16 +31,17 @@ import {
   ChangeFileValueMutation,
   ChangeFileValueMutationVariables,
   UnloadFileValueArchiveMutation,
-  UnloadFileValueArchiveMutationVariables
+  UnloadFileValueArchiveMutationVariables, SheetQueryVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
+import sheetQuery from '~/gql/dcis/queries/sheet.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/sheet/change_cells_option.graphql'
-import changeValueMutation from '~/gql/dcis/mutations/sheet/change_value.graphql'
-import changeFileValueMutation from '~/gql/dcis/mutations/sheet/change_file_value.graphql'
+import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
+import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
 import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/sheet/unload_file_value_archive.graphql'
 import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 
@@ -461,7 +463,7 @@ export function updateRowDimension (
 
 export function useChangeCellsOptionMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<string>,
+  sheetId: Ref<number>,
   updateSheet: Ref<UpdateType<SheetQuery>>
 ) {
   const { mutate } = useMutation<
@@ -476,7 +478,7 @@ export function useChangeCellsOptionMutation (
           }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
         ) => {
           for (const option of changedOptions) {
-            const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === option.cellId)
+            const cell = findCell(data.sheet as SheetType, (c: CellType) => c.id === parseInt(option.cellId))
             if (cell.kind === 'fl' && option.field === 'kind' && option.value !== 'fl') {
               try {
                 const variables: ValueFilesQueryVariables = {
@@ -494,7 +496,7 @@ export function useChangeCellsOptionMutation (
                   query: valueFilesQuery,
                   variables
                 })
-              } catch (_) {}
+              } catch {}
             }
             if (option.field === 'size') {
               cell[option.field] = Number(option.value)
@@ -511,41 +513,59 @@ export function useChangeCellsOptionMutation (
   })
   return async function (cells: CellType[], field: string, value: string) {
     await mutate({
-      cellIds: cells.map((cell: CellType) => cell.id),
+      cellIds: cells.map((cell: CellType) => cell.id.toString()),
       field,
       value
     })
   }
 }
 
-export function useChangeValueMutation (
+export const useChangeValueMutation = (
   documentId: Ref<string | null>,
-  sheetId: Ref<string>,
+  sheetId: Ref<number>,
   cell: Ref<CellType>,
-  updateSheet: Ref<UpdateType<SheetQuery>>
-) {
+  client: ApolloClient<SheetQuery>
+) => {
   const { mutate } = useMutation<
     ChangeValueMutation,
     ChangeValueMutationVariables
   >(changeValueMutation)
-  return async function (value: string) {
+  return async (value: string) => {
     await mutate({
       documentId: documentId.value,
       sheetId: sheetId.value,
-      columnId: cell.value.columnId,
-      rowId: cell.value.rowId,
+      cellId: cell.value.id,
       value
     }, {
-      update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) {
+      update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
         if (result.data.changeValue.success) {
-          updateSheet.value(dataProxy, result, (
-            data: SheetQuery, {
-              data: { changeValue: { value, updatedAt } }
-            }: Omit<FetchResult<ChangeValueMutation>, 'context'>
-          ) => {
-            updateCellValue(data, cell.value, updatedAt, value)
-            return data
-          })
+          const { values, updatedAt } = result.data.changeValue
+          const sheetValue = values.reduce<Record<number, ValueType[]>>((a, v) => {
+            if (!(v.sheetId in a)) { a[v.sheetId] = [] }
+            a[v.sheetId].push(v)
+            return a
+          }, {})
+          try {
+            // Читаем все sheet для которых пришли ответные данные изменение ячеек
+            for (const [sid, vs] of Object.entries(sheetValue)) {
+              const data = client.readQuery<SheetQuery, SheetQueryVariables>({
+                query: sheetQuery,
+                variables: {
+                  documentId: unref(documentId),
+                  sheetId: +sid
+                }
+              })
+              updateValues(data, vs, updatedAt)
+              client.writeQuery<SheetQuery, SheetQueryVariables>({
+                query: sheetQuery,
+                variables: {
+                  documentId: unref(documentId.value),
+                  sheetId: +sid
+                },
+                data
+              })
+            }
+          } catch { }
         }
       },
       optimisticResponse: {
@@ -553,8 +573,19 @@ export function useChangeValueMutation (
         changeValue: {
           __typename: 'ChangeValueMutationPayload',
           success: true,
-          errors: [],
-          value,
+          errors: null,
+          values: [
+            {
+              id: '',
+              sheetId: sheetId.value,
+              value,
+              verified: true,
+              columnId: cell.value.columnId,
+              rowId: cell.value.rowId,
+              payload: null,
+              __typename: 'ValueType'
+            }
+          ],
           updatedAt: new Date().toISOString()
         }
       }
@@ -564,7 +595,7 @@ export function useChangeValueMutation (
 
 export function useChangeFileValueMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<string>,
+  sheetId: Ref<number>,
   cell: Ref<CellType>,
   updateSheet: Ref<UpdateType<SheetQuery>>,
   updateFiles: UpdateType<ValueFilesQuery>
@@ -590,7 +621,10 @@ export function useChangeFileValueMutation (
               data: { changeFileValue: { value, updatedAt } }
             }: Omit<FetchResult<ChangeFileValueMutation>, 'context'>
           ) => {
-            updateCellValue(data, cell.value, updatedAt, value)
+            const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.value.rowId.toString())
+            dataRow.updatedAt = updatedAt
+            const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.value.id)
+            dataCell.value = value
             return data
           })
           updateFiles(dataProxy, result, (
@@ -607,16 +641,34 @@ export function useChangeFileValueMutation (
   }
 }
 
-function updateCellValue (data: SheetQuery, cell: CellType, updatedAt: string, value: string): void {
-  const dataRow = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === cell.rowId)
-  dataRow.updatedAt = updatedAt
-  const dataCell = dataRow.cells.find((c: CellFieldsFragment) => c.id === cell.id)
-  dataCell.value = value
+/**
+ *
+ * @param data
+ * @param values
+ * @param updatedAt
+ */
+const updateValues = (data: SheetQuery, values: ValueType[], updatedAt: string): void => {
+  const rowValues = values.reduce<Record<number, Record<number, ValueType>>>((a, v) => {
+    if (!(v.rowId in a)) { a[v.rowId] = {} }
+    a[v.rowId][v.columnId] = v
+    return a
+  }, {})
+  for (const [rowId, value] of Object.entries<Record<number, ValueType>>(rowValues)) {
+    const row = data.sheet.rows.find((r: RowDimensionFieldsFragment) => r.id === rowId)
+    row.updatedAt = updatedAt
+    row.cells = row.cells.map((c: CellFieldsFragment) => {
+      if (c.columnId in value) {
+        c.value = value[c.columnId].value
+        c.verified = value[c.columnId].verified
+      }
+      return c
+    })
+  }
 }
 
 export function useUnloadFileValueArchiveMutation (
   documentId: Ref<string | null>,
-  sheetId: Ref<string>,
+  sheetId: Ref<number>,
   cell: Ref<CellType>
 ) {
   const { mutate } = useMutation<

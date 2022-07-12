@@ -1,0 +1,24 @@
+[
+  {
+    "model": "dcis.Status",
+    "pk": 1,
+    "fields": {
+      "name": "Черновик",
+      "edit": true
+    }
+  },
+  {
+    "model": "dcis.Status",
+    "pk": 2,
+    "fields": {
+      "name": "Согласовано"
+    }
+  },
+  {
+    "model": "dcis.Status",
+    "pk": 3,
+    "fields": {
+      "name": "Утверждено"
+    }
+  }
+]

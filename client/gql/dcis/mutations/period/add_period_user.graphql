@@ -1,0 +1,38 @@
+#import "../../fragments/period_group_fields.graphql"
+#import "../../fragments/privilege_fields.graphql"
+#import "../../../core/fragments/user_fields.graphql"
+
+mutation AddPeriodUser($userId: ID!, $periodId: ID!, $periodGroupIds: [ID!]!, $privilegesIds: [ID!]!) {
+  changeUserPeriodGroups(input: {
+    userId: $userId,
+    periodGroupIds: $periodGroupIds
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    periodGroups {
+       ...PeriodGroupFields
+    }
+    user {
+      ...UserFields
+    }
+  }
+  changeUserPeriodPrivileges(input: {
+    userId: $userId,
+    periodId: $periodId,
+    privilegesIds: $privilegesIds
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    privileges {
+      ...PrivilegesFields
+    }
+  }
+}

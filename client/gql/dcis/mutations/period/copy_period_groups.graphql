@@ -1,0 +1,19 @@
+#import "../../fragments/period_group_fields.graphql"
+
+mutation CopyPeriodGroups($periodId: ID!, $selectedPeriodId: ID!, $periodGroupIds: [ID!]!) {
+  copyPeriodGroups(input: {
+    periodId: $periodId,
+    selectedPeriodId: $selectedPeriodId,
+    periodGroupIds: $periodGroupIds
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    periodGroups {
+      ...PeriodGroupFields
+    }
+  }
+}

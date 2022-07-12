@@ -1,30 +1,30 @@
 <template lang="pug">
-  v-autocomplete(
-    v-model="selectedUsers"
-    v-stream:update:search-input="searchStreamUsers$"
-    v-bind="$attrs"
-    :items="users"
-    :loading="$apollo.queries.users.loading"
-    :filter="filterUsers"
-    :label="$t('ac.users.components.changeUsers.users')"
-    item-text="name"
-    item-value="id"
-    multiple
-    clearable
-    return-object
-    hide-no-data
-    hide-selected
-  )
-    template(#selection="{ item }")
-      v-chip(@click:close="selectedUsers.splice(selectedUsers.indexOf(item), 1)" close)
-        avatar-dialog(:item="item" left)
-        | {{ item.lastName }} {{ item.firstName }} {{ item.sirName }}
-    template(#item="{ item }")
-      v-list-item-avatar
-        avatar-dialog(:item="item")
-      v-list-item-content
-        v-list-item-title {{ item.lastName }} {{ item.firstName }} {{ item.sirName }}
-        v-list-item-subtitle {{ item.username }}
+v-autocomplete(
+  v-model="selectedUsers"
+  v-stream:update:search-input="searchStreamUsers$"
+  v-bind="$attrs"
+  :items="users"
+  :loading="$apollo.queries.users.loading"
+  :filter="filterUsers"
+  :label="$t('ac.users.components.changeUsers.users')"
+  item-text="name"
+  item-value="id"
+  multiple
+  clearable
+  return-object
+  hide-no-data
+  hide-selected
+)
+  template(#selection="{ item }")
+    v-chip(@click:close="selectedUsers.splice(selectedUsers.indexOf(item), 1)" close)
+      avatar-dialog(:item="item" left)
+      | {{ item.lastName }} {{ item.firstName }} {{ item.sirName }}
+  template(#item="{ item }")
+    v-list-item-avatar
+      avatar-dialog(:item="item")
+    v-list-item-content
+      v-list-item-title {{ item.lastName }} {{ item.firstName }} {{ item.sirName }}
+      v-list-item-subtitle {{ item.username }}
 </template>
 
 <script lang="ts">

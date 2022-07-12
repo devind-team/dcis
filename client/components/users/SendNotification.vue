@@ -1,9 +1,9 @@
 <template lang="pug">
-  v-tooltip(bottom)
-    template(v-slot:activator="{ on }")
-      v-btn(v-on="on" icon)
-        v-icon mdi-bell-ring
-    span {{ $t('ac.users.components.sendNotification.sendNotification') }}
+v-tooltip(bottom)
+  template(v-slot:activator="{ on }")
+    v-btn(v-on="on" icon)
+      v-icon mdi-bell-ring
+  span {{ $t('ac.users.components.sendNotification.sendNotification') }}
 </template>
 
 <script lang="ts">

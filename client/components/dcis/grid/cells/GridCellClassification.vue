@@ -1,35 +1,35 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="600px" scrollable)
-    template(#activator="{ on }")
-      div(v-on="on") {{ value }}
-    v-card(:loading="loading")
-      v-card-title {{ $t('dcis.grid.changeValue') }}
+v-dialog(v-model="active" width="600px" scrollable)
+  template(#activator="{ on }")
+    div(v-on="on") {{ value }}
+  v-card(:loading="loading")
+    v-card-title {{ $t('dcis.grid.changeValue') }}
+      v-spacer
+      v-btn(@click="close" icon)
+        v-icon mdi-close
+    v-card-text
+      v-text-field(
+        v-model="search"
+        :label="$t('search')"
+        :hint="$t('shownOf', { count, totalCount })"
+        autofocus
+        persistent-hint
+        flat
+        clearable
+      )
+    v-divider
+    template(v-if="!loading && classifications.length === 0")
+      v-card-text(style="height: 248px;")
+        v-textarea(v-model="name" label="Комментарий" success)
+      v-card-actions
         v-spacer
-        v-btn(@click="close" icon)
-          v-icon mdi-close
-      v-card-text
-        v-text-field(
-          v-model="search"
-          :label="$t('search')"
-          :hint="$t('shownOf', { count, totalCount })"
-          autofocus
-          persistent-hint
-          flat
-          clearable
-        )
-      v-divider
-      template(v-if="!loading && classifications.length === 0")
-        v-card-text(style="height: 248px;")
-          v-textarea(v-model="name" label="Комментарий" success)
-        v-card-actions
-          v-spacer
-          v-btn(@click="mutate({ code: search, name })" color="primary") Добавить
-      v-card-text(v-else style="height: 300px;")
-        v-list
-          v-list-item(v-for="classification in classifications" :key="classification.id" @click="setValue(classification)")
-            v-list-item-content
-              v-list-item-title {{ classification.code }}
-              .caption {{ classification.name }}
+        v-btn(@click="mutate({ code: search, name })" color="primary") Добавить
+    v-card-text(v-else style="height: 300px;")
+      v-list
+        v-list-item(v-for="classification in classifications" :key="classification.id" @click="setValue(classification)")
+          v-list-item-content
+            v-list-item-title {{ classification.code }}
+            .caption {{ classification.name }}
 </template>
 
 <script lang="ts">

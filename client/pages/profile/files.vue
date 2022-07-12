@@ -1,53 +1,53 @@
 <template lang="pug">
-  v-card
-    v-card-title {{ $t('name') }}
-    v-card-text
-      v-row(align="center")
-        v-col(cols="12")
-          v-btn(@click="addFilesHandle" color="primary")
-            v-icon(left) mdi-upload
-            | {{ $t('profile.files.downloadFiles') }}
-      v-row
-        v-col(cols="12" sm="6")
-          v-text-field(v-model="search" :label="$t('search')" prepend-icon="mdi-magnify" clearable)
-        v-col.text-right(cols="12" sm="6") {{ $t('profile.files.shownOf', { count, totalCount }) }}
-      v-row
-        v-col
-         v-data-table(
-            :headers="headers"
-            :items="files"
-            :loading="loading"
-            disable-pagination
-            hide-default-footer
-          )
-            template(#item.name="{ item }")
-              a(:href="`/${item.src}`" target="__blank") {{ item.name }}
-            template(#item.updated="{ item }") {{ $filters.dateTimeHM(item.updatedAt) }}
-            template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('profile.files.kB') }}
-            template(#item.actions="{ item }")
-              text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changeFileMutate({ fileId: item.id, field: 'name', value: $event }).then()")
-                v-tooltip(bottom)
-                  template(#activator="{ on: onTooltipEdit }")
-                    v-btn(v-on="{...onMenu, ...onTooltipEdit}" icon color="success")
-                      v-icon mdi-pencil
-                  span {{ $t('profile.files.changeName') }}
-              v-btn(v-if="item.deleted" @click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'false' }).then()" icon color="warning")
-                v-icon mdi-delete-restore
-              v-tooltip(v-else bottom)
-                template(#activator="{ on: onTooltip }")
-                  v-menu(bottom)
-                    template(#activator="{ on: onMenu }")
-                      v-btn(v-on="{...onTooltip, ...onMenu}" icon color="red")
-                        v-icon mdi-delete
-                    v-card
-                      v-card-text {{ $t('profile.files.deletingFile') }}
-                      v-card-actions
-                        v-btn(
-                          v-if="hasPerm('devind_core.delete_file')"
-                          @click="deleteFileMutate({ fileId: item.id }).then()" color="error"
-                        ) {{ $t('profile.files.delete') }}
-                        v-btn(@click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'true' }).then()" color="warning") {{ $t('profile.files.delete') }}
-                span {{ $t('profile.files.deleteFile') }}
+v-card
+  v-card-title {{ $t('name') }}
+  v-card-text
+    v-row(align="center")
+      v-col(cols="12")
+        v-btn(@click="addFilesHandle" color="primary")
+          v-icon(left) mdi-upload
+          | {{ $t('profile.files.downloadFiles') }}
+    v-row
+      v-col(cols="12" sm="6")
+        v-text-field(v-model="search" :label="$t('search')" prepend-icon="mdi-magnify" clearable)
+      v-col.text-right(cols="12" sm="6") {{ $t('profile.files.shownOf', { count, totalCount }) }}
+    v-row
+      v-col
+       v-data-table(
+          :headers="headers"
+          :items="files"
+          :loading="loading"
+          disable-pagination
+          hide-default-footer
+        )
+          template(#item.name="{ item }")
+            a(:href="`/${item.src}`" target="__blank") {{ item.name }}
+          template(#item.updated="{ item }") {{ $filters.dateTimeHM(item.updatedAt) }}
+          template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('profile.files.kB') }}
+          template(#item.actions="{ item }")
+            text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changeFileMutate({ fileId: item.id, field: 'name', value: $event }).then()")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltipEdit }")
+                  v-btn(v-on="{...onMenu, ...onTooltipEdit}" icon color="success")
+                    v-icon mdi-pencil
+                span {{ $t('profile.files.changeName') }}
+            v-btn(v-if="item.deleted" @click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'false' }).then()" icon color="warning")
+              v-icon mdi-delete-restore
+            v-tooltip(v-else bottom)
+              template(#activator="{ on: onTooltip }")
+                v-menu(bottom)
+                  template(#activator="{ on: onMenu }")
+                    v-btn(v-on="{...onTooltip, ...onMenu}" icon color="red")
+                      v-icon mdi-delete
+                  v-card
+                    v-card-text {{ $t('profile.files.deletingFile') }}
+                    v-card-actions
+                      v-btn(
+                        v-if="hasPerm('devind_core.delete_file')"
+                        @click="deleteFileMutate({ fileId: item.id }).then()" color="error"
+                      ) {{ $t('profile.files.delete') }}
+                      v-btn(@click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'true' }).then()" color="warning") {{ $t('profile.files.delete') }}
+              span {{ $t('profile.files.deleteFile') }}
 </template>
 
 <script lang="ts">

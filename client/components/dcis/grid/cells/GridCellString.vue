@@ -1,13 +1,13 @@
 <template lang="pug">
-  input(
-    v-focus
-    :value="value"
-    type="text"
-    @keyup.esc="$emit('cancel')"
-    @keyup.enter="$event.target.blur()"
-    @keyup.tab.stop="$event.target.blur()"
-    @blur="$emit('set-value', $event.target.value)"
-  )
+input(
+  v-focus
+  :value="value"
+  type="text"
+  @keyup.esc="$emit('cancel')"
+  @keyup.enter="$event.target.blur()"
+  @keyup.tab.stop="$event.target.blur()"
+  @blur="$emit('set-value', $event.target.value)"
+)
 </template>
 
 <script lang="ts">

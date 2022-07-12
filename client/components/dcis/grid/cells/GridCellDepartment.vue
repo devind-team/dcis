@@ -1,17 +1,17 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="600px" persistent scrollable)
-    template(#activator="{ on }")
-      div(v-on="on") {{ value }}
-    v-card
-      v-card-title {{ t('dcis.grid.changeValue') }}
-        v-spacer
-        v-btn(@click="cancel" icon)
-          v-icon mdi-close
-      v-card-text(style="height: 60vh")
-        v-list
-          v-list-item(v-for="department in departments" :key="department.id" @click="setValue(department)")
-            v-list-item-content
-              v-list-item-title {{ department.code }} {{ department.name }}
+v-dialog(v-model="active" width="600px" persistent scrollable)
+  template(#activator="{ on }")
+    div(v-on="on") {{ value }}
+  v-card
+    v-card-title {{ t('dcis.grid.changeValue') }}
+      v-spacer
+      v-btn(@click="cancel" icon)
+        v-icon mdi-close
+    v-card-text(style="height: 60vh")
+      v-list
+        v-list-item(v-for="department in departments" :key="department.id" @click="setValue(department)")
+          v-list-item-content
+            v-list-item-title {{ department.code }} {{ department.name }}
 </template>
 
 <script lang="ts">

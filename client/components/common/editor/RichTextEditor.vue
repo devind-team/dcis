@@ -1,36 +1,36 @@
 <template lang="pug">
-  client-only
-    v-card(:class="{ 'fullscreen': isFullscreen }")
-      v-card-title(v-if="!preview" flat dense)
-        template(v-for="action in toolbarActions")
-          component(:is="action.component.type" v-bind="action.render" :editor="editor")
-        v-spacer
-        v-tooltip(top)
-          template(#activator="{ on, attrs }")
-            v-btn(v-on="on" v-bind="attrs" @click="editor.commands.undo()" icon)
-              v-icon mdi-undo
-          span {{$t('common.richTextEditor.undo')}}
-        v-tooltip(top)
-          template(#activator="{ on, attrs }")
-            v-btn(v-on="on" v-bind="attrs" @click="editor.commands.redo()" icon)
-              v-icon mdi-redo
-          span {{$t('common.richTextEditor.redo')}}
-        v-tooltip(top)
-          template(#activator="{ on, attrs }")
-            v-btn(v-on="on" v-bind="attrs" @click="toggleFullscreen" icon)
-              v-icon {{`${isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'}`}}
-          span {{`${isFullscreen ? $t('common.richTextEditor.fullscreenExit') : $t('common.richTextEditor.fullscreen')}`}}
-      v-card-text
-        bubble-menu(v-if="editor" :shouldShow="() => true" :editor="editor")
-          v-card
-            template(v-for="action in bubbleActions")
-              component(:is="action.component.type" v-bind="action.render" :editor="editor")
-        editor-typography
-          v-sheet(v-show="!preview")
-            editor-content.editor_content(:editor="editor")
-          v-sheet(v-show="preview" v-html="editor ? editor.getHTML() : ''")
-      v-card-actions
-        v-checkbox(v-model="preview" :label="$t('common.richTextEditor.preview')")
+client-only
+  v-card(:class="{ 'fullscreen': isFullscreen }")
+    v-card-title(v-if="!preview" flat dense)
+      template(v-for="action in toolbarActions")
+        component(:is="action.component.type" v-bind="action.render" :editor="editor")
+      v-spacer
+      v-tooltip(top)
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" @click="editor.commands.undo()" icon)
+            v-icon mdi-undo
+        span {{$t('common.richTextEditor.undo')}}
+      v-tooltip(top)
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" @click="editor.commands.redo()" icon)
+            v-icon mdi-redo
+        span {{$t('common.richTextEditor.redo')}}
+      v-tooltip(top)
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" @click="toggleFullscreen" icon)
+            v-icon {{`${isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'}`}}
+        span {{`${isFullscreen ? $t('common.richTextEditor.fullscreenExit') : $t('common.richTextEditor.fullscreen')}`}}
+    v-card-text
+      bubble-menu(v-if="editor" :shouldShow="() => true" :editor="editor")
+        v-card
+          template(v-for="action in bubbleActions")
+            component(:is="action.component.type" v-bind="action.render" :editor="editor")
+      editor-typography
+        v-sheet(v-show="!preview")
+          editor-content.editor_content(:editor="editor")
+        v-sheet(v-show="preview" v-html="editor ? editor.getHTML() : ''")
+    v-card-actions
+      v-checkbox(v-model="preview" :label="$t('common.richTextEditor.preview')")
 </template>
 
 <script lang="ts">

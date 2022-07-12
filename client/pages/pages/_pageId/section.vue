@@ -1,5 +1,5 @@
 <template lang="pug">
-  nuxt-child(v-if="!loading" :bread-crumbs="bc" :page="page")
+nuxt-child(v-if="!loading" :bread-crumbs="bc" :page="page")
 </template>
 
 <script lang="ts">

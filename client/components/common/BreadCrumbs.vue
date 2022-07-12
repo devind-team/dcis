@@ -1,9 +1,9 @@
 <template lang="pug">
-  v-container(v-bind="$attrs")
-    v-breadcrumbs.px-0(:items="links")
-      template(#divider)
-        v-icon mdi-chevron-double-right
-    slot
+v-container(v-bind="$attrs")
+  v-breadcrumbs.px-0(:items="links")
+    template(#divider)
+      v-icon mdi-chevron-double-right
+  slot
 </template>
 
 <script lang="ts">

@@ -1,16 +1,16 @@
 <template lang="pug">
-  bread-crumbs(:items="bc")
-    v-row(v-if="!loading")
-      v-col.mx-auto(md="8")
-        notification-page-view(
-          v-if="notificationKinkView[notification.notice.kind] === 'page'"
-          :page="notification.notice.page"
-        )
-        notification-mailing-view(
-          v-else-if="notificationKinkView[notification.notice.kind] === 'mailing'"
-          :mailing="notification.notice.mailing"
-        )
-    v-progress-circular(v-else color="primary" indeterminate)
+bread-crumbs(:items="bc")
+  v-row(v-if="!loading")
+    v-col.mx-auto(md="8")
+      notification-page-view(
+        v-if="notificationKinkView[notification.notice.kind] === 'page'"
+        :page="notification.notice.page"
+      )
+      notification-mailing-view(
+        v-else-if="notificationKinkView[notification.notice.kind] === 'mailing'"
+        :mailing="notification.notice.mailing"
+      )
+  v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">

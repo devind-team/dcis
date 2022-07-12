@@ -1,12 +1,12 @@
 <template lang="pug">
-  v-navigation-drawer(v-model="drawer" app temporary style="z-index: 11")
-    v-list
-      v-list-item(
-        v-for="category in categories"
-        :key="category.id"
-        :to="localePath({ name: 'categories-categoryId', params: { categoryId: category.id } })"
-        :class="{'v-list-item--active': activeCategories.map(e => e.id).includes(category.id) }"
-        text) {{ category.text }}
+v-navigation-drawer(v-model="drawer" app temporary style="z-index: 11")
+  v-list
+    v-list-item(
+      v-for="category in categories"
+      :key="category.id"
+      :to="localePath({ name: 'categories-categoryId', params: { categoryId: category.id } })"
+      :class="{'v-list-item--active': activeCategories.map(e => e.id).includes(category.id) }"
+      text) {{ category.text }}
 </template>
 
 <script lang="ts">

@@ -1,17 +1,17 @@
 <template lang="pug">
-  v-menu(left bottom)
-    template(#activator="{ on }")
-      v-btn(v-on="on" icon)
-        v-avatar(v-on="on" color="primary")
-          v-img(v-if="!!user.avatar" :src="`/${user.avatar}`")
-          .headline(v-else) {{ user.lastName[0] }}{{ user.firstName[0] }}
-    v-list
-      template(v-for="item in items")
-        v-list-item(v-if="!!item.permissions ? hasPerm(item.permissions) : true" :key="item.name" :to="localePath({ name: item.path })")
-          v-list-item-icon
-            v-icon mdi-{{ item.icon }}
-          v-list-item-content
-            v-list-item-title {{ $t(`avatarMenu.${item.name}`) }}
+v-menu(left bottom)
+  template(#activator="{ on }")
+    v-btn(v-on="on" icon)
+      v-avatar(v-on="on" color="primary")
+        v-img(v-if="!!user.avatar" :src="`/${user.avatar}`")
+        .headline(v-else) {{ user.lastName[0] }}{{ user.firstName[0] }}
+  v-list
+    template(v-for="item in items")
+      v-list-item(v-if="!!item.permissions ? hasPerm(item.permissions) : true" :key="item.name" :to="localePath({ name: item.path })")
+        v-list-item-icon
+          v-icon mdi-{{ item.icon }}
+        v-list-item-content
+          v-list-item-title {{ $t(`avatarMenu.${item.name}`) }}
 </template>
 
 <script lang="ts">

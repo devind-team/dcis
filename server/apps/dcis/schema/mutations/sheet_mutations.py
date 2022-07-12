@@ -10,18 +10,17 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
 
-
 from apps.dcis.models import Cell, ColumnDimension, RowDimension, Sheet
+from apps.dcis.permissions import ChangePeriodSheet
 from apps.dcis.schema.types import SheetType, CellType, ChangedCellOption, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.permissions import ChangeSheet
 from apps.dcis.services.sheet_services import (
-    rename_sheet,
     CheckCellOptions,
     add_row_dimension,
     change_cells_option,
     change_column_dimension,
     change_row_dimension,
     delete_row_dimension,
+    rename_sheet,
 )
 
 
@@ -39,7 +38,7 @@ class RenameSheetMutation(BaseMutation):
     cells = graphene.List(CellType, description='Измененные ячейки')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeSheet,))
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str):
         sheet, cells = rename_sheet(get_object_or_404(Sheet, pk=sheet_id), name)
         return RenameSheetMutation(
@@ -97,7 +96,7 @@ class AddRowDimensionMutation(BaseMutation):
     """Добавление строки."""
 
     class Input:
-        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
         document_id = graphene.ID(description='Идентификатор документа')
         parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')

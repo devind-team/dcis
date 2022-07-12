@@ -1,38 +1,38 @@
 <template lang="pug">
-  mutation-modal-form(
-    @close="$emit('close')"
-    :header="String(t('dcis.grid.rowSettings.header'))"
-    :subheader="String(t('dcis.grid.rowSettings.subheader', { updatedAt: dateTimeHM(row.updatedAt) }))"
-    :mutation="changeRowDimensionMutation"
-    :variables="variables"
-    :optimistic-response="optimisticResponse"
-    :update="update"
-    :button-text="String(t('dcis.grid.rowSettings.buttonText'))"
-    i18n-path="dcis.grid.rowSettings"
-    mutation-name="changeRowDimension"
-  )
-    template(#activator="{ on }")
-      slot(name="activator" :on="on")
-    template(#form)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String(t('dcis.grid.rowSettings.height'))"
-        rules="required|integer|min_value:0"
+mutation-modal-form(
+  @close="$emit('close')"
+  :header="String(t('dcis.grid.rowSettings.header'))"
+  :subheader="String(t('dcis.grid.rowSettings.subheader', { updatedAt: dateTimeHM(row.updatedAt) }))"
+  :mutation="changeRowDimensionMutation"
+  :variables="variables"
+  :optimistic-response="optimisticResponse"
+  :update="update"
+  :button-text="String(t('dcis.grid.rowSettings.buttonText'))"
+  i18n-path="dcis.grid.rowSettings"
+  mutation-name="changeRowDimension"
+)
+  template(#activator="{ on }")
+    slot(name="activator" :on="on")
+  template(#form)
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String(t('dcis.grid.rowSettings.height'))"
+      rules="required|integer|min_value:0"
+    )
+      v-text-field(
+        v-model="height"
+        :error-messages="errors"
+        :success="valid"
+        :label="t('dcis.grid.rowSettings.height')"
       )
-        v-text-field(
-          v-model="height"
-          :error-messages="errors"
-          :success="valid"
-          :label="t('dcis.grid.rowSettings.height')"
-        )
-      v-checkbox(v-model="fixed" :label="t('dcis.grid.rowSettings.fix')" success)
-      v-checkbox(v-model="hidden" :label="t('dcis.grid.rowSettings.hide')" success)
-      v-checkbox(
-        v-model="dynamic"
-        :label="t('dcis.grid.rowSettings.makeDynamic')"
-        :disabled="!!row.children.length || row.cells.some(cell => cell.rowspan !== 1)"
-        success
-      )
+    v-checkbox(v-model="fixed" :label="t('dcis.grid.rowSettings.fix')" success)
+    v-checkbox(v-model="hidden" :label="t('dcis.grid.rowSettings.hide')" success)
+    v-checkbox(
+      v-model="dynamic"
+      :label="t('dcis.grid.rowSettings.makeDynamic')"
+      :disabled="!!row.children.length || row.cells.some(cell => cell.rowspan !== 1)"
+      success
+    )
 </template>
 
 <script lang="ts">

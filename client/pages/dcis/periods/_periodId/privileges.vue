@@ -1,14 +1,14 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) Привилегии сбора {{ period.name }}
-    v-card(flat)
-      v-card-text
-        v-data-table(
-          :items="privileges"
-          :headers="headers"
-          :loading="loading"
-          hide-default-footer
-        )
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) Привилегии сбора {{ period.name }}
+  v-card(flat)
+    v-card-text
+      v-data-table(
+        :items="privileges"
+        :headers="headers"
+        :loading="loading"
+        hide-default-footer
+      )
 </template>
 
 <script lang="ts">
