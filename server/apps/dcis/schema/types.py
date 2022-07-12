@@ -17,7 +17,8 @@ from apps.dcis.models import (
     Attribute, AttributeValue, Document,
     DocumentStatus, Limitation, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
-    Project, Sheet, Status, Value,
+    Project, Sheet, Status,
+    Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -95,6 +96,10 @@ class PeriodType(DjangoObjectType):
     divisions = graphene.List(lambda: DivisionModelType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
 
+    can_add_document = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь добавлять документы в период'
+    )
     can_change_divisions = graphene.Boolean(
         required=True,
         description='Может ли пользователь изменять дивизионы периода'
@@ -118,10 +123,6 @@ class PeriodType(DjangoObjectType):
     can_delete = graphene.Boolean(
         required=True,
         description='Может ли пользователь удалять период'
-    )
-    can_add_document = graphene.Boolean(
-        required=True,
-        description='Может ли пользователь добавлять документы в период'
     )
 
     class Meta:
@@ -156,6 +157,10 @@ class PeriodType(DjangoObjectType):
         return period.periodgroup_set.all()
 
     @staticmethod
+    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
+        return AddDocumentBase.has_object_permission(info.context, period)
+
+    @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
         return ChangePeriodDivisionsBase.has_object_permission(info.context, period)
 
@@ -178,10 +183,6 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
         return DeletePeriodBase.has_object_permission(info.context, period)
-
-    @staticmethod
-    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase.has_object_permission(info.context, period)
 
 
 class DivisionModelType(graphene.ObjectType):
@@ -462,7 +463,8 @@ class CellType(graphene.ObjectType):
 
 
 class ValueType(DjangoObjectType):
-    """Тип значений"""
+    """Тип значения."""
+
     document = graphene.Field(DocumentType, description='Документ')
     payload = graphene.String(description='Дополнительное поле')
     sheet_id = graphene.Int(required=True, description='Идентификатор листа')

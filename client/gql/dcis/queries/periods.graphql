@@ -3,5 +3,6 @@
 query Periods($projectId: ID!) {
   periods(projectId: $projectId) {
     ...PeriodFields
+    canChangeSheet
   }
 }

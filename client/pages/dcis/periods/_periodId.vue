@@ -57,12 +57,21 @@ export default defineComponent({
           icon: 'account-multiple'
         }
       ]
-      if (!loading.value && (period.value.canChangeSettings || period.value.canDelete)) {
-        result.push({
-          title: t('dcis.periods.links.settings') as string,
-          to: 'dcis-periods-periodId-settings',
-          icon: 'cogs'
-        })
+      if (period.value) {
+        if (period.value.canChangeSheet) {
+          result.push({
+            title: t('dcis.periods.links.sheets') as string,
+            to: 'dcis-periods-periodId-sheets',
+            icon: 'table'
+          })
+        }
+        if (period.value.canChangeSettings || period.value.canDelete) {
+          result.push({
+            title: t('dcis.periods.links.settings') as string,
+            to: 'dcis-periods-periodId-settings',
+            icon: 'cogs'
+          })
+        }
       }
       return result
     })
@@ -85,7 +94,7 @@ export default defineComponent({
       ]
     })
 
-    return { period, loading, drawer, links, bc }
+    return { route, period, loading, drawer, links, bc }
   }
 })
 </script>

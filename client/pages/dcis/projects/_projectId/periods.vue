@@ -21,9 +21,8 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, onMounted, ref, useRoute, useRouter, toRef } from '#app'
+import { defineComponent, onMounted, useRoute, useRouter } from '#app'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
-import { useAuthStore } from '~/stores'
 import { ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -40,16 +39,12 @@ export default defineComponent({
   },
   setup () {
     const { t } = useI18n()
-    const authStore = useAuthStore()
     const router = useRouter()
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     const { localePath } = useI18n()
     const { defaultClient } = useApolloHelpers()
 
-    const hasPerm = toRef(authStore, 'hasPerm')
-    const name = ref<string>('')
-    const file = ref<File | null>(null)
     const statuses = Object.fromEntries(
       ['preparation', 'open', 'close'].map(e => ([e, t(`dcis.periods.statuses.${e}`) as string]))
     )
@@ -84,7 +79,7 @@ export default defineComponent({
       }
     })
 
-    return { t, name, file, headers, hasPerm, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
+    return { t, headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>
