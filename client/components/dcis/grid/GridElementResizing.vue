@@ -16,7 +16,7 @@ import { elementPositionToStyle } from '~/services/grid'
 export default defineComponent({
   props: {
     message: { type: String, required: true },
-    elementResizing: { type: Object as PropType<ElementResizingType>, required: true },
+    elementResizing: { type: Object as PropType<ElementResizingType>, required: true }
   },
   setup (props) {
     const style = computed<Record<string, string>>(() => elementPositionToStyle(props.elementResizing.position))

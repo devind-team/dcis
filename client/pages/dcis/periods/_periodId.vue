@@ -31,7 +31,7 @@ export default defineComponent({
       changeUpdate
     } = usePeriodQuery(route.params.periodId)
     provide('periodUpdate', update)
-    provide('changeUpdate', changeUpdate)
+    provide('periodChangeUpdate', changeUpdate)
 
     const drawer = ref<boolean>(false)
     const links = computed<LinksType[]>(() => {

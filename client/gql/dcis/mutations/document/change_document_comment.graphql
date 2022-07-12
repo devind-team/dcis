@@ -7,5 +7,4 @@ mutation ChangeDocumentComment($documentId: ID!, $comment: String!) {
     }
     __typename
   }
-
 }

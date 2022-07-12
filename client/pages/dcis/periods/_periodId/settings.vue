@@ -148,7 +148,7 @@ export default defineComponent({
       router.push(localePath({ name: 'dcis-periods-periodId-documents' }))
     }
 
-    const changeUpdate: ChangePeriodUpdateType = inject<ChangePeriodUpdateType>('changeUpdate')
+    const periodChangeUpdate = inject<ChangePeriodUpdateType>('periodChangeUpdate')
 
     const name = ref<string>(props.period.name)
     const multiple = ref<boolean>(props.period.multiple)
@@ -179,7 +179,7 @@ export default defineComponent({
     const changePeriodUpdate = (cache: DataProxy, result: ChangePeriodResultMutation) => {
       const { success } = result.data.changePeriod
       if (success) {
-        changeUpdate(cache, result)
+        periodChangeUpdate(cache, result)
         successUpdate.value = true
         promiseTimeout(5000).then(() => (successUpdate.value = false))
       }

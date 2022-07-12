@@ -27,8 +27,6 @@ mutation ChangePeriod(
     }
     period {
       ...PeriodFields
-      user { ...UserFields }
-      project { ...ProjectFields }
     }
     __typename
   }

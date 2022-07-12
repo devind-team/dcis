@@ -93,9 +93,7 @@ export function useCommonQuery<
   ): void => {
     update(cache, result, (dataCache) => {
       const mutationResult = getMutationResult(result)
-      console.log(mutationResult)
       const dataKey = Object.keys(dataCache)[0]
-      console.log(dataKey)
       dataCache[dataKey] = mutationResult[dataKey]
       return dataCache
     })

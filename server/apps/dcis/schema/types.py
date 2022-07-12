@@ -95,6 +95,7 @@ class PeriodType(DjangoObjectType):
     methodical_support = DjangoListField(FileType, description='Методическая поддержка')
     divisions = graphene.List(lambda: DivisionModelType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
+    sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
     can_add_document = graphene.Boolean(
         required=True,
@@ -138,9 +139,8 @@ class PeriodType(DjangoObjectType):
             'created_at',
             'updated_at',
             'user',
-            'period_groups',
             'project',
-            'methodical_support'
+            'methodical_support',
         )
         convert_choices_to_enum = False
 
@@ -155,6 +155,11 @@ class PeriodType(DjangoObjectType):
     @resolver_hints(model_field='periodgroup_set')
     def resolve_period_groups(period: Period, info: ResolveInfo):
         return period.periodgroup_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='sheet_set')
+    def resolve_sheets(period: Period, info: ResolveInfo) -> QuerySet[Sheet]:
+        return period.sheet_set.all()
 
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:

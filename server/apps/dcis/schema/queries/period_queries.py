@@ -122,7 +122,7 @@ class PeriodQueries(graphene.ObjectType):
         document_ids: list[str]
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        info.context.check_object_permissions(info.context, sheet)
+        info.context.check_object_permissions(info.context, sheet.period)
         return DocumentsSheetUnloader(
             sheet=sheet,
             document_ids=[from_global_id(document_id)[1] for document_id in document_ids],

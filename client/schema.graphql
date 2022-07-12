@@ -2915,6 +2915,8 @@ type PeriodType {
   privately: Boolean!
   """Проект"""
   project: ProjectType
+  """Листы"""
+  sheets: [BaseSheetType]!
   """Дата начала"""
   start: Date
   """Статус проекта"""

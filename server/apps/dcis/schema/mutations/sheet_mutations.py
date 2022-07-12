@@ -36,7 +36,9 @@ class RenameSheetMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str):
-        sheet, cells = rename_sheet(get_object_or_404(Sheet, pk=sheet_id), name)
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        info.context.check_object_permissions(info.context, sheet.period)
+        sheet, cells = rename_sheet(sheet, name)
         return RenameSheetMutation(
             sheet=sheet,
             cells=cells
