@@ -304,7 +304,7 @@ input AddRowDimensionMutationInput {
   """Идентификатор родительской строки"""
   parentId: ID
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
 }
 
 """Добавление строки."""
@@ -841,7 +841,7 @@ type ChangeFileMutationPayload {
 input ChangeFileValueMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
-  columnId: Int!
+  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
   """Новые файлы"""
@@ -849,9 +849,9 @@ input ChangeFileValueMutationInput {
   """Оставшиеся файлы"""
   remainingFiles: [ID!]!
   """Идентификатор строки"""
-  rowId: Int!
+  rowId: ID!
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
   """Значение"""
   value: String!
 }
@@ -1375,12 +1375,12 @@ type ChangeUserPropsMutationPayload {
 
 input ChangeValueMutationInput {
   """Идентификатор ячейки"""
-  cellId: Int!
+  cellId: ID!
   clientMutationId: String
   """Идентификатор документа"""
   documentId: ID!
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
   """Значение"""
   value: String!
 }
@@ -3226,7 +3226,7 @@ type Query {
     """Идентификатор документа"""
     documentId: ID
     """Идентификатор листа"""
-    sheetId: Int!
+    sheetId: ID!
   ): SheetType!
   """Статусы"""
   statuses: [StatusType!]
@@ -3258,13 +3258,13 @@ type Query {
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор колонки"""
-    columnId: Int!
+    columnId: ID!
     """Идентификатор документа"""
     documentId: ID!
     """Идентификатор строки"""
-    rowId: Int!
+    rowId: ID!
     """Идентификатор листа"""
-    sheetId: Int!
+    sheetId: ID!
   ): [FileType!]
 }
 
@@ -3810,15 +3810,15 @@ type UnloadDocumentMutationPayload {
 input UnloadFileValueArchiveMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
-  columnId: Int!
+  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
   """Название архива"""
   name: String!
   """Идентификатор строки"""
-  rowId: Int!
+  rowId: ID!
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
 }
 
 """Выгрузка архива значения ячейки типа `Файл`."""

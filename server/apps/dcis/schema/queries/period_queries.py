@@ -72,7 +72,7 @@ class PeriodQueries(graphene.ObjectType):
 
     sheet = graphene.Field(
         SheetType,
-        sheet_id=graphene.Int(required=True, description='Идентификатор листа'),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
         document_id=graphene.ID(description='Идентификатор документа'),
         required=True,
         description='Выгрузка листа'
@@ -80,9 +80,9 @@ class PeriodQueries(graphene.ObjectType):
     value_files = DjangoListField(
         FileType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        sheet_id=graphene.Int(required=True, description='Идентификатор листа'),
-        column_id=graphene.Int(required=True, description='Идентификатор колонки'),
-        row_id=graphene.Int(required=True, description='Идентификатор строки'),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        column_id=graphene.ID(required=True, description='Идентификатор колонки'),
+        row_id=graphene.ID(required=True, description='Идентификатор строки'),
         description='Файлы значения ячейки типа `Файл`'
     )
 
@@ -125,7 +125,7 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_sheet(root: Any, info: ResolveInfo, sheet_id: int, document_id: str | None = None):
+    def resolve_sheet(root: Any, info: ResolveInfo, sheet_id: str, document_id: str | None = None):
         return SheetUploader(
             sheet=get_object_or_404(Sheet, pk=sheet_id),
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
@@ -138,9 +138,9 @@ class PeriodQueries(graphene.ObjectType):
         root,
         info: ResolveInfo,
         document_id: str,
-        sheet_id: int,
-        column_id: int,
-        row_id: int,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
     ):
         value = Value.objects.filter(
             document_id=from_global_id(document_id)[1],
@@ -148,6 +148,4 @@ class PeriodQueries(graphene.ObjectType):
             column_id=column_id,
             row_id=row_id
         ).first()
-        if value is not None:
-            return get_file_value_files(value)
-        return []
+        return get_file_value_files(value) if value is not None else []

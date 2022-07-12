@@ -2,7 +2,7 @@
 #import "../fragments/column_dimension_fields.graphql"
 #import "../fragments/row_dimension_fields.graphql"
 
-query Sheet($sheetId: Int!, $documentId: ID) {
+query Sheet($sheetId: ID!, $documentId: ID) {
   sheet(sheetId: $sheetId, documentId: $documentId) {
     ...SheetFields
     columns {

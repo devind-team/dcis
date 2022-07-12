@@ -25,8 +25,8 @@ class ChangeValueMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Идентификатор документа')
-        cell_id = graphene.Int(required=True, description='Идентификатор ячейки')
-        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+        cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
         value = graphene.String(required=True, description='Значение')
 
     values = graphene.List(ValueType, description='Измененные ячейки')
@@ -38,8 +38,8 @@ class ChangeValueMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         document_id: str,
-        cell_id: int,
-        sheet_id: int,
+        cell_id: str,
+        sheet_id: str,
         value: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
@@ -60,9 +60,9 @@ class ChangeFileValueMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
-        column_id = graphene.Int(required=True, description='Идентификатор колонки')
-        row_id = graphene.Int(required=True, description='Идентификатор строки')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        column_id = graphene.ID(required=True, description='Идентификатор колонки')
+        row_id = graphene.ID(required=True, description='Идентификатор строки')
         value = graphene.String(required=True, description='Значение')
         remaining_files = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Оставшиеся файлы')
         new_files = graphene.List(graphene.NonNull(Upload), required=True, description='Новые файлы')
@@ -77,9 +77,9 @@ class ChangeFileValueMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         document_id: str,
-        sheet_id: int,
-        column_id: int,
-        row_id: int,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
         value: str,
         remaining_files: list[str],
         new_files: list[InMemoryUploadedFile]
@@ -106,9 +106,9 @@ class UnloadFileValueArchiveMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Идентификатор документа')
-        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
-        column_id = graphene.Int(required=True, description='Идентификатор колонки')
-        row_id = graphene.Int(required=True, description='Идентификатор строки')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        column_id = graphene.ID(required=True, description='Идентификатор колонки')
+        row_id = graphene.ID(required=True, description='Идентификатор строки')
         name = graphene.String(required=True, description='Название архива')
 
     src = graphene.String(description='Ссылка на сгенерированный архив')
@@ -119,9 +119,9 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         document_id: str,
-        sheet_id: int,
-        column_id: int,
-        row_id: int,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
         name: str
     ):
         return UnloadFileValueArchiveMutation(

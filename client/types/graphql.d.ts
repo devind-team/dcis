@@ -329,7 +329,7 @@ export type AddRowDimensionMutationInput = {
   /** Идентификатор родительской строки */
   parentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор листа */
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
 };
 
 /** Добавление строки. */
@@ -899,7 +899,7 @@ export type ChangeFileMutationPayload = {
 export type ChangeFileValueMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор колонки */
-  columnId: Scalars['Int'];
+  columnId: Scalars['ID'];
   /** Идентификатор документа */
   documentId: Scalars['ID'];
   /** Новые файлы */
@@ -907,9 +907,9 @@ export type ChangeFileValueMutationInput = {
   /** Оставшиеся файлы */
   remainingFiles: Array<Scalars['ID']>;
   /** Идентификатор строки */
-  rowId: Scalars['Int'];
+  rowId: Scalars['ID'];
   /** Идентификатор листа */
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
   /** Значение */
   value: Scalars['String'];
 };
@@ -1459,12 +1459,12 @@ export type ChangeUserPropsMutationPayload = {
 
 export type ChangeValueMutationInput = {
   /** Идентификатор ячейки */
-  cellId: Scalars['Int'];
+  cellId: Scalars['ID'];
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор документа */
   documentId: Scalars['ID'];
   /** Идентификатор листа */
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
   /** Значение */
   value: Scalars['String'];
 };
@@ -3973,7 +3973,7 @@ export type QuerySessionsArgs = {
 /** Схема запросов данных. */
 export type QuerySheetArgs = {
   documentId?: InputMaybe<Scalars['ID']>;
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -4024,10 +4024,10 @@ export type QueryUsersArgs = {
 
 /** Схема запросов данных. */
 export type QueryValueFilesArgs = {
-  columnId: Scalars['Int'];
+  columnId: Scalars['ID'];
   documentId: Scalars['ID'];
-  rowId: Scalars['Int'];
-  sheetId: Scalars['Int'];
+  rowId: Scalars['ID'];
+  sheetId: Scalars['ID'];
 };
 
 export type RecoveryPasswordMutationInput = {
@@ -4596,15 +4596,15 @@ export type UnloadDocumentMutationPayload = {
 export type UnloadFileValueArchiveMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор колонки */
-  columnId: Scalars['Int'];
+  columnId: Scalars['ID'];
   /** Идентификатор документа */
   documentId: Scalars['ID'];
   /** Название архива */
   name: Scalars['String'];
   /** Идентификатор строки */
-  rowId: Scalars['Int'];
+  rowId: Scalars['ID'];
   /** Идентификатор листа */
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
 };
 
 /** Выгрузка архива значения ячейки типа `Файл`. */
@@ -5282,7 +5282,7 @@ export type DeleteProjectMutationVariables = Exact<{
 export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddRowDimensionMutationVariables = Exact<{
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
   documentId?: InputMaybe<Scalars['ID']>;
   parentId?: InputMaybe<Scalars['ID']>;
   index: Scalars['Int'];
@@ -5335,9 +5335,9 @@ export type RenameSheetMutation = { __typename?: 'Mutation', renameSheet: { __ty
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];
-  sheetId: Scalars['Int'];
-  columnId: Scalars['Int'];
-  rowId: Scalars['Int'];
+  sheetId: Scalars['ID'];
+  columnId: Scalars['ID'];
+  rowId: Scalars['ID'];
   name: Scalars['String'];
 }>;
 
@@ -5345,9 +5345,9 @@ export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFi
 
 export type ChangeFileValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
-  sheetId: Scalars['Int'];
-  columnId: Scalars['Int'];
-  rowId: Scalars['Int'];
+  sheetId: Scalars['ID'];
+  columnId: Scalars['ID'];
+  rowId: Scalars['ID'];
   value: Scalars['String'];
   remainingFiles: Array<Scalars['ID']> | Scalars['ID'];
   newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
@@ -5357,8 +5357,8 @@ export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue
 
 export type ChangeValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
-  sheetId: Scalars['Int'];
-  cellId: Scalars['Int'];
+  sheetId: Scalars['ID'];
+  cellId: Scalars['ID'];
   value: Scalars['String'];
 }>;
 
@@ -5448,7 +5448,7 @@ export type ProjectsQueryVariables = Exact<{
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } | null> } | null };
 
 export type SheetQueryVariables = Exact<{
-  sheetId: Scalars['Int'];
+  sheetId: Scalars['ID'];
   documentId?: InputMaybe<Scalars['ID']>;
 }>;
 
@@ -5467,9 +5467,9 @@ export type UserPeriodPrivilegesQuery = { __typename?: 'Query', userPeriodPrivil
 
 export type ValueFilesQueryVariables = Exact<{
   documentId: Scalars['ID'];
-  sheetId: Scalars['Int'];
-  columnId: Scalars['Int'];
-  rowId: Scalars['Int'];
+  sheetId: Scalars['ID'];
+  columnId: Scalars['ID'];
+  rowId: Scalars['ID'];
 }>;
 
 export type ValueFilesQuery = { __typename?: 'Query', valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any }> | null };
