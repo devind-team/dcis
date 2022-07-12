@@ -336,6 +336,7 @@ class Value(models.Model):
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
+
     column = models.ForeignKey(ColumnDimension, on_delete=models.CASCADE, help_text='Колонка')
     row = models.ForeignKey(RowDimension, on_delete=models.CASCADE, help_text='Строка')
 
