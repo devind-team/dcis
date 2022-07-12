@@ -1,6 +1,7 @@
 from typing import Any
 
 import graphene
+from devind_core.schema import FileType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -12,11 +13,12 @@ from graphql_relay import from_global_id
 from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Document, DocumentStatus, Sheet, Status
+from apps.dcis.models import Document, DocumentStatus, Sheet, Status, Value
 from apps.dcis.permissions import ViewDocument
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, SheetType, StatusType
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
+from apps.dcis.services.value_services import get_file_value_files
 
 
 class DocumentQueries(graphene.ObjectType):
@@ -46,6 +48,15 @@ class DocumentQueries(graphene.ObjectType):
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
         required=True,
         description='Выгрузка листа с несколькими документами'
+    )
+
+    value_files = DjangoListField(
+        FileType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        column_id=graphene.ID(required=True, description='Идентификатор колонки'),
+        row_id=graphene.ID(required=True, description='Идентификатор строки'),
+        description='Файлы значения ячейки типа `Файл`'
     )
 
     @staticmethod
@@ -80,11 +91,32 @@ class DocumentQueries(graphene.ObjectType):
         document_id: str,
         sheet_id: str
     ) -> list[dict] | dict:
-        document_id = from_global_id(document_id)[1]
-        document = get_object_or_404(Document, pk=document_id)
+        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
         return DocumentSheetUnloader(
             sheet=get_object_or_404(Sheet, pk=sheet_id),
-            document_id=document_id,
+            document_id=document.id,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ViewDocument,))
+    def resolve_value_files(
+        root,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: str,
+        column_id: str,
+        row_id: str,
+    ):
+        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        info.context.check_object_permissions(info.context, document)
+        value = Value.objects.filter(
+            document_id=document.id,
+            sheet_id=sheet_id,
+            column_id=column_id,
+            row_id=row_id
+        ).first()
+        if value is not None:
+            return get_file_value_files(value)
+        return []

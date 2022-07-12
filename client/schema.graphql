@@ -484,6 +484,24 @@ type AuthTokenInfoType {
   tokenType: String
 }
 
+"""Тип листа без структуры."""
+type BaseSheetType {
+  """Комментарий"""
+  comment: String!
+  """Дата добавления"""
+  createdAt: DateTime!
+  """Идентификатор"""
+  id: ID!
+  """Наименование"""
+  name: String!
+  """Период"""
+  period: PeriodType
+  """Позиция"""
+  position: Int!
+  """Дата обновления"""
+  updatedAt: DateTime!
+}
+
 input BudgetClassificationCodeFilterInputType {
   """`Exact` lookup"""
   exact: String
@@ -1928,7 +1946,7 @@ type DocumentType implements Node {
   """Период сбора"""
   period: PeriodType
   """Листы"""
-  sheets: [SheetType]!
+  sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
   """Версия документа"""
@@ -3105,6 +3123,13 @@ type Query {
     """Идентификатор документа"""
     documentId: ID
   ): DocumentType
+  """Выгрузка листа с несколькими документами"""
+  documentSheet(
+    """Идентификатор документа"""
+    documentId: ID!
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Статусы документов"""
   documentStatuses(
     """Идентификатор документа"""
@@ -3120,6 +3145,13 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): DocumentTypeConnection!
+  """Выгрузка листа с несколькими документами"""
+  documentsSheet(
+    """Идентификаторы документов"""
+    documentIds: [ID!]
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
@@ -3221,13 +3253,6 @@ type Query {
   sessions(userId: ID): [SessionType!]!
   """Настройки приложения"""
   settings: [SettingType!]!
-  """Выгрузка листа"""
-  sheet(
-    """Идентификатор документа"""
-    documentId: ID
-    """Идентификатор листа"""
-    sheetId: Int!
-  ): SheetType!
   """Статусы"""
   statuses: [StatusType!]
   """Теги"""
@@ -3258,13 +3283,13 @@ type Query {
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор колонки"""
-    columnId: Int!
+    columnId: ID!
     """Идентификатор документа"""
     documentId: ID!
     """Идентификатор строки"""
-    rowId: Int!
+    rowId: ID!
     """Идентификатор листа"""
-    sheetId: Int!
+    sheetId: ID!
   ): [FileType!]
 }
 
@@ -3680,7 +3705,7 @@ type SheetType {
   """Дата добавления"""
   createdAt: DateTime!
   """Идентификатор"""
-  id: Int!
+  id: ID!
   """Наименование"""
   name: String!
   """Период"""
