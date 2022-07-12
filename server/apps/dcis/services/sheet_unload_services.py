@@ -1,3 +1,5 @@
+"""Модуль для выгрузки листов."""
+
 from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Sequence
@@ -29,7 +31,7 @@ class DataUnloader(ABC):
     @classmethod
     def unload_raw_data(
         cls,
-        objects:QuerySet | Sequence[Model],
+        objects: QuerySet | Sequence[Model],
         fields: Sequence[str],
         properties: Sequence[str] | None = None
     ) -> list[dict]:
@@ -385,14 +387,19 @@ class SheetPartialRowsUploader(SheetRowsUploader):
         return sorted(rows, key=lambda row: row['global_index'])
 
 
-class SheetUploader(DataUnloader):
+class SheetUnloader(DataUnloader):
     """Выгрузчик листа."""
 
-    def __init__(self, sheet: Sheet, fields: Sequence[str], document_id: int | str | None = None) -> None:
+    def __init__(self, sheet: Sheet, fields: Sequence[str]) -> None:
         super().__init__()
         self.sheet = sheet
         self.fields = fields
-        self.document_id = document_id
+        self.columns_unloader: SheetColumnsUnloader | None = None
+
+    @abstractmethod
+    def unload_rows(self) -> list[dict] | dict:
+        """Выгрузка строк."""
+        ...
 
     def unload_data(self) -> list[dict] | dict:
         """Выгрузка листа."""
@@ -400,28 +407,49 @@ class SheetUploader(DataUnloader):
             self.sheet,
             fields=[field for field in self.fields if field not in ('columns', 'rows')]
         )
-        columns_unloader = SheetColumnsUnloader(self.sheet.columndimension_set.all())
+        self.columns_unloader = SheetColumnsUnloader(self.sheet.columndimension_set.all())
         if 'columns' in self.fields:
-            sheet['columns'] = columns_unloader.unload()
+            sheet['columns'] = self.columns_unloader.unload()
         if 'rows' in self.fields:
-            if self.document_id is not None:
-                rows = self.sheet.rowdimension_set.filter(
-                    Q(parent__isnull=True) | Q(parent__isnull=False, document_id=self.document_id)
-                )
-                sheet['rows'] = SheetRowsUploader(
-                    columns_unloader=columns_unloader,
-                    rows=rows,
-                    cells=Cell.objects.filter(row__in=[row.id for row in rows]),
-                    merged_cells=self.sheet.mergedcell_set.all(),
-                    values=self.sheet.value_set.filter(document_id=self.document_id)
-                ).unload()
-            else:
-                rows = self.sheet.rowdimension_set.filter(parent__isnull=True)
-                sheet['rows'] = SheetRowsUploader(
-                    columns_unloader=columns_unloader,
-                    rows=rows,
-                    cells=Cell.objects.filter(row__in=[row.id for row in rows]),
-                    merged_cells=self.sheet.mergedcell_set.all(),
-                    values=Value.objects.none()
-                ).unload()
+            sheet['rows'] = self.unload_rows()
         return sheet
+
+
+class DocumentsSheetUnloader(SheetUnloader):
+    """Выгрузчик листа с несколькими документами."""
+
+    def __init__(self, sheet: Sheet, document_ids: list[int | str], fields: Sequence[str]) -> None:
+        super().__init__(sheet, fields)
+        self.document_ids = document_ids
+
+    def unload_rows(self) -> list[dict] | dict:
+        """Выгрузка строк."""
+        rows = self.sheet.rowdimension_set.filter(parent__isnull=True)
+        return SheetRowsUploader(
+            columns_unloader=self.columns_unloader,
+            rows=rows,
+            cells=Cell.objects.filter(row__in=[row.id for row in rows]),
+            merged_cells=self.sheet.mergedcell_set.all(),
+            values=Value.objects.none()
+        ).unload()
+
+
+class DocumentSheetUnloader(SheetUnloader):
+    """Выгрузчик листа с документом."""
+
+    def __init__(self, sheet: Sheet, document_id: int | str, fields: Sequence[str]) -> None:
+        super().__init__(sheet, fields)
+        self.document_id = document_id
+
+    def unload_rows(self) -> list[dict] | dict:
+        """Выгрузка строк."""
+        rows = self.sheet.rowdimension_set.filter(
+            Q(parent__isnull=True) | Q(parent__isnull=False, document_id=self.document_id)
+        )
+        return SheetRowsUploader(
+            columns_unloader=self.columns_unloader,
+            rows=rows,
+            cells=Cell.objects.filter(row__in=[row.id for row in rows]),
+            merged_cells=self.sheet.mergedcell_set.all(),
+            values=self.sheet.value_set.filter(document_id=self.document_id)
+        ).unload()

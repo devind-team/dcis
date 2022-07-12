@@ -34,7 +34,7 @@ import {
   UnloadFileValueArchiveMutationVariables, SheetQueryVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
-import sheetQuery from '~/gql/dcis/queries/sheet.graphql'
+import sheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'

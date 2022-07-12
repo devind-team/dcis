@@ -16,14 +16,14 @@ from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Period, Privilege, Sheet, Value
-from apps.dcis.permissions import ViewPeriod
+from apps.dcis.permissions import ChangePeriodSheet, ViewPeriod
 from apps.dcis.schema.types import PeriodType, PrivilegeType, SheetType
 from apps.dcis.services.period_services import (
     get_period_users,
     get_user_period_privileges,
     get_user_periods,
 )
-from apps.dcis.services.sheet_unload_services import SheetUploader
+from apps.dcis.services.sheet_unload_services import DocumentsSheetUnloader
 from apps.dcis.services.value_services import get_file_value_files
 
 
@@ -70,12 +70,12 @@ class PeriodQueries(graphene.ObjectType):
         description='Отдельные привилегии пользователя для периода'
     )
 
-    sheet = graphene.Field(
+    documents_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
-        document_id=graphene.ID(description='Идентификатор документа'),
+        document_ids=graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы документов'),
         required=True,
-        description='Выгрузка листа'
+        description='Выгрузка листа с несколькими документами'
     )
     value_files = DjangoListField(
         FileType,
@@ -124,12 +124,19 @@ class PeriodQueries(graphene.ObjectType):
         return get_user_period_privileges(user.id, period.id)
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def resolve_sheet(root: Any, info: ResolveInfo, sheet_id: str, document_id: str | None = None):
-        return SheetUploader(
-            sheet=get_object_or_404(Sheet, pk=sheet_id),
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
+    def resolve_documents_sheet(
+        root: Any,
+        info: ResolveInfo,
+        sheet_id: str,
+        document_ids: list[str]
+    ) -> list[dict] | dict:
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        info.context.check_object_permissions(info.context, sheet)
+        return DocumentsSheetUnloader(
+            sheet=sheet,
+            document_ids=[from_global_id(document_id)[1] for document_id in document_ids],
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
-            document_id=from_global_id(document_id)[1] if document_id else None
         ).unload()
 
     @staticmethod

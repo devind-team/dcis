@@ -28,11 +28,11 @@ import { useCommonQuery, useI18n } from '~/composables'
 import type {
   DocumentQuery,
   DocumentQueryVariables,
-  SheetQuery,
-  SheetQueryVariables
+  DocumentSheetQuery,
+  DocumentSheetQueryVariables
 } from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
-import sheetQuery from '~/gql/dcis/queries/sheet.graphql'
+import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import Grid from '~/components/dcis/Grid.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
@@ -55,13 +55,13 @@ export default defineComponent({
       })
     })
     const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet, changeUpdate } = useCommonQuery<
-      SheetQuery,
-      SheetQueryVariables
+      DocumentSheetQuery,
+      DocumentSheetQueryVariables
     >({
-      document: sheetQuery,
+      document: documentSheetQuery,
       variables: () => ({
         documentId: route.params.documentId,
-        sheetId: activeDocumentLoading.value ? undefined : activeDocument.value.sheets[active.value].id
+        sheetId: activeDocument.value ? activeDocument.value.sheets[active.value].id : ''
       }),
       options: () => ({
         enabled: !activeDocumentLoading.value

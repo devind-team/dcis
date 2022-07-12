@@ -9,11 +9,14 @@ from graphene_django import DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
+from stringcase import snakecase
 
-from apps.dcis.models import Document, DocumentStatus, Status
+from apps.dcis.helpers.info_fields import get_fields
+from apps.dcis.models import Document, DocumentStatus, Sheet, Status
 from apps.dcis.permissions import ViewDocument
-from apps.dcis.schema.types import DocumentStatusType, DocumentType, StatusType
+from apps.dcis.schema.types import DocumentStatusType, DocumentType, SheetType, StatusType
 from apps.dcis.services.document_services import get_user_documents
+from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
 
 
 class DocumentQueries(graphene.ObjectType):
@@ -35,6 +38,14 @@ class DocumentQueries(graphene.ObjectType):
         DocumentStatusType,
         document_id=graphene.ID(description='Идентификатор документа'),
         description='Статусы документов'
+    )
+
+    document_sheet = graphene.Field(
+        SheetType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        required=True,
+        description='Выгрузка листа с несколькими документами'
     )
 
     @staticmethod
@@ -60,3 +71,20 @@ class DocumentQueries(graphene.ObjectType):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
         return document.documentstatus_set.all()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ViewDocument,))
+    def resolve_document_sheet(
+        root,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: str
+    ) -> list[dict] | dict:
+        document_id = from_global_id(document_id)[1]
+        document = get_object_or_404(Document, pk=document_id)
+        info.context.check_object_permissions(info.context, document)
+        return DocumentSheetUnloader(
+            sheet=get_object_or_404(Sheet, pk=sheet_id),
+            document_id=document_id,
+            fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
+        ).unload()

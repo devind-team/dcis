@@ -1,0 +1,15 @@
+#import "../fragments/sheet_fields.graphql"
+#import "../fragments/column_dimension_fields.graphql"
+#import "../fragments/row_dimension_fields.graphql"
+
+query DocumentsSheet($sheetId: ID!, $documentIds: [ID!]!) {
+  documentsSheet(sheetId: $sheetId, documentIds: $documentIds) {
+    ...SheetFields
+    columns {
+      ...ColumnDimensionFields
+    }
+    rows {
+      ...RowDimensionFields
+    }
+  }
+}

@@ -1,7 +1,6 @@
 import json
 
 import graphene
-from devind_core.schema.types import ContentTypeType, FileType
 from devind_core.schema.types import FileType, ContentTypeType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
@@ -11,16 +10,14 @@ from django.db.models import QuerySet
 from graphene_django import DjangoObjectType, DjangoListField
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
-from stringcase import snakecase
 
 from apps.core.models import User
 from apps.core.schema import UserType
-from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import (
-    Attribute, AttributeValue, Division,
-    Document, DocumentStatus, Limitation,
-    Period, PeriodGroup, PeriodPrivilege,
-    Privilege, Project, Status, Value,
+    Attribute, AttributeValue, Document,
+    DocumentStatus, Limitation, Period,
+    PeriodGroup, PeriodPrivilege, Privilege,
+    Project, Sheet, Status, Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -37,8 +34,6 @@ from apps.dcis.permissions import (
     DeleteProjectBase,
 )
 from apps.dcis.services.divisions_services import get_divisions
-from apps.dcis.services.sheet_unload_services import SheetUploader
-from ..helpers.info_fields import get_fields
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -277,7 +272,7 @@ class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
     period = graphene.Field(PeriodType, description='Период сбора')
-    sheets = graphene.List(lambda: SheetType, required=True, description='Листы')
+    sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
@@ -301,15 +296,8 @@ class DocumentType(DjangoObjectType):
         connection_class = CountableConnection
 
     @staticmethod
-    def resolve_sheets(document: Document, info: ResolveInfo) -> list[dict] | dict:
-        return [
-            SheetUploader(
-                sheet=sheet,
-                fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
-                document_id=document.id
-            ).unload()
-            for sheet in document.sheets.all()
-        ]
+    def resolve_sheets(document: Document, info: ResolveInfo) -> QuerySet[Sheet]:
+        return document.sheets.all()
 
     @staticmethod
     def resolve_last_status(document: Document, info: ResolveInfo) -> DocumentStatus | None:
@@ -497,16 +485,21 @@ class ValueType(DjangoObjectType):
         return json.dumps(value.payload) if value.payload is not None else None
 
 
-class SheetType(graphene.ObjectType):
-    """Тип листа."""
+class BaseSheetType(graphene.ObjectType):
+    """Тип листа без структуры."""
 
-    id = graphene.Int(required=True, description='Идентификатор')
+    id = graphene.ID(required=True, description='Идентификатор')
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
     period = graphene.Field(PeriodType, description='Период')
+
+
+class SheetType(BaseSheetType):
+    """Тип листа."""
+
     columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
     rows = graphene.List(lambda: RowDimensionType, description='Строки')
 
