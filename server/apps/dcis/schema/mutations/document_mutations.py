@@ -12,7 +12,7 @@ from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.dcis.models import Document, DocumentStatus, Period, Status
-from apps.dcis.permissions import AddDocument, ChangeDocument
+from apps.dcis.permissions import AddDocument, ChangeDocument, ViewDocument
 from apps.dcis.schema.types import DocumentStatusType, DocumentType
 from apps.dcis.services.document_services import create_new_document
 from apps.dcis.services.document_unload_services import DocumentUnload
@@ -134,11 +134,12 @@ class UnloadDocumentMutation(BaseMutation):
     src = graphene.String(description='Ссылка на сгенерированный файл')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ViewDocument,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
         if not additional:
             additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])
+        info.context.check_object_permissions(info.context, document)
         document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
         src: str = document_unload.xlsx()
         return UnloadDocumentMutation(src=src)
