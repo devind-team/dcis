@@ -51,7 +51,7 @@ v-row
 <script lang="ts">
 import { PropType, Ref } from '#app'
 import { UpdateType } from '~/composables'
-import { DocumentType, SheetQuery, SheetType } from '~/types/graphql'
+import { DocumentType, DocumentSheetQuery, SheetType } from '~/types/graphql'
 import { CellsOptionsType } from '~/types/grid'
 
 export default defineComponent({
@@ -63,7 +63,7 @@ export default defineComponent({
 
     const activeDocument = inject<Ref<DocumentType>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(
       computed(() => activeDocument.value.id),
       computed(() => activeSheet.value.id),

@@ -5,18 +5,14 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
-from devind_helpers.schema.types import ErrorFieldType
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
-from stringcase import snakecase
 
-from apps.dcis.models import Cell, ColumnDimension, RowDimension, Sheet
+from apps.dcis.models import ColumnDimension, RowDimension, Sheet
 from apps.dcis.permissions import ChangePeriodSheet
-from apps.dcis.schema.types import SheetType, CellType, ChangedCellOption, GlobalIndicesInputType, RowDimensionType
+from apps.dcis.schema.types import CellType, GlobalIndicesInputType, RowDimensionType, SheetType
 from apps.dcis.services.sheet_services import (
-    CheckCellOptions,
     add_row_dimension,
-    change_cells_option,
     change_column_dimension,
     change_row_dimension,
     delete_row_dimension,
@@ -96,7 +92,7 @@ class AddRowDimensionMutation(BaseMutation):
     """Добавление строки."""
 
     class Input:
-        sheet_id = graphene.Int(required=True, description='Идентификатор листа')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
         document_id = graphene.ID(description='Идентификатор документа')
         parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')
@@ -197,50 +193,6 @@ class DeleteRowDimensionMutation(BaseMutation):
         )
 
 
-class ChangeCellsOptionMutation(BaseMutation):
-    """Изменение свойств ячеек:
-
-        - strong - true, false
-        - italic - true, false
-        - strike - true, false
-        - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
-        - horizontal_align - ['left', 'center', 'right']
-        - vertical_align - ['top', 'middle', 'bottom']
-        - size - число от 6 до 24
-        - kind - [
-            'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money',
-            'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
-        ]
-    """
-
-    class Input:
-        cell_ids = graphene.List(graphene.NonNull(graphene.ID), required=True, description='Идентификаторы ячеек')
-        field = graphene.String(required=True, description='Идентификатор поля')
-        value = graphene.String(description='Значение поля')
-
-    changed_options = graphene.List(
-        graphene.NonNull(ChangedCellOption),
-        description='Измененные свойства ячеек'
-    )
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(
-        root: Any,
-        info: ResolveInfo,
-        cell_ids: list[int],
-        field: str,
-        value: str | None = None
-    ):
-        field = snakecase(field)
-        match CheckCellOptions(field, value):
-            case CheckCellOptions.Error(field, error):
-                return ChangeCellsOptionMutation(success=False, errors=[ErrorFieldType(field, [error])])
-            case CheckCellOptions.Success(value):
-                cells = Cell.objects.filter(pk__in=cell_ids).all()
-                return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
-
-
 class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
@@ -251,6 +203,3 @@ class SheetMutations(graphene.ObjectType):
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     change_row_dimension = ChangeRowDimensionMutation.Field(required=True, description='Изменение строки')
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')
-
-    change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
-

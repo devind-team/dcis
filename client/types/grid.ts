@@ -6,12 +6,10 @@ export type RangeType = string
  * Режим работы таблицы
  * CHANGE - пользователь может менять структуру документа
  * WRITE - пользователь может вносить данные, изменяя модель Value
- * READ - документ доступен только для чтения
  */
 export enum GridMode {
   CHANGE,
-  WRITE,
-  READ
+  WRITE
 }
 
 /**

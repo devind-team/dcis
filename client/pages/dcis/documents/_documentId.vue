@@ -14,6 +14,7 @@ v-container(fluid :key="$route.fullpath")
       v-tab-item(v-for="sheet in activeDocument.sheets" :key="sheet.id")
         grid(
           v-if="!activeSheetLoading && activeSheet"
+          :mode="GridMode.WRITE"
           :active-sheet="activeSheet"
           :update-active-sheet="updateActiveSheet"
           :active-document="activeDocument"
@@ -25,6 +26,7 @@ v-container(fluid :key="$route.fullpath")
 <script lang="ts">
 import { defineComponent, inject, onUnmounted, ref, useRoute } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
+import { GridMode } from '~/types/grid'
 import type {
   DocumentQuery,
   DocumentQueryVariables,
@@ -75,6 +77,7 @@ export default defineComponent({
     })
 
     return {
+      GridMode,
       t,
       active,
       activeDocument,

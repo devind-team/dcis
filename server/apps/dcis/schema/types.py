@@ -419,7 +419,7 @@ class RowDimensionType(graphene.ObjectType):
 class CellType(graphene.ObjectType):
     """Тип ячейки."""
 
-    id = graphene.Int(required=True, description='Идентификатор')
+    id = graphene.ID(required=True, description='Идентификатор')
     # apps.dcis.models.KindCell
     kind = graphene.String(required=True, description='Тип значения')
 
@@ -429,8 +429,8 @@ class CellType(graphene.ObjectType):
     comment = graphene.String(description='Комментарий')
     mask = graphene.String(description='Маска для ввода значений')
     tooltip = graphene.String(description='Подсказка')
-    column_id = graphene.Int(description='Идентификатор колонки')
-    row_id = graphene.Int(description='Идентификатор строки')
+    column_id = graphene.ID(description='Идентификатор колонки')
+    row_id = graphene.ID(description='Идентификатор строки')
 
     # apps.dcis.models.Style
     horizontal_align = graphene.ID(description='Горизонтальное выравнивание')
@@ -467,9 +467,9 @@ class ValueType(DjangoObjectType):
 
     document = graphene.Field(DocumentType, description='Документ')
     payload = graphene.String(description='Дополнительное поле')
-    sheet_id = graphene.Int(required=True, description='Идентификатор листа')
-    column_id = graphene.Int(required=True, description='Идентификатор колонки')
-    row_id = graphene.Int(required=True, description='Идентификатор строки')
+    sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+    column_id = graphene.ID(required=True, description='Идентификатор колонки')
+    row_id = graphene.ID(required=True, description='Идентификатор строки')
 
     class Meta:
         model = Value

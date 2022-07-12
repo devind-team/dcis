@@ -100,8 +100,8 @@ export default defineComponent({
 
     const variables = computed<AddDocumentMutationVariables>(() => ({
       comment: comment.value,
-      periodId: Number(props.period.id),
-      statusId: Number(status.value?.id),
+      periodId: props.period.id,
+      statusId: status.value?.id,
       documentId: document.value?.id
     }))
 

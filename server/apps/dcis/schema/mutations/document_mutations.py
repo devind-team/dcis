@@ -31,10 +31,10 @@ class AddDocumentMutation(BaseMutation):
             document_id - документ от которого создавать копию
         """
         comment = graphene.String(required=True, description='Комментарий')
-        period_id = graphene.Int(required=True, description='Идентификатор периода')
-        status_id = graphene.Int(required=True, description='Начальный статус документа')
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        status_id = graphene.ID(required=True, description='Начальный статус документа')
         document_id = graphene.ID(description='Идентификатор документа')
-        division_id = graphene.Int(description='Идентификатор дивизиона')
+        division_id = graphene.ID(description='Идентификатор дивизиона')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
 
@@ -45,9 +45,9 @@ class AddDocumentMutation(BaseMutation):
         info: ResolveInfo,
         comment: str,
         period_id: str,
-        status_id: int,
-        document_id: int | None = None,
-        division_id: int | None = None,
+        status_id: str,
+        document_id: str | None = None,
+        division_id: str | None = None,
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
         user: User = info.context.user
@@ -84,14 +84,14 @@ class AddDocumentStatusMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Документ')
-        status_id = graphene.Int(required=True, description='Статус')
+        status_id = graphene.ID(required=True, description='Статус')
         comment = graphene.String(description='Комментарий')
 
     document_status = graphene.Field(DocumentStatusType, description='Статус документа')
 
     @staticmethod
     @permission_classes((IsAuthenticated, ChangeDocument))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: int, comment: str):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
         status: Status = get_object_or_404(Status, pk=status_id)

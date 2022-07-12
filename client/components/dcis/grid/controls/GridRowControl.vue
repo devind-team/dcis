@@ -32,7 +32,7 @@ v-menu(v-model="active" bottom close-on-content-click)
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
-import { DocumentType, SheetType, RowDimensionType, SheetQuery } from '~/types/graphql'
+import { DocumentType, SheetType, RowDimensionType, DocumentSheetQuery } from '~/types/graphql'
 import { UpdateType } from '~/composables/query-common'
 import { AddRowDimensionPosition } from '~/composables/grid-mutations'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
@@ -52,7 +52,7 @@ export default defineComponent({
 
     const activeDocument = inject<Ref<DocumentType>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
 
     const addRowDimensionMutate = useAddRowDimensionMutation(
       computed(() => activeDocument.value.id),

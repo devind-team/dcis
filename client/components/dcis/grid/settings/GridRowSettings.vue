@@ -41,7 +41,7 @@ import { FetchResult } from '@apollo/client/link/core'
 import { PropType, Ref } from '#app'
 import { UpdateType } from '~/composables'
 import {
-  SheetQuery,
+  DocumentSheetQuery,
   RowDimensionType,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables
@@ -86,7 +86,7 @@ export default defineComponent({
       }
     }))
 
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) => {
       updateRowDimension(updateSheet.value, dataProxy, result)
     }

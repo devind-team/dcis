@@ -38,7 +38,7 @@ import { PropType, Ref } from '#app'
 import { updateColumnDimension, UpdateType } from '~/composables'
 import { cellKinds } from '~/composables/grid'
 import {
-  SheetQuery,
+  DocumentSheetQuery,
   ColumnDimensionType,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables
@@ -90,7 +90,7 @@ export default defineComponent({
       }
     }))
 
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) => {
       updateColumnDimension(updateSheet.value, dataProxy, result)
     }

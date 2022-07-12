@@ -20,7 +20,7 @@ import {
 } from '~/composables'
 import {
   DocumentType,
-  SheetQuery,
+  DocumentSheetQuery,
   SheetType,
   CellType,
   ValueFilesQuery,
@@ -54,7 +54,7 @@ export default defineComponent({
     const { client } = useApolloClient()
     const activeDocument = inject<Ref<DocumentType>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
 
     const { data: files, update: updateFiles } = useCommonQuery<
       ValueFilesQuery,

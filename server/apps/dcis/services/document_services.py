@@ -43,10 +43,10 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
 def create_new_document(
     user: User,
     period: Period,
-    status_id: int,
+    status_id: int | str,
     comment: str,
-    document_id: int | None = None,
-    division_id: int | None = None
+    document_id: int | str | None = None,
+    division_id: int | str | None = None
 ) -> Document:
     """Добавление нового документа.
 

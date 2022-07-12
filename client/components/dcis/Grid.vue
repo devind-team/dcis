@@ -69,7 +69,7 @@ import {
   useChangeRowDimensionHeightMutation, useGrid,
   useI18n
 } from '~/composables'
-import { SheetQuery, SheetType, DocumentType } from '~/types/graphql'
+import { DocumentSheetQuery, SheetType, DocumentType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
@@ -85,8 +85,9 @@ export default defineComponent({
     GridElementResizing
   },
   props: {
+    mode: { type: Number, required: true },
     activeSheet: { type: Object as PropType<SheetType>, required: true },
-    updateActiveSheet: { type: Function as PropType<UpdateType<SheetQuery>>, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateType<DocumentSheetQuery>>, required: true },
     activeDocument: { type: Object as PropType<DocumentType>, required: true }
   },
   setup (props) {
