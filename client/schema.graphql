@@ -606,7 +606,7 @@ type CellType {
   """Объединение колонок"""
   colspan: Int!
   """Идентификатор колонки"""
-  columnId: Int
+  columnId: ID
   """Комментарий"""
   comment: String
   """Редактируемая ячейка"""
@@ -620,7 +620,7 @@ type CellType {
   """Горизонтальное выравнивание"""
   horizontalAlign: ID
   """Идентификатор"""
-  id: Int!
+  id: ID!
   """Курсив"""
   italic: Boolean!
   """Тип значения"""
@@ -632,7 +632,7 @@ type CellType {
   """Связанные с объединением позиции в плоской структуре"""
   relatedGlobalPositions: [String!]!
   """Идентификатор строки"""
-  rowId: Int
+  rowId: ID
   """Объединение строк"""
   rowspan: Int!
   """Размер шрифта"""
@@ -1849,7 +1849,7 @@ type DistrictType {
 """Описание обобщенного типа дивизиона."""
 type DivisionModelType {
   """Идентификатор модели дивизиона"""
-  id: Int!
+  id: ID!
   """Модель дивизиона: department, organization"""
   model: String!
   """Название дивизиона"""
@@ -3680,7 +3680,7 @@ type SheetType {
   """Дата добавления"""
   createdAt: DateTime!
   """Идентификатор"""
-  id: Int!
+  id: ID!
   """Наименование"""
   name: String!
   """Период"""
@@ -3961,7 +3961,7 @@ type UserTypeEdge {
 """Тип значений"""
 type ValueType {
   """Идентификатор колонки"""
-  columnId: Int!
+  columnId: ID!
   """Документ"""
   document: DocumentType
   """Текст ошибки"""
@@ -3970,9 +3970,9 @@ type ValueType {
   """Дополнительное поле"""
   payload: String
   """Идентификатор строки"""
-  rowId: Int!
+  rowId: ID!
   """Идентификатор листа"""
-  sheetId: Int!
+  sheetId: ID!
   """Значение"""
   value: String!
   """Валидно ли поле"""
