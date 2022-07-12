@@ -14,7 +14,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, Document, Value
-from apps.dcis.permissions import ChangeValue
+from apps.dcis.permissions import ChangeValue, ChangeValueBase
 from apps.dcis.schema.types import ValueType
 from apps.dcis.services.value_services import (
     create_file_value_archive,
@@ -48,7 +48,7 @@ class ChangeValueMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        info.context.check_object_permissions(info.context, (document, cell,))
+        info.context.check_object_permissions(info.context, ChangeValueBase.Obj(document=document, cell=cell,))
         result = update_or_create_value(
             document=document,
             cell=cell,
