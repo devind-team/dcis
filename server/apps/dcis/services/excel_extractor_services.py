@@ -46,7 +46,7 @@ class BuildColumnDimension:
 @dataclass
 class BuildRowDimension:
     """Построение строки."""
-    height: int
+    height: int | None
     style: BuildStyle
 
 
@@ -185,7 +185,7 @@ class ExcelExtractor:
     def _parse_rows_dimension(self, holder: DimensionHolder) -> dict[int, BuildRowDimension]:
         """Парсинг имеющихся строк."""
         return {
-            row.index: BuildRowDimension(int(row.height * 1.2), self.__border_style(row))
+            row.index: BuildRowDimension(int(row.height * 1.2) if row.height else None, self.__border_style(row))
             for index, row in holder.items()
         }
 
