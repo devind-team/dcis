@@ -1,6 +1,7 @@
 import { computed, ref, Ref, watch } from '#app'
-import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
+import { GridMode } from '~/types/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -13,8 +14,9 @@ export const cellKinds = {
 }
 
 export function useGrid (
+  mode: GridMode,
   sheet: Ref<SheetType>,
-  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void>,
+  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void> | null,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
   /**
@@ -105,26 +107,36 @@ export function useGrid (
   )
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
-    mousemoveColumnNameResizing(
-      column,
-      column.index - 1 > 0
-        ? sheet.value.columns[column.index - 2]
-        : null,
-      event
-    )
+    if (mode === GridMode.CHANGE) {
+      mousemoveColumnNameResizing(
+        column,
+        column.index - 1 > 0
+          ? sheet.value.columns[column.index - 2]
+          : null,
+        event
+      )
+    }
   }
   const mouseleaveColumnName = () => {
-    mouseleaveColumnNameResizing()
+    if (mode === GridMode.CHANGE) {
+      mouseleaveColumnNameResizing()
+    }
   }
   const mousedownColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
-    if (resizingColumn.value) {
-      mousedownColumnNameResizing(event)
+    if (mode === GridMode.CHANGE) {
+      if (resizingColumn.value) {
+        mousedownColumnNameResizing(event)
+      } else {
+        mouseDownColumnNameSelection(column)
+      }
     } else {
       mouseDownColumnNameSelection(column)
     }
   }
   const mouseupColumnName = async () => {
-    await mouseupColumnNameResizing()
+    if (mode === GridMode.CHANGE) {
+      await mouseupColumnNameResizing()
+    }
   }
 
   const mousemoveRowName = (row: RowDimensionType, event: MouseEvent) => {

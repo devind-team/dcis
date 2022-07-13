@@ -1,4 +1,5 @@
-import { CellType } from '~/types/graphql'
+import { CellType, DocumentSheetQuery, DocumentsSheetQuery } from '~/types/graphql'
+import { UpdateType } from '~/composables'
 
 export type RangeType = string
 
@@ -11,6 +12,8 @@ export enum GridMode {
   CHANGE,
   WRITE
 }
+
+export type UpdateSheetType = UpdateType<DocumentSheetQuery> | UpdateType<DocumentsSheetQuery>
 
 /**
  * Кодовые ошибки

@@ -6,7 +6,7 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   gridContainer: Ref<HTMLDivElement>,
   defaultSize: number,
   direction: 'x' | 'y',
-  changeSize: (dimension: T, size: number) => Promise<void>
+  changeSize: (dimension: T, size: number) => Promise<void> | null
 ) {
   const borderGag = 6
 
@@ -72,7 +72,9 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   const mouseup = async () => {
     if (resizing.value) {
       resizing.value.state = 'hover'
-      await changeSize(resizing.value.object as T, resizing.value.size)
+      if (changeSize !== null) {
+        await changeSize(resizing.value.object as T, resizing.value.size)
+      }
     }
   }
 
@@ -121,7 +123,9 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     if (resizing.value && resizing.value.state === 'resizing') {
       const res = resizing.value
       resizing.value = null
-      await changeSize(res.object as T, res.size)
+      if (changeSize !== null) {
+        await changeSize(res.object as T, res.size)
+      }
     }
   })
 

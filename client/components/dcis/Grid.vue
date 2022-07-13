@@ -62,15 +62,16 @@ div
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, provide, toRef } from '#app'
+import { defineComponent, PropType, Ref, provide, toRef } from '#app'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
-  useChangeRowDimensionHeightMutation, useGrid,
+  useChangeRowDimensionHeightMutation,
+  useGrid,
   useI18n
 } from '~/composables'
-import { GridMode } from '~/types/grid'
-import { DocumentSheetQuery, SheetType, DocumentType } from '~/types/graphql'
+import { GridMode, UpdateSheetType } from '~/types/grid'
+import { DocumentsSheetQuery, SheetType, DocumentType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
@@ -88,7 +89,7 @@ export default defineComponent({
   props: {
     mode: { type: Number, required: true },
     activeSheet: { type: Object as PropType<SheetType>, required: true },
-    updateActiveSheet: { type: Function as PropType<UpdateType<DocumentSheetQuery>>, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
     activeDocument: { type: Object as PropType<DocumentType>, default: null }
   },
   setup (props) {
@@ -106,7 +107,9 @@ export default defineComponent({
       height: props.mode === GridMode.WRITE ? 'calc(100vh - 230px)' : 'calc(100vh - 337px)'
     }))
 
-    const changeColumnWidth = useChangeColumnDimensionWidthMutation(updateActiveSheet)
+    const changeColumnWidth = props.mode === GridMode.CHANGE
+      ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      : null
     const changeRowHeight = useChangeRowDimensionHeightMutation(updateActiveSheet)
 
     const {
@@ -147,7 +150,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(activeSheet, changeColumnWidth, changeRowHeight)
+    } = useGrid(props.mode, activeSheet, changeColumnWidth, changeRowHeight)
 
     return {
       t,

@@ -63,7 +63,7 @@ class ChangeColumnDimensionMutation(BaseMutation):
     updated_at = graphene.DateTime(required=True, description='Дата обновления колонки')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -73,8 +73,10 @@ class ChangeColumnDimensionMutation(BaseMutation):
         hidden: bool,
         kind: str
     ):
+        column_dimension = get_object_or_404(ColumnDimension, pk=column_dimension_id)
+        info.context.check_object_permissions(info.context, column_dimension.sheet.period)
         column_dimension = change_column_dimension(
-            get_object_or_404(ColumnDimension, pk=column_dimension_id),
+            column_dimension=column_dimension,
             width=width,
             fixed=fixed,
             hidden=hidden,

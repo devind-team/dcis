@@ -4,6 +4,7 @@ import { FetchResult } from '@apollo/client/link/core'
 import { Ref, unref } from '#app'
 import { UpdateType } from '~/composables/query-common'
 import {
+  DocumentsSheetQuery,
   DocumentSheetQuery,
   DocumentSheetQueryVariables,
   ValueFilesQuery,
@@ -347,7 +348,7 @@ function updateRelativeRows (rows: RowDimensionFieldsFragment[]): void {
   }
 }
 
-export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateType<DocumentSheetQuery>>) {
+export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateType<DocumentsSheetQuery>>) {
   const { mutate } = useMutation<
     ChangeColumnDimensionMutation,
     ChangeColumnDimensionMutationVariables
@@ -380,7 +381,7 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateTy
 }
 
 export function updateColumnDimension (
-  updateSheet: UpdateType<DocumentSheetQuery>,
+  updateSheet: UpdateType<DocumentsSheetQuery>,
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
 ) {
@@ -389,10 +390,10 @@ export function updateColumnDimension (
       dataProxy,
       result,
       (
-        data: DocumentSheetQuery,
+        data: DocumentsSheetQuery,
         { data: { changeColumnDimension } }: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
       ) => {
-        const columnDimension = data.documentSheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
+        const columnDimension = data.documentsSheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
           columnDimension.id === changeColumnDimension.columnDimensionId)!
         columnDimension.width = changeColumnDimension.width
         columnDimension.fixed = changeColumnDimension.fixed
