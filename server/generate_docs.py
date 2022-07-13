@@ -99,7 +99,7 @@ def generate_markdown(mod: pdoc.doc.Module):
             ['Сигнатура', 'Декораторы', 'Описание'],
             [
                 [f"{function['name']}{function['signature']}",
-                 f"{'-' if not function['decorators'] else function['decorators']}",
+                 f"{'-' if not function['decorators'] else ', '.join(function['decorators'])}",
                  f"{'-' if not function['docstring'] else function['docstring']}"]
                 for function in get_function(mod.functions)
             ],
