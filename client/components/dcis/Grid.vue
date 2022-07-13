@@ -99,6 +99,7 @@ export default defineComponent({
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const activeDocument = toRef(props, 'activeDocument')
 
+    provide('mode', props.mode)
     provide('activeSheet', activeSheet)
     provide('updateActiveSheet', updateActiveSheet)
     provide('activeDocument', activeDocument)
