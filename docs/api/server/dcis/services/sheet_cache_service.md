@@ -4,12 +4,12 @@
 
 ### Функции
 
-| Сигнатура                                                                                                     | Декораторы | Описание                                |
-| :------------------------------------------------------------------------------------------------------------ | :--------- | :-------------------------------------- |
-| save_to_cache( formula_dependency: apps.dcis.services.sheet_cache_service.FormulaDependencyCache) -&#62; bool | -          | Сохраняем структуру зависимостей в кеш. |
-| get_from_cache( sheet_id: int) -&#62; Optional[apps.dcis.services.sheet_cache_service.FormulaDependencyCache] | -          | Забираем структуру из кеша.             |
-| delete_from_cache(sheet_id: int) -&#62; bool                                                                  | -          | Удаление структуры из кеша.             |
-| dependency_formula(formula: str) -&#62; list[str]                                                             | -          | Возвращает зависимость токенов.         |
+| Сигнатура                                                                                                       | Декораторы | Описание                                |
+| :-------------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------- |
+| save_to_cache( formula_dependency: apps.dcis.services.sheet_cache_service.FormulaDependencyCache) -&#62; bool   | -          | Сохраняем структуру зависимостей в кеш. |
+| get_from_cache( sheet_id: int) -&#62; apps.dcis.services.sheet_cache_service.FormulaDependencyCache &#124; None | -          | Забираем структуру из кеша.             |
+| delete_from_cache(sheet_id: int) -&#62; bool                                                                    | -          | Удаление структуры из кеша.             |
+| dependency_formula(formula: str) -&#62; list[str]                                                               | -          | Возвращает зависимость токенов.         |
 
 ## Класс FormulaDependencyCache
 
@@ -17,11 +17,11 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                                        | Декораторы | Описание            |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------ |
-| __init__( self, sheet_name: str, sheet_id: Optional[int] = None, dependency: dict[str, dict[str, int]] = &#60;factory&#62;, inversion: dict[str, list[str]] = &#60;factory&#62;) | -          | -                   |
-| __repr__(self)                                                                                                                                                                   | -          | Return repr(self).  |
-| __eq__(self, other)                                                                                                                                                              | -          | Return self==value. |
+| Сигнатура                                                                                                                                                                          | Декораторы | Описание            |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------ |
+| __init__( self, sheet_name: str, sheet_id: int &#124; None = None, dependency: dict[str, dict[str, int]] = &#60;factory&#62;, inversion: dict[str, list[str]] = &#60;factory&#62;) | -          | -                   |
+| __repr__(self)                                                                                                                                                                     | -          | Return repr(self).  |
+| __eq__(self, other)                                                                                                                                                                | -          | Return self==value. |
 
 ## Класс FormulaContainerCache
 
@@ -29,16 +29,16 @@
 
 ### Методы
 
-| Сигнатура                                                                        | Декораторы      | Описание                                                                                                                                                                                              |
-| :------------------------------------------------------------------------------- | :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| __init__(self, name: str, sheet_id: NoneType = None)                             | -               | -                                                                                                                                                                                                     |
-| recalculate_dependency(self, coordinate: str) -&#62; tuple[list[str], list[str]] | -               | Рассчитываем значения связанных ячеек.Нужно вычислить какие ячейки необходимо пересчитать и какие ячейкии какие данные нужны. - relation - выбираемые ячейки - recalculation - пересчитываемые ячейки |
-| add_formula(self, coordinate: str, formula: str)                                 | -               | Добавление информации в зависимость:param coordinate: координата ячейки:param formula: формула:return:                                                                                                |
-| change_formula(self, coordinate: str, formula: str)                              | -               | Изменяем формулу в ячейки.                                                                                                                                                                            |
-| delete_formula(self, coordinate: str)                                            | -               | Удаление информации о формуле в зависимости.                                                                                                                                                          |
-| rename_sheet(self, old_value: str, new_value: str)                               | -               | Функционал для изменения названия листов.                                                                                                                                                             |
-| save(self, sheet_id: Optional[int] = None) -&#62; bool                           | -               | -                                                                                                                                                                                                     |
-| get(cls, sheet: apps.dcis.models.document.Sheet)                                 | ['classmethod'] | Вытягиваем контейнер из кеша или строим новый.                                                                                                                                                        |
-| delete(self) -&#62; bool                                                         | -               | -                                                                                                                                                                                                     |
-| from_cache(cls, sheet_id: int)                                                   | ['classmethod'] | -                                                                                                                                                                                                     |
-| build_cache(cls, sheet: apps.dcis.models.document.Sheet)                         | ['classmethod'] | -                                                                                                                                                                                                     |
+| Сигнатура                                                                        | Декораторы  | Описание                                                                                                                                                                                              |
+| :------------------------------------------------------------------------------- | :---------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| __init__(self, name: str, sheet_id: int &#124; None = None)                      | -           | -                                                                                                                                                                                                     |
+| recalculate_dependency(self, coordinate: str) -&#62; tuple[list[str], list[str]] | -           | Рассчитываем значения связанных ячеек.Нужно вычислить какие ячейки необходимо пересчитать и какие ячейкии какие данные нужны. - relation - выбираемые ячейки - recalculation - пересчитываемые ячейки |
+| add_formula(self, coordinate: str, formula: str)                                 | -           | Добавление информации в зависимость:param coordinate: координата ячейки:param formula: формула:return:                                                                                                |
+| change_formula(self, coordinate: str, formula: str)                              | -           | Изменяем формулу в ячейки.                                                                                                                                                                            |
+| delete_formula(self, coordinate: str)                                            | -           | Удаление информации о формуле в зависимости.                                                                                                                                                          |
+| rename_sheet(self, old_value: str, new_value: str)                               | -           | Функционал для изменения названия листов.                                                                                                                                                             |
+| save(self, sheet_id: int &#124; None = None) -&#62; bool                         | -           | -                                                                                                                                                                                                     |
+| get(cls, sheet: apps.dcis.models.document.Sheet)                                 | classmethod | Вытягиваем контейнер из кеша или строим новый.                                                                                                                                                        |
+| delete(self) -&#62; bool                                                         | -           | -                                                                                                                                                                                                     |
+| from_cache(cls, sheet_id: int)                                                   | classmethod | -                                                                                                                                                                                                     |
+| build_cache(cls, sheet: apps.dcis.models.document.Sheet)                         | classmethod | -                                                                                                                                                                                                     |

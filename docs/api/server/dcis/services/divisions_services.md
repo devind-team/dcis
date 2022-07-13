@@ -1,11 +1,11 @@
 # Модуль divisions_services
 
-Модуль, отвечающий за выгрузку дивизионов пользователей.
+Модуль, отвечающий за работу с дивизионами.
 
 ### Функции
 
-| Сигнатура                                                                                                                                             | Декораторы | Описание                                                                        |
-| :---------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------ |
-| get_user_divisions( user: apps.core.models.User, project: apps.dcis.models.project.Project &#124; int &#124; None = None) -&#62; list[dict[str, str]] | -          | Получение списка обобщенных дивизионов для пользователя user и проекта project. |
-| document_in_user_divisions( document: apps.dcis.models.document.Document, user: apps.core.models.User) -&#62; bool                                    | -          | Принадлежит ли документ одному из дивизионов пользователя.                      |
-| _get_division(instances) -&#62; list[dict[str, str]]                                                                                                  | -          | Получение списка обобщенных дивизионов.                                         |
+| Сигнатура                                                                                                                                                                   | Декораторы | Описание                                                                                                                                                                                                                                         |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| get_user_divisions( user: apps.core.models.User, project: apps.dcis.models.project.Project &#124; int &#124; str &#124; None = None) -&#62; list[dict[str, int &#124; str]] | -          | Получение списка обобщенных дивизионов для пользователя и проекта.:param user: пользователь:param project: объект проекта, или идентификатор проекта, или None:return [{'id': int, name: 'string', 'model': 'department' | 'organization'}, ...] |
+| get_user_division_ids( user: apps.core.models.User, project: apps.dcis.models.project.Project &#124; int &#124; str &#124; None = None) -&#62; dict[str, int]               | -          | Получение идентификаторов дивизионов с привязкой к моделям.:param user: пользователь:param project: объект проекта, или идентификатор проекта, или None:return: {'department': [...], 'organization': [...]}                                     |
+| get_divisions(instances) -&#62; list[dict[str, int &#124; str]]                                                                                                             | -          | Получение списка обобщенных дивизионов.:param instances: модель дивизиона:return [{'id': int, name: 'string', 'model': 'department' | 'organization'}, ...]                                                                                      |

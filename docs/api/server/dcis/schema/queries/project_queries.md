@@ -8,11 +8,8 @@
 
 ### Методы
 
-| Сигнатура                                                                                                                                                 | Декораторы                                                 | Описание |
-| :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- | :------- |
-| resolve_project( root: Any, info: graphql.execution.base.ResolveInfo, project_id: str, *args, **kwargs)                                                   | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
-| resolve_projects(root: Any, info: graphql.execution.base.ResolveInfo, *args, **kwargs)                                                                    | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
-| resolve_period( root: Any, info: graphql.execution.base.ResolveInfo, period_id: str, *args, **kwargs)                                                     | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
-| resolve_periods( root: Any, info: graphql.execution.base.ResolveInfo, project_id: str, *args, **kwargs)                                                   | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
-| resolve_user_divisions( root: Any, info: graphql.execution.base.ResolveInfo, user_id: Optional[str] = None, project_id: Optional[str] = None) -&#62; list | ['staticmethod', 'permission_classes((IsAuthenticated,))'] | -        |
-| resolve_divisions( root: Any, info: graphql.execution.base.ResolveInfo, period_id: int, *args, **kwargs)                                                  | ['staticmethod']                                           | -        |
+| Сигнатура                                                                                                                               | Декораторы                                                       | Описание |
+| :-------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :------- |
+| resolve_project( root: Any, info: graphql.execution.base.ResolveInfo, project_id: str) -&#62; apps.dcis.models.project.Project          | staticmethod, permission_classes((IsAuthenticated, ViewProject)) | -        |
+| resolve_projects( root: Any, info: graphql.execution.base.ResolveInfo, *args, **kwargs) -&#62; django.db.models.query.QuerySet          | staticmethod, permission_classes((IsAuthenticated,))             | -        |
+| resolve_project_divisions( root: Any, info: graphql.execution.base.ResolveInfo, project_id: str) -&#62; list[dict[str, int &#124; str]] | staticmethod, permission_classes((IsAuthenticated, ViewProject)) | -        |
