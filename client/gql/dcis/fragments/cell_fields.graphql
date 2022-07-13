@@ -24,6 +24,7 @@ fragment CellFields on CellType {
   relatedGlobalPositions
   colspan
   rowspan
+  canChange
   value
   verified
   error

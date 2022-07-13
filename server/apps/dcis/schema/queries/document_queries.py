@@ -94,6 +94,7 @@ class DocumentQueries(graphene.ObjectType):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
         return DocumentSheetUnloader(
+            info.context,
             sheet=get_object_or_404(Sheet, pk=sheet_id),
             document_id=document.id,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],

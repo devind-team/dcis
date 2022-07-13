@@ -1,6 +1,6 @@
 from .document_permissions import (
     AddChildRowDimension,
-    AddChildRowDimensionOptimizedBase,
+    AddChildRowDimensionBase,
     AddDocument,
     AddDocumentBase,
     ChangeChildRowDimensionHeight,
@@ -8,7 +8,7 @@ from .document_permissions import (
     ChangeDocument,
     ChangeDocumentBase,
     ChangeValue,
-    ChangeValueOptimizedBase,
+    ChangeValueBase,
     DeleteChildRowDimension,
     DeleteChildRowDimensionBase,
     DeleteDocument,

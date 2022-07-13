@@ -417,6 +417,9 @@ class RowDimensionType(graphene.ObjectType):
     parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
     children = graphene.List(graphene.NonNull(lambda: RowDimensionType), required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
+    can_add_child_row = graphene.Boolean(required=True, description='Может ли пользователь добавить дочернюю строку')
+    can_change_height = graphene.Boolean(required=True, description='Может ли пользователь изменять высоту строки')
+    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалить строку')
     user = graphene.List(UserType, description='Пользователь')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
@@ -460,6 +463,7 @@ class CellType(graphene.ObjectType):
     )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
+    can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
 
     # От Value
     value = graphene.String(description='Значение')

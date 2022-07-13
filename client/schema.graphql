@@ -619,6 +619,8 @@ type CellType {
   borderColor: JSONString!
   """Стили границ"""
   borderStyle: JSONString!
+  """Может ли пользователь изменять значение ячейки"""
+  canChange: Boolean!
   """Цвет индекса"""
   color: String!
   """Объединение колонок"""
@@ -3441,6 +3443,12 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
+  """Может ли пользователь добавить дочернюю строку"""
+  canAddChildRow: Boolean!
+  """Может ли пользователь изменять высоту строки"""
+  canChangeHeight: Boolean!
+  """Может ли пользователь удалить строку"""
+  canDelete: Boolean!
   """Ячейки"""
   cells: [CellType!]!
   """Дочерние строки"""
