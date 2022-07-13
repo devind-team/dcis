@@ -34,11 +34,11 @@ import type {
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
-import Grid from '~/components/dcis/Grid.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
+import Grid from '~/components/dcis/Grid.vue'
 
 export default defineComponent({
-  components: { SheetControl, SettingsDocument, Grid },
+  components: { SettingsDocument, SheetControl, Grid },
   setup () {
     const route = useRoute()
 

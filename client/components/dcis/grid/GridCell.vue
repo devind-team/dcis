@@ -52,7 +52,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { client } = useApolloClient()
-    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
 
@@ -63,7 +63,7 @@ export default defineComponent({
     >({
       document: valueFilesQuery,
       variables: {
-        documentId: activeDocument.value.id,
+        documentId: activeDocument.value ? activeDocument.value.id : '',
         sheetId: activeSheet.value.id,
         columnId: props.cell.columnId,
         rowId: props.cell.rowId
@@ -74,14 +74,14 @@ export default defineComponent({
     })
 
     const changeValue = useChangeValueMutation(
-      computed(() => activeDocument.value.id),
+      computed(() => activeDocument.value ? activeDocument.value.id : ''),
       computed(() => activeSheet.value.id),
       computed(() => props.cell),
       client
     )
 
     const changeFileValue = useChangeFileValueMutation(
-      computed(() => activeDocument.value.id),
+      computed(() => activeDocument.value ? activeDocument.value.id : ''),
       computed(() => activeSheet.value.id),
       computed(() => props.cell),
       updateSheet,
@@ -89,7 +89,7 @@ export default defineComponent({
     )
 
     const unloadFileValueArchive = useUnloadFileValueArchiveMutation(
-      computed(() => activeDocument.value.id),
+      computed(() => activeDocument.value ? activeDocument.value.id : ''),
       computed(() => activeSheet.value.id),
       computed(() => props.cell)
     )

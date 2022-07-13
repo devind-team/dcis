@@ -9,7 +9,13 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
             v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
       v-tabs-items(v-model="activeSheetIndex")
         v-tab-item(v-for="sheet in period.sheets" :key="sheet.id")
-          div {{ activeSheet }}
+          grid(
+            v-if="activeSheet"
+            :mode="GridMode.CHANGE"
+            :active-sheet="activeSheet"
+            :update-active-sheet="updateActiveSheet"
+          )
+          v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
@@ -17,10 +23,10 @@ import { ApolloCache } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { inject, PropType, ref } from '#app'
 import { UpdateType } from '~/composables'
+import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   PeriodType,
-  SheetType,
   PeriodQuery,
   DocumentsSheetQuery,
   DocumentsSheetQueryVariables,
@@ -29,9 +35,10 @@ import {
 import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
+import Grid from '~/components/dcis/Grid.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, SheetControl },
+  components: { LeftNavigatorContainer, SheetControl, Grid },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -54,8 +61,7 @@ export default defineComponent({
 
     const {
       data: activeSheet,
-      update: updateActiveSheet,
-      changeUpdate
+      update: updateActiveSheet
     } = useCommonQuery<
       DocumentsSheetQuery,
       DocumentsSheetQueryVariables
@@ -87,6 +93,7 @@ export default defineComponent({
     })
 
     return {
+      GridMode,
       bc,
       activeSheetIndex,
       activeSheet,

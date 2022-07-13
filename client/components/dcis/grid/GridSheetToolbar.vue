@@ -61,11 +61,11 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
-    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(
-      computed(() => activeDocument.value.id),
+      computed(() => activeDocument.value ? activeDocument.value.id : ''),
       computed(() => activeSheet.value.id),
       updateSheet
     )

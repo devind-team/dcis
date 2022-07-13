@@ -50,12 +50,12 @@ export default defineComponent({
 
     const active = ref<boolean>(false)
 
-    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
 
     const addRowDimensionMutate = useAddRowDimensionMutation(
-      computed(() => activeDocument.value.id),
+      computed(() => activeDocument.value ? activeDocument.value.id : null),
       activeSheet,
       updateSheet
     )

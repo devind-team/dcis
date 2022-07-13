@@ -167,7 +167,7 @@ export function useGrid (
     }
     return null
   })
-  useOverlyingClass(document.body, cursorClass)
+  onMounted(() => useOverlyingClass(document.body, cursorClass))
 
   return {
     gridContainer,

@@ -2,7 +2,7 @@
 div
   grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
   .grid__body
-    div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
+    div.grid__container(ref="gridContainer" :style="gridContainerStyle" @scroll="gridContainerScroll")
       table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
         grid-header(
           :row-name-column-width="rowNameColumnWidth"
@@ -69,6 +69,7 @@ import {
   useChangeRowDimensionHeightMutation, useGrid,
   useI18n
 } from '~/composables'
+import { GridMode } from '~/types/grid'
 import { DocumentSheetQuery, SheetType, DocumentType } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
@@ -88,7 +89,7 @@ export default defineComponent({
     mode: { type: Number, required: true },
     activeSheet: { type: Object as PropType<SheetType>, required: true },
     updateActiveSheet: { type: Function as PropType<UpdateType<DocumentSheetQuery>>, required: true },
-    activeDocument: { type: Object as PropType<DocumentType>, required: true }
+    activeDocument: { type: Object as PropType<DocumentType>, default: null }
   },
   setup (props) {
     const { t } = useI18n()
@@ -97,9 +98,13 @@ export default defineComponent({
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const activeDocument = toRef(props, 'activeDocument')
 
-    provide('activeDocument', activeDocument)
     provide('activeSheet', activeSheet)
     provide('updateActiveSheet', updateActiveSheet)
+    provide('activeDocument', activeDocument)
+
+    const gridContainerStyle = computed(() => ({
+      height: props.mode === GridMode.WRITE ? 'calc(100vh - 230px)' : 'calc(100vh - 337px)'
+    }))
 
     const changeColumnWidth = useChangeColumnDimensionWidthMutation(updateActiveSheet)
     const changeRowHeight = useChangeRowDimensionHeightMutation(updateActiveSheet)
@@ -146,6 +151,7 @@ export default defineComponent({
 
     return {
       t,
+      gridContainerStyle,
       gridContainer,
       grid,
       resizingColumn,
@@ -216,7 +222,6 @@ div.grid__body
 
   .grid__container
     position: relative
-    height: calc(100vh - 230px)
     overflow: auto
 
     table.grid__table
@@ -227,8 +232,9 @@ div.grid__body
 
       td, th
         overflow: hidden
-        background-clip: padding-box
+        color: rgba(0, 0, 0, 0.87)
         background: white
+        background-clip: padding-box
         border-right: $border
         border-bottom: $border
 
@@ -243,6 +249,10 @@ div.grid__body
         th
           height: 25px
           border-top: $border
+          font-size: 16px
+
+          & > div:first-child
+            height: 100%
 
         th:first-child
           position: sticky
@@ -298,6 +308,7 @@ div.grid__body
           left: 0
           z-index: 1
           border-left: $border
+          font-size: 16px
           font-weight: bold
 
           &.grid__cell_row-name-selected
