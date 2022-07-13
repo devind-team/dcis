@@ -115,7 +115,7 @@ def generate_markdown(mod: pdoc.doc.Module):
                     ['Сигнатура', 'Декораторы', 'Описание'],
                     [
                         [f"{method['name']}{method['signature']}",
-                         f"{'-' if not method['decorators'] else method['decorators']}",
+                         f"{'-' if not method['decorators'] else ', '.join(method['decorators'])}",
                          f"{'-' if not method['docstring'] else method['docstring']}"]
                         for method in clazz['methods']
                     ],
