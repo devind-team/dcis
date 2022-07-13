@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "name": "Изменение дивизионов периода сбора",
-      "key": "change_divisions",
+      "key": "change_period_divisions",
       "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
@@ -21,8 +21,8 @@
     "model": "dcis.Privilege",
     "pk": 3,
     "fields": {
-      "name": "Изменение пользователей периода сбора",
-      "key": "change_users",
+      "name": "Изменение групп периода сбора",
+      "key": "change_period_groups",
       "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
@@ -30,8 +30,8 @@
     "model": "dcis.Privilege",
     "pk": 4,
     "fields": {
-      "name": "Изменение листа",
-      "key": "change_sheet",
+      "name": "Изменение пользователей периода сбора",
+      "key": "change_period_users",
       "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
@@ -39,8 +39,8 @@
     "model": "dcis.Privilege",
     "pk": 5,
     "fields": {
-      "name": "Добавление строки документа",
-      "key": "add_rowdimension",
+      "name": "Изменение настроек периода сбора",
+      "key": "change_period_settings",
       "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
@@ -48,8 +48,8 @@
     "model": "dcis.Privilege",
     "pk": 6,
     "fields": {
-      "name": "Удаление строки документа",
-      "key": "delete_rowdimension",
+      "name": "Просмотр документа",
+      "key": "view_document",
       "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
@@ -66,9 +66,9 @@
     "model": "dcis.Privilege",
     "pk": 8,
     "fields": {
-      "name": "Просмотр документа",
-      "key": "view_document",
-      "created_at": "2021-01-01T12:00:00.000Z"
+      "name": "Изменение документа",
+      "key": "change_document",
+       "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
   {
@@ -83,6 +83,42 @@
   {
     "model": "dcis.Privilege",
     "pk": 10,
+    "fields": {
+      "name": "Изменение листа",
+      "key": "change_sheet",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 11,
+    "fields": {
+      "name": "Добавление строки документа",
+      "key": "add_rowdimension",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 12,
+    "fields": {
+      "name": "Изменение строки документа",
+      "key": "change_rowdimension",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 13,
+    "fields": {
+      "name": "Удаление строки документа",
+      "key": "delete_rowdimension",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 14,
     "fields": {
       "name": "Изменение значения ячейки документа",
       "key": "change_value",

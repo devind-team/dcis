@@ -167,6 +167,33 @@ class AddChildRowDimension(BasePermission):
         )
 
 
+class ChangeChildRowDimensionHeightBase(BasePermission):
+    """Пропускает пользователей, которые могут изменять высоту дочерней строки, без проверки возможности просмотра."""
+
+    @staticmethod
+    def has_object_permission(context, obj: RowDimension):
+        return (
+            obj.document is not None and (
+                ChangePeriodSheet.has_object_permission(context, obj.document.period) or
+                context.user.has_perm('dcis.change_rowdimension') or
+                has_privilege(context.user.id, obj.document.period.id, 'change_rowdimension') or
+                obj.user_id == context.user.id
+            )
+        )
+
+
+class ChangeChildRowDimensionHeight(BasePermission):
+    """Пропускает пользователей, которые могут просматривать документ и изменять в нем высоту дочерних строк."""
+
+    @staticmethod
+    def has_object_permission(context, obj: RowDimension):
+        return obj.document is not None and ViewDocument.has_object_permission(
+            context, obj.document
+        ) and ChangeChildRowDimensionHeightBase.has_object_permission(
+            context, obj
+        )
+
+
 class DeleteChildRowDimensionBase(BasePermission):
     """Пропускает пользователей, которые могут удалять дочерние строки, без проверки возможности просмотра."""
 

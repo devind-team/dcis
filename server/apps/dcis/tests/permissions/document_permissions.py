@@ -11,6 +11,7 @@ from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, R
 from apps.dcis.permissions.document_permissions import (
     AddChildRowDimension,
     AddDocument,
+    ChangeChildRowDimensionHeight,
     ChangeDocument,
     ChangeValue,
     ChangeValueBase,
@@ -178,6 +179,17 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self._test_add_child_row_dimension((False, False, False, True))
             mock.assert_called_once_with(self.user.id, self.user_period.id, 'add_rowdimension')
 
+    def test_change_child_row_dimension_height(self) -> None:
+        """Тестирование класса `ChangeChildRowDimensionHeight`."""
+        self._test_change_child_row_dimension_height((False, False, True))
+        with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
+            self._test_change_child_row_dimension_height((False, True, True))
+        with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_rowdimension'):
+            self._test_change_child_row_dimension_height((False, True, True))
+        with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
+            self._test_change_child_row_dimension_height((False, True, True))
+            mock.assert_called_with(self.user.id, self.user_period.id, 'change_rowdimension')
+
     def test_delete_child_row_dimension(self) -> None:
         """Тестирование класса `DeleteChildRowDimension`"""
         self._test_delete_child_row_dimension((False, False, False, True))
@@ -239,6 +251,18 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 self.assertTrue(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))
             else:
                 self.assertFalse(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))
+
+    def _test_change_child_row_dimension_height(self, values: tuple[bool, bool, bool]) -> None:
+        """Тестирование класса `ChangeChildRowDimensionHeight` для 3 типов строк."""
+        for row_dimension, value in zip((
+            self.row_dimension,
+            self.document_row_dimension,
+            self.document_user_row_dimension,
+        ), values):
+            if value:
+                self.assertTrue(ChangeChildRowDimensionHeight.has_object_permission(self.context_mock, row_dimension))
+            else:
+                self.assertFalse(ChangeChildRowDimensionHeight.has_object_permission(self.context_mock, row_dimension))
 
     def _test_delete_child_row_dimension(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование класса `DeleteChildRowDimension` для 4 типов строк."""
