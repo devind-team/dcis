@@ -1,6 +1,7 @@
 """Разрешения на работу с документами периодов."""
 
 from dataclasses import dataclass
+from typing import Any
 
 from devind_helpers.permissions import BasePermission
 
@@ -9,6 +10,7 @@ from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import ChangePeriodSheet, ChangePeriodSheetBase, ViewPeriod
+from apps.core.models import User
 
 
 class ViewDocument(BasePermission):
@@ -95,8 +97,83 @@ class DeleteDocument(BasePermission):
         )
 
 
-class ChangeValueBase(BasePermission):
-    """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра."""
+class ChangeValueOptimizedBase:
+    """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра.
+
+    Позволяет вычислять разрешение многократно для одного пользователя
+    и нескольких ячеек одного документа, не делая дополнительных запросов.
+    """
+
+    def __init__(self, context: Any, document: Document) -> None:
+        self._context = context
+        self._document = document
+        self._can_change_period_sheet: bool | None = None
+        self._has_change_value_permission: bool | None = None
+        self._user_division_ids: list[int] | None = None
+        self._can_change_in_multiple_mode: bool | None = None
+
+    @property
+    def can_change_period_sheet(self) -> bool:
+        """Может ли пользователь изменять структуру листа."""
+        if self._can_change_period_sheet is None:
+            self._can_change_period_sheet = ChangePeriodSheetBase.has_object_permission(
+                self._context,
+                self._document.period
+            )
+        return self._can_change_period_sheet
+
+    @property
+    def has_change_value_permission(self) -> bool:
+        """Обладает ли пользователь привилегией, позволяющей изменять значение ячейки."""
+        if self._has_change_value_permission is None:
+            self._has_change_value_permission = self._context.user.has_perm('dcis.change_value') or has_privilege(
+                self._context.user.id,
+                self._document.period.id,
+                'change_value'
+            )
+        return self._has_change_value_permission
+
+    @property
+    def user_division_ids(self) -> list[int]:
+        """Идентификаторы дивизионов пользователя."""
+        if self._user_division_ids is None:
+            self._user_division_ids = [
+                division['id'] for division in get_user_divisions(self._context.user, self._document.period.project)
+            ]
+        return self._user_division_ids
+
+    @property
+    def can_change_in_multiple_mode(self) -> bool:
+        """Может ли пользователь изменять ячейки, если тип сбора является множественным."""
+        if self._can_change_in_multiple_mode is None:
+            self._can_change_in_multiple_mode = self._document.period.multiple and (
+                self._document.object_id in self.user_division_ids
+            )
+        return self._can_change_in_multiple_mode
+
+    def can_change_in_single_mode(self, cell: Cell) -> bool:
+        """Может ли пользователь изменять ячейку, если тип сбора является единичным."""
+        if self._document.period.multiple:
+            return False
+        return cell.row.parent_id is None or (
+            cell.row.parent_id is not None and cell.row.object_id in self.user_division_ids
+        )
+
+    def has_object_permission(self, cell: Cell) -> bool:
+        """Получение разрешения."""
+        if not (cell.editable and cell.formula is None):
+            return False
+        if self.can_change_period_sheet:
+            return True
+        return (
+            self.has_change_value_permission or
+            self.can_change_in_multiple_mode or
+            self.can_change_in_single_mode(cell)
+        )
+
+
+class ChangeValue(BasePermission):
+    """Пропускает пользователей, которые могут просматривать документ и изменять в нем значение ячейки."""
 
     @dataclass
     class Obj:
@@ -105,39 +182,11 @@ class ChangeValueBase(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: Obj):
-        if not (obj.cell.editable and obj.cell.formula is None):
-            return False
-        if ChangePeriodSheetBase.has_object_permission(context, obj.document.period):
-            return True
-        division_ids = [division['id'] for division in get_user_divisions(context.user, obj.document.period.project)]
-        return (
-            context.user.has_perm('dcis.change_value') or
-            has_privilege(context.user.id, obj.document.period.id, 'change_value') or
-            obj.document.period.multiple and obj.document.object_id in division_ids or
-            not obj.document.period.multiple and obj.cell.row.parent_id is None or (
-                not obj.document.period.multiple and
-                obj.cell.row.parent_id is not None and
-                obj.cell.row.object_id in division_ids
-            )
-        )
-
-
-class ChangeValue(BasePermission):
-    """Пропускает пользователей, которые могут просматривать документ и изменять в нем значение ячейки."""
-
-    @staticmethod
-    def has_object_permission(context, obj: ChangeValueBase.Obj):
-        if not (
-            ViewDocument.has_object_permission(context, obj.document) and
-            obj.cell.editable and
-            obj.cell.formula is None
-        ):
-            return False
-        return ChangePeriodSheet.has_object_permission(
-            context, obj.document.period
-        ) or ChangeValueBase.has_object_permission(
-            context, obj
-        )
+        return ViewDocument.has_object_permission(
+            context, obj.document
+        ) and ChangeValueOptimizedBase(
+            context, obj.document
+        ).has_object_permission(obj.cell)
 
 
 class AddChildRowDimensionBase(BasePermission):

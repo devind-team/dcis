@@ -8,7 +8,7 @@ from .document_permissions import (
     ChangeDocument,
     ChangeDocumentBase,
     ChangeValue,
-    ChangeValueBase,
+    ChangeValueOptimizedBase,
     DeleteChildRowDimension,
     DeleteChildRowDimensionBase,
     DeleteDocument,

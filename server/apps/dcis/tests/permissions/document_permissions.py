@@ -14,7 +14,6 @@ from apps.dcis.permissions.document_permissions import (
     ChangeChildRowDimensionHeight,
     ChangeDocument,
     ChangeValue,
-    ChangeValueBase,
     DeleteChildRowDimension,
     DeleteDocument,
     ViewDocument,
@@ -71,7 +70,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             dynamic=True,
         )
         self.column_dimensions = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 6)]
-        self.not_editable_cell_obj = ChangeValueBase.Obj(
+        self.not_editable_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(
                 row=self.row_dimension,
@@ -79,7 +78,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 editable=False,
             ),
         )
-        self.formula_cell_obj = ChangeValueBase.Obj(
+        self.formula_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(
                 row=self.row_dimension,
@@ -87,15 +86,15 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 formula='0',
             ),
         )
-        self.cell_obj = ChangeValueBase.Obj(
+        self.cell_obj = ChangeValue.Obj(
             document=self.document,
             cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[2]),
         )
-        self.child_cell_obj = ChangeValueBase.Obj(
+        self.child_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(row=self.document_row_dimension_child, column=self.column_dimensions[3])
         )
-        self.user_cell_obj = ChangeValueBase.Obj(
+        self.user_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[4]),
         )
@@ -146,7 +145,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         ):
             self._test_change_value((False, False, True, False, True))
             with patch(
-                'apps.dcis.permissions.document_permissions.ChangePeriodSheet.has_object_permission',
+                'apps.dcis.permissions.document_permissions.ChangePeriodSheetBase.has_object_permission',
                 new=Mock(return_value=True)
             ):
                 self._test_change_value((False, False, True, True, True))
