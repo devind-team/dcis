@@ -10,9 +10,9 @@ from django.db.models.manager import ManagerDescriptor
 from snakemd import Document, Table
 
 # Specify settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'devind.settings')
-# Setup Django
-django.setup()
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'devind.settings')
+# # Setup Django
+# django.setup()
 
 
 def recursive_module(mod: pdoc.doc.Module):
