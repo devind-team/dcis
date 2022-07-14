@@ -22,7 +22,7 @@ jobs:
           python-version: '3.10'
       - working-directory: server
         run: |
-          pip install poetry
+          pip install django pdoc snakemd
           pip install --upgrade pip
           poetry install 
           python generate_docs.py
