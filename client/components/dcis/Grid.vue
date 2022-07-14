@@ -67,11 +67,12 @@ import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
   useChangeRowDimensionHeightMutation,
+  useChangeChildRowDimensionHeightMutation,
   useGrid,
   useI18n
 } from '~/composables'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentsSheetQuery, SheetType, DocumentType } from '~/types/graphql'
+import { SheetType, DocumentType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
@@ -111,7 +112,9 @@ export default defineComponent({
     const changeColumnWidth = props.mode === GridMode.CHANGE
       ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
       : null
-    const changeRowHeight = useChangeRowDimensionHeightMutation(updateActiveSheet)
+    const changeRowHeight = props.mode === GridMode.CHANGE
+      ? useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const {
       gridContainer,

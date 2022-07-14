@@ -122,6 +122,13 @@ def change_row_dimension(
     return row_dimension
 
 
+def change_row_dimension_height(row_dimension: RowDimension, height: int) -> RowDimension:
+    """Изменение высоты строки."""
+    row_dimension.height = height
+    row_dimension.save(update_fields=('height', 'updated_at'))
+    return row_dimension
+
+
 @transaction.atomic
 def delete_row_dimension(row_dimension: RowDimension) -> int:
     """Удаление строки.

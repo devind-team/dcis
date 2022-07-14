@@ -853,6 +853,30 @@ export type ChangeCellsOptionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeChildRowDimensionHeightMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Высота строки */
+  height?: InputMaybe<Scalars['Int']>;
+  /** Идентификатор строки */
+  rowDimensionId: Scalars['ID'];
+};
+
+/** Изменение высоты дочерней строки. */
+export type ChangeChildRowDimensionHeightMutationPayload = {
+  __typename?: 'ChangeChildRowDimensionHeightMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Высота строки */
+  height?: Maybe<Scalars['Int']>;
+  /** Идентификатор строки */
+  rowDimensionId: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Дата обновления строки */
+  updatedAt: Scalars['DateTime'];
+};
+
 export type ChangeColumnDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор колонки */
@@ -2384,6 +2408,8 @@ export type Mutation = {
   changeCategoryPosition: ChangeCategoryPositionMutationPayload;
   /** Изменения опций ячейки */
   changeCellsOption: ChangeCellsOptionMutationPayload;
+  /** Изменение высоты дочерней строки. */
+  changeChildRowDimensionHeight: ChangeChildRowDimensionHeightMutationPayload;
   /** Изменение колонки */
   changeColumnDimension: ChangeColumnDimensionMutationPayload;
   /** Изменение комментария версии документа. */
@@ -2620,6 +2646,11 @@ export type MutationChangeCategoryPositionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeCellsOptionArgs = {
   input: ChangeCellsOptionMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeChildRowDimensionHeightArgs = {
+  input: ChangeChildRowDimensionHeightMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5185,6 +5216,13 @@ export type AddDocumentStatusMutationVariables = Exact<{
 }>;
 
 export type AddDocumentStatusMutation = { __typename?: 'Mutation', addDocumentStatus: { __typename: 'AddDocumentStatusMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } } | null } };
+
+export type ChangeChildRowDimensionHeightMutationVariables = Exact<{
+  rowDimensionId: Scalars['ID'];
+  height?: InputMaybe<Scalars['Int']>;
+}>;
+
+export type ChangeChildRowDimensionHeightMutation = { __typename?: 'Mutation', changeChildRowDimensionHeight: { __typename: 'ChangeChildRowDimensionHeightMutationPayload', success: boolean, rowDimensionId: string, height?: number | null, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ChangeDocumentCommentMutationVariables = Exact<{
   documentId: Scalars['ID'];

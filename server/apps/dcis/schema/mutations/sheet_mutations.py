@@ -172,7 +172,7 @@ class ChangeRowDimensionMutation(BaseMutation):
             dynamic=dynamic
         )
         return ChangeRowDimensionMutation(
-            row_dimension_id=row_dimension.pk,
+            row_dimension_id=row_dimension.id,
             height=row_dimension.height,
             fixed=row_dimension.fixed,
             hidden=row_dimension.hidden,

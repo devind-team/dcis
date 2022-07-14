@@ -3,7 +3,6 @@ import { ApolloClient, DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { Ref, unref } from '#app'
 import { UpdateType } from '~/composables/query-common'
-import { UpdateSheetType } from '~/types/grid'
 import {
   DocumentsSheetQuery,
   DocumentSheetQuery,
@@ -27,6 +26,8 @@ import {
   ChangeColumnDimensionMutationVariables,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables,
+  ChangeChildRowDimensionHeightMutation,
+  ChangeChildRowDimensionHeightMutationVariables,
   ChangeCellsOptionMutation,
   ChangeCellsOptionMutationVariables,
   ChangeValueMutation,
@@ -42,6 +43,7 @@ import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimensio
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
+import changeChildRowDimensionHeightMutation from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
@@ -406,7 +408,7 @@ export function updateColumnDimension (
   }
 }
 
-export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateSheetType>) {
+export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType<DocumentsSheetQuery>>) {
   const { mutate } = useMutation<
     ChangeRowDimensionMutation,
     ChangeRowDimensionMutationVariables
@@ -438,8 +440,51 @@ export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateShee
   }
 }
 
+export function useChangeChildRowDimensionHeightMutation (updateSheet: Ref<UpdateType<DocumentSheetQuery>>) {
+  const { mutate } = useMutation<
+    ChangeChildRowDimensionHeightMutation,
+    ChangeChildRowDimensionHeightMutationVariables
+  >(changeChildRowDimensionHeightMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeChildRowDimensionHeightMutation>, 'context'>) {
+      if (result.data.changeChildRowDimensionHeight.success) {
+        updateSheet.value(
+          dataProxy,
+          result, (
+            data: DocumentSheetQuery,
+            { data: { changeChildRowDimensionHeight } }: Omit<FetchResult<ChangeChildRowDimensionHeightMutation>, 'context'>
+          ) => {
+            const rowDimension = data.documentSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+              rowDimension.id === changeChildRowDimensionHeight.rowDimensionId)!
+            rowDimension.height = changeChildRowDimensionHeight.height
+            rowDimension.updatedAt = changeChildRowDimensionHeight.updatedAt
+            return data
+          }
+        )
+      }
+    }
+  })
+  return async function (rowDimension: RowDimensionType, height: number) {
+    const variables: ChangeChildRowDimensionHeightMutationVariables = {
+      rowDimensionId: rowDimension.id,
+      height
+    }
+    await mutate(variables, {
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeChildRowDimensionHeight: {
+          __typename: 'ChangeChildRowDimensionHeightMutationPayload',
+          success: true,
+          errors: [],
+          ...variables,
+          updatedAt: new Date().toISOString()
+        }
+      }
+    })
+  }
+}
+
 export function updateRowDimension (
-  updateSheet: UpdateSheetType,
+  updateSheet: UpdateType<DocumentsSheetQuery>,
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
 ) {
@@ -448,11 +493,10 @@ export function updateRowDimension (
       dataProxy,
       result,
       (
-        data: DocumentsSheetQuery | DocumentSheetQuery,
+        data: DocumentsSheetQuery,
         { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
       ) => {
-        const sheet = 'documentsSheet' in data ? data.documentsSheet : data.documentSheet
-        const rowDimension = sheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+        const rowDimension = data.documentsSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
           rowDimension.id === changeRowDimension.rowDimensionId)!
         rowDimension.height = changeRowDimension.height
         rowDimension.fixed = changeRowDimension.fixed

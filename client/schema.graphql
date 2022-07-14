@@ -797,6 +797,29 @@ type ChangeCellsOptionMutationPayload {
   success: Boolean!
 }
 
+input ChangeChildRowDimensionHeightMutationInput {
+  clientMutationId: String
+  """Высота строки"""
+  height: Int
+  """Идентификатор строки"""
+  rowDimensionId: ID!
+}
+
+"""Изменение высоты дочерней строки."""
+type ChangeChildRowDimensionHeightMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Высота строки"""
+  height: Int
+  """Идентификатор строки"""
+  rowDimensionId: ID!
+  """Успех мутации"""
+  success: Boolean!
+  """Дата обновления строки"""
+  updatedAt: DateTime!
+}
+
 input ChangeColumnDimensionMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
@@ -2248,6 +2271,8 @@ type Mutation {
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
+  """Изменение высоты дочерней строки."""
+  changeChildRowDimensionHeight(input: ChangeChildRowDimensionHeightMutationInput!): ChangeChildRowDimensionHeightMutationPayload!
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
   """Изменение комментария версии документа."""
