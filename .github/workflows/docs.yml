@@ -23,6 +23,7 @@ jobs:
       - working-directory: server
         run: |
           pip install poetry
+          pip install --upgrade pip
           poetry install 
           python generate_docs.py
 
