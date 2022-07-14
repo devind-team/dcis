@@ -507,14 +507,17 @@ class DocumentSheetUnloader(SheetUnloader):
 
     def get_row_permissions(self, row: RowDimension) -> dict[str, bool]:
         if row.document is None:
-            can_change_height = False
+            return {
+                'can_add_child_row': self.add_child_row_dimension.has_object_permission(row),
+                'can_change_height': False,
+                'can_delete': False,
+            }
         else:
-            can_change_height = self.change_child_row_dimension_height.has_object_permission(row)
-        return {
-            'can_add_child_row': self.add_child_row_dimension.has_object_permission(row),
-            'can_change_height':  can_change_height,
-            'can_delete': self.delete_child_row_dimension.has_object_permission(row),
-        }
+            return {
+                'can_add_child_row': self.add_child_row_dimension.has_object_permission(row),
+                'can_change_height': self.change_child_row_dimension_height.has_object_permission(row),
+                'can_delete': self.delete_child_row_dimension.has_object_permission(row),
+            }
 
     def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
         return {'can_change': self.change_value.has_object_permission(cell)}

@@ -190,13 +190,11 @@ class DeleteRowDimensionMutation(BaseMutation):
     row_dimension_id = graphene.ID(required=True, description='Идентификатор удаленной строки')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
-        return DeleteRowDimensionMutation(
-            row_dimension_id=delete_row_dimension(
-                row_dimension=get_object_or_404(RowDimension, pk=row_dimension_id)
-            )
-        )
+        row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
+        info.context.check_object_permissions(info.context, row_dimension.sheet.period)
+        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(row_dimension))
 
 
 class SheetMutations(graphene.ObjectType):

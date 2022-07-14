@@ -37,9 +37,9 @@ v-menu(v-model="active" bottom close-on-content-click)
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
-import { UpdateType } from '~/composables/query-common'
-import { GridMode } from '~/types/grid'
-import { DocumentType, SheetType, RowDimensionType, DocumentSheetQuery } from '~/types/graphql'
+import { GridMode, UpdateSheetType } from '~/types/grid'
+import { DocumentType, RowDimensionType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
+import { UpdateType } from '~/composables'
 import { AddRowDimensionPosition } from '~/composables/grid-mutations'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
 
@@ -59,7 +59,7 @@ export default defineComponent({
     const mode = inject<GridMode>('mode')
     const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateSheetType>>('updateActiveSheet')
 
     const addRowDimensionMutate = useAddRowDimensionMutation(
       computed(() => activeDocument.value ? activeDocument.value.id : null),
@@ -67,7 +67,9 @@ export default defineComponent({
       updateSheet
     )
 
-    const deleteRowDimensionMutate = useDeleteRowDimensionMutation(activeSheet, updateSheet)
+    const deleteRowDimensionMutate = mode === GridMode.CHANGE
+      ? useDeleteRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      : useDeleteChildRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const deleteRowDimension = async (row: RowDimensionType) => {
       await deleteRowDimensionMutate(row)

@@ -12,7 +12,7 @@ tbody
       grid-row-control(
         v-slot="{ on, attrs }"
         :row="row"
-        :can-delete="rootCount !== 1 || !!row.parent"
+        :can-delete="getCanDeleteRow(row)"
         :get-row-height="getRowHeight"
         :clear-selection="clearSelection"
       )
@@ -41,8 +41,8 @@ tbody
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
-import { SheetType, RowDimensionType, CellType } from '~/types/graphql'
-import { ResizingType } from '~/types/grid'
+import { CellType, RowDimensionType, SheetType } from '~/types/graphql'
+import { GridMode, ResizingType } from '~/types/grid'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -75,6 +75,7 @@ export default defineComponent({
     mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
+    const mode = inject<GridMode>('mode')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
     const rootCount = computed<number>(() => activeSheet.value.rows
@@ -85,6 +86,14 @@ export default defineComponent({
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name_boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': !props.resizingRow
+      }
+    }
+
+    const getCanDeleteRow = (row: RowDimensionType): boolean => {
+      if (mode === GridMode.CHANGE) {
+        return rootCount.value !== 1 || Boolean(row.parent)
+      } else {
+        return row.canDelete
       }
     }
 
@@ -128,7 +137,7 @@ export default defineComponent({
       return style
     }
 
-    return { activeSheet, rootCount, getRowNameCellClass, getCellStyle, getCellContentStyle }
+    return { activeSheet, getRowNameCellClass, getCanDeleteRow, getCellStyle, getCellContentStyle }
   }
 })
 </script>

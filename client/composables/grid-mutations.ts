@@ -22,6 +22,8 @@ import {
   AddRowDimensionMutationVariables,
   DeleteRowDimensionMutation,
   DeleteRowDimensionMutationVariables,
+  DeleteChildRowDimensionMutation,
+  DeleteChildRowDimensionMutationVariables,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables,
   ChangeRowDimensionMutation,
@@ -41,6 +43,7 @@ import { parsePosition, findCell } from '~/services/grid'
 import sheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
+import deleteChildRowDimensionMutation from '~/gql/dcis/mutations/document/delete_child_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeChildRowDimensionHeightMutation from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
@@ -113,7 +116,7 @@ export function useAddRowDimensionMutation (
 
 export function useDeleteRowDimensionMutation (
   sheet: Ref<SheetType>,
-  updateSheet: Ref<UpdateType<DocumentSheetQuery>>
+  updateSheet: Ref<UpdateType<DocumentsSheetQuery>>
 ) {
   const { mutate } = useMutation<
     DeleteRowDimensionMutation,
@@ -127,13 +130,43 @@ export function useDeleteRowDimensionMutation (
             dataProxy,
             result,
             (
-              data: DocumentSheetQuery, {
+              data: DocumentsSheetQuery, {
                 data: { deleteRowDimension: { rowDimensionId } }
               }: Omit<FetchResult<DeleteRowDimensionMutation>, 'context'>
             ) => {
-              data.documentSheet.rows = deleteRow(sheet.value.columns, data.documentSheet.rows, rowDimensionId)
+              data.documentsSheet.rows = deleteRow(sheet.value.columns, data.documentsSheet.rows, rowDimensionId)
               return data
             })
+        }
+      }
+    })
+  }
+}
+
+export function useDeleteChildRowDimensionMutation (
+  sheet: Ref<SheetType>,
+  updateSheet: Ref<UpdateType<DocumentSheetQuery>>
+) {
+  const { mutate } = useMutation<
+    DeleteChildRowDimensionMutation,
+    DeleteChildRowDimensionMutationVariables
+  >(deleteChildRowDimensionMutation)
+  return async function (rowDimension: RowDimensionType) {
+    await mutate({ rowDimensionId: rowDimension.id }, {
+      update (dataProxy: DataProxy, result: Omit<FetchResult<DeleteChildRowDimensionMutation>, 'context'>) {
+        if (result.data.deleteChildRowDimension.success) {
+          updateSheet.value(
+            dataProxy,
+            result,
+            (
+              data: DocumentSheetQuery, {
+                data: { deleteChildRowDimension: { rowDimensionId } }
+              }: Omit<FetchResult<DeleteChildRowDimensionMutation>, 'context'>
+            ) => {
+              data.documentSheet.rows = deleteRow(sheet.value.columns, data.documentSheet.rows, rowDimensionId)
+              return data
+            }
+          )
         }
       }
     })

@@ -1754,6 +1754,24 @@ export type DeleteCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteChildRowDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор строки */
+  rowDimensionId: Scalars['ID'];
+};
+
+/** Удаление дочерней строки. */
+export type DeleteChildRowDimensionMutationPayload = {
+  __typename?: 'DeleteChildRowDimensionMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленной строки */
+  rowDimensionId: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteDivisionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор дивизиона */
@@ -2476,6 +2494,8 @@ export type Mutation = {
   copyPeriodGroups: CopyPeriodGroupsMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
+  /** Удаление дочерней строки. */
+  deleteChildRowDimension: DeleteChildRowDimensionMutationPayload;
   /** Мутация на удаление дивизиона из периода. */
   deleteDivision: DeleteDivisionMutationPayload;
   /** Удаление статуса документа. */
@@ -2819,6 +2839,11 @@ export type MutationCopyPeriodGroupsArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteCategoryArgs = {
   input: DeleteCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteChildRowDimensionArgs = {
+  input: DeleteChildRowDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5230,6 +5255,12 @@ export type ChangeDocumentCommentMutationVariables = Exact<{
 }>;
 
 export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any } | null } };
+
+export type DeleteChildRowDimensionMutationVariables = Exact<{
+  rowDimensionId: Scalars['ID'];
+}>;
+
+export type DeleteChildRowDimensionMutation = { __typename?: 'Mutation', deleteChildRowDimension: { __typename: 'DeleteChildRowDimensionMutationPayload', success: boolean, rowDimensionId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];

@@ -12,11 +12,18 @@ from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Status
-from apps.dcis.permissions import AddDocument, ChangeChildRowDimensionHeight, ChangeDocument, ViewDocument
+from apps.dcis.permissions import (
+    AddDocument,
+    ChangeChildRowDimensionHeight,
+    ChangeDocument,
+    DeleteChildRowDimension,
+    ViewDocument,
+)
+from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType
 from apps.dcis.services.document_services import create_new_document
 from apps.dcis.services.document_unload_services import DocumentUnload
-from apps.dcis.services.sheet_services import change_row_dimension_height
+from apps.dcis.services.sheet_services import change_row_dimension_height, delete_row_dimension
 
 
 class AddDocumentMutation(BaseMutation):
@@ -170,6 +177,22 @@ class ChangeChildRowDimensionHeightMutation(BaseMutation):
         )
 
 
+class DeleteChildRowDimensionMutation(BaseMutation):
+    """Удаление дочерней строки."""
+
+    class Input:
+        row_dimension_id = graphene.ID(required=True, description='Идентификатор строки')
+
+    row_dimension_id = graphene.ID(required=True, description='Идентификатор удаленной строки')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, DeleteChildRowDimension,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
+        row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
+        info.context.check_object_permissions(info.context, row_dimension)
+        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(row_dimension))
+
+
 class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
@@ -180,3 +203,4 @@ class DocumentMutations(graphene.ObjectType):
     unload_document = UnloadDocumentMutation.Field(required=True)
 
     change_child_row_dimension_height = ChangeChildRowDimensionHeightMutation.Field(required=True)
+    delete_child_row_dimension = DeleteChildRowDimensionMutation.Field(required=True)

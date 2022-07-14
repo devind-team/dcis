@@ -1660,6 +1660,23 @@ type DeleteCategoryMutationPayload {
   success: Boolean!
 }
 
+input DeleteChildRowDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор строки"""
+  rowDimensionId: ID!
+}
+
+"""Удаление дочерней строки."""
+type DeleteChildRowDimensionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленной строки"""
+  rowDimensionId: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteDivisionMutationInput {
   clientMutationId: String
   """Идентификатор дивизиона"""
@@ -2339,6 +2356,8 @@ type Mutation {
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
+  """Удаление дочерней строки."""
+  deleteChildRowDimension(input: DeleteChildRowDimensionMutationInput!): DeleteChildRowDimensionMutationPayload!
   """Мутация на удаление дивизиона из периода."""
   deleteDivision(input: DeleteDivisionMutationInput!): DeleteDivisionMutationPayload!
   """Удаление статуса документа."""

@@ -102,7 +102,13 @@ def add_row_dimension(
         cells=cells,
         merged_cells=sheet.mergedcell_set.all(),
         values=[],
-        rows_global_indices_map={**global_indices_map, row_dimension.id: global_index}
+        rows_global_indices_map={**global_indices_map, row_dimension.id: global_index},
+        get_row_permissions=lambda _: {
+            'can_add_child_row': False,
+            'can_change_height': False,
+            'can_delete': False,
+        },
+        get_cell_permissions=lambda _: {'can_change': False}
     ).unload()[0]
 
 
