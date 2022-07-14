@@ -1653,7 +1653,7 @@ numpy = ">=1.17.3,<1.25.0"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.6.0"
+version = "1.7.1"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
 optional = false
@@ -2117,7 +2117,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "deb0e24b90dfc9759aab394d28810322c3ea3476b9e8f6799a1102c492614a2b"
+content-hash = "a4a8296da56899d253935a4e5899e8f90e5ad7a4053beb8944c96516c173bcdc"
 
 [metadata.files]
 aiohttp = [
@@ -3299,8 +3299,8 @@ scipy = [
     {file = "scipy-1.8.1.tar.gz", hash = "sha256:9e3fb1b0e896f14a85aa9a28d5f755daaeeb54c897b746df7a55ccb02b340f33"},
 ]
 sentry-sdk = [
-    {file = "sentry-sdk-1.6.0.tar.gz", hash = "sha256:b82ad57306d5546713f15d5d70daea0408cf7f998c7566db16e0e6257e51e561"},
-    {file = "sentry_sdk-1.6.0-py2.py3-none-any.whl", hash = "sha256:ddbd191b6f4e696b7845b4d87389898ae1207981faf114f968a57363aa6be03c"},
+    {file = "sentry-sdk-1.7.1.tar.gz", hash = "sha256:e410026af0af8c373f8ac40b550c15c11b58e60ddc3f65fcc395ad263daefaf1"},
+    {file = "sentry_sdk-1.7.1-py2.py3-none-any.whl", hash = "sha256:560ce41420373b6949830831e8e11d96b311694ae58c8b145954bcb365bb035f"},
 ]
 service-identity = [
     {file = "service-identity-21.1.0.tar.gz", hash = "sha256:6e6c6086ca271dc11b033d17c3a8bea9f24ebff920c587da090afc9519419d34"},
