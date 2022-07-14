@@ -4727,59 +4727,10 @@
     debug "^4.3.4"
     tsutils "^3.21.0"
 
-"@typescript-eslint/types@5.29.0":
-  version "5.29.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.29.0.tgz#7861d3d288c031703b2d97bc113696b4d8c19aab"
-  integrity sha512-X99VbqvAXOMdVyfFmksMy3u8p8yoRGITgU1joBJPzeYa0rhdf5ok9S56/itRoUSh99fiDoMtarSIJXo7H/SnOg==
-
-"@typescript-eslint/types@5.30.5":
-  version "5.30.5"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.30.5.tgz#36a0c05a72af3623cdf9ee8b81ea743b7de75a98"
-  integrity sha512-kZ80w/M2AvsbRvOr3PjaNh6qEW1LFqs2pLdo2s5R38B2HYXG8Z0PP48/4+j1QHJFL3ssHIbJ4odPRS8PlHrFfw==
-
 "@typescript-eslint/types@5.30.6":
   version "5.30.6"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.30.6.tgz#86369d0a7af8c67024115ac1da3e8fb2d38907e1"
   integrity sha512-HdnP8HioL1F7CwVmT4RaaMX57RrfqsOMclZc08wGMiDYJBsLGBM7JwXM4cZJmbWLzIR/pXg1kkrBBVpxTOwfUg==
-
-"@typescript-eslint/typescript-estree@5.27.1":
-  version "5.27.1"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.27.1.tgz#7621ee78607331821c16fffc21fc7a452d7bc808"
-  integrity sha512-DnZvvq3TAJ5ke+hk0LklvxwYsnXpRdqUY5gaVS0D4raKtbznPz71UJGnPTHEFo0GDxqLOLdMkkmVZjSpET1hFw==
-  dependencies:
-    "@typescript-eslint/types" "5.27.1"
-    "@typescript-eslint/visitor-keys" "5.27.1"
-    debug "^4.3.4"
-    globby "^11.1.0"
-    is-glob "^4.0.3"
-    semver "^7.3.7"
-    tsutils "^3.21.0"
-
-"@typescript-eslint/typescript-estree@5.30.5":
-  version "5.30.5"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.30.5.tgz#c520e4eba20551c4ec76af8d344a42eb6c9767bb"
-  integrity sha512-qGTc7QZC801kbYjAr4AgdOfnokpwStqyhSbiQvqGBLixniAKyH+ib2qXIVo4P9NgGzwyfD9I0nlJN7D91E1VpQ==
-  dependencies:
-    "@typescript-eslint/types" "5.30.5"
-    "@typescript-eslint/visitor-keys" "5.30.5"
-    debug "^4.3.4"
-    globby "^11.1.0"
-    is-glob "^4.0.3"
-    semver "^7.3.7"
-    tsutils "^3.21.0"
-
-"@typescript-eslint/typescript-estree@5.30.6":
-  version "5.30.6"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.30.6.tgz#a84a0d6a486f9b54042da1de3d671a2c9f14484e"
-  integrity sha512-Z7TgPoeYUm06smfEfYF0RBkpF8csMyVnqQbLYiGgmUSTaSXTP57bt8f0UFXstbGxKIreTwQCujtaH0LY9w9B+A==
-  dependencies:
-    "@typescript-eslint/types" "5.30.6"
-    "@typescript-eslint/visitor-keys" "5.30.6"
-    debug "^4.3.4"
-    globby "^11.1.0"
-    is-glob "^4.0.3"
-    semver "^7.3.7"
-    tsutils "^3.21.0"
 
 "@typescript-eslint/typescript-estree@5.30.6":
   version "5.30.6"
@@ -4991,17 +4942,7 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.31.tgz#c90de7126d833dcd3a4c7534d534be2fb41faa4e"
   integrity sha512-ymN2pj6zEjiKJZbrf98UM2pfDd6F2H7ksKw7NDt/ZZ1fh5Ei39X5tABugtT03ZRlWd9imccoK0hE8hpjpU7irQ==
 
-"@vueuse/core@8.9.2":
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.9.2.tgz#49499abc4db31232d21574cf0d996bd5581dfc13"
-  integrity sha512-dE3/JgwqIHmmtmRBdZAnq87rZCSFbYVps2t3gWy9Jv/+Qp6sHSSKuPFtwguJVZ2OnaGnB/AMRmx4CuFRxFin3A==
-  dependencies:
-    "@types/web-bluetooth" "^0.0.14"
-    "@vueuse/metadata" "8.9.2"
-    "@vueuse/shared" "8.9.2"
-    vue-demi "*"
-
-"@vueuse/core@^8.9.2":
+"@vueuse/core@8.9.2", "@vueuse/core@^8.9.2":
   version "8.9.2"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.9.2.tgz#49499abc4db31232d21574cf0d996bd5581dfc13"
   integrity sha512-dE3/JgwqIHmmtmRBdZAnq87rZCSFbYVps2t3gWy9Jv/+Qp6sHSSKuPFtwguJVZ2OnaGnB/AMRmx4CuFRxFin3A==
@@ -5029,13 +4970,6 @@
   version "8.9.2"
   resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-8.9.2.tgz#ce9d535968ad23d452566f3f61ad86b3e5606ad1"
   integrity sha512-g2s2BeyeEtJElmMFfFPnM+BTvnt0omniyvz8U18/zXDpQIMGozlNQgHoFeratyMfgVBhH/u2VKzmchChtDsgPQ==
-
-"@vueuse/shared@8.9.1":
-  version "8.9.1"
-  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-8.9.1.tgz#1b48414c06d1e3d14fe3f32bf72f5fab35451a3d"
-  integrity sha512-klZfn7ijI3juqVgpfQVrrlBh4uTFajwSCWm8Cdt45Kg26b1LZ9jn9n7J6GhmkFay5016GnjjivQoekQSMeJNUg==
-  dependencies:
-    vue-demi "*"
 
 "@vueuse/shared@8.9.2":
   version "8.9.2"
