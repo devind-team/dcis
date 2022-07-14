@@ -112,10 +112,9 @@ def resolve_evaluate_state(
     cell: Cell
     for cell in cells:
         coord: str = get_coordinate(cell.column.sheet, cell)
-        coordinate: str = f'{get_column_letter(cell.column.index)}{cell.row.index}'
         state[coord]: ValueState = {
-            'value': values_state.get(coordinate, cell.default),
-            'formula': cell.formula if cell.formula and coord in inversion_cells  else None,
+            'value': values_state.get(coord, cell.default),
+            'formula': cell.formula if cell.formula and coord in inversion_cells else None,
             'cell': cell
         }
     return state
