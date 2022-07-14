@@ -24,7 +24,7 @@ jobs:
         run: |
           pip install django pdoc snakemd
           pip install --upgrade pip
-          poetry install 
+#          poetry install
           python generate_docs.py
 
       - name: Setup Node.js
