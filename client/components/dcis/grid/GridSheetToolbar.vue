@@ -49,8 +49,8 @@ v-row
 </template>
 
 <script lang="ts">
-import { PropType, Ref } from '#app'
-import { UpdateType } from '~/composables'
+import { computed, defineComponent, inject, PropType, Ref } from '#app'
+import { UpdateType, useChangeCellsOptionMutation, useI18n } from '~/composables'
 import { DocumentType, SheetQuery, SheetType } from '~/types/graphql'
 import { CellsOptionsType } from '~/types/grid'
 

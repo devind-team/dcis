@@ -43,6 +43,7 @@ def update_or_create_value(
         payload: Any = None
 ) -> UpdateOrCrateValuesResult:
     """Создание или обновление значения."""
+    from pprint import pp
     val, created = Value.objects.update_or_create(
         column_id=cell.column_id,
         row_id=cell.row_id,
@@ -66,6 +67,9 @@ def recalculate_cells(document: Document, value: Value) -> list[Value]:
     sheet_containers: list[FormulaContainerCache] = [FormulaContainerCache.get(sheet) for sheet in sheets]
     # 1. Собираем зависимости и последовательность операций
     dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(sheet_containers, value)
+    # 1.1 Если у нас нет ячеек необходимых для пересчета, возвращаем только само значение
+    if not inversion_cells:
+        return [value]
     # 2. Получаем связанные ячейки и значения из базы данных
     cells, values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
     # 3. Строим изначальное состояние всех значений
@@ -73,7 +77,7 @@ def recalculate_cells(document: Document, value: Value) -> list[Value]:
     # 4. Рассчитываем значения
     evaluate_result: dict[str, ValueState] = evaluate_state(state, sequence_evaluate)
     # 5. Сохраняем значения
-    values: list[Value] = []
+    result_values: list[Value] = []
     for cell_name, result_value in evaluate_result.items():
         cell: Cell = result_value['cell']
         if (
@@ -93,8 +97,8 @@ def recalculate_cells(document: Document, value: Value) -> list[Value]:
                 'value': result_value['value']
             }
         )
-        values.append(val)
-    return [value, *values]
+        result_values.append(val)
+    return [value, *result_values]
 
 
 def update_or_create_file_value(
