@@ -171,12 +171,12 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         """Тестирование класса `AddChildRowDimension`."""
         self._test_add_child_row_dimension((False, False, False, False))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
-            self._test_add_child_row_dimension((False, False, False, True))
+            self._test_add_child_row_dimension((False, False, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.add_rowdimension'):
-            self._test_add_child_row_dimension((False, False, False, True))
+            self._test_add_child_row_dimension((False, False, True, True))
         with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-            self._test_add_child_row_dimension((False, False, False, True))
-            mock.assert_called_once_with(self.user.id, self.user_period.id, 'add_rowdimension')
+            self._test_add_child_row_dimension((False, False, True, True))
+            mock.assert_called_with(self.user.id, self.user_period.id, 'add_rowdimension')
 
     def test_change_child_row_dimension_height(self) -> None:
         """Тестирование класса `ChangeChildRowDimensionHeight`."""
@@ -241,10 +241,10 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
     def _test_add_child_row_dimension(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование класса `AddChildRowDimension` для 4 типов строк."""
         for row_dimension, value in zip((
-            self.row_dimension,
-            self.document_row_dimension,
-            self.dynamic_row_dimension,
-            self.document_dynamic_row_dimension,
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.row_dimension),
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.document_row_dimension),
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.dynamic_row_dimension),
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.document_dynamic_row_dimension),
         ), values):
             if value:
                 self.assertTrue(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))

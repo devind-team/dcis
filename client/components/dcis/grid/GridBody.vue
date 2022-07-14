@@ -10,9 +10,14 @@ tbody
       @mouseup="mouseupRowName"
     )
       grid-row-control(
+        v-if="viewControl(row)"
         v-slot="{ on, attrs }"
         :row="row"
-        :can-delete="getCanDeleteRow(row)"
+        :can-change-settings="canChangeRowSettings"
+        :can-add-before="canAddRowBeforeOrAfter(row)"
+        :can-add-after="canAddRowBeforeOrAfter(row)"
+        :can-add-inside="canAddRowInside(row)"
+        :can-delete="canDeleteRow(row)"
         :get-row-height="getRowHeight"
         :clear-selection="clearSelection"
       )
@@ -21,6 +26,7 @@ tbody
           :style="{ height: `${getRowHeight(row)}px` }"
           @contextmenu.prevent="on.click"
         ) {{ row.name }}
+      div(v-else :style="{ height: `${getRowHeight(row)}px` }") {{ row.name }}
     td(
       v-for="cell in row.cells"
       :key="cell.id"
@@ -89,12 +95,35 @@ export default defineComponent({
       }
     }
 
-    const getCanDeleteRow = (row: RowDimensionType): boolean => {
+    const canChangeRowSettings = mode === GridMode.CHANGE
+    const canAddRowBeforeOrAfter = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
-        return rootCount.value !== 1 || Boolean(row.parent)
-      } else {
-        return row.canDelete
+        return true
       }
+      if (rowDimension.parent) {
+        const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
+        return parent.canAddChildRow
+      }
+      return false
+    }
+    const canAddRowInside = (rowDimension: RowDimensionType): boolean => {
+      if (mode === GridMode.CHANGE) {
+        return false
+      }
+      return rowDimension.canAddChildRow
+    }
+    const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
+      if (mode === GridMode.CHANGE) {
+        return rootCount.value !== 1 || Boolean(rowDimension.parent)
+      } else {
+        return rowDimension.canDelete
+      }
+    }
+    const viewControl = (rowDimension: RowDimensionType): boolean => {
+      return canChangeRowSettings ||
+        canAddRowBeforeOrAfter(rowDimension) ||
+        canAddRowInside(rowDimension) ||
+        canDeleteRow(rowDimension)
     }
 
     const getCellStyle = (cell: CellType): Record<string, string> => {
@@ -137,7 +166,17 @@ export default defineComponent({
       return style
     }
 
-    return { activeSheet, getRowNameCellClass, getCanDeleteRow, getCellStyle, getCellContentStyle }
+    return {
+      activeSheet,
+      getRowNameCellClass,
+      canChangeRowSettings,
+      canAddRowBeforeOrAfter,
+      canDeleteRow,
+      canAddRowInside,
+      viewControl,
+      getCellStyle,
+      getCellContentStyle
+    }
   }
 })
 </script>

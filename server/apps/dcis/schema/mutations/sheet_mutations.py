@@ -97,8 +97,6 @@ class AddRowDimensionMutation(BaseMutation):
 
     class Input:
         sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        document_id = graphene.ID(description='Идентификатор документа')
-        parent_id = graphene.ID(description='Идентификатор родительской строки')
         index = graphene.Int(required=True, description='Индекс вставки')
         global_index = graphene.Int(required=True, description='Индекс вставки в плоскую структуру')
         global_indices = graphene.List(
@@ -110,23 +108,21 @@ class AddRowDimensionMutation(BaseMutation):
     row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        document_id: str | None,
         sheet_id: int,
-        parent_id: str | None,
         index: int,
         global_index: int,
         global_indices: list[GlobalIndicesInputType]
     ):
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        info.context.check_object_permissions(info.context, sheet.period)
         return AddRowDimensionMutation(
             row_dimension=add_row_dimension(
                 user=info.context.user,
-                sheet=get_object_or_404(Sheet, pk=sheet_id),
-                document_id=from_global_id(document_id)[1] if document_id else None,
-                parent_id=int(parent_id) if parent_id else None,
+                sheet=sheet,
                 index=index,
                 global_index=global_index,
                 global_indices_map={int(i.row_id): i.global_index for i in global_indices}

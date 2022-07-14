@@ -245,13 +245,18 @@ class AddChildRowDimensionBase(RowDimensionBasePermission):
 class AddChildRowDimension(BasePermission):
     """Пропускает пользователей, которые могут просматривать документ и добавлять в него дочерние строки."""
 
+    @dataclass
+    class Obj:
+        document: Document
+        row_dimension: RowDimension
+
     @staticmethod
-    def has_object_permission(context, obj: RowDimension):
-        return obj.document is not None and ViewDocument.has_object_permission(
+    def has_object_permission(context, obj: Obj):
+        return ViewDocument.has_object_permission(
             context, obj.document
         ) and AddChildRowDimensionBase(
             context, obj.document
-        ).has_object_permission(obj)
+        ).has_object_permission(obj.row_dimension)
 
 
 class ChangeChildRowDimensionHeightBase(RowDimensionBasePermission):

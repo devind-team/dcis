@@ -11,8 +11,9 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.models import User
-from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Status
+from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.permissions import (
+    AddChildRowDimension,
     AddDocument,
     ChangeChildRowDimensionHeight,
     ChangeDocument,
@@ -20,10 +21,14 @@ from apps.dcis.permissions import (
     ViewDocument,
 )
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
-from apps.dcis.schema.types import DocumentStatusType, DocumentType
+from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.document_services import create_new_document
 from apps.dcis.services.document_unload_services import DocumentUnload
-from apps.dcis.services.sheet_services import change_row_dimension_height, delete_row_dimension
+from apps.dcis.services.sheet_services import (
+    add_child_row_dimension,
+    change_row_dimension_height,
+    delete_row_dimension,
+)
 
 
 class AddDocumentMutation(BaseMutation):
@@ -153,6 +158,55 @@ class UnloadDocumentMutation(BaseMutation):
         return UnloadDocumentMutation(src=src)
 
 
+class AddChildRowDimensionMutation(BaseMutation):
+    """Добавление дочерней строки."""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        parent_id = graphene.ID(required=True, description='Идентификатор родительской строки')
+        index = graphene.Int(required=True, description='Индекс вставки')
+        global_index = graphene.Int(required=True, description='Индекс вставки в плоскую структуру')
+        global_indices = graphene.List(
+            graphene.NonNull(GlobalIndicesInputType),
+            required=True,
+            description='Вспомогательные индексы в плоской структуре'
+        )
+
+    row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, AddChildRowDimension,))
+    def mutate_and_get_payload(
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        sheet_id: str,
+        parent_id: str,
+        index: int,
+        global_index: int,
+        global_indices: list[GlobalIndicesInputType]
+    ):
+        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        parent = get_object_or_404(RowDimension, pk=parent_id)
+        info.context.check_object_permissions(
+            info.context,
+            AddChildRowDimension.Obj(document=document, row_dimension=parent)
+        )
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        return AddChildRowDimensionMutation(
+            row_dimension=add_child_row_dimension(
+                context=info.context,
+                sheet=sheet,
+                document=document,
+                parent=parent,
+                index=index,
+                global_index=global_index,
+                global_indices_map={int(i.row_id): i.global_index for i in global_indices}
+            )
+        )
+
+
 class ChangeChildRowDimensionHeightMutation(BaseMutation):
     """Изменение высоты дочерней строки."""
 
@@ -202,5 +256,6 @@ class DocumentMutations(graphene.ObjectType):
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
 
+    add_child_row_dimension = AddChildRowDimensionMutation.Field(required=True)
     change_child_row_dimension_height = ChangeChildRowDimensionHeightMutation.Field(required=True)
     delete_child_row_dimension = DeleteChildRowDimensionMutation.Field(required=True)

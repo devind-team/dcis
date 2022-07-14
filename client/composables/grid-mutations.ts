@@ -20,6 +20,8 @@ import {
   GlobalIndicesInputType,
   AddRowDimensionMutation,
   AddRowDimensionMutationVariables,
+  AddChildRowDimensionMutation,
+  AddChildRowDimensionMutationVariables,
   DeleteRowDimensionMutation,
   DeleteRowDimensionMutationVariables,
   DeleteChildRowDimensionMutation,
@@ -42,6 +44,7 @@ import {
 import { parsePosition, findCell } from '~/services/grid'
 import sheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
+import addChildRowDimensionMutation from '~/gql/dcis/mutations/document/add_child_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
 import deleteChildRowDimensionMutation from '~/gql/dcis/mutations/document/delete_child_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
@@ -60,20 +63,22 @@ export enum AddRowDimensionPosition {
 }
 
 export function useAddRowDimensionMutation (
-  documentId: Ref<string | null>,
   sheet: Ref<SheetType>,
-  updateSheet: Ref<UpdateType<DocumentSheetQuery>>
+  updateSheet: Ref<UpdateType<DocumentsSheetQuery>>
 ) {
-  const { mutate } = useMutation<AddRowDimensionMutation, AddRowDimensionMutationVariables>(addRowDimensionMutation, {
+  const { mutate } = useMutation<
+    AddRowDimensionMutation,
+    AddRowDimensionMutationVariables
+  >(addRowDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) {
       if (result.data.addRowDimension.success) {
         updateSheet.value(
           dataProxy,
           result,
-          (data: DocumentSheetQuery, {
+          (data: DocumentsSheetQuery, {
             data: { addRowDimension: { rowDimension } }
           }: Omit<FetchResult<AddRowDimensionMutation>, 'context'>) => {
-            data.documentSheet.rows = addRow(sheet.value.columns, data.documentSheet.rows, rowDimension)
+            data.documentsSheet.rows = addRow(sheet.value.columns, data.documentsSheet.rows, rowDimension)
             return data
           })
       }
@@ -84,11 +89,11 @@ export function useAddRowDimensionMutation (
       AddRowDimensionMutationVariables, 'index' | 'globalIndex'
     > = {
       sheetId: sheet.value.id,
-      documentId: rowDimension.parent ? documentId.value : null,
-      parentId: rowDimension.parent?.id,
       globalIndices: collectGlobalIndices(sheet.value.rows, rowDimension)
     }
-    if (position === AddRowDimensionPosition.AFTER) {
+    if (position === AddRowDimensionPosition.BEFORE) {
+      variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
+    } else if (position === AddRowDimensionPosition.AFTER) {
       const children = collectChildren(sheet.value.rows, [rowDimension.id])
         .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
       variables = {
@@ -96,21 +101,76 @@ export function useAddRowDimensionMutation (
         index: rowDimension.index + 1,
         globalIndex: children.at(-1).globalIndex + 1
       }
-    } else if (position === AddRowDimensionPosition.BEFORE) {
-      variables = { ...variables, index: rowDimension.index, globalIndex: rowDimension.globalIndex }
-    } else if (position === AddRowDimensionPosition.INSIDE) {
-      const index = rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1
+    }
+    await mutate(variables as AddRowDimensionMutationVariables)
+  }
+}
+
+export function useAddChildRowDimensionMutation (
+  documentId: Ref<string>,
+  sheet: Ref<SheetType>,
+  updateSheet: Ref<UpdateType<DocumentSheetQuery>>
+) {
+  const { mutate } = useMutation<
+    AddChildRowDimensionMutation,
+    AddChildRowDimensionMutationVariables
+  >(addChildRowDimensionMutation, {
+    update (dateProxy: DataProxy, result: Omit<FetchResult<AddChildRowDimensionMutation>, 'context'>) {
+      if (result.data.addChildRowDimension.success) {
+        updateSheet.value(
+          dateProxy,
+          result,
+          (data: DocumentSheetQuery, {
+            data: { addChildRowDimension: { rowDimension } }
+          }: Omit<FetchResult<AddChildRowDimensionMutation>, 'context'>) => {
+            data.documentSheet.rows = addRow(sheet.value.columns, data.documentSheet.rows, rowDimension)
+            return data
+          }
+        )
+      }
+    }
+  })
+  return async function (
+    rowDimension: RowDimensionType,
+    position: AddRowDimensionPosition
+  ) {
+    const parentRowDimension = rowDimension.parent
+      ? sheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
+      : null
+    let variables: AddChildRowDimensionMutationVariables | Omit<
+      AddChildRowDimensionMutationVariables, 'parentId' | 'index' | 'globalIndex'
+    > = {
+      documentId: documentId.value,
+      sheetId: sheet.value.id,
+      globalIndices: collectGlobalIndices(sheet.value.rows, rowDimension)
+    }
+    if (position === AddRowDimensionPosition.BEFORE) {
+      variables = {
+        ...variables,
+        parentId: parentRowDimension.id,
+        index: rowDimension.index,
+        globalIndex: rowDimension.globalIndex
+      }
+    } else if (position === AddRowDimensionPosition.AFTER) {
       const children = collectChildren(sheet.value.rows, [rowDimension.id])
         .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
       variables = {
         ...variables,
-        documentId: documentId.value,
+        parentId: parentRowDimension.id,
+        index: rowDimension.index + 1,
+        globalIndex: children.at(-1).globalIndex + 1
+      }
+    } else if (position === AddRowDimensionPosition.INSIDE) {
+      const children = collectChildren(sheet.value.rows, [rowDimension.id])
+        .sort((c1: RowDimensionType, c2: RowDimensionType) => c1.globalIndex - c2.globalIndex)
+      variables = {
+        ...variables,
         parentId: rowDimension.id,
-        index,
+        index: rowDimension.children.length ? rowDimension.children.at(-1).index + 1 : 1,
         globalIndex: children.at(-1).globalIndex + 1
       }
     }
-    await mutate(variables as AddRowDimensionMutationVariables)
+    await mutate(variables as AddChildRowDimensionMutationVariables)
   }
 }
 

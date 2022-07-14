@@ -104,6 +104,34 @@ export type AddCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddChildRowDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Индекс вставки в плоскую структуру */
+  globalIndex: Scalars['Int'];
+  /** Вспомогательные индексы в плоской структуре */
+  globalIndices: Array<GlobalIndicesInputType>;
+  /** Индекс вставки */
+  index: Scalars['Int'];
+  /** Идентификатор родительской строки */
+  parentId: Scalars['ID'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
+};
+
+/** Добавление дочерней строки. */
+export type AddChildRowDimensionMutationPayload = {
+  __typename?: 'AddChildRowDimensionMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Добавленная строка */
+  rowDimension: RowDimensionType;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddDivisionsMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификаторы дивизионов */
@@ -318,16 +346,12 @@ export type AddProjectMutationPayload = {
 
 export type AddRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор документа */
-  documentId?: InputMaybe<Scalars['ID']>;
   /** Индекс вставки в плоскую структуру */
   globalIndex: Scalars['Int'];
   /** Вспомогательные индексы в плоской структуре */
   globalIndices: Array<GlobalIndicesInputType>;
   /** Индекс вставки */
   index: Scalars['Int'];
-  /** Идентификатор родительской строки */
-  parentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор листа */
   sheetId: Scalars['ID'];
 };
@@ -2382,6 +2406,8 @@ export type Mutation = {
   addBudgetClassification: AddBudgetClassificationMutationPayload;
   /** Мутация для добавления категории */
   addCategory: AddCategoryMutationPayload;
+  /** Добавление дочерней строки. */
+  addChildRowDimension: AddChildRowDimensionMutationPayload;
   /** Мутация на добавление дивизионов в период. */
   addDivisions: AddDivisionsMutationPayload;
   /** Добавление документа. */
@@ -2556,6 +2582,11 @@ export type MutationAddBudgetClassificationArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddCategoryArgs = {
   input: AddCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddChildRowDimensionArgs = {
+  input: AddChildRowDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5224,6 +5255,17 @@ export type ChangeCellsOptionMutationVariables = Exact<{
 
 export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value?: string | null }> | null } };
 
+export type AddChildRowDimensionMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+  parentId: Scalars['ID'];
+  index: Scalars['Int'];
+  globalIndex: Scalars['Int'];
+  globalIndices: Array<GlobalIndicesInputType> | GlobalIndicesInputType;
+}>;
+
+export type AddChildRowDimensionMutation = { __typename?: 'Mutation', addChildRowDimension: { __typename: 'AddChildRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, canAddChildRow: boolean, canChangeHeight: boolean, canDelete: boolean, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChange: boolean, value?: string | null, verified: boolean, error?: string | null }> } } };
+
 export type AddDocumentMutationVariables = Exact<{
   comment: Scalars['String'];
   periodId: Scalars['ID'];
@@ -5397,8 +5439,6 @@ export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { 
 
 export type AddRowDimensionMutationVariables = Exact<{
   sheetId: Scalars['ID'];
-  documentId?: InputMaybe<Scalars['ID']>;
-  parentId?: InputMaybe<Scalars['ID']>;
   index: Scalars['Int'];
   globalIndex: Scalars['Int'];
   globalIndices: Array<GlobalIndicesInputType> | GlobalIndicesInputType;

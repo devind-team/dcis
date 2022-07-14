@@ -89,6 +89,33 @@ type AddCategoryMutationPayload {
   success: Boolean!
 }
 
+input AddChildRowDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Индекс вставки в плоскую структуру"""
+  globalIndex: Int!
+  """Вспомогательные индексы в плоской структуре"""
+  globalIndices: [GlobalIndicesInputType!]!
+  """Индекс вставки"""
+  index: Int!
+  """Идентификатор родительской строки"""
+  parentId: ID!
+  """Идентификатор листа"""
+  sheetId: ID!
+}
+
+"""Добавление дочерней строки."""
+type AddChildRowDimensionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленная строка"""
+  rowDimension: RowDimensionType!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDivisionsMutationInput {
   clientMutationId: String
   """Идентификаторы дивизионов"""
@@ -293,16 +320,12 @@ type AddProjectMutationPayload {
 
 input AddRowDimensionMutationInput {
   clientMutationId: String
-  """Идентификатор документа"""
-  documentId: ID
   """Индекс вставки в плоскую структуру"""
   globalIndex: Int!
   """Вспомогательные индексы в плоской структуре"""
   globalIndices: [GlobalIndicesInputType!]!
   """Индекс вставки"""
   index: Int!
-  """Идентификатор родительской строки"""
-  parentId: ID
   """Идентификатор листа"""
   sheetId: ID!
 }
@@ -2244,6 +2267,8 @@ type Mutation {
   addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
+  """Добавление дочерней строки."""
+  addChildRowDimension(input: AddChildRowDimensionMutationInput!): AddChildRowDimensionMutationPayload!
   """Мутация на добавление дивизионов в период."""
   addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
   """Добавление документа."""
