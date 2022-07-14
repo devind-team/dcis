@@ -2,9 +2,9 @@
 
 query ValueFiles(
   $documentId: ID!,
-  $sheetId: Int!,
-  $columnId: Int!,
-  $rowId: Int!
+  $sheetId: ID!,
+  $columnId: ID!,
+  $rowId: ID!
 ) {
   valueFiles(
     documentId: $documentId,

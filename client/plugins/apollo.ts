@@ -1,5 +1,6 @@
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { Plugin } from '@nuxt/types'
+import { useRuntimeConfig } from '#app'
 import schema from '~/schema.json'
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({

@@ -1,6 +1,6 @@
 #import "../../fragments/value_fields.graphql"
 
-mutation ChangeValue($documentId: ID!, $sheetId: Int!, $cellId: Int!, $value: String!) {
+mutation ChangeValue($documentId: ID!, $sheetId: ID!, $cellId: ID!, $value: String!) {
   changeValue(input: {
     documentId: $documentId,
     sheetId: $sheetId,
