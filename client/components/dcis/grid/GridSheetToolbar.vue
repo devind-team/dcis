@@ -2,33 +2,34 @@
 v-row
   v-col.my-2.d-flex.align-center
     v-btn-toggle(v-model="formatting" multiple)
-      v-btn(:disabled="disabled" value="strong" height="40")
+      v-btn(:disabled="disabled || readonly" value="strong" height="40")
         v-icon mdi-format-bold
-      v-btn(:disabled="disabled" value="italic" height="40")
+      v-btn(:disabled="disabled || readonly" value="italic" height="40")
         v-icon mdi-format-italic
-      v-btn(:disabled="disabled" value="underline" height="40")
+      v-btn(:disabled="disabled || readonly" value="underline" height="40")
         v-icon mdi-format-underline
-      v-btn(:disabled="disabled" value="strike" height="40")
+      v-btn(:disabled="disabled || readonly" value="strike" height="40")
         v-icon mdi-format-strikethrough
     v-btn-toggle.mx-1(v-model="horizontalAlign")
-      v-btn(:disabled="disabled" value="left" height="40")
+      v-btn(:disabled="disabled || readonly" value="left" height="40")
         v-icon mdi-format-align-left
-      v-btn(:disabled="disabled" value="center" height="40")
+      v-btn(:disabled="disabled || readonly" value="center" height="40")
         v-icon mdi-format-align-center
-      v-btn(:disabled="disabled" value="right" height="40")
+      v-btn(:disabled="disabled || readonly"  value="right" height="40")
         v-icon mdi-format-align-right
     v-btn-toggle.mx-1(v-model="verticalAlign")
-      v-btn(:disabled="disabled" value="top" height="40")
+      v-btn(:disabled="disabled || readonly" value="top" height="40")
         v-icon mdi-format-align-top
-      v-btn(:disabled="disabled" value="middle" height="40")
+      v-btn(:disabled="disabled || readonly" value="middle" height="40")
         v-icon mdi-format-align-middle
-      v-btn(:disabled="disabled" value="bottom" height="40")
+      v-btn(:disabled="disabled || readonly" value="bottom" height="40")
         v-icon mdi-format-align-bottom
     v-combobox.mx-1.shrink(
       v-model="size"
       :label="t('dcis.grid.sheetToolbar.fontSize')"
       :items="sizes"
       :disabled="disabled"
+      :readonly="readonly"
       style="width: 170px"
       filled
       outlined
@@ -40,6 +41,7 @@ v-row
       :label="t('dcis.grid.sheetToolbar.kind')"
       :items="kinds"
       :disabled="disabled"
+      :readonly="readonly"
       style="width: 170px"
       filled
       outlined
@@ -51,8 +53,8 @@ v-row
 <script lang="ts">
 import { PropType, Ref } from '#app'
 import { UpdateType } from '~/composables'
-import { DocumentType, DocumentSheetQuery, SheetType } from '~/types/graphql'
-import { CellsOptionsType } from '~/types/grid'
+import { DocumentsSheetQuery, DocumentType, SheetType } from '~/types/graphql'
+import { CellsOptionsType, GridMode } from '~/types/grid'
 
 export default defineComponent({
   props: {
@@ -61,9 +63,10 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
+    const mode = inject<GridMode>('mode')
     const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(
       computed(() => activeDocument.value ? activeDocument.value.id : ''),
       computed(() => activeSheet.value.id),
@@ -71,6 +74,7 @@ export default defineComponent({
     )
 
     const disabled = computed<boolean>(() => !props.selectedCellsOptions)
+    const readonly = computed<boolean>(() => mode === GridMode.WRITE)
 
     const formatting = computed<string[]>({
       get: () => !disabled.value
@@ -132,6 +136,7 @@ export default defineComponent({
     return {
       t,
       disabled,
+      readonly,
       formatting,
       horizontalAlign,
       verticalAlign,

@@ -6,7 +6,6 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
 
 from apps.dcis.models import ColumnDimension, RowDimension, Sheet
 from apps.dcis.permissions import ChangePeriodSheet

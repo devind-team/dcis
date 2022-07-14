@@ -6,6 +6,7 @@ import graphene
 from devind_dictionaries.models import BudgetClassification
 from devind_dictionaries.schema.types import BudgetClassificationType
 from devind_helpers.decorators import permission_classes
+from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
@@ -14,6 +15,7 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
+from apps.dcis.permissions import ChangePeriodSheet
 from apps.dcis.schema.types import ChangedCellOption
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
@@ -48,7 +50,7 @@ class ChangeCellsOptionMutation(BaseMutation):
     )
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -62,6 +64,9 @@ class ChangeCellsOptionMutation(BaseMutation):
                 return ChangeCellsOptionMutation(success=False, errors=[ErrorFieldType(field, [error])])
             case CheckCellOptions.Success(value):
                 cells = Cell.objects.filter(pk__in=cell_ids).all()
+                if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
+                    raise PermissionDenied('Ошибка доступа')
+                info.context.check_object_permissions(info.context, cells.first().row.sheet.period)
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 

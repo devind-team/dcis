@@ -605,7 +605,7 @@ export function updateRowDimension (
 export function useChangeCellsOptionMutation (
   documentId: Ref<string | null>,
   sheetId: Ref<string>,
-  updateSheet: Ref<UpdateType<DocumentSheetQuery>>
+  updateSheet: Ref<UpdateType<DocumentsSheetQuery>>
 ) {
   const { mutate } = useMutation<
     ChangeCellsOptionMutation,
@@ -614,13 +614,13 @@ export function useChangeCellsOptionMutation (
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>) {
       if (result.data.changeCellsOption.success) {
         updateSheet.value(dataProxy, result, (
-          data: DocumentSheetQuery, {
+          data: DocumentsSheetQuery, {
             data: { changeCellsOption: { changedOptions } }
           }: Omit<FetchResult<ChangeCellsOptionMutation>, 'context'>
         ) => {
           for (const option of changedOptions) {
             const cell = findCell(
-              data.documentSheet as SheetType,
+              data.documentsSheet as SheetType,
               (c: CellType) => c.id === option.cellId
             )
             if (cell.kind === 'fl' && option.field === 'kind' && option.value !== 'fl') {
