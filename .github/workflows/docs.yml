@@ -2,8 +2,8 @@ name: docs
 
 on:
   # trigger deployment on every push to main branch
-  push:
-    branches: [409-документирование-проекта]
+#  push:
+#    branches: [409-документирование-проекта]
   # trigger deployment manually
   workflow_dispatch:
 
@@ -16,22 +16,24 @@ jobs:
           # fetch all commits to get last updated time or other git log info
           fetch-depth: 0
 
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.4.0
-        with:
-          redis-version: '6'
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - working-directory: server
-        run: |
-          cp .env.example .env
-          pip install poetry
-          pip install --upgrade pip
-          poetry install
-          poetry run python generate_docs.py
+#      - name: Start Redis
+#        uses: supercharge/redis-github-action@1.4.0
+#        with:
+#          redis-version: '6'
+#
+#      - name: Setup Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.10'
+#
+#      - name: Run python script
+#        working-directory: server
+#        run: |
+#          cp .env.example .env
+#          pip install poetry
+#          pip install --upgrade pip
+#          poetry install
+#          poetry run python generate_docs.py
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
