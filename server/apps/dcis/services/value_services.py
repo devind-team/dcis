@@ -1,18 +1,25 @@
 """Файл, содержащий сервисы для изменения значений ячеек."""
+from datetime import datetime
 from os import path
 from pathlib import Path
-from datetime import datetime
 from typing import Any, cast, NamedTuple
 from zipfile import ZipFile
 
 from devind_core.models import File
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
 from django.utils.timezone import now
 
 from apps.core.models import User
-from apps.dcis.models import Value, RowDimension, Document, Cell
+from apps.dcis.helpers.sheet_cache import FormulaContainerCache
+from apps.dcis.models import Value, Sheet, RowDimension, Document, Cell
+from apps.dcis.helpers.cell import (
+    get_dependency_cells,
+    resolve_cells,
+    resolve_evaluate_state,
+    evaluate_state,
+    ValueState,
+)
 
 
 class UpdateOrCrateValueResult(NamedTuple):
@@ -29,11 +36,11 @@ class UpdateOrCrateValuesResult(NamedTuple):
 
 
 def update_or_create_value(
-    document: Document,
-    cell: Cell,
-    sheet_id: int | str,
-    value: str,
-    payload: Any = None
+        document: Document,
+        cell: Cell,
+        sheet_id: int | str,
+        value: str,
+        payload: Any = None
 ) -> UpdateOrCrateValuesResult:
     """Создание или обновление значения."""
     val, created = Value.objects.update_or_create(
@@ -46,20 +53,59 @@ def update_or_create_value(
             'payload': payload
         }
     )
+    values = recalculate_cells(document, val)
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
-    return UpdateOrCrateValuesResult(values=[val], updated_at=updated_at)
+    return UpdateOrCrateValuesResult(values=values, updated_at=updated_at)
+
+
+def recalculate_cells(document: Document, value: Value) -> list[Value]:
+    """Пересчитываем значения ячеек в зависимости от новых."""
+    from pprint import pp
+    sheets: list[Sheet] = document.sheets.all()
+    sheet_containers: list[FormulaContainerCache] = [FormulaContainerCache.get(sheet) for sheet in sheets]
+    # 1. Собираем зависимости и последовательность операций
+    dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(sheet_containers, value)
+    # 2. Получаем связанные ячейки и значения из базы данных
+    cells, values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
+    # 3. Строим изначальное состояние всех значений
+    state: dict[str, ValueState] = resolve_evaluate_state(cells, values, inversion_cells)
+    # 4. Рассчитываем значения
+    evaluate_result: dict[str, ValueState] = evaluate_state(state, sequence_evaluate)
+    # 5. Сохраняем значения
+    values: list[Value] = []
+    for cell_name, result_value in evaluate_result.items():
+        cell: Cell = result_value['cell']
+        if (
+                cell_name not in inversion_cells or
+                cell.column_id == value.column_id and
+                cell.row_id == value.row_id and
+                cell.column.sheet_id == value.sheet_id
+        ):
+            continue
+
+        val, created = Value.objects.update_or_create(
+            column_id=cell.column_id,
+            row_id=cell.row_id,
+            sheet_id=cell.column.sheet_id,
+            document=document,
+            defaults={
+                'value': result_value['value']
+            }
+        )
+        values.append(val)
+    return [value, *values]
 
 
 def update_or_create_file_value(
-    user: User,
-    document_id: int | str,
-    sheet_id: int | str,
-    column_id: int | str,
-    row_id: int | str,
-    value: str,
-    remaining_files: list[int],
-    new_files: list[InMemoryUploadedFile],
+        user: User,
+        document_id: int | str,
+        sheet_id: int | str,
+        column_id: int | str,
+        row_id: int | str,
+        value: str,
+        remaining_files: list[int],
+        new_files: list[InMemoryUploadedFile],
 ) -> UpdateOrCrateValueResult:
     """Изменение файлов значения ячейки типа `Файл`."""
     payload = [*remaining_files]
