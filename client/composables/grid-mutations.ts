@@ -406,7 +406,7 @@ export function updateColumnDimension (
   }
 }
 
-export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType<DocumentSheetQuery>>) {
+export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateSheetType>) {
   const { mutate } = useMutation<
     ChangeRowDimensionMutation,
     ChangeRowDimensionMutationVariables

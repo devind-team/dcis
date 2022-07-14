@@ -468,14 +468,14 @@ class DocumentsSheetUnloader(SheetUnloader):
             get_cell_permissions=self.get_cell_permissions,
         ).unload()
 
-    def get_row_permissions(self, row: RowDimension) -> [str, bool]:
+    def get_row_permissions(self, row: RowDimension) -> dict[str, bool]:
         return {
             'can_add_child_row': True,
             'can_change_height': True,
             'can_delete': True,
         }
 
-    def get_cell_permissions(self, cell: Cell) -> [str, bool]:
+    def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
         return {'can_change': True}
 
 
@@ -505,12 +505,16 @@ class DocumentSheetUnloader(SheetUnloader):
             get_cell_permissions=self.get_cell_permissions
         ).unload()
 
-    def get_row_permissions(self, row: RowDimension) -> [str, bool]:
+    def get_row_permissions(self, row: RowDimension) -> dict[str, bool]:
+        if row.document is None:
+            can_change_height = False
+        else:
+            can_change_height = self.change_child_row_dimension_height.has_object_permission(row)
         return {
             'can_add_child_row': self.add_child_row_dimension.has_object_permission(row),
-            'can_change_height': self.change_child_row_dimension_height.has_object_permission(row),
+            'can_change_height':  can_change_height,
             'can_delete': self.delete_child_row_dimension.has_object_permission(row),
         }
 
-    def get_cell_permissions(self, cell: Cell) -> [str, bool]:
+    def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
         return {'can_change': self.change_value.has_object_permission(cell)}

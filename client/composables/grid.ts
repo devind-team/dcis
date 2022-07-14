@@ -113,30 +113,23 @@ export function useGrid (
         column.index - 1 > 0
           ? sheet.value.columns[column.index - 2]
           : null,
-        event
+        event,
+        (_: ColumnDimensionType) => true
       )
     }
   }
   const mouseleaveColumnName = () => {
-    if (mode === GridMode.CHANGE) {
-      mouseleaveColumnNameResizing()
-    }
+    mouseleaveColumnNameResizing()
   }
   const mousedownColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
-    if (mode === GridMode.CHANGE) {
-      if (resizingColumn.value) {
-        mousedownColumnNameResizing(event)
-      } else {
-        mouseDownColumnNameSelection(column)
-      }
+    if (resizingColumn.value) {
+      mousedownColumnNameResizing(event)
     } else {
       mouseDownColumnNameSelection(column)
     }
   }
   const mouseupColumnName = async () => {
-    if (mode === GridMode.CHANGE) {
-      await mouseupColumnNameResizing()
-    }
+    await mouseupColumnNameResizing()
   }
 
   const mousemoveRowName = (row: RowDimensionType, event: MouseEvent) => {
@@ -145,7 +138,8 @@ export function useGrid (
       row.globalIndex - 1 > 0
         ? sheet.value.rows[row.globalIndex - 2]
         : null,
-      event
+      event,
+      (row: RowDimensionType) => row.canChangeHeight
     )
   }
   const mouseleaveRowName = () => {

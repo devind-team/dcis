@@ -31,7 +31,12 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     }
   }
 
-  const mousemove = (dimension: T, previousDimension: T | null, event: MouseEvent) => {
+  const mousemove = (
+    dimension: T,
+    previousDimension: T | null,
+    event: MouseEvent,
+    canResize: (dimension: T) => boolean
+  ) => {
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
     if (resizing.value && resizing.value.state === 'resizing') {
@@ -40,12 +45,16 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
       )
       resizing.value.mousePosition = mousePosition
     } else if (cell[offsetSizeKey] - event[eventOffsetKey] < borderGag) {
-      setResizingHover(dimension, mousePosition)
+      if (canResize(dimension)) {
+        setResizingHover(dimension, mousePosition)
+      }
     } else if (
       cell[offsetSizeKey] - event[eventOffsetKey] > cell[offsetSizeKey] - borderGag &&
       previousDimension
     ) {
-      setResizingHover(previousDimension, mousePosition)
+      if (canResize(previousDimension)) {
+        setResizingHover(previousDimension, mousePosition)
+      }
     } else {
       resizing.value = null
     }
