@@ -1,0 +1,1 @@
+const a=JSON.parse('{"key":"v-dc3c355c","path":"/api/server/dcis/admin.html","title":"\u041C\u043E\u0434\u0443\u043B\u044C admin","lang":"ru-RU","frontmatter":{},"excerpt":"","headers":[],"git":{"updatedTime":1656674921000,"contributors":[{"name":"squak","email":"squakrazv@gmail.com","commits":1}]},"filePathRelative":"api/server/dcis/admin.md"}');export{a as data};
