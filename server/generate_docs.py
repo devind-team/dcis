@@ -10,9 +10,9 @@ from django.db.models.manager import ManagerDescriptor
 from snakemd import Document, Table
 
 # Specify settings module
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'devind.settings')
-# # Setup Django
-# django.setup()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'devind.settings')
+# Setup Django
+django.setup()
 
 
 def recursive_module(mod: pdoc.doc.Module):
@@ -24,7 +24,6 @@ def recursive_module(mod: pdoc.doc.Module):
 
 def get_function(module_functions: list) -> list:
     """Извлечение данных функции из модуля."""
-    t = module_functions
     list_functions = []
     for module_function in module_functions:
         function = {
