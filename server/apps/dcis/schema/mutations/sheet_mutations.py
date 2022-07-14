@@ -152,7 +152,7 @@ class ChangeRowDimensionMutation(BaseMutation):
     updated_at = graphene.DateTime(required=True, description='Дата обновления строки')
 
     @staticmethod
-    @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -162,8 +162,10 @@ class ChangeRowDimensionMutation(BaseMutation):
         hidden: bool,
         dynamic: bool
     ):
+        row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
+        info.context.check_object_permissions(info.context, row_dimension.sheet.period)
         row_dimension = change_row_dimension(
-            get_object_or_404(RowDimension, pk=row_dimension_id),
+            row_dimension=row_dimension,
             height=height,
             fixed=fixed,
             hidden=hidden,

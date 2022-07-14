@@ -3,7 +3,12 @@ v-menu(v-model="active" bottom close-on-content-click)
   template(#activator="{ on, attrs }")
     slot(:on="on" :attrs="attrs")
   v-list(dense)
-    grid-row-settings(:row="row" @close="active = false" :get-row-height="getRowHeight")
+    grid-row-settings(
+      v-if="mode === GridMode.CHANGE"
+      :row="row"
+      :get-row-height="getRowHeight"
+      @close="active = false"
+    )
       template(#activator="{ on }")
         v-list-item(v-on="on")
           v-list-item-icon
@@ -32,8 +37,9 @@ v-menu(v-model="active" bottom close-on-content-click)
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
-import { DocumentType, SheetType, RowDimensionType, DocumentSheetQuery } from '~/types/graphql'
 import { UpdateType } from '~/composables/query-common'
+import { GridMode } from '~/types/grid'
+import { DocumentType, SheetType, RowDimensionType, DocumentSheetQuery } from '~/types/graphql'
 import { AddRowDimensionPosition } from '~/composables/grid-mutations'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
 
@@ -50,6 +56,7 @@ export default defineComponent({
 
     const active = ref<boolean>(false)
 
+    const mode = inject<GridMode>('mode')
     const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
     const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
@@ -68,7 +75,9 @@ export default defineComponent({
     }
 
     return {
+      GridMode,
       t,
+      mode,
       active,
       addRowDimensionMutate,
       deleteRowDimension,

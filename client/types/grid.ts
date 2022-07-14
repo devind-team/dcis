@@ -13,9 +13,9 @@ export enum GridMode {
   WRITE
 }
 
-export type UpdateSheetType = UpdateType<DocumentSheetQuery> | UpdateType<DocumentsSheetQuery>
+export type UpdateSheetType = UpdateType<DocumentsSheetQuery | DocumentSheetQuery>
 
-/**
+/*
  * Кодовые ошибки
  */
 export enum ErrorCode {

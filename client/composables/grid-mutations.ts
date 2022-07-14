@@ -3,6 +3,7 @@ import { ApolloClient, DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { Ref, unref } from '#app'
 import { UpdateType } from '~/composables/query-common'
+import { UpdateSheetType } from '~/types/grid'
 import {
   DocumentsSheetQuery,
   DocumentSheetQuery,
@@ -438,7 +439,7 @@ export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType
 }
 
 export function updateRowDimension (
-  updateSheet: UpdateType<DocumentSheetQuery>,
+  updateSheet: UpdateSheetType,
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
 ) {
@@ -447,10 +448,11 @@ export function updateRowDimension (
       dataProxy,
       result,
       (
-        data: DocumentSheetQuery,
+        data: DocumentsSheetQuery | DocumentSheetQuery,
         { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
       ) => {
-        const rowDimension = data.documentSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+        const sheet = 'documentsSheet' in data ? data.documentsSheet : data.documentSheet
+        const rowDimension = sheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
           rowDimension.id === changeRowDimension.rowDimensionId)!
         rowDimension.height = changeRowDimension.height
         rowDimension.fixed = changeRowDimension.fixed

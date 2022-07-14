@@ -1,6 +1,5 @@
 <template lang="pug">
 mutation-modal-form(
-  @close="$emit('close')"
   :header="String(t('dcis.grid.columnSettings.header'))"
   :subheader="String(t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
   :mutation="changeColumnDimensionMutation"
@@ -10,6 +9,7 @@ mutation-modal-form(
   :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
   i18n-path="dcis.grid.columnSettings"
   mutation-name="changeColumnDimension"
+  @close="$emit('close')"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
@@ -25,10 +25,10 @@ mutation-modal-form(
         :success="valid"
         :label="t('dcis.grid.columnSettings.width')"
       )
-    v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" success)
+    v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" color="primary")
     //- В разработке
-    v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')" success)
-    v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" success)
+    v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')" color="primary")
+    v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" color="primary")
 </template>
 
 <script lang="ts">
@@ -38,7 +38,7 @@ import { PropType, Ref } from '#app'
 import { updateColumnDimension, UpdateType } from '~/composables'
 import { cellKinds } from '~/composables/grid'
 import {
-  DocumentSheetQuery,
+  DocumentsSheetQuery,
   ColumnDimensionType,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables
@@ -90,7 +90,7 @@ export default defineComponent({
       }
     }))
 
-    const updateSheet = inject<Ref<UpdateType<DocumentSheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) => {
       updateColumnDimension(updateSheet.value, dataProxy, result)
     }
