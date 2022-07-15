@@ -6,7 +6,7 @@
     v-on="cellListeners"
     :is="`GridCell${cellKind}`"
   )
-  template(v-else) {{ cell.value }}
+  div(v-else) {{ cell.value }}
 </template>
 
 <script lang="ts">
