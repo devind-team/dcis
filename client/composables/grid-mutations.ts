@@ -42,7 +42,7 @@ import {
   UnloadFileValueArchiveMutationVariables
 } from '~/types/graphql'
 import { parsePosition, findCell } from '~/services/grid'
-import sheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
+import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import addChildRowDimensionMutation from '~/gql/dcis/mutations/document/add_child_row_dimension.graphql'
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
@@ -676,9 +676,9 @@ export const useChangeValueMutation = (
   >(changeValueMutation)
   return async (value: string) => {
     await mutate({
-      documentId: documentId.value,
-      sheetId: sheetId.value,
-      cellId: cell.value.id,
+      documentId: unref(documentId),
+      sheetId: unref(sheetId),
+      cellId: unref(cell.value).id,
       value
     }, {
       update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
@@ -689,11 +689,11 @@ export const useChangeValueMutation = (
             a[v.sheetId].push(v)
             return a
           }, {})
-          try {
-            // Читаем все sheet для которых пришли ответные данные изменение ячеек
-            for (const [sid, vs] of Object.entries(sheetValue)) {
+          // Читаем все sheet для которых пришли ответные данные изменение ячеек
+          for (const [sid, vs] of Object.entries(sheetValue)) {
+            try {
               const data = client.readQuery<DocumentSheetQuery, DocumentSheetQueryVariables>({
-                query: sheetQuery,
+                query: documentSheetQuery,
                 variables: {
                   documentId: unref(documentId),
                   sheetId: sid
@@ -701,15 +701,15 @@ export const useChangeValueMutation = (
               })
               updateValues(data, vs, updatedAt)
               client.writeQuery<DocumentSheetQuery, DocumentSheetQueryVariables>({
-                query: sheetQuery,
+                query: documentSheetQuery,
                 variables: {
-                  documentId: unref(documentId.value),
+                  documentId: unref(documentId),
                   sheetId: sid
                 },
                 data
               })
-            }
-          } catch { }
+            } catch { }
+          }
         }
       },
       optimisticResponse: {
@@ -750,8 +750,8 @@ export function useChangeFileValueMutation (
   >(changeFileValueMutation)
   return async function (value: string, remainingFiles: string[], newFiles: File[]) {
     await mutate({
-      documentId: documentId.value,
-      sheetId: sheetId.value,
+      documentId: unref(documentId),
+      sheetId: unref(sheetId),
       columnId: cell.value.columnId,
       rowId: cell.value.rowId,
       value,
@@ -822,12 +822,13 @@ export function useUnloadFileValueArchiveMutation (
     UnloadFileValueArchiveMutationVariables
   >(unloadFileValueArchiveMutation)
   return async function (): Promise<string> {
+    const { columnId, rowId, position } = unref(cell)
     const { data: { unloadFileValueArchive: { src } } } = await mutate({
-      documentId: documentId.value,
-      sheetId: sheetId.value,
-      columnId: cell.value.columnId,
-      rowId: cell.value.rowId,
-      name: cell.value.position
+      documentId: unref(documentId),
+      sheetId: unref(sheetId),
+      columnId,
+      rowId,
+      name: position
     })
     return src
   }

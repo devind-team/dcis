@@ -1932,7 +1932,7 @@ type DistrictType {
 """Описание обобщенного типа дивизиона."""
 type DivisionModelType {
   """Идентификатор модели дивизиона"""
-  id: Int!
+  id: ID!
   """Модель дивизиона: department, organization"""
   model: String!
   """Название дивизиона"""

@@ -15,7 +15,7 @@ from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
 from xlsx_evaluate import Evaluator, ModelCompiler
 
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
-from .sheet_cache_service import FormulaContainerCache
+from apps.dcis.helpers.sheet_cache import FormulaContainerCache
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 
 
@@ -282,7 +282,9 @@ class ExcelExtractor:
             evaluator = Evaluator(evaluate_model)
             for cell in sheet.cells:
                 if cell.formula:
-                    cell.default = str(evaluator.evaluate(self.coordinate(sheet.name, cell.column_id, cell.row_id)))
+                    coordinate: str = self.coordinate(sheet.name, cell.column_id, cell.row_id)
+                    cell.default = str(evaluator.evaluate(coordinate))
+                    cells_values[coordinate] = cell.default
                     sheet.cache_container.add_formula(cell.coordinate, cell.formula)
         return sheets
 
