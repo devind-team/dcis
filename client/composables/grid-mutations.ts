@@ -32,6 +32,8 @@ import {
   ChangeRowDimensionMutationVariables,
   ChangeChildRowDimensionHeightMutation,
   ChangeChildRowDimensionHeightMutationVariables,
+  ChangeCellDefaultMutation,
+  ChangeCellDefaultMutationVariables,
   ChangeCellsOptionMutation,
   ChangeCellsOptionMutationVariables,
   ChangeValueMutation,
@@ -50,6 +52,7 @@ import deleteChildRowDimensionMutation from '~/gql/dcis/mutations/document/delet
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeChildRowDimensionHeightMutation from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
+import changeCellDefaultMutation from '~/gql/dcis/mutations/cell/change_cell_default.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
@@ -599,6 +602,47 @@ export function updateRowDimension (
         return data
       }
     )
+  }
+}
+
+export function useChangeCellDefaultMutation (updateSheet: Ref<UpdateType<DocumentsSheetQuery>>) {
+  const { mutate } = useMutation<
+    ChangeCellDefaultMutation,
+    ChangeCellDefaultMutationVariables
+  >(changeCellDefaultMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeCellDefaultMutation>, 'context'>) {
+      if (result.data.changeCellDefault.success) {
+        updateSheet.value(dataProxy, result, (
+          data: DocumentsSheetQuery, {
+            data: { changeCellDefault }
+          }: Omit<FetchResult<ChangeCellDefaultMutation>, 'context'>
+        ) => {
+          const cell = findCell(
+            data.documentsSheet as SheetType,
+            (c: CellType) => c.id === changeCellDefault.cellId
+          )
+          cell.value = changeCellDefault.default
+          return data
+        })
+      }
+    }
+  })
+  return async function (cell: CellType, defaultValue: string) {
+    await mutate({
+      cellId: cell.id,
+      default: defaultValue
+    }, {
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeCellDefault: {
+          __typename: 'ChangeCellDefaultPayload',
+          success: true,
+          errors: [],
+          cellId: cell.id,
+          default: defaultValue
+        }
+      }
+    })
   }
 }
 

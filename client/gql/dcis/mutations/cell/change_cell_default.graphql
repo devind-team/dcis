@@ -1,0 +1,14 @@
+mutation ChangeCellDefault($cellId: ID!, $default: String!) {
+  changeCellDefault(input: { cellId: $cellId, default: $default }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    cellId
+
+    default
+    __typename
+  }
+}

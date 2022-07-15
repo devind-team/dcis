@@ -277,6 +277,13 @@ class CheckCellOptions:
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
 
 
+def change_cell_default(cell: Cell, default: str) -> Cell:
+    """Изменение значения ячейки по умолчанию."""
+    cell.default = default
+    cell.save(update_fields=('default',))
+    return cell
+
+
 @transaction.atomic
 def change_cells_option(cells: Sequence[Cell], field: str, value:  str | int | bool | None) -> list[dict]:
     """Изменение свойств ячеек."""

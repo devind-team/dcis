@@ -785,6 +785,27 @@ type ChangeCategoryPositionMutationPayload {
   success: Boolean!
 }
 
+input ChangeCellDefaultInput {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  clientMutationId: String
+  """Значение по умолчанию"""
+  default: String!
+}
+
+"""Изменение значения ячейки по умолчанию."""
+type ChangeCellDefaultPayload {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  clientMutationId: String
+  """Значение по умолчанию"""
+  default: String!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeCellsOptionMutationInput {
   """Идентификаторы ячеек"""
   cellIds: [ID!]!
@@ -2309,6 +2330,8 @@ type Mutation {
   changeCategoryParent(input: ChangeCategoryParentMutationInput!): ChangeCategoryParentMutationPayload!
   """Мутация для изменения порядка следования вывода категорий"""
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
+  """Изменение значения ячейки по умолчанию"""
+  changeCellDefault(input: ChangeCellDefaultInput!): ChangeCellDefaultPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение высоты дочерней строки."""
