@@ -12,7 +12,8 @@ import {
 export const useRenameSheetMutation = (
   sheetId: string,
   name: string,
-  update?: MutationUpdaterFn) => {
+  update?: MutationUpdaterFn
+) => {
   return useMutation<RenameSheetMutation, RenameSheetMutationVariables>(renameSheetDocument, {
     update,
     variables: { sheetId, name }

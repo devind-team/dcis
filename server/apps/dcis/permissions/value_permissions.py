@@ -1,7 +1,7 @@
 """Модуль разрешений для изменения значений"""
 
-from apps.dcis.models import Document, Cell
-from apps.dcis.permissions import ViewDocument, ChangePeriodSheet
+from apps.dcis.models import Cell, Document
+from apps.dcis.permissions import ChangePeriodSheet, ViewDocument
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 

@@ -18,14 +18,20 @@ thead
       @mousedown="mousedownColumnName(column, $event)"
       @mouseup="mouseupColumnName"
     )
-      grid-column-control(v-slot="{ on, attrs }" :column="column" :get-column-width="getColumnWidth")
+      grid-column-control(
+        v-if="mode === GridMode.CHANGE"
+        v-slot="{ on, attrs }"
+        :column="column"
+        :get-column-width="getColumnWidth"
+      )
         div(v-bind="attrs" @contextmenu.prevent="on.click") {{ column.name }}
+      div(v-else) {{ column.name }}
 </template>
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
+import { GridMode, ResizingType } from '~/types/grid'
 import { SheetType, ColumnDimensionType } from '~/types/graphql'
-import { ResizingType } from '~/types/grid'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -54,6 +60,7 @@ export default defineComponent({
     selectAllCells: { type: Function as PropType<() => void>, required: true }
   },
   setup (props) {
+    const mode = inject<GridMode>('mode')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
@@ -64,7 +71,7 @@ export default defineComponent({
       }
     }
 
-    return { activeSheet, getHeaderClass }
+    return { GridMode, mode, activeSheet, getHeaderClass }
   }
 })
 </script>

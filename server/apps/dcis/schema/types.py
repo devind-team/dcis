@@ -1,24 +1,24 @@
 import json
 
 import graphene
-from devind_core.schema.types import FileType, ContentTypeType
+from devind_core.schema.types import ContentTypeType, FileType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.db.models import QuerySet
-from graphene_django import DjangoObjectType, DjangoListField
+from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
-from stringcase import snakecase
 
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.models import (
-    Attribute, AttributeValue,
-    Document, DocumentStatus, Limitation,
-    Period, PeriodGroup, PeriodPrivilege,
-    Privilege, Project, Status, Value,
+    Attribute, AttributeValue, Document,
+    DocumentStatus, Limitation, Period,
+    PeriodGroup, PeriodPrivilege, Privilege,
+    Project, Sheet, Status,
+    Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -35,8 +35,6 @@ from apps.dcis.permissions import (
     DeleteProjectBase,
 )
 from apps.dcis.services.divisions_services import get_divisions
-from apps.dcis.services.sheet_unload_services import SheetUploader
-from ..helpers.info_fields import get_fields
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -97,7 +95,12 @@ class PeriodType(DjangoObjectType):
     methodical_support = DjangoListField(FileType, description='Методическая поддержка')
     divisions = graphene.List(lambda: DivisionModelType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
+    sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
+    can_add_document = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь добавлять документы в период'
+    )
     can_change_divisions = graphene.Boolean(
         required=True,
         description='Может ли пользователь изменять дивизионы периода'
@@ -122,10 +125,6 @@ class PeriodType(DjangoObjectType):
         required=True,
         description='Может ли пользователь удалять период'
     )
-    can_add_document = graphene.Boolean(
-        required=True,
-        description='Может ли пользователь добавлять документы в период'
-    )
 
     class Meta:
         model = Period
@@ -140,9 +139,8 @@ class PeriodType(DjangoObjectType):
             'created_at',
             'updated_at',
             'user',
-            'period_groups',
             'project',
-            'methodical_support'
+            'methodical_support',
         )
         convert_choices_to_enum = False
 
@@ -157,6 +155,15 @@ class PeriodType(DjangoObjectType):
     @resolver_hints(model_field='periodgroup_set')
     def resolve_period_groups(period: Period, info: ResolveInfo):
         return period.periodgroup_set.all()
+
+    @staticmethod
+    @resolver_hints(model_field='sheet_set')
+    def resolve_sheets(period: Period, info: ResolveInfo) -> QuerySet[Sheet]:
+        return period.sheet_set.all()
+
+    @staticmethod
+    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
+        return AddDocumentBase.has_object_permission(info.context, period)
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
@@ -181,10 +188,6 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
         return DeletePeriodBase.has_object_permission(info.context, period)
-
-    @staticmethod
-    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase.has_object_permission(info.context, period)
 
 
 class DivisionModelType(graphene.ObjectType):
@@ -275,7 +278,7 @@ class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
     period = graphene.Field(PeriodType, description='Период сбора')
-    sheets = graphene.List(lambda: SheetType, required=True, description='Листы')
+    sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
@@ -299,15 +302,8 @@ class DocumentType(DjangoObjectType):
         connection_class = CountableConnection
 
     @staticmethod
-    def resolve_sheets(document: Document, info: ResolveInfo) -> list[dict] | dict:
-        return [
-            SheetUploader(
-                sheet=sheet,
-                fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
-                document_id=document.id
-            ).unload()
-            for sheet in document.sheets.all()
-        ]
+    def resolve_sheets(document: Document, info: ResolveInfo) -> QuerySet[Sheet]:
+        return document.sheets.all()
 
     @staticmethod
     def resolve_last_status(document: Document, info: ResolveInfo) -> DocumentStatus | None:
@@ -421,6 +417,9 @@ class RowDimensionType(graphene.ObjectType):
     parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
     children = graphene.List(graphene.NonNull(lambda: RowDimensionType), required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
+    can_add_child_row = graphene.Boolean(required=True, description='Может ли пользователь добавить дочернюю строку')
+    can_change_height = graphene.Boolean(required=True, description='Может ли пользователь изменять высоту строки')
+    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалить строку')
     user = graphene.List(UserType, description='Пользователь')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
@@ -464,6 +463,7 @@ class CellType(graphene.ObjectType):
     )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
+    can_change_value = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
 
     # От Value
     value = graphene.String(description='Значение')
@@ -472,7 +472,8 @@ class CellType(graphene.ObjectType):
 
 
 class ValueType(DjangoObjectType):
-    """Тип значений"""
+    """Тип значения."""
+
     document = graphene.Field(DocumentType, description='Документ')
     payload = graphene.String(description='Дополнительное поле')
     sheet_id = graphene.ID(required=True, description='Идентификатор листа')
@@ -495,8 +496,8 @@ class ValueType(DjangoObjectType):
         return json.dumps(value.payload) if value.payload is not None else None
 
 
-class SheetType(graphene.ObjectType):
-    """Тип листа."""
+class BaseSheetType(graphene.ObjectType):
+    """Тип листа без структуры."""
 
     id = graphene.ID(required=True, description='Идентификатор')
     name = graphene.String(required=True, description='Наименование')
@@ -505,6 +506,11 @@ class SheetType(graphene.ObjectType):
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
     period = graphene.Field(PeriodType, description='Период')
+
+
+class SheetType(BaseSheetType):
+    """Тип листа."""
+
     columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
     rows = graphene.List(lambda: RowDimensionType, description='Строки')
 

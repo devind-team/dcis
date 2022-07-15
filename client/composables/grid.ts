@@ -1,6 +1,7 @@
 import { computed, ref, Ref, watch } from '#app'
-import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
+import { GridMode } from '~/types/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -13,8 +14,9 @@ export const cellKinds = {
 }
 
 export function useGrid (
+  mode: GridMode,
   sheet: Ref<SheetType>,
-  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void>,
+  changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void> | null,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
   /**
@@ -105,13 +107,16 @@ export function useGrid (
   )
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
-    mousemoveColumnNameResizing(
-      column,
-      column.index - 1 > 0
-        ? sheet.value.columns[column.index - 2]
-        : null,
-      event
-    )
+    if (mode === GridMode.CHANGE) {
+      mousemoveColumnNameResizing(
+        column,
+        column.index - 1 > 0
+          ? sheet.value.columns[column.index - 2]
+          : null,
+        event,
+        (_: ColumnDimensionType) => true
+      )
+    }
   }
   const mouseleaveColumnName = () => {
     mouseleaveColumnNameResizing()
@@ -133,7 +138,8 @@ export function useGrid (
       row.globalIndex - 1 > 0
         ? sheet.value.rows[row.globalIndex - 2]
         : null,
-      event
+      event,
+      (row: RowDimensionType) => row.canChangeHeight
     )
   }
   const mouseleaveRowName = () => {
@@ -167,7 +173,7 @@ export function useGrid (
     }
     return null
   })
-  useOverlyingClass(document.body, cursorClass)
+  onMounted(() => useOverlyingClass(document.body, cursorClass))
 
   return {
     gridContainer,

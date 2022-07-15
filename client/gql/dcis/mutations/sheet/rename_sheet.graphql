@@ -1,6 +1,7 @@
 
 mutation RenameSheet($sheetId: ID!, $name: String!) {
   renameSheet(input: { sheetId: $sheetId, name: $name }) {
+    success
     errors {
       field
       messages

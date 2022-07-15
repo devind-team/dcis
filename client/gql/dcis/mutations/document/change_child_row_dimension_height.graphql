@@ -1,0 +1,20 @@
+mutation ChangeChildRowDimensionHeight(
+  $rowDimensionId: ID!,
+  $height: Int,
+) {
+  changeChildRowDimensionHeight(input: {
+    rowDimensionId: $rowDimensionId,
+    height: $height,
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    rowDimensionId
+    height
+    updatedAt
+    __typename
+  }
+}

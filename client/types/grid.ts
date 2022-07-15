@@ -1,4 +1,5 @@
-import { CellType } from '~/types/graphql'
+import { CellType, DocumentSheetQuery, DocumentsSheetQuery } from '~/types/graphql'
+import { UpdateType } from '~/composables'
 
 export type RangeType = string
 
@@ -6,15 +7,15 @@ export type RangeType = string
  * Режим работы таблицы
  * CHANGE - пользователь может менять структуру документа
  * WRITE - пользователь может вносить данные, изменяя модель Value
- * READ - документ доступен только для чтения
  */
 export enum GridMode {
   CHANGE,
-  WRITE,
-  READ
+  WRITE
 }
 
-/**
+export type UpdateSheetType = UpdateType<DocumentsSheetQuery | DocumentSheetQuery>
+
+/*
  * Кодовые ошибки
  */
 export enum ErrorCode {

@@ -11,9 +11,9 @@ from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, R
 from apps.dcis.permissions.document_permissions import (
     AddChildRowDimension,
     AddDocument,
+    ChangeChildRowDimensionHeight,
     ChangeDocument,
     ChangeValue,
-    ChangeValueBase,
     DeleteChildRowDimension,
     DeleteDocument,
     ViewDocument,
@@ -70,7 +70,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             dynamic=True,
         )
         self.column_dimensions = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 6)]
-        self.not_editable_cell_obj = ChangeValueBase.Obj(
+        self.not_editable_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(
                 row=self.row_dimension,
@@ -78,7 +78,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 editable=False,
             ),
         )
-        self.formula_cell_obj = ChangeValueBase.Obj(
+        self.formula_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(
                 row=self.row_dimension,
@@ -86,15 +86,15 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 formula='0',
             ),
         )
-        self.cell_obj = ChangeValueBase.Obj(
+        self.cell_obj = ChangeValue.Obj(
             document=self.document,
             cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[2]),
         )
-        self.child_cell_obj = ChangeValueBase.Obj(
+        self.child_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(row=self.document_row_dimension_child, column=self.column_dimensions[3])
         )
-        self.user_cell_obj = ChangeValueBase.Obj(
+        self.user_cell_obj = ChangeValue.Obj(
             document=self.user_document,
             cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[4]),
         )
@@ -145,7 +145,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         ):
             self._test_change_value((False, False, True, False, True))
             with patch(
-                'apps.dcis.permissions.document_permissions.ChangePeriodSheet.has_object_permission',
+                'apps.dcis.permissions.document_permissions.ChangePeriodSheetBase.has_object_permission',
                 new=Mock(return_value=True)
             ):
                 self._test_change_value((False, False, True, True, True))
@@ -171,12 +171,23 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         """Тестирование класса `AddChildRowDimension`."""
         self._test_add_child_row_dimension((False, False, False, False))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
-            self._test_add_child_row_dimension((False, False, False, True))
+            self._test_add_child_row_dimension((False, False, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.add_rowdimension'):
-            self._test_add_child_row_dimension((False, False, False, True))
+            self._test_add_child_row_dimension((False, False, True, True))
         with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-            self._test_add_child_row_dimension((False, False, False, True))
-            mock.assert_called_once_with(self.user.id, self.user_period.id, 'add_rowdimension')
+            self._test_add_child_row_dimension((False, False, True, True))
+            mock.assert_called_with(self.user.id, self.user_period.id, 'add_rowdimension')
+
+    def test_change_child_row_dimension_height(self) -> None:
+        """Тестирование класса `ChangeChildRowDimensionHeight`."""
+        self._test_change_child_row_dimension_height((False, False, True))
+        with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
+            self._test_change_child_row_dimension_height((False, True, True))
+        with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_rowdimension'):
+            self._test_change_child_row_dimension_height((False, True, True))
+        with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
+            self._test_change_child_row_dimension_height((False, True, True))
+            mock.assert_called_with(self.user.id, self.user_period.id, 'change_rowdimension')
 
     def test_delete_child_row_dimension(self) -> None:
         """Тестирование класса `DeleteChildRowDimension`"""
@@ -230,15 +241,27 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
     def _test_add_child_row_dimension(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование класса `AddChildRowDimension` для 4 типов строк."""
         for row_dimension, value in zip((
-            self.row_dimension,
-            self.document_row_dimension,
-            self.dynamic_row_dimension,
-            self.document_dynamic_row_dimension,
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.row_dimension),
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.document_row_dimension),
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.dynamic_row_dimension),
+            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.document_dynamic_row_dimension),
         ), values):
             if value:
                 self.assertTrue(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))
             else:
                 self.assertFalse(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))
+
+    def _test_change_child_row_dimension_height(self, values: tuple[bool, bool, bool]) -> None:
+        """Тестирование класса `ChangeChildRowDimensionHeight` для 3 типов строк."""
+        for row_dimension, value in zip((
+            self.row_dimension,
+            self.document_row_dimension,
+            self.document_user_row_dimension,
+        ), values):
+            if value:
+                self.assertTrue(ChangeChildRowDimensionHeight.has_object_permission(self.context_mock, row_dimension))
+            else:
+                self.assertFalse(ChangeChildRowDimensionHeight.has_object_permission(self.context_mock, row_dimension))
 
     def _test_delete_child_row_dimension(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование класса `DeleteChildRowDimension` для 4 типов строк."""

@@ -3,22 +3,27 @@ v-menu(v-model="active" bottom close-on-content-click)
   template(#activator="{ on, attrs }")
     slot(:on="on" :attrs="attrs")
   v-list(dense)
-    grid-row-settings(:row="row" @close="active = false" :get-row-height="getRowHeight")
+    grid-row-settings(
+      v-if="canChangeSettings"
+      :row="row"
+      :get-row-height="getRowHeight"
+      @close="active = false"
+    )
       template(#activator="{ on }")
         v-list-item(v-on="on")
           v-list-item-icon
             v-icon mdi-cog
           v-list-item-content {{ t('dcis.grid.rowControl.properties') }}
-    v-list-item(@click="addRowDimensionMutate(row, AddRowDimensionPosition.BEFORE)")
+    v-list-item(v-if="canAddBefore" @click="addRowDimensionMutate(row, AddRowDimensionPosition.BEFORE)")
       v-list-item-icon
         v-icon mdi-table-row-plus-before
       v-list-item-content {{ t('dcis.grid.rowControl.addRowAbove') }}
-    v-list-item(@click="addRowDimensionMutate(row, AddRowDimensionPosition.AFTER)")
+    v-list-item(v-if="canAddAfter" @click="addRowDimensionMutate(row, AddRowDimensionPosition.AFTER)")
       v-list-item-icon
         v-icon mdi-table-row-plus-after
       v-list-item-content {{ t('dcis.grid.rowControl.addRowBelow') }}
     v-list-item(
-      v-if="row.dynamic"
+      v-if="canAddInside"
       @click="addRowDimensionMutate(row, AddRowDimensionPosition.INSIDE)"
     )
       v-list-item-icon
@@ -32,15 +37,19 @@ v-menu(v-model="active" bottom close-on-content-click)
 
 <script lang="ts">
 import { PropType, Ref } from '#app'
-import { DocumentType, SheetType, RowDimensionType, SheetQuery } from '~/types/graphql'
-import { UpdateType } from '~/composables/query-common'
-import { AddRowDimensionPosition } from '~/composables/grid-mutations'
+import { AddRowDimensionPosition, UpdateType } from '~/composables'
+import { GridMode, UpdateSheetType } from '~/types/grid'
+import { DocumentSheetQuery, DocumentsSheetQuery, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
 
 export default defineComponent({
   components: { GridRowSettings },
   props: {
     row: { type: Object as PropType<RowDimensionType>, required: true },
+    canChangeSettings: { type: Boolean, required: true },
+    canAddBefore: { type: Boolean, required: true },
+    canAddAfter: { type: Boolean, required: true },
+    canAddInside: { type: Boolean, required: true },
     canDelete: { type: Boolean, required: true },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
     clearSelection: { type: Function as PropType<() => void>, required: true }
@@ -50,17 +59,25 @@ export default defineComponent({
 
     const active = ref<boolean>(false)
 
-    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+    const mode = inject<GridMode>('mode')
+    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateSheetType>>('updateActiveSheet')
 
-    const addRowDimensionMutate = useAddRowDimensionMutation(
-      computed(() => activeDocument.value.id),
-      activeSheet,
-      updateSheet
-    )
+    const addRowDimensionMutate = mode === GridMode.CHANGE
+      ? useAddRowDimensionMutation(
+        activeSheet,
+        updateSheet as Ref<UpdateType<DocumentsSheetQuery>>
+      )
+      : useAddChildRowDimensionMutation(
+        computed(() => activeDocument.value ? activeDocument.value.id : null),
+        activeSheet,
+        updateSheet as Ref<UpdateType<DocumentSheetQuery>>
+      )
 
-    const deleteRowDimensionMutate = useDeleteRowDimensionMutation(activeSheet, updateSheet)
+    const deleteRowDimensionMutate = mode === GridMode.CHANGE
+      ? useDeleteRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      : useDeleteChildRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const deleteRowDimension = async (row: RowDimensionType) => {
       await deleteRowDimensionMutate(row)
@@ -68,11 +85,11 @@ export default defineComponent({
     }
 
     return {
+      AddRowDimensionPosition,
       t,
       active,
       addRowDimensionMutate,
-      deleteRowDimension,
-      AddRowDimensionPosition
+      deleteRowDimension
     }
   }
 })

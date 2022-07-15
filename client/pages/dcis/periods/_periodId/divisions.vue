@@ -127,7 +127,7 @@ export default defineComponent({
       return []
     })
 
-    const periodUpdate: UpdateType<PeriodQuery> = inject('periodUpdate')
+    const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
     const addDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => periodUpdate(
       cache,

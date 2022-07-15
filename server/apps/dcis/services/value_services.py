@@ -1,4 +1,5 @@
 """Файл, содержащий сервисы для изменения значений ячеек."""
+
 from datetime import datetime
 from os import path
 from pathlib import Path
@@ -36,14 +37,13 @@ class UpdateOrCrateValuesResult(NamedTuple):
 
 
 def update_or_create_value(
-        document: Document,
-        cell: Cell,
-        sheet_id: int | str,
-        value: str,
-        payload: Any = None
+    document: Document,
+    cell: Cell,
+    sheet_id: int | str,
+    value: str,
+    payload: Any = None
 ) -> UpdateOrCrateValuesResult:
     """Создание или обновление значения."""
-    from pprint import pp
     val, created = Value.objects.update_or_create(
         column_id=cell.column_id,
         row_id=cell.row_id,
@@ -102,14 +102,13 @@ def recalculate_cells(document: Document, value: Value) -> list[Value]:
 
 
 def update_or_create_file_value(
-        user: User,
-        document_id: int | str,
-        sheet_id: int | str,
-        column_id: int | str,
-        row_id: int | str,
-        value: str,
-        remaining_files: list[int],
-        new_files: list[InMemoryUploadedFile],
+    user: User,
+    document: Document,
+    cell: Cell,
+    sheet_id: int | str,
+    value: str,
+    remaining_files: list[int],
+    new_files: list[InMemoryUploadedFile],
 ) -> UpdateOrCrateValueResult:
     """Изменение файлов значения ячейки типа `Файл`."""
     payload = [*remaining_files]
@@ -121,17 +120,17 @@ def update_or_create_file_value(
             user=user
         ).pk)
     val, created = Value.objects.update_or_create(
-        column_id=column_id,
-        row_id=row_id,
-        document_id=document_id,
+        column_id=cell.column_id,
+        row_id=cell.row_id,
         sheet_id=sheet_id,
+        document=document,
         defaults={
             'value': value,
             'payload': payload
         }
     )
     updated_at = now()
-    RowDimension.objects.filter(pk=row_id).update(updated_at=updated_at)
+    RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
     return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
 
 

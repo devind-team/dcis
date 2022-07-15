@@ -1,22 +1,40 @@
+#import "../../core/fragments/user_fields.graphql"
+#import "./project_fields.graphql"
+#import "./division_model_fields.graphql"
 #import "./period_group_fields.graphql"
 
 fragment PeriodFields on PeriodType {
   id
   name
-  multiple
   status
+  multiple
+  privately
   start
   expiration
-  privately
   createdAt
-  methodicalSupport {
-    name
-    src
-    size
-    __typename
+  user {
+    ...UserFields
+  }
+  project {
+    ...ProjectFields
+  }
+  divisions {
+    ...DivisionModelFields
   }
   periodGroups {
     ...PeriodGroupFields
   }
+  sheets {
+    id
+    name
+    __typename
+  }
+  canAddDocument
+  canChangeDivisions
+  canChangeGroups
+  canChangeUsers
+  canChangeSettings
+  canChangeSheet
+  canDelete
   __typename
 }

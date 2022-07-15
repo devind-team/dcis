@@ -1,7 +1,7 @@
 <template lang="pug">
 .grid__cell-content(:class="contentClasses")
   component(
-    v-if="active && cell.editable && !cell.formula"
+    v-if="active && cell.canChangeValue"
     v-bind="cellProps"
     v-on="cellListeners"
     :is="`GridCell${cellKind}`"
@@ -14,15 +14,19 @@ import { computed, defineComponent, inject, PropType, Ref } from '#app'
 import { useApolloClient } from '@vue/apollo-composable'
 import {
   UpdateType,
+  useChangeCellDefaultMutation,
   useChangeFileValueMutation,
-  useChangeValueMutation, useCommonQuery,
+  useChangeValueMutation,
+  useCommonQuery,
   useUnloadFileValueArchiveMutation
 } from '~/composables'
+import { GridMode, UpdateSheetType } from '~/types/grid'
 import {
-  DocumentType,
-  SheetQuery,
-  SheetType,
   CellType,
+  DocumentSheetQuery,
+  DocumentsSheetQuery,
+  DocumentType,
+  SheetType,
   ValueFilesQuery,
   ValueFilesQueryVariables
 } from '~/types/graphql'
@@ -52,9 +56,11 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { client } = useApolloClient()
-    const activeDocument = inject<Ref<DocumentType>>('activeDocument')
+
+    const mode = inject<GridMode>('mode')
+    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<SheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateSheetType>>('updateActiveSheet')
 
     const { data: files, update: updateFiles } = useCommonQuery<
       ValueFilesQuery,
@@ -63,41 +69,54 @@ export default defineComponent({
     >({
       document: valueFilesQuery,
       variables: {
-        documentId: activeDocument.value.id,
+        documentId: activeDocument.value ? activeDocument.value.id : '',
         sheetId: activeSheet.value.id,
         columnId: props.cell.columnId,
         rowId: props.cell.rowId
       },
       options: computed(() => ({
-        enabled: props.active && props.cell.editable && props.cell.kind === 'fl'
+        enabled: props.active && props.cell.editable && props.cell.kind === 'fl' && mode === GridMode.WRITE
       }))
     })
 
-    const changeValue = useChangeValueMutation(
-      computed(() => activeDocument.value.id),
-      computed(() => activeSheet.value.id),
-      computed(() => props.cell),
-      client
-    )
+    const changeDefault = mode === GridMode.CHANGE
+      ? useChangeCellDefaultMutation(updateSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      : null
+    const changeValue = mode === GridMode.WRITE
+      ? useChangeValueMutation(
+        computed(() => activeDocument.value.id),
+        computed(() => activeSheet.value.id),
+        computed(() => props.cell),
+        client
+      )
+      : null
 
-    const changeFileValue = useChangeFileValueMutation(
-      computed(() => activeDocument.value.id),
-      computed(() => activeSheet.value.id),
-      computed(() => props.cell),
-      updateSheet,
-      updateFiles
-    )
+    const changeFileValue = mode === GridMode.WRITE
+      ? useChangeFileValueMutation(
+        computed(() => activeDocument.value.id),
+        computed(() => activeSheet.value.id),
+        computed(() => props.cell),
+        updateSheet as Ref<UpdateType<DocumentSheetQuery>>,
+        updateFiles
+      )
+      : null
 
-    const unloadFileValueArchive = useUnloadFileValueArchiveMutation(
-      computed(() => activeDocument.value.id),
-      computed(() => activeSheet.value.id),
-      computed(() => props.cell)
-    )
+    const unloadFileValueArchive = mode === GridMode.WRITE
+      ? useUnloadFileValueArchiveMutation(
+        computed(() => activeDocument.value ? activeDocument.value.id : ''),
+        computed(() => activeSheet.value.id),
+        computed(() => props.cell)
+      )
+      : null
 
     const setValue = async (value: string) => {
       emit('clear-active')
       if (props.cell.value !== value) {
-        await changeValue(value)
+        if (mode === GridMode.CHANGE) {
+          await changeDefault(props.cell, value)
+        } else {
+          await changeValue(value)
+        }
       }
     }
 
@@ -115,6 +134,16 @@ export default defineComponent({
       emit('clear-active')
     }
 
+    const cellKind = computed<string>(() => {
+      if (props.cell.kind in cellKinds) {
+        if (props.cell.kind === 'fl' && mode === GridMode.CHANGE) {
+          return 'String'
+        }
+        return cellKinds[props.cell.kind]
+      }
+      return 'String'
+    })
+
     const cellProps = computed<object>(() => {
       if (props.cell.kind === 'fl') {
         return { value: props.cell.value, files: files.value || [] }
@@ -123,21 +152,17 @@ export default defineComponent({
     })
 
     const cellListeners = computed<Record<string, Function>>(() => {
-      if (props.cell.kind === 'fl') {
+      if (cellKind.value === 'Files') {
         return { 'set-value': setFileValue, 'unload-archive': uploadArchive, cancel }
       }
       return { 'set-value': setValue, cancel }
     })
 
-    const cellKind = computed<string>(() => (
-      props.cell.kind in cellKinds ? cellKinds[props.cell.kind] : 'String'
-    ))
-
     const contentClasses = computed<Record<string, boolean>>(() => ({
-      'grid__cell-content_active': props.active && ['n', 's', 'money'].includes(props.cell.kind)
+      'grid__cell-content_active': props.active && ['Numeric', 'String', 'Money'].includes(cellKind.value)
     }))
 
-    return { cellKind, contentClasses, cellProps, cellListeners }
+    return { cellKind, cellProps, cellListeners, contentClasses }
   }
 })
 </script>

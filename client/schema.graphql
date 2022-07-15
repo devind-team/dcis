@@ -89,6 +89,33 @@ type AddCategoryMutationPayload {
   success: Boolean!
 }
 
+input AddChildRowDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Индекс вставки в плоскую структуру"""
+  globalIndex: Int!
+  """Вспомогательные индексы в плоской структуре"""
+  globalIndices: [GlobalIndicesInputType!]!
+  """Индекс вставки"""
+  index: Int!
+  """Идентификатор родительской строки"""
+  parentId: ID!
+  """Идентификатор листа"""
+  sheetId: ID!
+}
+
+"""Добавление дочерней строки."""
+type AddChildRowDimensionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленная строка"""
+  rowDimension: RowDimensionType!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDivisionsMutationInput {
   clientMutationId: String
   """Идентификаторы дивизионов"""
@@ -113,13 +140,13 @@ input AddDocumentMutationInput {
   """Комментарий"""
   comment: String!
   """Идентификатор дивизиона"""
-  divisionId: Int
+  divisionId: ID
   """Идентификатор документа"""
   documentId: ID
   """Идентификатор периода"""
-  periodId: Int!
+  periodId: ID!
   """Начальный статус документа"""
-  statusId: Int!
+  statusId: ID!
 }
 
 """Добавление документа."""
@@ -140,7 +167,7 @@ input AddDocumentStatusMutationInput {
   """Документ"""
   documentId: ID!
   """Статус"""
-  statusId: Int!
+  statusId: ID!
 }
 
 """Добавление статуса документа."""
@@ -293,16 +320,12 @@ type AddProjectMutationPayload {
 
 input AddRowDimensionMutationInput {
   clientMutationId: String
-  """Идентификатор документа"""
-  documentId: ID
   """Индекс вставки в плоскую структуру"""
   globalIndex: Int!
   """Вспомогательные индексы в плоской структуре"""
   globalIndices: [GlobalIndicesInputType!]!
   """Индекс вставки"""
   index: Int!
-  """Идентификатор родительской строки"""
-  parentId: ID
   """Идентификатор листа"""
   sheetId: ID!
 }
@@ -484,6 +507,24 @@ type AuthTokenInfoType {
   tokenType: String
 }
 
+"""Тип листа без структуры."""
+type BaseSheetType {
+  """Комментарий"""
+  comment: String!
+  """Дата добавления"""
+  createdAt: DateTime!
+  """Идентификатор"""
+  id: ID!
+  """Наименование"""
+  name: String!
+  """Период"""
+  period: PeriodType
+  """Позиция"""
+  position: Int!
+  """Дата обновления"""
+  updatedAt: DateTime!
+}
+
 input BudgetClassificationCodeFilterInputType {
   """`Exact` lookup"""
   exact: String
@@ -601,6 +642,8 @@ type CellType {
   borderColor: JSONString!
   """Стили границ"""
   borderStyle: JSONString!
+  """Может ли пользователь изменять значение ячейки"""
+  canChangeValue: Boolean!
   """Цвет индекса"""
   color: String!
   """Объединение колонок"""
@@ -742,6 +785,27 @@ type ChangeCategoryPositionMutationPayload {
   success: Boolean!
 }
 
+input ChangeCellDefaultInput {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  clientMutationId: String
+  """Значение по умолчанию"""
+  default: String!
+}
+
+"""Изменение значения ячейки по умолчанию."""
+type ChangeCellDefaultPayload {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  clientMutationId: String
+  """Значение по умолчанию"""
+  default: String!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeCellsOptionMutationInput {
   """Идентификаторы ячеек"""
   cellIds: [ID!]!
@@ -775,6 +839,29 @@ type ChangeCellsOptionMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+}
+
+input ChangeChildRowDimensionHeightMutationInput {
+  clientMutationId: String
+  """Высота строки"""
+  height: Int
+  """Идентификатор строки"""
+  rowDimensionId: ID!
+}
+
+"""Изменение высоты дочерней строки."""
+type ChangeChildRowDimensionHeightMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Высота строки"""
+  height: Int
+  """Идентификатор строки"""
+  rowDimensionId: ID!
+  """Успех мутации"""
+  success: Boolean!
+  """Дата обновления строки"""
+  updatedAt: DateTime!
 }
 
 input ChangeColumnDimensionMutationInput {
@@ -839,17 +926,15 @@ type ChangeFileMutationPayload {
 }
 
 input ChangeFileValueMutationInput {
+  """Идентификатор ячейки"""
+  cellId: ID!
   clientMutationId: String
-  """Идентификатор колонки"""
-  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
   """Новые файлы"""
   newFiles: [Upload!]!
   """Оставшиеся файлы"""
   remainingFiles: [ID!]!
-  """Идентификатор строки"""
-  rowId: ID!
   """Идентификатор листа"""
   sheetId: ID!
   """Значение"""
@@ -1617,6 +1702,23 @@ type DeleteCategoryMutationPayload {
   success: Boolean!
 }
 
+input DeleteChildRowDimensionMutationInput {
+  clientMutationId: String
+  """Идентификатор строки"""
+  rowDimensionId: ID!
+}
+
+"""Удаление дочерней строки."""
+type DeleteChildRowDimensionMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленной строки"""
+  rowDimensionId: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteDivisionMutationInput {
   clientMutationId: String
   """Идентификатор дивизиона"""
@@ -1928,7 +2030,7 @@ type DocumentType implements Node {
   """Период сбора"""
   period: PeriodType
   """Листы"""
-  sheets: [SheetType]!
+  sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
   """Версия документа"""
@@ -2184,6 +2286,8 @@ type Mutation {
   addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
+  """Добавление дочерней строки."""
+  addChildRowDimension(input: AddChildRowDimensionMutationInput!): AddChildRowDimensionMutationPayload!
   """Мутация на добавление дивизионов в период."""
   addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
   """Добавление документа."""
@@ -2226,8 +2330,12 @@ type Mutation {
   changeCategoryParent(input: ChangeCategoryParentMutationInput!): ChangeCategoryParentMutationPayload!
   """Мутация для изменения порядка следования вывода категорий"""
   changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
+  """Изменение значения ячейки по умолчанию"""
+  changeCellDefault(input: ChangeCellDefaultInput!): ChangeCellDefaultPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
+  """Изменение высоты дочерней строки."""
+  changeChildRowDimensionHeight(input: ChangeChildRowDimensionHeightMutationInput!): ChangeChildRowDimensionHeightMutationPayload!
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
   """Изменение комментария версии документа."""
@@ -2294,6 +2402,8 @@ type Mutation {
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
+  """Удаление дочерней строки."""
+  deleteChildRowDimension(input: DeleteChildRowDimensionMutationInput!): DeleteChildRowDimensionMutationPayload!
   """Мутация на удаление дивизиона из периода."""
   deleteDivision(input: DeleteDivisionMutationInput!): DeleteDivisionMutationPayload!
   """Удаление статуса документа."""
@@ -2897,6 +3007,8 @@ type PeriodType {
   privately: Boolean!
   """Проект"""
   project: ProjectType
+  """Листы"""
+  sheets: [BaseSheetType]!
   """Дата начала"""
   start: Date
   """Статус проекта"""
@@ -3105,6 +3217,13 @@ type Query {
     """Идентификатор документа"""
     documentId: ID
   ): DocumentType
+  """Выгрузка листа с несколькими документами"""
+  documentSheet(
+    """Идентификатор документа"""
+    documentId: ID!
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Статусы документов"""
   documentStatuses(
     """Идентификатор документа"""
@@ -3120,6 +3239,13 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): DocumentTypeConnection!
+  """Выгрузка листа с несколькими документами"""
+  documentsSheet(
+    """Идентификаторы документов"""
+    documentIds: [ID!]
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
@@ -3221,13 +3347,6 @@ type Query {
   sessions(userId: ID): [SessionType!]!
   """Настройки приложения"""
   settings: [SettingType!]!
-  """Выгрузка листа"""
-  sheet(
-    """Идентификатор документа"""
-    documentId: ID
-    """Идентификатор листа"""
-    sheetId: ID!
-  ): SheetType!
   """Статусы"""
   statuses: [StatusType!]
   """Теги"""
@@ -3414,6 +3533,12 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
+  """Может ли пользователь добавить дочернюю строку"""
+  canAddChildRow: Boolean!
+  """Может ли пользователь изменять высоту строки"""
+  canChangeHeight: Boolean!
+  """Может ли пользователь удалить строку"""
+  canDelete: Boolean!
   """Ячейки"""
   cells: [CellType!]!
   """Дочерние строки"""
@@ -3958,7 +4083,7 @@ type UserTypeEdge {
   node: UserType
 }
 
-"""Тип значений"""
+"""Тип значения."""
 type ValueType {
   """Идентификатор колонки"""
   columnId: ID!

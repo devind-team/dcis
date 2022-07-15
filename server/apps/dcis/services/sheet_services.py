@@ -1,6 +1,6 @@
 import re
 from argparse import ArgumentTypeError
-from typing import NamedTuple, Sequence
+from typing import Any, NamedTuple, Sequence
 
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
@@ -9,8 +9,14 @@ from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
-from apps.dcis.models import Period, RowDimension, Sheet, Value
+from apps.dcis.models import Document, Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
+from apps.dcis.permissions import (
+    AddChildRowDimensionBase,
+    ChangeChildRowDimensionHeightBase,
+    ChangeValueBase,
+    DeleteChildRowDimensionBase,
+)
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
@@ -70,8 +76,6 @@ def change_column_dimension(
 def add_row_dimension(
     user: User,
     sheet: Sheet,
-    document_id: str | int,
-    parent_id: int | None,
     index: int,
     global_index: int,
     global_indices_map: dict[int, int]
@@ -81,28 +85,92 @@ def add_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
-    sheet.rowdimension_set.filter(parent_id=parent_id, index__gte=index).update(index=F('index') + 1)
+    def get_row_permissions(_: RowDimension) -> dict[str | bool]:
+        return {
+            'can_add_child_row': True,
+            'can_change_height': True,
+            'can_delete': True,
+        }
+
+    def get_cell_permissions(_: Cell) -> dict[str | bool]:
+        return {'can_change_value': True}
+
+    sheet.rowdimension_set.filter(parent_id=None, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
         index=index,
-        document_id=document_id,
-        parent_id=parent_id,
-        dynamic=bool(parent_id),
         user=user
     )
     cells = [
         Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
         for column in sheet.columndimension_set.all()
     ]
-    if not parent_id:
-        move_merged_cells(sheet, index, 1)
+    move_merged_cells(sheet, index, 1)
     return SheetPartialRowsUploader(
         columns_unloader=SheetColumnsUnloader(sheet.columndimension_set.all()),
         rows=[row_dimension],
         cells=cells,
         merged_cells=sheet.mergedcell_set.all(),
         values=[],
-        rows_global_indices_map={**global_indices_map, row_dimension.id: global_index}
+        rows_global_indices_map={**global_indices_map, row_dimension.id: global_index},
+        get_row_permissions=get_row_permissions,
+        get_cell_permissions=get_cell_permissions,
+    ).unload()[0]
+
+
+@transaction.atomic
+def add_child_row_dimension(
+    context: Any,
+    sheet: Sheet,
+    document: Document,
+    parent: RowDimension,
+    index: int,
+    global_index: int,
+    global_indices_map: dict[int, int]
+) -> dict:
+    """Добавление дочерней строки.
+
+    После добавления строки, строка приобретает новый индекс,
+    соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
+    """
+
+    add_child_row_dimension_perm = AddChildRowDimensionBase(context, document)
+    change_child_row_dimension_height_perm = ChangeChildRowDimensionHeightBase(context, document)
+    delete_child_row_dimension_perm = DeleteChildRowDimensionBase(context, document)
+    change_value_perm = ChangeValueBase(context, document)
+
+    def get_row_permissions(row: RowDimension) -> dict[str | bool]:
+        return {
+            'can_add_child_row': add_child_row_dimension_perm.has_object_permission(row),
+            'can_change_height': change_child_row_dimension_height_perm.has_object_permission(row),
+            'can_delete': delete_child_row_dimension_perm.has_object_permission(row),
+        }
+
+    def get_cell_permissions(cell: Cell) -> dict[str | bool]:
+        return {'can_change_value': change_value_perm.has_object_permission(cell)}
+
+    sheet.rowdimension_set.filter(parent=parent, index__gte=index).update(index=F('index') + 1)
+    row_dimension = RowDimension.objects.create(
+        sheet=sheet,
+        index=index,
+        document=document,
+        parent=parent,
+        dynamic=True,
+        user=context.user
+    )
+    cells = [
+        Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
+        for column in sheet.columndimension_set.all()
+    ]
+    return SheetPartialRowsUploader(
+        columns_unloader=SheetColumnsUnloader(sheet.columndimension_set.all()),
+        rows=[row_dimension],
+        cells=cells,
+        merged_cells=sheet.mergedcell_set.all(),
+        values=[],
+        rows_global_indices_map={**global_indices_map, row_dimension.id: global_index},
+        get_row_permissions=get_row_permissions,
+        get_cell_permissions=get_cell_permissions,
     ).unload()[0]
 
 
@@ -119,6 +187,13 @@ def change_row_dimension(
     row_dimension.hidden = hidden
     row_dimension.dynamic = dynamic
     row_dimension.save(update_fields=('height', 'fixed', 'hidden', 'dynamic', 'updated_at'))
+    return row_dimension
+
+
+def change_row_dimension_height(row_dimension: RowDimension, height: int) -> RowDimension:
+    """Изменение высоты строки."""
+    row_dimension.height = height
+    row_dimension.save(update_fields=('height', 'updated_at'))
     return row_dimension
 
 
@@ -200,6 +275,13 @@ class CheckCellOptions:
         if value in allowed_values:
             return cls.Success(value)
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
+
+
+def change_cell_default(cell: Cell, default: str) -> Cell:
+    """Изменение значения ячейки по умолчанию."""
+    cell.default = default
+    cell.save(update_fields=('default',))
+    return cell
 
 
 @transaction.atomic

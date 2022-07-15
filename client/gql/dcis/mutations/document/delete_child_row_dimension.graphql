@@ -1,0 +1,12 @@
+mutation DeleteChildRowDimension($rowDimensionId: ID!) {
+  deleteChildRowDimension(input: { rowDimensionId: $rowDimensionId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    rowDimensionId
+    __typename
+  }
+}

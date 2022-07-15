@@ -6,22 +6,5 @@
 query Period($periodId: ID!) {
   period(periodId: $periodId) {
     ...PeriodFields
-    canChangeDivisions
-    canChangeGroups
-    canChangeUsers
-    canChangeSettings
-    canChangeSheet
-    canDelete
-    canAddDocument
-    project {
-      ...ProjectFields
-      __typename
-    }
-    user {
-      ...UserFields
-    }
-    divisions {
-      ...DivisionModelFields
-    }
   }
 }

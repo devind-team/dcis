@@ -143,7 +143,7 @@ export default defineComponent({
       usersCount.value = pagination.itemsLength
     }
 
-    const periodUpdate: UpdateType<PeriodQuery> = inject('periodUpdate')
+    const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
     const changeUserPeriodGroupsUpdate = (
       cache: DataProxy,

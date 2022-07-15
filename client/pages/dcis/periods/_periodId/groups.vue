@@ -90,7 +90,7 @@ export default defineComponent({
       }
     ]))
     const selectedGroup = ref<PeriodGroupType | null | undefined>(null)
-    const periodUpdate: UpdateType<PeriodQuery> = inject('periodUpdate')
+    const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
     /**
      * Обновление после добавления группы

@@ -104,6 +104,34 @@ export type AddCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddChildRowDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Индекс вставки в плоскую структуру */
+  globalIndex: Scalars['Int'];
+  /** Вспомогательные индексы в плоской структуре */
+  globalIndices: Array<GlobalIndicesInputType>;
+  /** Индекс вставки */
+  index: Scalars['Int'];
+  /** Идентификатор родительской строки */
+  parentId: Scalars['ID'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
+};
+
+/** Добавление дочерней строки. */
+export type AddChildRowDimensionMutationPayload = {
+  __typename?: 'AddChildRowDimensionMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Добавленная строка */
+  rowDimension: RowDimensionType;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddDivisionsMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификаторы дивизионов */
@@ -129,13 +157,13 @@ export type AddDocumentMutationInput = {
   /** Комментарий */
   comment: Scalars['String'];
   /** Идентификатор дивизиона */
-  divisionId?: InputMaybe<Scalars['Int']>;
+  divisionId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор документа */
   documentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор периода */
-  periodId: Scalars['Int'];
+  periodId: Scalars['ID'];
   /** Начальный статус документа */
-  statusId: Scalars['Int'];
+  statusId: Scalars['ID'];
 };
 
 /** Добавление документа. */
@@ -157,7 +185,7 @@ export type AddDocumentStatusMutationInput = {
   /** Документ */
   documentId: Scalars['ID'];
   /** Статус */
-  statusId: Scalars['Int'];
+  statusId: Scalars['ID'];
 };
 
 /** Добавление статуса документа. */
@@ -318,16 +346,12 @@ export type AddProjectMutationPayload = {
 
 export type AddRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор документа */
-  documentId?: InputMaybe<Scalars['ID']>;
   /** Индекс вставки в плоскую структуру */
   globalIndex: Scalars['Int'];
   /** Вспомогательные индексы в плоской структуре */
   globalIndices: Array<GlobalIndicesInputType>;
   /** Индекс вставки */
   index: Scalars['Int'];
-  /** Идентификатор родительской строки */
-  parentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор листа */
   sheetId: Scalars['ID'];
 };
@@ -514,6 +538,25 @@ export type AuthTokenInfoType = {
   tokenType?: Maybe<Scalars['String']>;
 };
 
+/** Тип листа без структуры. */
+export type BaseSheetType = {
+  __typename?: 'BaseSheetType';
+  /** Комментарий */
+  comment: Scalars['String'];
+  /** Дата добавления */
+  createdAt: Scalars['DateTime'];
+  /** Идентификатор */
+  id: Scalars['ID'];
+  /** Наименование */
+  name: Scalars['String'];
+  /** Период */
+  period?: Maybe<PeriodType>;
+  /** Позиция */
+  position: Scalars['Int'];
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
+};
+
 export type BudgetClassificationCodeFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['String']>;
@@ -650,6 +693,8 @@ export type CellType = {
   borderColor: Scalars['JSONString'];
   /** Стили границ */
   borderStyle: Scalars['JSONString'];
+  /** Может ли пользователь изменять значение ячейки */
+  canChangeValue: Scalars['Boolean'];
   /** Цвет индекса */
   color: Scalars['String'];
   /** Объединение колонок */
@@ -796,6 +841,28 @@ export type ChangeCategoryPositionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeCellDefaultInput = {
+  /** Идентификатор ячейки */
+  cellId: Scalars['ID'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Значение по умолчанию */
+  default: Scalars['String'];
+};
+
+/** Изменение значения ячейки по умолчанию. */
+export type ChangeCellDefaultPayload = {
+  __typename?: 'ChangeCellDefaultPayload';
+  /** Идентификатор ячейки */
+  cellId: Scalars['ID'];
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Значение по умолчанию */
+  default: Scalars['String'];
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type ChangeCellsOptionMutationInput = {
   /** Идентификаторы ячеек */
   cellIds: Array<Scalars['ID']>;
@@ -830,6 +897,30 @@ export type ChangeCellsOptionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+};
+
+export type ChangeChildRowDimensionHeightMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Высота строки */
+  height?: InputMaybe<Scalars['Int']>;
+  /** Идентификатор строки */
+  rowDimensionId: Scalars['ID'];
+};
+
+/** Изменение высоты дочерней строки. */
+export type ChangeChildRowDimensionHeightMutationPayload = {
+  __typename?: 'ChangeChildRowDimensionHeightMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Высота строки */
+  height?: Maybe<Scalars['Int']>;
+  /** Идентификатор строки */
+  rowDimensionId: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Дата обновления строки */
+  updatedAt: Scalars['DateTime'];
 };
 
 export type ChangeColumnDimensionMutationInput = {
@@ -897,17 +988,15 @@ export type ChangeFileMutationPayload = {
 };
 
 export type ChangeFileValueMutationInput = {
+  /** Идентификатор ячейки */
+  cellId: Scalars['ID'];
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор колонки */
-  columnId: Scalars['ID'];
   /** Идентификатор документа */
   documentId: Scalars['ID'];
   /** Новые файлы */
   newFiles: Array<Scalars['Upload']>;
   /** Оставшиеся файлы */
   remainingFiles: Array<Scalars['ID']>;
-  /** Идентификатор строки */
-  rowId: Scalars['ID'];
   /** Идентификатор листа */
   sheetId: Scalars['ID'];
   /** Значение */
@@ -1709,6 +1798,24 @@ export type DeleteCategoryMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteChildRowDimensionMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор строки */
+  rowDimensionId: Scalars['ID'];
+};
+
+/** Удаление дочерней строки. */
+export type DeleteChildRowDimensionMutationPayload = {
+  __typename?: 'DeleteChildRowDimensionMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленной строки */
+  rowDimensionId: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteDivisionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор дивизиона */
@@ -2040,7 +2147,7 @@ export type DocumentType = Node & {
   /** Период сбора */
   period?: Maybe<PeriodType>;
   /** Листы */
-  sheets: Array<Maybe<SheetType>>;
+  sheets: Array<Maybe<BaseSheetType>>;
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
   /** Версия документа */
@@ -2319,6 +2426,8 @@ export type Mutation = {
   addBudgetClassification: AddBudgetClassificationMutationPayload;
   /** Мутация для добавления категории */
   addCategory: AddCategoryMutationPayload;
+  /** Добавление дочерней строки. */
+  addChildRowDimension: AddChildRowDimensionMutationPayload;
   /** Мутация на добавление дивизионов в период. */
   addDivisions: AddDivisionsMutationPayload;
   /** Добавление документа. */
@@ -2361,8 +2470,12 @@ export type Mutation = {
   changeCategoryParent: ChangeCategoryParentMutationPayload;
   /** Мутация для изменения порядка следования вывода категорий */
   changeCategoryPosition: ChangeCategoryPositionMutationPayload;
+  /** Изменение значения ячейки по умолчанию */
+  changeCellDefault: ChangeCellDefaultPayload;
   /** Изменения опций ячейки */
   changeCellsOption: ChangeCellsOptionMutationPayload;
+  /** Изменение высоты дочерней строки. */
+  changeChildRowDimensionHeight: ChangeChildRowDimensionHeightMutationPayload;
   /** Изменение колонки */
   changeColumnDimension: ChangeColumnDimensionMutationPayload;
   /** Изменение комментария версии документа. */
@@ -2429,6 +2542,8 @@ export type Mutation = {
   copyPeriodGroups: CopyPeriodGroupsMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
+  /** Удаление дочерней строки. */
+  deleteChildRowDimension: DeleteChildRowDimensionMutationPayload;
   /** Мутация на удаление дивизиона из периода. */
   deleteDivision: DeleteDivisionMutationPayload;
   /** Удаление статуса документа. */
@@ -2489,6 +2604,11 @@ export type MutationAddBudgetClassificationArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddCategoryArgs = {
   input: AddCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddChildRowDimensionArgs = {
+  input: AddChildRowDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2597,8 +2717,18 @@ export type MutationChangeCategoryPositionArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationChangeCellDefaultArgs = {
+  input: ChangeCellDefaultInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationChangeCellsOptionArgs = {
   input: ChangeCellsOptionMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeChildRowDimensionHeightArgs = {
+  input: ChangeChildRowDimensionHeightMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -2767,6 +2897,11 @@ export type MutationCopyPeriodGroupsArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteCategoryArgs = {
   input: DeleteCategoryMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteChildRowDimensionArgs = {
+  input: DeleteChildRowDimensionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3475,6 +3610,8 @@ export type PeriodType = {
   privately: Scalars['Boolean'];
   /** Проект */
   project?: Maybe<ProjectType>;
+  /** Листы */
+  sheets: Array<Maybe<BaseSheetType>>;
   /** Дата начала */
   start?: Maybe<Scalars['Date']>;
   /** Статус проекта */
@@ -3666,10 +3803,14 @@ export type Query = {
   districts?: Maybe<Array<DistrictType>>;
   /** Документ */
   document?: Maybe<DocumentType>;
+  /** Выгрузка листа с несколькими документами */
+  documentSheet: SheetType;
   /** Статусы документов */
   documentStatuses?: Maybe<Array<DocumentStatusType>>;
   /** Документы */
   documents: DocumentTypeConnection;
+  /** Выгрузка листа с несколькими документами */
+  documentsSheet: SheetType;
   files: FileTypeConnection;
   groups: Array<GroupType>;
   /** Установлены ли настройки приложения */
@@ -3725,8 +3866,6 @@ export type Query = {
   sessions: Array<SessionType>;
   /** Настройки приложения */
   settings: Array<SettingType>;
-  /** Выгрузка листа */
-  sheet: SheetType;
   /** Статусы */
   statuses?: Maybe<Array<StatusType>>;
   /** Теги */
@@ -3798,6 +3937,12 @@ export type QueryDocumentArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryDocumentSheetArgs = {
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
 export type QueryDocumentStatusesArgs = {
   documentId?: InputMaybe<Scalars['ID']>;
 };
@@ -3810,6 +3955,12 @@ export type QueryDocumentsArgs = {
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
   periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryDocumentsSheetArgs = {
+  documentIds?: InputMaybe<Array<Scalars['ID']>>;
+  sheetId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -3968,12 +4119,6 @@ export type QueryRegionArgs = {
 /** Схема запросов данных. */
 export type QuerySessionsArgs = {
   userId?: InputMaybe<Scalars['ID']>;
-};
-
-/** Схема запросов данных. */
-export type QuerySheetArgs = {
-  documentId?: InputMaybe<Scalars['ID']>;
-  sheetId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -4185,6 +4330,12 @@ export type RowDimensionType = {
   __typename?: 'RowDimensionType';
   /** Агрегирование перечисление (мин, макс) для динамических строк */
   aggregation?: Maybe<Scalars['String']>;
+  /** Может ли пользователь добавить дочернюю строку */
+  canAddChildRow: Scalars['Boolean'];
+  /** Может ли пользователь изменять высоту строки */
+  canChangeHeight: Scalars['Boolean'];
+  /** Может ли пользователь удалить строку */
+  canDelete: Scalars['Boolean'];
   /** Ячейки */
   cells: Array<CellType>;
   /** Дочерние строки */
@@ -4765,7 +4916,7 @@ export type UserTypeEdge = {
   node?: Maybe<UserType>;
 };
 
-/** Тип значений */
+/** Тип значения. */
 export type ValueType = {
   __typename?: 'ValueType';
   /** Идентификатор колонки */
@@ -5080,7 +5231,7 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
-export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null };
+export type CellFieldsFragment = { __typename?: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChangeValue: boolean, value?: string | null, verified: boolean, error?: string | null };
 
 export type ColumnDimensionFieldsFragment = { __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any };
 
@@ -5092,7 +5243,7 @@ export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, c
 
 export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
 
-export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null };
+export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> };
 
 export type PeriodGroupFieldsFragment = { __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null };
 
@@ -5100,7 +5251,7 @@ export type PrivilegesFieldsFragment = { __typename: 'PrivilegeType', id: string
 
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } };
 
-export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> };
+export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, canAddChildRow: boolean, canChangeHeight: boolean, canDelete: boolean, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename?: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChangeValue: boolean, value?: string | null, verified: boolean, error?: string | null }> };
 
 export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any };
 
@@ -5123,12 +5274,38 @@ export type AddBudgetClassificationMutationVariables = Exact<{
 
 export type AddBudgetClassificationMutation = { __typename?: 'Mutation', addBudgetClassification: { __typename?: 'AddBudgetClassificationMutationPayload', budgetClassification?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } };
 
+export type ChangeCellDefaultMutationVariables = Exact<{
+  cellId: Scalars['ID'];
+  default: Scalars['String'];
+}>;
+
+export type ChangeCellDefaultMutation = { __typename?: 'Mutation', changeCellDefault: { __typename: 'ChangeCellDefaultPayload', success: boolean, cellId: string, default: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type ChangeCellsOptionMutationVariables = Exact<{
+  cellIds: Array<Scalars['ID']> | Scalars['ID'];
+  field: Scalars['String'];
+  value?: InputMaybe<Scalars['String']>;
+}>;
+
+export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value?: string | null }> | null } };
+
+export type AddChildRowDimensionMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+  parentId: Scalars['ID'];
+  index: Scalars['Int'];
+  globalIndex: Scalars['Int'];
+  globalIndices: Array<GlobalIndicesInputType> | GlobalIndicesInputType;
+}>;
+
+export type AddChildRowDimensionMutation = { __typename?: 'Mutation', addChildRowDimension: { __typename: 'AddChildRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, canAddChildRow: boolean, canChangeHeight: boolean, canDelete: boolean, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename?: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChangeValue: boolean, value?: string | null, verified: boolean, error?: string | null }> } } };
+
 export type AddDocumentMutationVariables = Exact<{
   comment: Scalars['String'];
-  periodId: Scalars['Int'];
-  statusId: Scalars['Int'];
+  periodId: Scalars['ID'];
+  statusId: Scalars['ID'];
   documentId?: InputMaybe<Scalars['ID']>;
-  divisionId?: InputMaybe<Scalars['Int']>;
+  divisionId?: InputMaybe<Scalars['ID']>;
 }>;
 
 export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
@@ -5136,10 +5313,17 @@ export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __ty
 export type AddDocumentStatusMutationVariables = Exact<{
   comment: Scalars['String'];
   documentId: Scalars['ID'];
-  statusId: Scalars['Int'];
+  statusId: Scalars['ID'];
 }>;
 
 export type AddDocumentStatusMutation = { __typename?: 'Mutation', addDocumentStatus: { __typename: 'AddDocumentStatusMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } } | null } };
+
+export type ChangeChildRowDimensionHeightMutationVariables = Exact<{
+  rowDimensionId: Scalars['ID'];
+  height?: InputMaybe<Scalars['Int']>;
+}>;
+
+export type ChangeChildRowDimensionHeightMutation = { __typename?: 'Mutation', changeChildRowDimensionHeight: { __typename: 'ChangeChildRowDimensionHeightMutationPayload', success: boolean, rowDimensionId: string, height?: number | null, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ChangeDocumentCommentMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -5147,6 +5331,12 @@ export type ChangeDocumentCommentMutationVariables = Exact<{
 }>;
 
 export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any } | null } };
+
+export type DeleteChildRowDimensionMutationVariables = Exact<{
+  rowDimensionId: Scalars['ID'];
+}>;
+
+export type DeleteChildRowDimensionMutation = { __typename?: 'Mutation', deleteChildRowDimension: { __typename: 'DeleteChildRowDimensionMutationPayload', success: boolean, rowDimensionId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];
@@ -5175,7 +5365,7 @@ export type AddPeriodMutationVariables = Exact<{
   multiple: Scalars['Boolean'];
 }>;
 
-export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, canAddDocument: boolean, id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null } | null } };
+export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } | null } };
 
 export type AddPeriodGroupMutationVariables = Exact<{
   name: Scalars['String'];
@@ -5203,7 +5393,7 @@ export type ChangePeriodMutationVariables = Exact<{
   expiration?: InputMaybe<Scalars['Date']>;
 }>;
 
-export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null } | null } };
+export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } | null } };
 
 export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
   periodGroupId: Scalars['ID'];
@@ -5283,22 +5473,12 @@ export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { 
 
 export type AddRowDimensionMutationVariables = Exact<{
   sheetId: Scalars['ID'];
-  documentId?: InputMaybe<Scalars['ID']>;
-  parentId?: InputMaybe<Scalars['ID']>;
   index: Scalars['Int'];
   globalIndex: Scalars['Int'];
   globalIndices: Array<GlobalIndicesInputType> | GlobalIndicesInputType;
 }>;
 
-export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> } } };
-
-export type ChangeCellsOptionMutationVariables = Exact<{
-  cellIds: Array<Scalars['ID']> | Scalars['ID'];
-  field: Scalars['String'];
-  value?: InputMaybe<Scalars['String']>;
-}>;
-
-export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value?: string | null }> | null } };
+export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension: { __typename: 'AddRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, canAddChildRow: boolean, canChangeHeight: boolean, canDelete: boolean, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename?: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChangeValue: boolean, value?: string | null, verified: boolean, error?: string | null }> } } };
 
 export type ChangeColumnDimensionMutationVariables = Exact<{
   columnDimensionId: Scalars['ID'];
@@ -5331,23 +5511,12 @@ export type RenameSheetMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
 
-export type RenameSheetMutation = { __typename?: 'Mutation', renameSheet: { __typename?: 'RenameSheetMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, sheet?: { __typename: 'SheetType', id: string, name: string } | null, cells?: Array<{ __typename: 'CellType', id: string, formula?: string | null } | null> | null } };
-
-export type UnloadFileValueArchiveMutationVariables = Exact<{
-  documentId: Scalars['ID'];
-  sheetId: Scalars['ID'];
-  columnId: Scalars['ID'];
-  rowId: Scalars['ID'];
-  name: Scalars['String'];
-}>;
-
-export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type RenameSheetMutation = { __typename?: 'Mutation', renameSheet: { __typename?: 'RenameSheetMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, sheet?: { __typename: 'SheetType', id: string, name: string } | null, cells?: Array<{ __typename: 'CellType', id: string, formula?: string | null } | null> | null } };
 
 export type ChangeFileValueMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['ID'];
-  columnId: Scalars['ID'];
-  rowId: Scalars['ID'];
+  cellId: Scalars['ID'];
   value: Scalars['String'];
   remainingFiles: Array<Scalars['ID']> | Scalars['ID'];
   newFiles: Array<Scalars['Upload']> | Scalars['Upload'];
@@ -5363,6 +5532,16 @@ export type ChangeValueMutationVariables = Exact<{
 }>;
 
 export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, payload?: string | null, rowId: string, columnId: string, sheetId: string } | null> | null } };
+
+export type UnloadFileValueArchiveMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+  columnId: Scalars['ID'];
+  rowId: Scalars['ID'];
+  name: Scalars['String'];
+}>;
+
+export type UnloadFileValueArchiveMutation = { __typename?: 'Mutation', unloadFileValueArchive: { __typename: 'UnloadFileValueArchiveMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ActiveBudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;
@@ -5388,7 +5567,14 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets: Array<{ __typename: 'SheetType', id: string, name: string } | null> } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, period?: { __typename: 'PeriodType', id: string, name: string } | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } | null };
+
+export type DocumentSheetQueryVariables = Exact<{
+  documentId: Scalars['ID'];
+  sheetId: Scalars['ID'];
+}>;
+
+export type DocumentSheetQuery = { __typename?: 'Query', documentSheet: { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, canAddChildRow: boolean, canChangeHeight: boolean, canDelete: boolean, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename?: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChangeValue: boolean, value?: string | null, verified: boolean, error?: string | null }> } | null> | null } };
 
 export type DocumentStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
@@ -5402,6 +5588,13 @@ export type DocumentsQueryVariables = Exact<{
 
 export type DocumentsQuery = { __typename?: 'Query', documents: { __typename?: 'DocumentTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'DocumentTypeEdge', node?: { __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } | null> } };
 
+export type DocumentsSheetQueryVariables = Exact<{
+  sheetId: Scalars['ID'];
+  documentIds: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+export type DocumentsSheetQuery = { __typename?: 'Query', documentsSheet: { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, canAddChildRow: boolean, canChangeHeight: boolean, canDelete: boolean, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename?: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, canChangeValue: boolean, value?: string | null, verified: boolean, error?: string | null }> } | null> | null } };
+
 export type OrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OrganizationsQuery = { __typename?: 'Query', organizations?: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
@@ -5410,7 +5603,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, canAddDocument: boolean, id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } };
 
 export type PeriodUsersQueryVariables = Exact<{
   periodId: Scalars['ID'];
@@ -5422,7 +5615,7 @@ export type PeriodsQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
 
-export type PeriodsQuery = { __typename?: 'Query', periods: Array<{ __typename: 'PeriodType', id: string, name: string, multiple: boolean, status: string, start?: any | null, expiration?: any | null, privately: boolean, createdAt: any, methodicalSupport?: Array<{ __typename: 'FileType', name: string, src: string, size?: number | null }> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null }> };
+export type PeriodsQuery = { __typename?: 'Query', periods: Array<{ __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> }> };
 
 export type PrivilegesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5446,13 +5639,6 @@ export type ProjectsQueryVariables = Exact<{
 }>;
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } | null> } | null };
-
-export type SheetQueryVariables = Exact<{
-  sheetId: Scalars['ID'];
-  documentId?: InputMaybe<Scalars['ID']>;
-}>;
-
-export type SheetQuery = { __typename?: 'Query', sheet: { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any } | null> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> } | null> | null } };
 
 export type StatusesQueryVariables = Exact<{ [key: string]: never; }>;
 

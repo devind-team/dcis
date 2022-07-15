@@ -73,8 +73,12 @@ export default defineComponent({
       pagination: useCursorPagination({ pageSize: 20 })
     })
 
-    const { mutate } = useMutation<AddBudgetClassificationMutationPayload, CreateBudgetClassificationInput>(addBudgetClassificationMutation, {
-      update: (cache: DataProxy | any, result: { data: AddBudgetClassificationMutationPayload }) => addUpdate(cache, result, 'budgetClassification')
+    const { mutate } = useMutation<
+      AddBudgetClassificationMutationPayload,
+      CreateBudgetClassificationInput
+    >(addBudgetClassificationMutation, {
+      update: (cache: DataProxy | any, result: { data: AddBudgetClassificationMutationPayload }) =>
+        addUpdate(cache, result, 'budgetClassification')
     })
 
     const setValue = (classification: BudgetClassificationType) => {

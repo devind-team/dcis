@@ -1,7 +1,7 @@
 #import "../../fragments/status_fields.graphql"
 #import "../../../core/fragments/user_fields.graphql"
 
-mutation AddDocumentStatus($comment: String!, $documentId: ID!, $statusId: Int!) {
+mutation AddDocumentStatus($comment: String!, $documentId: ID!, $statusId: ID!) {
   addDocumentStatus(input: { comment: $comment, documentId: $documentId, statusId: $statusId }) {
     success
     errors {
