@@ -103,7 +103,7 @@ class AddDocumentStatusMutation(BaseMutation):
     document_status = graphene.Field(DocumentStatusType, description='Статус документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeDocument))
+    @permission_classes((IsAuthenticated, ChangeDocument,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)

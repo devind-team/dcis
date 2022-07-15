@@ -463,7 +463,7 @@ class CellType(graphene.ObjectType):
     )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
-    can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
+    can_change_value = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
 
     # От Value
     value = graphene.String(description='Значение')

@@ -752,8 +752,7 @@ export function useChangeFileValueMutation (
     await mutate({
       documentId: unref(documentId),
       sheetId: unref(sheetId),
-      columnId: cell.value.columnId,
-      rowId: cell.value.rowId,
+      cellId: unref(cell.value).id,
       value,
       remainingFiles,
       newFiles

@@ -643,7 +643,7 @@ type CellType {
   """Стили границ"""
   borderStyle: JSONString!
   """Может ли пользователь изменять значение ячейки"""
-  canChange: Boolean!
+  canChangeValue: Boolean!
   """Цвет индекса"""
   color: String!
   """Объединение колонок"""
@@ -905,17 +905,15 @@ type ChangeFileMutationPayload {
 }
 
 input ChangeFileValueMutationInput {
+  """Идентификатор ячейки"""
+  cellId: ID!
   clientMutationId: String
-  """Идентификатор колонки"""
-  columnId: ID!
   """Идентификатор документа"""
   documentId: ID!
   """Новые файлы"""
   newFiles: [Upload!]!
   """Оставшиеся файлы"""
   remainingFiles: [ID!]!
-  """Идентификатор строки"""
-  rowId: ID!
   """Идентификатор листа"""
   sheetId: ID!
   """Значение"""

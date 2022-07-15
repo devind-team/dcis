@@ -1,7 +1,7 @@
 <template lang="pug">
 .grid__cell-content(:class="contentClasses")
   component(
-    v-if="active && cell.editable && !cell.formula"
+    v-if="active && cell.canChangeValue"
     v-bind="cellProps"
     v-on="cellListeners"
     :is="`GridCell${cellKind}`"

@@ -93,7 +93,7 @@ def add_row_dimension(
         }
 
     def get_cell_permissions(_: Cell) -> dict[str | bool]:
-        return {'can_change': True}
+        return {'can_change_value': True}
 
     sheet.rowdimension_set.filter(parent_id=None, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
@@ -147,7 +147,7 @@ def add_child_row_dimension(
         }
 
     def get_cell_permissions(cell: Cell) -> dict[str | bool]:
-        return {'can_change': change_value_perm.has_object_permission(cell)}
+        return {'can_change_value': change_value_perm.has_object_permission(cell)}
 
     sheet.rowdimension_set.filter(parent=parent, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(

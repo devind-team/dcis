@@ -476,7 +476,7 @@ class DocumentsSheetUnloader(SheetUnloader):
         }
 
     def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
-        return {'can_change': True}
+        return {'can_change_value': True}
 
 
 class DocumentSheetUnloader(SheetUnloader):
@@ -520,4 +520,4 @@ class DocumentSheetUnloader(SheetUnloader):
             }
 
     def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
-        return {'can_change': self.change_value.has_object_permission(cell)}
+        return {'can_change_value': self.change_value.has_object_permission(cell)}
