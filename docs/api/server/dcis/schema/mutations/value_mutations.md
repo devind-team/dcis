@@ -1,0 +1,37 @@
+# Модуль value_mutations
+
+Модуль содержит мутации, относящиеся к значениям ячеек.
+
+## Класс ChangeValueMutation
+
+Изменение значения ячейки.
+
+### Методы
+
+| Сигнатура                                                                                                                               | Декораторы                                                       | Описание |
+| :-------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, cell_id: int, sheet_id: int, value: str) | staticmethod, permission_classes((IsAuthenticated, ChangeValue)) | -        |
+
+## Класс ChangeFileValueMutation
+
+Изменение значения ячейки типа `Файл`.
+
+### Методы
+
+| Сигнатура                                                                                                                                                                                                                                                | Декораторы                                           | Описание |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: int, column_id: int, row_id: int, value: str, remaining_files: list[str], new_files: list[django.core.files.uploadedfile.InMemoryUploadedFile]) | staticmethod, permission_classes((IsAuthenticated,)) | -        |
+
+## Класс UnloadFileValueArchiveMutation
+
+Выгрузка архива значения ячейки типа `Файл`.
+
+### Методы
+
+| Сигнатура                                                                                                                                             | Декораторы                                           | Описание |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :------- |
+| mutate_and_get_payload( root: Any, info: graphql.execution.base.ResolveInfo, document_id: str, sheet_id: int, column_id: int, row_id: int, name: str) | staticmethod, permission_classes((IsAuthenticated,)) | -        |
+
+## Класс ValueMutations
+
+Мутации, связанные с ячейками.
