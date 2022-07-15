@@ -1,15 +1,10 @@
-//import { defineUserConfig } from 'vuepress'
-import { defineUserConfig } from 'vuepress'
+import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
 import { path } from '@vuepress/utils'
-import { navbarEn, sidebarEn, navbarRu, sidebarRu } from './configs'
+import { navbarEn, navbarRu, sidebarEn, sidebarRu } from './configs'
 
 export default defineUserConfig({
-  // lang: 'en-US',
-  // title: 'Documentation',
-  // descDCISription: 'Just playing around',
-  // base: '/document-vuepress/'
   base: '/dcis/',
 
   locales: {
@@ -22,7 +17,7 @@ export default defineUserConfig({
       lang: 'en-US',
       title: 'Home',
       description: 'Just playing around',
-},
+    },
   },
 
   theme: defaultTheme({
@@ -35,7 +30,10 @@ export default defineUserConfig({
         selectLanguageName: 'Russian',
         selectLanguageText: 'Russian',
         selectLanguageAriaLabel: 'Russian',
-        sidebar: sidebarRu
+        sidebar: sidebarRu,
+        editLinkText: 'Изменить эту страницу на GitHub',
+        lastUpdatedText: 'Последнее обновление',
+        contributorsText: 'Авторы',
       },
       '/en/': {
         navbar: navbarEn,

@@ -1,6 +1,7 @@
 {
   "name": "documentation",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "docs:build": "vuepress build --clean-cache",
     "docs:clean": "rimraf .vuepress/.temp .vuepress/.cache .vuepress/dist",
