@@ -1,8 +1,8 @@
 <template lang="pug">
 mutation-modal-form(
-  :header="String($t('dcis.periods.divisions.addDivisions.header'))"
+  :header="header"
   :subheader="period.name"
-  :button-text="String($t('dcis.periods.divisions.addDivisions.buttonText'))"
+  :button-text="buttonText"
   :mutation="addDivisionsMutation"
   :variables="{ periodId: period.id, divisionIds: selectedDivisions.map(e => e.id) }"
   :update="addDivisionsUpdate"
@@ -47,6 +47,8 @@ type UpdateFunction = (cache: DataProxy | any, result: AddDivisionsMutationPaylo
 export default defineComponent({
   components: { MutationModalForm },
   props: {
+    header: { type: String, required: true },
+    buttonText: { type: String, required: true },
     period: { type: Object as PropType<PeriodType>, required: true },
     divisions: { type: Array as PropType<DivisionModelType[]>, default: () => [] },
     loading: { type: Boolean as PropType<boolean>, default: false },

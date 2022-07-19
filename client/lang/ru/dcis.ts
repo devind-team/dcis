@@ -42,7 +42,8 @@ export default {
     },
     links: {
       documents: 'Документы',
-      divisions: 'Дивизионы',
+      departments: 'Департаменты',
+      organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
       sheets: 'Таблица',
@@ -77,10 +78,13 @@ export default {
       delete: '@:delete'
     },
     divisions: {
-      name: '@:dcis.periods.links.divisions',
+      departmentsName: '@:dcis.periods.links.departments',
+      organizationsName: '@:dcis.periods.links.organizations',
       addDivisions: {
-        buttonText: 'Добавить дивизионы',
-        header: 'Добавление дивизионов',
+        departmentsButtonText: 'Добавить департаменты',
+        organizationsButtonText: 'Добавить организации',
+        departmentsHeader: 'Добавление департаментов',
+        organizationsHeader: 'Добавление организаций',
         name: '@:name'
       },
       tableHeaders: {
@@ -89,7 +93,8 @@ export default {
       },
       deleteDivision: {
         tooltip: '@:delete',
-        itemName: 'дивизион'
+        departmentItemName: 'департамент',
+        organizationItemName: 'организацию'
       }
     },
     groups: {
