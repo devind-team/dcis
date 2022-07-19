@@ -25,7 +25,7 @@ thead
     :get-column-width="getColumnWidth"
     :pos-x="posX"
     :pos-y="posY"
-    @close="currentCol=null"
+    @close="currentCol = null"
   )
 </template>
 

@@ -13,7 +13,7 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
           v-list-item-icon
             v-icon mdi-cog
           v-list-item-content
-            v-list-item-title {{ t('dcis.grid.columnControl.properties') }}
+            v-list-item-title {{ $t('dcis.grid.columnControl.properties') }}
 </template>
 
 <script lang="ts">
@@ -28,11 +28,6 @@ export default defineComponent({
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
     posX: { type: Number, required: true },
     posY: { type: Number, required: true }
-  },
-  setup () {
-    const { t } = useI18n()
-
-    return { t }
   }
 })
 </script>

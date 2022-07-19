@@ -38,7 +38,7 @@ tbody
     :clear-selection="clearSelection"
     :pos-x="posX"
     :pos-y="posY"
-    @close="currentRow=null"
+    @close="currentRow = null"
   )
 </template>
 
