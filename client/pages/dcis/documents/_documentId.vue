@@ -3,7 +3,7 @@ v-container(fluid :key="$route.fullpath")
   template(v-if="!activeDocumentLoading")
     .title {{ activeDocument.period.name }}. {{ $t('dcis.grid.version', { version: activeDocument.version }) }}
     v-tabs.mt-1(v-model="activeSheetIndex")
-      settings-document(:document-id="$route.params.documentId")
+      settings-document(:document="activeDocument")
         template(#activator="{ on, attrs }")
           v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
             v-icon mdi-cog
