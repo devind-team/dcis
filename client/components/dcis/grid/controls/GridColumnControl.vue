@@ -6,7 +6,7 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
     grid-column-settings(
       :column="column"
       :get-column-width="getColumnWidth"
-      @close="active = false"
+      @close="$emit('close')"
     )
       template(#activator="{ on }")
         v-list-item(v-on="on")
@@ -32,9 +32,7 @@ export default defineComponent({
   setup () {
     const { t } = useI18n()
 
-    const active = ref<boolean>(false)
-
-    return { t, active }
+    return { t }
   }
 })
 </script>
