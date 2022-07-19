@@ -178,6 +178,8 @@ export default {
       header: 'Добавление документа',
       comment: 'Комментарий',
       status: 'Статус',
+      department: 'Департамент',
+      organization: 'Организация',
       lastDocument: 'Значения из документа',
       version: '@:dcis.documents.version'
     },
