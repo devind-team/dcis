@@ -22,7 +22,7 @@ v-dialog(v-model="active" width="600")
       v-btn(
         :loading="loading"
         color="primary"
-        @click="mutate({ documentId: document.id, additional })"
+        @click="unloadDocument"
       ) {{ $t('dcis.documents.unloadDocument.unload') }}
 </template>
 
@@ -30,7 +30,7 @@ v-dialog(v-model="active" width="600")
 import { defineComponent, PropType, ref } from '#app'
 import { useMutation } from '@vue/apollo-composable'
 import { DocumentType, UnloadDocumentMutation, UnloadDocumentMutationVariables } from '~/types/graphql'
-import unloadDocument from '~/gql/dcis/mutations/document/unload_document.graphql'
+import unloadDocumentMutation from '~/gql/dcis/mutations/document/unload_document.graphql'
 
 export type UnloadDocumentMutationResult = { data: UnloadDocumentMutation }
 
@@ -61,7 +61,7 @@ export default defineComponent({
     const { mutate, loading, onDone } = useMutation<
       UnloadDocumentMutation,
       UnloadDocumentMutationVariables
-    >(unloadDocument)
+    >(unloadDocumentMutation)
     onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
       if (success) {
         close()
@@ -69,12 +69,19 @@ export default defineComponent({
       }
     })
 
+    const unloadDocument = () => {
+      mutate({
+        documentId: props.document.id,
+        additional: params.filter((param: string) => additional.value.includes(param))
+      })
+    }
+
     const close = () => {
       active.value = false
       emit('close')
     }
 
-    return { active, params, additional, paramsTranslations, mutate, loading, close }
+    return { active, params, additional, paramsTranslations, unloadDocument, loading, close }
   }
 })
 </script>
