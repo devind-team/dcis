@@ -9,7 +9,7 @@ tbody
       @mousedown="mousedownRowName(row, $event)"
       @mouseup="mouseupRowName"
     )
-      div(:style="{ height: `${getRowHeight(row)}px` }" @contextmenu.prevent="(e) => showMenu(e, row)") {{ row.name }}
+      div(:style="{ height: `${getRowHeight(row)}px` }" @contextmenu="(e) => showMenu(e, row)") {{ row.name }}
     td(
       v-for="cell in row.cells"
       :key="cell.id"

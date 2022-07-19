@@ -18,7 +18,7 @@ thead
       @mousedown="mousedownColumnName(column, $event)"
       @mouseup="mouseupColumnName"
     )
-      div(@contextmenu.prevent="(e) => showMenu(e, column)") {{ column.name }}
+      div(@contextmenu="(e) => showMenu(e, column)") {{ column.name }}
   grid-column-control(
     v-if="!!currentCol && mode === GridMode.CHANGE"
     :column="currentCol"
