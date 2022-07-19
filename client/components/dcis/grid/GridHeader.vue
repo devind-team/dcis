@@ -18,18 +18,18 @@ thead
       @mousedown="mousedownColumnName(column, $event)"
       @mouseup="mouseupColumnName"
     )
-      grid-column-control(
-        v-if="mode === GridMode.CHANGE"
-        v-slot="{ on, attrs }"
-        :column="column"
-        :get-column-width="getColumnWidth"
-      )
-        div(v-bind="attrs" @contextmenu.prevent="on.click") {{ column.name }}
-      div(v-else) {{ column.name }}
+      div(@contextmenu.prevent="(e) => showMenu(e, column)") {{ column.name }}
+  grid-column-control(
+    v-if="currentCol && mode === GridMode.CHANGE"
+    :column="currentCol"
+    :get-column-width="getColumnWidth"
+    :pos-x="posX"
+    :pos-y="posY"
+  )
 </template>
 
 <script lang="ts">
-import { PropType, Ref } from '#app'
+import { nextTick, PropType, Ref } from '#app'
 import { GridMode, ResizingType } from '~/types/grid'
 import { SheetType, ColumnDimensionType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
@@ -71,7 +71,20 @@ export default defineComponent({
       }
     }
 
-    return { GridMode, mode, activeSheet, getHeaderClass }
+    const currentCol = ref<ColumnDimensionType>(null)
+    const posX = ref(0)
+    const posY = ref(0)
+    const showMenu = (e: MouseEvent, col: ColumnDimensionType) => {
+      e.preventDefault()
+      currentCol.value = null
+      posY.value = e.clientY
+      posX.value = e.clientX
+      nextTick(() => {
+        currentCol.value = col
+      })
+    }
+
+    return { GridMode, mode, activeSheet, posX, posY, currentCol, showMenu, getHeaderClass }
   }
 })
 </script>

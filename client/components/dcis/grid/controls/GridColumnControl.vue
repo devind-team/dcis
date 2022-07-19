@@ -1,5 +1,5 @@
 <template lang="pug">
-v-menu(v-model="active" bottom close-on-content-click)
+v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-content-click)
   template(#activator="{ on, attrs }")
     slot(:on="on" :attrs="attrs")
   v-list(dense)
@@ -25,7 +25,9 @@ export default defineComponent({
   components: { GridColumnSettings },
   props: {
     column: { type: Object as PropType<ColumnDimensionType>, required: true },
-    getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true }
+    getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
+    posX: { type: Number, required: true },
+    posY: { type: Number, required: true }
   },
   setup () {
     const { t } = useI18n()
