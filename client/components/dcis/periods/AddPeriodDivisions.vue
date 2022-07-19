@@ -1,5 +1,6 @@
 <template lang="pug">
 mutation-modal-form(
+  ref="form"
   :header="header"
   :subheader="period.name"
   :button-text="buttonText"
@@ -19,8 +20,7 @@ mutation-modal-form(
       v-model="selectedDivisions"
       :headers="headers"
       :items="divisions"
-      :loading="loading"
-      :search="search"
+      :loading="divisionsLoading"
       item-key="id"
       show-select
       disable-pagination
@@ -29,16 +29,20 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
+import { UseQueryOptions, VariablesParameter } from '@vue/apollo-composable/dist/useQuery'
 import { DataProxy } from 'apollo-cache'
+import { defineComponent, PropType, ref } from '#app'
 import {
   DivisionModelType,
   PeriodType,
+  PeriodPossibleDivisionsQuery,
+  PeriodPossibleDivisionsQueryVariables,
   AddDivisionsMutationPayload
 } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import { useDebounceSearch, useI18n } from '~/composables'
+import periodPossibleDivisionsQuery from '~/gql/dcis/queries/period_possible_divisions.graphql'
 import addDivisionsMutation from '~/gql/dcis/mutations/period/add_divisions.graphql'
 
 export type ChangeDivisionsMutationResult = { data: { addDivisions: AddDivisionsMutationPayload } }
@@ -50,14 +54,46 @@ export default defineComponent({
     header: { type: String, required: true },
     buttonText: { type: String, required: true },
     period: { type: Object as PropType<PeriodType>, required: true },
-    divisions: { type: Array as PropType<DivisionModelType[]>, default: () => [] },
-    loading: { type: Boolean as PropType<boolean>, default: false },
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
     const { t } = useI18n()
 
-    const { search } = useDebounceSearch()
+    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
+    onMounted(() => {
+      watch(() => form.value.active, (value: boolean) => {
+        if (value) {
+          queryOptions.value.enabled = true
+          refetchDivisions()
+        } else {
+          queryOptions.value.enabled = false
+        }
+      })
+    })
+
+    const queryOptions = ref<UseQueryOptions<
+      PeriodPossibleDivisionsQuery,
+      PeriodPossibleDivisionsQueryVariables
+    >>({ enabled: false, fetchPolicy: 'no-cache' })
+    const { search, debounceSearch } = useDebounceSearch()
+    const { data: divisions, loading: divisionsLoading, refetch: refetchDivisions } = useQueryRelay<
+      PeriodPossibleDivisionsQuery,
+      PeriodPossibleDivisionsQueryVariables,
+      DivisionModelType
+    >({
+      document: periodPossibleDivisionsQuery,
+      options: queryOptions,
+      variables: () => {
+        const result: VariablesParameter<PeriodPossibleDivisionsQueryVariables> = {
+          periodId: props.period.id,
+          search: debounceSearch.value
+        }
+        if (debounceSearch.value) {
+          result.first = undefined
+        }
+        return result
+      }
+    })
 
     const selectedDivisions = ref<DivisionModelType[]>([])
 
@@ -76,7 +112,17 @@ export default defineComponent({
       search.value = ''
     }
 
-    return { addDivisionsMutation, search, selectedDivisions, headers, addDivisionsUpdate, close }
+    return {
+      form,
+      addDivisionsMutation,
+      search,
+      divisions,
+      divisionsLoading,
+      selectedDivisions,
+      headers,
+      addDivisionsUpdate,
+      close
+    }
   }
 })
 </script>

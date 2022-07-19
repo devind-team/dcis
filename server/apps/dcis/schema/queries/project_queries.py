@@ -11,8 +11,7 @@ from graphql_relay import from_global_id
 
 from apps.dcis.models import Project
 from apps.dcis.permissions import ViewProject
-from apps.dcis.schema.types import DivisionModelType, ProjectType
-from apps.dcis.services.divisions_services import get_divisions
+from apps.dcis.schema.types import ProjectType
 from apps.dcis.services.project_services import get_user_projects
 
 
@@ -26,11 +25,6 @@ class ProjectQueries(graphene.ObjectType):
         description='Проект'
     )
     projects = AdvancedDjangoFilterConnectionField(ProjectType, description='Проекты')
-    project_divisions = graphene.List(
-        DivisionModelType,
-        project_id=graphene.ID(required=True, description='Идентификатор проекта'),
-        description='Возможные дивизионы проекта'
-    )
 
     @staticmethod
     @permission_classes((IsAuthenticated, ViewProject))
@@ -43,10 +37,3 @@ class ProjectQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_projects(root: Any, info: ResolveInfo, *args, **kwargs) -> QuerySet[Project]:
         return get_user_projects(info.context.user)
-
-    @staticmethod
-    @permission_classes((IsAuthenticated, ViewProject,))
-    def resolve_project_divisions(root: Any, info: ResolveInfo, project_id: str) -> list[dict[str, int | str]]:
-        project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        info.context.check_object_permissions(info.context, project)
-        return get_divisions(project.division.objects.all())

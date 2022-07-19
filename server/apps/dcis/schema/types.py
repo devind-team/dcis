@@ -34,7 +34,7 @@ from apps.dcis.permissions import (
     DeletePeriodBase,
     DeleteProjectBase,
 )
-from apps.dcis.services.divisions_services import get_divisions
+from apps.dcis.services.divisions_services import get_period_divisions
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -147,9 +147,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     @resolver_hints(model_field='division_set')
     def resolve_divisions(period: Period, info: ResolveInfo) -> list[dict[str, int | str]]:
-        return get_divisions(period.project.division.objects.filter(
-            pk__in=period.division_set.values_list('object_id', flat=True)
-        ))
+        return get_period_divisions(period)
 
     @staticmethod
     @resolver_hints(model_field='periodgroup_set')
@@ -196,6 +194,16 @@ class DivisionModelType(graphene.ObjectType):
     id = graphene.ID(required=True, description='Идентификатор модели дивизиона')
     name = graphene.String(required=True, description='Название дивизиона')
     model = graphene.String(required=True, description='Модель дивизиона: department, organization')
+
+    class Meta:
+        interfaces = (graphene.relay.Node,)
+
+
+class DivisionModelTypeConnection(graphene.relay.Connection):
+    """Connection для обобщенного типа дивизиона."""
+
+    class Meta:
+        node = DivisionModelType
 
 
 class OrganizationOriginalType(DjangoObjectType):

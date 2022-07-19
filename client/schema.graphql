@@ -1949,13 +1949,29 @@ type DistrictType {
 }
 
 """Описание обобщенного типа дивизиона."""
-type DivisionModelType {
+type DivisionModelType implements Node {
   """Идентификатор модели дивизиона"""
   id: ID!
   """Модель дивизиона: department, organization"""
   model: String!
   """Название дивизиона"""
   name: String!
+}
+
+"""Connection для обобщенного типа дивизиона."""
+type DivisionModelTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DivisionModelTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+}
+
+"""A Relay edge containing a `DivisionModelType` and its cursor."""
+type DivisionModelTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DivisionModelType
 }
 
 """Debugging information for the current query."""
@@ -3289,6 +3305,17 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
+  """Возможные дивизионы периода"""
+  periodPossibleDivisions(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    """Идентификатор периода"""
+    periodId: ID!
+    """Запрос поиска"""
+    search: String
+  ): DivisionModelTypeConnection
   """Пользователи, связанные периодом"""
   periodUsers(
     """Идентификатор периода"""
@@ -3319,11 +3346,6 @@ type Query {
     """Идентификатор проекта"""
     projectId: ID!
   ): ProjectType!
-  """Возможные дивизионы проекта"""
-  projectDivisions(
-    """Идентификатор проекта"""
-    projectId: ID!
-  ): [DivisionModelType]
   """Проекты"""
   projects(
     after: String

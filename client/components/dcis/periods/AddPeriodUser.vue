@@ -142,14 +142,14 @@ export default defineComponent({
       loading: usersLoading
     } = useQueryRelay<UsersQuery, UsersQueryVariables, UserType>({
       document: usersQuery,
+      options,
       variables: () => {
         const result: VariablesParameter<UsersQueryVariables> = { search: usersDebounceSearch.value }
         if (usersDebounceSearch.value) {
           result.first = undefined
         }
         return result
-      },
-      options
+      }
     })
 
     const { data: privileges, loading: privilegesLoading } = useCommonQuery<

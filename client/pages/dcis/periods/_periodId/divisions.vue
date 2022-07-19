@@ -7,8 +7,6 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         :header="addHeader"
         :button-text="addButtonText"
         :period="period"
-        :divisions="filterDivisions"
-        :loading="loading"
         :update="addDivisionsUpdate"
       )
         template(#activator="{ on }")
@@ -26,7 +24,6 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         :headers="tableHeaders"
         :items="period.divisions"
         :search="search"
-        :loading="loading"
         disable-pagination
         hide-default-footer
         @pagination="pagination"
@@ -56,15 +53,13 @@ import {
   DeleteDivisionMutation,
   DeleteDivisionMutationVariables,
   DeleteDivisionMutationPayload,
-  ProjectDivisionsQuery,
-  ProjectDivisionsQueryVariables, DivisionModelType
+  DivisionModelType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { UpdateType, useCommonQuery, useI18n } from '~/composables'
+import { UpdateType, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
-import divisionsQuery from '~/gql/dcis/queries/project_divisions.graphql'
 import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
 
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
@@ -132,22 +127,6 @@ export default defineComponent({
       return result
     })
 
-    const { data: projectDivisions, loading } = useCommonQuery<
-      ProjectDivisionsQuery,
-      ProjectDivisionsQueryVariables
-    >({
-      document: divisionsQuery,
-      variables: { projectId: props.period.project.id }
-    })
-
-    const filterDivisions = computed<DivisionModelType[]>(() => {
-      if (projectDivisions.value) {
-        return projectDivisions.value.filter(division =>
-          !props.period.divisions.map(periodDivision => periodDivision.id).includes(division.id))
-      }
-      return []
-    })
-
     const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
     const addDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => periodUpdate(
@@ -191,8 +170,6 @@ export default defineComponent({
       addButtonText,
       deleteItemName,
       tableHeaders,
-      loading,
-      filterDivisions,
       addDivisionsUpdate,
       deleteDivision
     }

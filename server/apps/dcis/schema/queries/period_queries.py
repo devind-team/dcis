@@ -5,6 +5,7 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from django.db.models import QuerySet
+from graphene import ConnectionField
 from graphene_django import DjangoListField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
@@ -16,7 +17,8 @@ from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Period, Privilege, Sheet
 from apps.dcis.permissions import ChangePeriodSheet, ViewPeriod
-from apps.dcis.schema.types import PeriodType, PrivilegeType, SheetType
+from apps.dcis.schema.types import DivisionModelTypeConnection, PeriodType, PrivilegeType, SheetType
+from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
     get_period_users,
     get_user_period_privileges,
@@ -45,6 +47,13 @@ class PeriodQueries(graphene.ObjectType):
         project_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Периоды'
+    )
+
+    period_possible_divisions = ConnectionField(
+        DivisionModelTypeConnection,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        search=graphene.String(description='Запрос поиска'),
+        description='Возможные дивизионы периода'
     )
 
     period_users = DjangoListField(
@@ -92,6 +101,20 @@ class PeriodQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_periods(root: Any, info: ResolveInfo, project_id: str) -> QuerySet[Period]:
         return get_user_periods(info.context.user, from_global_id(project_id)[1])
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ViewPeriod,))
+    def resolve_period_possible_divisions(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        search: str | None = None,
+        *args,
+        **kwargs
+    ) -> list[dict[str, int | str]]:
+        period = get_object_or_404(Period, pk=period_id)
+        info.context.check_object_permissions(info.context, period)
+        return get_period_possible_divisions(period, search or '')
 
     @staticmethod
     @permission_classes((IsAuthenticated, ViewPeriod,))
