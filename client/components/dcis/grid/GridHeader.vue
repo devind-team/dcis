@@ -20,11 +20,12 @@ thead
     )
       div(@contextmenu.prevent="(e) => showMenu(e, column)") {{ column.name }}
   grid-column-control(
-    v-if="currentCol && mode === GridMode.CHANGE"
+    v-if="!!currentCol && mode === GridMode.CHANGE"
     :column="currentCol"
     :get-column-width="getColumnWidth"
     :pos-x="posX"
     :pos-y="posY"
+    @close="currentCol=null"
   )
 </template>
 
