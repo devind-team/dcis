@@ -2061,7 +2061,7 @@ export type DistrictType = {
 };
 
 /** Описание обобщенного типа дивизиона. */
-export type DivisionModelType = {
+export type DivisionModelType = Node & {
   __typename?: 'DivisionModelType';
   /** Идентификатор модели дивизиона */
   id: Scalars['ID'];
@@ -2069,6 +2069,24 @@ export type DivisionModelType = {
   model: Scalars['String'];
   /** Название дивизиона */
   name: Scalars['String'];
+};
+
+/** Connection для обобщенного типа дивизиона. */
+export type DivisionModelTypeConnection = {
+  __typename?: 'DivisionModelTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<DivisionModelTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+};
+
+/** A Relay edge containing a `DivisionModelType` and its cursor. */
+export type DivisionModelTypeEdge = {
+  __typename?: 'DivisionModelTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<DivisionModelType>;
 };
 
 /** Debugging information for the current query. */
@@ -3837,6 +3855,8 @@ export type Query = {
   pages: PageTypeConnection;
   /** Период */
   period: PeriodType;
+  /** Возможные дивизионы периода */
+  periodPossibleDivisions?: Maybe<DivisionModelTypeConnection>;
   /** Пользователи, связанные периодом */
   periodUsers: Array<UserType>;
   /** Периоды */
@@ -3852,8 +3872,6 @@ export type Query = {
   profilesValue: Array<ProfileValueType>;
   /** Проект */
   project: ProjectType;
-  /** Возможные дивизионы проекта */
-  projectDivisions?: Maybe<Array<Maybe<DivisionModelType>>>;
   /** Проекты */
   projects?: Maybe<ProjectTypeConnection>;
   region?: Maybe<RegionType>;
@@ -4072,6 +4090,16 @@ export type QueryPeriodArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryPeriodPossibleDivisionsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  periodId: Scalars['ID'];
+  search?: InputMaybe<Scalars['String']>;
+};
+
+/** Схема запросов данных. */
 export type QueryPeriodUsersArgs = {
   periodId: Scalars['ID'];
 };
@@ -4093,11 +4121,6 @@ export type QueryProfilesValueArgs = {
 
 /** Схема запросов данных. */
 export type QueryProjectArgs = {
-  projectId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryProjectDivisionsArgs = {
   projectId: Scalars['ID'];
 };
 
@@ -5605,6 +5628,14 @@ export type PeriodQueryVariables = Exact<{
 
 export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } };
 
+export type PeriodPossibleDivisionsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+  search?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+}>;
+
+export type PeriodPossibleDivisionsQuery = { __typename?: 'Query', periodPossibleDivisions?: { __typename?: 'DivisionModelTypeConnection', edges: Array<{ __typename?: 'DivisionModelTypeEdge', node?: { __typename: 'DivisionModelType', id: string, model: string, name: string } | null } | null> } | null };
+
 export type PeriodUsersQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
@@ -5626,12 +5657,6 @@ export type ProjectQueryVariables = Exact<{
 }>;
 
 export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'ProjectType', canChange: boolean, canDelete: boolean, canAddPeriod: boolean, id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } };
-
-export type ProjectDivisionsQueryVariables = Exact<{
-  projectId: Scalars['ID'];
-}>;
-
-export type ProjectDivisionsQuery = { __typename?: 'Query', projectDivisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null };
 
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
