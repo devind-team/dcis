@@ -10,7 +10,6 @@ from graphene_django_cud.mutations import DjangoUpdateMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.core.models import User
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.permissions import (
     AddChildRowDimension,
@@ -22,7 +21,7 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.services.document_services import create_new_document
+from apps.dcis.services.document_services import create_document
 from apps.dcis.services.document_unload_services import DocumentUnload
 from apps.dcis.services.sheet_services import (
     add_child_row_dimension,
@@ -37,17 +36,17 @@ class AddDocumentMutation(BaseMutation):
     class Input:
         """Входные параметры мутации.
 
-            comment - комментарий к документу
-            period_id - идентификатор периода
-            status_id - идентификатор устанавливаемого статуса
-            division_id - идентификатор дивизиона
-            document_id - документ от которого создавать копию
+          - comment - комментарий к документу
+          - period_id - идентификатор периода
+          - status_id - идентификатор устанавливаемого статуса
+          - division_id - идентификатор дивизиона
+          - document_id - идентификатор документа, от которого создавать копию
         """
         comment = graphene.String(required=True, description='Комментарий')
         period_id = graphene.ID(required=True, description='Идентификатор периода')
-        status_id = graphene.ID(required=True, description='Начальный статус документа')
-        document_id = graphene.ID(description='Идентификатор документа')
+        status_id = graphene.ID(required=True, description='Идентификатор начального статуса документа')
         division_id = graphene.ID(description='Идентификатор дивизиона')
+        document_id = graphene.ID(description='Идентификатор документа, от которого создавать копию')
 
     document = graphene.Field(DocumentType, description='Созданный документ')
 
@@ -63,17 +62,16 @@ class AddDocumentMutation(BaseMutation):
         division_id: str | None = None,
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
-        user: User = info.context.user
-        period: Period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=period_id)
         info.context.check_object_permissions(info.context, period)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
-        document: Document = create_new_document(
-            user,
-            period,
-            status_id,
-            comment,
-            document_id,
-            division_id
+        document = create_document(
+            user=info.context.user,
+            period=period,
+            status_id=status_id,
+            comment=comment,
+            document_id=document_id,
+            division_id=division_id
         )
         return AddDocumentMutation(document=document)
 

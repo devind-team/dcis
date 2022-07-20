@@ -158,11 +158,11 @@ export type AddDocumentMutationInput = {
   comment: Scalars['String'];
   /** Идентификатор дивизиона */
   divisionId?: InputMaybe<Scalars['ID']>;
-  /** Идентификатор документа */
+  /** Идентификатор документа, от которого создавать копию */
   documentId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор периода */
   periodId: Scalars['ID'];
-  /** Начальный статус документа */
+  /** Идентификатор начального статуса документа */
   statusId: Scalars['ID'];
 };
 
@@ -5304,8 +5304,8 @@ export type AddDocumentMutationVariables = Exact<{
   comment: Scalars['String'];
   periodId: Scalars['ID'];
   statusId: Scalars['ID'];
-  documentId?: InputMaybe<Scalars['ID']>;
   divisionId?: InputMaybe<Scalars['ID']>;
+  documentId?: InputMaybe<Scalars['ID']>;
 }>;
 
 export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
