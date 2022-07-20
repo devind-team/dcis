@@ -1,9 +1,14 @@
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
+    comment
+    version
+    createdAt
+    updatedAt
     period {
       id
       name
+      multiple
       project {
         id
         name
@@ -14,17 +19,19 @@ query Document($documentId: ID!) {
         }
         __typename
       }
+      divisions {
+        id
+        name
+        __typename
+      }
       __typename
     }
-    comment
-    version
-    createdAt
-    updatedAt
     sheets {
       id
       name
       __typename
     }
+    objectId
     __typename
   }
 }

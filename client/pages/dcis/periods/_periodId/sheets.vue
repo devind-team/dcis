@@ -1,21 +1,20 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.sheets.name') }}
-  v-row
-    v-col(cols="12")
-      v-tabs(v-model="activeSheetIndex")
-        template(v-for="sheet in period.sheets")
-          sheet-control(v-slot="{ on, attrs }" :sheet="sheet" :update="renameSheetUpdate" :key="sheet.id")
-            v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
-      v-tabs-items(v-model="activeSheetIndex")
-        v-tab-item(v-for="sheet in period.sheets" :key="sheet.id")
-          grid(
-            v-if="activeSheet"
-            :mode="GridMode.CHANGE"
-            :active-sheet="activeSheet"
-            :update-active-sheet="updateActiveSheet"
-          )
-          v-progress-circular(v-else color="primary" indeterminate)
+  template
+    v-tabs(v-model="activeSheetIndex")
+      template(v-for="sheet in period.sheets")
+        sheet-control(v-slot="{ on, attrs }" :sheet="sheet" :update="renameSheetUpdate" :key="sheet.id")
+          v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
+    v-tabs-items(v-model="activeSheetIndex")
+      v-tab-item(v-for="sheet in period.sheets" :key="sheet.id")
+        grid(
+          v-if="activeSheet"
+          :mode="GridMode.CHANGE"
+          :active-sheet="activeSheet"
+          :update-active-sheet="updateActiveSheet"
+        )
+        v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
