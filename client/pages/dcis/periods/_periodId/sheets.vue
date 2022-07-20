@@ -3,7 +3,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   template(#header) {{ $t('dcis.periods.sheets.name') }}
   v-row
     v-col(cols="12")
-      v-tabs
+      v-tabs(v-model="activeSheetIndex")
         template(v-for="sheet in period.sheets")
           sheet-control(v-slot="{ on, attrs }" :sheet="sheet" :update="renameSheetUpdate" :key="sheet.id")
             v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
