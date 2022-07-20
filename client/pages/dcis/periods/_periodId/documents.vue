@@ -26,7 +26,8 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
         strong(v-else) {{ item.lastStatus.status.name }}.
         div {{ t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
         .font-italic {{ item.lastStatus.comment }}
-    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+    template(#item.department="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
+    template(#item.ad="{ item }") item.objectId
 </template>
 
 <script lang="ts">
@@ -64,7 +65,6 @@ export default defineComponent({
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
-
     const userStore = useAuthStore()
     const hasPerm = toRef(userStore, 'hasPerm')
 
@@ -100,12 +100,20 @@ export default defineComponent({
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
       ChangeDocumentCommentMutate({ documentId: document.id, comment })
     }
-    const headers: DataTableHeader[] = [
+    const headers: DataTableHeader[] = props.period.multiple
+      ? [{
+          text: props.period.project.contentType.model === 'department'
+            ? t('dcis.documents.tableHeaders.department') as string
+            : t('dcis.documents.tableHeaders.organization') as string,
+          value: 'department'
+        }]
+      : []
+
+    headers.push(
       { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
       { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-      { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
       { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
-    ]
+    )
 
     return {
       t,

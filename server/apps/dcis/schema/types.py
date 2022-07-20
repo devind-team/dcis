@@ -292,6 +292,8 @@ class DocumentType(DjangoObjectType):
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
     can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять документ')
 
+    object_id = graphene.ID(description='Идентификатор дивизиона')
+
     class Meta:
         model = Document
         interfaces = (graphene.relay.Node,)

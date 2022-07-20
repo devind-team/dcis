@@ -2042,7 +2042,7 @@ type DocumentType implements Node {
   """Последний статус документа"""
   lastStatus: DocumentStatusType
   """Идентификатор дивизиона"""
-  objectId: Int
+  objectId: ID
   """Период сбора"""
   period: PeriodType
   """Листы"""
