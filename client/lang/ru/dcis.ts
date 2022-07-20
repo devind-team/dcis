@@ -186,7 +186,11 @@ export default {
       subheader: '@:dcis.documents.version',
       status: 'Статус',
       comment: 'Комментарий',
-      buttonText: '@:add'
+      buttonText: '@:add',
+      delete: {
+        itemName: 'статус',
+        tooltip: '@:delete'
+      }
     },
     unloading: {
       name: 'Выгрузить документ',

@@ -21,9 +21,18 @@ mutation-modal-form(
           v-list-item-subtitle {{ getUserName(item.user) }}
         v-list-item-content
           v-list-item-subtitle.font-italic {{ item.comment }}
-        v-list-item-action(v-if="documentStatuses.length > 1 && hasPerm('dcis.delete_documentstatus')" )
-          v-btn(@click="deleteDocumentStatus({ documentStatusId: item.id }).then()" icon)
-            v-icon(color="error") mdi-close-circle
+        v-list-item-action(v-if="documentStatuses.length > 1")
+          delete-menu(
+            :item-name="String($t('dcis.documents.status.delete.itemName'))"
+            @confirm="deleteDocumentStatus({ documentStatusId: item.id })"
+          )
+            template(#default="{ on: onMenu }")
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
+                    v-btn(color="error" icon)
+                      v-icon mdi-delete
+                span {{ $t('dcis.documents.status.delete.tooltip') }}
     v-divider
     v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
     validation-provider(
@@ -66,6 +75,7 @@ import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
 export type DeleteDocumentStatusMutationResult = { data: { deleteDocumentStatus: DeleteDocumentStatusMutationPayload } }
@@ -77,7 +87,7 @@ type PeriodUpdateType = (
 ) => void
 
 export default defineComponent({
-  components: { MutationModalForm },
+  components: { MutationModalForm, DeleteMenu },
   props: {
     document: { type: Object as PropType<DocumentType>, required: true },
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
