@@ -4,6 +4,16 @@ query Document($documentId: ID!) {
     period {
       id
       name
+      project {
+        id
+        name
+        contentType {
+          id
+          model
+          __typename
+        }
+        __typename
+      }
       __typename
     }
     comment
