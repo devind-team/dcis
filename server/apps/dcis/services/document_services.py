@@ -6,7 +6,7 @@ from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
 from django.db.models import Max, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import Cell, Document, Limitation, Period, RowDimension, Sheet, Status, Value, DocumentStatus
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
@@ -161,3 +161,13 @@ def transfer_limitations(
         limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
         limitation.save()
         transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
+
+
+def add_document_status(status: Status, document: Document, comment: str, user: User) -> DocumentStatus.status:
+    """Добавление статуса документа."""
+    return DocumentStatus.objects.create(
+        status=status,
+        document=document,
+        comment=comment,
+        user=user
+    )

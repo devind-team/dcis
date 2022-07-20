@@ -22,7 +22,10 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.services.document_services import create_new_document
+from apps.dcis.services.document_services import (
+    create_new_document,
+    add_document_status
+)
 from apps.dcis.services.document_unload_services import DocumentUnload
 from apps.dcis.services.sheet_services import (
     add_child_row_dimension,
@@ -108,13 +111,12 @@ class AddDocumentStatusMutation(BaseMutation):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
         status: Status = get_object_or_404(Status, pk=status_id)
-        document_status = DocumentStatus.objects.create(
-            status=status,
-            document=document,
-            comment=comment,
-            user=info.context.user
+        return AddDocumentStatusMutation(document_status=add_document_status(
+            status,
+            document,
+            comment,
+            info.context.user)
         )
-        return AddDocumentStatusMutation(document_status=document_status)
 
 
 class DeleteDocumentStatusMutation(BaseMutation):
