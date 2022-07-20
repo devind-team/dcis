@@ -82,7 +82,7 @@
     "@typescript-eslint/parser": "^5.30.6",
     "core-js": "^3.23.4",
     "eslint": "^8.19.0",
-    "eslint-import-resolver-typescript": "^3.2.5",
+    "eslint-import-resolver-typescript": "^3.3.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-nuxt": "^3.2.0",
     "pug": "^3.0.2",
