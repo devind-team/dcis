@@ -1,10 +1,10 @@
 <template lang="pug">
 .grid__cell-content(:class="contentClasses")
   component(
-    v-if="active && cell.canChangeValue"
-    v-bind="cellProps"
-    v-on="cellListeners"
-    :is="`GridCell${cellKind}`"
+    v-if="renderComponent"
+    v-bind="componentProps"
+    v-on="componentListeners"
+    :is="componentName"
   )
   div(v-else) {{ cell.value }}
 </template>
@@ -144,15 +144,22 @@ export default defineComponent({
       return 'String'
     })
 
-    const cellProps = computed<object>(() => {
-      if (props.cell.kind === 'fl') {
-        return { value: props.cell.value, files: files.value || [] }
+    const componentName = computed<string>(() => `GridCell${cellKind.value}`)
+    const hasFiles = computed<boolean>(() =>
+      componentName.value === 'GridCellFiles' && Boolean(files.value) && files.value.length !== 0)
+    const renderComponent = computed<boolean>(() =>
+      props.active && (hasFiles.value || props.cell.canChangeValue)
+    )
+
+    const componentProps = computed(() => {
+      if (componentName.value === 'GridCellFiles') {
+        return { value: props.cell.value, files: files.value || [], readonly: !props.cell.canChangeValue }
       }
-      return { value: props.cell.value }
+      return { value: props.cell.value, readonly: !props.cell.canChangeValue }
     })
 
-    const cellListeners = computed<Record<string, Function>>(() => {
-      if (cellKind.value === 'Files') {
+    const componentListeners = computed<Record<string, Function>>(() => {
+      if (componentName.value === 'GridCellFiles') {
         return { 'set-value': setFileValue, 'unload-archive': uploadArchive, cancel }
       }
       return { 'set-value': setValue, cancel }
@@ -162,7 +169,7 @@ export default defineComponent({
       'grid__cell-content_active': props.active && ['Numeric', 'String', 'Money'].includes(cellKind.value)
     }))
 
-    return { cellKind, cellProps, cellListeners, contentClasses }
+    return { componentName, renderComponent, componentProps, componentListeners, contentClasses }
   }
 })
 </script>
