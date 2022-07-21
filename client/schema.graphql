@@ -253,10 +253,20 @@ type AddPageMutationPayload {
   success: Boolean!
 }
 
-"""Мутация на добавление группы периода."""
+input AddPeriodGroupMutationInput {
+  clientMutationId: String
+  """Название группы периода"""
+  name: String!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация на добавление группы в период."""
 type AddPeriodGroupMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Добавленная группа периода"""
   periodGroup: PeriodGroupType
   """Успех мутации"""
   success: Boolean!
@@ -1641,13 +1651,6 @@ input CreateBudgetClassificationInput {
   name: String!
 }
 
-input CreatePeriodGroupInput {
-  """Наименование группы периода привилегии"""
-  name: String!
-  """Период"""
-  period: ID!
-}
-
 input CreateProjectInput {
   """Архив"""
   archive: Boolean
@@ -2312,8 +2315,8 @@ type Mutation {
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
   addPeriod(input: AddPeriodMutationInput!): AddPeriodMutationPayload!
-  """Мутация на добавление группы периода."""
-  addPeriodGroup(input: CreatePeriodGroupInput!): AddPeriodGroupMutationPayload!
+  """Мутация на добавление группы в период."""
+  addPeriodGroup(input: AddPeriodGroupMutationInput!): AddPeriodGroupMutationPayload!
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""

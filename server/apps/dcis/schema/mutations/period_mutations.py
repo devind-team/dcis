@@ -37,7 +37,8 @@ from apps.dcis.services.period_services import (
     copy_period_groups,
     change_period_group_privileges,
     change_user_period_groups,
-    change_user_period_privileges
+    change_user_period_privileges,
+    add_period_group
 )
 
 
@@ -140,19 +141,21 @@ class DeleteDivisionMutation(BaseMutation):
         return DeleteDivisionMutation(delete_id=division_id)
 
 
-class AddPeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
-    """Мутация на добавление группы периода."""
+class AddPeriodGroupMutation(BaseMutation):
+    """Мутация на добавление группы в период."""
 
-    class Meta:
-        model = PeriodGroup
-        login_required = True
-        exclude_fields = ('users', 'privileges',)
+    class Input:
+        name = graphene.String(required=True, description='Название группы периода')
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
 
-    @classmethod
-    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any) -> None:
-        period = get_object_or_404(Period, pk=input.period)
-        if not ChangePeriodGroups.has_object_permission(info.context, period):
-            raise PermissionDenied('Ошибка доступа')
+    period_group = graphene.Field(PeriodGroupType, description='Добавленная группа периода')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, period_id: str | int):
+        period = get_object_or_404(Period, pk=period_id)
+        info.context.check_object_permissions(info.context, period)
+        return AddPeriodGroupMutation(period_group=add_period_group(name, period_id))
 
 
 class CopyPeriodGroupsMutation(BaseMutation):
@@ -279,7 +282,7 @@ class PeriodMutations(graphene.ObjectType):
     add_divisions = AddDivisionsMutation.Field(required=True)
     delete_division = DeleteDivisionMutation.Field(required=True)
 
-    add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
+    add_period_group = AddPeriodGroupMutation.Field(required=True)
     copy_period_groups = CopyPeriodGroupsMutation.Field(required=True)
     change_period_group_privileges = ChangePeriodGroupPrivilegesMutation.Field(required=True)
     delete_period_group = DeletePeriodGroupMutation.Field(required=True)

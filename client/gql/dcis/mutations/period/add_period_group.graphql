@@ -1,7 +1,7 @@
 #import "../../fragments/period_group_fields.graphql"
 
 mutation AddPeriodGroup($name: String!, $periodId: ID!) {
-  addPeriodGroup(input: {name: $name, period: $periodId}) {
+  addPeriodGroup(input: {name: $name, periodId: $periodId}) {
     success
     errors {
       messages

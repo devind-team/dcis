@@ -275,11 +275,21 @@ export type AddPageMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Мутация на добавление группы периода. */
+export type AddPeriodGroupMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Название группы периода */
+  name: Scalars['String'];
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Мутация на добавление группы в период. */
 export type AddPeriodGroupMutationPayload = {
   __typename?: 'AddPeriodGroupMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Добавленная группа периода */
   periodGroup?: Maybe<PeriodGroupType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
@@ -1749,13 +1759,6 @@ export type CreateBudgetClassificationInput = {
   name: Scalars['String'];
 };
 
-export type CreatePeriodGroupInput = {
-  /** Наименование группы периода привилегии */
-  name: Scalars['String'];
-  /** Период */
-  period: Scalars['ID'];
-};
-
 export type CreateProjectInput = {
   /** Архив */
   archive?: InputMaybe<Scalars['Boolean']>;
@@ -2452,7 +2455,7 @@ export type Mutation = {
   addPage: AddPageMutationPayload;
   /** Мутация для создания периода. */
   addPeriod: AddPeriodMutationPayload;
-  /** Мутация на добавление группы периода. */
+  /** Мутация на добавление группы в период. */
   addPeriodGroup: AddPeriodGroupMutationPayload;
   /** Мутация для добавления записи профиля. */
   addProfile: AddProfileMutationPayload;
@@ -2658,7 +2661,7 @@ export type MutationAddPeriodArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationAddPeriodGroupArgs = {
-  input: CreatePeriodGroupInput;
+  input: AddPeriodGroupMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */

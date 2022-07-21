@@ -159,3 +159,11 @@ def change_user_period_privileges(
         PeriodPrivilege.objects.create(period_id=period_id, user_id=user_id, privilege=privilege)
         privileges.append(privilege)
     return privileges
+
+
+def add_period_group(name: str, period_id: str | int) -> PeriodGroup:
+    """Добавление группы в период."""
+    return PeriodGroup.objects.create(
+            name=name,
+            period_id=period_id,
+        )
