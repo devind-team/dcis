@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, inject } from '#app'
+import { defineComponent, Ref, PropType, toRef, provide } from '#app'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -70,7 +70,7 @@ import {
   useI18n
 } from '~/composables'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
+import { DocumentType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
@@ -83,17 +83,28 @@ export default defineComponent({
     GridSelectionView,
     GridElementResizing
   },
-  setup () {
+  props: {
+    mode: { type: Number, required: true },
+    activeSheet: { type: Object as PropType<SheetType>, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
+    activeDocument: { type: Object as PropType<DocumentType>, default: null }
+  },
+  setup (props) {
     const { t } = useI18n()
 
-    const mode = inject<GridMode>('mode')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateActiveSheet = inject<Ref<UpdateSheetType>>('updateActiveSheet')
+    const activeSheet = toRef(props, 'activeSheet')
+    const updateActiveSheet = toRef(props, 'updateActiveSheet')
+    const activeDocument = toRef(props, 'activeDocument')
 
-    const changeColumnWidth = mode === GridMode.CHANGE
+    provide('mode', props.mode)
+    provide('activeSheet', activeSheet)
+    provide('updateActiveSheet', updateActiveSheet)
+    provide('activeDocument', activeDocument)
+
+    const changeColumnWidth = props.mode === GridMode.CHANGE
       ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
       : null
-    const changeRowHeight = mode === GridMode.CHANGE
+    const changeRowHeight = props.mode === GridMode.CHANGE
       ? useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
       : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
@@ -135,7 +146,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(mode, activeSheet, changeColumnWidth, changeRowHeight)
+    } = useGrid(props.mode, activeSheet, changeColumnWidth, changeRowHeight)
 
     return {
       t,

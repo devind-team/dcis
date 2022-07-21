@@ -51,30 +51,25 @@ v-row
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, Ref } from '#app'
-import { UpdateType, useChangeCellsOptionMutation, useI18n } from '~/composables'
-import { DocumentType, DocumentsSheetQuery, SheetType } from '~/types/graphql'
+import { computed, defineComponent, PropType, toRef } from '#app'
+import { useChangeCellsOptionMutation, useI18n, UpdateType } from '~/composables'
+import { DocumentsSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, GridMode } from '~/types/grid'
 
 export default defineComponent({
   props: {
+    mode: { type: Number, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateType<DocumentsSheetQuery>>, required: true },
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
   },
   setup (props) {
     const { t } = useI18n()
 
-    const mode = inject<GridMode>('mode')
-    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
-    const changeCellsOption = useChangeCellsOptionMutation(
-      computed(() => activeDocument.value ? activeDocument.value.id : ''),
-      computed(() => activeSheet.value.id),
-      updateSheet
-    )
+    const updateActiveSheet = toRef(props, 'updateActiveSheet')
+    const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
 
     const disabled = computed<boolean>(() => !props.selectedCellsOptions)
-    const readonly = computed<boolean>(() => mode === GridMode.WRITE)
+    const readonly = computed<boolean>(() => props.mode === GridMode.WRITE)
 
     const formatting = computed<string[]>({
       get: () => !disabled.value

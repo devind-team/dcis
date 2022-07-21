@@ -3,7 +3,11 @@ div
   v-tabs(v-model="activeSheetIndex")
     slot(name="settings")
     v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
-  grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
+  grid-sheet-toolbar(
+    :mode="mode"
+    :update-active-sheet="updateActiveSheet"
+    :selected-cells-options="selectedCellsOptions"
+  )
   v-tabs-items(v-model="activeSheetIndex" style="height: calc(100vh - 337px)")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
@@ -18,7 +22,7 @@ div
 </template>
 
 <script lang="ts">
-import { PropType, provide, toRef } from '#app'
+import { PropType } from '#app'
 import { DocumentType, BaseSheetType, SheetType } from '~/types/graphql'
 import { UpdateSheetType, CellsOptionsType } from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
@@ -45,15 +49,6 @@ export default defineComponent({
         emit('input', value)
       }
     })
-
-    const activeSheet = toRef(props, 'activeSheet')
-    const updateActiveSheet = toRef(props, 'updateActiveSheet')
-    const activeDocument = toRef(props, 'activeDocument')
-
-    provide('mode', props.mode)
-    provide('activeSheet', activeSheet)
-    provide('updateActiveSheet', updateActiveSheet)
-    provide('activeDocument', activeDocument)
 
     const selectedCellsOptions = computed<CellsOptionsType | null>(() =>
       grid.value && grid.value.length ? grid.value[0].selectedCellsOptions : null
