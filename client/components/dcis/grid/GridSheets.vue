@@ -4,15 +4,17 @@ div
     slot(name="settings")
     v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
-  grid(
-    v-if="activeSheet"
-    ref="grid"
-    :mode="mode"
-    :active-sheet="activeSheet"
-    :update-active-sheet="updateActiveSheet"
-    :active-document="activeDocument"
-  )
-  v-progress-circular(v-else color="primary" indeterminate)
+  v-tabs-items(v-model="activeSheetIndex")
+    v-tab-item(v-for="sheet in sheets" :key="sheet.id")
+      grid(
+        v-if="activeSheet && activeSheet.id === sheet.id"
+        ref="grid"
+        :mode="mode"
+        :active-sheet="activeSheet"
+        :update-active-sheet="updateActiveSheet"
+        :active-document="activeDocument"
+      )
+      v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
@@ -33,7 +35,7 @@ export default defineComponent({
     activeDocument: { type: Object as PropType<DocumentType>, default: null }
   },
   setup (props, { emit }) {
-    const grid = ref<InstanceType<typeof Grid> | null>(null)
+    const grid = ref<InstanceType<typeof Grid>[] | null>(null)
 
     const activeSheetIndex = computed<number>({
       get () {
@@ -54,7 +56,7 @@ export default defineComponent({
     provide('activeDocument', activeDocument)
 
     const selectedCellsOptions = computed<CellsOptionsType | null>(() =>
-      grid.value ? grid.value.selectedCellsOptions : null
+      grid.value && grid.value.length ? grid.value[0].selectedCellsOptions : null
     )
 
     return { grid, activeSheetIndex, selectedCellsOptions }

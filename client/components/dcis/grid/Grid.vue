@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, Ref, inject } from '#app'
+import { defineComponent, Ref, inject } from '#app'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -83,7 +83,7 @@ export default defineComponent({
     GridSelectionView,
     GridElementResizing
   },
-  setup (props) {
+  setup () {
     const { t } = useI18n()
 
     const mode = inject<GridMode>('mode')
