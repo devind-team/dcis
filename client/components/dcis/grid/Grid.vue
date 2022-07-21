@@ -210,8 +210,6 @@ $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
 $arrow-down-cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
 div.grid__body
-  position: relative
-
   .grid__element-resizing
     position: absolute
     z-index: 2

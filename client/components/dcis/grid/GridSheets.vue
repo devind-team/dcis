@@ -8,7 +8,7 @@ div
     :update-active-sheet="updateActiveSheet"
     :selected-cells-options="selectedCellsOptions"
   )
-  v-tabs-items(v-model="activeSheetIndex" style="height: calc(100vh - 337px)")
+  v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
         v-if="activeSheet && activeSheet.id === sheet.id"
@@ -58,3 +58,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="sass">
+.grid-sheet__tabs-items
+  height: calc(100vh - 337px)
+  overflow: visible !important
+</style>
