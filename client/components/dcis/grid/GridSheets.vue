@@ -4,7 +4,7 @@ div
     slot(name="settings")
     v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
-  v-tabs-items(v-model="activeSheetIndex")
+  v-tabs-items(v-model="activeSheetIndex" style="height: calc(100vh - 337px)")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
         v-if="activeSheet && activeSheet.id === sheet.id"
