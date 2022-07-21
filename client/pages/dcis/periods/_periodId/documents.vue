@@ -8,6 +8,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
           v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
   items-data-filter(
+    v-if="period.multiple"
     v-model="selectedDocs"
     :items="period.divisions.map( x => ({id: x.id, name: x.name}))"
     :get-name="i => i.name"
@@ -34,7 +35,6 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
         div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
         .font-italic {{ item.lastStatus.comment }}
     template(#item.department="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
-    template(#item.ad="{ item }") item.objectId
 </template>
 
 <script lang="ts">
@@ -59,6 +59,8 @@ import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/do
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+
+type DivisionFilterType = { id: string, name: string }
 
 export default defineComponent({
   components: { ItemsDataFilter, LeftNavigatorContainer, AddDocument, DocumentStatuses, TextMenu },
@@ -122,7 +124,7 @@ export default defineComponent({
       { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
       { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
     )
-    const selectedDocs = ref([])
+    const selectedDocs = ref<DivisionFilterType[]>([])
     const visibleDocs = computed<DocumentType[]>(() => {
       return selectedDocs.value.length > 0
         ? documents.value.filter(x => selectedDocs.value.map(x => x.id).includes(x.objectId))
