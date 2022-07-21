@@ -1,17 +1,24 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ t('dcis.documents.name') }}
+  template(#header) {{ $t('dcis.documents.name') }}
     template(v-if="period.canAddDocument")
       v-spacer
       add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
         template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ t('dcis.documents.addDocument.buttonText') }}
+          v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-  v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
+  items-data-filter(
+    v-if="period.multiple"
+    v-model="selectedDocs"
+    :items="period.divisions.map( x => ({id: x.id, name: x.name}))"
+    :get-name="i => i.name"
+    multiple
+  )
+  v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
     template(#item.version="{ item }")
       nuxt-link(
         :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-      ) {{ t('dcis.documents.tableItems.version', { version: item.version }) }}
+      ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
     template(#item.comment="{ item }")
       template(v-if="item.comment")
         template(v-if="item.canChange")
@@ -24,9 +31,9 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
           template(#activator="{ on }")
             a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
         strong(v-else) {{ item.lastStatus.status.name }}.
-        div {{ t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
+        div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
         .font-italic {{ item.lastStatus.comment }}
-    template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+    template(#item.division="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
 </template>
 
 <script lang="ts">
@@ -50,9 +57,12 @@ import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
+import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+
+type DivisionFilterType = { id: string, name: string }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AddDocument, DocumentStatuses, TextMenu },
+  components: { ItemsDataFilter, LeftNavigatorContainer, AddDocument, DocumentStatuses, TextMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -64,14 +74,13 @@ export default defineComponent({
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
-
     const userStore = useAuthStore()
     const hasPerm = toRef(userStore, 'hasPerm')
 
     const {
       data: documents,
       loading,
-      pagination: { count, totalCount },
+      pagination: { totalCount },
       update,
       addUpdate,
       changeUpdate
@@ -100,15 +109,29 @@ export default defineComponent({
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
       ChangeDocumentCommentMutate({ documentId: document.id, comment })
     }
-    const headers: DataTableHeader[] = [
+    const headers: DataTableHeader[] = props.period.multiple
+      ? [{
+          text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
+          value: 'division'
+        }]
+      : []
+
+    headers.push(
       { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
       { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-      { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
       { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
-    ]
-
+    )
+    const selectedDocs = ref<DivisionFilterType[]>([])
+    const visibleDocs = computed<DocumentType[]>(() => {
+      return selectedDocs.value.length > 0
+        ? documents.value.filter(x => selectedDocs.value.map(x => x.id).includes(x.objectId))
+        : documents.value
+    })
+    const count = computed(() => {
+      return selectedDocs.value.length > 0 ? visibleDocs.value.length : totalCount.value
+    })
     return {
-      t,
+      selectedDocs,
       documents,
       loading,
       headers,
@@ -116,6 +139,7 @@ export default defineComponent({
       count,
       totalCount,
       update,
+      visibleDocs,
       addDocumentUpdate,
       dateTimeHM,
       changeDocumentComment

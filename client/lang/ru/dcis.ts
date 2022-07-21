@@ -167,6 +167,8 @@ export default {
       version: 'Версия',
       comment: 'Комментарий',
       createdAt: 'Дата добавления',
+      organization: '@:dcis.documents.addDocument.organization',
+      department: '@:dcis.documents.addDocument.department',
       lastStatus: 'Статус'
     },
     tableItems: {
