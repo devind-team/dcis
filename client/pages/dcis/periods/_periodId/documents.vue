@@ -13,7 +13,6 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
     :items="period.divisions.map( x => ({id: x.id, name: x.name}))"
     :get-name="i => i.name"
     multiple
-    has-select-all
   )
   v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
     template(#item.version="{ item }")
@@ -34,7 +33,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
         strong(v-else) {{ item.lastStatus.status.name }}.
         div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
         .font-italic {{ item.lastStatus.comment }}
-    template(#item.department="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
+    template(#item.division="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
 </template>
 
 <script lang="ts">
@@ -112,10 +111,8 @@ export default defineComponent({
     }
     const headers: DataTableHeader[] = props.period.multiple
       ? [{
-          text: props.period.project.contentType.model === 'department'
-            ? t('dcis.documents.tableHeaders.department') as string
-            : t('dcis.documents.tableHeaders.organization') as string,
-          value: 'department'
+          text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
+          value: 'division'
         }]
       : []
 
