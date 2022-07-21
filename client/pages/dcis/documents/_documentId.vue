@@ -50,9 +50,9 @@ export default defineComponent({
     const { t, localePath } = useI18n()
     const route = useRoute()
 
-    const documentName = computed<string | null>(() => {
+    const documentName = computed<string>(() => {
       if (!activeDocument.value) {
-        return null
+        return ''
       }
       const division = activeDocument.value.period.multiple
         ? activeDocument.value.period.divisions
