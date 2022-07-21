@@ -262,6 +262,7 @@ export default {
     },
     changeValue: 'Изменение значения',
     cellFiles: {
+      readonlyHeader: 'Файлы',
       file: 'Файл №{number}',
       newFiles: 'Новые файлы',
       uploadArchive: 'Скачать архив'
