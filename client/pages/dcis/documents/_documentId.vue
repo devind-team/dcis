@@ -3,22 +3,19 @@ bread-crumbs(:items="bc" fluid)
   v-card(v-if="!activeDocumentLoading")
     v-card-title {{ documentName }}
     v-card-text
-      v-tabs(v-model="activeSheetIndex")
-        settings-document(:document="activeDocument")
-          template(#activator="{ on, attrs }")
-            v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
-              v-icon mdi-cog
-        v-tab(v-for="sheet in activeDocument.sheets" :key="sheet.id") {{ sheet.name }}
-      v-tabs-items(v-model="activeSheetIndex")
-        v-tab-item(v-for="sheet in activeDocument.sheets" :key="sheet.id")
-          grid(
-            v-if="activeSheet"
-            :mode="GridMode.WRITE"
-            :active-sheet="activeSheet"
-            :update-active-sheet="updateActiveSheet"
-            :active-document="activeDocument"
-          )
-          v-progress-circular(v-else color="primary" indeterminate)
+      grid-sheets(
+        v-model="activeSheetIndex"
+        :mode="GridMode.WRITE"
+        :sheets="activeDocument.sheets"
+        :active-sheet="activeSheet"
+        :update-active-sheet="updateActiveSheet"
+        :active-document="activeDocument"
+      )
+        template(#settings)
+          settings-document(:document="activeDocument")
+            template(#activator="{ on, attrs }")
+              v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
+                v-icon mdi-cog
   v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
@@ -39,10 +36,10 @@ import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
-import Grid from '~/components/dcis/Grid.vue'
+import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs, SettingsDocument, SheetControl, Grid },
+  components: { BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
@@ -105,7 +102,7 @@ export default defineComponent({
         documentId: route.params.documentId
       })
     })
-    const { data: activeSheet, update: updateActiveSheet } = useCommonQuery<
+    const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet } = useCommonQuery<
       DocumentSheetQuery,
       DocumentSheetQueryVariables
     >({
@@ -133,6 +130,7 @@ export default defineComponent({
       activeDocument,
       activeDocumentLoading,
       activeSheet,
+      activeSheetLoading,
       updateActiveSheet
     }
   }

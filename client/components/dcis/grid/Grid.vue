@@ -1,68 +1,66 @@
 <template lang="pug">
-div
-  grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
-  .grid__body
-    div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
-      table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
-        grid-header(
-          :row-name-column-width="rowNameColumnWidth"
-          :resizing-column="resizingColumn"
-          :get-column-width="getColumnWidth"
-          :selected-column-positions="selectedColumnsPositions"
-          :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
-          :all-cells-selected="allCellsSelected"
-          :mouseenter-column-name="mouseenterColumnName"
-          :mousemove-column-name="mousemoveColumnName"
-          :mouseleave-column-name="mouseleaveColumnName"
-          :mousedown-column-name="mousedownColumnName"
-          :mouseup-column-name="mouseupColumnName"
-          :select-all-cells="selectAllCells"
-        )
-        grid-body(
-          :resizing-row="resizingRow"
-          :get-row-height="getRowHeight"
-          :active-cell="activeCell"
-          :set-active-cell="setActiveCell"
-          :selected-rows-positions="selectedRowsPositions"
-          :boundary-selected-rows-positions="boundarySelectedRowsPositions"
-          :clear-selection="clearSelection"
-          :mouseenter-row-name="mouseenterRowName"
-          :mousemove-row-name="mousemoveRowName"
-          :mouseleave-row-name="mouseleaveRowName"
-          :mousedown-row-name="mousedownRowName"
-          :mouseup-row-name="mouseupRowName"
-          :mousedown-cell="mousedownCell"
-          :mouseenter-cell="mouseenterCell"
-          :mouseup-cell="mouseupCell"
-        )
-      grid-selection-view(
-        v-if="columnsSelectionView"
-        :key="columnsSelectionView.id"
-        :selection-view="columnsSelectionView"
+.grid__body
+  div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
+    table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
+      grid-header(
+        :row-name-column-width="rowNameColumnWidth"
+        :resizing-column="resizingColumn"
+        :get-column-width="getColumnWidth"
+        :selected-column-positions="selectedColumnsPositions"
+        :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
+        :all-cells-selected="allCellsSelected"
+        :mouseenter-column-name="mouseenterColumnName"
+        :mousemove-column-name="mousemoveColumnName"
+        :mouseleave-column-name="mouseleaveColumnName"
+        :mousedown-column-name="mousedownColumnName"
+        :mouseup-column-name="mouseupColumnName"
+        :select-all-cells="selectAllCells"
       )
-      grid-selection-view(
-        v-if="rowsSelectionView"
-        :key="rowsSelectionView.id"
-        :selection-view="rowsSelectionView"
+      grid-body(
+        :resizing-row="resizingRow"
+        :get-row-height="getRowHeight"
+        :active-cell="activeCell"
+        :set-active-cell="setActiveCell"
+        :selected-rows-positions="selectedRowsPositions"
+        :boundary-selected-rows-positions="boundarySelectedRowsPositions"
+        :clear-selection="clearSelection"
+        :mouseenter-row-name="mouseenterRowName"
+        :mousemove-row-name="mousemoveRowName"
+        :mouseleave-row-name="mouseleaveRowName"
+        :mousedown-row-name="mousedownRowName"
+        :mouseup-row-name="mouseupRowName"
+        :mousedown-cell="mousedownCell"
+        :mouseenter-cell="mouseenterCell"
+        :mouseup-cell="mouseupCell"
       )
-      template(v-if="cellsSelectionView")
-        grid-selection-view(
-          v-for="view in cellsSelectionView"
-          :selection-view="view"
-          :key="view.id"
-        )
-    grid-element-resizing(
-      :message="String(t('dcis.grid.columnWidth'))"
-      :element-resizing="resizingColumnWidth"
+    grid-selection-view(
+      v-if="columnsSelectionView"
+      :key="columnsSelectionView.id"
+      :selection-view="columnsSelectionView"
     )
-    grid-element-resizing(
-      :message="String(t('dcis.grid.rowHeight'))"
-      :element-resizing="resizingRowHeight"
+    grid-selection-view(
+      v-if="rowsSelectionView"
+      :key="rowsSelectionView.id"
+      :selection-view="rowsSelectionView"
     )
+    template(v-if="cellsSelectionView")
+      grid-selection-view(
+        v-for="view in cellsSelectionView"
+        :selection-view="view"
+        :key="view.id"
+      )
+  grid-element-resizing(
+    :message="String(t('dcis.grid.columnWidth'))"
+    :element-resizing="resizingColumnWidth"
+  )
+  grid-element-resizing(
+    :message="String(t('dcis.grid.rowHeight'))"
+    :element-resizing="resizingRowHeight"
+  )
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, Ref, provide, toRef } from '#app'
+import { defineComponent, Ref, PropType, toRef, provide } from '#app'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -72,8 +70,7 @@ import {
   useI18n
 } from '~/composables'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { SheetType, DocumentType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
-import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
+import { DocumentType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
@@ -81,7 +78,6 @@ import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
   components: {
-    GridSheetToolbar,
     GridHeader,
     GridBody,
     GridSelectionView,
@@ -197,7 +193,7 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-@import '~vuetify/src/styles/styles.sass'
+@import '~vuetify/src/styles/styles'
 
 .grid__cursor_cell *
   cursor: cell !important
@@ -214,8 +210,6 @@ $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
 $arrow-down-cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
 div.grid__body
-  position: relative
-
   .grid__element-resizing
     position: absolute
     z-index: 2

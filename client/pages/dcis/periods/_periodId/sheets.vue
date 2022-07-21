@@ -2,19 +2,13 @@
 left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.sheets.name') }}
   template
-    v-tabs(v-model="activeSheetIndex")
-      template(v-for="sheet in period.sheets")
-        sheet-control(v-slot="{ on, attrs }" :sheet="sheet" :update="renameSheetUpdate" :key="sheet.id")
-          v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
-    v-tabs-items(v-model="activeSheetIndex")
-      v-tab-item(v-for="sheet in period.sheets" :key="sheet.id")
-        grid(
-          v-if="activeSheet"
-          :mode="GridMode.CHANGE"
-          :active-sheet="activeSheet"
-          :update-active-sheet="updateActiveSheet"
-        )
-        v-progress-circular(v-else color="primary" indeterminate)
+    grid-sheets(
+      v-model="activeSheetIndex"
+      :mode="GridMode.CHANGE"
+      :sheets="period.sheets"
+      :active-sheet="activeSheet"
+      :update-active-sheet="updateActiveSheet"
+    )
 </template>
 
 <script lang="ts">
@@ -34,10 +28,10 @@ import {
 import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
-import Grid from '~/components/dcis/Grid.vue'
+import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, SheetControl, Grid },
+  components: { LeftNavigatorContainer, SheetControl, GridSheets },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
