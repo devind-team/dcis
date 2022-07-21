@@ -2,7 +2,7 @@
 div
   grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
   .grid__body
-    div.grid__container(ref="gridContainer" :style="gridContainerStyle" @scroll="gridContainerScroll")
+    div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
       table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
         grid-header(
           :row-name-column-width="rowNameColumnWidth"
@@ -105,10 +105,6 @@ export default defineComponent({
     provide('updateActiveSheet', updateActiveSheet)
     provide('activeDocument', activeDocument)
 
-    const gridContainerStyle = computed(() => ({
-      height: props.mode === GridMode.WRITE ? 'calc(100vh - 230px)' : 'calc(100vh - 337px)'
-    }))
-
     const changeColumnWidth = props.mode === GridMode.CHANGE
       ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
       : null
@@ -158,7 +154,6 @@ export default defineComponent({
 
     return {
       t,
-      gridContainerStyle,
       gridContainer,
       grid,
       resizingColumn,
@@ -230,6 +225,7 @@ div.grid__body
   .grid__container
     position: relative
     overflow: auto
+    height: calc(100vh - 337px)
 
     table.grid__table
       height: 1px
