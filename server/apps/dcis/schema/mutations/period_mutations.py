@@ -200,17 +200,21 @@ class ChangePeriodGroupPrivilegesMutation(BaseMutation):
                                                                                              period_group))
 
 
-class DeletePeriodGroupMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+class DeletePeriodGroupMutation(BaseMutation):
     """Мутация на удаление группы периода."""
 
-    class Meta:
-        model = PeriodGroup
-        login_required = True
+    class Input:
+        period_group_id = graphene.ID(required=True, description='Идентификатор группы периода')
 
-    @classmethod
-    def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: PeriodGroup) -> None:
-        if not ChangePeriodGroups.has_object_permission(info.context, obj.period):
-            raise PermissionDenied('Ошибка доступа')
+    delete_id = graphene.ID(required=True, description='Идентификатор удаленной группы периода')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str):
+        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+        info.context.check_object_permissions(info.context, period_group.period)
+        period_group.delete()
+        return DeletePeriodMutation(delete_id=period_group_id)
 
 
 class ChangeUserPeriodGroupsMutation(BaseMutation):
@@ -278,7 +282,7 @@ class PeriodMutations(graphene.ObjectType):
     add_period_group = AddPeriodGroupMutationPayload.Field(required=True)
     copy_period_groups = CopyPeriodGroupsMutation.Field(required=True)
     change_period_group_privileges = ChangePeriodGroupPrivilegesMutation.Field(required=True)
-    delete_period_group = DeletePeriodGroupMutationPayload.Field(required=True)
+    delete_period_group = DeletePeriodGroupMutation.Field(required=True)
 
     change_user_period_groups = ChangeUserPeriodGroupsMutation.Field(required=True)
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)

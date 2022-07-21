@@ -1921,15 +1921,20 @@ export type DeletePageMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeletePeriodGroupMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор группы периода */
+  periodGroupId: Scalars['ID'];
+};
+
 /** Мутация на удаление группы периода. */
 export type DeletePeriodGroupMutationPayload = {
   __typename?: 'DeletePeriodGroupMutationPayload';
-  deletedId?: Maybe<Scalars['ID']>;
-  deletedInputId?: Maybe<Scalars['ID']>;
-  deletedRawId?: Maybe<Scalars['ID']>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Идентификатор удаленной группы периода */
+  deleteId: Scalars['ID'];
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
-  found?: Maybe<Scalars['Boolean']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2946,7 +2951,7 @@ export type MutationDeletePeriodArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationDeletePeriodGroupArgs = {
-  id: Scalars['ID'];
+  input: DeletePeriodGroupMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5447,7 +5452,7 @@ export type DeletePeriodGroupMutationVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
-export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodGroup: { __typename?: 'DeletePeriodGroupMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodGroup: { __typename: 'DeletePeriodGroupMutationPayload', success: boolean, deleteId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddProjectMutationVariables = Exact<{
   name: Scalars['String'];

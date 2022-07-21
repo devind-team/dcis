@@ -1818,14 +1818,19 @@ type DeletePageMutationPayload {
   success: Boolean!
 }
 
+input DeletePeriodGroupMutationInput {
+  clientMutationId: String
+  """Идентификатор группы периода"""
+  periodGroupId: ID!
+}
+
 """Мутация на удаление группы периода."""
 type DeletePeriodGroupMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Идентификатор удаленной группы периода"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -2424,7 +2429,7 @@ type Mutation {
   """Мутация на удаление периода."""
   deletePeriod(input: DeletePeriodMutationInput!): DeletePeriodMutationPayload!
   """Мутация на удаление группы периода."""
-  deletePeriodGroup(id: ID!): DeletePeriodGroupMutationPayload!
+  deletePeriodGroup(input: DeletePeriodGroupMutationInput!): DeletePeriodGroupMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
   """Мутация на удаление проекта."""
