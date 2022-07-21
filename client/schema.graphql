@@ -1408,7 +1408,7 @@ type ChangeUserPeriodGroupsMutationPayload {
   user: UserType!
 }
 
-input ChangeUserPeriodPrivilegesInput {
+input ChangeUserPeriodPrivilegesMutationInput {
   clientMutationId: String
   """Идентификатор периода"""
   periodId: ID!
@@ -1419,7 +1419,7 @@ input ChangeUserPeriodPrivilegesInput {
 }
 
 """Мутация на изменение отдельных привилегий пользователя в периоде."""
-type ChangeUserPeriodPrivilegesPayload {
+type ChangeUserPeriodPrivilegesMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1830,14 +1830,19 @@ type DeletePeriodGroupMutationPayload {
   success: Boolean!
 }
 
+input DeletePeriodMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
 """Мутация на удаление периода."""
 type DeletePeriodMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Идентификатор удаленного периода"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -2391,7 +2396,7 @@ type Mutation {
   """Мутация на изменение групп пользователя в периоде."""
   changeUserPeriodGroups(input: ChangeUserPeriodGroupsMutationInput!): ChangeUserPeriodGroupsMutationPayload!
   """Мутация на изменение отдельных привилегий пользователя в периоде."""
-  changeUserPeriodPrivileges(input: ChangeUserPeriodPrivilegesInput!): ChangeUserPeriodPrivilegesPayload!
+  changeUserPeriodPrivileges(input: ChangeUserPeriodPrivilegesMutationInput!): ChangeUserPeriodPrivilegesMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
@@ -2417,7 +2422,7 @@ type Mutation {
   """Удаление страницы"""
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация на удаление периода."""
-  deletePeriod(id: ID!): DeletePeriodMutationPayload!
+  deletePeriod(input: DeletePeriodMutationInput!): DeletePeriodMutationPayload!
   """Мутация на удаление группы периода."""
   deletePeriodGroup(id: ID!): DeletePeriodGroupMutationPayload!
   """Мутация для удаления записи профиля."""

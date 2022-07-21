@@ -19,6 +19,7 @@ from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     AddPeriod,
+    DeletePeriod,
     ChangePeriodDivisions,
     ChangePeriodGroups,
     ChangePeriodSettings,
@@ -87,17 +88,21 @@ class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
             raise PermissionDenied('Ошибка доступа')
 
 
-class DeletePeriodMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
+class DeletePeriodMutation(BaseMutation):
     """Мутация на удаление периода."""
 
-    class Meta:
-        model = Period
-        login_required = True
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
 
-    @classmethod
-    def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: Period) -> None:
-        if not ChangePeriodSettings.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+    delete_id = graphene.ID(required=True, description='Идентификатор удаленного периода')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangePeriodSettings,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str):
+        period = get_object_or_404(Period, pk=period_id)
+        info.context.check_object_permissions(info.context, period)
+        period.delete()
+        return DeletePeriodMutation(delete_id=period_id)
 
 
 class AddDivisionsMutation(BaseMutation):
@@ -265,7 +270,7 @@ class PeriodMutations(graphene.ObjectType):
 
     add_period = AddPeriodMutation.Field(required=True)
     change_period = ChangePeriodMutationPayload.Field(required=True)
-    delete_period = DeletePeriodMutationPayload.Field(required=True)
+    delete_period = DeletePeriodMutation.Field(required=True)
 
     add_divisions = AddDivisionsMutation.Field(required=True)
     delete_division = DeleteDivisionMutation.Field(required=True)
