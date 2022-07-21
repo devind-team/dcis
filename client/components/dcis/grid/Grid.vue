@@ -193,7 +193,7 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-@import '../../../node_modules/vuetify/src/styles/styles'
+@import '~vuetify/src/styles/styles'
 
 .grid__cursor_cell *
   cursor: cell !important
