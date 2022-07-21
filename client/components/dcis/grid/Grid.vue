@@ -1,68 +1,66 @@
 <template lang="pug">
-div
-  grid-sheet-toolbar(:selected-cells-options="selectedCellsOptions")
-  .grid__body
-    div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
-      table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
-        grid-header(
-          :row-name-column-width="rowNameColumnWidth"
-          :resizing-column="resizingColumn"
-          :get-column-width="getColumnWidth"
-          :selected-column-positions="selectedColumnsPositions"
-          :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
-          :all-cells-selected="allCellsSelected"
-          :mouseenter-column-name="mouseenterColumnName"
-          :mousemove-column-name="mousemoveColumnName"
-          :mouseleave-column-name="mouseleaveColumnName"
-          :mousedown-column-name="mousedownColumnName"
-          :mouseup-column-name="mouseupColumnName"
-          :select-all-cells="selectAllCells"
-        )
-        grid-body(
-          :resizing-row="resizingRow"
-          :get-row-height="getRowHeight"
-          :active-cell="activeCell"
-          :set-active-cell="setActiveCell"
-          :selected-rows-positions="selectedRowsPositions"
-          :boundary-selected-rows-positions="boundarySelectedRowsPositions"
-          :clear-selection="clearSelection"
-          :mouseenter-row-name="mouseenterRowName"
-          :mousemove-row-name="mousemoveRowName"
-          :mouseleave-row-name="mouseleaveRowName"
-          :mousedown-row-name="mousedownRowName"
-          :mouseup-row-name="mouseupRowName"
-          :mousedown-cell="mousedownCell"
-          :mouseenter-cell="mouseenterCell"
-          :mouseup-cell="mouseupCell"
-        )
-      grid-selection-view(
-        v-if="columnsSelectionView"
-        :key="columnsSelectionView.id"
-        :selection-view="columnsSelectionView"
+.grid__body
+  div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
+    table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
+      grid-header(
+        :row-name-column-width="rowNameColumnWidth"
+        :resizing-column="resizingColumn"
+        :get-column-width="getColumnWidth"
+        :selected-column-positions="selectedColumnsPositions"
+        :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
+        :all-cells-selected="allCellsSelected"
+        :mouseenter-column-name="mouseenterColumnName"
+        :mousemove-column-name="mousemoveColumnName"
+        :mouseleave-column-name="mouseleaveColumnName"
+        :mousedown-column-name="mousedownColumnName"
+        :mouseup-column-name="mouseupColumnName"
+        :select-all-cells="selectAllCells"
       )
-      grid-selection-view(
-        v-if="rowsSelectionView"
-        :key="rowsSelectionView.id"
-        :selection-view="rowsSelectionView"
+      grid-body(
+        :resizing-row="resizingRow"
+        :get-row-height="getRowHeight"
+        :active-cell="activeCell"
+        :set-active-cell="setActiveCell"
+        :selected-rows-positions="selectedRowsPositions"
+        :boundary-selected-rows-positions="boundarySelectedRowsPositions"
+        :clear-selection="clearSelection"
+        :mouseenter-row-name="mouseenterRowName"
+        :mousemove-row-name="mousemoveRowName"
+        :mouseleave-row-name="mouseleaveRowName"
+        :mousedown-row-name="mousedownRowName"
+        :mouseup-row-name="mouseupRowName"
+        :mousedown-cell="mousedownCell"
+        :mouseenter-cell="mouseenterCell"
+        :mouseup-cell="mouseupCell"
       )
-      template(v-if="cellsSelectionView")
-        grid-selection-view(
-          v-for="view in cellsSelectionView"
-          :selection-view="view"
-          :key="view.id"
-        )
-    grid-element-resizing(
-      :message="String(t('dcis.grid.columnWidth'))"
-      :element-resizing="resizingColumnWidth"
+    grid-selection-view(
+      v-if="columnsSelectionView"
+      :key="columnsSelectionView.id"
+      :selection-view="columnsSelectionView"
     )
-    grid-element-resizing(
-      :message="String(t('dcis.grid.rowHeight'))"
-      :element-resizing="resizingRowHeight"
+    grid-selection-view(
+      v-if="rowsSelectionView"
+      :key="rowsSelectionView.id"
+      :selection-view="rowsSelectionView"
     )
+    template(v-if="cellsSelectionView")
+      grid-selection-view(
+        v-for="view in cellsSelectionView"
+        :selection-view="view"
+        :key="view.id"
+      )
+  grid-element-resizing(
+    :message="String(t('dcis.grid.columnWidth'))"
+    :element-resizing="resizingColumnWidth"
+  )
+  grid-element-resizing(
+    :message="String(t('dcis.grid.rowHeight'))"
+    :element-resizing="resizingRowHeight"
+  )
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, Ref, provide, toRef } from '#app'
+import { defineComponent, PropType, Ref, inject } from '#app'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -72,8 +70,7 @@ import {
   useI18n
 } from '~/composables'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { SheetType, DocumentType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
-import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
+import { SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
@@ -81,34 +78,22 @@ import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
   components: {
-    GridSheetToolbar,
     GridHeader,
     GridBody,
     GridSelectionView,
     GridElementResizing
   },
-  props: {
-    mode: { type: Number, required: true },
-    activeSheet: { type: Object as PropType<SheetType>, required: true },
-    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
-    activeDocument: { type: Object as PropType<DocumentType>, default: null }
-  },
   setup (props) {
     const { t } = useI18n()
 
-    const activeSheet = toRef(props, 'activeSheet')
-    const updateActiveSheet = toRef(props, 'updateActiveSheet')
-    const activeDocument = toRef(props, 'activeDocument')
+    const mode = inject<GridMode>('mode')
+    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const updateActiveSheet = inject<Ref<UpdateSheetType>>('updateActiveSheet')
 
-    provide('mode', props.mode)
-    provide('activeSheet', activeSheet)
-    provide('updateActiveSheet', updateActiveSheet)
-    provide('activeDocument', activeDocument)
-
-    const changeColumnWidth = props.mode === GridMode.CHANGE
+    const changeColumnWidth = mode === GridMode.CHANGE
       ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
       : null
-    const changeRowHeight = props.mode === GridMode.CHANGE
+    const changeRowHeight = mode === GridMode.CHANGE
       ? useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
       : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
@@ -150,7 +135,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(props.mode, activeSheet, changeColumnWidth, changeRowHeight)
+    } = useGrid(mode, activeSheet, changeColumnWidth, changeRowHeight)
 
     return {
       t,
@@ -197,7 +182,7 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-@import '~vuetify/src/styles/styles.sass'
+@import '../../../node_modules/vuetify/src/styles/styles'
 
 .grid__cursor_cell *
   cursor: cell !important
