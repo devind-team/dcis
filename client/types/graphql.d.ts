@@ -1272,12 +1272,31 @@ export type ChangePeriodGroupPrivilegesMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangePeriodMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Дата окончания */
+  expiration?: InputMaybe<Scalars['Date']>;
+  /** Множественное заполнение */
+  multiple?: InputMaybe<Scalars['Boolean']>;
+  /** Название периода */
+  name?: InputMaybe<Scalars['String']>;
+  /** Идентификатор текущего периода */
+  periodId: Scalars['ID'];
+  /** Приватность полей */
+  privately?: InputMaybe<Scalars['Boolean']>;
+  /** Дата начала */
+  start?: InputMaybe<Scalars['Date']>;
+  /** Статус проекта */
+  status?: InputMaybe<Scalars['String']>;
+};
+
 /** Мутация на изменение настроек периода. */
 export type ChangePeriodMutationPayload = {
   __typename?: 'ChangePeriodMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
-  /** Измененный период */
+  /** Добавленный период */
   period?: Maybe<PeriodType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
@@ -2822,8 +2841,7 @@ export type MutationChangePasswordArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationChangePeriodArgs = {
-  id: Scalars['ID'];
-  input: UpdatePeriodInput;
+  input: ChangePeriodMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4786,29 +4804,6 @@ export type UnloadFileValueArchiveMutationPayload = {
 export type UpdateDocumentInput = {
   /** Комментарий */
   comment: Scalars['String'];
-};
-
-export type UpdatePeriodInput = {
-  attributeSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  divisionSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  documentSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  /** Дата окончания */
-  expiration?: InputMaybe<Scalars['Date']>;
-  /** Множественное заполнение */
-  multiple?: InputMaybe<Scalars['Boolean']>;
-  /** Наименование периода */
-  name: Scalars['String'];
-  periodgroupSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  periodprivilegeSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  /** Приватность полей */
-  privately?: InputMaybe<Scalars['Boolean']>;
-  sheetSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  /** Дата начала */
-  start?: InputMaybe<Scalars['Date']>;
-  /** Статус проекта */
-  status?: InputMaybe<Scalars['String']>;
-  /** Организатор сборов */
-  user?: InputMaybe<Scalars['ID']>;
 };
 
 export type UpdateProjectInput = {

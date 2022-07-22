@@ -1197,11 +1197,30 @@ type ChangePeriodGroupPrivilegesMutationPayload {
   success: Boolean!
 }
 
+input ChangePeriodMutationInput {
+  clientMutationId: String
+  """Дата окончания"""
+  expiration: Date
+  """Множественное заполнение"""
+  multiple: Boolean
+  """Название периода"""
+  name: String
+  """Идентификатор текущего периода"""
+  periodId: ID!
+  """Приватность полей"""
+  privately: Boolean
+  """Дата начала"""
+  start: Date
+  """Статус проекта"""
+  status: String
+}
+
 """Мутация на изменение настроек периода."""
 type ChangePeriodMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Измененный период"""
+  """Добавленный период"""
   period: PeriodType
   """Успех мутации"""
   success: Boolean!
@@ -2380,7 +2399,7 @@ type Mutation {
   """Мутация для изменения пароля пользователя."""
   changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
   """Мутация на изменение настроек периода."""
-  changePeriod(id: ID!, input: UpdatePeriodInput!): ChangePeriodMutationPayload!
+  changePeriod(input: ChangePeriodMutationInput!): ChangePeriodMutationPayload!
   """Мутация на изменение привилегий группы."""
   changePeriodGroupPrivileges(input: ChangePeriodGroupPrivilegesMutationInput!): ChangePeriodGroupPrivilegesMutationPayload!
   """Мутация на изменение значения профиля."""
@@ -3973,29 +3992,6 @@ type UnloadFileValueArchiveMutationPayload {
 input UpdateDocumentInput {
   """Комментарий"""
   comment: String!
-}
-
-input UpdatePeriodInput {
-  attributeSet: [ID]
-  divisionSet: [ID]
-  documentSet: [ID]
-  """Дата окончания"""
-  expiration: Date
-  """Множественное заполнение"""
-  multiple: Boolean
-  """Наименование периода"""
-  name: String!
-  periodgroupSet: [ID]
-  periodprivilegeSet: [ID]
-  """Приватность полей"""
-  privately: Boolean
-  sheetSet: [ID]
-  """Дата начала"""
-  start: Date
-  """Статус проекта"""
-  status: String
-  """Организатор сборов"""
-  user: ID
 }
 
 input UpdateProjectInput {

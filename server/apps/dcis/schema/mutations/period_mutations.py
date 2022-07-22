@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import date
 
 import graphene
 from devind_core.models import File
@@ -8,18 +9,15 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.core.schema import UserType
-from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     AddPeriod,
-    DeletePeriod,
     ChangePeriodDivisions,
     ChangePeriodGroups,
     ChangePeriodSettings,
@@ -38,7 +36,8 @@ from apps.dcis.services.period_services import (
     change_period_group_privileges,
     change_user_period_groups,
     change_user_period_privileges,
-    add_period_group
+    add_period_group,
+    change_settings_period
 )
 
 
@@ -72,21 +71,43 @@ class AddPeriodMutation(BaseMutation):
         return AddPeriodMutation(period=period)
 
 
-class ChangePeriodMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
+class ChangePeriodMutation(BaseMutation):
     """Мутация на изменение настроек периода."""
 
-    class Meta:
-        model = Period
-        login_required = True
-        exclude_fields = ('project', 'methodical_support',)
-        optional_fields = ('start', 'expiration', 'user',)
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор текущего периода')
+        name = graphene.String(required=True, description='Название периода')
+        status = graphene.String(required=True, description='Статус проекта')
+        multiple = graphene.Boolean(required=True, description='Множественное заполнение')
+        privately = graphene.Boolean(required=True, description='Приватность полей')
+        start = graphene.Date(required=False, description='Дата начала')
+        expiration = graphene.Date(required=False, description='Дата окончания')
 
-    period = graphene.Field(PeriodType, description='Измененный период')
+    period = graphene.Field(PeriodType, description='Добавленный период')
 
-    @classmethod
-    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Period) -> None:
-        if not ChangePeriodSettings.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangePeriodSettings,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        name: str,
+        status: str,
+        multiple: bool,
+        privately: bool,
+        start: date,
+        expiration: date
+    ):
+        period = get_object_or_404(Period, pk=period_id)
+        info.context.check_object_permissions(info.context, period)
+        return ChangePeriodMutation(period=change_settings_period(
+            period,
+            name,
+            status,
+            multiple,
+            privately,
+            start,
+            expiration))
 
 
 class DeletePeriodMutation(BaseMutation):
@@ -276,7 +297,7 @@ class PeriodMutations(graphene.ObjectType):
     """Список мутация периода."""
 
     add_period = AddPeriodMutation.Field(required=True)
-    change_period = ChangePeriodMutationPayload.Field(required=True)
+    change_period = ChangePeriodMutation.Field(required=True)
     delete_period = DeletePeriodMutation.Field(required=True)
 
     add_divisions = AddDivisionsMutation.Field(required=True)

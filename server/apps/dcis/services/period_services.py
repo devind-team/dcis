@@ -2,6 +2,7 @@
 
 from django.db.models import Q, QuerySet
 from graphql import ResolveInfo
+from datetime import date
 
 from apps.core.models import User
 from apps.dcis.models import Period, Privilege, Project, Division, PeriodGroup, PeriodPrivilege
@@ -167,3 +168,22 @@ def add_period_group(name: str, period_id: str | int) -> PeriodGroup:
             name=name,
             period_id=period_id,
         )
+
+
+def change_settings_period(
+        period: Period,
+        name: str,
+        status: str,
+        multiple: bool,
+        privately: bool,
+        start: date,
+        expiration: date) -> Period:
+    """Изменение настроек периода."""
+    period.name = name
+    period.status = status
+    period.multiple = multiple
+    period.privately = privately
+    period.start = start
+    period.expiration = expiration
+    period.save()
+    return period
