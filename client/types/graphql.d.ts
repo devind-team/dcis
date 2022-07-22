@@ -969,10 +969,24 @@ export type ChangeColumnDimensionMutationPayload = {
   width?: Maybe<Scalars['Int']>;
 };
 
+export type ChangeDocumentCommentMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Комментарий */
+  comment: Scalars['String'];
+  /** Идентификатор документа */
+  documentId?: InputMaybe<Scalars['ID']>;
+};
+
 /** Изменение комментария версии документа. */
 export type ChangeDocumentCommentMutationPayload = {
   __typename?: 'ChangeDocumentCommentMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Созданный документ */
   document?: Maybe<DocumentType>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
 };
 
 export type ChangeFileMutationInput = {
@@ -1277,17 +1291,17 @@ export type ChangePeriodMutationInput = {
   /** Дата окончания */
   expiration?: InputMaybe<Scalars['Date']>;
   /** Множественное заполнение */
-  multiple?: InputMaybe<Scalars['Boolean']>;
+  multiple: Scalars['Boolean'];
   /** Название периода */
-  name?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
   /** Идентификатор текущего периода */
   periodId: Scalars['ID'];
   /** Приватность полей */
-  privately?: InputMaybe<Scalars['Boolean']>;
+  privately: Scalars['Boolean'];
   /** Дата начала */
   start?: InputMaybe<Scalars['Date']>;
   /** Статус проекта */
-  status?: InputMaybe<Scalars['String']>;
+  status: Scalars['String'];
 };
 
 /** Мутация на изменение настроек периода. */
@@ -2770,8 +2784,7 @@ export type MutationChangeColumnDimensionArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationChangeDocumentCommentArgs = {
-  id: Scalars['ID'];
-  input: UpdateDocumentInput;
+  input: ChangeDocumentCommentMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4799,11 +4812,6 @@ export type UnloadFileValueArchiveMutationPayload = {
   src?: Maybe<Scalars['String']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
-};
-
-export type UpdateDocumentInput = {
-  /** Комментарий */
-  comment: Scalars['String'];
 };
 
 export type UpdateProjectInput = {

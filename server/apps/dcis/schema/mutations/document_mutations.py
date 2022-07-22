@@ -81,18 +81,28 @@ class AddDocumentMutation(BaseMutation):
         return AddDocumentMutation(document=document)
 
 
-class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
+class ChangeDocumentCommentMutation(BaseMutation):
     """Изменение комментария версии документа."""
 
-    class Meta:
-        model = Document
-        login_required = True
-        only_fields = ('comment',)
+    class Input:
+        comment = graphene.String(required=True, description='Комментарий')
+        document_id = graphene.ID(description='Идентификатор документа')
 
-    @classmethod
-    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Document) -> None:
-        if not ChangeDocument.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+    document = graphene.Field(DocumentType, description='Созданный документ')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangeDocument,))
+    def mutate_and_get_payload(
+        root: None,
+        info: ResolveInfo,
+        document_id: str,
+        comment: str,
+    ):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        info.context.check_object_permissions(info.context, document)
+        document.comment = comment
+        document.save(update_fields=('comment', 'updated_at'))
+        return ChangeDocumentCommentMutation(document=document)
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -253,7 +263,7 @@ class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
     add_document = AddDocumentMutation.Field(required=True)
-    change_document_comment = ChangeDocumentCommentMutationPayload.Field(required=True)
+    change_document_comment = ChangeDocumentCommentMutation.Field(required=True)
     add_document_status = AddDocumentStatusMutation.Field(required=True)
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)

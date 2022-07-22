@@ -83,7 +83,7 @@ export default defineComponent({
       }
     }
 
-    const { mutate: ChangeDocumentCommentMutate } = useMutation<
+    const { mutate: changeDocumentCommentMutate } = useMutation<
       ChangeDocumentCommentMutation,
       ChangeDocumentCommentMutationVariables
     >(
@@ -98,7 +98,7 @@ export default defineComponent({
     )
 
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
-      ChangeDocumentCommentMutate({ documentId: document.id, comment })
+      changeDocumentCommentMutate({ documentId: document.id, comment })
     }
     const headers: DataTableHeader[] = [
       { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },

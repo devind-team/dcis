@@ -909,9 +909,23 @@ type ChangeColumnDimensionMutationPayload {
   width: Int
 }
 
+input ChangeDocumentCommentMutationInput {
+  clientMutationId: String
+  """Комментарий"""
+  comment: String!
+  """Идентификатор документа"""
+  documentId: ID
+}
+
 """Изменение комментария версии документа."""
 type ChangeDocumentCommentMutationPayload {
+  clientMutationId: String
+  """Созданный документ"""
   document: DocumentType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input ChangeFileMutationInput {
@@ -1202,17 +1216,17 @@ input ChangePeriodMutationInput {
   """Дата окончания"""
   expiration: Date
   """Множественное заполнение"""
-  multiple: Boolean
+  multiple: Boolean!
   """Название периода"""
-  name: String
+  name: String!
   """Идентификатор текущего периода"""
   periodId: ID!
   """Приватность полей"""
-  privately: Boolean
+  privately: Boolean!
   """Дата начала"""
   start: Date
   """Статус проекта"""
-  status: String
+  status: String!
 }
 
 """Мутация на изменение настроек периода."""
@@ -2371,7 +2385,7 @@ type Mutation {
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
   """Изменение комментария версии документа."""
-  changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
+  changeDocumentComment(input: ChangeDocumentCommentMutationInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Изменение значения ячейки типа `Файл`"""
@@ -3987,11 +4001,6 @@ type UnloadFileValueArchiveMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
-}
-
-input UpdateDocumentInput {
-  """Комментарий"""
-  comment: String!
 }
 
 input UpdateProjectInput {
