@@ -56,7 +56,7 @@ mutation-modal-form(
 import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
 import type { PropType } from '#app'
-import { defineComponent, ref, toRef } from '#app'
+import { defineComponent, ref } from '#app'
 import {
   AddDocumentStatusMutationPayload,
   DeleteDocumentStatusMutation,
@@ -70,7 +70,6 @@ import {
   StatusType
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
-import { useAuthStore } from '~/stores'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'
@@ -93,9 +92,7 @@ export default defineComponent({
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
   setup (props) {
-    const userStore = useAuthStore()
     const { dateTimeHM, getUserName } = useFilters()
-    const hasPerm = toRef(userStore, 'hasPerm')
     const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
 
@@ -167,7 +164,6 @@ export default defineComponent({
       status,
       statuses,
       documentStatuses,
-      hasPerm,
       dateTimeHM,
       getUserName,
       addDocumentStatusUpdate,

@@ -10,7 +10,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
   items-data-filter(
     v-if="period.multiple"
     v-model="selectedDocs"
-    :items="period.divisions.map( x => ({id: x.id, name: x.name}))"
+    :items="period.divisions.map(x => ({ id: x.id, name: x.name }))"
     :get-name="i => i.name"
     multiple
   )
@@ -30,7 +30,9 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
         document-statuses(v-if="item.canChange" :update="update" :document="item")
           template(#activator="{ on }")
             a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-        strong(v-else) {{ item.lastStatus.status.name }}.
+        document-statuses-readonly(v-else :document="item")
+          template(#activator="{ on }")
+            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
         div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
         .font-italic {{ item.lastStatus.comment }}
     template(#item.division="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
@@ -53,16 +55,24 @@ import {
   ChangeDocumentCommentMutationVariables
 } from '~/types/graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
-import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
-import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import TextMenu from '~/components/common/menu/TextMenu.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
+import DocumentStatusesReadonly from '~/components/dcis/documents/DocumentStatusesReadonly.vue'
+import TextMenu from '~/components/common/menu/TextMenu.vue'
 
 type DivisionFilterType = { id: string, name: string }
 
 export default defineComponent({
-  components: { ItemsDataFilter, LeftNavigatorContainer, AddDocument, DocumentStatuses, TextMenu },
+  components: {
+    LeftNavigatorContainer,
+    ItemsDataFilter,
+    AddDocument,
+    DocumentStatuses,
+    DocumentStatusesReadonly,
+    TextMenu
+  },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },

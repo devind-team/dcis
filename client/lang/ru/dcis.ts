@@ -186,7 +186,8 @@ export default {
       version: '@:dcis.documents.version'
     },
     status: {
-      header: 'Добавление статуса',
+      header: 'Изменение статусов',
+      readonlyHeader: 'Статусы',
       subheader: '@:dcis.documents.version',
       status: 'Статус',
       comment: 'Комментарий',
