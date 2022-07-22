@@ -41,20 +41,23 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         self.sheet = Sheet.objects.create(period=self.user_period)
         self.row_dimension = RowDimension.objects.create(index=1, sheet=self.sheet)
         self.document_row_dimension = RowDimension.objects.create(
+            index=1,
+            sheet=self.sheet,
+            document=self.user_document,
+            parent=self.row_dimension
+        )
+        self.document_user_row_dimension = RowDimension.objects.create(
             index=2,
             sheet=self.sheet,
             document=self.user_document,
-        )
-        self.document_user_row_dimension = RowDimension.objects.create(
-            index=3,
-            sheet=self.sheet,
-            document=self.user_document,
+            parent=self.row_dimension,
             user=self.user,
         )
         self.document_row_dimension_with_child = RowDimension.objects.create(
-            index=4,
+            index=3,
             sheet=self.sheet,
             document=self.user_document,
+            parent=self.row_dimension
         )
         self.document_row_dimension_child = RowDimension.objects.create(
             index=1,
@@ -62,11 +65,12 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             document=self.user_document,
             parent=self.document_row_dimension_with_child,
         )
-        self.dynamic_row_dimension = RowDimension.objects.create(index=5, sheet=self.sheet, dynamic=True)
+        self.dynamic_row_dimension = RowDimension.objects.create(index=2, sheet=self.sheet, dynamic=True)
         self.document_dynamic_row_dimension = RowDimension.objects.create(
-            index=6,
+            index=1,
             sheet=self.sheet,
             document=self.user_document,
+            parent=self.dynamic_row_dimension,
             dynamic=True,
         )
         self.column_dimensions = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 6)]

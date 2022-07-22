@@ -7,6 +7,7 @@ from .document_permissions import (
     ChangeChildRowDimensionHeightBase,
     ChangeDocument,
     ChangeDocumentBase,
+    ChangeDocumentSheetBase,
     ChangeValue,
     ChangeValueBase,
     DeleteChildRowDimension,
@@ -40,5 +41,4 @@ from .project_permissions import (
     DeleteProjectBase,
     ViewProject,
 )
-
 from .value_permissions import can_change_value

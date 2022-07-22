@@ -11,5 +11,6 @@ query DocumentSheet($documentId: ID!, $sheetId: ID!) {
     rows {
       ...RowDimensionFields
     }
+    canChange
   }
 }

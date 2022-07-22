@@ -61,6 +61,8 @@
 
 <script lang="ts">
 import { defineComponent, Ref, PropType, toRef, provide } from '#app'
+import { GridMode, UpdateSheetType } from '~/types/grid'
+import { DocumentType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -69,8 +71,7 @@ import {
   useGrid,
   useI18n
 } from '~/composables'
-import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
+import { useAuthStore } from '~/stores'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
@@ -91,6 +92,8 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
+
+    const userStore = useAuthStore()
 
     const activeSheet = toRef(props, 'activeSheet')
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
@@ -146,7 +149,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(props.mode, activeSheet, changeColumnWidth, changeRowHeight)
+    } = useGrid(userStore.user, props.mode, activeSheet, changeColumnWidth, changeRowHeight)
 
     return {
       t,

@@ -2,19 +2,14 @@
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Any, Callable, Sequence
+from typing import Any, Sequence
 
 from django.db.models import Model, Q, QuerySet
 from openpyxl.utils import column_index_from_string, get_column_letter
 
 from apps.dcis.models import Document
 from apps.dcis.models.sheet import Cell, ColumnDimension, MergedCell, RowDimension, Sheet, Value
-from apps.dcis.permissions import (
-    AddChildRowDimensionBase,
-    ChangeChildRowDimensionHeightBase,
-    DeleteChildRowDimensionBase,
-    ChangeValueBase,
-)
+from apps.dcis.permissions import ChangeDocumentSheetBase
 
 
 class DataUnloader(ABC):
@@ -78,7 +73,7 @@ class SheetColumnsUnloader(DataUnloader):
     _column_fields = (
         'id', 'index', 'width',
         'fixed', 'hidden', 'kind',
-        'created_at', 'updated_at', 'user'
+        'created_at', 'updated_at', 'user_id'
     )
 
 
@@ -91,9 +86,7 @@ class SheetRowsUnloader(DataUnloader):
         rows: QuerySet[RowDimension] | Sequence[RowDimension],
         cells: QuerySet[Cell] | Sequence[Cell],
         merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
-        values: QuerySet[Value] | Sequence[Value],
-        get_row_permissions: Callable[[RowDimension], dict[str, bool]],
-        get_cell_permissions: Callable[[Cell], dict[str, bool]]
+        values: QuerySet[Value] | Sequence[Value]
     ) -> None:
         super().__init__()
         self.columns_unloader = columns_unloader
@@ -101,8 +94,6 @@ class SheetRowsUnloader(DataUnloader):
         self.cells = cells
         self.merged_cells = merged_cells
         self.values = values
-        self.get_row_permissions = get_row_permissions
-        self.get_cell_permissions = get_cell_permissions
 
     def unload_data(self) -> list[dict] | dict:
         """Выгрузка строк листа."""
@@ -119,7 +110,8 @@ class SheetRowsUnloader(DataUnloader):
         'id', 'index', 'height',
         'fixed', 'hidden', 'dynamic',
         'aggregation', 'created_at', 'updated_at',
-        'parent_id', 'document_id', 'user',
+        'parent_id', 'document_id', 'object_id',
+        'user_id',
     )
     _cells_fields = (
         'id', 'kind', 'editable',
@@ -156,19 +148,11 @@ class SheetRowsUnloader(DataUnloader):
 
     def _unload_raw_rows(self) -> list[dict]:
         """Выгрузка необработанных строк листа."""
-        result: list[dict] = []
-        for row, row_data in zip(self.rows, self.unload_raw_data(self.rows, self._rows_fields)):
-            row_data.update(self.get_row_permissions(row))
-            result.append(row_data)
-        return result
+        return self.unload_raw_data(self.rows, self._rows_fields)
 
     def _unload_raw_cells(self) -> list[dict]:
         """Выгрузка необработанных ячеек листа."""
-        result: list[dict] = []
-        for cell, cell_data in zip(self.cells, self.unload_raw_data(self.cells, self._cells_fields)):
-            cell_data.update(self.get_cell_permissions(cell))
-            result.append(cell_data)
-        return result
+        return self.unload_raw_data(self.cells, self._cells_fields)
 
     def _unload_raw_values(self) -> list[dict]:
         """Выгрузка необработанных значений листа."""
@@ -351,8 +335,6 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
         cells: QuerySet[Cell] | Sequence[Cell],
         merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
         values: QuerySet[Value] | Sequence[Value],
-        get_row_permissions: Callable[[RowDimension], dict[str, bool]],
-        get_cell_permissions: Callable[[Cell], dict[str, bool]],
         rows_global_indices_map: dict[dict]
     ) -> None:
         super().__init__(
@@ -360,9 +342,7 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
             rows=rows,
             cells=cells,
             merged_cells=merged_cells,
-            values=values,
-            get_row_permissions=get_row_permissions,
-            get_cell_permissions=get_cell_permissions
+            values=values
         )
         self.rows_global_indices_map = rows_global_indices_map
 
@@ -425,26 +405,23 @@ class SheetUnloader(DataUnloader):
         ...
 
     @abstractmethod
-    def get_row_permissions(self, row: RowDimension) -> dict[str, bool]:
-        """Получение разрешений для строки."""
-        ...
-
-    @abstractmethod
-    def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
-        """Получение разрешений для ячейки."""
+    def get_can_change(self) -> bool:
+        """Получение разрешения на изменение листа."""
         ...
 
     def unload_data(self) -> list[dict] | dict:
         """Выгрузка листа."""
         sheet = self._model_to_dict(
             self.sheet,
-            fields=[field for field in self.fields if field not in ('columns', 'rows')]
+            fields=[field for field in self.fields if field not in ('columns', 'rows', 'can_change')]
         )
         self.columns_unloader = SheetColumnsUnloader(self.sheet.columndimension_set.all())
         if 'columns' in self.fields:
             sheet['columns'] = self.columns_unloader.unload()
         if 'rows' in self.fields:
             sheet['rows'] = self.unload_rows()
+        if 'can_change' in self.fields:
+            sheet['can_change'] = self.get_can_change()
         return sheet
 
 
@@ -464,19 +441,10 @@ class DocumentsSheetUnloader(SheetUnloader):
             cells=Cell.objects.filter(row__in=[row.id for row in rows]),
             merged_cells=self.sheet.mergedcell_set.all(),
             values=Value.objects.none(),
-            get_row_permissions=self.get_row_permissions,
-            get_cell_permissions=self.get_cell_permissions,
         ).unload()
 
-    def get_row_permissions(self, row: RowDimension) -> dict[str, bool]:
-        return {
-            'can_add_child_row': True,
-            'can_change_height': True,
-            'can_delete': True,
-        }
-
-    def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
-        return {'can_change_value': True}
+    def get_can_change(self) -> bool:
+        return True
 
 
 class DocumentSheetUnloader(SheetUnloader):
@@ -485,10 +453,7 @@ class DocumentSheetUnloader(SheetUnloader):
     def __init__(self, context: Any, sheet: Sheet, document_id: int | str, fields: Sequence[str]) -> None:
         super().__init__(sheet, fields)
         self.document = Document.objects.get(pk=document_id)
-        self.add_child_row_dimension = AddChildRowDimensionBase(context, self.document)
-        self.change_child_row_dimension_height = ChangeChildRowDimensionHeightBase(context, self.document)
-        self.delete_child_row_dimension = DeleteChildRowDimensionBase(context, self.document)
-        self.change_value = ChangeValueBase(context, self.document)
+        self.change_document_sheet = ChangeDocumentSheetBase(context, self.document)
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""
@@ -500,24 +465,8 @@ class DocumentSheetUnloader(SheetUnloader):
             rows=rows,
             cells=Cell.objects.filter(row__in=[row.id for row in rows]),
             merged_cells=self.sheet.mergedcell_set.all(),
-            values=self.sheet.value_set.filter(document_id=self.document.id),
-            get_row_permissions=self.get_row_permissions,
-            get_cell_permissions=self.get_cell_permissions
+            values=self.sheet.value_set.filter(document_id=self.document.id)
         ).unload()
 
-    def get_row_permissions(self, row: RowDimension) -> dict[str, bool]:
-        if row.document is None:
-            return {
-                'can_add_child_row': self.add_child_row_dimension.has_object_permission(row),
-                'can_change_height': False,
-                'can_delete': False,
-            }
-        else:
-            return {
-                'can_add_child_row': self.add_child_row_dimension.has_object_permission(row),
-                'can_change_height': self.change_child_row_dimension_height.has_object_permission(row),
-                'can_delete': self.delete_child_row_dimension.has_object_permission(row),
-            }
-
-    def get_cell_permissions(self, cell: Cell) -> dict[str, bool]:
-        return {'can_change_value': self.change_value.has_object_permission(cell)}
+    def get_can_change(self) -> bool:
+        return self.change_document_sheet.has_permission

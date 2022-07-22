@@ -407,7 +407,7 @@ class ColumnDimensionType(graphene.ObjectType):
     kind = graphene.String(required=True, description='Тип значений')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
-    user = graphene.List(UserType, description='Пользователь')
+    user_id = graphene.ID(description='Идентификатор пользователя')
 
 
 class RowDimensionType(graphene.ObjectType):
@@ -427,10 +427,8 @@ class RowDimensionType(graphene.ObjectType):
     parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
     children = graphene.List(graphene.NonNull(lambda: RowDimensionType), required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
-    can_add_child_row = graphene.Boolean(required=True, description='Может ли пользователь добавить дочернюю строку')
-    can_change_height = graphene.Boolean(required=True, description='Может ли пользователь изменять высоту строки')
-    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалить строку')
-    user = graphene.List(UserType, description='Пользователь')
+    object_id = graphene.ID(description='Идентификатор дивизиона')
+    user_id = graphene.ID(description='Идентификатор пользователя')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
 
@@ -473,7 +471,6 @@ class CellType(graphene.ObjectType):
     )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
-    can_change_value = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
 
     # От Value
     value = graphene.String(description='Значение')
@@ -521,8 +518,9 @@ class BaseSheetType(graphene.ObjectType):
 class SheetType(BaseSheetType):
     """Тип листа."""
 
-    columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
-    rows = graphene.List(lambda: RowDimensionType, description='Строки')
+    columns = graphene.List(graphene.NonNull(lambda: ColumnDimensionType), description='Колонки')
+    rows = graphene.List(graphene.NonNull(lambda: RowDimensionType), description='Строки')
+    can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять лист')
 
 
 class LimitationType(DjangoObjectType):
