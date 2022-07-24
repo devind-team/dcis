@@ -62,7 +62,7 @@
 <script lang="ts">
 import { defineComponent, Ref, PropType, toRef, provide } from '#app'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
+import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -103,6 +103,13 @@ export default defineComponent({
     provide('activeSheet', activeSheet)
     provide('updateActiveSheet', updateActiveSheet)
     provide('activeDocument', activeDocument)
+
+    const canChangeRowHeight = (rowDimension: RowDimensionType) => {
+      if (props.mode === GridMode.CHANGE) {
+        return true
+      }
+      return rowDimension.parent !== null && (activeSheet.value.canChange || userStore.user.id === rowDimension.userId)
+    }
 
     const changeColumnWidth = props.mode === GridMode.CHANGE
       ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
@@ -149,7 +156,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(userStore.user, props.mode, activeSheet, changeColumnWidth, changeRowHeight)
+    } = useGrid(props.mode, activeSheet, canChangeRowHeight, changeColumnWidth, changeRowHeight)
 
     return {
       t,

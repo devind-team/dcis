@@ -1,5 +1,5 @@
 import { computed, ref, Ref, watch } from '#app'
-import { CellType, ColumnDimensionType, RowDimensionType, SheetType, UserType } from '~/types/graphql'
+import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
 import { GridMode } from '~/types/grid'
 
@@ -14,9 +14,9 @@ export const cellKinds = {
 }
 
 export function useGrid (
-  user: UserType,
   mode: GridMode,
   sheet: Ref<SheetType>,
+  canChangeRowHeight: (rowDimension: RowDimensionType) => boolean,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void> | null,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
@@ -140,12 +140,7 @@ export function useGrid (
         ? sheet.value.rows[row.globalIndex - 2]
         : null,
       event,
-      (row: RowDimensionType) => {
-        if (mode === GridMode.CHANGE) {
-          return true
-        }
-        return row.parent !== null && (sheet.value.canChange || user.id === row.userId)
-      }
+      canChangeRowHeight
     )
   }
   const mouseleaveRowName = () => {
