@@ -61,6 +61,8 @@
 
 <script lang="ts">
 import { defineComponent, Ref, PropType, toRef, provide } from '#app'
+import { GridMode, UpdateSheetType } from '~/types/grid'
+import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -69,8 +71,7 @@ import {
   useGrid,
   useI18n
 } from '~/composables'
-import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentType, SheetType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
+import { useAuthStore } from '~/stores'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
@@ -92,6 +93,8 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
+    const userStore = useAuthStore()
+
     const activeSheet = toRef(props, 'activeSheet')
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const activeDocument = toRef(props, 'activeDocument')
@@ -100,6 +103,13 @@ export default defineComponent({
     provide('activeSheet', activeSheet)
     provide('updateActiveSheet', updateActiveSheet)
     provide('activeDocument', activeDocument)
+
+    const canChangeRowHeight = (rowDimension: RowDimensionType) => {
+      if (props.mode === GridMode.CHANGE) {
+        return true
+      }
+      return rowDimension.parent !== null && (activeSheet.value.canChange || userStore.user.id === rowDimension.userId)
+    }
 
     const changeColumnWidth = props.mode === GridMode.CHANGE
       ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
@@ -146,7 +156,7 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(props.mode, activeSheet, changeColumnWidth, changeRowHeight)
+    } = useGrid(props.mode, activeSheet, canChangeRowHeight, changeColumnWidth, changeRowHeight)
 
     return {
       t,

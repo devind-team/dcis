@@ -20,9 +20,10 @@ import {
   useCommonQuery,
   useUnloadFileValueArchiveMutation
 } from '~/composables'
+import { useAuthStore } from '~/stores'
 import { GridMode, UpdateSheetType } from '~/types/grid'
 import {
-  CellType,
+  CellType, DivisionModelType,
   DocumentSheetQuery,
   DocumentsSheetQuery,
   DocumentType,
@@ -56,6 +57,8 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { client } = useApolloClient()
+
+    const userStore = useAuthStore()
 
     const mode = inject<GridMode>('mode')
     const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
@@ -134,6 +137,20 @@ export default defineComponent({
       emit('clear-active')
     }
 
+    const canChangeValue = computed<boolean>(() => {
+      if (mode === GridMode.CHANGE) {
+        return true
+      }
+      if (activeSheet.value.canChange) {
+        return true
+      }
+      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
+      if (activeDocument.value.period.multiple) {
+        return userDivisionIds.includes(activeDocument.value.objectId)
+      }
+      return userDivisionIds.includes(props.cell.rowId)
+    })
+
     const cellKind = computed<string>(() => {
       if (props.cell.kind in cellKinds) {
         if (props.cell.kind === 'fl' && mode === GridMode.CHANGE) {
@@ -148,14 +165,14 @@ export default defineComponent({
     const hasFiles = computed<boolean>(() =>
       componentName.value === 'GridCellFiles' && Boolean(files.value) && files.value.length !== 0)
     const renderComponent = computed<boolean>(() =>
-      props.active && (hasFiles.value || props.cell.canChangeValue)
+      props.active && (hasFiles.value || canChangeValue.value)
     )
 
     const componentProps = computed(() => {
       if (componentName.value === 'GridCellFiles') {
-        return { value: props.cell.value, files: files.value || [], readonly: !props.cell.canChangeValue }
+        return { value: props.cell.value, files: files.value || [], readonly: !canChangeValue.value }
       }
-      return { value: props.cell.value, readonly: !props.cell.canChangeValue }
+      return { value: props.cell.value, readonly: !canChangeValue.value }
     })
 
     const componentListeners = computed<Record<string, Function>>(() => {

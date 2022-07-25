@@ -16,6 +16,7 @@ export const cellKinds = {
 export function useGrid (
   mode: GridMode,
   sheet: Ref<SheetType>,
+  canChangeRowHeight: (rowDimension: RowDimensionType) => boolean,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void> | null,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
@@ -139,7 +140,7 @@ export function useGrid (
         ? sheet.value.rows[row.globalIndex - 2]
         : null,
       event,
-      (row: RowDimensionType) => row.canChangeHeight
+      canChangeRowHeight
     )
   }
   const mouseleaveRowName = () => {

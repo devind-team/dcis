@@ -25,9 +25,8 @@ fragment RowDimensionFields on RowDimensionType {
     __typename
   }
   documentId
-  canAddChildRow
-  canChangeHeight
-  canDelete
+  objectId
+  userId
   cells {
     ...CellFields
   }

@@ -642,8 +642,6 @@ type CellType {
   borderColor: JSONString!
   """Стили границ"""
   borderStyle: JSONString!
-  """Может ли пользователь изменять значение ячейки"""
-  canChangeValue: Boolean!
   """Цвет индекса"""
   color: String!
   """Объединение колонок"""
@@ -1511,8 +1509,8 @@ type ColumnDimensionType {
   name: String!
   """Дата обновления"""
   updatedAt: DateTime!
-  """Пользователь"""
-  user: [UserType]
+  """Идентификатор пользователя"""
+  userId: ID
   """Ширина колонки"""
   width: Int
 }
@@ -3555,12 +3553,6 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
-  """Может ли пользователь добавить дочернюю строку"""
-  canAddChildRow: Boolean!
-  """Может ли пользователь изменять высоту строки"""
-  canChangeHeight: Boolean!
-  """Может ли пользователь удалить строку"""
-  canDelete: Boolean!
   """Ячейки"""
   cells: [CellType!]!
   """Дочерние строки"""
@@ -3585,12 +3577,14 @@ type RowDimensionType {
   index: Int!
   """Название строки"""
   name: String!
+  """Идентификатор дивизиона"""
+  objectId: ID
   """Родительская строка"""
   parent: RowDimensionType
   """Дата обновления"""
   updatedAt: DateTime!
-  """Пользователь"""
-  user: [UserType]
+  """Идентификатор пользователя"""
+  userId: ID
 }
 
 """Ошибка в строке."""
@@ -3820,8 +3814,10 @@ type SettingType {
 
 """Тип листа."""
 type SheetType {
+  """Может ли пользователь изменять лист"""
+  canChange: Boolean!
   """Колонки"""
-  columns: [ColumnDimensionType]
+  columns: [ColumnDimensionType!]
   """Комментарий"""
   comment: String!
   """Дата добавления"""
@@ -3835,7 +3831,7 @@ type SheetType {
   """Позиция"""
   position: Int!
   """Строки"""
-  rows: [RowDimensionType]
+  rows: [RowDimensionType!]
   """Дата обновления"""
   updatedAt: DateTime!
 }

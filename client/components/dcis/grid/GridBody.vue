@@ -46,6 +46,7 @@ tbody
 import { PropType, Ref, nextTick } from '#app'
 import { CellType, RowDimensionType, SheetType } from '~/types/graphql'
 import { GridMode, ResizingType } from '~/types/grid'
+import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -78,6 +79,8 @@ export default defineComponent({
     mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
+    const userStore = useAuthStore()
+
     const mode = inject<GridMode>('mode')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
@@ -99,7 +102,7 @@ export default defineComponent({
       }
       if (rowDimension.parent) {
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
-        return parent.canAddChildRow
+        return parent.dynamic && activeSheet.value.canChange
       }
       return false
     }
@@ -107,13 +110,15 @@ export default defineComponent({
       if (mode === GridMode.CHANGE) {
         return false
       }
-      return rowDimension.canAddChildRow
+      return rowDimension.dynamic && activeSheet.value.canChange
     }
     const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
         return rootCount.value !== 1 || Boolean(rowDimension.parent)
       } else {
-        return rowDimension.canDelete
+        return rowDimension.parent !== null && rowDimension.children.length === 0 && (
+          activeSheet.value.canChange || rowDimension.userId === userStore.user.id
+        )
       }
     }
     const viewControl = (rowDimension: RowDimensionType): boolean => {

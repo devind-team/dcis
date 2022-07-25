@@ -1,6 +1,5 @@
 """Разрешения на работу с документами периодов."""
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
@@ -97,20 +96,17 @@ class DeleteDocument(BasePermission):
         )
 
 
-class ChangeValueBase:
-    """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра.
+class ChangeDocumentSheetBase:
+    """Пропускает пользователей, которые могут изменять лист документа."""
 
-    Позволяет вычислять разрешение многократно для одного пользователя
-    и нескольких ячеек одного документа, не делая дополнительных запросов.
-    """
+    global_permission: str = ''
+    local_permission: str = ''
 
-    def __init__(self, context: Any, document: Document) -> None:
+    def __init__(self, context: Any, document: Document):
         self._context = context
         self._document = document
         self._can_change_period_sheet: bool | None = None
-        self._has_change_value_permission: bool | None = None
-        self._user_division_ids: list[int] | None = None
-        self._can_change_in_multiple_mode: bool | None = None
+        self._has_privilege: bool | None = None
 
     @property
     def can_change_period_sheet(self) -> bool:
@@ -123,15 +119,36 @@ class ChangeValueBase:
         return self._can_change_period_sheet
 
     @property
-    def has_change_value_permission(self) -> bool:
-        """Обладает ли пользователь привилегией, позволяющей изменять значение ячейки."""
-        if self._has_change_value_permission is None:
-            self._has_change_value_permission = self._context.user.has_perm('dcis.change_value') or has_privilege(
+    def has_privilege(self) -> bool:
+        """Обладает ли пользователь привилегией, позволяющей выполнять действие."""
+        if self._has_privilege is None:
+            self._has_privilege = self._context.user.has_perm(self.global_permission) or has_privilege(
                 self._context.user.id,
                 self._document.period.id,
-                'change_value'
+                self.local_permission
             )
-        return self._has_change_value_permission
+        return self._has_privilege
+
+    @property
+    def has_permission(self) -> bool:
+        """Получение разрешения."""
+        return self.can_change_period_sheet or self.has_privilege
+
+
+class ChangeValueBase(ChangeDocumentSheetBase):
+    """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра.
+
+    Позволяет вычислять разрешение многократно для одного пользователя
+    и нескольких ячеек одного документа, не делая дополнительных запросов.
+    """
+
+    global_permission = 'dcis.change_value'
+    local_permission = 'change_value'
+
+    def __init__(self, context: Any, document: Document) -> None:
+        super().__init__(context, document)
+        self._user_division_ids: list[int] | None = None
+        self._can_change_in_multiple_mode: bool | None = None
 
     @property
     def user_division_ids(self) -> list[int]:
@@ -166,7 +183,7 @@ class ChangeValueBase:
         if self.can_change_period_sheet:
             return True
         return (
-            self.has_change_value_permission or
+            self.has_permission or
             self.can_change_in_multiple_mode or
             self.can_change_in_single_mode(cell)
         )
@@ -189,57 +206,14 @@ class ChangeValue(BasePermission):
         ).has_object_permission(obj.cell)
 
 
-class RowDimensionBasePermission(ABC):
-    """Базовое разрешение на работу со строками.
-
-    Позволяет вычислять разрешение многократно для одного пользователя
-    и нескольких строк одного документа, не делая дополнительных запросов.
-    """
-
-    global_permission: str = ''
-    local_permission: str = ''
-
-    def __init__(self, context: Any, document: Document):
-        self._context = context
-        self._document = document
-        self._can_change_period_sheet: bool | None = None
-        self._has_permission: bool | None = None
-
-    @property
-    def can_change_period_sheet(self) -> bool:
-        """Может ли пользователь изменять структуру листа."""
-        if self._can_change_period_sheet is None:
-            self._can_change_period_sheet = ChangePeriodSheetBase.has_object_permission(
-                self._context,
-                self._document.period
-            )
-        return self._can_change_period_sheet
-
-    @property
-    def has_permission(self) -> bool:
-        """Обладает ли пользователь привилегией, позволяющей выполнять действие."""
-        if self._has_permission is None:
-            self._has_permission = self._context.user.has_perm(self.global_permission) or has_privilege(
-                self._context.user.id,
-                self._document.period.id,
-                self.local_permission
-            )
-        return self._has_permission
-
-    @abstractmethod
-    def has_object_permission(self, row: RowDimension) -> bool:
-        """Получение разрешения."""
-        ...
-
-
-class AddChildRowDimensionBase(RowDimensionBasePermission):
+class AddChildRowDimensionBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут добавлять дочерние строки, без проверки возможности просмотра."""
 
     global_permission = 'dcis.add_rowdimension'
     local_permission = 'add_rowdimension'
 
     def has_object_permission(self, row: RowDimension) -> bool:
-        return row.dynamic and (self.can_change_period_sheet or self.has_permission)
+        return row.dynamic and self.has_permission
 
 
 class AddChildRowDimension(BasePermission):
@@ -259,7 +233,7 @@ class AddChildRowDimension(BasePermission):
         ).has_object_permission(obj.row_dimension)
 
 
-class ChangeChildRowDimensionHeightBase(RowDimensionBasePermission):
+class ChangeChildRowDimensionHeightBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут изменять высоту дочерней строки, без проверки возможности просмотра."""
 
     global_permission = 'dcis.change_rowdimension'
@@ -267,9 +241,11 @@ class ChangeChildRowDimensionHeightBase(RowDimensionBasePermission):
 
     def has_object_permission(self, row: RowDimension) -> bool:
         return (
-            self.can_change_period_sheet or
-            self.has_permission or
-            row.user_id == self._context.user.id
+            row.parent_id is not None and
+            row.document_id is not None and (
+                self.has_permission
+                or row.user_id == self._context.user.id
+            )
         )
 
 
@@ -278,14 +254,17 @@ class ChangeChildRowDimensionHeight(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: RowDimension):
-        return obj.document is not None and ViewDocument.has_object_permission(
-            context, obj.document
-        ) and ChangeChildRowDimensionHeightBase(
-            context, obj.document
-        ).has_object_permission(obj)
+        return (
+            obj.parent_id is not None and
+            obj.document_id is not None and ViewDocument.has_object_permission(
+                context, obj.document
+            ) and ChangeChildRowDimensionHeightBase(
+                context, obj.document
+            ).has_object_permission(obj)
+        )
 
 
-class DeleteChildRowDimensionBase(RowDimensionBasePermission):
+class DeleteChildRowDimensionBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут удалять дочерние строки, без проверки возможности просмотра."""
 
     global_permission = 'dcis.delete_rowdimension'
@@ -293,10 +272,12 @@ class DeleteChildRowDimensionBase(RowDimensionBasePermission):
 
     def has_object_permission(self, row: RowDimension) -> bool:
         return (
-            self.can_change_period_sheet or
-            self.has_permission or
-            row.user_id == self._context.user.id
-        ) and row.rowdimension_set.count() == 0
+            row.parent_id is not None and
+            row.document_id is not None and (
+                self.has_permission or
+                row.user_id == self._context.user.id
+            ) and row.rowdimension_set.count() == 0
+        )
 
 
 class DeleteChildRowDimension(BasePermission):
@@ -304,8 +285,11 @@ class DeleteChildRowDimension(BasePermission):
 
     @staticmethod
     def has_object_permission(context, obj: RowDimension):
-        return obj.document is not None and ViewDocument.has_object_permission(
-            context, obj.document
-        ) and DeleteChildRowDimensionBase(
-            context, obj.document
-        ).has_object_permission(obj)
+        return (
+            obj.parent_id is not None and
+            obj.document_id is not None and ViewDocument.has_object_permission(
+                context, obj.document
+            ) and DeleteChildRowDimensionBase(
+                context, obj.document
+            ).has_object_permission(obj)
+        )
