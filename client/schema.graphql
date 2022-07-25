@@ -1903,14 +1903,19 @@ type DeleteProfileMutationPayload {
   success: Boolean!
 }
 
+input DeleteProjectMutationInput {
+  clientMutationId: String
+  """Идентификатор проекта"""
+  projectId: ID!
+}
+
 """Мутация на удаление проекта."""
 type DeleteProjectMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Идентификатор удаленного проекта"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -2469,7 +2474,7 @@ type Mutation {
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
   """Мутация на удаление проекта."""
-  deleteProject(id: ID!): DeleteProjectMutationPayload!
+  deleteProject(input: DeleteProjectMutationInput!): DeleteProjectMutationPayload!
   """Удаление строки"""
   deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
   """Удаление секции"""

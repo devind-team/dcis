@@ -2009,15 +2009,20 @@ export type DeleteProfileMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteProjectMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор проекта */
+  projectId: Scalars['ID'];
+};
+
 /** Мутация на удаление проекта. */
 export type DeleteProjectMutationPayload = {
   __typename?: 'DeleteProjectMutationPayload';
-  deletedId?: Maybe<Scalars['ID']>;
-  deletedInputId?: Maybe<Scalars['ID']>;
-  deletedRawId?: Maybe<Scalars['ID']>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Идентификатор удаленного проекта */
+  deleteId: Scalars['ID'];
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
-  found?: Maybe<Scalars['Boolean']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2995,7 +3000,7 @@ export type MutationDeleteProfileArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteProjectArgs = {
-  id: Scalars['ID'];
+  input: DeleteProjectMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5485,7 +5490,7 @@ export type DeleteProjectMutationVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
-export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutationPayload', success: boolean, found?: boolean | null, deletedId?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type DeleteProjectMutation = { __typename?: 'Mutation', deleteProject: { __typename: 'DeleteProjectMutationPayload', success: boolean, deleteId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddRowDimensionMutationVariables = Exact<{
   sheetId: Scalars['ID'];

@@ -1,13 +1,12 @@
 mutation DeleteProject($id: ID!) {
-  deleteProject(id: $id) {
+  deleteProject(input: {projectId: $id}) {
     success
     errors {
       field
       messages
       __typename
     }
-    found
-    deletedId
+    deleteId
     __typename
   }
 }
