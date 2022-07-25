@@ -131,7 +131,7 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
       - все формулы текущего листа рассчитываем и обновляем результаты
     """
     for sheet_name in sequence_evaluate:
-        input_state: dict[str, str | int | float | None] = {}
+        input_state: dict[str, str | int | float] = {}
         cell_name: str
         cell_state: ValueState
         for cell_name, cell_state in state.items():
