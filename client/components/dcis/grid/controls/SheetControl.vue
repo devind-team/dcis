@@ -18,7 +18,7 @@ v-menu(v-model="active" bottom close-on-content-click)
 <script lang="ts">
 import { MutationUpdaterFn } from '@apollo/client'
 import { defineComponent, PropType, ref } from '#app'
-import { BaseSheetType } from '~/types/graphql'
+import { RenameSheetMutation, BaseSheetType } from '~/types/graphql'
 import { useRenameSheetMutation } from '~/services/grapqhl/mutations/dcis/sheet_mutations'
 import RenameDialog from '~/components/dcis/common/RenameDialog.vue'
 
@@ -26,7 +26,7 @@ export default defineComponent({
   components: { RenameDialog },
   props: {
     sheet: { type: Object as PropType<BaseSheetType>, required: true },
-    update: { type: Function as PropType<MutationUpdaterFn<any>>, required: true }
+    update: { type: Function as PropType<MutationUpdaterFn<RenameSheetMutation>>, required: true }
   },
   setup (props) {
     const active = ref<boolean>(false)

@@ -9,6 +9,14 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
       :active-sheet="activeSheet"
       :update-active-sheet="updateActiveSheet"
     )
+      template(#tabs="{ sheets, updateSize }")
+        template(v-for="sheet in sheets")
+          sheet-control(
+            v-slot="{ on, attrs }"
+            :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
+            :key="sheet.id"
+          )
+            v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
 </template>
 
 <script lang="ts">
@@ -66,7 +74,11 @@ export default defineComponent({
       })
     })
 
-    const renameSheetUpdate = (cache: ApolloCache<RenameSheetMutation>, result: FetchResult<RenameSheetMutation>) => {
+    const renameSheetUpdate = (
+      cache: ApolloCache<RenameSheetMutation>,
+      result: FetchResult<RenameSheetMutation>,
+      updateSize: () => void
+    ) => {
       if (result.data.renameSheet.success) {
         periodUpdate(
           cache,
@@ -76,6 +88,7 @@ export default defineComponent({
             return dataCache
           }
         )
+        updateSize()
       }
     }
 
