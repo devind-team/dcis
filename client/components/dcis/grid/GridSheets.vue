@@ -1,8 +1,9 @@
 <template lang="pug">
 div
-  v-tabs(v-model="activeSheetIndex")
+  v-tabs(ref="tabs" v-model="activeSheetIndex")
     slot(name="settings")
-    v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
+    slot(name="tabs" :sheets="sheets" :update-size="updateSize")
+      v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(
     :mode="mode"
     :update-active-sheet="updateActiveSheet"
@@ -22,6 +23,7 @@ div
 </template>
 
 <script lang="ts">
+import { VTabs } from 'vuetify/lib/components/VTabs'
 import { PropType } from '#app'
 import { DocumentType, BaseSheetType, SheetType } from '~/types/graphql'
 import { UpdateSheetType, CellsOptionsType } from '~/types/grid'
@@ -39,6 +41,7 @@ export default defineComponent({
     activeDocument: { type: Object as PropType<DocumentType>, default: null }
   },
   setup (props, { emit }) {
+    const tabs = ref<InstanceType<typeof VTabs> | null>(null)
     const grid = ref<InstanceType<typeof Grid>[] | null>(null)
 
     const activeSheetIndex = computed<number>({
@@ -54,7 +57,11 @@ export default defineComponent({
       grid.value && grid.value.length ? grid.value[0].selectedCellsOptions : null
     )
 
-    return { grid, activeSheetIndex, selectedCellsOptions }
+    const updateSize = () => {
+      tabs.value.onResize()
+    }
+
+    return { tabs, grid, activeSheetIndex, selectedCellsOptions, updateSize }
   }
 })
 </script>
