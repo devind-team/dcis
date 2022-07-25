@@ -131,15 +131,18 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
       - все формулы текущего листа рассчитываем и обновляем результаты
     """
     for sheet_name in sequence_evaluate:
-        input_state: dict[str, str | int | float | None] = {}
+        input_state: dict[str, str | int | float] = {}
         cell_name: str
         cell_state: ValueState
         for cell_name, cell_state in state.items():
             sn, column, row = parse_coordinate(cell_name)
             if sn == sheet_name:
-                input_state[f'{column}{row}'] = cell_state['formula'] if cell_state['formula'] else cell_state['value']
-            else:
-                input_state[cell_name] = cell_state.get('value', None)
+                if cell_state['formula']:
+                    input_state[f'{column}{row}'] = cell_state['formula']
+                elif cell_state['value'] is not None:
+                    input_state[f'{column}{row}'] = cell_state['value']
+            elif cell_state['value'] is not None:
+                input_state[cell_name] = cell_state['value']
         compiler: ModelCompiler = ModelCompiler()
         model: Model = compiler.read_and_parse_dict(input_dict=input_state, default_sheet=sheet_name)
         evaluator = Evaluator(model)
