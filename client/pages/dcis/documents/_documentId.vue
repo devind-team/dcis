@@ -112,7 +112,8 @@ export default defineComponent({
         sheetId: activeDocument.value ? activeDocument.value.sheets[activeSheetIndex.value].id : ''
       }),
       options: () => ({
-        enabled: !activeDocumentLoading.value
+        enabled: !activeDocumentLoading.value,
+        fetchPolicy: 'cache-and-network'
       })
     })
 
