@@ -171,3 +171,16 @@ def add_document_status(status: Status, document: Document, comment: str, user: 
         comment=comment,
         user=user
     )
+
+
+def delete_document_status(status: DocumentStatus) -> None:
+    """Изменение комментария версии документа."""
+    return status.delete()
+
+
+def change_document_comment(document: Document, comment: str) -> Document:
+    """Изменение комментария версии документа."""
+    document.comment = comment
+    document.save(update_fields=('comment', 'updated_at'))
+    return document
+

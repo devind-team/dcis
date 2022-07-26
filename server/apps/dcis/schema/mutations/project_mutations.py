@@ -7,47 +7,48 @@ from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.decorators import permission_classes
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.schema.types import ErrorFieldType
 from django.contrib.contenttypes.models import ContentType
-from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project
-from apps.dcis.permissions import ChangeProject, DeleteProject
+from apps.dcis.permissions import AddProject, ChangeProject, DeleteProject
 from apps.dcis.schema.types import ProjectType
 from apps.dcis.validators import ProjectValidator
 from apps.dcis.services.project_services import (
+    create_project,
     change_project,
     delete_project
 )
 
 
-class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
+class AddProjectMutation(BaseMutation):
     """Мутация для добавления проекта."""
 
-    class Meta:
-        model = Project
-        login_required = True
-        field_types = {
-            'content_type': graphene.String(required=True)
-        }
-        permissions = ('dcis.add_project',)
-        auto_context_fields = {'user': 'user'}
+    class Input:
+        name = graphene.String(required=True, description='Наименование проекта')
+        short = graphene.String(required=True, description='Сокращенное наименование проекта')
+        description = graphene.String(required=True, description='Описание проекта')
+        visibility = graphene.Boolean(description='Видимость проекта')
+        content_type = graphene.String(required=True, description='Тип дивизиона')
 
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
-    @classmethod
-    def validate(cls, root: Any, info: ResolveInfo, input, *args, **kwargs):
-        validator: ProjectValidator = ProjectValidator(input)
-        if validator.validate():
-            super().validate(root, info, input)
-        else:
-            raise ValueError(validator.validate_message_plain)
-
-    @classmethod
-    def handle_content_type(cls, value: str, field: str, info: ResolveInfo, *args, **kwargs):
-        return ContentType.objects.get_for_model(Project.DIVISION_KIND.get(value, Department))
+    @staticmethod
+    @permission_classes((IsAuthenticated, AddProject,))
+    def mutate_and_get_payload(
+            root: Any,
+            info: ResolveInfo,
+            visibility: bool,
+            **kwargs
+    ):
+        validator = ProjectValidator(kwargs)
+        if not validator.validate():
+            return AddProjectMutation(success=False, error=ErrorFieldType.from_validator(validator.get_message()))
+        kwargs.values()
+        return AddProjectMutation(project=create_project(kwargs, visibility))
 
 
 class ChangeProjectMutation(BaseMutation):
@@ -100,6 +101,6 @@ class DeleteProjectMutation(BaseMutation):
 class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
-    add_project = AddProjectMutationPayload.Field(required=True)
+    add_project = AddProjectMutation.Field(required=True)
     change_project = ChangeProjectMutation.Field(required=True)
     delete_project = DeleteProjectMutation.Field(required=True)

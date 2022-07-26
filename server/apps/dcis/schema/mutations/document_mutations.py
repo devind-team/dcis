@@ -24,7 +24,9 @@ from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutatio
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.document_services import (
     create_new_document,
-    add_document_status
+    add_document_status,
+    change_document_comment,
+    delete_document_status
 )
 from apps.dcis.services.document_unload_services import DocumentUnload
 from apps.dcis.services.sheet_services import (
@@ -100,9 +102,7 @@ class ChangeDocumentCommentMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         info.context.check_object_permissions(info.context, document)
-        document.comment = comment
-        document.save(update_fields=('comment', 'updated_at'))
-        return ChangeDocumentCommentMutation(document=document)
+        return ChangeDocumentCommentMutation(document=change_document_comment(document, comment))
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -142,7 +142,7 @@ class DeleteDocumentStatusMutation(BaseMutation):
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
         status = get_object_or_404(DocumentStatus, pk=document_status_id)
         info.context.check_object_permissions(info.context, status.document)
-        status.delete()
+        delete_document_status(status)
         return DeleteDocumentStatusMutation(id=document_status_id)
 
 

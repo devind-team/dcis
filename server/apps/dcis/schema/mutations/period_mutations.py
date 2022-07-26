@@ -31,13 +31,14 @@ from apps.dcis.services.period_services import (
     create_period,
     add_period_methodical_support,
     add_divisions_period,
-    remove_divisions_period,
+    delete_divisions_period,
     copy_period_groups,
     change_period_group_privileges,
     change_user_period_groups,
     change_user_period_privileges,
     add_period_group,
-    change_settings_period
+    change_settings_period,
+    delete_period
 )
 
 
@@ -123,7 +124,7 @@ class DeletePeriodMutation(BaseMutation):
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str):
         period = get_object_or_404(Period, pk=period_id)
         info.context.check_object_permissions(info.context, period)
-        period.delete()
+        delete_period(period)
         return DeletePeriodMutation(delete_id=period_id)
 
 
@@ -158,7 +159,7 @@ class DeleteDivisionMutation(BaseMutation):
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_id: str):
         period = get_object_or_404(Period, pk=period_id)
         info.context.check_object_permissions(info.context, period)
-        remove_divisions_period(period_id, division_id)
+        delete_divisions_period(period_id, division_id)
         return DeleteDivisionMutation(delete_id=division_id)
 
 

@@ -109,7 +109,7 @@ def add_divisions_period(period: Period, division_ids: list[str | int]) -> list[
     return get_divisions(divisions)
 
 
-def remove_divisions_period(period_id: str | int, division_id: str | int) -> None:
+def delete_divisions_period(period_id: str | int, division_id: str | int) -> None:
     """Удаление дивизиона из периода."""
     return Division.objects.get(period_id=period_id, object_id=division_id).delete()
 
@@ -187,3 +187,8 @@ def change_settings_period(
     period.expiration = expiration
     period.save()
     return period
+
+
+def delete_period(period: Period) -> None:
+    """Удаление периода."""
+    return period.delete()
