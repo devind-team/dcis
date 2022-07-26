@@ -3,6 +3,7 @@ from .document_permissions import (
     AddChildRowDimensionBase,
     AddDocument,
     AddDocumentBase,
+    AddBudgetClassification,
     ChangeChildRowDimensionHeight,
     ChangeChildRowDimensionHeightBase,
     ChangeDocument,

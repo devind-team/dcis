@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from devind_helpers.permissions import BasePermission
+from devind_helpers.permissions import BasePermission, ModelPermission
 
 from apps.dcis.models import Cell, Document, Period, RowDimension
 from apps.dcis.services.divisions_services import get_user_divisions
@@ -22,6 +22,9 @@ class ViewDocument(BasePermission):
             ViewPeriod.has_object_permission(context, obj.period) and
             obj in get_user_documents(context.user, obj.period)
         )
+
+
+AddBudgetClassification = ModelPermission('devind_dictionaries.add_budgetclassification')
 
 
 class AddDocumentBase(BasePermission):
