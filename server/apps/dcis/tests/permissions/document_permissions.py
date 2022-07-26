@@ -6,17 +6,18 @@ from unittest.mock import Mock, patch
 from devind_dictionaries.models import Department
 from devind_helpers.permissions import BasePermission
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 
 from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet
 from apps.dcis.permissions.document_permissions import (
-    AddChildRowDimension,
-    AddDocument,
-    ChangeChildRowDimensionHeight,
-    ChangeDocument,
-    ChangeValue,
-    DeleteChildRowDimension,
-    DeleteDocument,
-    ViewDocument,
+    can_add_child_row_dimension,
+    can_add_document,
+    can_change_child_row_dimension_height,
+    can_change_document,
+    can_change_value,
+    can_delete_child_row_dimension,
+    can_delete_document,
+    can_view_document,
 )
 from .common import PermissionsTestCase
 
@@ -105,27 +106,27 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_view_document(self) -> None:
         """Тестирование класса `ViewDocument`."""
-        self.assertFalse(ViewDocument.has_object_permission(self.context_mock, self.document))
+        self.assertRaises(PermissionDenied, can_view_document, self.context_mock, self.document)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertFalse(ViewDocument.has_object_permission(self.context_mock, self.document))
-        self.assertTrue(ViewDocument.has_object_permission(self.context_mock, self.user_document))
+            self.assertRaises(PermissionDenied, can_view_document, self.context_mock, self.document)
+        can_view_document(self.context_mock, self.user_document)
 
     def test_add_document(self) -> None:
         """Тестирование класса `AddDocument`."""
-        self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.period))
+        self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.period)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.period))
+            self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.period)
         with patch.object(
             self.user,
             'has_perm',
             new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period', 'dcis.add_document')
         ):
-            self.assertTrue(AddDocument.has_object_permission(self.context_mock, self.period))
-        self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.user_period))
+            can_add_document(self.context_mock, self.period)
+        self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.user_period)
         for global_perm in ('dcis.add_project', 'dcis.add_period'):
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.period))
-                self.assertTrue(AddDocument.has_object_permission(self.context_mock, self.user_period))
+                self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.period)
+                can_add_document(self.context_mock, self.user_period)
 
     def test_change_document(self) -> None:
         """Тестирование класса `ChangeDocument`."""

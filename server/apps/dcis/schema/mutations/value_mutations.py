@@ -15,7 +15,7 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, Document, Value
-from apps.dcis.permissions import ViewDocument, can_change_value
+from apps.dcis.permissions import can_view_document, can_change_value
 from apps.dcis.schema.types import ValueType
 from apps.dcis.services.value_services import (
     create_file_value_archive,
@@ -120,7 +120,7 @@ class UnloadFileValueArchiveMutation(BaseMutation):
     src = graphene.String(description='Ссылка на сгенерированный архив')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -131,7 +131,7 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         name: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context, document)
         return UnloadFileValueArchiveMutation(
             src=create_file_value_archive(
                 value=get_object_or_404(

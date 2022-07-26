@@ -9,7 +9,7 @@ from graphql import ResolveInfo
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project
-from apps.dcis.permissions import ChangeProject, DeleteProject
+from apps.dcis.permissions import can_change_project, can_delete_project
 from apps.dcis.schema.types import ProjectType
 from apps.dcis.validators import ProjectValidator
 
@@ -53,8 +53,7 @@ class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Project) -> None:
-        if not ChangeProject.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+        can_change_project(info.context, obj)
 
 
 class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
@@ -66,8 +65,7 @@ class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: Project) -> None:
-        if not DeleteProject.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+        can_delete_project(info.context, obj)
 
 
 class ProjectMutations(graphene.ObjectType):
