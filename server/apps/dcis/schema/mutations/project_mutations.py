@@ -17,6 +17,10 @@ from apps.dcis.models import Project
 from apps.dcis.permissions import ChangeProject, DeleteProject
 from apps.dcis.schema.types import ProjectType
 from apps.dcis.validators import ProjectValidator
+from apps.dcis.services.project_services import (
+    change_project,
+    delete_project
+)
 
 
 class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
@@ -46,20 +50,34 @@ class AddProjectMutationPayload(DjangoCudBaseMutation, DjangoCreateMutation):
         return ContentType.objects.get_for_model(Project.DIVISION_KIND.get(value, Department))
 
 
-class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
+class ChangeProjectMutation(BaseMutation):
     """Мутация изменения настроек проекта."""
 
-    class Meta:
-        model = Project
-        login_required = True
-        exclude_fields = ('content_type', 'object_id',)
+    class Input:
+        project_id = graphene.ID(required=True, description='Идентификатор проекта')
+        name = graphene.String(description='Наименование проекта')
+        short = graphene.String(description='Сокращенное наименование проекта')
+        description = graphene.String(description='Описание проекта')
+        visibility = graphene.Boolean(description='Видимость проекта')
+        archive = graphene.Boolean(description='Архив')
 
     project = graphene.Field(ProjectType, description='Измененный проект')
 
-    @classmethod
-    def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Project) -> None:
-        if not ChangeProject.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+    @staticmethod
+    @permission_classes((IsAuthenticated, ChangeProject,))
+    def mutate_and_get_payload(
+            root: Any,
+            info: ResolveInfo,
+            project_id: str | int,
+            name: str,
+            short: str,
+            description: str,
+            visibility: bool,
+            archive: bool
+    ):
+        project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        info.context.check_object_permissions(info.context, project)
+        return ChangeProjectMutation(project=change_project(project, name, short, description, visibility, archive))
 
 
 class DeleteProjectMutation(BaseMutation):
@@ -73,9 +91,9 @@ class DeleteProjectMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated, DeleteProject,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, project_id: str | int):
-        project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
         info.context.check_object_permissions(info.context, project)
-        project.delete()
+        delete_project(project)
         return DeleteProjectMutation(delete_id=project_id)
 
 
@@ -83,5 +101,5 @@ class ProjectMutations(graphene.ObjectType):
     """Список мутация проекта."""
 
     add_project = AddProjectMutationPayload.Field(required=True)
-    change_project = ChangeProjectMutationPayload.Field(required=True)
+    change_project = ChangeProjectMutation.Field(required=True)
     delete_project = DeleteProjectMutation.Field(required=True)

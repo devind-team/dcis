@@ -42,3 +42,23 @@ def get_user_projects(user: User) -> QuerySet[Project]:
     if user.has_perm('dcis.view_project'):
         return Project.objects.all()
     return get_user_participant_projects(user) | get_user_privileges_projects(user) | get_user_divisions_projects(user)
+
+
+def change_project(
+        project: Project,
+        name: str,
+        short: str,
+        description: str,
+        visibility: bool,
+        archive: bool) -> Project:
+    project.name = name
+    project.short = short
+    project.description = description
+    project.visibility = visibility
+    project.archive = archive
+    project.save(update_fields=('name', 'short', 'description', 'visibility', 'archive', 'updated_at'))
+    return project
+
+
+def delete_project(project: Project) -> None:
+    return project.delete()

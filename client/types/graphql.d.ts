@@ -1358,9 +1358,26 @@ export type ChangeProfileVisibilityMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeProjectMutationInput = {
+  /** Архив */
+  archive?: InputMaybe<Scalars['Boolean']>;
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Описание проекта */
+  description?: InputMaybe<Scalars['String']>;
+  /** Наименование проекта */
+  name?: InputMaybe<Scalars['String']>;
+  /** Идентификатор проекта */
+  projectId: Scalars['ID'];
+  /** Сокращенное наименование проекта */
+  short?: InputMaybe<Scalars['String']>;
+  /** Видимость проекта */
+  visibility?: InputMaybe<Scalars['Boolean']>;
+};
+
 /** Мутация изменения настроек проекта. */
 export type ChangeProjectMutationPayload = {
   __typename?: 'ChangeProjectMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Измененный проект */
@@ -2879,8 +2896,7 @@ export type MutationChangeProfileVisibilityArgs = {
 
 /** Мутации на изменение чего-либо. */
 export type MutationChangeProjectArgs = {
-  id: Scalars['ID'];
-  input: UpdateProjectInput;
+  input: ChangeProjectMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4817,22 +4833,6 @@ export type UnloadFileValueArchiveMutationPayload = {
   src?: Maybe<Scalars['String']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
-};
-
-export type UpdateProjectInput = {
-  /** Архив */
-  archive?: InputMaybe<Scalars['Boolean']>;
-  /** Описание проекта */
-  description: Scalars['String'];
-  /** Наименование проекта */
-  name: Scalars['String'];
-  periodSet?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  /** Сокращенное наименование проекта */
-  short: Scalars['String'];
-  /** Организатор сборов */
-  user?: InputMaybe<Scalars['ID']>;
-  /** Видимость проекта */
-  visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
 export type UploadUsersMutationInput = {

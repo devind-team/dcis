@@ -1280,8 +1280,25 @@ type ChangeProfileVisibilityMutationPayload {
   success: Boolean!
 }
 
+input ChangeProjectMutationInput {
+  """Архив"""
+  archive: Boolean
+  clientMutationId: String
+  """Описание проекта"""
+  description: String
+  """Наименование проекта"""
+  name: String
+  """Идентификатор проекта"""
+  projectId: ID!
+  """Сокращенное наименование проекта"""
+  short: String
+  """Видимость проекта"""
+  visibility: Boolean
+}
+
 """Мутация изменения настроек проекта."""
 type ChangeProjectMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Измененный проект"""
@@ -2426,7 +2443,7 @@ type Mutation {
   """Матция для изменения видимости."""
   changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
   """Мутация изменения настроек проекта."""
-  changeProject(id: ID!, input: UpdateProjectInput!): ChangeProjectMutationPayload!
+  changeProject(input: ChangeProjectMutationInput!): ChangeProjectMutationPayload!
   """Изменение строки"""
   changeRowDimension(input: ChangeRowDimensionMutationInput!): ChangeRowDimensionMutationPayload!
   """Изменение текста секции"""
@@ -4006,22 +4023,6 @@ type UnloadFileValueArchiveMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
-}
-
-input UpdateProjectInput {
-  """Архив"""
-  archive: Boolean
-  """Описание проекта"""
-  description: String!
-  """Наименование проекта"""
-  name: String!
-  periodSet: [ID]
-  """Сокращенное наименование проекта"""
-  short: String!
-  """Организатор сборов"""
-  user: ID
-  """Видимость проекта"""
-  visibility: Boolean
 }
 
 """
