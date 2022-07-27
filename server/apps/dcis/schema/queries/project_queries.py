@@ -30,7 +30,7 @@ class ProjectQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_project(root: Any, info: ResolveInfo, project_id: str) -> Project:
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        can_view_project(info.context, project)
+        can_view_project(info.context.user, project)
         return project
 
     @staticmethod

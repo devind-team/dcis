@@ -53,7 +53,7 @@ class ChangeProjectMutationPayload(DjangoCudBaseMutation, DjangoUpdateMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Project) -> None:
-        can_change_project(info.context, obj)
+        can_change_project(info.context.user, obj)
 
 
 class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
@@ -65,7 +65,7 @@ class DeleteProjectMutationPayload(DjangoCudBaseMutation, DjangoDeleteMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, id: str, obj: Project) -> None:
-        can_delete_project(info.context, obj)
+        can_delete_project(info.context.user, obj)
 
 
 class ProjectMutations(graphene.ObjectType):

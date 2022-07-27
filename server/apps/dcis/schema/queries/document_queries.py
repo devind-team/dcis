@@ -68,7 +68,7 @@ class DocumentQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_document(root, info: ResolveInfo, document_id: str) -> Document:
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_view_document(info.context, document)
+        can_view_document(info.context.user, document)
         return document
 
     @staticmethod
@@ -80,7 +80,7 @@ class DocumentQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_document_statuses(root, info: ResolveInfo, document_id: str) -> QuerySet[DocumentStatus]:
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_view_document(info.context, document)
+        can_view_document(info.context.user, document)
         return document.documentstatus_set.all()
 
     @staticmethod
@@ -92,7 +92,7 @@ class DocumentQueries(graphene.ObjectType):
         sheet_id: str
     ) -> list[dict] | dict:
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_view_document(info.context, document)
+        can_view_document(info.context.user, document)
         return DocumentSheetUnloader(
             info.context,
             sheet=get_object_or_404(Sheet, pk=sheet_id),
@@ -111,7 +111,7 @@ class DocumentQueries(graphene.ObjectType):
         row_id: str,
     ):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_view_document(info.context, document)
+        can_view_document(info.context.user, document)
         value = Value.objects.filter(
             document_id=document.id,
             sheet_id=sheet_id,

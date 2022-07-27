@@ -105,27 +105,27 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_view_document(self) -> None:
         """Тестирование класса `ViewDocument`."""
-        self.assertRaises(PermissionDenied, can_view_document, self.context_mock, self.document)
+        self.assertRaises(PermissionDenied, can_view_document, self.user, self.document)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertRaises(PermissionDenied, can_view_document, self.context_mock, self.document)
-        can_view_document(self.context_mock, self.user_document)
+            self.assertRaises(PermissionDenied, can_view_document, self.user, self.document)
+        can_view_document(self.user, self.user_document)
 
     def test_add_document(self) -> None:
         """Тестирование класса `AddDocument`."""
-        self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.period)
+        self.assertRaises(PermissionDenied, can_add_document, self.user, self.period)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.period)
+            self.assertRaises(PermissionDenied, can_add_document, self.user, self.period)
         with patch.object(
             self.user,
             'has_perm',
             new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period', 'dcis.add_document')
         ):
-            can_add_document(self.context_mock, self.period)
-        self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.user_period)
+            can_add_document(self.user, self.period)
+        self.assertRaises(PermissionDenied, can_add_document, self.user, self.user_period)
         for global_perm in ('dcis.add_project', 'dcis.add_period'):
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                self.assertRaises(PermissionDenied, can_add_document, self.context_mock, self.period)
-                can_add_document(self.context_mock, self.user_period)
+                self.assertRaises(PermissionDenied, can_add_document, self.user, self.period)
+                can_add_document(self.user, self.user_period)
 
     def test_change_document(self) -> None:
         """Тестирование класса `ChangeDocument`."""
@@ -206,26 +206,26 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def _test_common(self, f: Callable[[Any, Any], None], permission: str, privilege: str) -> None:
         """Общий механизм тестирования для классов `ChangeDocument` и `DeleteDocument`."""
-        self.assertRaises(PermissionDenied, f, self.context_mock, self.document)
-        self.assertRaises(PermissionDenied, f, self.context_mock, self.user_document)
+        self.assertRaises(PermissionDenied, f, self.user, self.document)
+        self.assertRaises(PermissionDenied, f, self.user, self.user_document)
         with patch(
             'apps.dcis.permissions.document_permissions.can_view_document',
             new=Mock()
         ):
-            self.assertRaises(PermissionDenied, f, self.context_mock, self.document)
-            self.assertRaises(PermissionDenied, f, self.context_mock, self.user_document)
+            self.assertRaises(PermissionDenied, f, self.user, self.document)
+            self.assertRaises(PermissionDenied, f, self.user, self.user_document)
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == permission):
-                f(self.context_mock, self.document)
-                f(self.context_mock, self.user_document)
+                f(self.user, self.document)
+                f(self.user, self.user_document)
             for global_perm in ('dcis.add_project', 'dcis.add_period'):
                 with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                    self.assertRaises(PermissionDenied, f, self.context_mock, self.document)
-                    f(self.context_mock, self.user_document)
+                    self.assertRaises(PermissionDenied, f, self.user, self.document)
+                    f(self.user, self.user_document)
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-                f(self.context_mock, self.document)
+                f(self.user, self.document)
                 mock.assert_called_once_with(self.user.id, self.period.id, privilege)
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-                f(self.context_mock, self.user_document)
+                f(self.user, self.user_document)
                 mock.assert_called_once_with(self.user.id, self.user_period.id, privilege)
 
     def _test_change_value(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
@@ -238,12 +238,12 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.user_cell_obj,
         ), values):
             if value:
-                can_change_value(self.context_mock, cell_obj['document'], cell_obj['cell'])
+                can_change_value(self.user, cell_obj['document'], cell_obj['cell'])
             else:
                 self.assertRaises(
                     PermissionDenied,
                     can_change_value,
-                    self.context_mock,
+                    self.user,
                     cell_obj['document'],
                     cell_obj['cell']
                 )
@@ -258,7 +258,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         ), values):
             if value:
                 can_add_child_row_dimension(
-                    self.context_mock,
+                    self.user,
                     row_dimension['document'],
                     row_dimension['row_dimension']
                 )
@@ -266,7 +266,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 self.assertRaises(
                     PermissionDenied,
                     can_add_child_row_dimension,
-                    self.context_mock,
+                    self.user,
                     row_dimension['document'],
                     row_dimension['row_dimension']
                 )
@@ -279,12 +279,12 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.document_user_row_dimension,
         ), values):
             if value:
-                can_change_child_row_dimension_height(self.context_mock, row_dimension)
+                can_change_child_row_dimension_height(self.user, row_dimension)
             else:
                 self.assertRaises(
                     PermissionDenied,
                     can_change_child_row_dimension_height,
-                    self.context_mock,
+                    self.user,
                     row_dimension
                 )
 
@@ -297,6 +297,6 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.document_user_row_dimension,
         ), values):
             if value:
-                can_delete_child_row_dimension(self.context_mock, row_dimension)
+                can_delete_child_row_dimension(self.user, row_dimension)
             else:
-                self.assertRaises(PermissionDenied, can_delete_child_row_dimension, self.context_mock, row_dimension)
+                self.assertRaises(PermissionDenied, can_delete_child_row_dimension, self.user, row_dimension)

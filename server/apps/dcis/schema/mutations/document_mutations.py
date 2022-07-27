@@ -63,7 +63,7 @@ class AddDocumentMutation(BaseMutation):
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
         period = get_object_or_404(Period, pk=period_id)
-        can_add_document(info.context, period)
+        can_add_document(info.context.user, period)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document = create_document(
             user=info.context.user,
@@ -86,7 +86,7 @@ class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Document) -> None:
-        can_change_document(info.context, obj)
+        can_change_document(info.context.user, obj)
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -103,7 +103,7 @@ class AddDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_change_document(info.context, document)
+        can_change_document(info.context.user, document)
         status: Status = get_object_or_404(Status, pk=status_id)
         document_status = DocumentStatus.objects.create(
             status=status,
@@ -126,7 +126,7 @@ class DeleteDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
         status = get_object_or_404(DocumentStatus, pk=document_status_id)
-        can_change_document(info.context, status.document)
+        can_change_document(info.context.user, status.document)
         status.delete()
         return DeleteDocumentStatusMutation(id=document_status_id)
 
@@ -149,7 +149,7 @@ class UnloadDocumentMutation(BaseMutation):
         if not additional:
             additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])
-        can_view_document(info.context, document)
+        can_view_document(info.context.user, document)
         document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
         src: str = document_unload.xlsx()
         return UnloadDocumentMutation(src=src)
@@ -187,7 +187,7 @@ class AddChildRowDimensionMutation(BaseMutation):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         parent = get_object_or_404(RowDimension, pk=parent_id)
         can_add_child_row_dimension(
-            info.context,
+            info.context.user,
             document=document, row_dimension=parent
         )
         sheet = get_object_or_404(Sheet, pk=sheet_id)
@@ -219,7 +219,7 @@ class ChangeChildRowDimensionHeightMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, row_dimension_id: str, height: int):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        can_change_child_row_dimension_height(info.context, row_dimension)
+        can_change_child_row_dimension_height(info.context.user, row_dimension)
         row_dimension = change_row_dimension_height(row_dimension, height)
         return ChangeChildRowDimensionHeightMutation(
             row_dimension_id=row_dimension.id,
@@ -240,7 +240,7 @@ class DeleteChildRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        can_delete_child_row_dimension(info.context, row_dimension)
+        can_delete_child_row_dimension(info.context.user, row_dimension)
         return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(row_dimension))
 
 

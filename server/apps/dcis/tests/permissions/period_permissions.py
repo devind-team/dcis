@@ -41,22 +41,22 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
 
     def test_view_period(self) -> None:
         """Тестирование класса `ViewPeriod`."""
-        self.assertRaises(PermissionDenied, can_view_period, self.context_mock, self.period)
+        self.assertRaises(PermissionDenied, can_view_period, self.user, self.period)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.view_project'):
-            self.assertRaises(PermissionDenied, can_view_period, self.context_mock, self.period)
-        can_view_period(self.context_mock, self.user_period_without_documents)
+            self.assertRaises(PermissionDenied, can_view_period, self.user, self.period)
+        can_view_period(self.user, self.user_period_without_documents)
 
     def test_add_period(self) -> None:
         """Тестирование класса `AddPeriod`."""
-        self.assertRaises(PermissionDenied, can_add_period, self.context_mock, self.project)
+        self.assertRaises(PermissionDenied, can_add_period, self.user, self.project)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.view_project'):
-            self.assertRaises(PermissionDenied, can_add_period, self.context_mock, self.project)
+            self.assertRaises(PermissionDenied, can_add_period, self.user, self.project)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.add_period')):
-            can_add_period(self.context_mock, self.project)
-        self.assertRaises(PermissionDenied, can_add_period, self.context_mock, self.user_project)
+            can_add_period(self.user, self.project)
+        self.assertRaises(PermissionDenied, can_add_period, self.user, self.user_project)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'):
-            self.assertRaises(PermissionDenied, can_add_period, self.context_mock, self.period)
-            can_add_period(self.context_mock, self.user_project)
+            self.assertRaises(PermissionDenied, can_add_period, self.user, self.period)
+            can_add_period(self.user, self.user_project)
 
     def test_change_period(self) -> None:
         """Тестирование класса `ChangePeriod`."""
@@ -104,40 +104,40 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
 
     def test_delete_period(self) -> None:
         """Тестирование класса `DeletePeriod`."""
-        self.assertRaises(PermissionDenied, can_delete_period, self.context_mock, self.period)
-        self.assertRaises(PermissionDenied, can_delete_period, self.context_mock, self.user_period_without_documents)
+        self.assertRaises(PermissionDenied, can_delete_period, self.user, self.period)
+        self.assertRaises(PermissionDenied, can_delete_period, self.user, self.user_period_without_documents)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.delete_period'):
-            can_delete_period(self.context_mock, self.user_period_without_documents)
+            can_delete_period(self.user, self.user_period_without_documents)
         with patch(
                 'apps.dcis.permissions.period_permissions.can_view_period',
                 new=Mock(return_value=True),
         ):
             for global_perm in ('dcis.add_project', 'dcis.add_period'):
                 with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                    self.assertRaises(PermissionDenied, can_delete_period, self.context_mock, self.period)
+                    self.assertRaises(PermissionDenied, can_delete_period, self.user, self.period)
                     self.assertRaises(PermissionDenied,
-                                      can_delete_period, self.context_mock, self.user_period_with_documents
+                                      can_delete_period, self.user, self.user_period_with_documents
                                       )
-                    can_delete_period(self.context_mock, self.user_period_without_documents)
+                    can_delete_period(self.user, self.user_period_without_documents)
 
     def _test_change_period(self, f: Callable[[Any, Any], None], permission: str, privilege: str) -> None:
         """Тестирование разрешений на изменение периода."""
-        self.assertRaises(PermissionDenied, f, self.context_mock, self.period)
-        self.assertRaises(PermissionDenied, f, self.context_mock, self.user_period_without_documents)
+        self.assertRaises(PermissionDenied, f, self.user, self.period)
+        self.assertRaises(PermissionDenied, f, self.user, self.user_period_without_documents)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == permission):
-            f(self.context_mock, self.user_period_without_documents)
+            f(self.user, self.user_period_without_documents)
         with patch.object(
                 self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'
         ), patch(
             'apps.dcis.permissions.period_permissions.can_view_period',
             new=Mock(),
         ):
-            self.assertRaises(PermissionDenied, f, self.context_mock, self.period)
-            f(self.context_mock, self.user_period_without_documents)
+            self.assertRaises(PermissionDenied, f, self.user, self.period)
+            f(self.user, self.user_period_without_documents)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_period'):
-            f(self.context_mock, self.user_period_without_documents)
+            f(self.user, self.user_period_without_documents)
         with patch('apps.dcis.permissions.period_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-            f(self.context_mock, self.user_period_without_documents)
+            f(self.user, self.user_period_without_documents)
             mock.assert_called_once_with(self.user.id, self.user_period_without_documents.id, privilege)
 
     def _test_change_period_element(
@@ -156,7 +156,7 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             'apps.dcis.permissions.period_permissions.has_privilege',
             new=Mock(return_value=True),
         ) as mock:
-            f(self.context_mock, self.user_period_without_documents)
+            f(self.user, self.user_period_without_documents)
             mock.assert_called_once_with(
                 self.user.id,
                 self.user_period_without_documents.id,

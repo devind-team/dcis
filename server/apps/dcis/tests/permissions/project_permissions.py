@@ -35,45 +35,45 @@ class ProjectPermissionsTestCase(PermissionsTestCase):
 
     def test_view_project(self) -> None:
         """Тестирование класса `ViewProject`."""
-        self.assertRaises(PermissionDenied, can_view_project, self.context_mock, self.project)
-        can_view_project(self.context_mock, self.user_project_without_periods)
+        self.assertRaises(PermissionDenied, can_view_project, self.user, self.project)
+        can_view_project(self.user, self.user_project_without_periods)
 
     def test_change_project(self) -> None:
         """Тестирование класса `ChangeProject`."""
-        self.assertRaises(PermissionDenied, can_change_project, self.context_mock, self.project)
-        self.assertRaises(PermissionDenied, can_change_project, self.context_mock, self.user_project_without_periods)
+        self.assertRaises(PermissionDenied, can_change_project, self.user, self.project)
+        self.assertRaises(PermissionDenied, can_change_project, self.user, self.user_project_without_periods)
         with patch(
                 'apps.dcis.permissions.project_permissions.can_view_project',
                 new=Mock()
         ):
-            self.assertRaises(PermissionDenied, can_change_project, self.context_mock, self.project)
+            self.assertRaises(PermissionDenied, can_change_project, self.user, self.project)
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.change_project'):
-                can_change_project(self.context_mock, self.project)
-            self.assertRaises(PermissionDenied, can_change_project, self.context_mock,
+                can_change_project(self.user, self.project)
+            self.assertRaises(PermissionDenied, can_change_project, self.user,
                               self.user_project_without_periods)
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'):
-                can_change_project(self.context_mock, self.user_project_without_periods)
+                can_change_project(self.user, self.user_project_without_periods)
 
     def test_delete_project(self) -> None:
         """Тестирование класса `DeleteProject`."""
-        self.assertRaises(PermissionDenied, can_delete_project, self.context_mock, self.project)
-        self.assertRaises(PermissionDenied, can_delete_project, self.context_mock, self.user_project_without_periods)
-        self.assertRaises(PermissionDenied, can_delete_project, self.context_mock, self.user_project_with_periods)
+        self.assertRaises(PermissionDenied, can_delete_project, self.user, self.project)
+        self.assertRaises(PermissionDenied, can_delete_project, self.user, self.user_project_without_periods)
+        self.assertRaises(PermissionDenied, can_delete_project, self.user, self.user_project_with_periods)
         with patch(
                 'apps.dcis.permissions.project_permissions.can_view_project',
                 new=Mock()
         ):
-            self.assertRaises(PermissionDenied, can_delete_project, self.context_mock, self.project)
+            self.assertRaises(PermissionDenied, can_delete_project, self.user, self.project)
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.delete_project'):
-                can_delete_project(self.context_mock, self.project)
-            self.assertRaises(PermissionDenied, can_delete_project, self.context_mock,
+                can_delete_project(self.user, self.project)
+            self.assertRaises(PermissionDenied, can_delete_project, self.user,
                               self.user_project_without_periods)
-            self.assertRaises(PermissionDenied, can_delete_project, self.context_mock, self.user_project_with_periods)
+            self.assertRaises(PermissionDenied, can_delete_project, self.user, self.user_project_with_periods)
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'):
-                can_delete_project(self.context_mock, self.user_project_without_periods)
+                can_delete_project(self.user, self.user_project_without_periods)
                 self.assertRaises(
                     PermissionDenied,
                     can_delete_project,
-                    self.context_mock,
+                    self.user,
                     self.user_project_with_periods
                 )

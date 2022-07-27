@@ -39,7 +39,7 @@ class ChangeCellDefault(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, default: str):
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        can_change_period_sheet(info.context, cell.row.sheet.period)
+        can_change_period_sheet(info.context.user, cell.row.sheet.period)
         change_cell_default(cell, default)
         return ChangeCellDefault(cell_id=cell.id, default=cell.default)
 
@@ -87,7 +87,7 @@ class ChangeCellsOptionMutation(BaseMutation):
                 cells = Cell.objects.filter(pk__in=cell_ids).all()
                 if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
                     raise PermissionDenied('Ошибка доступа')
-                can_change_period_sheet(info.context, cells.first().row.sheet.period)
+                can_change_period_sheet(info.context.user, cells.first().row.sheet.period)
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 
