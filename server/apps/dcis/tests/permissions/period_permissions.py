@@ -151,14 +151,14 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
         self._test_change_period(f, permission, change_period_privilege)
         with patch(
                 'apps.dcis.permissions.period_permissions.can_change_period_base',
-                new=Mock(),
+                new=Mock(side_effect=PermissionDenied()),
         ), patch(
             'apps.dcis.permissions.period_permissions.has_privilege',
             new=Mock(return_value=True),
         ) as mock:
             f(self.context_mock, self.user_period_without_documents)
-            # mock.assert_called_once_with( todo как это раньше работало?
-            #     self.user.id,
-            #     self.user_period_without_documents.id,
-            #     change_period_element_privilege
-            # )
+            mock.assert_called_once_with(
+                self.user.id,
+                self.user_period_without_documents.id,
+                change_period_element_privilege
+            )

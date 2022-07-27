@@ -325,13 +325,13 @@ class ChangeChildRowDimensionHeightBase(ChangeDocumentSheetBase):
 
 def can_change_child_row_dimension_height(context, obj: RowDimension):
     """Пропускает пользователей, которые могут просматривать документ и изменять в нем высоту дочерних строк."""
-    can_view_document(context, obj.document)
     if (
         obj.parent_id is not None and
         obj.document_id is not None and ChangeChildRowDimensionHeightBase(
             context, obj.document
         ).has_object_permission(obj)
     ):
+        can_view_document(context, obj.document)
         return
     raise PermissionDenied('Недостаточно прав для изменения высоты дочерних строк')
 
@@ -367,13 +367,13 @@ class DeleteChildRowDimensionBase(ChangeDocumentSheetBase):
 
 def can_delete_child_row_dimension(context, obj: RowDimension):
     """Пропускает пользователей, которые могут просматривать документ и удалять из него дочерние строки."""
-    can_view_document(context, obj.document)
     if (
         obj.parent_id is not None and
         obj.document_id is not None and DeleteChildRowDimensionBase(
             context, obj.document
         ).has_object_permission(obj)
     ):
+        can_view_document(context, obj.document)
         return
     raise PermissionDenied('Недостаточно прав для удаления строки')
 
