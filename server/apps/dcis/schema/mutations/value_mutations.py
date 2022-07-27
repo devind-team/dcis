@@ -36,7 +36,7 @@ class ChangeValueMutation(BaseMutation):
         value = graphene.String(required=True, description='Значение')
 
     values = graphene.List(ValueType, description='Измененные ячейки')
-    updated_at = graphene.DateTime(required=True, description='Дата изменения')
+    updated_at = graphene.DateTime(description='Дата изменения')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

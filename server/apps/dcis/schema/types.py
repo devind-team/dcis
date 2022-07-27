@@ -79,7 +79,7 @@ class ProjectType(OptimizedDjangoObjectType):
     def resolve_can_change(project: Project, info: ResolveInfo) -> bool:
         # todo заменить страшную конструкцию хелпером при переходе на strawberry
         try:
-            can_change_project_base(info.context, project)
+            can_change_project_base(info.context.user, project)
         except PermissionDenied:
             return False
         return True
@@ -87,7 +87,7 @@ class ProjectType(OptimizedDjangoObjectType):
     @staticmethod
     def resolve_can_delete(project: Project, info: ResolveInfo) -> bool:
         try:
-            can_delete_project_base(info.context, project)
+            can_delete_project_base(info.context.user, project)
         except PermissionDenied:
             return False
         return True
@@ -95,7 +95,7 @@ class ProjectType(OptimizedDjangoObjectType):
     @staticmethod
     def resolve_can_add_period(project: Project, info: ResolveInfo) -> bool:
         try:
-            can_add_period_base(info.context, project)
+            can_add_period_base(info.context.user, project)
         except PermissionDenied:
             return False
         return True
@@ -176,7 +176,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_add_document_base(info.context, period)
+            can_add_document_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -184,7 +184,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_change_period_divisions_base(info.context, period)
+            can_change_period_divisions_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -192,7 +192,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_groups(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_change_period_groups_base(info.context, period)
+            can_change_period_groups_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -200,7 +200,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_change_period_users_base(info.context, period)
+            can_change_period_users_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -208,7 +208,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_change_period_settings_base(info.context, period)
+            can_change_period_settings_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -216,7 +216,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_sheet(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_change_period_sheet_base(info.context, period)
+            can_change_period_sheet_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -224,7 +224,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
         try:
-            can_delete_period_base(info.context, period)
+            can_delete_period_base(info.context.user, period)
         except PermissionDenied:
             return False
         return True
@@ -367,7 +367,7 @@ class DocumentType(DjangoObjectType):
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
         try:
-            can_change_document_base(info.context, document)
+            can_change_document_base(info.context.user, document)
         except PermissionDenied:
             return False
         return True
@@ -375,7 +375,7 @@ class DocumentType(DjangoObjectType):
     @staticmethod
     def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
         try:
-            can_delete_document_base(info.context, document)
+            can_delete_document_base(info.context.user, document)
         except PermissionDenied:
             return False
         return True
