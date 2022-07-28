@@ -21,7 +21,7 @@ tbody
       @mouseup="mouseupCell(cell)"
     )
       grid-cell(
-        :style="getCellContentStyle(row, cell)"
+        :style="getCellContentStyle(cell)"
         :cell="cell"
         :active="!!activeCell && activeCell.id === cell.id"
         @clear-active="setActiveCell(null)"
@@ -46,6 +46,7 @@ tbody
 import { PropType, Ref, nextTick } from '#app'
 import { CellType, RowDimensionType, SheetType } from '~/types/graphql'
 import { GridMode, ResizingType } from '~/types/grid'
+import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
@@ -148,7 +149,7 @@ export default defineComponent({
       return style
     }
 
-    const getCellContentStyle = (row: RowDimensionType, cell: CellType): Record<string, string> => {
+    const getCellContentStyle = (cell: CellType): Record<string, string> => {
       const valuesMap = {
         left: 'flex-start',
         top: 'flex-start',
@@ -158,7 +159,7 @@ export default defineComponent({
         bottom: 'flex-end'
       }
       const style: Record<string, string> = {
-        height: cell.rowspan === 1 ? `${props.getRowHeight(row)}px` : '100%'
+        height: `${getCellHeight(cell)}px`
       }
       if (cell.horizontalAlign) {
         style['justify-content'] = valuesMap[cell.horizontalAlign]
@@ -167,6 +168,16 @@ export default defineComponent({
       if (cell.verticalAlign) { style['align-items'] = valuesMap[cell.verticalAlign] }
       return style
     }
+
+    const getCellHeight = (cell: CellType) => {
+      const { minRow, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
+      let height = 0
+      for (let i = minRow - 1; i <= maxRow - 1; i++) {
+        height += props.getRowHeight(activeSheet.value.rows[i])
+      }
+      return height
+    }
+
     const currentRow = ref<RowDimensionType>(null)
     const posX = ref(0)
     const posY = ref(0)
