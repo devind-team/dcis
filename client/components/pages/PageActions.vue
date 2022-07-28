@@ -196,7 +196,7 @@ export default defineComponent({
       }
     }
 
-    return { active, hasPerm, addSections, hasChangePerm, getBoolPropTitle, deletePageDone }
+    return { active, user, hasPerm, addSections, hasChangePerm, getBoolPropTitle, deletePageDone }
   }
 })
 </script>
