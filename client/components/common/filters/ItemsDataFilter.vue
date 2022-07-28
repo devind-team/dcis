@@ -79,6 +79,7 @@ base-data-filter(
 <script lang="ts">
 import type { PropType } from '#app'
 import { computed, defineComponent, ref } from '#app'
+import { useI18n } from '~/composables'
 import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, SearchOn } from '~/types/filters'
 import BaseDataFilter from '~/components/common/filters/BaseDataFilter.vue'
 
@@ -103,9 +104,7 @@ export default defineComponent({
     },
     multipleMessageFunction: {
       type: Function as PropType<MultipleMessageFunction>,
-      default (name: string, restLength: number): string {
-        return (this as any).$tc('common.filters.itemsDataFilter.multipleMessage', restLength, { name, restLength })
-      }
+      required: false
     },
     searchLabel: {
       type: String,
@@ -122,6 +121,8 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const { tc } = useI18n()
+
     const search = ref<string>('')
     const tempValue = ref<Item[] | Item>(props.value)
 
@@ -175,7 +176,7 @@ export default defineComponent({
       if (selectedItems.value.length === 1) {
         return props.getName(selectedItems.value[0])
       }
-      return props.multipleMessageFunction(props.getName(selectedItems.value[0]), selectedItems.value.length - 1)
+      return defaultMultipleMessageFunction(props.getName(selectedItems.value[0]), selectedItems.value.length - 1)
     })
 
     const allSelected = computed<boolean>({
@@ -225,6 +226,12 @@ export default defineComponent({
       tempItems.value = selected
         ? [...tempItems.value, item]
         : tempItems.value.filter(selectedItem => selectedItem[props.itemKey] !== item[props.itemKey])
+    }
+
+    const defaultMultipleMessageFunction = (name: string, restLength: number): string => {
+      return props.multipleMessageFunction
+        ? props.multipleMessageFunction(name, restLength)
+        : tc('common.filters.itemsDataFilter.multipleMessage', restLength, { name, restLength })
     }
 
     return {

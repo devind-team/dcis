@@ -1,10 +1,10 @@
 <template lang="pug">
 .grid__cell-content(:class="contentClasses")
   component(
-    v-if="active && cell.canChangeValue"
-    v-bind="cellProps"
-    v-on="cellListeners"
-    :is="`GridCell${cellKind}`"
+    v-if="renderComponent"
+    v-bind="componentProps"
+    v-on="componentListeners"
+    :is="componentName"
   )
   div(v-else) {{ cell.value }}
 </template>
@@ -20,9 +20,10 @@ import {
   useCommonQuery,
   useUnloadFileValueArchiveMutation
 } from '~/composables'
+import { useAuthStore } from '~/stores'
 import { GridMode, UpdateSheetType } from '~/types/grid'
 import {
-  CellType,
+  CellType, DivisionModelType,
   DocumentSheetQuery,
   DocumentsSheetQuery,
   DocumentType,
@@ -56,6 +57,8 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { client } = useApolloClient()
+
+    const userStore = useAuthStore()
 
     const mode = inject<GridMode>('mode')
     const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
@@ -134,6 +137,20 @@ export default defineComponent({
       emit('clear-active')
     }
 
+    const canChangeValue = computed<boolean>(() => {
+      if (mode === GridMode.CHANGE) {
+        return true
+      }
+      if (activeSheet.value.canChange) {
+        return true
+      }
+      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
+      if (activeDocument.value.period.multiple) {
+        return userDivisionIds.includes(activeDocument.value.objectId)
+      }
+      return userDivisionIds.includes(props.cell.rowId)
+    })
+
     const cellKind = computed<string>(() => {
       if (props.cell.kind in cellKinds) {
         if (props.cell.kind === 'fl' && mode === GridMode.CHANGE) {
@@ -144,15 +161,22 @@ export default defineComponent({
       return 'String'
     })
 
-    const cellProps = computed<object>(() => {
-      if (props.cell.kind === 'fl') {
-        return { value: props.cell.value, files: files.value || [] }
+    const componentName = computed<string>(() => `GridCell${cellKind.value}`)
+    const hasFiles = computed<boolean>(() =>
+      componentName.value === 'GridCellFiles' && Boolean(files.value) && files.value.length !== 0)
+    const renderComponent = computed<boolean>(() =>
+      props.active && (hasFiles.value || canChangeValue.value)
+    )
+
+    const componentProps = computed(() => {
+      if (componentName.value === 'GridCellFiles') {
+        return { value: props.cell.value, files: files.value || [], readonly: !canChangeValue.value }
       }
-      return { value: props.cell.value }
+      return { value: props.cell.value, readonly: !canChangeValue.value }
     })
 
-    const cellListeners = computed<Record<string, Function>>(() => {
-      if (cellKind.value === 'Files') {
+    const componentListeners = computed<Record<string, Function>>(() => {
+      if (componentName.value === 'GridCellFiles') {
         return { 'set-value': setFileValue, 'unload-archive': uploadArchive, cancel }
       }
       return { 'set-value': setValue, cancel }
@@ -162,7 +186,7 @@ export default defineComponent({
       'grid__cell-content_active': props.active && ['Numeric', 'String', 'Money'].includes(cellKind.value)
     }))
 
-    return { cellKind, cellProps, cellListeners, contentClasses }
+    return { componentName, renderComponent, componentProps, componentListeners, contentClasses }
   }
 })
 </script>

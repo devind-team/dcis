@@ -86,16 +86,6 @@ def add_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
-    def get_row_permissions(_: RowDimension) -> dict[str | bool]:
-        return {
-            'can_add_child_row': True,
-            'can_change_height': True,
-            'can_delete': True,
-        }
-
-    def get_cell_permissions(_: Cell) -> dict[str | bool]:
-        return {'can_change_value': True}
-
     sheet.rowdimension_set.filter(parent_id=None, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
@@ -114,8 +104,6 @@ def add_row_dimension(
         merged_cells=sheet.mergedcell_set.all(),
         values=[],
         rows_global_indices_map={**global_indices_map, row_dimension.id: global_index},
-        get_row_permissions=get_row_permissions,
-        get_cell_permissions=get_cell_permissions,
     ).unload()[0]
 
 
@@ -134,22 +122,6 @@ def add_child_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
-
-    add_child_row_dimension_perm = AddChildRowDimensionBase(context, document)
-    change_child_row_dimension_height_perm = ChangeChildRowDimensionHeightBase(context, document)
-    delete_child_row_dimension_perm = DeleteChildRowDimensionBase(context, document)
-    change_value_perm = ChangeValueBase(context, document)
-
-    def get_row_permissions(row: RowDimension) -> dict[str | bool]:
-        return {
-            'can_add_child_row': add_child_row_dimension_perm.has_object_permission(row),
-            'can_change_height': change_child_row_dimension_height_perm.has_object_permission(row),
-            'can_delete': delete_child_row_dimension_perm.has_object_permission(row),
-        }
-
-    def get_cell_permissions(cell: Cell) -> dict[str | bool]:
-        return {'can_change_value': change_value_perm.has_object_permission(cell)}
-
     sheet.rowdimension_set.filter(parent=parent, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
@@ -170,8 +142,6 @@ def add_child_row_dimension(
         merged_cells=sheet.mergedcell_set.all(),
         values=[],
         rows_global_indices_map={**global_indices_map, row_dimension.id: global_index},
-        get_row_permissions=get_row_permissions,
-        get_cell_permissions=get_cell_permissions,
     ).unload()[0]
 
 

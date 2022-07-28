@@ -42,7 +42,8 @@ export default {
     },
     links: {
       documents: 'Документы',
-      divisions: 'Дивизионы',
+      departments: 'Департаменты',
+      organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
       sheets: 'Таблица',
@@ -77,10 +78,13 @@ export default {
       delete: '@:delete'
     },
     divisions: {
-      name: '@:dcis.periods.links.divisions',
+      departmentsName: '@:dcis.periods.links.departments',
+      organizationsName: '@:dcis.periods.links.organizations',
       addDivisions: {
-        buttonText: 'Добавить дивизионы',
-        header: 'Добавление дивизионов',
+        departmentsButtonText: 'Добавить департаменты',
+        organizationsButtonText: 'Добавить организации',
+        departmentsHeader: 'Добавление департаментов',
+        organizationsHeader: 'Добавление организаций',
         name: '@:name'
       },
       tableHeaders: {
@@ -89,7 +93,8 @@ export default {
       },
       deleteDivision: {
         tooltip: '@:delete',
-        itemName: 'дивизион'
+        departmentItemName: 'департамент',
+        organizationItemName: 'организацию'
       }
     },
     groups: {
@@ -162,6 +167,8 @@ export default {
       version: 'Версия',
       comment: 'Комментарий',
       createdAt: 'Дата добавления',
+      organization: '@:dcis.documents.addDocument.organization',
+      department: '@:dcis.documents.addDocument.department',
       lastStatus: 'Статус'
     },
     tableItems: {
@@ -173,24 +180,33 @@ export default {
       header: 'Добавление документа',
       comment: 'Комментарий',
       status: 'Статус',
+      department: 'Департамент',
+      organization: 'Организация',
       lastDocument: 'Значения из документа',
       version: '@:dcis.documents.version'
     },
     status: {
-      header: 'Добавление статуса',
+      header: 'Изменение статусов',
+      readonlyHeader: 'Статусы',
       subheader: '@:dcis.documents.version',
       status: 'Статус',
       comment: 'Комментарий',
-      buttonText: '@:add'
+      buttonText: '@:add',
+      delete: {
+        itemName: 'статус',
+        tooltip: '@:delete'
+      }
     },
-    unloading: {
+    unloadDocument: {
       name: 'Выгрузить документ',
-      row_add_date: 'Дата добавления строки',
-      row_update_date: 'Дата последних изменений в строке',
-      division_name: 'Название дивизиона',
-      division_head: 'Начальник дивизиона',
-      user: 'Пользователь, добавивший строку',
       additional: 'Дополнительные колонки',
+      rowAddDate: 'Дата добавления строки',
+      rowUpdateDate: 'Дата последних изменений в строке',
+      departmentName: 'Название департамента',
+      organizationName: 'Название организации',
+      departmentHead: 'Начальник департамента',
+      organizationHead: 'Начальник организации',
+      user: 'Пользователь, добавивший строку',
       unload: 'Выгрузить'
     }
   },
@@ -247,6 +263,7 @@ export default {
     },
     changeValue: 'Изменение значения',
     cellFiles: {
+      readonlyHeader: 'Файлы',
       file: 'Файл №{number}',
       newFiles: 'Новые файлы',
       uploadArchive: 'Скачать архив'

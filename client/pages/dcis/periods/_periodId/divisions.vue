@@ -1,16 +1,16 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ $t('dcis.periods.divisions.name') }}
+  template(#header) {{ header }}
     template(v-if="period.canChangeDivisions")
       v-spacer
       add-period-divisions(
+        :header="addHeader"
+        :button-text="addButtonText"
         :period="period"
-        :divisions="filterDivisions"
-        :loading="loading"
         :update="addDivisionsUpdate"
       )
         template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.divisions.addDivisions.buttonText') }}
+          v-btn(v-on="on" color="primary") {{ addButtonText }}
   v-row(align="center")
     v-col(cols="12" md="8")
       v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
@@ -21,17 +21,16 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   v-card(flat)
     v-card-text
       v-data-table(
-        :headers="headers"
+        :headers="tableHeaders"
         :items="period.divisions"
         :search="search"
-        :loading="loading"
         disable-pagination
         hide-default-footer
         @pagination="pagination"
       )
         template(#item.actions="{ item }")
           delete-menu(
-            :item-name="String($t('dcis.periods.divisions.deleteDivision.itemName'))"
+            :item-name="deleteItemName"
             @confirm="deleteDivision({ periodId: period.id, divisionId: item.id })"
           )
             template(#default="{ on: onMenu }")
@@ -54,15 +53,13 @@ import {
   DeleteDivisionMutation,
   DeleteDivisionMutationVariables,
   DeleteDivisionMutationPayload,
-  ProjectDivisionsQuery,
-  ProjectDivisionsQueryVariables, DivisionModelType
+  DivisionModelType
 } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import { UpdateType, useCommonQuery, useI18n } from '~/composables'
+import { UpdateType, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
-import divisionsQuery from '~/gql/dcis/queries/project_divisions.graphql'
 import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
 
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
@@ -83,16 +80,35 @@ export default defineComponent({
       divisionsCount.value = pagination.itemsLength
     }
 
+    const header = computed<string>(() => props.period.project.contentType.model === 'department'
+      ? t('dcis.periods.divisions.departmentsName') as string
+      : t('dcis.periods.divisions.organizationsName') as string
+    )
+
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
-        text: t('dcis.periods.divisions.name') as string,
+        text: header.value,
         to: localePath({ name: 'dcis-periods-periodId-divisions' }),
         exact: true
       }
     ]))
 
-    const headers = computed(() => {
+    const addHeader = computed<string>(() => props.period.project.contentType.model === 'department'
+      ? t('dcis.periods.divisions.addDivisions.departmentsHeader') as string
+      : t('dcis.periods.divisions.addDivisions.organizationsHeader') as string
+    )
+    const addButtonText = computed<string>(() => props.period.project.contentType.model === 'department'
+      ? t('dcis.periods.divisions.addDivisions.departmentsButtonText') as string
+      : t('dcis.periods.divisions.addDivisions.organizationsButtonText') as string
+    )
+
+    const deleteItemName = computed<string>(() => props.period.project.contentType.model === 'department'
+      ? t('dcis.periods.divisions.deleteDivision.departmentItemName') as string
+      : t('dcis.periods.divisions.deleteDivision.organizationItemName') as string
+    )
+
+    const tableHeaders = computed(() => {
       const result: DataTableHeader[] = [
         {
           text: t('dcis.periods.divisions.tableHeaders.name') as string,
@@ -109,22 +125,6 @@ export default defineComponent({
         })
       }
       return result
-    })
-
-    const { data: projectDivisions, loading } = useCommonQuery<
-      ProjectDivisionsQuery,
-      ProjectDivisionsQueryVariables
-    >({
-      document: divisionsQuery,
-      variables: { projectId: props.period.project.id }
-    })
-
-    const filterDivisions = computed<DivisionModelType[]>(() => {
-      if (projectDivisions.value) {
-        return projectDivisions.value.filter(division =>
-          !props.period.divisions.map(periodDivision => periodDivision.id).includes(division.id))
-      }
-      return []
     })
 
     const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
@@ -164,10 +164,12 @@ export default defineComponent({
       search,
       divisionsCount,
       pagination,
+      header,
       bc,
-      headers,
-      loading,
-      filterDivisions,
+      addHeader,
+      addButtonText,
+      deleteItemName,
+      tableHeaders,
       addDivisionsUpdate,
       deleteDivision
     }

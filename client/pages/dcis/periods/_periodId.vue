@@ -40,23 +40,26 @@ export default defineComponent({
           title: t('dcis.periods.links.documents') as string,
           to: 'dcis-periods-periodId-documents',
           icon: 'file-table-box-multiple-outline'
-        },
-        {
-          title: t('dcis.periods.links.divisions') as string,
-          to: 'dcis-periods-periodId-divisions',
-          icon: 'briefcase-outline'
-        },
-        {
-          title: t('dcis.periods.links.groups') as string,
-          to: 'dcis-periods-periodId-groups',
-          icon: 'account-group'
-        },
-        {
-          title: t('dcis.periods.links.users') as string,
-          to: 'dcis-periods-periodId-users',
-          icon: 'account-multiple'
         }
       ]
+      if (period.value) {
+        result.push({
+          title: period.value.project.contentType.model === 'department'
+            ? t('dcis.periods.links.departments') as string
+            : t('dcis.periods.links.organizations') as string,
+          to: 'dcis-periods-periodId-divisions',
+          icon: 'briefcase-outline'
+        })
+      }
+      result.push({
+        title: t('dcis.periods.links.groups') as string,
+        to: 'dcis-periods-periodId-groups',
+        icon: 'account-group'
+      }, {
+        title: t('dcis.periods.links.users') as string,
+        to: 'dcis-periods-periodId-users',
+        icon: 'account-multiple'
+      })
       if (period.value) {
         if (period.value.canChangeSheet) {
           result.push({

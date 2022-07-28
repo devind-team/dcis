@@ -3,7 +3,7 @@ v-footer(padless)
   v-container
     v-row
       v-col.d-flex.flex-column.justify-space-between(cols="12" md="9")
-        nuxt-link.caption(to="/instructions/Сборы_временная инструкция.docx" target="_blank")
+        nuxt-link.caption(to="/instructions/Инструкция.docx" target="_blank")
           | Инструкция.
         a.caption(href="https://www.cbias.ru/sso_app/support.spf" target="_blank")
           | Обращение в службу технической поддержки.
