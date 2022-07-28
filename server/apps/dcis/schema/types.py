@@ -7,6 +7,7 @@ from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.db.models import QuerySet
+from django.core.exceptions import PermissionDenied
 from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
@@ -21,20 +22,21 @@ from apps.dcis.models import (
     Value,
 )
 from apps.dcis.permissions import (
-    AddDocumentBase,
-    AddPeriodBase,
-    ChangeDocumentBase,
-    ChangePeriodDivisionsBase,
-    ChangePeriodGroupsBase,
-    ChangePeriodSettingsBase,
-    ChangePeriodSheetBase,
-    ChangePeriodUsersBase,
-    ChangeProjectBase,
-    DeleteDocumentBase,
-    DeletePeriodBase,
-    DeleteProjectBase,
+    can_add_document_base,
+    can_add_period_base,
+    can_change_document_base,
+    can_change_period_divisions_base,
+    can_change_period_groups_base,
+    can_change_period_settings_base,
+    can_change_period_sheet_base,
+    can_change_period_users_base,
+    can_change_project_base,
+    can_delete_document_base,
+    can_delete_period_base,
+    can_delete_project_base
 )
 from apps.dcis.services.divisions_services import get_period_divisions
+from apps.dcis.helpers.exceptions import is_raises
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -76,15 +78,15 @@ class ProjectType(OptimizedDjangoObjectType):
 
     @staticmethod
     def resolve_can_change(project: Project, info: ResolveInfo) -> bool:
-        return ChangeProjectBase.has_object_permission(info.context, project)
+        return not is_raises(PermissionDenied, can_change_project_base, info.context.user, project)
 
     @staticmethod
     def resolve_can_delete(project: Project, info: ResolveInfo) -> bool:
-        return DeleteProjectBase.has_object_permission(info.context, project)
+        return not is_raises(PermissionDenied, can_delete_project_base, info.context.user, project)
 
     @staticmethod
     def resolve_can_add_period(project: Project, info: ResolveInfo) -> bool:
-        return AddPeriodBase.has_object_permission(info.context, project)
+        return not is_raises(PermissionDenied, can_add_period_base, info.context.user, project)
 
 
 class PeriodType(DjangoObjectType):
@@ -161,31 +163,31 @@ class PeriodType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_add_document_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodDivisionsBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_divisions_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_groups(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodGroupsBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_groups_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodUsersBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_users_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodSettingsBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_settings_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_sheet(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodSheetBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_sheet_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
-        return DeletePeriodBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_delete_period_base, info.context.user, period)
 
 
 class DivisionModelType(graphene.ObjectType):
@@ -324,11 +326,11 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
-        return ChangeDocumentBase.has_object_permission(info.context, document)
+        return not is_raises(PermissionDenied, can_change_document_base, info.context.user, document)
 
     @staticmethod
     def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
-        return DeleteDocumentBase.has_object_permission(info.context, document)
+        return not is_raises(PermissionDenied, can_delete_document_base, info.context.user, document)
 
 
 class DocumentStatusType(DjangoObjectType):

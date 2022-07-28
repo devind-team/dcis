@@ -453,7 +453,7 @@ class DocumentSheetUnloader(SheetUnloader):
     def __init__(self, context: Any, sheet: Sheet, document_id: int | str, fields: Sequence[str]) -> None:
         super().__init__(sheet, fields)
         self.document = Document.objects.get(pk=document_id)
-        self.change_document_sheet = ChangeDocumentSheetBase(context, self.document)
+        self.change_document_sheet = ChangeDocumentSheetBase(context.user, self.document)
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""

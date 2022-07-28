@@ -12,12 +12,12 @@ from graphql_relay import from_global_id
 
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.permissions import (
-    AddChildRowDimension,
-    AddDocument,
-    ChangeChildRowDimensionHeight,
-    ChangeDocument,
-    DeleteChildRowDimension,
-    ViewDocument,
+    can_add_child_row_dimension,
+    can_add_document,
+    can_change_child_row_dimension_height,
+    can_change_document,
+    can_delete_child_row_dimension,
+    can_view_document,
 )
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
@@ -51,7 +51,7 @@ class AddDocumentMutation(BaseMutation):
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: None,
         info: ResolveInfo,
@@ -63,7 +63,7 @@ class AddDocumentMutation(BaseMutation):
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_add_document(info.context.user, period)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document = create_document(
             user=info.context.user,
@@ -86,8 +86,7 @@ class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Document) -> None:
-        if not ChangeDocument.has_object_permission(info.context, obj):
-            raise PermissionDenied('Ошибка доступа')
+        can_change_document(info.context.user, obj)
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -101,10 +100,10 @@ class AddDocumentStatusMutation(BaseMutation):
     document_status = graphene.Field(DocumentStatusType, description='Статус документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_change_document(info.context.user, document)
         status: Status = get_object_or_404(Status, pk=status_id)
         document_status = DocumentStatus.objects.create(
             status=status,
@@ -124,10 +123,10 @@ class DeleteDocumentStatusMutation(BaseMutation):
     id = graphene.ID(required=True, description='Идентификатор статуса документа')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
         status = get_object_or_404(DocumentStatus, pk=document_status_id)
-        info.context.check_object_permissions(info.context, status.document)
+        can_change_document(info.context.user, status.document)
         status.delete()
         return DeleteDocumentStatusMutation(id=document_status_id)
 
@@ -145,12 +144,12 @@ class UnloadDocumentMutation(BaseMutation):
     src = graphene.String(description='Ссылка на сгенерированный файл')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
         if not additional:
             additional = []
         document = Document.objects.get(pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context.user, document)
         document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
         src: str = document_unload.xlsx()
         return UnloadDocumentMutation(src=src)
@@ -174,7 +173,7 @@ class AddChildRowDimensionMutation(BaseMutation):
     row_dimension = graphene.Field(RowDimensionType, required=True, description='Добавленная строка')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddChildRowDimension,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: None,
         info: ResolveInfo,
@@ -187,9 +186,9 @@ class AddChildRowDimensionMutation(BaseMutation):
     ):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         parent = get_object_or_404(RowDimension, pk=parent_id)
-        info.context.check_object_permissions(
-            info.context,
-            AddChildRowDimension.Obj(document=document, row_dimension=parent)
+        can_add_child_row_dimension(
+            info.context.user,
+            document=document, row_dimension=parent
         )
         sheet = get_object_or_404(Sheet, pk=sheet_id)
         return AddChildRowDimensionMutation(
@@ -217,10 +216,10 @@ class ChangeChildRowDimensionHeightMutation(BaseMutation):
     updated_at = graphene.DateTime(required=True, description='Дата обновления строки')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeChildRowDimensionHeight,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, row_dimension_id: str, height: int):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        info.context.check_object_permissions(info.context, row_dimension)
+        can_change_child_row_dimension_height(info.context.user, row_dimension)
         row_dimension = change_row_dimension_height(row_dimension, height)
         return ChangeChildRowDimensionHeightMutation(
             row_dimension_id=row_dimension.id,
@@ -238,10 +237,10 @@ class DeleteChildRowDimensionMutation(BaseMutation):
     row_dimension_id = graphene.ID(required=True, description='Идентификатор удаленной строки')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, DeleteChildRowDimension,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        info.context.check_object_permissions(info.context, row_dimension)
+        can_delete_child_row_dimension(info.context.user, row_dimension)
         return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(row_dimension))
 
 

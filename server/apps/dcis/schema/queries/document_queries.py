@@ -14,7 +14,7 @@ from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Document, DocumentStatus, Sheet, Status, Value
-from apps.dcis.permissions import ViewDocument
+from apps.dcis.permissions import can_view_document
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, SheetType, StatusType
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
@@ -65,10 +65,10 @@ class DocumentQueries(graphene.ObjectType):
         return get_user_documents(info.context.user, from_global_id(period_id)[1])
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def resolve_document(root, info: ResolveInfo, document_id: str) -> Document:
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context.user, document)
         return document
 
     @staticmethod
@@ -77,14 +77,14 @@ class DocumentQueries(graphene.ObjectType):
         return Status.objects.all()
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def resolve_document_statuses(root, info: ResolveInfo, document_id: str) -> QuerySet[DocumentStatus]:
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context.user, document)
         return document.documentstatus_set.all()
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def resolve_document_sheet(
         root,
         info: ResolveInfo,
@@ -92,7 +92,7 @@ class DocumentQueries(graphene.ObjectType):
         sheet_id: str
     ) -> list[dict] | dict:
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context.user, document)
         return DocumentSheetUnloader(
             info.context,
             sheet=get_object_or_404(Sheet, pk=sheet_id),
@@ -101,7 +101,7 @@ class DocumentQueries(graphene.ObjectType):
         ).unload()
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def resolve_value_files(
         root,
         info: ResolveInfo,
@@ -111,7 +111,7 @@ class DocumentQueries(graphene.ObjectType):
         row_id: str,
     ):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context.user, document)
         value = Value.objects.filter(
             document_id=document.id,
             sheet_id=sheet_id,

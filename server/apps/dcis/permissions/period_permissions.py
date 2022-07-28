@@ -1,216 +1,160 @@
 """Разрешения на работу с периодами проектов."""
 
-from devind_helpers.permissions import BasePermission
+from django.core.exceptions import PermissionDenied
 
+from apps.core.models import User
 from apps.dcis.models import Period, Project
 from apps.dcis.services.period_services import get_user_periods
 from apps.dcis.services.privilege_services import has_privilege
-from .project_permissions import ViewProject
+from .project_permissions import can_view_project
 
 
-class ViewPeriod(BasePermission):
+def can_view_period(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период."""
+    can_view_project(
+        user, obj.project
+    )
+    if obj in get_user_periods(user, obj.project.id):
+        return
+    raise PermissionDenied('Недостаточно прав для просмотра периода')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewProject.has_object_permission(context, obj.project) and obj in get_user_periods(
-            context.user,
-            obj.project.id
-        )
 
-
-class AddPeriodBase(BasePermission):
+def can_add_period_base(user: User, obj: Project):
     """Пропускает пользователей, которые могут добавлять периоды в проект, без проверки возможности просмотра."""
+    if user.has_perm('dcis.add_period') or (
+        obj.user_id == user.id and
+        user.has_perm('dcis.add_project')
+    ):
+        return
+    raise PermissionDenied('Недостаточно прав для добавления периода')
 
-    @staticmethod
-    def has_object_permission(context, obj: Project):
-        return context.user.has_perm('dcis.add_period') or (
-            obj.user_id == context.user.id and
-            context.user.has_perm('dcis.add_project')
-        )
 
-
-class AddPeriod(BasePermission):
+def can_add_period(user: User, obj: Project):
     """Пропускает пользователей, которые могут просматривать проект и добавлять в него периоды."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Project):
-        return ViewProject.has_object_permission(
-            context, obj
-        ) and AddPeriodBase.has_object_permission(
-            context, obj
-        )
+    can_view_project(user, obj)
+    can_add_period_base(user, obj)
 
 
-class ChangePeriodBase(BasePermission):
+def can_change_period_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут изменять период в проекте, без проверки возможности просмотра."""
+    if (
+        user.has_perm('dcis.change_period') or
+        obj.project.user_id == user.id and user.has_perm('dcis.add_project') or
+        obj.user_id == user.id and user.has_perm('dcis.add_period') or
+        has_privilege(user.id, obj.id, 'change_period')
+    ):
+        return
+    raise PermissionDenied('Недостаточно прав для изменения периода в проекте')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return (
-            context.user.has_perm('dcis.change_period') or
-            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project') or
-            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period') or
-            has_privilege(context.user.id, obj.id, 'change_period')
-        )
 
-
-class ChangePeriod(BasePermission):
+def can_change_period(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать и изменять период в проекте."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and ChangePeriodBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_change_period_base(user, obj)
 
 
-class ChangePeriodDivisionsBase(BasePermission):
+def can_change_period_divisions_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут изменять дивизионы периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, obj)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, obj.id, 'change_period_divisions'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения дивизионов в периоде')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ChangePeriodBase.has_object_permission(
-            context, obj
-        ) or has_privilege(
-            context.user.id, obj.id, 'change_period_divisions'
-        )
 
-
-class ChangePeriodDivisions(BasePermission):
+def can_change_period_divisions(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем дивизионы."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and ChangePeriodDivisionsBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_change_period_divisions_base(user, obj)
 
 
-class ChangePeriodGroupsBase(BasePermission):
+def can_change_period_groups_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут изменять группы периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, obj)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, obj.id, 'change_period_groups'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения групп периода')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ChangePeriodBase.has_object_permission(
-            context, obj
-        ) or has_privilege(
-            context.user.id, obj.id, 'change_period_groups'
-        )
 
-
-class ChangePeriodGroups(BasePermission):
+def can_change_period_groups(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем группы."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and ChangePeriodGroupsBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_change_period_groups_base(user, obj)
 
 
-class ChangePeriodUsersBase(BasePermission):
+def can_change_period_users_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут изменять пользователей периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, obj)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, obj.id, 'change_period_users'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения пользователей периода')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ChangePeriodBase.has_object_permission(
-            context, obj
-        ) or has_privilege(
-            context.user.id, obj.id, 'change_period_users'
-        )
 
-
-class ChangePeriodUsers(BasePermission):
+def can_change_period_users(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем пользователей."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and ChangePeriodUsersBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_change_period_users_base(user, obj)
 
 
-class ChangePeriodSettingsBase(BasePermission):
+def can_change_period_settings_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут изменять настройки периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, obj)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, obj.id, 'change_period_settings'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения настроек периода')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ChangePeriodBase.has_object_permission(
-            context, obj
-        ) or has_privilege(
-            context.user.id, obj.id, 'change_period_settings'
-        )
 
-
-class ChangePeriodSettings(BasePermission):
+def can_change_period_settings(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем настройки."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and ChangePeriodSettingsBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_change_period_settings_base(user, obj)
 
 
-class ChangePeriodSheetBase(BasePermission):
+def can_change_period_sheet_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут изменять структуру листа, без проверки возможности просмотра."""
+    if (
+        user.has_perm('dcis.change_sheet') or
+        obj.project.user_id == user.id and user.has_perm('dcis.add_project') or
+        obj.user_id == user.id and user.has_perm('dcis.add_period') or
+        has_privilege(user.id, obj.id, 'change_sheet')
+    ):
+        return
+    raise PermissionDenied('Недостаточно прав для изменения структуры листа')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return (
-            context.user.has_perm('dcis.change_sheet') or
-            obj.project.user_id == context.user.id and context.user.has_perm('dcis.add_project') or
-            obj.user_id == context.user.id and context.user.has_perm('dcis.add_period') or
-            has_privilege(context.user.id, obj.id, 'change_sheet')
-        )
 
-
-class ChangePeriodSheet(BasePermission):
+def can_change_period_sheet(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру листа."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and ChangePeriodSheetBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_change_period_sheet_base(user, obj)
 
 
-class DeletePeriodBase(BasePermission):
+def can_delete_period_base(user: User, obj: Period):
     """Пропускает пользователей, которые могут удалять период, без проверки возможности просмотра."""
+    if user.has_perm('dcis.delete_period') or (
+        obj.project.user_id == user.id and
+        user.has_perm('dcis.add_project') and
+        obj.document_set.count() == 0
+    ) or (
+        obj.user_id == user.id and
+        user.has_perm('dcis.add_period') and
+        obj.document_set.count() == 0
+    ):
+        return
+    raise PermissionDenied('Недостаточно прав для удаления периода')
 
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return context.user.has_perm('dcis.delete_period') or (
-            obj.project.user_id == context.user.id and
-            context.user.has_perm('dcis.add_project') and
-            obj.document_set.count() == 0
-        ) or (
-            obj.user_id == context.user.id and
-            context.user.has_perm('dcis.add_period') and
-            obj.document_set.count() == 0
-        )
 
-
-class DeletePeriod(BasePermission):
+def can_delete_period(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать и удалять период в проекте."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Period):
-        return ViewPeriod.has_object_permission(
-            context, obj
-        ) and DeletePeriodBase.has_object_permission(
-            context, obj
-        )
+    can_view_period(user, obj)
+    can_delete_period_base(user, obj)

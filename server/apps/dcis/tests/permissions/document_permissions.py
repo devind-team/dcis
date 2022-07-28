@@ -1,22 +1,22 @@
 """Тесты разрешений на работу с документами периодов."""
 
-from typing import Type
+from typing import Callable, Any
 from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
-from devind_helpers.permissions import BasePermission
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 
 from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet
 from apps.dcis.permissions.document_permissions import (
-    AddChildRowDimension,
-    AddDocument,
-    ChangeChildRowDimensionHeight,
-    ChangeDocument,
-    ChangeValue,
-    DeleteChildRowDimension,
-    DeleteDocument,
-    ViewDocument,
+    can_add_child_row_dimension,
+    can_add_document,
+    can_change_child_row_dimension_height,
+    can_change_document,
+    can_change_value,
+    can_delete_child_row_dimension,
+    can_delete_document,
+    can_view_document,
 )
 from .common import PermissionsTestCase
 
@@ -74,82 +74,82 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             dynamic=True,
         )
         self.column_dimensions = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 6)]
-        self.not_editable_cell_obj = ChangeValue.Obj(
-            document=self.user_document,
-            cell=Cell.objects.create(
+        self.not_editable_cell_obj = {
+            'document': self.user_document,
+            'cell': Cell.objects.create(
                 row=self.row_dimension,
                 column=self.column_dimensions[0],
                 editable=False,
             ),
-        )
-        self.formula_cell_obj = ChangeValue.Obj(
-            document=self.user_document,
-            cell=Cell.objects.create(
+        }
+        self.formula_cell_obj = {
+            'document': self.user_document,
+            'cell': Cell.objects.create(
                 row=self.row_dimension,
                 column=self.column_dimensions[1],
                 formula='0',
             ),
-        )
-        self.cell_obj = ChangeValue.Obj(
-            document=self.document,
-            cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[2]),
-        )
-        self.child_cell_obj = ChangeValue.Obj(
-            document=self.user_document,
-            cell=Cell.objects.create(row=self.document_row_dimension_child, column=self.column_dimensions[3])
-        )
-        self.user_cell_obj = ChangeValue.Obj(
-            document=self.user_document,
-            cell=Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[4]),
-        )
+        }
+        self.cell_obj = {
+            'document': self.document,
+            'cell': Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[2]),
+        }
+        self.child_cell_obj = {
+            'document': self.user_document,
+            'cell': Cell.objects.create(row=self.document_row_dimension_child, column=self.column_dimensions[3])
+        }
+        self.user_cell_obj = {
+            'document': self.user_document,
+            'cell': Cell.objects.create(row=self.row_dimension, column=self.column_dimensions[4]),
+        }
 
     def test_view_document(self) -> None:
         """Тестирование класса `ViewDocument`."""
-        self.assertFalse(ViewDocument.has_object_permission(self.context_mock, self.document))
+        self.assertRaises(PermissionDenied, can_view_document, self.user, self.document)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertFalse(ViewDocument.has_object_permission(self.context_mock, self.document))
-        self.assertTrue(ViewDocument.has_object_permission(self.context_mock, self.user_document))
+            self.assertRaises(PermissionDenied, can_view_document, self.user, self.document)
+        can_view_document(self.user, self.user_document)
 
     def test_add_document(self) -> None:
         """Тестирование класса `AddDocument`."""
-        self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.period))
+        self.assertRaises(PermissionDenied, can_add_document, self.user, self.period)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.period))
+            self.assertRaises(PermissionDenied, can_add_document, self.user, self.period)
         with patch.object(
             self.user,
             'has_perm',
             new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period', 'dcis.add_document')
         ):
-            self.assertTrue(AddDocument.has_object_permission(self.context_mock, self.period))
-        self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.user_period))
+            can_add_document(self.user, self.period)
+        self.assertRaises(PermissionDenied, can_add_document, self.user, self.user_period)
         for global_perm in ('dcis.add_project', 'dcis.add_period'):
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                self.assertFalse(AddDocument.has_object_permission(self.context_mock, self.period))
-                self.assertTrue(AddDocument.has_object_permission(self.context_mock, self.user_period))
+                self.assertRaises(PermissionDenied, can_add_document, self.user, self.period)
+                can_add_document(self.user, self.user_period)
 
     def test_change_document(self) -> None:
         """Тестирование класса `ChangeDocument`."""
-        self._test_common(ChangeDocument, 'dcis.change_document', 'change_document')
+        self._test_common(can_change_document, 'dcis.change_document', 'change_document')
 
     def test_delete_document(self) -> None:
         """Тестирование класса `DeleteDocument`."""
-        self._test_common(DeleteDocument, 'dcis.delete_document', 'delete_document')
+        self._test_common(can_delete_document, 'dcis.delete_document', 'delete_document')
 
     def test_change_value(self) -> None:
         """Тестирование класса `ChangeValue`."""
         self._test_change_value((False, False, False, False, True))
         with patch(
-            'apps.dcis.permissions.document_permissions.ViewDocument.has_object_permission',
-            new=Mock(return_value=False)
+            'apps.dcis.permissions.document_permissions.can_view_document',
+            new=Mock(side_effect=PermissionDenied())
         ):
             self._test_change_value((False, False, False, False, False))
         with patch(
-            'apps.dcis.permissions.document_permissions.ViewDocument.has_object_permission',
-            new=Mock(return_value=True)
+            'apps.dcis.permissions.document_permissions.can_view_document',
+            new=Mock()
         ):
             self._test_change_value((False, False, True, False, True))
             with patch(
-                'apps.dcis.permissions.document_permissions.ChangePeriodSheetBase.has_object_permission',
+                'apps.dcis.permissions.document_permissions.can_change_period_sheet_base',
                 new=Mock(return_value=True)
             ):
                 self._test_change_value((False, False, True, True, True))
@@ -204,28 +204,28 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self._test_delete_child_row_dimension((False, False, True, True))
             mock.assert_called_with(self.user.id, self.user_period.id, 'delete_rowdimension')
 
-    def _test_common(self, cls: Type[BasePermission], permission: str, privilege: str) -> None:
+    def _test_common(self, f: Callable[[Any, Any], None], permission: str, privilege: str) -> None:
         """Общий механизм тестирования для классов `ChangeDocument` и `DeleteDocument`."""
-        self.assertFalse(cls.has_object_permission(self.context_mock, self.document))
-        self.assertFalse(cls.has_object_permission(self.context_mock, self.user_document))
+        self.assertRaises(PermissionDenied, f, self.user, self.document)
+        self.assertRaises(PermissionDenied, f, self.user, self.user_document)
         with patch(
-            'apps.dcis.permissions.document_permissions.ViewDocument.has_object_permission',
-            new=Mock(return_value=True)
+            'apps.dcis.permissions.document_permissions.can_view_document',
+            new=Mock()
         ):
-            self.assertFalse(cls.has_object_permission(self.context_mock, self.document))
-            self.assertFalse(cls.has_object_permission(self.context_mock, self.user_document))
+            self.assertRaises(PermissionDenied, f, self.user, self.document)
+            self.assertRaises(PermissionDenied, f, self.user, self.user_document)
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == permission):
-                self.assertTrue(cls.has_object_permission(self.context_mock, self.document))
-                self.assertTrue(cls.has_object_permission(self.context_mock, self.user_document))
+                f(self.user, self.document)
+                f(self.user, self.user_document)
             for global_perm in ('dcis.add_project', 'dcis.add_period'):
                 with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                    self.assertFalse(cls.has_object_permission(self.context_mock, self.document))
-                    self.assertTrue(cls.has_object_permission(self.context_mock, self.user_document))
+                    self.assertRaises(PermissionDenied, f, self.user, self.document)
+                    f(self.user, self.user_document)
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-                self.assertTrue(cls.has_object_permission(self.context_mock, self.document))
+                f(self.user, self.document)
                 mock.assert_called_once_with(self.user.id, self.period.id, privilege)
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-                self.assertTrue(cls.has_object_permission(self.context_mock, self.user_document))
+                f(self.user, self.user_document)
                 mock.assert_called_once_with(self.user.id, self.user_period.id, privilege)
 
     def _test_change_value(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
@@ -238,22 +238,38 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.user_cell_obj,
         ), values):
             if value:
-                self.assertTrue(ChangeValue.has_object_permission(self.context_mock, cell_obj))
+                can_change_value(self.user, cell_obj['document'], cell_obj['cell'])
             else:
-                self.assertFalse(ChangeValue.has_object_permission(self.context_mock, cell_obj))
+                self.assertRaises(
+                    PermissionDenied,
+                    can_change_value,
+                    self.user,
+                    cell_obj['document'],
+                    cell_obj['cell']
+                )
 
     def _test_add_child_row_dimension(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование класса `AddChildRowDimension` для 4 типов строк."""
         for row_dimension, value in zip((
-            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.row_dimension),
-            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.document_row_dimension),
-            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.dynamic_row_dimension),
-            AddChildRowDimension.Obj(document=self.user_document, row_dimension=self.document_dynamic_row_dimension),
+            {'document': self.user_document, 'row_dimension': self.row_dimension},
+            {'document': self.user_document, 'row_dimension': self.document_row_dimension},
+            {'document': self.user_document, 'row_dimension': self.dynamic_row_dimension},
+            {'document': self.user_document, 'row_dimension': self.document_dynamic_row_dimension},
         ), values):
             if value:
-                self.assertTrue(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))
+                can_add_child_row_dimension(
+                    self.user,
+                    row_dimension['document'],
+                    row_dimension['row_dimension']
+                )
             else:
-                self.assertFalse(AddChildRowDimension.has_object_permission(self.context_mock, row_dimension))
+                self.assertRaises(
+                    PermissionDenied,
+                    can_add_child_row_dimension,
+                    self.user,
+                    row_dimension['document'],
+                    row_dimension['row_dimension']
+                )
 
     def _test_change_child_row_dimension_height(self, values: tuple[bool, bool, bool]) -> None:
         """Тестирование класса `ChangeChildRowDimensionHeight` для 3 типов строк."""
@@ -263,9 +279,14 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.document_user_row_dimension,
         ), values):
             if value:
-                self.assertTrue(ChangeChildRowDimensionHeight.has_object_permission(self.context_mock, row_dimension))
+                can_change_child_row_dimension_height(self.user, row_dimension)
             else:
-                self.assertFalse(ChangeChildRowDimensionHeight.has_object_permission(self.context_mock, row_dimension))
+                self.assertRaises(
+                    PermissionDenied,
+                    can_change_child_row_dimension_height,
+                    self.user,
+                    row_dimension
+                )
 
     def _test_delete_child_row_dimension(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование класса `DeleteChildRowDimension` для 4 типов строк."""
@@ -276,6 +297,6 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.document_user_row_dimension,
         ), values):
             if value:
-                self.assertTrue(DeleteChildRowDimension.has_object_permission(self.context_mock, row_dimension))
+                can_delete_child_row_dimension(self.user, row_dimension)
             else:
-                self.assertFalse(DeleteChildRowDimension.has_object_permission(self.context_mock, row_dimension))
+                self.assertRaises(PermissionDenied, can_delete_child_row_dimension, self.user, row_dimension)
