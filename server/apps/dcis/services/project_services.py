@@ -5,6 +5,8 @@ from django.db.models import Q, QuerySet
 from apps.core.models import User
 from apps.dcis.models import Project
 from apps.dcis.services.divisions_services import get_user_division_ids
+from django.contrib.contenttypes.models import ContentType
+from devind_dictionaries.models import Department
 
 
 def get_user_participant_projects(user: User) -> QuerySet[Project]:
@@ -42,3 +44,36 @@ def get_user_projects(user: User) -> QuerySet[Project]:
     if user.has_perm('dcis.view_project'):
         return Project.objects.all()
     return get_user_participant_projects(user) | get_user_privileges_projects(user) | get_user_divisions_projects(user)
+
+
+def create_project(validate_field: dict, visibility: bool) -> Project:
+    """Создание периода."""
+    return Project.objects.create(
+            name=validate_field['name'],
+            short=validate_field['short'],
+            description=validate_field['description'],
+            content_type=ContentType.objects.get_for_model(Project.DIVISION_KIND.
+                                                           get(validate_field['content_type'], Department)),
+            visibility=visibility)
+
+
+def change_project(
+        project: Project,
+        name: str,
+        short: str,
+        description: str,
+        visibility: bool,
+        archive: bool) -> Project:
+    """Изменение настроек проекта."""
+    project.name = name
+    project.short = short
+    project.description = description
+    project.visibility = visibility
+    project.archive = archive
+    project.save(update_fields=('name', 'short', 'description', 'visibility', 'archive', 'updated_at'))
+    return project
+
+
+def delete_project(project: Project) -> None:
+    """Удаление проекта."""
+    return project.delete()

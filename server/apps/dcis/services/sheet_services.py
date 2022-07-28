@@ -18,6 +18,7 @@ from apps.dcis.permissions import (
     DeleteChildRowDimensionBase,
 )
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
+from devind_dictionaries.models import BudgetClassification
 
 
 @transaction.atomic
@@ -292,3 +293,8 @@ def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False)
             merge_cells.delete()
         else:
             merge_cells.save(update_fields=('min_row', 'max_row',))
+
+
+def add_budget_classification(code: str, name: str) -> BudgetClassification:
+    """Добавления КБК в словарь."""
+    return BudgetClassification.objects.create(code=code, name=name)

@@ -1,7 +1,7 @@
 #import "../../fragments/document_fields.graphql"
 
 mutation ChangeDocumentComment($documentId: ID!, $comment: String!) {
-  changeDocumentComment(id: $documentId, input: { comment: $comment }) {
+  changeDocumentComment(input: { documentId: $documentId, comment: $comment }) {
     document {
       ...DocumentFields
     }
