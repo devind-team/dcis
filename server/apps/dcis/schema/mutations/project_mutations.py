@@ -9,11 +9,13 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from django.contrib.contenttypes.models import ContentType
+from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project
+from apps.dcis.permissions import can_change_project, can_delete_project
 from apps.dcis.permissions import AddProject, ChangeProject, DeleteProject
 from apps.dcis.schema.types import ProjectType
 from apps.dcis.validators import ProjectValidator
@@ -65,7 +67,7 @@ class ChangeProjectMutation(BaseMutation):
     project = graphene.Field(ProjectType, description='Измененный проект')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeProject,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
             root: Any,
             info: ResolveInfo,
@@ -77,7 +79,7 @@ class ChangeProjectMutation(BaseMutation):
             archive: bool
     ):
         project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        info.context.check_object_permissions(info.context, project)
+        can_change_project(info.context.user, project)
         return ChangeProjectMutation(project=change_project(project, name, short, description, visibility, archive))
 
 
@@ -90,10 +92,10 @@ class DeleteProjectMutation(BaseMutation):
     delete_id = graphene.ID(required=True, description='Идентификатор удаленного проекта')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, DeleteProject,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, project_id: str | int):
         project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        info.context.check_object_permissions(info.context, project)
+        can_delete_project(info.context.user, project)
         delete_project(project)
         return DeleteProjectMutation(delete_id=project_id)
 

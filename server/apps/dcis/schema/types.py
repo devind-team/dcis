@@ -7,6 +7,7 @@ from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.db.models import QuerySet
+from django.core.exceptions import PermissionDenied
 from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
@@ -21,20 +22,21 @@ from apps.dcis.models import (
     Value,
 )
 from apps.dcis.permissions import (
-    AddDocumentBase,
-    AddPeriodBase,
-    ChangeDocumentBase,
-    ChangePeriodDivisionsBase,
-    ChangePeriodGroupsBase,
-    ChangePeriodSettingsBase,
-    ChangePeriodSheetBase,
-    ChangePeriodUsersBase,
-    ChangeProjectBase,
-    DeleteDocumentBase,
-    DeletePeriodBase,
-    DeleteProjectBase,
+    can_add_document_base,
+    can_add_period_base,
+    can_change_document_base,
+    can_change_period_divisions_base,
+    can_change_period_groups_base,
+    can_change_period_settings_base,
+    can_change_period_sheet_base,
+    can_change_period_users_base,
+    can_change_project_base,
+    can_delete_document_base,
+    can_delete_period_base,
+    can_delete_project_base
 )
-from apps.dcis.services.divisions_services import get_divisions
+from apps.dcis.services.divisions_services import get_period_divisions
+from apps.dcis.helpers.exceptions import is_raises
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -76,15 +78,15 @@ class ProjectType(OptimizedDjangoObjectType):
 
     @staticmethod
     def resolve_can_change(project: Project, info: ResolveInfo) -> bool:
-        return ChangeProjectBase.has_object_permission(info.context, project)
+        return not is_raises(PermissionDenied, can_change_project_base, info.context.user, project)
 
     @staticmethod
     def resolve_can_delete(project: Project, info: ResolveInfo) -> bool:
-        return DeleteProjectBase.has_object_permission(info.context, project)
+        return not is_raises(PermissionDenied, can_delete_project_base, info.context.user, project)
 
     @staticmethod
     def resolve_can_add_period(project: Project, info: ResolveInfo) -> bool:
-        return AddPeriodBase.has_object_permission(info.context, project)
+        return not is_raises(PermissionDenied, can_add_period_base, info.context.user, project)
 
 
 class PeriodType(DjangoObjectType):
@@ -147,9 +149,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     @resolver_hints(model_field='division_set')
     def resolve_divisions(period: Period, info: ResolveInfo) -> list[dict[str, int | str]]:
-        return get_divisions(period.project.division.objects.filter(
-            pk__in=period.division_set.values_list('object_id', flat=True)
-        ))
+        return get_period_divisions(period)
 
     @staticmethod
     @resolver_hints(model_field='periodgroup_set')
@@ -163,31 +163,31 @@ class PeriodType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_add_document_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodDivisionsBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_divisions_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_groups(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodGroupsBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_groups_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodUsersBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_users_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodSettingsBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_settings_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_sheet(period: Period, info: ResolveInfo) -> bool:
-        return ChangePeriodSheetBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_change_period_sheet_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_delete(period: Period, info: ResolveInfo) -> bool:
-        return DeletePeriodBase.has_object_permission(info.context, period)
+        return not is_raises(PermissionDenied, can_delete_period_base, info.context.user, period)
 
 
 class DivisionModelType(graphene.ObjectType):
@@ -196,6 +196,16 @@ class DivisionModelType(graphene.ObjectType):
     id = graphene.ID(required=True, description='Идентификатор модели дивизиона')
     name = graphene.String(required=True, description='Название дивизиона')
     model = graphene.String(required=True, description='Модель дивизиона: department, organization')
+
+    class Meta:
+        interfaces = (graphene.relay.Node,)
+
+
+class DivisionModelTypeConnection(graphene.relay.Connection):
+    """Connection для обобщенного типа дивизиона."""
+
+    class Meta:
+        node = DivisionModelType
 
 
 class OrganizationOriginalType(DjangoObjectType):
@@ -284,6 +294,8 @@ class DocumentType(DjangoObjectType):
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
     can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять документ')
 
+    object_id = graphene.ID(description='Идентификатор дивизиона')
+
     class Meta:
         model = Document
         interfaces = (graphene.relay.Node,)
@@ -314,11 +326,11 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
-        return ChangeDocumentBase.has_object_permission(info.context, document)
+        return not is_raises(PermissionDenied, can_change_document_base, info.context.user, document)
 
     @staticmethod
     def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
-        return DeleteDocumentBase.has_object_permission(info.context, document)
+        return not is_raises(PermissionDenied, can_delete_document_base, info.context.user, document)
 
 
 class DocumentStatusType(DjangoObjectType):
@@ -397,7 +409,7 @@ class ColumnDimensionType(graphene.ObjectType):
     kind = graphene.String(required=True, description='Тип значений')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
-    user = graphene.List(UserType, description='Пользователь')
+    user_id = graphene.ID(description='Идентификатор пользователя')
 
 
 class RowDimensionType(graphene.ObjectType):
@@ -417,10 +429,8 @@ class RowDimensionType(graphene.ObjectType):
     parent = graphene.Field(lambda: RowDimensionType, description='Родительская строка')
     children = graphene.List(graphene.NonNull(lambda: RowDimensionType), required=True, description='Дочерние строки')
     document_id = graphene.ID(description='Идентификатор документа')
-    can_add_child_row = graphene.Boolean(required=True, description='Может ли пользователь добавить дочернюю строку')
-    can_change_height = graphene.Boolean(required=True, description='Может ли пользователь изменять высоту строки')
-    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалить строку')
-    user = graphene.List(UserType, description='Пользователь')
+    object_id = graphene.ID(description='Идентификатор дивизиона')
+    user_id = graphene.ID(description='Идентификатор пользователя')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
 
@@ -463,7 +473,6 @@ class CellType(graphene.ObjectType):
     )
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
-    can_change_value = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
 
     # От Value
     value = graphene.String(description='Значение')
@@ -511,8 +520,9 @@ class BaseSheetType(graphene.ObjectType):
 class SheetType(BaseSheetType):
     """Тип листа."""
 
-    columns = graphene.List(lambda: ColumnDimensionType, description='Колонки')
-    rows = graphene.List(lambda: RowDimensionType, description='Строки')
+    columns = graphene.List(graphene.NonNull(lambda: ColumnDimensionType), description='Колонки')
+    rows = graphene.List(graphene.NonNull(lambda: RowDimensionType), description='Строки')
+    can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять лист')
 
 
 class LimitationType(DjangoObjectType):

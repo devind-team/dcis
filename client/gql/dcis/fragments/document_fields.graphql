@@ -4,5 +4,6 @@ fragment DocumentFields on DocumentType {
   version
   createdAt
   updatedAt
+  objectId
   __typename
 }

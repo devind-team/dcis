@@ -3,7 +3,7 @@
 from django.db.models import Q
 
 from apps.core.models import User
-from apps.dcis.models import Project
+from apps.dcis.models import Project, Period
 
 
 def get_user_divisions(user: User, project: Project | int | str | None = None) -> list[dict[str, int | str]]:
@@ -38,6 +38,24 @@ def get_user_division_ids(user: User, project: Project | int | str | None = None
         for division_name in Project.DIVISION_KIND.keys()
     }
     return {dn: dv for dn, dv in divisions.items() if dv}
+
+
+def get_period_divisions(period: Period, search: str = '') -> list[dict[str, int | str]]:
+    """Получение списка обобщенных дивизионов периода."""
+    return get_divisions(period.project.division.objects.filter(
+        name__contains=search,
+        pk__in=period.division_set.values_list('object_id', flat=True)
+    ))
+
+
+def get_period_possible_divisions(
+    period: Period,
+    search: str = ''
+) -> list[dict[str, int | str]]:
+    """Получение списка возможных обобщенных дивизионов периода."""
+    return get_divisions(period.project.division.objects.filter(
+        name__contains=search
+    ).exclude(pk__in=period.division_set.values_list('object_id', flat=True)))
 
 
 def get_divisions(instances) -> list[dict[str, int | str]]:

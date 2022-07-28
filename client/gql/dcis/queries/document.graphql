@@ -1,20 +1,37 @@
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
-    period {
-      id
-      name
-      __typename
-    }
     comment
     version
     createdAt
     updatedAt
+    period {
+      id
+      name
+      multiple
+      project {
+        id
+        name
+        contentType {
+          id
+          model
+          __typename
+        }
+        __typename
+      }
+      divisions {
+        id
+        name
+        __typename
+      }
+      __typename
+    }
     sheets {
       id
       name
       __typename
     }
+    objectId
     __typename
   }
 }

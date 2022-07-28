@@ -1,65 +1,50 @@
 """Разрешения на работу с проектами сборов."""
 
-from devind_helpers.permissions import BasePermission, ModelPermission
+from django.core.exceptions import PermissionDenied
+from devind_helpers.permissions import ModelPermission
 
+from apps.core.models import User
 from apps.dcis.models import Project
 from apps.dcis.services.project_services import get_user_projects
 
 
-class ViewProject(BasePermission):
+def can_view_project(user: User, obj: Project):
     """Пропускает пользователей, которые могут просматривать проект."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Project):
-        return obj in get_user_projects(context.user)
+    if obj in get_user_projects(user):
+        return
+    raise PermissionDenied('Недостаточно прав для просмотра проекта')
 
 
 AddProject = ModelPermission('dcis.add_project')
 
 
-class ChangeProjectBase(BasePermission):
+def can_change_project_base(user: User, obj: Project):
     """Пропускает пользователей, которые могут изменять проект, без проверки возможности просмотра."""
+    if user.has_perm('dcis.change_project') or (
+            obj.user_id == user.id and user.has_perm('dcis.add_project')
+    ):
+        return
+    raise PermissionDenied('Недостаточно прав для изменения проекта')
 
-    @staticmethod
-    def has_object_permission(context, obj: Project):
-        return context.user.has_perm('dcis.change_project') or (
-            obj.user_id == context.user.id and context.user.has_perm('dcis.add_project')
-        )
 
-
-class ChangeProject(BasePermission):
+def can_change_project(user: User, obj: Project):
     """Пропускает пользователей, которые могут просматривать и изменять проект."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Project):
-        return ViewProject.has_object_permission(
-            context,
-            obj
-        ) and ChangeProjectBase.has_object_permission(
-            context,
-            obj
-        )
+    can_view_project(user, obj)
+    can_change_project_base(user, obj)
 
 
-class DeleteProjectBase(BasePermission):
+def can_delete_project_base(user: User, obj):
     """Пропускает пользователей, которые могут удалять проект, без проверки возможности просмотра."""
-
-    @staticmethod
-    def has_object_permission(context, obj):
-        return context.user.has_perm('dcis.delete_project') or (
-            obj.user_id == context.user.id and
-            context.user.has_perm('dcis.add_project') and
+    if user.has_perm('dcis.delete_project') or (
+            obj.user_id == user.id and
+            user.has_perm('dcis.add_project') and
             obj.period_set.count() == 0
-        )
+    ):
+        return
+    raise PermissionDenied('Недостаточно прав для удаления проекта')
 
 
-class DeleteProject(BasePermission):
+def can_delete_project(user: User, obj: Project):
     """Пропускает пользователей, которые могут просматривать и удалять проект."""
-
-    @staticmethod
-    def has_object_permission(context, obj: Project):
-        return ViewProject.has_object_permission(
-            context, obj
-        ) and DeleteProjectBase.has_object_permission(
-            context, obj
-        )
+    can_view_project(user, obj)
+    can_delete_project_base(user, obj)

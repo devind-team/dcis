@@ -1,5 +1,4 @@
 from typing import Any
-from datetime import date
 
 import graphene
 from devind_core.models import File
@@ -9,20 +8,22 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.core.schema import UserType
+from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
-    AddPeriod,
-    ChangePeriodDivisions,
-    ChangePeriodGroups,
-    ChangePeriodSettings,
-    ChangePeriodUsers,
-    ViewPeriod,
+    can_add_period,
+    can_change_period_divisions,
+    can_change_period_groups,
+    can_change_period_settings,
+    can_change_period_users,
+    can_view_period,
 )
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
 from apps.dcis.services.divisions_services import get_divisions
@@ -54,7 +55,7 @@ class AddPeriodMutation(BaseMutation):
     period = graphene.Field(PeriodType, description='Добавленный период')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddPeriod,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -84,7 +85,7 @@ class ChangePeriodMutation(BaseMutation):
         start = graphene.Date(required=False, description='Дата начала')
         expiration = graphene.Date(required=False, description='Дата окончания')
 
-    period = graphene.Field(PeriodType, description='Добавленный период')
+    period = graphene.Field(PeriodType, description='Измененный период')
 
     @staticmethod
     @permission_classes((IsAuthenticated, ChangePeriodSettings,))
@@ -138,10 +139,10 @@ class AddDivisionsMutation(BaseMutation):
     divisions = graphene.List(DivisionModelType, required=True, description='Новые дивизионы')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodDivisions,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_change_period_divisions(info.context.user, period)
         return AddDivisionsMutation(divisions=add_divisions_period(period, division_ids))
 
 
@@ -155,10 +156,10 @@ class DeleteDivisionMutation(BaseMutation):
     delete_id = graphene.ID(required=True, description='Идентификатор удаленного дивизиона')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodDivisions,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_id: str):
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_change_period_divisions(info.context.user, period)
         delete_divisions_period(period_id, division_id)
         return DeleteDivisionMutation(delete_id=division_id)
 
@@ -191,7 +192,7 @@ class CopyPeriodGroupsMutation(BaseMutation):
     period_groups = graphene.List(PeriodGroupType, required=True, description='Новые группы периода')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -200,10 +201,9 @@ class CopyPeriodGroupsMutation(BaseMutation):
         period_group_ids: list[str]
     ):
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_change_period_groups(info.context.user, period)
         selected_period = get_object_or_404(Period, pk=selected_period_id)
-        if not ViewPeriod.has_object_permission(info.context, selected_period):
-            raise PermissionDenied('Ошибка доступа')
+        can_view_period(info.context.user, selected_period)
         return CopyPeriodGroupsMutation(period_groups=copy_period_groups(period_group_ids, period, selected_period))
 
 
@@ -217,10 +217,10 @@ class ChangePeriodGroupPrivilegesMutation(BaseMutation):
     privileges = graphene.List(PrivilegeType, required=True, description='Привилегии группы')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: int, privileges_ids: list[str]):
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        info.context.check_object_permissions(info.context, period_group.period)
+        can_change_period_groups(info.context.user, period_group.period)
         return ChangePeriodGroupPrivilegesMutation(privileges=change_period_group_privileges(privileges_ids,
                                                                                              period_group))
 
@@ -234,10 +234,10 @@ class DeletePeriodGroupMutation(BaseMutation):
     delete_id = graphene.ID(required=True, description='Идентификатор удаленной группы периода')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodGroups,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str):
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        info.context.check_object_permissions(info.context, period_group.period)
+        can_change_period_groups(info.context.user, period_group.period)
         period_group.delete()
         return DeletePeriodMutation(delete_id=period_group_id)
 
@@ -256,14 +256,23 @@ class ChangeUserPeriodGroupsMutation(BaseMutation):
     period_groups = graphene.List(PeriodGroupType, required=True, description='Группы пользователя')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodUsers,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_group_ids: list[PeriodGroup]):
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
         user.periodgroup_set.set(change_user_period_groups(period_group_ids, info))
+
         return ChangeUserPeriodGroupsMutation(
             user=user,
             period_groups=change_user_period_groups(period_group_ids, info)
         )
+
+        # period_groups: list[PeriodGroup] = []
+        # for period_group_id in period_group_ids:
+        #     period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+        #     can_change_period_users(info.context.user, period_group.period)
+        #     period_groups.append(period_group)
+        # user.periodgroup_set.set(period_groups)
+        # return ChangeUserPeriodGroupsMutation(user=user, period_groups=period_groups)
 
 
 class ChangeUserPeriodPrivilegesMutation(BaseMutation):
@@ -281,10 +290,10 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
     privileges = graphene.List(PrivilegeType, required=True, description='Привилегии пользователя в периоде')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodUsers,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_id: str, privileges_ids: list[str]):
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_change_period_users(info.context.user, period)
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
         return ChangeUserPeriodPrivilegesMutation(
             user=user,

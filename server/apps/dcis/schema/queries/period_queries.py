@@ -5,6 +5,7 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from django.db.models import QuerySet
+from graphene import ConnectionField
 from graphene_django import DjangoListField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
@@ -15,8 +16,9 @@ from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Period, Privilege, Sheet
-from apps.dcis.permissions import ChangePeriodSheet, ViewPeriod
-from apps.dcis.schema.types import PeriodType, PrivilegeType, SheetType
+from apps.dcis.permissions import can_change_period_sheet, can_view_period
+from apps.dcis.schema.types import DivisionModelTypeConnection, PeriodType, PrivilegeType, SheetType
+from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
     get_period_users,
     get_user_period_privileges,
@@ -45,6 +47,13 @@ class PeriodQueries(graphene.ObjectType):
         project_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Периоды'
+    )
+
+    period_possible_divisions = ConnectionField(
+        DivisionModelTypeConnection,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        search=graphene.String(description='Запрос поиска'),
+        description='Возможные дивизионы периода'
     )
 
     period_users = DjangoListField(
@@ -82,10 +91,10 @@ class PeriodQueries(graphene.ObjectType):
         return Privilege.objects.all()
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewPeriod))
+    @permission_classes((IsAuthenticated,))
     def resolve_period(root: Any, info: ResolveInfo, period_id: str) -> Period:
         period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
-        info.context.check_object_permissions(info.context, period)
+        can_view_period(info.context.user, period)
         return period
 
     @staticmethod
@@ -94,14 +103,28 @@ class PeriodQueries(graphene.ObjectType):
         return get_user_periods(info.context.user, from_global_id(project_id)[1])
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewPeriod,))
+    @permission_classes((IsAuthenticated,))
+    def resolve_period_possible_divisions(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        search: str | None = None,
+        *args,
+        **kwargs
+    ) -> list[dict[str, int | str]]:
+        period = get_object_or_404(Period, pk=period_id)
+        can_view_period(info.context.user, period)
+        return get_period_possible_divisions(period, search or '')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_period_users(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[User]:
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_view_period(info.context.user, period)
         return get_period_users(period)
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewPeriod,))
+    @permission_classes((IsAuthenticated,))
     def resolve_user_period_privileges(
         root,
         info: ResolveInfo,
@@ -109,12 +132,12 @@ class PeriodQueries(graphene.ObjectType):
         period_id: str,
     ) -> QuerySet[Privilege]:
         period = get_object_or_404(Period, pk=period_id)
-        info.context.check_object_permissions(info.context, period)
+        can_view_period(info.context.user, period)
         user = get_user_from_id_or_context(info, user_id)
         return get_user_period_privileges(user.id, period.id)
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
+    @permission_classes((IsAuthenticated,))
     def resolve_documents_sheet(
         root: Any,
         info: ResolveInfo,
@@ -122,7 +145,7 @@ class PeriodQueries(graphene.ObjectType):
         document_ids: list[str]
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        info.context.check_object_permissions(info.context, sheet.period)
+        can_change_period_sheet(info.context.user, sheet.period)
         return DocumentsSheetUnloader(
             sheet=sheet,
             document_ids=[from_global_id(document_id)[1] for document_id in document_ids],

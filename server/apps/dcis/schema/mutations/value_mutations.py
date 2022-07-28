@@ -10,12 +10,13 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.exceptions import PermissionDenied
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, Document, Value
-from apps.dcis.permissions import ViewDocument, can_change_value
+from apps.dcis.permissions import can_view_document, can_change_value
 from apps.dcis.schema.types import ValueType
 from apps.dcis.services.value_services import (
     create_file_value_archive,
@@ -35,7 +36,7 @@ class ChangeValueMutation(BaseMutation):
         value = graphene.String(required=True, description='Значение')
 
     values = graphene.List(ValueType, description='Измененные ячейки')
-    updated_at = graphene.DateTime(required=True, description='Дата изменения')
+    updated_at = graphene.DateTime(description='Дата изменения')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -49,8 +50,11 @@ class ChangeValueMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        if not can_change_value(info.context, document, cell):
-            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', ['Ошибка доступа'])])
+        try:
+            can_change_value(info.context.user, document, cell)
+        except PermissionDenied as e:
+            # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
+            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
         result = update_or_create_value(
             document=document,
             cell=cell,
@@ -89,8 +93,11 @@ class ChangeFileValueMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        if not can_change_value(info.context, document, cell):
-            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', ['Ошибка доступа'])])
+
+        try:
+            can_change_value(info.context.user, document, cell)
+        except PermissionDenied as e:
+            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
         result = update_or_create_file_value(
             user=info.context.user,
             document=document,
@@ -120,7 +127,7 @@ class UnloadFileValueArchiveMutation(BaseMutation):
     src = graphene.String(description='Ссылка на сгенерированный архив')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ViewDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -131,7 +138,7 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         name: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
+        can_view_document(info.context.user, document)
         return UnloadFileValueArchiveMutation(
             src=create_file_value_archive(
                 value=get_object_or_404(

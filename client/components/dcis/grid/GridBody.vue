@@ -9,24 +9,7 @@ tbody
       @mousedown="mousedownRowName(row, $event)"
       @mouseup="mouseupRowName"
     )
-      grid-row-control(
-        v-if="viewControl(row)"
-        v-slot="{ on, attrs }"
-        :row="row"
-        :can-change-settings="canChangeRowSettings"
-        :can-add-before="canAddRowBeforeOrAfter(row)"
-        :can-add-after="canAddRowBeforeOrAfter(row)"
-        :can-add-inside="canAddRowInside(row)"
-        :can-delete="canDeleteRow(row)"
-        :get-row-height="getRowHeight"
-        :clear-selection="clearSelection"
-      )
-        div(
-          v-bind="attrs"
-          :style="{ height: `${getRowHeight(row)}px` }"
-          @contextmenu.prevent="on.click"
-        ) {{ row.name }}
-      div(v-else :style="{ height: `${getRowHeight(row)}px` }") {{ row.name }}
+      div(:style="{ height: `${getRowHeight(row)}px` }" @contextmenu="(e) => showMenu(e, row)") {{ row.name }}
     td(
       v-for="cell in row.cells"
       :key="cell.id"
@@ -43,12 +26,27 @@ tbody
         :active="!!activeCell && activeCell.id === cell.id"
         @clear-active="setActiveCell(null)"
       )
+  grid-row-control(
+    v-if="!!currentRow && viewControl(currentRow)"
+    :row="currentRow"
+    :can-change-settings="canChangeRowSettings"
+    :can-add-before="canAddRowBeforeOrAfter(currentRow)"
+    :can-add-after="canAddRowBeforeOrAfter(currentRow)"
+    :can-add-inside="canAddRowInside(currentRow)"
+    :can-delete="canDeleteRow(currentRow)"
+    :get-row-height="getRowHeight"
+    :clear-selection="clearSelection"
+    :pos-x="posX"
+    :pos-y="posY"
+    @close="currentRow = null"
+  )
 </template>
 
 <script lang="ts">
-import { PropType, Ref } from '#app'
+import { PropType, Ref, nextTick } from '#app'
 import { CellType, RowDimensionType, SheetType } from '~/types/graphql'
 import { GridMode, ResizingType } from '~/types/grid'
+import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -81,6 +79,8 @@ export default defineComponent({
     mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
+    const userStore = useAuthStore()
+
     const mode = inject<GridMode>('mode')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
@@ -102,7 +102,7 @@ export default defineComponent({
       }
       if (rowDimension.parent) {
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
-        return parent.canAddChildRow
+        return parent.dynamic && activeSheet.value.canChange
       }
       return false
     }
@@ -110,13 +110,15 @@ export default defineComponent({
       if (mode === GridMode.CHANGE) {
         return false
       }
-      return rowDimension.canAddChildRow
+      return rowDimension.dynamic && activeSheet.value.canChange
     }
     const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
         return rootCount.value !== 1 || Boolean(rowDimension.parent)
       } else {
-        return rowDimension.canDelete
+        return rowDimension.parent !== null && rowDimension.children.length === 0 && (
+          activeSheet.value.canChange || rowDimension.userId === userStore.user.id
+        )
       }
     }
     const viewControl = (rowDimension: RowDimensionType): boolean => {
@@ -165,8 +167,24 @@ export default defineComponent({
       if (cell.verticalAlign) { style['align-items'] = valuesMap[cell.verticalAlign] }
       return style
     }
+    const currentRow = ref<RowDimensionType>(null)
+    const posX = ref(0)
+    const posY = ref(0)
+    const showMenu = (e: MouseEvent, row: RowDimensionType) => {
+      e.preventDefault()
+      currentRow.value = null
+      posY.value = e.clientY
+      posX.value = e.clientX
+      nextTick(() => {
+        currentRow.value = row
+      })
+    }
 
     return {
+      currentRow,
+      posX,
+      posY,
+      showMenu,
       activeSheet,
       getRowNameCellClass,
       canChangeRowSettings,

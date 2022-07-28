@@ -1,13 +1,11 @@
 <template lang="pug">
-v-menu(v-model="active" bottom close-on-content-click)
-  template(#activator="{ on, attrs }")
-    slot(:on="on" :attrs="attrs")
+v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-content-click)
   v-list(dense)
     grid-row-settings(
       v-if="canChangeSettings"
       :row="row"
       :get-row-height="getRowHeight"
-      @close="active = false"
+      @close="$emit('close')"
     )
       template(#activator="{ on }")
         v-list-item(v-on="on")
@@ -52,12 +50,12 @@ export default defineComponent({
     canAddInside: { type: Boolean, required: true },
     canDelete: { type: Boolean, required: true },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
-    clearSelection: { type: Function as PropType<() => void>, required: true }
+    clearSelection: { type: Function as PropType<() => void>, required: true },
+    posX: { type: Number, required: true },
+    posY: { type: Number, required: true }
   },
   setup (props) {
     const { t } = useI18n()
-
-    const active = ref<boolean>(false)
 
     const mode = inject<GridMode>('mode')
     const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
@@ -87,7 +85,6 @@ export default defineComponent({
     return {
       AddRowDimensionPosition,
       t,
-      active,
       addRowDimensionMutate,
       deleteRowDimension
     }
