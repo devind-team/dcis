@@ -1,21 +1,22 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.sheets.name') }}
-  v-row
-    v-col(cols="12")
-      v-tabs
-        template(v-for="sheet in period.sheets")
-          sheet-control(v-slot="{ on, attrs }" :sheet="sheet" :update="renameSheetUpdate" :key="sheet.id")
-            v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
-      v-tabs-items(v-model="activeSheetIndex")
-        v-tab-item(v-for="sheet in period.sheets" :key="sheet.id")
-          grid(
-            v-if="activeSheet"
-            :mode="GridMode.CHANGE"
-            :active-sheet="activeSheet"
-            :update-active-sheet="updateActiveSheet"
+  template
+    grid-sheets(
+      v-model="activeSheetIndex"
+      :mode="GridMode.CHANGE"
+      :sheets="period.sheets"
+      :active-sheet="activeSheet"
+      :update-active-sheet="updateActiveSheet"
+    )
+      template(#tabs="{ sheets, updateSize }")
+        template(v-for="sheet in sheets")
+          sheet-control(
+            v-slot="{ on, attrs }"
+            :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
+            :key="sheet.id"
           )
-          v-progress-circular(v-else color="primary" indeterminate)
+            v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
 </template>
 
 <script lang="ts">
@@ -35,10 +36,10 @@ import {
 import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
-import Grid from '~/components/dcis/Grid.vue'
+import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, SheetControl, Grid },
+  components: { LeftNavigatorContainer, SheetControl, GridSheets },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -73,7 +74,11 @@ export default defineComponent({
       })
     })
 
-    const renameSheetUpdate = (cache: ApolloCache<RenameSheetMutation>, result: FetchResult<RenameSheetMutation>) => {
+    const renameSheetUpdate = (
+      cache: ApolloCache<RenameSheetMutation>,
+      result: FetchResult<RenameSheetMutation>,
+      updateSize: () => void
+    ) => {
       if (result.data.renameSheet.success) {
         periodUpdate(
           cache,
@@ -83,6 +88,7 @@ export default defineComponent({
             return dataCache
           }
         )
+        updateSize()
       }
     }
 

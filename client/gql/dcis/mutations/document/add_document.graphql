@@ -1,13 +1,13 @@
 #import "../../fragments/status_fields.graphql"
 #import "../../fragments/document_fields.graphql"
 
-mutation AddDocument($comment: String!, $periodId: ID!, $statusId: ID!, $documentId: ID, $divisionId: ID) {
+mutation AddDocument($comment: String!, $periodId: ID!, $statusId: ID!, $divisionId: ID, $documentId: ID) {
   addDocument(input: {
     comment: $comment,
     periodId: $periodId,
     statusId: $statusId,
-    documentId: $documentId,
-    divisionId: $divisionId
+    divisionId: $divisionId,
+    documentId: $documentId
   }) {
     success
     errors {

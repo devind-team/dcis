@@ -3,7 +3,7 @@ v-dialog(v-model="active" width="600px" persistent)
   template(#activator="{ on }")
     div(v-on="on") {{ value }}
   v-card
-    v-card-title {{ t('dcis.grid.changeValue') }}
+    v-card-title {{ readonly ? $t('dcis.grid.cellFiles.readonlyHeader') : $t('dcis.grid.changeValue') }}
       v-spacer
       v-btn(@click="cancel" icon)
         v-icon mdi-close
@@ -13,7 +13,7 @@ v-dialog(v-model="active" width="600px" persistent)
         :key="localFile.file.id"
         dense
       )
-        v-list-item-action
+        v-list-item-action(v-if="!readonly")
           v-tooltip(bottom)
             template(#activator="{ on, attrs }")
               v-btn(
@@ -27,7 +27,7 @@ v-dialog(v-model="active" width="600px" persistent)
                 @click="localFile.deleted = !localFile.deleted"
               )
                 v-icon(size="22") {{ localFile.deleted ? 'mdi-delete-off' : 'mdi-delete' }}
-            span {{ t(localFile.deleted ? 'cancelDeletion' : 'delete') }}
+            span {{ $t(localFile.deleted ? 'cancelDeletion' : 'delete') }}
         v-list-item-content
           v-list-item-title
             nuxt-link(
@@ -36,8 +36,9 @@ v-dialog(v-model="active" width="600px" persistent)
               target="_blank"
             ) {{ localFile.file.name }}
       v-file-input(
+        v-if="!readonly"
         v-model="newFiles"
-        :label="t('dcis.grid.cellFiles.newFiles')"
+        :label="$t('dcis.grid.cellFiles.newFiles')"
         chips
         clearable
         multiple
@@ -47,9 +48,9 @@ v-dialog(v-model="active" width="600px" persistent)
         v-if="existingFiles.length"
         color="success"
         @click="$emit('unload-archive')"
-      ) {{ t('dcis.grid.cellFiles.uploadArchive') }}
+      ) {{ $t('dcis.grid.cellFiles.uploadArchive') }}
       v-spacer
-      v-btn(color="primary" @click="setValue") {{ t('save') }}
+      v-btn(v-if="!readonly" color="primary" @click="setValue") {{ $t('save') }}
 </template>
 
 <script lang="ts">
@@ -66,7 +67,8 @@ export default defineComponent({
   components: { FileField },
   props: {
     files: { type: Array as PropType<FileType[]>, required: true },
-    value: { type: String, default: null }
+    value: { type: String, default: null },
+    readonly: { type: Boolean, required: true }
   },
   setup (props, { emit }) {
     const { t } = useI18n()
@@ -102,7 +104,6 @@ export default defineComponent({
     }
 
     return {
-      t,
       active,
       existingFiles,
       newFiles,

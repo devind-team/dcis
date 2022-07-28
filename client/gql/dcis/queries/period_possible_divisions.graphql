@@ -1,0 +1,11 @@
+#import "../fragments/division_model_fields.graphql"
+
+query PeriodPossibleDivisions($periodId: ID!, $search: String, $first: Int) {
+  periodPossibleDivisions(periodId: $periodId, search: $search, first: $first) {
+    edges {
+      node {
+        ...DivisionModelFields
+      }
+    }
+  }
+}

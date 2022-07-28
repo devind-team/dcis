@@ -1,19 +1,19 @@
 <template lang="pug">
-v-menu(v-model="active" bottom close-on-content-click)
+v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-content-click)
   template(#activator="{ on, attrs }")
     slot(:on="on" :attrs="attrs")
   v-list(dense)
     grid-column-settings(
       :column="column"
       :get-column-width="getColumnWidth"
-      @close="active = false"
+      @close="$emit('close')"
     )
       template(#activator="{ on }")
         v-list-item(v-on="on")
           v-list-item-icon
             v-icon mdi-cog
           v-list-item-content
-            v-list-item-title {{ t('dcis.grid.columnControl.properties') }}
+            v-list-item-title {{ $t('dcis.grid.columnControl.properties') }}
 </template>
 
 <script lang="ts">
@@ -25,14 +25,9 @@ export default defineComponent({
   components: { GridColumnSettings },
   props: {
     column: { type: Object as PropType<ColumnDimensionType>, required: true },
-    getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true }
-  },
-  setup () {
-    const { t } = useI18n()
-
-    const active = ref<boolean>(false)
-
-    return { t, active }
+    getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
+    posX: { type: Number, required: true },
+    posY: { type: Number, required: true }
   }
 })
 </script>

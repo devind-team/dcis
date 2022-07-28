@@ -38,6 +38,23 @@ mutation-modal-form(
         :label="$t('dcis.documents.addDocument.status')"
         item-text="name"
         item-value="id"
+        return-object
+      )
+    validation-provider(
+      v-if="period.multiple"
+      v-slot="{ errors, valid }"
+      :name="divisionLabel"
+      rules="required"
+    )
+      v-autocomplete(
+        v-model="division"
+        :error-messages="errors"
+        :success="valid"
+        :items="period.divisions"
+        :label="divisionLabel"
+        item-text="name"
+        item-value="id"
+        return-object
       )
     v-autocomplete(
       v-if="documents.length"
@@ -48,6 +65,7 @@ mutation-modal-form(
       item-value="id"
       success
       clearable
+      return-object
     )
       template(#selection="{ item }") {{ $t('dcis.documents.addDocument.version', { version: item.version }) }}
       template(#item="{ item }")
@@ -63,8 +81,9 @@ import { computed, ref } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import {
   PeriodType,
-  DocumentType,
   StatusType,
+  DivisionModelType,
+  DocumentType,
   StatusesQuery,
   StatusesQueryVariables,
   AddDocumentMutationPayload,
@@ -88,8 +107,14 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
+    const divisionLabel = computed<string>(() => props.period.project.contentType.model === 'department'
+      ? t('dcis.documents.addDocument.department') as string
+      : t('dcis.documents.addDocument.organization') as string
+    )
+
     const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
+    const division = ref<DivisionModelType | null>(null)
     const document = ref<DocumentType>(null)
 
     const { data: statuses, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
@@ -103,12 +128,14 @@ export default defineComponent({
       comment: comment.value,
       periodId: props.period.id,
       statusId: status.value?.id,
+      divisionId: division.value?.id,
       documentId: document.value?.id
     }))
 
     const close = () => {
       comment.value = ''
       status.value = statuses[0]
+      division.value = null
       document.value = null
     }
 
@@ -120,7 +147,17 @@ export default defineComponent({
         item.comment.toLocaleLowerCase().includes(searchText)
     }
 
-    return { comment, status, document, statuses, variables, close, documentFilter }
+    return {
+      divisionLabel,
+      comment,
+      status,
+      division,
+      document,
+      statuses,
+      variables,
+      close,
+      documentFilter
+    }
   }
 })
 </script>

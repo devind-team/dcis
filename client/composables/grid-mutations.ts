@@ -8,7 +8,6 @@ import {
   DocumentSheetQuery,
   DocumentSheetQueryVariables,
   ValueFilesQuery,
-  ValueFilesQueryVariables,
   SheetType,
   RowDimensionType,
   RowDimensionFieldsFragment,
@@ -57,7 +56,6 @@ import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_op
 import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
 import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/values/unload_file_value_archive.graphql'
-import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 
 export enum AddRowDimensionPosition {
   BEFORE,
@@ -646,11 +644,7 @@ export function useChangeCellDefaultMutation (updateSheet: Ref<UpdateType<Docume
   }
 }
 
-export function useChangeCellsOptionMutation (
-  documentId: Ref<string | null>,
-  sheetId: Ref<string>,
-  updateSheet: Ref<UpdateType<DocumentsSheetQuery>>
-) {
+export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<DocumentsSheetQuery>>) {
   const { mutate } = useMutation<
     ChangeCellsOptionMutation,
     ChangeCellsOptionMutationVariables
@@ -667,25 +661,6 @@ export function useChangeCellsOptionMutation (
               data.documentsSheet as SheetType,
               (c: CellType) => c.id === option.cellId
             )
-            if (cell.kind === 'fl' && option.field === 'kind' && option.value !== 'fl') {
-              try {
-                const variables: ValueFilesQueryVariables = {
-                  sheetId: String(sheetId.value),
-                  documentId: documentId.value,
-                  columnId: String(cell.columnId),
-                  rowId: String(cell.rowId)
-                }
-                dataProxy.readQuery<ValueFilesQuery, ValueFilesQueryVariables>({
-                  query: valueFilesQuery,
-                  variables
-                })
-                dataProxy.writeQuery<ValueFilesQuery, ValueFilesQueryVariables>({
-                  data: { valueFiles: [] },
-                  query: valueFilesQuery,
-                  variables
-                })
-              } catch {}
-            }
             if (option.field === 'size') {
               cell[option.field] = Number(option.value)
             } else if (['strong', 'italic', 'strike'].includes(option.field)) {

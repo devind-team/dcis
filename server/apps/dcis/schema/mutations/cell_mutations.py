@@ -16,7 +16,7 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
-from apps.dcis.permissions import ChangePeriodSheet, AddBudgetClassification
+from apps.dcis.permissions import can_change_period_sheet
 from apps.dcis.schema.types import ChangedCellOption
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
@@ -37,10 +37,10 @@ class ChangeCellDefault(BaseMutation):
     default = graphene.String(required=True, description='Значение по умолчанию')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, default: str):
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        info.context.check_object_permissions(info.context, cell.row.sheet.period)
+        can_change_period_sheet(info.context.user, cell.row.sheet.period)
         change_cell_default(cell, default)
         return ChangeCellDefault(cell_id=cell.id, default=cell.default)
 
@@ -72,7 +72,7 @@ class ChangeCellsOptionMutation(BaseMutation):
     )
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangePeriodSheet,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
@@ -88,7 +88,7 @@ class ChangeCellsOptionMutation(BaseMutation):
                 cells = Cell.objects.filter(pk__in=cell_ids).all()
                 if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
                     raise PermissionDenied('Ошибка доступа')
-                info.context.check_object_permissions(info.context, cells.first().row.sheet.period)
+                can_change_period_sheet(info.context.user, cells.first().row.sheet.period)
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 

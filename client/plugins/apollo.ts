@@ -1,4 +1,4 @@
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
+import { InMemoryCache, defaultDataIdFromObject, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { Plugin } from '@nuxt/types'
 import { useRuntimeConfig } from '#app'
 import schema from '~/schema.json'
@@ -13,7 +13,17 @@ export default <Plugin> function (): any {
     httpEndpoint: API_URL,
     browserHttpEndpoint: API_URL_BROWSER,
     wsEndpoint: WS_URL,
-    cache: new InMemoryCache({ fragmentMatcher }),
+    cache: new InMemoryCache({
+      fragmentMatcher,
+      dataIdFromObject (object) {
+        switch (object.__typename) {
+          case 'SheetType': return undefined
+          case 'RowDimensionType': return undefined
+          case 'CellType': return undefined
+          default: return defaultDataIdFromObject(object)
+        }
+      }
+    }),
     httpLinkOptions: {
       headers: {
         'Accept-Language': 'ru' // Язык по умолчанию
