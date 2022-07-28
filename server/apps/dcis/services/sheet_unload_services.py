@@ -142,9 +142,9 @@ class SheetRowsUnloader(DataUnloader):
         merged_cell_positions = self._create_merged_cell_positions(merged_cells)
         merged_cell_row_positions = self._create_merged_cell_row_positions(merged_cells)
         self._add_cell_values(cells, values)
-        self._add_cells(rows, cells)
+        self._add_cells(rows, columns_map, cells)
         self._add_cell_properties(rows, columns_map, merged_cells_map)
-        self._prepare_row_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
+        self._filter_rows_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
 
     def _unload_raw_rows(self) -> list[dict]:
         """Выгрузка необработанных строк листа."""
@@ -249,10 +249,11 @@ class SheetRowsUnloader(DataUnloader):
                 cell.update({'value': default, 'verified': True, 'error': None})
 
     @staticmethod
-    def _add_cells(rows: list[dict], cells: list[dict]) -> None:
+    def _add_cells(rows: list[dict], columns_map: dict[dict], cells: list[dict]) -> None:
         """Добавление ячеек к строкам."""
         for row in rows:
             row['cells'] = [cell for cell in cells if cell['row_id'] == row['id']]
+            row['cells'].sort(key=lambda cell: columns_map[cell['column_id']]['index'])
 
     @classmethod
     def _add_cell_properties(cls, rows: list[dict], columns_map: dict[dict], merged_cells_map: dict[dict]) -> None:
@@ -289,22 +290,21 @@ class SheetRowsUnloader(DataUnloader):
                 cell['related_global_positions'].append(f'{column_name}{row_index}')
 
     @classmethod
-    def _prepare_row_cells(
+    def _filter_rows_cells(
         cls,
         rows: list[dict],
         merged_cells_map: dict,
         merged_cell_positions: list[str],
         merged_cell_row_positions: list[str]
     ) -> None:
-        """Сортировка ячеек строк с удалением лишних ячеек."""
+        """Удаление лишних ячеек из строк."""
         for row in rows:
-            cells: list[dict] = []
+            row['output_cells']: list[dict] = []
             for cell in row['cells']:
                 root_cell = cls._find_root_cell(row, cell)
                 positions = merged_cell_positions if cell['id'] == root_cell['id'] else merged_cell_row_positions
                 if root_cell['position'] in merged_cells_map or root_cell['position'] not in positions:
-                    cells.append(cell)
-            row['output_cells'] = sorted(cells, key=lambda c: c['global_position'])
+                    row['output_cells'].append(cell)
         for row in rows:
             row['cells'] = row['output_cells']
 
