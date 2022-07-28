@@ -134,7 +134,7 @@ export default defineComponent({
 
     const close = () => {
       comment.value = ''
-      status.value = statuses[0]
+      status.value = statuses.value[0]
       division.value = null
       document.value = null
     }

@@ -11,12 +11,6 @@ from xlsx_evaluate.tokenizer import ExcelParser, f_token
 from apps.core.models import User
 from apps.dcis.models import Document, Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
-from apps.dcis.permissions import (
-    AddChildRowDimensionBase,
-    ChangeChildRowDimensionHeightBase,
-    ChangeValueBase,
-    DeleteChildRowDimensionBase,
-)
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
@@ -121,7 +115,7 @@ def add_child_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
-    sheet.rowdimension_set.filter(parent=parent, index__gte=index).update(index=F('index') + 1)
+    sheet.rowdimension_set.filter(parent=parent, document=document, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
         index=index,
