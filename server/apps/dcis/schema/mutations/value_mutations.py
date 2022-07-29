@@ -9,14 +9,14 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.exceptions import PermissionDenied
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, Document, Value
-from apps.dcis.permissions import can_view_document, can_change_value
+from apps.dcis.permissions import can_change_value
 from apps.dcis.schema.types import ValueType
 from apps.dcis.services.value_services import (
     create_file_value_archive,
@@ -138,9 +138,10 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         name: str
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_view_document(info.context.user, document)
         return UnloadFileValueArchiveMutation(
             src=create_file_value_archive(
+                info,
+                document,
                 value=get_object_or_404(
                     Value,
                     document_id=document.id,
