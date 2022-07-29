@@ -24,7 +24,7 @@ from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, Sheet
 
 
 @transaction.atomic
-def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
+def rename_sheet(info: ResolveInfo, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     """Переименование листа с учетом формул.
 
     sheet.name -> name
@@ -32,6 +32,7 @@ def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     :param sheet - лист
     :param name - новое имя листа
     """
+    can_change_period_sheet(info.context.user, sheet.period)
     changed_cell: list[Cell] = []
     sheet_name: str = f"'{name}'" if ' ' in name else name
     period: Period = sheet.period
@@ -60,6 +61,7 @@ def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
 
 
 def change_column_dimension(
+    info: ResolveInfo,
     column_dimension: ColumnDimension,
     width: int | None,
     fixed: bool,
@@ -67,6 +69,7 @@ def change_column_dimension(
     kind: str
 ) -> ColumnDimension:
     """Изменение колонки."""
+    can_change_period_sheet(info.context.user, column_dimension.sheet.period)
     column_dimension.width = width
     column_dimension.fixed = fixed
     column_dimension.hidden = hidden
@@ -88,6 +91,7 @@ def add_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
+    can_change_period_sheet(user, sheet.period)
     sheet.rowdimension_set.filter(parent_id=None, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
@@ -111,14 +115,14 @@ def add_row_dimension(
 
 @transaction.atomic
 def add_child_row_dimension(
-    info: ResolveInfo,
-    context: Any,
-    sheet: Sheet,
-    document: Document,
-    parent: RowDimension,
-    index: int,
-    global_index: int,
-    global_indices_map: dict[int, int]
+        info: ResolveInfo,
+        context: Any,
+        sheet: Sheet,
+        document: Document,
+        parent: RowDimension,
+        index: int,
+        global_index: int,
+        global_indices_map: dict[int, int]
 ) -> dict:
     """Добавление дочерней строки.
 
@@ -154,13 +158,15 @@ def add_child_row_dimension(
 
 
 def change_row_dimension(
-    row_dimension: RowDimension,
-    height: int,
-    fixed: bool,
-    hidden: bool,
-    dynamic: bool
+        info: ResolveInfo,
+        row_dimension: RowDimension,
+        height: int,
+        fixed: bool,
+        hidden: bool,
+        dynamic: bool
 ) -> RowDimension:
     """Изменение строки."""
+    can_change_period_sheet(info.context.user, row_dimension.sheet.period)
     row_dimension.height = height
     row_dimension.fixed = fixed
     row_dimension.hidden = hidden
@@ -183,6 +189,7 @@ def delete_row_dimension(info: ResolveInfo, row_dimension: RowDimension) -> int:
 
     После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
     """
+    can_change_period_sheet(info.context.user, row_dimension.sheet.period)
     can_delete_child_row_dimension(info.context.user, row_dimension)
     row_dimension_id = row_dimension.id
     row_dimension.delete()
