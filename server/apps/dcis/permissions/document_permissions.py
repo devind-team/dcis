@@ -9,6 +9,10 @@ from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
 
+from devind_helpers.permissions import ModelPermission
+
+AddBudgetClassification = ModelPermission('devind_dictionaries.add_budgetclassification')
+
 
 def can_view_document(user: User, obj: Document):
     """Пропускает пользователей, которые могут просматривать документ."""

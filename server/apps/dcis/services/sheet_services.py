@@ -2,24 +2,21 @@ import re
 from argparse import ArgumentTypeError
 from typing import Any, NamedTuple, Sequence
 
+from devind_dictionaries.models import BudgetClassification
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import F
+from graphql import ResolveInfo
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
 from apps.dcis.models import Document, Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
-from apps.dcis.permissions import (
-    AddChildRowDimensionBase,
-    ChangeChildRowDimensionHeightBase,
-    ChangeValueBase,
-    DeleteChildRowDimensionBase,
-)
+from apps.dcis.permissions import can_change_period_sheet
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
-from devind_dictionaries.models import BudgetClassification
-
+from django.db.models import QuerySet
+from devind_helpers.exceptions import PermissionDenied
 
 @transaction.atomic
 def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
@@ -248,11 +245,19 @@ class CheckCellOptions:
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
 
 
-def change_cell_default(cell: Cell, default: str) -> Cell:
+def change_cell_default(info: ResolveInfo, cell: Cell, default: str) -> Cell:
     """Изменение значения ячейки по умолчанию."""
+    can_change_period_sheet(info.context.user, cell.row.sheet.period)
     cell.default = default
     cell.save(update_fields=('default',))
     return cell
+
+
+def success_check_cell_options(info: ResolveInfo, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+    if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
+        raise PermissionDenied('Ошибка доступа')
+    can_change_period_sheet(info.context.user, cells.first().row.sheet.period)
+    return cells
 
 
 @transaction.atomic
