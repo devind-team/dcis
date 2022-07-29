@@ -5,7 +5,6 @@ from django.core.exceptions import PermissionDenied
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, Period, RowDimension
 from apps.dcis.services.divisions_services import get_user_divisions
-from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
 
@@ -16,6 +15,7 @@ AddBudgetClassification = ModelPermission('devind_dictionaries.add_budgetclassif
 
 def can_view_document(user: User, obj: Document):
     """Пропускает пользователей, которые могут просматривать документ."""
+    from apps.dcis.services.document_services import get_user_documents
     try:
         can_view_period(user, obj.period)
         if obj not in get_user_documents(user, obj.period):

@@ -4,13 +4,13 @@ from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
 from apps.dcis.models import Period, Project
-from apps.dcis.services.period_services import get_user_periods
 from apps.dcis.services.privilege_services import has_privilege
 from .project_permissions import can_view_project
 
 
 def can_view_period(user: User, obj: Period):
     """Пропускает пользователей, которые могут просматривать период."""
+    from apps.dcis.services.period_services import get_user_periods
     can_view_project(
         user, obj.project
     )
