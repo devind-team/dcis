@@ -2,33 +2,22 @@ from typing import Any
 
 import graphene
 from devind_helpers.decorators import permission_classes
-from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
-from graphene_django_cud.mutations import DjangoUpdateMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.core.models import User
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
-from apps.dcis.permissions import (
-    can_add_child_row_dimension,
-    can_add_document,
-    can_change_child_row_dimension_height,
-    can_change_document,
-    can_delete_child_row_dimension,
-    can_view_document,
-)
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.services.document_services import create_document
 from apps.dcis.services.document_services import (
     add_document_status,
     change_document_comment,
+    create_document,
     delete_document_status
 )
-from apps.dcis.services.document_unload_services import DocumentUnload
+from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.sheet_services import (
     add_child_row_dimension,
     change_row_dimension_height,
@@ -69,7 +58,6 @@ class AddDocumentMutation(BaseMutation):
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
         period = get_object_or_404(Period, pk=period_id)
-        can_add_document(info.context.user, period)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document = create_document(
             user=info.context.user,
@@ -92,7 +80,7 @@ class ChangeDocumentCommentMutation(BaseMutation):
     document = graphene.Field(DocumentType, description='Созданный документ')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, ChangeDocument,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: None,
         info: ResolveInfo,
@@ -100,8 +88,7 @@ class ChangeDocumentCommentMutation(BaseMutation):
         comment: str,
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        info.context.check_object_permissions(info.context, document)
-        return ChangeDocumentCommentMutation(document=change_document_comment(document, comment))
+        return ChangeDocumentCommentMutation(document=change_document_comment(info, document, comment))
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -118,7 +105,6 @@ class AddDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_change_document(info.context.user, document)
         status: Status = get_object_or_404(Status, pk=status_id)
         return AddDocumentStatusMutation(document_status=add_document_status(
             status,
@@ -140,8 +126,7 @@ class DeleteDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
         status = get_object_or_404(DocumentStatus, pk=document_status_id)
-        info.context.check_object_permissions(info.context, status.document)
-        delete_document_status(status)
+        delete_document_status(info, status)
         return DeleteDocumentStatusMutation(id=document_status_id)
 
 
@@ -160,13 +145,7 @@ class UnloadDocumentMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
-        if not additional:
-            additional = []
-        document = Document.objects.get(pk=from_global_id(document_id)[1])
-        can_view_document(info.context.user, document)
-        document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
-        src: str = document_unload.xlsx()
-        return UnloadDocumentMutation(src=src)
+        return UnloadDocumentMutation(src=document_upload(info, document_id, additional))
 
 
 class AddChildRowDimensionMutation(BaseMutation):
@@ -200,13 +179,10 @@ class AddChildRowDimensionMutation(BaseMutation):
     ):
         document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         parent = get_object_or_404(RowDimension, pk=parent_id)
-        can_add_child_row_dimension(
-            info.context.user,
-            document=document, row_dimension=parent
-        )
         sheet = get_object_or_404(Sheet, pk=sheet_id)
         return AddChildRowDimensionMutation(
             row_dimension=add_child_row_dimension(
+                info=info.context.user,
                 context=info.context,
                 sheet=sheet,
                 document=document,
@@ -233,8 +209,7 @@ class ChangeChildRowDimensionHeightMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, row_dimension_id: str, height: int):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        can_change_child_row_dimension_height(info.context.user, row_dimension)
-        row_dimension = change_row_dimension_height(row_dimension, height)
+        row_dimension = change_row_dimension_height(info, row_dimension, height)
         return ChangeChildRowDimensionHeightMutation(
             row_dimension_id=row_dimension.id,
             height=row_dimension.height,
@@ -254,8 +229,7 @@ class DeleteChildRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        can_delete_child_row_dimension(info.context.user, row_dimension)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(row_dimension))
+        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(info, row_dimension))
 
 
 class DocumentMutations(graphene.ObjectType):

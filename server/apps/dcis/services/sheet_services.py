@@ -3,9 +3,10 @@ from argparse import ArgumentTypeError
 from typing import Any, NamedTuple, Sequence
 
 from devind_dictionaries.models import BudgetClassification
+from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, QuerySet
 from graphql import ResolveInfo
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
@@ -13,10 +14,14 @@ from xlsx_evaluate.tokenizer import ExcelParser, f_token
 from apps.core.models import User
 from apps.dcis.models import Document, Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
-from apps.dcis.permissions import can_change_period_sheet
+from apps.dcis.permissions import (
+    can_add_child_row_dimension,
+    can_change_child_row_dimension_height,
+    can_change_period_sheet,
+    can_delete_child_row_dimension
+)
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
-from django.db.models import QuerySet
-from devind_helpers.exceptions import PermissionDenied
+
 
 @transaction.atomic
 def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
@@ -106,6 +111,7 @@ def add_row_dimension(
 
 @transaction.atomic
 def add_child_row_dimension(
+    info: ResolveInfo,
     context: Any,
     sheet: Sheet,
     document: Document,
@@ -119,6 +125,11 @@ def add_child_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
+    can_add_child_row_dimension(
+        info.context.user,
+        document=document,
+        row_dimension=parent
+    )
     sheet.rowdimension_set.filter(parent=parent, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
@@ -158,19 +169,21 @@ def change_row_dimension(
     return row_dimension
 
 
-def change_row_dimension_height(row_dimension: RowDimension, height: int) -> RowDimension:
+def change_row_dimension_height(info: ResolveInfo, row_dimension: RowDimension, height: int) -> RowDimension:
     """Изменение высоты строки."""
+    can_change_child_row_dimension_height(info.context.user, row_dimension)
     row_dimension.height = height
     row_dimension.save(update_fields=('height', 'updated_at'))
     return row_dimension
 
 
 @transaction.atomic
-def delete_row_dimension(row_dimension: RowDimension) -> int:
+def delete_row_dimension(info: ResolveInfo, row_dimension: RowDimension) -> int:
     """Удаление строки.
 
     После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
     """
+    can_delete_child_row_dimension(info.context.user, row_dimension)
     row_dimension_id = row_dimension.id
     row_dimension.delete()
     row_dimension.sheet.rowdimension_set.filter(

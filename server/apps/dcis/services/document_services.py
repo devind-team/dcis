@@ -1,19 +1,22 @@
 """Модуль, отвечающий за работу с документами."""
 
-from typing import Type
-
-from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
+from devind_helpers.orm_utils import get_object_or_none
+from django.db import transaction
 from django.db.models import Max, QuerySet
+from graphql import ResolveInfo
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Limitation, Period, RowDimension, Sheet, Status, Value, DocumentStatus
+from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.permissions import (
+    can_add_document,
+    can_change_document,
+)
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
 
 def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Document]:
     """Получение документов пользователя для периода.
-
     Пользователь видит период документ:
       - пользователь обладает глобальной привилегией dcis.view_document
       - пользователь создал проект документа
@@ -40,7 +43,8 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         return Document.objects.filter(rowdimension__object_id__in=division_ids)
 
 
-def create_new_document(
+@transaction.atomic
+def create_document(
     user: User,
     period: Period,
     status_id: int | str,
@@ -49,21 +53,17 @@ def create_new_document(
     division_id: int | str | None = None
 ) -> Document:
     """Добавление нового документа.
-
-        user - пользователь, который создает документ
-        period_id - собираемый период
-        status_id - идентификатор статуса устанавливаемого документа
-        object_id - идентификатор дивизиона
+    :param user: пользователь, который создает документ
+    :param period: собираемый период
+    :param status_id: идентификатор начального статуса документа
+    :param comment: комментарий к документу
+    :param document_id: идентификатор документа, от которого создавать копию
+    :param division_id: идентификатор дивизиона
     """
-    status: Status = get_object_or_404(Status, pk=status_id)
-    latest_document: Document | None = get_object_or_none(Document, pk=document_id)
-    max_version: int | None = Document.objects.filter(
-        period=period,
-        object_id=division_id
-    ).aggregate(version=Max('version'))['version']
-
-    document: Document = Document.objects.create(
-        version=max_version + 1 if max_version is not None else 1,
+    can_add_document(user, period)
+    source_document: Document | None = get_object_or_none(Document, pk=document_id)
+    document = Document.objects.create(
+        version=(get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
         period=period
@@ -71,46 +71,60 @@ def create_new_document(
     document.documentstatus_set.create(
         comment='Документ добавлен',
         user=user,
-        status=status
+        status_id=status_id
     )
-    sheet: Sheet
     for sheet in period.sheet_set.all():
         document.sheets.add(sheet)
-        if latest_document is not None:
-            rows_transform: dict[int | Type[int], int] = {}
-            parent_rows: list[int] = sheet.rowdimension_set \
-                .filter(parent__isnull=True) \
-                .values_list('id', flat=True)
-            for parent_row in parent_rows:
-                rows_transform.update(transfer_rows(user, sheet, latest_document, document, parent_row))
-
-            # Копируем свойства ячеек дочерних строк
-            cells: list[Cell] = Cell.objects.filter(row_id__in=rows_transform.keys()).all()
-            for cell in cells:
-                cell_id = cell.id
-                cell.pk, cell.row_id = None, rows_transform[cell.row_id]
-                cell.save()
-                # Переносим ограничения
-                transfer_limitations(cell_id, cell.pk)
-
-            # Копируем значения
-            values: list[Value] = Value.objects.filter(sheet=sheet, document=latest_document)
-            for value in values:
-                value.id, value.document, value.row_id = None, document, rows_transform.get(value.row_id, value.row_id)
-                value.save()
+        if source_document is not None:
+            rows_transform: dict[int, int] = {}
+            parent_row_ids: list[int] = sheet.rowdimension_set.filter(
+                parent__isnull=True
+            ).values_list('id', flat=True)
+            for parent_row_id in parent_row_ids:
+                rows_transform.update(transfer_rows(user, sheet, source_document, document, parent_row_id))
+            transfer_cells(rows_transform)
+            transfer_values(sheet, document, source_document, rows_transform)
     return document
+
+
+def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+    """Получение максимальной версии документа для периода."""
+    return Document.objects.filter(
+        period_id=period_id,
+        object_id=division_id
+    ).aggregate(version=Max('version'))['version']
+
+
+def transfer_cells(rows_transform: dict[int, int]) -> None:
+    """Перенос ячеек дочерних строк."""
+    for cell in Cell.objects.filter(row_id__in=rows_transform.keys()):
+        cell_id = cell.id
+        cell.pk, cell.row_id = None, rows_transform[cell.row_id]
+        cell.save()
+        transfer_limitations(cell_id, cell.id)
+
+
+def transfer_values(
+    sheet: Sheet,
+    document: Document,
+    source_document: Document,
+    rows_transform: dict[int, int]
+) -> None:
+    """Перенос значений."""
+    for value in Value.objects.filter(sheet=sheet, document=source_document):
+        value.id, value.document, value.row_id = None, document, rows_transform.get(value.row_id, value.row_id)
+        value.save()
 
 
 def transfer_rows(
     user: User,
     sheet: Sheet,
-    last_document: Document,
+    source_document: Document,
     document: Document,
     parent_id: int,
-    parent_ids=None
+    parent_ids: dict[int, int] | None = None
 ) -> dict[int, int]:
     """Переносим дочерние строки.
-
     Рекурсивно проходимся по строкам и создаем новые с трансфером идентификаторов для значений.
         row_id = 1 parent = none        ---->   row_id = 1, parent = none   - не участвует в трансфере
             row_id = 2 parent = 1       ---->       row_id = 5, parent = 1      transform[2] = 5
@@ -121,10 +135,8 @@ def transfer_rows(
         parent_ids = {}
 
     rows_transform: dict[int, int] = {}
-    rows: list[RowDimension] = last_document.rowdimension_set.filter(parent_id=parent_id).all()
-    row: RowDimension
-    for row in rows:
-        document_row: RowDimension = RowDimension.objects.create(
+    for row in source_document.rowdimension_set.filter(parent_id=parent_id):
+        document_row = RowDimension.objects.create(
             index=row.index,
             height=row.height,
             dynamic=row.dynamic,
@@ -136,7 +148,7 @@ def transfer_rows(
             parent_id=parent_ids.get(parent_id, parent_id)
         )
         rows_transform[row.id] = document_row.id
-        rows_transform.update(transfer_rows(user, sheet, last_document, document, row.id, rows_transform))
+        rows_transform.update(transfer_rows(user, sheet, source_document, document, row.id, rows_transform))
     return rows_transform
 
 
@@ -147,16 +159,12 @@ def transfer_limitations(
     parent_id: int | None = None
 ) -> None:
     """Рекурсивно переносим ограничения ячеек.
-
-        cell_original - оригинальная ячейка
-        cell - ячейка в которую переносим ограничения
-        parent_id_original - идентификатор оригинального переносимого ограничения
-        parent_id - идентификатор переносимого ограничения
+    :param cell_original: оригинальная ячейка
+    :param cell: ячейка в которую переносим ограничения
+    :param parent_id_original: идентификатор оригинального переносимого ограничения
+    :param parent_id: идентификатор переносимого ограничения
     """
-    limitations: list[Limitation] = Limitation.objects \
-        .filter(cell_id=cell_original, parent_id=parent_id_original) \
-        .all()
-    for limitation in limitations:
+    for limitation in Limitation.objects.filter(cell_id=cell_original, parent_id=parent_id_original):
         limitation_parent = limitation.pk
         limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
         limitation.save()
@@ -165,6 +173,7 @@ def transfer_limitations(
 
 def add_document_status(status: Status, document: Document, comment: str, user: User) -> DocumentStatus.status:
     """Добавление статуса документа."""
+    can_change_document(user, document)
     return DocumentStatus.objects.create(
         status=status,
         document=document,
@@ -173,13 +182,15 @@ def add_document_status(status: Status, document: Document, comment: str, user: 
     )
 
 
-def delete_document_status(status: DocumentStatus) -> None:
+def delete_document_status(info: ResolveInfo, status: DocumentStatus) -> None:
     """Изменение комментария версии документа."""
-    return status.delete()
+    can_change_document(info.context.user, status.document)
+    status.delete()
 
 
-def change_document_comment(document: Document, comment: str) -> Document:
+def change_document_comment(info: ResolveInfo, document: Document, comment: str) -> Document:
     """Изменение комментария версии документа."""
+    can_change_document(info.context.user, document)
     document.comment = comment
     document.save(update_fields=('comment', 'updated_at'))
     return document

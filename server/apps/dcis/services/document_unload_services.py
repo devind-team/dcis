@@ -7,12 +7,17 @@ from typing import Type
 
 from django.conf import settings
 from django.db.models import Q
+from graphql import ResolveInfo
+from graphql_relay import from_global_id
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from apps.core.models import User
 from apps.dcis.models import Cell, ColumnDimension, Document, MergedCell, Period, Project, RowDimension, Value
+from apps.dcis.permissions import (
+    can_view_document,
+)
 
 
 @dataclass
@@ -239,3 +244,13 @@ class DocumentUnload:
             border_style=cell.border_style.get(position),
             color=f'{cell.border_color[position][1:]}' if cell.border_color[position] else None
         )
+
+
+def document_upload(info: ResolveInfo, document_id: str, additional: list[str] | None = None) -> str:
+    """Функция выгрузки документа."""
+    if not additional:
+        additional = []
+    document = Document.objects.get(pk=from_global_id(document_id)[1])
+    can_view_document(info.context.user, document)
+    document_unload: DocumentUnload = DocumentUnload(document, info.context.get_host(), additional)
+    return document_unload.xlsx()
