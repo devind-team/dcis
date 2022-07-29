@@ -1,29 +1,19 @@
 from typing import Any
 
 import graphene
-from devind_dictionaries.models import Department
-from devind_helpers.exceptions import PermissionDenied
-from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.decorators import permission_classes
-from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
-from django.contrib.contenttypes.models import ContentType
-from graphene_django_cud.mutations import DjangoCreateMutation, DjangoDeleteMutation, DjangoUpdateMutation
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.helpers import DjangoCudBaseMutation
 from apps.dcis.models import Project
-from apps.dcis.permissions import can_change_project, can_delete_project
-from apps.dcis.permissions import AddProject, ChangeProject, DeleteProject
+from apps.dcis.permissions import AddProject
 from apps.dcis.schema.types import ProjectType
+from apps.dcis.services.project_services import (change_project, create_project, delete_project)
 from apps.dcis.validators import ProjectValidator
-from apps.dcis.services.project_services import (
-    create_project,
-    change_project,
-    delete_project
-)
 
 
 class AddProjectMutation(BaseMutation):
@@ -79,8 +69,15 @@ class ChangeProjectMutation(BaseMutation):
             archive: bool
     ):
         project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        can_change_project(info.context.user, project)
-        return ChangeProjectMutation(project=change_project(project, name, short, description, visibility, archive))
+        return ChangeProjectMutation(project=change_project(
+            info,
+            project,
+            name,
+            short,
+            description,
+            visibility,
+            archive)
+        )
 
 
 class DeleteProjectMutation(BaseMutation):
@@ -95,8 +92,7 @@ class DeleteProjectMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, project_id: str | int):
         project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        can_delete_project(info.context.user, project)
-        delete_project(project)
+        delete_project(info, project)
         return DeleteProjectMutation(delete_id=project_id)
 
 

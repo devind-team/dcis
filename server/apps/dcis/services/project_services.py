@@ -1,12 +1,14 @@
 """Модуль, отвечающий за работу с проектами."""
 
+from devind_dictionaries.models import Department
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
+from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.dcis.models import Project
+from apps.dcis.permissions import can_change_project, can_delete_project
 from apps.dcis.services.divisions_services import get_user_division_ids
-from django.contrib.contenttypes.models import ContentType
-from devind_dictionaries.models import Department
 
 
 def get_user_participant_projects(user: User) -> QuerySet[Project]:
@@ -58,6 +60,7 @@ def create_project(validate_field: dict, visibility: bool) -> Project:
 
 
 def change_project(
+        info: ResolveInfo,
         project: Project,
         name: str,
         short: str,
@@ -65,6 +68,7 @@ def change_project(
         visibility: bool,
         archive: bool) -> Project:
     """Изменение настроек проекта."""
+    can_change_project(info.context.user, project)
     project.name = name
     project.short = short
     project.description = description
@@ -74,6 +78,7 @@ def change_project(
     return project
 
 
-def delete_project(project: Project) -> None:
+def delete_project(info: ResolveInfo, project: Project) -> None:
     """Удаление проекта."""
-    return project.delete()
+    can_delete_project(info.context.user, project)
+    project.delete()
