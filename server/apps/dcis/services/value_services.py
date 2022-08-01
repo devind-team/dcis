@@ -62,7 +62,6 @@ def update_or_create_value(
 
 def recalculate_cells(document: Document, value: Value) -> list[Value]:
     """Пересчитываем значения ячеек в зависимости от новых."""
-    from pprint import pp
     sheets: list[Sheet] = document.sheets.all()
     sheet_containers: list[FormulaContainerCache] = [FormulaContainerCache.get(sheet) for sheet in sheets]
     # 1. Собираем зависимости и последовательность операций
@@ -81,20 +80,21 @@ def recalculate_cells(document: Document, value: Value) -> list[Value]:
     for cell_name, result_value in evaluate_result.items():
         cell: Cell = result_value['cell']
         if (
+                result_value['value'] is None or
                 cell_name not in inversion_cells or
                 cell.column_id == value.column_id and
                 cell.row_id == value.row_id and
                 cell.column.sheet_id == value.sheet_id
         ):
             continue
-
         val, created = Value.objects.update_or_create(
             column_id=cell.column_id,
             row_id=cell.row_id,
             sheet_id=cell.column.sheet_id,
             document=document,
             defaults={
-                'value': result_value['value']
+                'value': result_value['value'],
+                'error': result_value['error'],
             }
         )
         result_values.append(val)

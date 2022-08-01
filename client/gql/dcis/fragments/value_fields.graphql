@@ -1,10 +1,11 @@
 fragment ValueFields on ValueType {
   id
   value
-  verified
   payload
-  rowId
+  verified
+  error
   columnId
+  rowId
   sheetId
   __typename
 }

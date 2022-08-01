@@ -1476,7 +1476,7 @@ type ChangeValueMutationPayload {
   """Успех мутации"""
   success: Boolean!
   """Дата изменения"""
-  updatedAt: DateTime!
+  updatedAt: DateTime
   """Измененные ячейки"""
   values: [ValueType]
 }

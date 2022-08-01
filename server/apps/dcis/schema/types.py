@@ -483,8 +483,8 @@ class CellType(graphene.ObjectType):
 class ValueType(DjangoObjectType):
     """Тип значения."""
 
-    document = graphene.Field(DocumentType, description='Документ')
     payload = graphene.String(description='Дополнительное поле')
+    document = graphene.Field(DocumentType, description='Документ')
     sheet_id = graphene.ID(required=True, description='Идентификатор листа')
     column_id = graphene.ID(required=True, description='Идентификатор колонки')
     row_id = graphene.ID(required=True, description='Идентификатор строки')

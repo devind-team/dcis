@@ -6,7 +6,7 @@
     v-on="componentListeners"
     :is="componentName"
   )
-  div(v-else) {{ cell.value }}
+  div(v-else) {{ cellValue }}
 </template>
 
 <script lang="ts">
@@ -112,14 +112,17 @@ export default defineComponent({
       )
       : null
 
+    const cellValue = computed<string>(() => props.cell.error ? props.cell.error : props.cell.value)
+
     const setValue = async (value: string) => {
       emit('clear-active')
-      if (props.cell.value !== value) {
-        if (mode === GridMode.CHANGE) {
-          await changeDefault(props.cell, value)
-        } else {
-          await changeValue(value)
-        }
+      if (props.cell.value === value || (props.cell.value === null && value === '')) {
+        return
+      }
+      if (mode === GridMode.CHANGE) {
+        await changeDefault(props.cell, value)
+      } else {
+        await changeValue(value)
       }
     }
 
@@ -140,6 +143,9 @@ export default defineComponent({
     const canChangeValue = computed<boolean>(() => {
       if (mode === GridMode.CHANGE) {
         return true
+      }
+      if (!props.cell.editable || props.cell.kind === 'f') {
+        return false
       }
       if (activeSheet.value.canChange) {
         return true
@@ -170,9 +176,9 @@ export default defineComponent({
 
     const componentProps = computed(() => {
       if (componentName.value === 'GridCellFiles') {
-        return { value: props.cell.value, files: files.value || [], readonly: !canChangeValue.value }
+        return { value: cellValue.value, files: files.value || [], readonly: !canChangeValue.value }
       }
-      return { value: props.cell.value, readonly: !canChangeValue.value }
+      return { value: cellValue.value, readonly: !canChangeValue.value }
     })
 
     const componentListeners = computed<Record<string, Function>>(() => {
@@ -186,7 +192,7 @@ export default defineComponent({
       'grid__cell-content_active': props.active && ['Numeric', 'String', 'Money'].includes(cellKind.value)
     }))
 
-    return { componentName, renderComponent, componentProps, componentListeners, contentClasses }
+    return { cellValue, componentName, renderComponent, componentProps, componentListeners, contentClasses }
   }
 })
 </script>

@@ -137,13 +137,15 @@ export default defineComponent({
       if (cell.strike) { textDecoration.push('line-through') }
       if (cell.underline) { textDecoration.push('underline') }
       if (cell.size) { style['font-size'] = `${cell.size}px` }
-      if (cell.color) { style['font-color'] = cell.color }
+      if (cell.error) {
+        style.color = 'red'
+      } else if (cell.color) { style.color = cell.color }
       if (cell.background) { style['background-color'] = cell.background }
       style['text-decoration'] = textDecoration.join(' ')
       const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
       for (const position of ['top', 'right', 'bottom', 'left']) {
         if (borderColor[position]) {
-          cell[`border-${position}`] = `1 px solid ${borderColor[position] || 'black'}`
+          style[`border-${position}`] = `1 px solid ${borderColor[position] || 'black'}`
         }
       }
       return style
