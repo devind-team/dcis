@@ -114,12 +114,13 @@ export default defineComponent({
 
     const setValue = async (value: string) => {
       emit('clear-active')
-      if (props.cell.value !== value) {
-        if (mode === GridMode.CHANGE) {
-          await changeDefault(props.cell, value)
-        } else {
-          await changeValue(value)
-        }
+      if (props.cell.value === value || (props.cell.value === null && value === '')) {
+        return
+      }
+      if (mode === GridMode.CHANGE) {
+        await changeDefault(props.cell, value)
+      } else {
+        await changeValue(value)
       }
     }
 
