@@ -10,7 +10,7 @@ export default defineComponent({
   setup () {
     const router = useRouter()
     const { localePath } = useI18n()
-    router.push(localePath({ name: 'panel-ac-users' }))
+    router.push(localePath({ name: 'panel-ac-permissions' }))
   }
 })
 </script>
