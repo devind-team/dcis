@@ -156,7 +156,10 @@ export default defineComponent({
 
     const deleteProjectDone = ({ data: { deleteProject: { success } } }: DeleteProjectResultMutation) => {
       if (success) {
-        router.push(localePath({ name: 'dcis-projects', query: { projectId: route.params.projectId } }))
+        router.push(localePath({
+          name: 'dcis-projects',
+          query: { deleteProjectId: route.params.projectId }
+        }))
       }
     }
 
