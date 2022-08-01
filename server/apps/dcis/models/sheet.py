@@ -329,22 +329,10 @@ class Value(models.Model):
     В связи с этим добавлено поле sheet, которое точно определяет к какому листу имеет отношение таблицы.
     """
 
-    CYCLE_REF = 'CYCLE_REF'
-
-    KIND_ERROR = (
-        (CYCLE_REF, 'cycle_ref'),
-    )
-
     value = models.TextField(help_text='Значение')
     payload = models.JSONField(null=True, help_text='Дополнительные данные')
     verified = models.BooleanField(default=True, help_text='Валидно ли поле')
-    error = models.CharField(
-        max_length=20,
-        default=None,
-        null=True,
-        choices=KIND_ERROR,
-        help_text='Тип ошибки'
-    )
+    error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')

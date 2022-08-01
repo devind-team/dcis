@@ -154,7 +154,7 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
             except RuntimeError as e:
                 if 'Cycle detected' in str(e):
                     state[formula]['value'] = ''
-                    state[formula]['error'] = 'cycle_ref'
+                    state[formula]['error'] = 'Циклическая ссылка'
                 else:
                     raise e
     return state

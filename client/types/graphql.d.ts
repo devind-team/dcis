@@ -1565,7 +1565,7 @@ export type ChangeValueMutationPayload = {
   /** Успех мутации */
   success: Scalars['Boolean'];
   /** Дата изменения */
-  updatedAt: Scalars['DateTime'];
+  updatedAt?: Maybe<Scalars['DateTime']>;
   /** Измененные ячейки */
   values?: Maybe<Array<Maybe<ValueType>>>;
 };
@@ -5276,7 +5276,7 @@ export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: s
 
 export type StatusFieldsFragment = { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean };
 
-export type ValueFieldsFragment = { __typename: 'ValueType', id: string, value: string, verified: boolean, payload?: string | null, rowId: string, columnId: string, sheetId: string };
+export type ValueFieldsFragment = { __typename: 'ValueType', id: string, value: string, payload?: string | null, verified: boolean, error?: string | null, columnId: string, rowId: string, sheetId: string };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
@@ -5550,7 +5550,7 @@ export type ChangeValueMutationVariables = Exact<{
   value: Scalars['String'];
 }>;
 
-export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, verified: boolean, payload?: string | null, rowId: string, columnId: string, sheetId: string } | null> | null } };
+export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, updatedAt?: any | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, verified: boolean, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];
