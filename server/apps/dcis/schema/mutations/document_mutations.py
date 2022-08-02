@@ -2,7 +2,6 @@ from typing import Any
 
 import graphene
 from devind_helpers.decorators import permission_classes
-from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation

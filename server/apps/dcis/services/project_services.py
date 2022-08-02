@@ -41,4 +41,8 @@ def get_user_projects(user: User) -> QuerySet[Project]:
     """
     if user.has_perm('dcis.view_project'):
         return Project.objects.all()
-    return get_user_participant_projects(user) | get_user_privileges_projects(user) | get_user_divisions_projects(user)
+    return (
+        get_user_participant_projects(user) |
+        get_user_privileges_projects(user) |
+        get_user_divisions_projects(user)
+    ).distinct()
