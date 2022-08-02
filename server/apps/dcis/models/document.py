@@ -53,6 +53,7 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
 
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь, добавивший документ')
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     sheets = models.ManyToManyField(Sheet)
 

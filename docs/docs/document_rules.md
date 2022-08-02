@@ -110,6 +110,7 @@
   позволяющей просматривать все документы в рамках периода;
 - `Document.period.project.user_id == info.context.user.id` - пользователь создал проект документа;
 - `Document.period.user_id == info.context.user.id` - пользователь создал период документа;
+- `Document.user_id == info.context.user.id` - пользователь создал документ;
 - `Document.object_id in get_user_divisions(info.context.user, Document.period.project)` - период создан с
   множественным типом сбора, и пользователь добавлен в закрепленный за документом дивизион;
 - `Document.rowdimension__object_id in get_user_divisions(info.context.user, Document.period.project)` - период создан с
