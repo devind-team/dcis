@@ -17,6 +17,7 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
       - пользователь обладает глобальной привилегией dcis.view_document
       - пользователь создал проект документа
       - пользователь создал период документа
+      - пользователь создал документ
       - период создан с множественным типом сбора, и
         пользователь добавлен в закрепленный за документом дивизион
       - период создан с единичным типом сбора, и
@@ -34,9 +35,10 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         return Document.objects.filter(period_id=period.id)
     division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
     if period.multiple:
-        return Document.objects.filter(period_id=period.id, object_id__in=division_ids)
+        divisions_documents = Document.objects.filter(period=period, object_id__in=division_ids)
     else:
-        return Document.objects.filter(period_id=period.id, rowdimension__object_id__in=division_ids)
+        divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
+    return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
 
 
 @transaction.atomic

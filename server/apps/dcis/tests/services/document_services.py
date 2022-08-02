@@ -52,6 +52,7 @@ class GetUserDocumentsTestCase(TestCase):
         self.multiple_single_project = Project.objects.create(content_type=self.department_content_type)
 
         self.multiple_period = Period.objects.create(project=self.multiple_single_project, multiple=True)
+        self.multiple_period_user_document = Document.objects.create(period=self.multiple_period, user=self.user)
         self.department_documents = [Document.objects.create(
             period=self.multiple_period, object_id=department.id
         ) for department in self.departments]
@@ -61,6 +62,7 @@ class GetUserDocumentsTestCase(TestCase):
         self.not_department_document = Document.objects.create(period=self.multiple_period)
 
         self.single_period = Period.objects.create(project=self.multiple_single_project, multiple=False)
+        self.single_period_user_document = Document.objects.create(period=self.single_period, user=self.user)
         self.department_row_document = Document.objects.create(period=self.single_period)
         self.department_sheet = Sheet.objects.create(period=self.single_period)
         self.department_row_dimensions = [RowDimension.objects.create(
@@ -128,7 +130,7 @@ class GetUserDocumentsTestCase(TestCase):
         """
         for period in self._get_period(self.multiple_period):
             self.assertSetEqual(
-                set(self.department_documents),
+                {self.multiple_period_user_document, *self.department_documents},
                 set(get_user_documents(self.user, period))
             )
 
@@ -139,7 +141,7 @@ class GetUserDocumentsTestCase(TestCase):
         """
         for period in self._get_period(self.single_period):
             self.assertSetEqual(
-                {self.department_row_document},
+                {self.single_period_user_document, self.department_row_document},
                 set(get_user_documents(self.user, period))
             )
 
