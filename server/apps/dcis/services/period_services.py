@@ -45,13 +45,11 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     """
     if user.has_perm('dcis.view_period'):
         return Period.objects.filter(project_id=project_id)
-    return get_user_participant_periods(
-        user, project_id
-    ) | get_user_divisions_periods(
-        user, project_id
-    ) | get_user_privileges_periods(
-        user, project_id
-    )
+    return (
+        get_user_participant_periods(user, project_id) |
+        get_user_divisions_periods(user, project_id) |
+        get_user_privileges_periods(user, project_id)
+    ).distinct()
 
 
 def get_period_users(period: Period | int | str) -> QuerySet[User]:

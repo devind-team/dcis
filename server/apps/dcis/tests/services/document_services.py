@@ -23,6 +23,17 @@ class GetUserDocumentsTestCase(TestCase):
 
         self.departments = [Department.objects.create(user=self.user) for _ in range(3)]
 
+        self.extra_project = Project.objects.create(content_type=self.department_content_type)
+        self.extra_period = Period.objects.create(project=self.extra_project)
+        self.extra_row_document = Document.objects.create(period=self.extra_period)
+        self.extra_department_sheet = Sheet.objects.create(period=self.extra_period)
+        self.extra_department_row_dimensions = [RowDimension.objects.create(
+            index=1,
+            sheet=self.extra_department_sheet,
+            document=self.extra_row_document,
+            object_id=department.id
+        ) for department in self.departments]
+
         self.user_is_creator_project = Project.objects.create(
             user=self.user,
             content_type=self.department_content_type
@@ -43,6 +54,9 @@ class GetUserDocumentsTestCase(TestCase):
         self.multiple_period = Period.objects.create(project=self.multiple_single_project, multiple=True)
         self.department_documents = [Document.objects.create(
             period=self.multiple_period, object_id=department.id
+        ) for department in self.departments]
+        self.not_period_department_documents = [Document.objects.create(
+            period=self.extra_period, object_id=department.id
         ) for department in self.departments]
         self.not_department_document = Document.objects.create(period=self.multiple_period)
 
