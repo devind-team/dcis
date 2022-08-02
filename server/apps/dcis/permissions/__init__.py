@@ -41,4 +41,3 @@ from .project_permissions import (
     can_delete_project_base,
     can_view_project,
 )
-from .value_permissions import can_change_value
