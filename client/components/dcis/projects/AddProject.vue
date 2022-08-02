@@ -77,7 +77,7 @@ export default defineComponent({
   setup (props, { emit }) {
     const authStore = useAuthStore()
 
-    const availableDivisions: string[] = ['department', 'organization']
+    const availableDivisions: string[] = ['organization', 'department']
 
     const user = toRef(authStore, 'user')
     const name = ref<string>('')
