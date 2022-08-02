@@ -287,6 +287,7 @@ class StatusType(DjangoObjectType):
 class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
+    user = graphene.Field(UserType, description='Пользователь, добавивший документ')
     period = graphene.Field(PeriodType, description='Период сбора')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
@@ -305,6 +306,7 @@ class DocumentType(DjangoObjectType):
             'version',
             'created_at',
             'updated_at',
+            'user',
             'period',
             'sheets',
             'object_id',
