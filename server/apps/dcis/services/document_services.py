@@ -64,6 +64,7 @@ def create_document(
         version=(get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
+        user=user,
         period=period
     )
     document.documentstatus_set.create(
