@@ -113,7 +113,7 @@ export default defineComponent({
       }
       return rowDimension.parent !== null && (
         activeSheet.value.canChange ||
-        activeDocument.value.user.id === userStore.user.id ||
+        activeDocument.value.user?.id === userStore.user.id ||
         userStore.user.id === rowDimension.userId
       )
     }

@@ -54,12 +54,12 @@ class AddDocumentBase:
         """Может ли пользователь добавлять документ с конкретным дивизионом и статусом."""
         return not status.protected and int(division_id) in self.user_division_ids
 
-    def has_object_permission(self, status: Status, division_id: int | str) -> bool:
+    def has_object_permission(self, status: Status, division_id: int | str | None) -> bool:
         """Получение разрешения."""
-        return self.can_add_any_document or self.can_add_restricted_document(status, division_id)
+        return self.can_add_any_document or (division_id and self.can_add_restricted_document(status, division_id))
 
 
-def can_add_document(user: User, obj: Period, status: Status, division_id: int | str):
+def can_add_document(user: User, obj: Period, status: Status, division_id: int | str | None):
     """Пропускает пользователей, которые могут просматривать период и добавлять в него документы."""
     can_view_period(user, obj)
     if AddDocumentBase(user, obj).has_object_permission(status, division_id):

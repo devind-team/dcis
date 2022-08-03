@@ -1,9 +1,15 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.documents.name') }}
-    template(v-if="period.canAddDocument")
+    template(v-if="period.canAddDocument || userPeriodDivision.length")
       v-spacer
-      add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
+      add-document(
+        :can-add-any-document="period.canAddDocument"
+        :user-divisions="userPeriodDivision"
+        :period="period"
+        :documents="documents"
+        :update="addDocumentUpdate"
+      )
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
@@ -43,7 +49,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, toRef, useNuxt2Meta } from '#app'
+import { defineComponent, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useI18n } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
@@ -51,6 +57,7 @@ import { BreadCrumbsItem } from '~/types/devind'
 import {
   DocumentType,
   PeriodType,
+  DivisionModelType,
   ChangeDocumentCommentMutation,
   ChangeDocumentCommentMutationVariables
 } from '~/types/graphql'
@@ -85,7 +92,11 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
     const userStore = useAuthStore()
-    const hasPerm = toRef(userStore, 'hasPerm')
+
+    const userPeriodDivision = computed(() => {
+      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
+      return props.period.divisions.filter((division: DivisionModelType) => userDivisionIds.includes(division.id))
+    })
 
     const {
       data: documents,
@@ -102,7 +113,7 @@ export default defineComponent({
       }
     }
 
-    const { mutate: ChangeDocumentCommentMutate } = useMutation<
+    const { mutate: changeDocumentCommentMutate } = useMutation<
       ChangeDocumentCommentMutation,
       ChangeDocumentCommentMutationVariables
     >(
@@ -117,7 +128,7 @@ export default defineComponent({
     )
 
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
-      ChangeDocumentCommentMutate({ documentId: document.id, comment })
+      changeDocumentCommentMutate({ documentId: document.id, comment })
     }
     const headers: DataTableHeader[] = props.period.multiple
       ? [{
@@ -140,19 +151,20 @@ export default defineComponent({
     const count = computed(() => {
       return selectedDocs.value.length > 0 ? visibleDocs.value.length : totalCount.value
     })
+
     return {
-      selectedDocs,
+      userPeriodDivision,
       documents,
       loading,
       headers,
-      hasPerm,
       count,
       totalCount,
       update,
       visibleDocs,
       addDocumentUpdate,
       dateTimeHM,
-      changeDocumentComment
+      changeDocumentComment,
+      selectedDocs
     }
   }
 })

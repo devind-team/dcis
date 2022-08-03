@@ -116,7 +116,7 @@ export default defineComponent({
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
         return parent.dynamic && (
           activeSheet.value.canChange ||
-          activeDocument.value.user.id === userStore.user.id ||
+          activeDocument.value.user?.id === userStore.user.id ||
           canAddRowRegardingDivisions(rowDimension)
         )
       }
@@ -131,7 +131,7 @@ export default defineComponent({
       }
       return rowDimension.dynamic && (
         activeSheet.value.canChange ||
-        activeDocument.value.user.id === userStore.user.id ||
+        activeDocument.value.user?.id === userStore.user.id ||
         canAddRowRegardingDivisions(rowDimension)
       )
     }
@@ -144,7 +144,7 @@ export default defineComponent({
       }
       return rowDimension.parent !== null && rowDimension.children.length === 0 && (
         activeSheet.value.canChange ||
-        activeDocument.value.user.id === userStore.user.id ||
+        activeDocument.value.user?.id === userStore.user.id ||
         rowDimension.userId === userStore.user.id
       )
     }
