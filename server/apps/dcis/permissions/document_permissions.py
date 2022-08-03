@@ -84,6 +84,8 @@ class ChangeDocumentSheetBase:
         self._is_document_editable: bool | None = None
         self._can_change_period_sheet: bool | None = None
         self._has_privilege: bool | None = None
+        self._user_division_ids: list[int] | None = None
+        self._can_change_in_multiple_mode: bool | None = None
 
     @property
     def is_document_editable(self) -> bool:
@@ -123,22 +125,6 @@ class ChangeDocumentSheetBase:
         """Получение разрешения."""
         return self._document.user == self._user or self.can_change_period_sheet or self.has_privilege
 
-
-class ChangeValueBase(ChangeDocumentSheetBase):
-    """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра.
-
-    Позволяет вычислять разрешение многократно для одного пользователя
-    и нескольких ячеек одного документа, не делая дополнительных запросов.
-    """
-
-    global_permission = 'dcis.change_value'
-    local_permission = 'change_value'
-
-    def __init__(self, user: User, document: Document) -> None:
-        super().__init__(user, document)
-        self._user_division_ids: list[int] | None = None
-        self._can_change_in_multiple_mode: bool | None = None
-
     @property
     def user_division_ids(self) -> list[int]:
         """Идентификаторы дивизионов пользователя."""
@@ -156,6 +142,17 @@ class ChangeValueBase(ChangeDocumentSheetBase):
                 self._document.object_id in self.user_division_ids
             )
         return self._can_change_in_multiple_mode
+
+
+class ChangeValueBase(ChangeDocumentSheetBase):
+    """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра.
+
+    Позволяет вычислять разрешение многократно для одного пользователя
+    и нескольких ячеек одного документа, не делая дополнительных запросов.
+    """
+
+    global_permission = 'dcis.change_value'
+    local_permission = 'change_value'
 
     def can_change_in_single_mode(self, cell: Cell) -> bool:
         """Может ли пользователь изменять ячейку, если тип сбора является единичным."""
@@ -192,8 +189,18 @@ class AddChildRowDimensionBase(ChangeDocumentSheetBase):
     global_permission = 'dcis.add_rowdimension'
     local_permission = 'add_rowdimension'
 
+    def can_change_in_single_mode(self, row: RowDimension) -> bool:
+        """Может ли пользователь добавлять дочернюю строку, если тип сбора является единичным."""
+        if self._document.period.multiple:
+            return False
+        return row.parent_id is None or (
+            row.parent_id is not None and row.object_id in self.user_division_ids
+        )
+
     def has_object_permission(self, row: RowDimension) -> bool:
-        return self.is_document_editable and row.dynamic and self.has_permission
+        return self.is_document_editable and row.dynamic and (
+            self.has_permission or self.can_change_in_multiple_mode or self.can_change_in_single_mode(row)
+        )
 
 
 def can_add_child_row_dimension(user: User, document: Document, row_dimension: RowDimension):

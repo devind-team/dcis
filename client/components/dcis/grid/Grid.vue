@@ -111,10 +111,11 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
       }
-      if (activeDocument.value.user.id === userStore.user.id) {
-        return true
-      }
-      return rowDimension.parent !== null && (activeSheet.value.canChange || userStore.user.id === rowDimension.userId)
+      return rowDimension.parent !== null && (
+        activeSheet.value.canChange ||
+        activeDocument.value.user.id === userStore.user.id ||
+        userStore.user.id === rowDimension.userId
+      )
     }
 
     const changeColumnWidth = props.mode === GridMode.CHANGE

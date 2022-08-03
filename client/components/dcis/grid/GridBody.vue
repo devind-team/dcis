@@ -44,7 +44,7 @@ tbody
 
 <script lang="ts">
 import { PropType, Ref, nextTick, inject } from '#app'
-import { CellType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
+import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
 import { GridMode, ResizingType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
@@ -98,6 +98,13 @@ export default defineComponent({
     }
 
     const canChangeRowSettings = mode === GridMode.CHANGE
+    const canAddRowRegardingDivisions = (rowDimension: RowDimensionType): boolean => {
+      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
+      if (activeDocument.value.period.multiple) {
+        return userDivisionIds.includes(activeDocument.value.objectId)
+      }
+      return userDivisionIds.includes(rowDimension.id)
+    }
     const canAddRowBeforeOrAfter = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
         return true
@@ -105,12 +112,13 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
       }
-      if (activeDocument.value.user.id === userStore.user.id) {
-        return true
-      }
       if (rowDimension.parent) {
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
-        return parent.dynamic && activeSheet.value.canChange
+        return parent.dynamic && (
+          activeSheet.value.canChange ||
+          activeDocument.value.user.id === userStore.user.id ||
+          canAddRowRegardingDivisions(rowDimension)
+        )
       }
       return false
     }
@@ -121,10 +129,11 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
       }
-      if (activeDocument.value.user.id === userStore.user.id) {
-        return true
-      }
-      return rowDimension.dynamic && activeSheet.value.canChange
+      return rowDimension.dynamic && (
+        activeSheet.value.canChange ||
+        activeDocument.value.user.id === userStore.user.id ||
+        canAddRowRegardingDivisions(rowDimension)
+      )
     }
     const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
@@ -133,11 +142,10 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
       }
-      if (activeDocument.value.user.id === userStore.user.id) {
-        return true
-      }
       return rowDimension.parent !== null && rowDimension.children.length === 0 && (
-        activeSheet.value.canChange || rowDimension.userId === userStore.user.id
+        activeSheet.value.canChange ||
+        activeDocument.value.user.id === userStore.user.id ||
+        rowDimension.userId === userStore.user.id
       )
     }
     const viewControl = (rowDimension: RowDimensionType): boolean => {

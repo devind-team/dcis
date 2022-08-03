@@ -211,7 +211,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         """Тестирование класса `AddChildRowDimension`."""
         with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
             self._test_add_child_row_dimension((False, False, False, False, False))
-        self._test_add_child_row_dimension((False, False, False, False, True))
+        self._test_add_child_row_dimension((False, False, True, False, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
             self._test_add_child_row_dimension((False, False, True, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.add_rowdimension'):
@@ -219,6 +219,17 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
             self._test_add_child_row_dimension((False, False, True, True, True))
             mock.assert_called_with(self.user.id, self.user_period.id, 'add_rowdimension')
+        with patch(
+            'apps.dcis.permissions.document_permissions.get_user_divisions',
+            new=Mock(return_value=({'id': 1},))
+        ) as mock:
+            self._test_add_child_row_dimension((False, False, True, False, True))
+            with patch.object(self.user_period_document, 'object_id', new=1), patch.object(
+                self.user_period, 'multiple', new=True,
+            ):
+                self._test_add_child_row_dimension((False, False, True, True, True))
+            with patch.object(self.document_dynamic_row_dimension, 'object_id', new=1):
+                self._test_add_child_row_dimension((False, False, True, True, True))
 
     def test_change_child_row_dimension_height(self) -> None:
         """Тестирование класса `ChangeChildRowDimensionHeight`."""
