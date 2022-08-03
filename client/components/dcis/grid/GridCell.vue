@@ -144,10 +144,10 @@ export default defineComponent({
       if (mode === GridMode.CHANGE) {
         return true
       }
-      if (!props.cell.editable || props.cell.kind === 'f') {
+      if (!activeDocument.value.lastStatus.status.edit || !props.cell.editable || props.cell.kind === 'f') {
         return false
       }
-      if (activeSheet.value.canChange) {
+      if (activeSheet.value.canChange || activeDocument.value.user?.id === userStore.user.id) {
         return true
       }
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)

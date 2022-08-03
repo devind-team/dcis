@@ -22,7 +22,7 @@ from apps.dcis.models import (
     Value,
 )
 from apps.dcis.permissions import (
-    can_add_document_base,
+    AddDocumentBase,
     can_add_period_base,
     can_change_document_base,
     can_change_period_divisions_base,
@@ -31,12 +31,12 @@ from apps.dcis.permissions import (
     can_change_period_sheet_base,
     can_change_period_users_base,
     can_change_project_base,
-    can_delete_document_base,
     can_delete_period_base,
     can_delete_project_base
 )
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.helpers.exceptions import is_raises
+from apps.dcis.services.document_services import get_document_last_status
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -163,7 +163,7 @@ class PeriodType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_add_document_base, info.context.user, period)
+        return AddDocumentBase(info.context.user, period).can_add_any_document
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
@@ -281,7 +281,7 @@ class StatusType(DjangoObjectType):
 
     class Meta:
         model = Status
-        fields = ('id', 'name', 'edit', 'comment',)
+        fields = ('id', 'name', 'edit', 'protected', 'comment',)
 
 
 class DocumentType(DjangoObjectType):
@@ -321,18 +321,11 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_last_status(document: Document, info: ResolveInfo) -> DocumentStatus | None:
-        try:
-            return document.documentstatus_set.latest('created_at')
-        except DocumentStatus.DoesNotExist:
-            return None
+        return get_document_last_status(document)
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_document_base, info.context.user, document)
-
-    @staticmethod
-    def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_delete_document_base, info.context.user, document)
 
 
 class DocumentStatusType(DjangoObjectType):

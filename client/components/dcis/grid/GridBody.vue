@@ -43,8 +43,8 @@ tbody
 </template>
 
 <script lang="ts">
-import { PropType, Ref, nextTick } from '#app'
-import { CellType, RowDimensionType, SheetType } from '~/types/graphql'
+import { PropType, Ref, nextTick, inject } from '#app'
+import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
 import { GridMode, ResizingType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
@@ -83,6 +83,7 @@ export default defineComponent({
     const userStore = useAuthStore()
 
     const mode = inject<GridMode>('mode')
+    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
     const rootCount = computed<number>(() => activeSheet.value.rows
@@ -97,13 +98,27 @@ export default defineComponent({
     }
 
     const canChangeRowSettings = mode === GridMode.CHANGE
+    const canAddRowRegardingDivisions = (rowDimension: RowDimensionType): boolean => {
+      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
+      if (activeDocument.value.period.multiple) {
+        return userDivisionIds.includes(activeDocument.value.objectId)
+      }
+      return userDivisionIds.includes(rowDimension.id)
+    }
     const canAddRowBeforeOrAfter = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
         return true
       }
+      if (!activeDocument.value.lastStatus.status.edit) {
+        return false
+      }
       if (rowDimension.parent) {
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
-        return parent.dynamic && activeSheet.value.canChange
+        return parent.dynamic && (
+          activeSheet.value.canChange ||
+          activeDocument.value.user?.id === userStore.user.id ||
+          canAddRowRegardingDivisions(rowDimension)
+        )
       }
       return false
     }
@@ -111,16 +126,27 @@ export default defineComponent({
       if (mode === GridMode.CHANGE) {
         return false
       }
-      return rowDimension.dynamic && activeSheet.value.canChange
+      if (!activeDocument.value.lastStatus.status.edit) {
+        return false
+      }
+      return rowDimension.dynamic && (
+        activeSheet.value.canChange ||
+        activeDocument.value.user?.id === userStore.user.id ||
+        canAddRowRegardingDivisions(rowDimension)
+      )
     }
     const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
       if (mode === GridMode.CHANGE) {
         return rootCount.value !== 1 || Boolean(rowDimension.parent)
-      } else {
-        return rowDimension.parent !== null && rowDimension.children.length === 0 && (
-          activeSheet.value.canChange || rowDimension.userId === userStore.user.id
-        )
       }
+      if (!activeDocument.value.lastStatus.status.edit) {
+        return false
+      }
+      return rowDimension.parent !== null && rowDimension.children.length === 0 && (
+        activeSheet.value.canChange ||
+        activeDocument.value.user?.id === userStore.user.id ||
+        rowDimension.userId === userStore.user.id
+      )
     }
     const viewControl = (rowDimension: RowDimensionType): boolean => {
       return canChangeRowSettings ||

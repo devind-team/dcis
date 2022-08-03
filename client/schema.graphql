@@ -2047,6 +2047,8 @@ type DocumentType implements Node {
   sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
+  """Пользователь, добавивший документ"""
+  user: UserType
   """Версия документа"""
   version: Int!
 }
@@ -3840,11 +3842,13 @@ type SheetType {
 type StatusType {
   """Комментарий"""
   comment: String
-  """Можно ли редактировать"""
+  """Можно ли редактировать документ со статусом"""
   edit: Boolean!
   id: ID!
-  """Наименование статуса"""
+  """Название статуса"""
   name: String!
+  """Является ли статус защищенным от изменения"""
+  protected: Boolean!
 }
 
 """Подписки на сокеты."""

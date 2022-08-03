@@ -1,19 +1,21 @@
 from .document_permissions import (
-    can_add_child_row_dimension,
     AddChildRowDimensionBase,
-    can_add_document,
-    can_add_document_base,
-    can_change_child_row_dimension_height,
+    AddDocumentBase,
     ChangeChildRowDimensionHeightBase,
+    ChangeDocumentSheetBase,
+    ChangeValueBase,
+    DeleteChildRowDimensionBase,
+    can_add_child_row_dimension,
+    can_add_document,
+    can_add_document_status,
+    can_add_document_status_base,
+    can_change_child_row_dimension_height,
     can_change_document,
     can_change_document_base,
-    ChangeDocumentSheetBase,
+    can_change_document_comment,
+    can_change_document_comment_base,
     can_change_value,
-    ChangeValueBase,
     can_delete_child_row_dimension,
-    DeleteChildRowDimensionBase,
-    can_delete_document,
-    can_delete_document_base,
     can_view_document,
 )
 from .period_permissions import (
@@ -41,4 +43,3 @@ from .project_permissions import (
     can_delete_project_base,
     can_view_project,
 )
-from .value_permissions import can_change_value

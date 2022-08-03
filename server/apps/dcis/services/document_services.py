@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import Max, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Limitation, Period, RowDimension, Sheet, Value
+from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Value
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
@@ -39,6 +39,22 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
     else:
         divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
     return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
+
+
+def get_document_last_status(document: Document) -> DocumentStatus | None:
+    """Получение последнего статуса документа."""
+    try:
+        return document.documentstatus_set.latest('created_at')
+    except DocumentStatus.DoesNotExist:
+        return None
+
+
+def is_document_editable(document: Document) -> bool:
+    """Является ли документ редактируемым."""
+    last_status = get_document_last_status(document)
+    if last_status is None or not last_status.status.edit:
+        return False
+    return True
 
 
 @transaction.atomic

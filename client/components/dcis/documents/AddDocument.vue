@@ -40,8 +40,9 @@ mutation-modal-form(
         item-value="id"
         return-object
       )
+    v-alert(v-if="status && status.comment" type="warning" dense) {{ status.comment }}
     validation-provider(
-      v-if="period.multiple"
+      v-if="period.multiple && (canAddAnyDocument || userDivisions.length > 1)"
       v-slot="{ errors, valid }"
       :name="divisionLabel"
       rules="required"
@@ -50,7 +51,7 @@ mutation-modal-form(
         v-model="division"
         :error-messages="errors"
         :success="valid"
-        :items="period.divisions"
+        :items="canAddAnyDocument ? period.divisions : userDivisions"
         :label="divisionLabel"
         item-text="name"
         item-value="id"
@@ -97,6 +98,8 @@ export type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMu
 export default defineComponent({
   components: { MutationModalForm },
   props: {
+    canAddAnyDocument: { type: Boolean, required: true },
+    userDivisions: { type: Array as PropType<DivisionModelType[]>, required: true },
     update: {
       type: Function as PropType<(cache: DataProxy, result: AddDocumentMutationResultType) => void>,
       required: true
@@ -117,24 +120,40 @@ export default defineComponent({
     const division = ref<DivisionModelType | null>(null)
     const document = ref<DocumentType>(null)
 
-    const { data: statuses, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
+    const divisionId = computed<string | null>(() => {
+      if (!props.period.multiple) {
+        return null
+      }
+      return props.userDivisions.length === 1 ? props.userDivisions[0].id : division.value?.id
+    })
+
+    const { data: statusesData, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
       document: statusesQuery
     })
+    const statuses = computed<StatusType[]>(() => {
+      if (!statusesData.value) {
+        return []
+      }
+      return props.canAddAnyDocument
+        ? statusesData.value as StatusType[]
+        : statusesData.value.filter((status: StatusType) => !status.protected)
+    })
+
     onResult(({ data: { statuses } }) => {
-      status.value = statuses[0]
+      nextTick(() => { status.value = statuses[0] || null })
     })
 
     const variables = computed<AddDocumentMutationVariables>(() => ({
       comment: comment.value,
       periodId: props.period.id,
       statusId: status.value?.id,
-      divisionId: division.value?.id,
+      divisionId: divisionId.value,
       documentId: document.value?.id
     }))
 
     const close = () => {
       comment.value = ''
-      status.value = statuses.value[0]
+      status.value = statuses.value[0] || null
       division.value = null
       document.value = null
     }

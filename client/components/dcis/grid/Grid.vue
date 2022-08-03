@@ -108,7 +108,14 @@ export default defineComponent({
       if (props.mode === GridMode.CHANGE) {
         return true
       }
-      return rowDimension.parent !== null && (activeSheet.value.canChange || userStore.user.id === rowDimension.userId)
+      if (!activeDocument.value.lastStatus.status.edit) {
+        return false
+      }
+      return rowDimension.parent !== null && (
+        activeSheet.value.canChange ||
+        activeDocument.value.user?.id === userStore.user.id ||
+        userStore.user.id === rowDimension.userId
+      )
     }
 
     const changeColumnWidth = props.mode === GridMode.CHANGE
