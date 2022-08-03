@@ -27,15 +27,15 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
       ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
     template(#item.comment="{ item }")
       template(v-if="item.comment")
-        template(v-if="item.canChange")
+        template(v-if="canChangeDocument(item)")
           text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
             a(v-on="on") {{ item.comment }}
         template(v-else) {{ item.comment }}
     template(#item.lastStatus="{ item }")
       template(v-if="item.lastStatus")
         document-statuses(
-          :can-add="canAddDocument(item)"
-          :can-delete="canDeleteDocument(item)"
+          :can-add="canChangeDocument(item)"
+          :can-delete="canDeleteDocumentStatus(item)"
           :update="update"
           :document="item"
         )
@@ -96,10 +96,10 @@ export default defineComponent({
       return props.period.divisions.filter((division: DivisionModelType) => userDivisionIds.includes(division.id))
     })
 
-    const canAddDocument = (document: DocumentType) => {
+    const canChangeDocument = (document: DocumentType) => {
       return document.canChange || document.user?.id === userStore.user.id
     }
-    const canDeleteDocument = (document: DocumentType) => {
+    const canDeleteDocumentStatus = (document: DocumentType) => {
       return document.canChange
     }
 
@@ -168,8 +168,8 @@ export default defineComponent({
 
     return {
       userPeriodDivision,
-      canAddDocument,
-      canDeleteDocument,
+      canChangeDocument,
+      canDeleteDocumentStatus,
       documents,
       loading,
       totalCount,
