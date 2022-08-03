@@ -14,7 +14,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
           v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
   items-data-filter(
-    v-if="period.multiple"
+    v-if="showFilter"
     v-model="selectedDocs"
     :items="period.divisions.map(x => ({ id: x.id, name: x.name }))"
     :get-name="i => i.name"
@@ -68,8 +68,6 @@ import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/do
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import DocumentStatusesReadonly from '~/components/dcis/documents/DocumentStatusesReadonly.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
-
-type DivisionFilterType = { id: string, name: string }
 
 export default defineComponent({
   components: {
@@ -130,19 +128,28 @@ export default defineComponent({
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
       changeDocumentCommentMutate({ documentId: document.id, comment })
     }
-    const headers: DataTableHeader[] = props.period.multiple
-      ? [{
-          text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
-          value: 'division'
-        }]
-      : []
 
-    headers.push(
-      { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-      { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-      { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
-    )
-    const selectedDocs = ref<DivisionFilterType[]>([])
+    const showFilter = computed<boolean>(() => {
+      return props.period.multiple && documents.value && new Set(
+        documents.value.map((document: DocumentType) => document.objectId)
+      ).size > 1
+    })
+    const headers = computed<DataTableHeader[]>(() => {
+      const result: DataTableHeader[] = showFilter.value
+        ? [{
+            text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
+            value: 'division'
+          }]
+        : []
+      result.push(
+        { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
+        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
+        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
+      )
+      return result
+    })
+
+    const selectedDocs = ref<DivisionModelType[]>([])
     const visibleDocs = computed<DocumentType[]>(() => {
       return selectedDocs.value.length > 0
         ? documents.value.filter(x => selectedDocs.value.map(x => x.id).includes(x.objectId))
@@ -156,15 +163,16 @@ export default defineComponent({
       userPeriodDivision,
       documents,
       loading,
-      headers,
-      count,
       totalCount,
       update,
-      visibleDocs,
       addDocumentUpdate,
       dateTimeHM,
       changeDocumentComment,
-      selectedDocs
+      showFilter,
+      headers,
+      selectedDocs,
+      visibleDocs,
+      count
     }
   }
 })
