@@ -7,7 +7,7 @@ from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 
-from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet
+from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet, Status
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
     can_add_document,
@@ -30,13 +30,25 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
 
+        self.status_edit = Status.objects.create(edit=True)
+
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
         self.document = Document.objects.create(period=self.period)
+        self.document.documentstatus_set.create(
+            document=self.document,
+            status=self.status_edit,
+            user=self.user
+        )
 
         self.user_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
         self.user_period = Period.objects.create(user=self.user, project=self.user_project)
         self.user_document = Document.objects.create(period=self.user_period)
+        self.user_document.documentstatus_set.create(
+            document=self.user_document,
+            status=self.status_edit,
+            user=self.user
+        )
 
         self.sheet = Sheet.objects.create(period=self.user_period)
         self.row_dimension = RowDimension.objects.create(index=1, sheet=self.sheet)
@@ -137,6 +149,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_change_value(self) -> None:
         """Тестирование класса `ChangeValue`."""
+        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
+            self._test_change_value((False, False, False, False, False))
         self._test_change_value((False, False, False, False, True))
         with patch(
             'apps.dcis.permissions.document_permissions.can_view_document',
@@ -175,6 +189,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         """Тестирование класса `AddChildRowDimension`."""
         self._test_add_child_row_dimension((False, False, False, False))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
+            with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
+                self._test_add_child_row_dimension((False, False, False, False))
             self._test_add_child_row_dimension((False, False, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.add_rowdimension'):
             self._test_add_child_row_dimension((False, False, True, True))
@@ -184,6 +200,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_change_child_row_dimension_height(self) -> None:
         """Тестирование класса `ChangeChildRowDimensionHeight`."""
+        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
+            self._test_change_child_row_dimension_height((False, False, False))
         self._test_change_child_row_dimension_height((False, False, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
             self._test_change_child_row_dimension_height((False, True, True))
@@ -195,6 +213,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_delete_child_row_dimension(self) -> None:
         """Тестирование класса `DeleteChildRowDimension`"""
+        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
+            self._test_delete_child_row_dimension((False, False, False, False))
         self._test_delete_child_row_dimension((False, False, False, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
             self._test_delete_child_row_dimension((False, False, True, True))

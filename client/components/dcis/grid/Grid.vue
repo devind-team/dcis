@@ -108,6 +108,9 @@ export default defineComponent({
       if (props.mode === GridMode.CHANGE) {
         return true
       }
+      if (!activeDocument.value.lastStatus.status.edit) {
+        return false
+      }
       return rowDimension.parent !== null && (activeSheet.value.canChange || userStore.user.id === rowDimension.userId)
     }
 

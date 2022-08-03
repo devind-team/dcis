@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, Period, RowDimension
 from apps.dcis.services.divisions_services import get_user_divisions
-from apps.dcis.services.document_services import get_user_documents
+from apps.dcis.services.document_services import get_user_documents, is_document_editable
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
 
@@ -81,8 +81,16 @@ class ChangeDocumentSheetBase:
     def __init__(self, user: User, document: Document):
         self._user = user
         self._document = document
+        self._is_document_editable: bool | None = None
         self._can_change_period_sheet: bool | None = None
         self._has_privilege: bool | None = None
+
+    @property
+    def is_document_editable(self) -> bool:
+        """Является ли документ редактируемым."""
+        if self._is_document_editable is None:
+            self._is_document_editable = is_document_editable(self._document)
+        return self._is_document_editable
 
     @property
     def can_change_period_sheet(self) -> bool:
@@ -159,7 +167,7 @@ class ChangeValueBase(ChangeDocumentSheetBase):
 
     def has_object_permission(self, cell: Cell) -> bool:
         """Получение разрешения."""
-        if not (cell.editable and cell.formula is None):
+        if not (self.is_document_editable and cell.editable and cell.formula is None):
             return False
         if self.can_change_period_sheet:
             return True
@@ -185,7 +193,7 @@ class AddChildRowDimensionBase(ChangeDocumentSheetBase):
     local_permission = 'add_rowdimension'
 
     def has_object_permission(self, row: RowDimension) -> bool:
-        return row.dynamic and self.has_permission
+        return self.is_document_editable and row.dynamic and self.has_permission
 
 
 def can_add_child_row_dimension(user: User, document: Document, row_dimension: RowDimension):
@@ -204,6 +212,7 @@ class ChangeChildRowDimensionHeightBase(ChangeDocumentSheetBase):
 
     def has_object_permission(self, row: RowDimension) -> bool:
         return (
+            self.is_document_editable and
             row.parent_id is not None and
             row.document_id is not None and (
                 self.has_permission
@@ -233,6 +242,7 @@ class DeleteChildRowDimensionBase(ChangeDocumentSheetBase):
 
     def has_object_permission(self, row: RowDimension) -> bool:
         return (
+            self.is_document_editable and
             row.parent_id is not None and
             row.document_id is not None and (
                 self.has_permission or

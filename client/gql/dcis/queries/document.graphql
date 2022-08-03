@@ -31,6 +31,17 @@ query Document($documentId: ID!) {
       name
       __typename
     }
+    lastStatus {
+      id
+      comment
+      status {
+        id
+        name
+        edit
+        __typename
+      }
+      __typename
+    }
     objectId
     __typename
   }

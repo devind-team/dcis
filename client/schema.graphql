@@ -2047,6 +2047,8 @@ type DocumentType implements Node {
   sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
+  """Пользователь, добавивший документ"""
+  user: UserType
   """Версия документа"""
   version: Int!
 }

@@ -37,6 +37,7 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.helpers.exceptions import is_raises
+from apps.dcis.services.document_services import get_document_last_status
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -321,10 +322,7 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_last_status(document: Document, info: ResolveInfo) -> DocumentStatus | None:
-        try:
-            return document.documentstatus_set.latest('created_at')
-        except DocumentStatus.DoesNotExist:
-            return None
+        return get_document_last_status(document)
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
