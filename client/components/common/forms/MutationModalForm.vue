@@ -13,6 +13,7 @@ v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="p
     :button-text="buttonText"
     :i18n-path="i18nPath"
     :hide-alert-timeout="hideAlertTimeout"
+    :hide-actions="hideActions"
     v-on="mutationListeners"
   )
     template(#header)
@@ -65,7 +66,8 @@ export default defineComponent({
     buttonText: { type: String, default: '' },
     i18nPath: { type: String, default: '' },
     width: { type: [String, Number], default: 600 },
-    hideAlertTimeout: { type: Number, default: 5000 }
+    hideAlertTimeout: { type: Number, default: 5000 },
+    hideActions: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
     const instance = getCurrentInstance()
