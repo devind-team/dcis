@@ -1,8 +1,9 @@
 <template lang="pug">
 mutation-modal-form(
-  :header="String($t('dcis.documents.status.header'))"
+  :header="header"
   :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
   :button-text="String($t('dcis.documents.status.buttonText'))"
+  :hide-actions="!canAdd"
   :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
   :variables="{ documentId: document.id, statusId: status && status.id, comment }"
   :update="addDocumentStatusUpdate"
@@ -21,7 +22,7 @@ mutation-modal-form(
           v-list-item-subtitle {{ getUserName(item.user) }}
         v-list-item-content
           v-list-item-subtitle.font-italic {{ item.comment }}
-        v-list-item-action(v-if="documentStatuses.length > 1")
+        v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
           delete-menu(
             :item-name="String($t('dcis.documents.status.delete.itemName'))"
             @confirm="deleteDocumentStatus({ documentStatusId: item.id })"
@@ -33,30 +34,32 @@ mutation-modal-form(
                     v-btn(color="error" icon)
                       v-icon mdi-delete
                 span {{ $t('dcis.documents.status.delete.tooltip') }}
-    v-divider
-    v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
-    validation-provider(
-      v-slot="{ errors, valid }"
-      :name="String($t('dcis.documents.status.status'))"
-      rules="required"
-    )
-      v-select(
-        v-model="status"
-        :error-messages="errors"
-        :success="valid"
-        :items="statuses"
-        :label="$t('dcis.documents.status.status')"
-        item-text="name"
-        item-value="id"
-        return-object
+    template(v-if="canAdd")
+      v-divider
+      v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
+      validation-provider(
+        v-slot="{ errors, valid }"
+        :name="String($t('dcis.documents.status.status'))"
+        rules="required"
       )
+        v-select(
+          v-model="status"
+          :error-messages="errors"
+          :success="valid"
+          :items="statuses"
+          :label="$t('dcis.documents.status.status')"
+          item-text="name"
+          item-value="id"
+          return-object
+        )
+      v-alert(v-if="status && status.comment" type="warning" dense) {{ status.comment }}
 </template>
 
 <script lang="ts">
 import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
 import type { PropType } from '#app'
-import { defineComponent, ref } from '#app'
+import { computed, defineComponent, ref } from '#app'
 import {
   AddDocumentStatusMutationPayload,
   DeleteDocumentStatusMutation,
@@ -88,19 +91,37 @@ type PeriodUpdateType = (
 export default defineComponent({
   components: { MutationModalForm, DeleteMenu },
   props: {
+    canAdd: { type: Boolean, required: true },
+    canDelete: { type: Boolean, required: true },
     document: { type: Object as PropType<DocumentType>, required: true },
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
   setup (props) {
+    const { t } = useI18n()
     const { dateTimeHM, getUserName } = useFilters()
+
+    const header = computed<string>(() => props.canAdd || props.canDelete
+      ? t('dcis.documents.status.header') as string
+      : t('dcis.documents.status.readonlyHeader') as string
+    )
+
     const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
 
-    const { data: statuses, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
+    const { data: statusesData, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
       document: statusesQuery
     })
+    const statuses = computed<StatusType[]>(() => {
+      if (!statusesData.value) {
+        return []
+      }
+      return props.document.canChange
+        ? statusesData.value as StatusType[]
+        : statusesData.value.filter((status: StatusType) => !status.protected)
+    })
+
     onResult(({ data: { statuses } }) => {
-      status.value = statuses[0]
+      nextTick(() => { status.value = statuses[0] || null })
     })
 
     const {
@@ -155,11 +176,12 @@ export default defineComponent({
       })
 
     const close = () => {
-      status.value = statuses[0]
+      status.value = statuses.value[0] || null
       comment.value = ''
     }
 
     return {
+      header,
       comment,
       status,
       statuses,

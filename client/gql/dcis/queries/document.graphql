@@ -1,3 +1,5 @@
+#import "../fragments/status_fields.graphql"
+
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
@@ -39,10 +41,7 @@ query Document($documentId: ID!) {
       id
       comment
       status {
-        id
-        name
-        edit
-        __typename
+        ...StatusFields
       }
       __typename
     }

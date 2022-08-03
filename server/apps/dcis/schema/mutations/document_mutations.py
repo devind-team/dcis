@@ -105,8 +105,8 @@ class AddDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_add_document_status(info.context.user, document)
         status: Status = get_object_or_404(Status, pk=status_id)
+        can_add_document_status(info.context.user, document, status)
         document_status = DocumentStatus.objects.create(
             status=status,
             document=document,

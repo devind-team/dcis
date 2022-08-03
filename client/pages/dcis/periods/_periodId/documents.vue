@@ -33,10 +33,12 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
         template(v-else) {{ item.comment }}
     template(#item.lastStatus="{ item }")
       template(v-if="item.lastStatus")
-        document-statuses(v-if="item.canChange" :update="update" :document="item")
-          template(#activator="{ on }")
-            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-        document-statuses-readonly(v-else :document="item")
+        document-statuses(
+          :can-add="canAddDocument(item)"
+          :can-delete="canDeleteDocument(item)"
+          :update="update"
+          :document="item"
+        )
           template(#activator="{ on }")
             a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
         div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
@@ -66,7 +68,6 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
-import DocumentStatusesReadonly from '~/components/dcis/documents/DocumentStatusesReadonly.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 
 export default defineComponent({
@@ -75,7 +76,6 @@ export default defineComponent({
     ItemsDataFilter,
     AddDocument,
     DocumentStatuses,
-    DocumentStatusesReadonly,
     TextMenu
   },
   middleware: 'auth',
@@ -95,6 +95,13 @@ export default defineComponent({
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
       return props.period.divisions.filter((division: DivisionModelType) => userDivisionIds.includes(division.id))
     })
+
+    const canAddDocument = (document: DocumentType) => {
+      return document.canChange || document.user?.id === userStore.user.id
+    }
+    const canDeleteDocument = (document: DocumentType) => {
+      return document.canChange
+    }
 
     const {
       data: documents,
@@ -161,6 +168,8 @@ export default defineComponent({
 
     return {
       userPeriodDivision,
+      canAddDocument,
+      canDeleteDocument,
       documents,
       loading,
       totalCount,
