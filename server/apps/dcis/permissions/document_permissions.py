@@ -41,10 +41,10 @@ def can_add_document(user: User, obj: Period):
 def can_change_document_base(user: User, obj: Document):
     """Пропускает пользователей, которые могут изменять документ в периоде, без проверки возможности просмотра."""
     if user.has_perm('dcis.change_document') or (
-            obj.period.project.user_id == user.id and user.has_perm('dcis.add_project')
-        ) or (
-            obj.period.user_id == user.id and user.has_perm('dcis.add_period')
-        ) or has_privilege(user.id, obj.id, 'change_document'):
+        obj.period.project.user_id == user.id and user.has_perm('dcis.add_project')
+    ) or (
+        obj.period.user_id == user.id and user.has_perm('dcis.add_period')
+    ) or has_privilege(user.id, obj.period.id, 'change_document'):
         return
     raise PermissionDenied('Недостаточно прав для изменения документа в периоде')
 
@@ -61,7 +61,7 @@ def can_delete_document_base(user: User, obj: Document):
         obj.period.project.user_id == user.id and user.has_perm('dcis.add_project')
     ) or (
         obj.period.user_id == user.id and user.has_perm('dcis.add_period')
-    ) or has_privilege(user.id, obj.id, 'delete_document'):
+    ) or has_privilege(user.id, obj.period.id, 'delete_document'):
         return
     raise PermissionDenied('Недостаточно прав для удаления документа в периоде')
 
@@ -121,7 +121,7 @@ class ChangeDocumentSheetBase:
     @property
     def has_permission(self) -> bool:
         """Получение разрешения."""
-        return self.can_change_period_sheet or self.has_privilege
+        return self._document.user == self._user or self.can_change_period_sheet or self.has_privilege
 
 
 class ChangeValueBase(ChangeDocumentSheetBase):
