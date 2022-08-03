@@ -105,6 +105,9 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
       }
+      if (activeDocument.value.user.id === userStore.user.id) {
+        return true
+      }
       if (rowDimension.parent) {
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
         return parent.dynamic && activeSheet.value.canChange
@@ -118,6 +121,9 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
       }
+      if (activeDocument.value.user.id === userStore.user.id) {
+        return true
+      }
       return rowDimension.dynamic && activeSheet.value.canChange
     }
     const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
@@ -126,6 +132,9 @@ export default defineComponent({
       }
       if (!activeDocument.value.lastStatus.status.edit) {
         return false
+      }
+      if (activeDocument.value.user.id === userStore.user.id) {
+        return true
       }
       return rowDimension.parent !== null && rowDimension.children.length === 0 && (
         activeSheet.value.canChange || rowDimension.userId === userStore.user.id

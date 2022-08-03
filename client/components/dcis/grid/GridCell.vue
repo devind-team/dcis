@@ -150,6 +150,9 @@ export default defineComponent({
       if (activeSheet.value.canChange) {
         return true
       }
+      if (activeDocument.value.user.id === userStore.user.id) {
+        return true
+      }
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
       if (activeDocument.value.period.multiple) {
         return userDivisionIds.includes(activeDocument.value.objectId)

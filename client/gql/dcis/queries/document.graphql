@@ -5,6 +5,10 @@ query Document($documentId: ID!) {
     version
     createdAt
     updatedAt
+    user {
+      id
+      __typename
+    }
     period {
       id
       name
