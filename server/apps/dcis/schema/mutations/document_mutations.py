@@ -13,9 +13,11 @@ from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, She
 from apps.dcis.permissions import (
     can_add_child_row_dimension,
     can_add_document,
+    can_add_document_status,
     can_change_child_row_dimension_height,
-    can_change_document,
+    can_change_document_comment,
     can_delete_child_row_dimension,
+    can_change_document,
     can_view_document,
 )
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
@@ -86,7 +88,7 @@ class ChangeDocumentCommentMutationPayload(DjangoUpdateMutation):
 
     @classmethod
     def check_permissions(cls, root: Any, info: ResolveInfo, input: Any, id: str, obj: Document) -> None:
-        can_change_document(info.context.user, obj)
+        can_change_document_comment(info.context.user, obj)
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -103,7 +105,7 @@ class AddDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        can_change_document(info.context.user, document)
+        can_add_document_status(info.context.user, document)
         status: Status = get_object_or_404(Status, pk=status_id)
         document_status = DocumentStatus.objects.create(
             status=status,

@@ -10,14 +10,14 @@ from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
 
 
-def can_view_document(user: User, obj: Document):
+def can_view_document(user: User, document: Document):
     """Пропускает пользователей, которые могут просматривать документ."""
     try:
-        can_view_period(user, obj.period)
-        if obj not in get_user_documents(user, obj.period):
+        can_view_period(user, document.period)
+        if document not in get_user_documents(user, document.period):
             raise PermissionDenied()
     except PermissionDenied:
-        raise PermissionDenied('Недостаточно прав для просмотра документов')
+        raise PermissionDenied('Недостаточно прав для просмотра документа.')
 
 
 class AddDocumentBase:
@@ -59,23 +59,23 @@ class AddDocumentBase:
         return self.can_add_any_document or (division_id and self.can_add_restricted_document(status, division_id))
 
 
-def can_add_document(user: User, obj: Period, status: Status, division_id: int | str | None):
+def can_add_document(user: User, period: Period, status: Status, division_id: int | str | None):
     """Пропускает пользователей, которые могут просматривать период и добавлять в него документы."""
-    can_view_period(user, obj)
-    if AddDocumentBase(user, obj).has_object_permission(status, division_id):
+    can_view_period(user, period)
+    if AddDocumentBase(user, period).has_object_permission(status, division_id):
         return
-    raise PermissionDenied('Недостаточно прав для добавления документа в период')
+    raise PermissionDenied('Недостаточно прав для добавления документа в период.')
 
 
-def can_change_document_base(user: User, obj: Document):
+def can_change_document_base(user: User, document: Document):
     """Пропускает пользователей, которые могут изменять документ в периоде, без проверки возможности просмотра."""
     if user.has_perm('dcis.change_document') or (
-        obj.period.project.user_id == user.id and user.has_perm('dcis.add_project')
+        document.period.project.user_id == user.id and user.has_perm('dcis.add_project')
     ) or (
-        obj.period.user_id == user.id and user.has_perm('dcis.add_period')
-    ) or has_privilege(user.id, obj.period.id, 'change_document'):
+        document.period.user_id == user.id and user.has_perm('dcis.add_period')
+    ) or has_privilege(user.id, document.period.id, 'change_document'):
         return
-    raise PermissionDenied('Недостаточно прав для изменения документа в периоде')
+    raise PermissionDenied('Недостаточно прав для изменения документа в периоде.')
 
 
 def can_change_document(user: User, obj: Document):
@@ -84,21 +84,30 @@ def can_change_document(user: User, obj: Document):
     can_change_document_base(user, obj)
 
 
-def can_delete_document_base(user: User, obj: Document):
-    """Пропускает пользователей, которые могут удалять документ в периоде, без проверки возможности просмотра."""
-    if user.has_perm('dcis.delete_document') or (
-        obj.period.project.user_id == user.id and user.has_perm('dcis.add_project')
-    ) or (
-        obj.period.user_id == user.id and user.has_perm('dcis.add_period')
-    ) or has_privilege(user.id, obj.period.id, 'delete_document'):
+def can_change_document_comment_base(user: User, document: Document):
+    """Пропускает пользователей, которые могут изменять комментарий документа, без проверки возможности просмотра."""
+    if document.user_id == user.id:
         return
-    raise PermissionDenied('Недостаточно прав для удаления документа в периоде')
+    can_change_document_base(user, document)
 
 
-def can_delete_document(user: User, obj: Document):
-    """Пропускает пользователей, которые могут просматривать и удалять документ в периоде."""
-    can_view_document(user, obj)
-    can_delete_document_base(user, obj)
+def can_change_document_comment(user: User, document: Document):
+    """Пропускает пользователей, которые могут просматривать документ и изменять его комментарий."""
+    can_view_document(user, document)
+    can_change_document_comment_base(user, document)
+
+
+def can_add_document_status_base(user: User, document: Document, status: Status):
+    """Пропускает пользователей, которые могут добавлять статус документа, без проверки возможности просмотра."""
+    if not status.protected and document.user_id == user.id:
+        return
+    can_change_document_base(user, document)
+
+
+def can_add_document_status(user: User, document: Document, status: Status):
+    """Пропускает пользователей, которые могут просматривать документ и добавлять в него статус."""
+    can_view_document(user, document)
+    can_add_document_status_base(user, document, status)
 
 
 class ChangeDocumentSheetBase:
@@ -209,7 +218,7 @@ def can_change_value(user: User, document: Document, cell: Cell):
     can_view_document(user, document)
     if ChangeValueBase(user, document).has_object_permission(cell):
         return
-    raise PermissionDenied('Недостаточно прав для изменения значений ячейки')
+    raise PermissionDenied('Недостаточно прав для изменения значения ячейки.')
 
 
 class AddChildRowDimensionBase(ChangeDocumentSheetBase):
@@ -237,7 +246,7 @@ def can_add_child_row_dimension(user: User, document: Document, row_dimension: R
     can_view_document(user, document)
     if AddChildRowDimensionBase(user, document).has_object_permission(row_dimension):
         return
-    raise PermissionDenied('Недостаточно прав для добавления дочерних строк')
+    raise PermissionDenied('Недостаточно прав для добавления дочерних строк.')
 
 
 class ChangeChildRowDimensionHeightBase(ChangeDocumentSheetBase):
@@ -257,17 +266,17 @@ class ChangeChildRowDimensionHeightBase(ChangeDocumentSheetBase):
         )
 
 
-def can_change_child_row_dimension_height(user: User, obj: RowDimension):
+def can_change_child_row_dimension_height(user: User, row: RowDimension):
     """Пропускает пользователей, которые могут просматривать документ и изменять в нем высоту дочерних строк."""
     if (
-        obj.parent_id is not None and
-        obj.document_id is not None and ChangeChildRowDimensionHeightBase(
-            user, obj.document
-        ).has_object_permission(obj)
+        row.parent_id is not None and
+        row.document_id is not None and ChangeChildRowDimensionHeightBase(
+            user, row.document
+        ).has_object_permission(row)
     ):
-        can_view_document(user, obj.document)
+        can_view_document(user, row.document)
         return
-    raise PermissionDenied('Недостаточно прав для изменения высоты дочерних строк')
+    raise PermissionDenied('Недостаточно прав для изменения высоты дочерней строки.')
 
 
 class DeleteChildRowDimensionBase(ChangeDocumentSheetBase):
@@ -287,14 +296,14 @@ class DeleteChildRowDimensionBase(ChangeDocumentSheetBase):
         )
 
 
-def can_delete_child_row_dimension(user: User, obj: RowDimension):
+def can_delete_child_row_dimension(user: User, row: RowDimension):
     """Пропускает пользователей, которые могут просматривать документ и удалять из него дочерние строки."""
     if (
-        obj.parent_id is not None and
-        obj.document_id is not None and DeleteChildRowDimensionBase(
-            user, obj.document
-        ).has_object_permission(obj)
+        row.parent_id is not None and
+        row.document_id is not None and DeleteChildRowDimensionBase(
+            user, row.document
+        ).has_object_permission(row)
     ):
-        can_view_document(user, obj.document)
+        can_view_document(user, row.document)
         return
-    raise PermissionDenied('Недостаточно прав для удаления строки')
+    raise PermissionDenied('Недостаточно прав для удаления строки.')

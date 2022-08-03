@@ -31,7 +31,6 @@ from apps.dcis.permissions import (
     can_change_period_sheet_base,
     can_change_period_users_base,
     can_change_project_base,
-    can_delete_document_base,
     can_delete_period_base,
     can_delete_project_base
 )
@@ -327,10 +326,6 @@ class DocumentType(DjangoObjectType):
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_document_base, info.context.user, document)
-
-    @staticmethod
-    def resolve_can_delete(document: Document, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_delete_document_base, info.context.user, document)
 
 
 class DocumentStatusType(DjangoObjectType):
