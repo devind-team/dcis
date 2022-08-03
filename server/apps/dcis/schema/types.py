@@ -22,7 +22,7 @@ from apps.dcis.models import (
     Value,
 )
 from apps.dcis.permissions import (
-    can_add_document_base,
+    AddDocumentBase,
     can_add_period_base,
     can_change_document_base,
     can_change_period_divisions_base,
@@ -164,7 +164,7 @@ class PeriodType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_add_document_base, info.context.user, period)
+        return AddDocumentBase(info.context.user, period).can_add_any_document
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:

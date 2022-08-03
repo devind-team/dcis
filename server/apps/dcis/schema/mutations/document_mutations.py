@@ -62,12 +62,13 @@ class AddDocumentMutation(BaseMutation):
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
         period = get_object_or_404(Period, pk=period_id)
-        can_add_document(info.context.user, period)
+        status = get_object_or_404(Status, pk=status_id)
+        can_add_document(info.context.user, period, status, division_id)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document = create_document(
             user=info.context.user,
             period=period,
-            status_id=status_id,
+            status_id=status.id,
             comment=comment,
             document_id=document_id,
             division_id=division_id

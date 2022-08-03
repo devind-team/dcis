@@ -3,7 +3,7 @@
 from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Period, RowDimension
+from apps.dcis.models import Cell, Document, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.document_services import get_user_documents, is_document_editable
 from apps.dcis.services.privilege_services import has_privilege
@@ -20,22 +20,51 @@ def can_view_document(user: User, obj: Document):
         raise PermissionDenied('Недостаточно прав для просмотра документов')
 
 
-def can_add_document_base(user, obj: Period):
+class AddDocumentBase:
     """Пропускает пользователей, которые могут добавлять документы в период, без проверки возможности просмотра."""
-    if (
-        user.has_perm('dcis.add_document') or
-        obj.project.user_id == user.id and user.has_perm('dcis.add_project') or
-        obj.user_id == user.id and user.has_perm('dcis.add_period') or
-        has_privilege(user.id, obj.id, 'add_document')
-    ):
-        return
-    raise PermissionDenied('Недостаточно прав для добавления документа в период')
+
+    def __init__(self, user: User, period: Period):
+        self._user = user
+        self._period = period
+        self._user_division_ids: list[int] | None = None
+        self._can_add_any_document: bool | None = None
+
+    @property
+    def user_division_ids(self) -> list[int]:
+        """Идентификаторы дивизионов пользователя."""
+        if self._user_division_ids is None:
+            self._user_division_ids = [
+                division['id'] for division in get_user_divisions(self._user)
+            ]
+        return self._user_division_ids
+
+    @property
+    def can_add_any_document(self) -> bool:
+        """Может ли пользователь добавлять любой документ."""
+        if self._can_add_any_document is None:
+            self._can_add_any_document = (
+                self._user.has_perm('dcis.add_document') or
+                self._period.project.user_id == self._user.id and self._user.has_perm('dcis.add_project') or
+                self._period.user_id == self._user.id and self._user.has_perm('dcis.add_period') or
+                has_privilege(self._user.id, self._period.id, 'add_document')
+            )
+        return self._can_add_any_document
+
+    def can_add_restricted_document(self, status: Status, division_id: int | str) -> bool:
+        """Может ли пользователь добавлять документ с конкретным дивизионом и статусом."""
+        return not status.protected and int(division_id) in self.user_division_ids
+
+    def has_object_permission(self, status: Status, division_id: int | str) -> bool:
+        """Получение разрешения."""
+        return self.can_add_any_document or self.can_add_restricted_document(status, division_id)
 
 
-def can_add_document(user: User, obj: Period):
+def can_add_document(user: User, obj: Period, status: Status, division_id: int | str):
     """Пропускает пользователей, которые могут просматривать период и добавлять в него документы."""
     can_view_period(user, obj)
-    can_add_document_base(user, obj)
+    if AddDocumentBase(user, obj).has_object_permission(status, division_id):
+        return
+    raise PermissionDenied('Недостаточно прав для добавления документа в период')
 
 
 def can_change_document_base(user: User, obj: Document):
