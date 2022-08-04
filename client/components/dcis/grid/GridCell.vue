@@ -122,9 +122,12 @@ export default defineComponent({
       return 'String'
     })
 
-    const cellValue = computed<string | number>(() => {
+    const cellValue = computed<string | number | null>(() => {
       if (props.cell.error) {
         return props.cell.error
+      }
+      if (props.cell.value === null) {
+        return props.cell.value
       }
       if (cellKind.value === 'Numeric') {
         return Number(props.cell.value)
