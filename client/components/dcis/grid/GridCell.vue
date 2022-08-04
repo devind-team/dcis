@@ -184,7 +184,11 @@ export default defineComponent({
       if (!activeDocument.value.lastStatus.status.edit || !props.cell.editable || props.cell.kind === 'f') {
         return false
       }
-      if (activeSheet.value.canChange || activeDocument.value.user?.id === userStore.user.id) {
+      if (
+        activeSheet.value.canChange ||
+        activeSheet.value.canChangeValue ||
+        activeDocument.value.user?.id === userStore.user.id
+      ) {
         return true
       }
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)

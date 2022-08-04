@@ -3816,8 +3816,16 @@ type SettingType {
 
 """Тип листа."""
 type SheetType {
+  """Может ли пользователь добавлять дочерние строки для строк"""
+  canAddChildRowDimension: Boolean!
   """Может ли пользователь изменять лист"""
   canChange: Boolean!
+  """Может ли пользователь изменять высоту дочерней строки"""
+  canChangeChildRowDimensionHeight: Boolean!
+  """Может ли пользователь изменять значение ячейки"""
+  canChangeValue: Boolean!
+  """Может ли пользователь удалять дочернюю строку, не имеющую собственных дочерних строк"""
+  canDeleteChildRowDimension: Boolean!
   """Колонки"""
   columns: [ColumnDimensionType!]
   """Комментарий"""
