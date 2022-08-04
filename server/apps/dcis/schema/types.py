@@ -518,6 +518,19 @@ class SheetType(BaseSheetType):
     columns = graphene.List(graphene.NonNull(lambda: ColumnDimensionType), description='Колонки')
     rows = graphene.List(graphene.NonNull(lambda: RowDimensionType), description='Строки')
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять лист')
+    can_change_value = graphene.Boolean(required=True, description='Может ли пользователь изменять значение ячейки')
+    can_add_child_row_dimension = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь добавлять дочерние строки для строк'
+    )
+    can_change_child_row_dimension_height = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять высоту дочерней строки'
+    )
+    can_delete_child_row_dimension = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь удалять дочернюю строку, не имеющую собственных дочерних строк'
+    )
 
 
 class LimitationType(DjangoObjectType):

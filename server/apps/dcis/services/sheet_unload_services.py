@@ -9,7 +9,13 @@ from openpyxl.utils import column_index_from_string, get_column_letter
 
 from apps.dcis.models import Document
 from apps.dcis.models.sheet import Cell, ColumnDimension, MergedCell, RowDimension, Sheet, Value
-from apps.dcis.permissions import ChangeDocumentSheetBase
+from apps.dcis.permissions import (
+    AddChildRowDimensionBase,
+    ChangeChildRowDimensionHeightBase,
+    ChangeDocumentSheetBase,
+    ChangeValueBase,
+    DeleteChildRowDimensionBase,
+)
 
 
 class DataUnloader(ABC):
@@ -405,8 +411,8 @@ class SheetUnloader(DataUnloader):
         ...
 
     @abstractmethod
-    def get_can_change(self) -> bool:
-        """Получение разрешения на изменение листа."""
+    def get_permissions(self) -> dict[str, bool]:
+        """Получение разрешений."""
         ...
 
     def unload_data(self) -> list[dict] | dict:
@@ -421,7 +427,7 @@ class SheetUnloader(DataUnloader):
         if 'rows' in self.fields:
             sheet['rows'] = self.unload_rows()
         if 'can_change' in self.fields:
-            sheet['can_change'] = self.get_can_change()
+            sheet.update(self.get_permissions())
         return sheet
 
 
@@ -443,8 +449,14 @@ class DocumentsSheetUnloader(SheetUnloader):
             values=Value.objects.none(),
         ).unload()
 
-    def get_can_change(self) -> bool:
-        return True
+    def get_permissions(self) -> dict[str, bool]:
+        return {
+            'can_change': True,
+            'can_change_value': True,
+            'can_add_child_row_dimension': True,
+            'can_change_child_row_dimension_height': True,
+            'can_delete_child_row_dimension': True,
+        }
 
 
 class DocumentSheetUnloader(SheetUnloader):
@@ -454,6 +466,10 @@ class DocumentSheetUnloader(SheetUnloader):
         super().__init__(sheet, fields)
         self.document = Document.objects.get(pk=document_id)
         self.change_document_sheet = ChangeDocumentSheetBase(context.user, self.document)
+        self.change_value = ChangeValueBase(context.user, self.document)
+        self.add_child_row_dimension = AddChildRowDimensionBase(context.user, self.document)
+        self.change_child_row_dimension_height = ChangeChildRowDimensionHeightBase(context.user, self.document)
+        self.delete_child_row_dimension = DeleteChildRowDimensionBase(context.user, self.document)
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""
@@ -468,5 +484,11 @@ class DocumentSheetUnloader(SheetUnloader):
             values=self.sheet.value_set.filter(document_id=self.document.id)
         ).unload()
 
-    def get_can_change(self) -> bool:
-        return self.change_document_sheet.has_permission
+    def get_permissions(self) -> dict[str, bool]:
+        return {
+            'can_change': self.change_document_sheet.has_permission,
+            'can_change_value': self.change_value.has_privilege,
+            'can_add_child_row_dimension': self.add_child_row_dimension.has_privilege,
+            'can_change_child_row_dimension_height': self.change_child_row_dimension_height.has_privilege,
+            'can_delete_child_row_dimension': self.delete_child_row_dimension.has_privilege,
+        }
