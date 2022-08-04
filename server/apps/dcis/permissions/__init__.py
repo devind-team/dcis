@@ -1,7 +1,7 @@
 from .document_permissions import (
     can_add_child_row_dimension,
     AddChildRowDimensionBase,
-    AddBudgetClassification,
+    can_add_budget_classification,
     can_add_document,
     can_add_document_base,
     can_change_child_row_dimension_height,
@@ -35,7 +35,7 @@ from .period_permissions import (
     can_view_period,
 )
 from .project_permissions import (
-    AddProject,
+    can_add_project,
     can_change_project,
     can_change_project_base,
     can_delete_project,

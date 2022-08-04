@@ -15,6 +15,7 @@ from apps.core.models import User
 from apps.dcis.models import Document, Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
 from apps.dcis.permissions import (
+    can_add_budget_classification,
     can_add_child_row_dimension,
     can_change_child_row_dimension_height,
     can_change_period_sheet,
@@ -320,6 +321,7 @@ def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False)
             merge_cells.save(update_fields=('min_row', 'max_row',))
 
 
-def add_budget_classification(code: str, name: str) -> BudgetClassification:
+def add_budget_classification(user: User, code: str, name: str) -> BudgetClassification:
     """Добавления КБК в словарь."""
+    can_add_budget_classification(user)
     return BudgetClassification.objects.create(code=code, name=name)

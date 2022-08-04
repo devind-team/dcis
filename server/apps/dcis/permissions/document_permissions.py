@@ -10,7 +10,12 @@ from .period_permissions import can_change_period_sheet_base, can_view_period
 
 from devind_helpers.permissions import ModelPermission
 
-AddBudgetClassification = ModelPermission('devind_dictionaries.add_budgetclassification')
+
+def can_add_budget_classification(user: User):
+    """Пропускает пользователей, которые могут изменять проект, без проверки возможности просмотра."""
+    if user.has_perm('devind_dictionaries.add_budgetclassification'):
+        return
+    raise PermissionDenied('Недостаточно прав для изменения проекта')
 
 
 def can_view_document(user: User, obj: Document):

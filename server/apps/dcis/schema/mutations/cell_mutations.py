@@ -15,7 +15,7 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
-from apps.dcis.permissions import AddBudgetClassification
+from apps.dcis.permissions import can_add_budget_classification
 from apps.dcis.schema.types import ChangedCellOption
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
@@ -99,14 +99,18 @@ class AddBudgetClassificationMutation(BaseMutation):
     budget_classification = graphene.Field(BudgetClassificationType, description='Добавленная КБК')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddBudgetClassification,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
         code: str,
         name: str
     ):
-        return AddBudgetClassificationMutation(budget_classification=add_budget_classification(code, name))
+        return AddBudgetClassificationMutation(budget_classification=add_budget_classification(
+            info.context.user,
+            code,
+            name)
+        )
 
 
 class CellMutations(graphene.ObjectType):

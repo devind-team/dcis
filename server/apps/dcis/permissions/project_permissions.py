@@ -15,7 +15,11 @@ def can_view_project(user: User, obj: Project):
     raise PermissionDenied('Недостаточно прав для просмотра проекта')
 
 
-AddProject = ModelPermission('dcis.add_project')
+def can_add_project(user: User):
+    """Пропускает пользователей, которые могут изменять проект, без проверки возможности просмотра."""
+    if user.has_perm('dcis.add_project'):
+        return
+    raise PermissionDenied('Недостаточно прав для изменения проекта')
 
 
 def can_change_project_base(user: User, obj: Project):

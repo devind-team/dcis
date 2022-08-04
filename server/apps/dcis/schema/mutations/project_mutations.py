@@ -10,7 +10,6 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Project
-from apps.dcis.permissions import AddProject
 from apps.dcis.schema.types import ProjectType
 from apps.dcis.services.project_services import (change_project, create_project, delete_project)
 from apps.dcis.validators import ProjectValidator
@@ -29,7 +28,7 @@ class AddProjectMutation(BaseMutation):
     project = graphene.Field(ProjectType, description='Добавленный проект')
 
     @staticmethod
-    @permission_classes((IsAuthenticated, AddProject,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
             root: Any,
             info: ResolveInfo,
@@ -40,7 +39,7 @@ class AddProjectMutation(BaseMutation):
         if not validator.validate():
             return AddProjectMutation(success=False, error=ErrorFieldType.from_validator(validator.get_message()))
         kwargs.values()
-        return AddProjectMutation(project=create_project(kwargs, visibility))
+        return AddProjectMutation(project=create_project(info.context.user, kwargs, visibility))
 
 
 class ChangeProjectMutation(BaseMutation):
@@ -70,13 +69,13 @@ class ChangeProjectMutation(BaseMutation):
     ):
         project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
         return ChangeProjectMutation(project=change_project(
-            info,
-            project,
-            name,
-            short,
-            description,
-            visibility,
-            archive)
+            user=info.context.user,
+            project=project,
+            name=name,
+            short=short,
+            description=description,
+            visibility=visibility,
+            archive=archive)
         )
 
 
