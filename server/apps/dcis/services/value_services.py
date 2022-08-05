@@ -10,7 +10,6 @@ from devind_core.models import File
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.timezone import now
-from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.dcis.helpers.cell import (ValueState, evaluate_state, get_dependency_cells, resolve_cells,
@@ -130,9 +129,9 @@ def update_or_create_file_value(
     return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
 
 
-def create_file_value_archive(info: ResolveInfo, document: Document, value: Value, name: str) -> str:
+def create_file_value_archive(user: User, document: Document, value: Value, name: str) -> str:
     """Создание архива значения ячейки типа `Файл`."""
-    can_view_document(info.context.user, document)
+    can_view_document(user, document)
     archive_path = f'{path.join(settings.TEMP_FILES_DIR, name)}.zip'
     with ZipFile(archive_path, 'w') as zip_file:
         for file in get_file_value_files(value):

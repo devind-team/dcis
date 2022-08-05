@@ -88,7 +88,7 @@ class ChangeDocumentCommentMutation(BaseMutation):
         comment: str,
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        return ChangeDocumentCommentMutation(document=change_document_comment(info, document, comment))
+        return ChangeDocumentCommentMutation(document=change_document_comment(info.context.user, document, comment))
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -126,7 +126,7 @@ class DeleteDocumentStatusMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
         status = get_object_or_404(DocumentStatus, pk=document_status_id)
-        delete_document_status(info, status)
+        delete_document_status(info.context.user, status)
         return DeleteDocumentStatusMutation(id=document_status_id)
 
 
@@ -145,7 +145,12 @@ class UnloadDocumentMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
-        return UnloadDocumentMutation(src=document_upload(info, document_id, additional))
+        return UnloadDocumentMutation(src=document_upload(
+            user=info.context.user,
+            get_host=info.context.get_host(),
+            document_id=document_id,
+            additional=additional)
+        )
 
 
 class AddChildRowDimensionMutation(BaseMutation):
@@ -182,7 +187,7 @@ class AddChildRowDimensionMutation(BaseMutation):
         sheet = get_object_or_404(Sheet, pk=sheet_id)
         return AddChildRowDimensionMutation(
             row_dimension=add_child_row_dimension(
-                info=info.context.user,
+                user=info.context.user,
                 context=info.context,
                 sheet=sheet,
                 document=document,

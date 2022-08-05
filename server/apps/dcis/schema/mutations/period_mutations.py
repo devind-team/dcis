@@ -91,14 +91,15 @@ class ChangePeriodMutation(BaseMutation):
     ):
         period = get_object_or_404(Period, pk=period_id)
         return ChangePeriodMutation(period=change_settings_period(
-            info,
-            period,
-            name,
-            status,
-            multiple,
-            privately,
-            start,
-            expiration))
+            user=info.context.user,
+            period=period,
+            name=name,
+            status=status,
+            multiple=multiple,
+            privately=privately,
+            start=start,
+            expiration=expiration)
+        )
 
 
 class DeletePeriodMutation(BaseMutation):
@@ -113,7 +114,7 @@ class DeletePeriodMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str):
         period = get_object_or_404(Period, pk=period_id)
-        delete_period(info, period)
+        delete_period(user=info.context.user, period=period)
         return DeletePeriodMutation(delete_id=period_id)
 
 
@@ -129,7 +130,11 @@ class AddDivisionsMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_ids: list[str]):
-        return AddDivisionsMutation(divisions=add_divisions_period(info, period_id, division_ids))
+        return AddDivisionsMutation(divisions=add_divisions_period(
+            user=info.context.user,
+            period_id=period_id,
+            division_ids=division_ids)
+        )
 
 
 class DeleteDivisionMutation(BaseMutation):
@@ -144,7 +149,11 @@ class DeleteDivisionMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_id: str):
-        delete_divisions_period(info, period_id, division_id)
+        delete_divisions_period(
+            user=info.context.user,
+            period_id=period_id,
+            division_id=division_id
+        )
         return DeleteDivisionMutation(delete_id=division_id)
 
 
@@ -160,7 +169,11 @@ class AddPeriodGroupMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, period_id: str | int):
-        return AddPeriodGroupMutation(period_group=add_period_group(info, name, period_id))
+        return AddPeriodGroupMutation(period_group=add_period_group(
+            user=info.context.user,
+            name=name,
+            period_id=period_id)
+        )
 
 
 class CopyPeriodGroupsMutation(BaseMutation):
@@ -183,10 +196,11 @@ class CopyPeriodGroupsMutation(BaseMutation):
         period_group_ids: list[str]
     ):
         return CopyPeriodGroupsMutation(period_groups=copy_period_groups(
-            info,
-            period_id,
-            period_group_ids,
-            selected_period_id))
+            user=info.context.user,
+            period_id=period_id,
+            period_group_ids=period_group_ids,
+            selected_period_id=selected_period_id)
+        )
 
 
 class ChangePeriodGroupPrivilegesMutation(BaseMutation):
@@ -202,9 +216,10 @@ class ChangePeriodGroupPrivilegesMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: int, privileges_ids: list[str]):
         return ChangePeriodGroupPrivilegesMutation(privileges=change_period_group_privileges(
-            info,
-            period_group_id,
-            privileges_ids))
+            user=info.context.user,
+            period_group_id=period_group_id,
+            privileges_ids=privileges_ids)
+        )
 
 
 class DeletePeriodGroupMutation(BaseMutation):
@@ -219,7 +234,7 @@ class DeletePeriodGroupMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_group_id: str):
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        delete_period_groups(info, period_group)
+        delete_period_groups(user=info.context.user, period_group=period_group)
         return DeletePeriodMutation(delete_id=period_group_id)
 
 
@@ -240,11 +255,10 @@ class ChangeUserPeriodGroupsMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_group_ids: list[PeriodGroup]):
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
-        user.periodgroup_set.set(change_user_period_groups(info, period_group_ids))
-
+        user.periodgroup_set.set(change_user_period_groups(user=info.context.user, period_group_ids=period_group_ids))
         return ChangeUserPeriodGroupsMutation(
             user=user,
-            period_groups=change_user_period_groups(info, period_group_ids)
+            period_groups=change_user_period_groups(user=info.context.user, period_group_ids=period_group_ids)
         )
 
 
@@ -269,10 +283,10 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
         return ChangeUserPeriodPrivilegesMutation(
             user=user,
             privileges=change_user_period_privileges(
-                info,
-                user.id,
-                period_id,
-                privileges_ids)
+                user=info.context.user,
+                user_id=user.id,
+                period_id=period_id,
+                privileges_ids=privileges_ids)
         )
 
 

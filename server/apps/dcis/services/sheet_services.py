@@ -7,7 +7,6 @@ from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import F, QuerySet
-from graphql import ResolveInfo
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
@@ -25,7 +24,7 @@ from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, Sheet
 
 
 @transaction.atomic
-def rename_sheet(info: ResolveInfo, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
+def rename_sheet(user: User, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     """Переименование листа с учетом формул.
 
     sheet.name -> name
@@ -33,7 +32,7 @@ def rename_sheet(info: ResolveInfo, sheet: Sheet, name: str) -> tuple[Sheet, lis
     :param sheet - лист
     :param name - новое имя листа
     """
-    can_change_period_sheet(info.context.user, sheet.period)
+    can_change_period_sheet(user, sheet.period)
     changed_cell: list[Cell] = []
     sheet_name: str = f"'{name}'" if ' ' in name else name
     period: Period = sheet.period
@@ -62,7 +61,7 @@ def rename_sheet(info: ResolveInfo, sheet: Sheet, name: str) -> tuple[Sheet, lis
 
 
 def change_column_dimension(
-    info: ResolveInfo,
+    user: User,
     column_dimension: ColumnDimension,
     width: int | None,
     fixed: bool,
@@ -70,7 +69,7 @@ def change_column_dimension(
     kind: str
 ) -> ColumnDimension:
     """Изменение колонки."""
-    can_change_period_sheet(info.context.user, column_dimension.sheet.period)
+    can_change_period_sheet(user, column_dimension.sheet.period)
     column_dimension.width = width
     column_dimension.fixed = fixed
     column_dimension.hidden = hidden
@@ -116,7 +115,7 @@ def add_row_dimension(
 
 @transaction.atomic
 def add_child_row_dimension(
-        info: ResolveInfo,
+        user: User,
         context: Any,
         sheet: Sheet,
         document: Document,
@@ -131,7 +130,7 @@ def add_child_row_dimension(
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
     can_add_child_row_dimension(
-        info.context.user,
+        user,
         document=document,
         row_dimension=parent
     )
@@ -159,7 +158,7 @@ def add_child_row_dimension(
 
 
 def change_row_dimension(
-        info: ResolveInfo,
+        user: User,
         row_dimension: RowDimension,
         height: int,
         fixed: bool,
@@ -167,7 +166,7 @@ def change_row_dimension(
         dynamic: bool
 ) -> RowDimension:
     """Изменение строки."""
-    can_change_period_sheet(info.context.user, row_dimension.sheet.period)
+    can_change_period_sheet(user, row_dimension.sheet.period)
     row_dimension.height = height
     row_dimension.fixed = fixed
     row_dimension.hidden = hidden
@@ -176,22 +175,22 @@ def change_row_dimension(
     return row_dimension
 
 
-def change_row_dimension_height(info: ResolveInfo, row_dimension: RowDimension, height: int) -> RowDimension:
+def change_row_dimension_height(user: User, row_dimension: RowDimension, height: int) -> RowDimension:
     """Изменение высоты строки."""
-    can_change_child_row_dimension_height(info.context.user, row_dimension)
+    can_change_child_row_dimension_height(user, row_dimension)
     row_dimension.height = height
     row_dimension.save(update_fields=('height', 'updated_at'))
     return row_dimension
 
 
 @transaction.atomic
-def delete_row_dimension(info: ResolveInfo, row_dimension: RowDimension) -> int:
+def delete_row_dimension(user: User, row_dimension: RowDimension) -> int:
     """Удаление строки.
 
     После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
     """
-    can_change_period_sheet(info.context.user, row_dimension.sheet.period)
-    can_delete_child_row_dimension(info.context.user, row_dimension)
+    can_change_period_sheet(user, row_dimension.sheet.period)
+    can_delete_child_row_dimension(user, row_dimension)
     row_dimension_id = row_dimension.id
     row_dimension.delete()
     row_dimension.sheet.rowdimension_set.filter(
@@ -266,18 +265,18 @@ class CheckCellOptions:
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
 
 
-def change_cell_default(info: ResolveInfo, cell: Cell, default: str) -> Cell:
+def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     """Изменение значения ячейки по умолчанию."""
-    can_change_period_sheet(info.context.user, cell.row.sheet.period)
+    can_change_period_sheet(user, cell.row.sheet.period)
     cell.default = default
     cell.save(update_fields=('default',))
     return cell
 
 
-def success_check_cell_options(info: ResolveInfo, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+def success_check_cell_options(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
     if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
         raise PermissionDenied('Ошибка доступа')
-    can_change_period_sheet(info.context.user, cells.first().row.sheet.period)
+    can_change_period_sheet(user, cells.first().row.sheet.period)
     return cells
 
 

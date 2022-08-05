@@ -3,7 +3,6 @@
 from devind_helpers.orm_utils import get_object_or_none
 from django.db import transaction
 from django.db.models import Max, QuerySet
-from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
@@ -182,16 +181,16 @@ def add_document_status(status: Status, document: Document, comment: str, user: 
     )
 
 
-def change_document_comment(info: ResolveInfo, document: Document, comment: str) -> Document:
+def change_document_comment(user: User, document: Document, comment: str) -> Document:
     """Изменение комментария версии документа."""
-    can_change_document(info.context.user, document)
+    can_change_document(user, document)
     document.comment = comment
     document.save(update_fields=('comment', 'updated_at'))
     return document
 
 
-def delete_document_status(info: ResolveInfo, status: DocumentStatus) -> None:
+def delete_document_status(user: User, status: DocumentStatus) -> None:
     """Изменение комментария версии документа."""
-    can_change_document(info.context.user, status.document)
+    can_change_document(user, status.document)
     status.delete()
 

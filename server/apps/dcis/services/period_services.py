@@ -6,7 +6,6 @@ from devind_core.models import File
 from devind_helpers.orm_utils import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q, QuerySet
-from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
@@ -111,10 +110,10 @@ def add_period_methodical_support(period: Period, file: InMemoryUploadedFile, us
         )
 
 
-def add_divisions_period(info: ResolveInfo, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
+def add_divisions_period(user: User, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
     """Добавление дивизионов в период."""
     period = get_object_or_404(Period, pk=period_id)
-    can_change_period_divisions(info.context.user, period)
+    can_change_period_divisions(user, period)
     division_links = Division.objects.bulk_create([
         Division(period=period, object_id=division_id) for division_id in division_ids
     ])
@@ -122,23 +121,23 @@ def add_divisions_period(info: ResolveInfo, period_id: str | int, division_ids: 
     return get_divisions(divisions)
 
 
-def delete_divisions_period(info: ResolveInfo, period_id: str | int, division_id: str | int) -> None:
+def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:
     """Удаление дивизиона из периода."""
     period = get_object_or_404(Period, pk=period_id)
-    can_change_period_divisions(info.context.user, period)
+    can_change_period_divisions(user, period)
     Division.objects.get(period_id=period_id, object_id=division_id).delete()
 
 
 def copy_period_groups(
-        info: ResolveInfo,
+        user: User,
         period_id: str | int,
         period_group_ids: list[str | int],
         selected_period_id: str | int) -> list[PeriodGroup]:
     """Перенос групп из другого периода."""
     period = get_object_or_404(Period, pk=period_id)
-    can_change_period_groups(info.context.user, period)
+    can_change_period_groups(user, period)
     selected_period = get_object_or_404(Period, pk=selected_period_id)
-    can_view_period(info.context.user, selected_period)
+    can_view_period(user, selected_period)
     period_groups: list[PeriodGroup] = []
     for period_group_id in period_group_ids:
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
@@ -153,12 +152,12 @@ def copy_period_groups(
 
 
 def change_period_group_privileges(
-        info: ResolveInfo,
+        user: User,
         period_group_id: str | int,
         privileges_ids: list[str | int]) -> list[Privilege]:
     """Изменение привилегий группы."""
     period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-    can_change_period_groups(info.context.user, period_group.period)
+    can_change_period_groups(user, period_group.period)
     privileges: list[Privilege] = []
     for privilege_id in privileges_ids:
         privilege = get_object_or_404(Privilege, pk=privilege_id)
@@ -167,24 +166,24 @@ def change_period_group_privileges(
     return privileges
 
 
-def change_user_period_groups(info: ResolveInfo, period_group_ids: list[PeriodGroup]) -> list[PeriodGroup]:
+def change_user_period_groups(user: User, period_group_ids: list[PeriodGroup]) -> list[PeriodGroup]:
     """Изменение групп пользователя в периоде."""
     period_groups: list[PeriodGroup] = []
     for period_group_id in period_group_ids:
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        can_change_period_users(info.context.user, period_group.period)
+        can_change_period_users(user, period_group.period)
         period_groups.append(period_group)
     return period_groups
 
 
 def change_user_period_privileges(
-        info: ResolveInfo,
+        user: User,
         user_id: str | int,
         period_id: str | int,
         privileges_ids: list[str | int]) -> list[Privilege]:
     """Изменение отдельных привилегий пользователя в периоде."""
     period = get_object_or_404(Period, pk=period_id)
-    can_change_period_users(info.context.user, period)
+    can_change_period_users(user, period)
     PeriodPrivilege.objects.filter(period_id=period_id, user_id=user_id).delete()
     privileges: list[Privilege] = []
     for privileges_id in privileges_ids:
@@ -194,10 +193,10 @@ def change_user_period_privileges(
     return privileges
 
 
-def add_period_group(info: ResolveInfo, name: str, period_id: str | int) -> PeriodGroup:
+def add_period_group(user: User, name: str, period_id: str | int) -> PeriodGroup:
     """Добавление группы в период."""
     period = get_object_or_404(Period, pk=period_id)
-    can_change_period_groups(info.context.user, period)
+    can_change_period_groups(user, period)
     return PeriodGroup.objects.create(
             name=name,
             period_id=period_id,
@@ -205,7 +204,7 @@ def add_period_group(info: ResolveInfo, name: str, period_id: str | int) -> Peri
 
 
 def change_settings_period(
-        info: ResolveInfo,
+        user: User,
         period: Period,
         name: str,
         status: str,
@@ -214,7 +213,7 @@ def change_settings_period(
         start: date,
         expiration: date) -> Period:
     """Изменение настроек периода."""
-    can_change_period_settings(info.context.user, period)
+    can_change_period_settings(user, period)
     period.name = name
     period.status = status
     period.multiple = multiple
@@ -225,14 +224,14 @@ def change_settings_period(
     return period
 
 
-def delete_period(info: ResolveInfo, period: Period) -> None:
+def delete_period(user: User, period: Period) -> None:
     """Удаление периода."""
-    can_delete_period(info.context.user, period)
+    can_delete_period(user, period)
     period.delete()
 
 
-def delete_period_groups(info: ResolveInfo, period_group: PeriodGroup) -> None:
+def delete_period_groups(user: User, period_group: PeriodGroup) -> None:
     """Удаление группы периода."""
-    can_change_period_groups(info.context.user, period_group.period)
+    can_change_period_groups(user, period_group.period)
     period_group.delete()
 

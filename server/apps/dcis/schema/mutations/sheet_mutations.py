@@ -35,7 +35,7 @@ class RenameSheetMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str):
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        sheet, cells = rename_sheet(info, sheet, name)
+        sheet, cells = rename_sheet(user=info.context.user, sheet=sheet, name=name)
         return RenameSheetMutation(
             sheet=sheet,
             cells=cells
@@ -72,7 +72,7 @@ class ChangeColumnDimensionMutation(BaseMutation):
     ):
         column_dimension = get_object_or_404(ColumnDimension, pk=column_dimension_id)
         column_dimension = change_column_dimension(
-            info,
+            user=info.context.user,
             column_dimension=column_dimension,
             width=width,
             fixed=fixed,
@@ -156,7 +156,7 @@ class ChangeRowDimensionMutation(BaseMutation):
     ):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
         row_dimension = change_row_dimension(
-            info,
+            user=info.context.user,
             row_dimension=row_dimension,
             height=height,
             fixed=fixed,
@@ -185,7 +185,10 @@ class DeleteRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(info, row_dimension))
+        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(
+            user=info.context.user,
+            row_dimension=row_dimension)
+        )
 
 
 class SheetMutations(graphene.ObjectType):

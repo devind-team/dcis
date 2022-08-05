@@ -140,8 +140,8 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         return UnloadFileValueArchiveMutation(
             src=create_file_value_archive(
-                info,
-                document,
+                user=info.context.user,
+                document=document,
                 value=get_object_or_404(
                     Value,
                     document_id=document.id,

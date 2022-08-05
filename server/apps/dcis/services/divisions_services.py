@@ -3,7 +3,7 @@
 from django.db.models import Q
 
 from apps.core.models import User
-from apps.dcis.models import Project, Period
+from apps.dcis.models import Period, Project
 
 
 def get_user_divisions(user: User, project: Project | int | str | None = None) -> list[dict[str, int | str]]:

@@ -40,7 +40,7 @@ class ChangeCellDefault(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, default: str):
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        change_cell_default(info, cell, default)
+        change_cell_default(user=info.context.user, cell=cell, default=default)
         return ChangeCellDefault(cell_id=cell.id, default=cell.default)
 
 
@@ -85,7 +85,7 @@ class ChangeCellsOptionMutation(BaseMutation):
                 return ChangeCellsOptionMutation(success=False, errors=[ErrorFieldType(field, [error])])
             case CheckCellOptions.Success(value):
                 cells = Cell.objects.filter(pk__in=cell_ids).all()
-                success_check_cell_options(info, cells)
+                success_check_cell_options(user=info.context.user, cells=cells)
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 
