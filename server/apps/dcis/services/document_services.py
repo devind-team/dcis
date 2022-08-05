@@ -182,16 +182,16 @@ def add_document_status(status: Status, document: Document, comment: str, user: 
     )
 
 
-def delete_document_status(info: ResolveInfo, status: DocumentStatus) -> None:
-    """Изменение комментария версии документа."""
-    can_change_document(info.context.user, status.document)
-    status.delete()
-
-
 def change_document_comment(info: ResolveInfo, document: Document, comment: str) -> Document:
     """Изменение комментария версии документа."""
     can_change_document(info.context.user, document)
     document.comment = comment
     document.save(update_fields=('comment', 'updated_at'))
     return document
+
+
+def delete_document_status(info: ResolveInfo, status: DocumentStatus) -> None:
+    """Изменение комментария версии документа."""
+    can_change_document(info.context.user, status.document)
+    status.delete()
 

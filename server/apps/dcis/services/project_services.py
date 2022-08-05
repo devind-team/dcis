@@ -3,11 +3,10 @@
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
-from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.dcis.models import Project
-from apps.dcis.permissions import can_change_project, can_delete_project
+from apps.dcis.permissions import can_add_project, can_change_project, can_delete_project
 from apps.dcis.services.divisions_services import get_user_division_ids
 
 
@@ -48,8 +47,9 @@ def get_user_projects(user: User) -> QuerySet[Project]:
     return get_user_participant_projects(user) | get_user_privileges_projects(user) | get_user_divisions_projects(user)
 
 
-def create_project(validate_field: dict, visibility: bool) -> Project:
+def create_project(user: User, validate_field: dict, visibility: bool) -> Project:
     """Создание периода."""
+    can_add_project(user)
     return Project.objects.create(
             name=validate_field['name'],
             short=validate_field['short'],
@@ -60,7 +60,7 @@ def create_project(validate_field: dict, visibility: bool) -> Project:
 
 
 def change_project(
-        info: ResolveInfo,
+        user: User,
         project: Project,
         name: str,
         short: str,
@@ -68,7 +68,7 @@ def change_project(
         visibility: bool,
         archive: bool) -> Project:
     """Изменение настроек проекта."""
-    can_change_project(info.context.user, project)
+    can_change_project(user, project)
     project.name = name
     project.short = short
     project.description = description
@@ -78,7 +78,7 @@ def change_project(
     return project
 
 
-def delete_project(info: ResolveInfo, project: Project) -> None:
+def delete_project(user: User, project: Project) -> None:
     """Удаление проекта."""
-    can_delete_project(info.context.user, project)
+    can_delete_project(user, project)
     project.delete()

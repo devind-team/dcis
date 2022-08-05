@@ -91,7 +91,7 @@ class DeleteProjectMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, project_id: str | int):
         project: Project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        delete_project(info, project)
+        delete_project(info.context.user, project)
         return DeleteProjectMutation(delete_id=project_id)
 
 
