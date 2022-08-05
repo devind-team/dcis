@@ -129,11 +129,7 @@ class ProjectsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
-
-        self.user = User.objects.create(username='user', email='user@gmain.com')
         self.super_user = User.objects.create(username='super_user', email='super_user@gmain.com', is_superuser=True)
-        self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
-
         self.data_project = {
             'name': 'Testing name',
             'short': 'Testing short',
