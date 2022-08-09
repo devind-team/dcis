@@ -5,13 +5,20 @@ from django.core.exceptions import PermissionDenied
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
-from apps.dcis.services.document_services import get_user_documents, is_document_editable
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
 
 
+def can_add_budget_classification(user: User):
+    """Пропускает пользователей, которые могут добавлять КБК, без проверки возможности просмотра."""
+    if user.has_perm('devind_dictionaries.add_budgetclassification'):
+        return
+    raise PermissionDenied('Недостаточно прав для добавления КБК.')
+
+
 def can_view_document(user: User, document: Document):
     """Пропускает пользователей, которые могут просматривать документ."""
+    from apps.dcis.services.document_services import get_user_documents
     try:
         can_view_period(user, document.period)
         if document not in get_user_documents(user, document.period):
@@ -128,6 +135,7 @@ class ChangeDocumentSheetBase:
     @property
     def is_document_editable(self) -> bool:
         """Является ли документ редактируемым."""
+        from apps.dcis.services.document_services import is_document_editable
         if self._is_document_editable is None:
             self._is_document_editable = is_document_editable(self._document)
         return self._is_document_editable

@@ -11,17 +11,18 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
-from graphene_django_cud.mutations import DjangoCreateMutation
 from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
-from apps.dcis.permissions import can_change_period_sheet
+from apps.dcis.permissions import can_add_budget_classification
 from apps.dcis.schema.types import ChangedCellOption
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
     change_cell_default,
+    success_check_cell_options,
     change_cells_option,
+    add_budget_classification
 )
 
 
@@ -39,8 +40,7 @@ class ChangeCellDefault(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, default: str):
         cell: Cell = get_object_or_404(Cell, pk=cell_id)
-        can_change_period_sheet(info.context.user, cell.row.sheet.period)
-        change_cell_default(cell, default)
+        change_cell_default(user=info.context.user, cell=cell, default=default)
         return ChangeCellDefault(cell_id=cell.id, default=cell.default)
 
 
@@ -85,22 +85,32 @@ class ChangeCellsOptionMutation(BaseMutation):
                 return ChangeCellsOptionMutation(success=False, errors=[ErrorFieldType(field, [error])])
             case CheckCellOptions.Success(value):
                 cells = Cell.objects.filter(pk__in=cell_ids).all()
-                if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
-                    raise PermissionDenied('Ошибка доступа')
-                can_change_period_sheet(info.context.user, cells.first().row.sheet.period)
+                success_check_cell_options(user=info.context.user, cells=cells)
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
 
 
-class AddBudgetClassificationMutationPayload(DjangoCreateMutation):
+class AddBudgetClassificationMutation(BaseMutation):
     """Мутация для добавления КБК в словарь."""
 
-    class Meta:
-        model = BudgetClassification
-        login_required = True
-        required_fields = ('code', 'name',)
-        permissions = ('devind_dictionaries.add_budgetclassification',) # noqa
+    class Input:
+        code = graphene.String(required=True, description='Code')
+        name = graphene.String(required=True, description='Name')
 
     budget_classification = graphene.Field(BudgetClassificationType, description='Добавленная КБК')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        code: str,
+        name: str
+    ):
+        return AddBudgetClassificationMutation(budget_classification=add_budget_classification(
+            info.context.user,
+            code,
+            name)
+        )
 
 
 class CellMutations(graphene.ObjectType):
@@ -108,7 +118,7 @@ class CellMutations(graphene.ObjectType):
 
     change_cell_default = ChangeCellDefault.Field(required=True, description='Изменение значения ячейки по умолчанию')
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
-    add_budget_classification = AddBudgetClassificationMutationPayload.Field(
+    add_budget_classification = AddBudgetClassificationMutation.Field(
         required=True,
         description='Добавление нового КБК'
     )

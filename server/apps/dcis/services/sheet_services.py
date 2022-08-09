@@ -2,20 +2,29 @@ import re
 from argparse import ArgumentTypeError
 from typing import Any, NamedTuple, Sequence
 
+from devind_dictionaries.models import BudgetClassification
+from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, QuerySet
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
 from apps.dcis.models import Document, Period, RowDimension, Sheet, Value
 from apps.dcis.models.sheet import Cell, ColumnDimension
+from apps.dcis.permissions import (
+    can_add_budget_classification,
+    can_add_child_row_dimension,
+    can_change_child_row_dimension_height,
+    can_change_period_sheet,
+    can_delete_child_row_dimension
+)
 from apps.dcis.services.sheet_unload_services import SheetColumnsUnloader, SheetPartialRowsUploader
 
 
 @transaction.atomic
-def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
+def rename_sheet(user: User, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     """Переименование листа с учетом формул.
 
     sheet.name -> name
@@ -23,6 +32,7 @@ def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
     :param sheet - лист
     :param name - новое имя листа
     """
+    can_change_period_sheet(user, sheet.period)
     changed_cell: list[Cell] = []
     sheet_name: str = f"'{name}'" if ' ' in name else name
     period: Period = sheet.period
@@ -51,6 +61,7 @@ def rename_sheet(sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]]:
 
 
 def change_column_dimension(
+    user: User,
     column_dimension: ColumnDimension,
     width: int | None,
     fixed: bool,
@@ -58,6 +69,7 @@ def change_column_dimension(
     kind: str
 ) -> ColumnDimension:
     """Изменение колонки."""
+    can_change_period_sheet(user, column_dimension.sheet.period)
     column_dimension.width = width
     column_dimension.fixed = fixed
     column_dimension.hidden = hidden
@@ -79,6 +91,7 @@ def add_row_dimension(
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
+    can_change_period_sheet(user, sheet.period)
     sheet.rowdimension_set.filter(parent_id=None, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
@@ -102,19 +115,25 @@ def add_row_dimension(
 
 @transaction.atomic
 def add_child_row_dimension(
-    context: Any,
-    sheet: Sheet,
-    document: Document,
-    parent: RowDimension,
-    index: int,
-    global_index: int,
-    global_indices_map: dict[int, int]
+        user: User,
+        context: Any,
+        sheet: Sheet,
+        document: Document,
+        parent: RowDimension,
+        index: int,
+        global_index: int,
+        global_indices_map: dict[int, int]
 ) -> dict:
     """Добавление дочерней строки.
 
     После добавления строки, строка приобретает новый индекс,
     соответственно, все строки после вставленной строки должны увеличить свой индекс на единицу.
     """
+    can_add_child_row_dimension(
+        user,
+        document=document,
+        row_dimension=parent
+    )
     sheet.rowdimension_set.filter(parent=parent, document=document, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
@@ -139,13 +158,15 @@ def add_child_row_dimension(
 
 
 def change_row_dimension(
-    row_dimension: RowDimension,
-    height: int,
-    fixed: bool,
-    hidden: bool,
-    dynamic: bool
+        user: User,
+        row_dimension: RowDimension,
+        height: int,
+        fixed: bool,
+        hidden: bool,
+        dynamic: bool
 ) -> RowDimension:
     """Изменение строки."""
+    can_change_period_sheet(user, row_dimension.sheet.period)
     row_dimension.height = height
     row_dimension.fixed = fixed
     row_dimension.hidden = hidden
@@ -154,19 +175,22 @@ def change_row_dimension(
     return row_dimension
 
 
-def change_row_dimension_height(row_dimension: RowDimension, height: int) -> RowDimension:
+def change_row_dimension_height(user: User, row_dimension: RowDimension, height: int) -> RowDimension:
     """Изменение высоты строки."""
+    can_change_child_row_dimension_height(user, row_dimension)
     row_dimension.height = height
     row_dimension.save(update_fields=('height', 'updated_at'))
     return row_dimension
 
 
 @transaction.atomic
-def delete_row_dimension(row_dimension: RowDimension) -> int:
+def delete_row_dimension(user: User, row_dimension: RowDimension) -> int:
     """Удаление строки.
 
     После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
     """
+    can_change_period_sheet(user, row_dimension.sheet.period)
+    can_delete_child_row_dimension(user, row_dimension)
     row_dimension_id = row_dimension.id
     row_dimension.delete()
     row_dimension.sheet.rowdimension_set.filter(
@@ -241,11 +265,19 @@ class CheckCellOptions:
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
 
 
-def change_cell_default(cell: Cell, default: str) -> Cell:
+def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     """Изменение значения ячейки по умолчанию."""
+    can_change_period_sheet(user, cell.row.sheet.period)
     cell.default = default
     cell.save(update_fields=('default',))
     return cell
+
+
+def success_check_cell_options(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+    if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
+        raise PermissionDenied('Ошибка доступа')
+    can_change_period_sheet(user, cells.first().row.sheet.period)
+    return cells
 
 
 @transaction.atomic
@@ -286,3 +318,9 @@ def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False)
             merge_cells.delete()
         else:
             merge_cells.save(update_fields=('min_row', 'max_row',))
+
+
+def add_budget_classification(user: User, code: str, name: str) -> BudgetClassification:
+    """Добавления КБК в словарь."""
+    can_add_budget_classification(user)
+    return BudgetClassification.objects.create(code=code, name=name)

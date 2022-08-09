@@ -5,7 +5,11 @@ from django.db import transaction
 from django.db.models import Max, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Value
+from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.permissions import (
+    can_add_document,
+    can_add_document_status, can_change_document, can_change_document_comment,
+)
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
@@ -61,7 +65,7 @@ def is_document_editable(document: Document) -> bool:
 def create_document(
     user: User,
     period: Period,
-    status_id: int | str,
+    status: Status,
     comment: str,
     document_id: int | str | None = None,
     division_id: int | str | None = None
@@ -70,11 +74,12 @@ def create_document(
 
     :param user: пользователь, который создает документ
     :param period: собираемый период
-    :param status_id: идентификатор начального статуса документа
+    :param status: начальный статус документа
     :param comment: комментарий к документу
     :param document_id: идентификатор документа, от которого создавать копию
     :param division_id: идентификатор дивизиона
     """
+    can_add_document(user, period, status, division_id)
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     document = Document.objects.create(
         version=(get_documents_max_version(period.id, division_id) or 0) + 1,
@@ -86,7 +91,7 @@ def create_document(
     document.documentstatus_set.create(
         comment='Документ добавлен',
         user=user,
-        status_id=status_id
+        status_id=status.id
     )
     for sheet in period.sheet_set.all():
         document.sheets.add(sheet)
@@ -186,3 +191,28 @@ def transfer_limitations(
         limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
         limitation.save()
         transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
+
+
+def add_document_status(status: Status, document: Document, comment: str, user: User) -> DocumentStatus:
+    """Добавление статуса документа."""
+    can_add_document_status(user, document, status)
+    return DocumentStatus.objects.create(
+        status=status,
+        document=document,
+        comment=comment,
+        user=user
+    )
+
+
+def change_document_comment(user: User, document: Document, comment: str) -> Document:
+    """Изменение комментария версии документа."""
+    can_change_document_comment(user, document)
+    document.comment = comment
+    document.save(update_fields=('comment', 'updated_at'))
+    return document
+
+
+def delete_document_status(user: User, status: DocumentStatus) -> None:
+    """Изменение комментария версии документа."""
+    can_change_document(user, status.document)
+    status.delete()

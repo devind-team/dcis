@@ -5,17 +5,21 @@ from devind_helpers.permissions import ModelPermission
 
 from apps.core.models import User
 from apps.dcis.models import Project
-from apps.dcis.services.project_services import get_user_projects
 
 
 def can_view_project(user: User, project: Project):
     """Пропускает пользователей, которые могут просматривать проект."""
+    from apps.dcis.services.project_services import get_user_projects
     if project in get_user_projects(user):
         return
     raise PermissionDenied('Недостаточно прав для просмотра проекта.')
 
 
-AddProject = ModelPermission('dcis.add_project')
+def can_add_project(user: User):
+    """Пропускает пользователей, которые могут добавлять проект, без проверки возможности просмотра."""
+    if user.has_perm('dcis.add_project'):
+        return
+    raise PermissionDenied('Недостаточно прав для добавления проекта.')
 
 
 def can_change_project_base(user: User, project: Project):

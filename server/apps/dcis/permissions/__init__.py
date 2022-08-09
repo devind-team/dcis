@@ -5,6 +5,7 @@ from .document_permissions import (
     ChangeDocumentSheetBase,
     ChangeValueBase,
     DeleteChildRowDimensionBase,
+    can_add_budget_classification,
     can_add_child_row_dimension,
     can_add_document,
     can_add_document_status,
@@ -36,7 +37,7 @@ from .period_permissions import (
     can_view_period,
 )
 from .project_permissions import (
-    AddProject,
+    can_add_project,
     can_change_project,
     can_change_project_base,
     can_delete_project,
