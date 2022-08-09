@@ -8,153 +8,153 @@ from apps.dcis.services.privilege_services import has_privilege
 from .project_permissions import can_view_project
 
 
-def can_view_period(user: User, obj: Period):
+def can_view_period(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период."""
     from apps.dcis.services.period_services import get_user_periods
     can_view_project(
-        user, obj.project
+        user, period.project
     )
-    if obj in get_user_periods(user, obj.project.id):
+    if period in get_user_periods(user, period.project.id):
         return
-    raise PermissionDenied('Недостаточно прав для просмотра периода')
+    raise PermissionDenied('Недостаточно прав для просмотра периода.')
 
 
-def can_add_period_base(user: User, obj: Project):
+def can_add_period_base(user: User, project: Project):
     """Пропускает пользователей, которые могут добавлять периоды в проект, без проверки возможности просмотра."""
     if user.has_perm('dcis.add_period') or (
-        obj.user_id == user.id and
+        project.user_id == user.id and
         user.has_perm('dcis.add_project')
     ):
         return
-    raise PermissionDenied('Недостаточно прав для добавления периода')
+    raise PermissionDenied('Недостаточно прав для добавления периода.')
 
 
-def can_add_period(user: User, obj: Project):
+def can_add_period(user: User, project: Project):
     """Пропускает пользователей, которые могут просматривать проект и добавлять в него периоды."""
-    can_view_project(user, obj)
-    can_add_period_base(user, obj)
+    can_view_project(user, project)
+    can_add_period_base(user, project)
 
 
-def can_change_period_base(user: User, obj: Period):
+def can_change_period_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять период в проекте, без проверки возможности просмотра."""
     if (
         user.has_perm('dcis.change_period') or
-        obj.project.user_id == user.id and user.has_perm('dcis.add_project') or
-        obj.user_id == user.id and user.has_perm('dcis.add_period') or
-        has_privilege(user.id, obj.id, 'change_period')
+        period.project.user_id == user.id and user.has_perm('dcis.add_project') or
+        period.user_id == user.id and user.has_perm('dcis.add_period') or
+        has_privilege(user.id, period.id, 'change_period')
     ):
         return
-    raise PermissionDenied('Недостаточно прав для изменения периода в проекте')
+    raise PermissionDenied('Недостаточно прав для изменения периода в проекте.')
 
 
-def can_change_period(user: User, obj: Period):
+def can_change_period(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать и изменять период в проекте."""
-    can_view_period(user, obj)
-    can_change_period_base(user, obj)
+    can_view_period(user, period)
+    can_change_period_base(user, period)
 
 
-def can_change_period_divisions_base(user: User, obj: Period):
+def can_change_period_divisions_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять дивизионы периода, без проверки возможности просмотра."""
     try:
-        can_change_period_base(user, obj)
+        can_change_period_base(user, period)
         return
     except PermissionDenied:
-        if has_privilege(user.id, obj.id, 'change_period_divisions'):
+        if has_privilege(user.id, period.id, 'change_period_divisions'):
             return
-    raise PermissionDenied('Недостаточно прав для изменения дивизионов в периоде')
+    raise PermissionDenied('Недостаточно прав для изменения дивизионов периода.')
 
 
-def can_change_period_divisions(user: User, obj: Period):
+def can_change_period_divisions(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем дивизионы."""
-    can_view_period(user, obj)
-    can_change_period_divisions_base(user, obj)
+    can_view_period(user, period)
+    can_change_period_divisions_base(user, period)
 
 
-def can_change_period_groups_base(user: User, obj: Period):
+def can_change_period_groups_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять группы периода, без проверки возможности просмотра."""
     try:
-        can_change_period_base(user, obj)
+        can_change_period_base(user, period)
         return
     except PermissionDenied:
-        if has_privilege(user.id, obj.id, 'change_period_groups'):
+        if has_privilege(user.id, period.id, 'change_period_groups'):
             return
-    raise PermissionDenied('Недостаточно прав для изменения групп периода')
+    raise PermissionDenied('Недостаточно прав для изменения групп периода.')
 
 
-def can_change_period_groups(user: User, obj: Period):
+def can_change_period_groups(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем группы."""
-    can_view_period(user, obj)
-    can_change_period_groups_base(user, obj)
+    can_view_period(user, period)
+    can_change_period_groups_base(user, period)
 
 
-def can_change_period_users_base(user: User, obj: Period):
+def can_change_period_users_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять пользователей периода, без проверки возможности просмотра."""
     try:
-        can_change_period_base(user, obj)
+        can_change_period_base(user, period)
         return
     except PermissionDenied:
-        if has_privilege(user.id, obj.id, 'change_period_users'):
+        if has_privilege(user.id, period.id, 'change_period_users'):
             return
-    raise PermissionDenied('Недостаточно прав для изменения пользователей периода')
+    raise PermissionDenied('Недостаточно прав для изменения пользователей периода.')
 
 
-def can_change_period_users(user: User, obj: Period):
+def can_change_period_users(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем пользователей."""
-    can_view_period(user, obj)
-    can_change_period_users_base(user, obj)
+    can_view_period(user, period)
+    can_change_period_users_base(user, period)
 
 
-def can_change_period_settings_base(user: User, obj: Period):
+def can_change_period_settings_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять настройки периода, без проверки возможности просмотра."""
     try:
-        can_change_period_base(user, obj)
+        can_change_period_base(user, period)
         return
     except PermissionDenied:
-        if has_privilege(user.id, obj.id, 'change_period_settings'):
+        if has_privilege(user.id, period.id, 'change_period_settings'):
             return
-    raise PermissionDenied('Недостаточно прав для изменения настроек периода')
+    raise PermissionDenied('Недостаточно прав для изменения настроек периода.')
 
 
-def can_change_period_settings(user: User, obj: Period):
+def can_change_period_settings(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем настройки."""
-    can_view_period(user, obj)
-    can_change_period_settings_base(user, obj)
+    can_view_period(user, period)
+    can_change_period_settings_base(user, period)
 
 
-def can_change_period_sheet_base(user: User, obj: Period):
+def can_change_period_sheet_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять структуру листа, без проверки возможности просмотра."""
     if (
         user.has_perm('dcis.change_sheet') or
-        obj.project.user_id == user.id and user.has_perm('dcis.add_project') or
-        obj.user_id == user.id and user.has_perm('dcis.add_period') or
-        has_privilege(user.id, obj.id, 'change_sheet')
+        period.project.user_id == user.id and user.has_perm('dcis.add_project') or
+        period.user_id == user.id and user.has_perm('dcis.add_period') or
+        has_privilege(user.id, period.id, 'change_sheet')
     ):
         return
-    raise PermissionDenied('Недостаточно прав для изменения структуры листа')
+    raise PermissionDenied('Недостаточно прав для изменения структуры листа.')
 
 
-def can_change_period_sheet(user: User, obj: Period):
+def can_change_period_sheet(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру листа."""
-    can_view_period(user, obj)
-    can_change_period_sheet_base(user, obj)
+    can_view_period(user, period)
+    can_change_period_sheet_base(user, period)
 
 
-def can_delete_period_base(user: User, obj: Period):
+def can_delete_period_base(user: User, period: Period):
     """Пропускает пользователей, которые могут удалять период, без проверки возможности просмотра."""
     if user.has_perm('dcis.delete_period') or (
-        obj.project.user_id == user.id and
+        period.project.user_id == user.id and
         user.has_perm('dcis.add_project') and
-        obj.document_set.count() == 0
+        period.document_set.count() == 0
     ) or (
-        obj.user_id == user.id and
+        period.user_id == user.id and
         user.has_perm('dcis.add_period') and
-        obj.document_set.count() == 0
+        period.document_set.count() == 0
     ):
         return
-    raise PermissionDenied('Недостаточно прав для удаления периода')
+    raise PermissionDenied('Недостаточно прав для удаления периода.')
 
 
-def can_delete_period(user: User, obj: Period):
+def can_delete_period(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать и удалять период в проекте."""
-    can_view_period(user, obj)
-    can_delete_period_base(user, obj)
+    can_view_period(user, period)
+    can_delete_period_base(user, period)

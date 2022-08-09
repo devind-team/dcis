@@ -33,13 +33,13 @@ class ProjectPermissionsTestCase(PermissionsTestCase):
         )
         self.periods = [Period.objects.create(project=self.user_project_with_periods) for _ in range(3)]
 
-    def test_view_project(self) -> None:
-        """Тестирование класса `ViewProject`."""
+    def test_can_view_project(self) -> None:
+        """Тестирование функции `can_view_project`."""
         self.assertRaises(PermissionDenied, can_view_project, self.user, self.project)
         can_view_project(self.user, self.user_project_without_periods)
 
-    def test_change_project(self) -> None:
-        """Тестирование класса `ChangeProject`."""
+    def test_can_change_project(self) -> None:
+        """Тестирование функции `can_change_project`."""
         self.assertRaises(PermissionDenied, can_change_project, self.user, self.project)
         self.assertRaises(PermissionDenied, can_change_project, self.user, self.user_project_without_periods)
         with patch(
@@ -54,8 +54,8 @@ class ProjectPermissionsTestCase(PermissionsTestCase):
             with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'):
                 can_change_project(self.user, self.user_project_without_periods)
 
-    def test_delete_project(self) -> None:
-        """Тестирование класса `DeleteProject`."""
+    def test_can_delete_project(self) -> None:
+        """Тестирование функции `can_delete_project`."""
         self.assertRaises(PermissionDenied, can_delete_project, self.user, self.project)
         self.assertRaises(PermissionDenied, can_delete_project, self.user, self.user_project_without_periods)
         self.assertRaises(PermissionDenied, can_delete_project, self.user, self.user_project_with_periods)

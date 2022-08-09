@@ -62,10 +62,23 @@ type ActiveStatisticsType {
   times: [DateStatisticsType]!
 }
 
+input AddBudgetClassificationMutationInput {
+  clientMutationId: String
+  """Code"""
+  code: String!
+  """Name"""
+  name: String!
+}
+
 """Мутация для добавления КБК в словарь."""
 type AddBudgetClassificationMutationPayload {
   """Добавленная КБК"""
   budgetClassification: BudgetClassificationType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input AddCategoryMutationInput {
@@ -318,8 +331,23 @@ type AddProfileMutationPayload {
   success: Boolean!
 }
 
+input AddProjectMutationInput {
+  clientMutationId: String
+  """Тип дивизиона"""
+  contentType: String!
+  """Описание проекта"""
+  description: String!
+  """Наименование проекта"""
+  name: String!
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Видимость проекта"""
+  visibility: Boolean
+}
+
 """Мутация для добавления проекта."""
 type AddProjectMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Добавленный проект"""
@@ -1232,7 +1260,7 @@ type ChangePeriodMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Добавленный период"""
+  """Измененный период"""
   period: PeriodType
   """Успех мутации"""
   success: Boolean!
@@ -1536,7 +1564,7 @@ type ChangeValueMutationPayload {
   """Успех мутации"""
   success: Boolean!
   """Дата изменения"""
-  updatedAt: DateTime!
+  updatedAt: DateTime
   """Измененные ячейки"""
   values: [ValueType]
 }
@@ -1686,34 +1714,6 @@ type CopyPeriodGroupsMutationPayload {
   periodGroups: [PeriodGroupType]!
   """Успех мутации"""
   success: Boolean!
-}
-
-input CreateBudgetClassificationInput {
-  """Active"""
-  active: Boolean
-  """Code"""
-  code: String!
-  """Date of end activity"""
-  end: DateTime
-  """Name"""
-  name: String!
-}
-
-input CreateProjectInput {
-  """Архив"""
-  archive: Boolean
-  contentType: String!
-  """Описание проекта"""
-  description: String!
-  """Наименование проекта"""
-  name: String!
-  periodSet: [ID]
-  """Сокращенное наименование проекта"""
-  short: String!
-  """Организатор сборов"""
-  user: ID
-  """Видимость проекта"""
-  visibility: Boolean
 }
 
 """
@@ -2115,6 +2115,8 @@ type DocumentType implements Node {
   sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
+  """Пользователь, добавивший документ"""
+  user: UserType
   """Версия документа"""
   version: Int!
 }
@@ -2365,7 +2367,7 @@ type MailingType {
 """Мутации на изменение чего-либо."""
 type Mutation {
   """Добавление нового КБК"""
-  addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
+  addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление дочерней строки."""
@@ -2389,7 +2391,7 @@ type Mutation {
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
-  addProject(input: CreateProjectInput!): AddProjectMutationPayload!
+  addProject(input: AddProjectMutationInput!): AddProjectMutationPayload!
   """Добавление строки"""
   addRowDimension(input: AddRowDimensionMutationInput!): AddRowDimensionMutationPayload!
   """Добавление секции"""
@@ -3882,8 +3884,16 @@ type SettingType {
 
 """Тип листа."""
 type SheetType {
+  """Может ли пользователь добавлять дочерние строки для строк"""
+  canAddChildRowDimension: Boolean!
   """Может ли пользователь изменять лист"""
   canChange: Boolean!
+  """Может ли пользователь изменять высоту дочерней строки"""
+  canChangeChildRowDimensionHeight: Boolean!
+  """Может ли пользователь изменять значение ячейки"""
+  canChangeValue: Boolean!
+  """Может ли пользователь удалять дочернюю строку, не имеющую собственных дочерних строк"""
+  canDeleteChildRowDimension: Boolean!
   """Колонки"""
   columns: [ColumnDimensionType!]
   """Комментарий"""
@@ -3908,11 +3918,13 @@ type SheetType {
 type StatusType {
   """Комментарий"""
   comment: String
-  """Можно ли редактировать"""
+  """Можно ли редактировать документ со статусом"""
   edit: Boolean!
   id: ID!
-  """Наименование статуса"""
+  """Название статуса"""
   name: String!
+  """Является ли статус защищенным от изменения"""
+  protected: Boolean!
 }
 
 """Подписки на сокеты."""

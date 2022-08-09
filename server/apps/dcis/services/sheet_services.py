@@ -134,7 +134,7 @@ def add_child_row_dimension(
         document=document,
         row_dimension=parent
     )
-    sheet.rowdimension_set.filter(parent=parent, index__gte=index).update(index=F('index') + 1)
+    sheet.rowdimension_set.filter(parent=parent, document=document, index__gte=index).update(index=F('index') + 1)
     row_dimension = RowDimension.objects.create(
         sheet=sheet,
         index=index,

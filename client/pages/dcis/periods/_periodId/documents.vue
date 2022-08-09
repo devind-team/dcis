@@ -1,14 +1,20 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.documents.name') }}
-    template(v-if="period.canAddDocument")
+    template(v-if="period.canAddDocument || userPeriodDivision.length")
       v-spacer
-      add-document(:period="period" :documents="documents" :update="addDocumentUpdate")
+      add-document(
+        :can-add-any-document="period.canAddDocument"
+        :user-divisions="userPeriodDivision"
+        :period="period"
+        :documents="documents"
+        :update="addDocumentUpdate"
+      )
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
   items-data-filter(
-    v-if="period.multiple"
+    v-if="showFilter"
     v-model="selectedDocs"
     :items="period.divisions.map(x => ({ id: x.id, name: x.name }))"
     :get-name="i => i.name"
@@ -21,16 +27,18 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
       ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
     template(#item.comment="{ item }")
       template(v-if="item.comment")
-        template(v-if="item.canChange")
+        template(v-if="canChangeDocument(item)")
           text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
             a(v-on="on") {{ item.comment }}
         template(v-else) {{ item.comment }}
     template(#item.lastStatus="{ item }")
       template(v-if="item.lastStatus")
-        document-statuses(v-if="item.canChange" :update="update" :document="item")
-          template(#activator="{ on }")
-            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-        document-statuses-readonly(v-else :document="item")
+        document-statuses(
+          :can-add="canChangeDocument(item)"
+          :can-delete="canDeleteDocumentStatus(item)"
+          :update="update"
+          :document="item"
+        )
           template(#activator="{ on }")
             a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
         div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
@@ -43,7 +51,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, toRef, useNuxt2Meta } from '#app'
+import { defineComponent, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useI18n } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
@@ -51,6 +59,7 @@ import { BreadCrumbsItem } from '~/types/devind'
 import {
   DocumentType,
   PeriodType,
+  DivisionModelType,
   ChangeDocumentCommentMutation,
   ChangeDocumentCommentMutationVariables
 } from '~/types/graphql'
@@ -59,10 +68,7 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
-import DocumentStatusesReadonly from '~/components/dcis/documents/DocumentStatusesReadonly.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
-
-type DivisionFilterType = { id: string, name: string }
 
 export default defineComponent({
   components: {
@@ -70,7 +76,6 @@ export default defineComponent({
     ItemsDataFilter,
     AddDocument,
     DocumentStatuses,
-    DocumentStatusesReadonly,
     TextMenu
   },
   middleware: 'auth',
@@ -85,7 +90,18 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
     const userStore = useAuthStore()
-    const hasPerm = toRef(userStore, 'hasPerm')
+
+    const userPeriodDivision = computed(() => {
+      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
+      return props.period.divisions.filter((division: DivisionModelType) => userDivisionIds.includes(division.id))
+    })
+
+    const canChangeDocument = (document: DocumentType) => {
+      return document.canChange || document.user?.id === userStore.user.id
+    }
+    const canDeleteDocumentStatus = (document: DocumentType) => {
+      return document.canChange
+    }
 
     const {
       data: documents,
@@ -119,19 +135,28 @@ export default defineComponent({
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
       changeDocumentCommentMutate({ documentId: document.id, comment })
     }
-    const headers: DataTableHeader[] = props.period.multiple
-      ? [{
-          text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
-          value: 'division'
-        }]
-      : []
 
-    headers.push(
-      { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-      { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-      { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
-    )
-    const selectedDocs = ref<DivisionFilterType[]>([])
+    const showFilter = computed<boolean>(() => {
+      return props.period.multiple && documents.value && new Set(
+        documents.value.map((document: DocumentType) => document.objectId)
+      ).size > 1
+    })
+    const headers = computed<DataTableHeader[]>(() => {
+      const result: DataTableHeader[] = showFilter.value
+        ? [{
+            text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
+            value: 'division'
+          }]
+        : []
+      result.push(
+        { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
+        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
+        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
+      )
+      return result
+    })
+
+    const selectedDocs = ref<DivisionModelType[]>([])
     const visibleDocs = computed<DocumentType[]>(() => {
       return selectedDocs.value.length > 0
         ? documents.value.filter(x => selectedDocs.value.map(x => x.id).includes(x.objectId))
@@ -140,19 +165,23 @@ export default defineComponent({
     const count = computed(() => {
       return selectedDocs.value.length > 0 ? visibleDocs.value.length : totalCount.value
     })
+
     return {
-      selectedDocs,
+      userPeriodDivision,
+      canChangeDocument,
+      canDeleteDocumentStatus,
       documents,
       loading,
-      headers,
-      hasPerm,
-      count,
       totalCount,
       update,
-      visibleDocs,
       addDocumentUpdate,
       dateTimeHM,
-      changeDocumentComment
+      changeDocumentComment,
+      showFilter,
+      headers,
+      selectedDocs,
+      visibleDocs,
+      count
     }
   }
 })

@@ -83,6 +83,7 @@ def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) 
 class ValueState(TypedDict):
     """Результативное состояние для расчета новых значений по формулам."""
     value: int | float | str | None
+    error: str | None = None
     formula: str | None
     cell: Cell
 
@@ -114,6 +115,7 @@ def resolve_evaluate_state(
         coord: str = get_coordinate(cell.column.sheet, cell)
         state[coord]: ValueState = {
             'value': values_state.get(coord, cell.default),
+            'error': None,
             'formula': cell.formula if cell.formula and coord in inversion_cells else None,
             'cell': cell
         }
@@ -147,7 +149,14 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
         model: Model = compiler.read_and_parse_dict(input_dict=input_state, default_sheet=sheet_name)
         evaluator = Evaluator(model)
         for formula in model.formulae:
-            state[formula]['value'] = str(evaluator.evaluate(formula))
+            try:
+                state[formula]['value'] = str(evaluator.evaluate(formula))
+            except RuntimeError as e:
+                if 'Cycle detected' in str(e):
+                    state[formula]['value'] = ''
+                    state[formula]['error'] = 'Циклическая ссылка'
+                else:
+                    raise e
     return state
 
 

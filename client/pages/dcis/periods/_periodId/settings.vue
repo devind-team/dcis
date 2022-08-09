@@ -190,7 +190,7 @@ export default defineComponent({
         router.push(localePath({
           name: 'dcis-projects-projectId-periods',
           params: { projectId: props.period.project.id },
-          query: { periodId: deleteId }
+          query: { deletePeriodId: deleteId }
         }))
       }
     }

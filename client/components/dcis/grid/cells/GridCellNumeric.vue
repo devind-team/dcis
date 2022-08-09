@@ -20,7 +20,7 @@ export default defineComponent({
     }
   },
   props: {
-    value: { type: String, default: null }
+    value: { type: Number, default: null }
   }
 })
 </script>

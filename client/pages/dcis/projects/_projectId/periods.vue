@@ -66,10 +66,10 @@ export default defineComponent({
     ) => addUpdate(cache, result, 'period')
 
     onMounted(() => {
-      if (route.query.periodId) {
+      if (periods.value && route.query.deletePeriodId) {
         update(
           defaultClient.cache,
-          { data: { deletePeriod: { id: route.query.periodId } } },
+          { data: { deletePeriod: { id: route.query.deletePeriodId } } },
           (cacheData, { data: { deletePeriod: { id: periodId } } }
           ) => {
             cacheData.periods = cacheData.periods.filter(period => period.id !== periodId)

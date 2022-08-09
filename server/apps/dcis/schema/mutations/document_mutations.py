@@ -15,7 +15,7 @@ from apps.dcis.services.document_services import (
     add_document_status,
     change_document_comment,
     create_document,
-    delete_document_status
+    delete_document_status,
 )
 from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.sheet_services import (
@@ -58,11 +58,12 @@ class AddDocumentMutation(BaseMutation):
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
         period = get_object_or_404(Period, pk=period_id)
+        status = get_object_or_404(Status, pk=status_id)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document = create_document(
             user=info.context.user,
             period=period,
-            status_id=status_id,
+            status=status,
             comment=comment,
             document_id=document_id,
             division_id=division_id
@@ -107,10 +108,10 @@ class AddDocumentStatusMutation(BaseMutation):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
         return AddDocumentStatusMutation(document_status=add_document_status(
-            status,
-            document,
-            comment,
-            info.context.user)
+            status=status,
+            document=document,
+            comment=comment,
+            user=info.context.user)
         )
 
 
@@ -214,7 +215,7 @@ class ChangeChildRowDimensionHeightMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, row_dimension_id: str, height: int):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        row_dimension = change_row_dimension_height(info, row_dimension, height)
+        row_dimension = change_row_dimension_height(info.context.user, row_dimension, height)
         return ChangeChildRowDimensionHeightMutation(
             row_dimension_id=row_dimension.id,
             height=row_dimension.height,
@@ -234,7 +235,7 @@ class DeleteChildRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(info, row_dimension))
+        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(info.context.user, row_dimension))
 
 
 class DocumentMutations(graphene.ObjectType):

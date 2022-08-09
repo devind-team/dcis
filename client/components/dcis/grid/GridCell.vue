@@ -6,7 +6,7 @@
     v-on="componentListeners"
     :is="componentName"
   )
-  div(v-else) {{ cell.value }}
+  div(v-else) {{ formattedCellValue }}
 </template>
 
 <script lang="ts">
@@ -112,14 +112,54 @@ export default defineComponent({
       )
       : null
 
+    const cellKind = computed<string>(() => {
+      if (props.cell.kind in cellKinds) {
+        if (props.cell.kind === 'fl' && mode === GridMode.CHANGE) {
+          return 'String'
+        }
+        return cellKinds[props.cell.kind]
+      }
+      return 'String'
+    })
+
+    const cellValue = computed<string | number | null>(() => {
+      if (props.cell.error) {
+        return props.cell.error
+      }
+      if (props.cell.value === null) {
+        return props.cell.value
+      }
+      if (cellKind.value === 'Numeric') {
+        return Number(props.cell.value)
+      }
+      if (cellKind.value === 'Formula') {
+        const numberValue = parseFloat(props.cell.value)
+        if (isNaN(numberValue)) {
+          return props.cell.value
+        }
+        return numberValue
+      }
+      return props.cell.value
+    })
+    const formattedCellValue = computed<string>(() => {
+      if (typeof cellValue.value === 'number') {
+        return new Intl.NumberFormat('ru-RU', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(cellValue.value)
+      }
+      return cellValue.value
+    })
+
     const setValue = async (value: string) => {
       emit('clear-active')
-      if (props.cell.value !== value) {
-        if (mode === GridMode.CHANGE) {
-          await changeDefault(props.cell, value)
-        } else {
-          await changeValue(value)
-        }
+      if (props.cell.value === value || (props.cell.value === null && value === '')) {
+        return
+      }
+      if (mode === GridMode.CHANGE) {
+        await changeDefault(props.cell, value)
+      } else {
+        await changeValue(value)
       }
     }
 
@@ -141,7 +181,14 @@ export default defineComponent({
       if (mode === GridMode.CHANGE) {
         return true
       }
-      if (activeSheet.value.canChange) {
+      if (!activeDocument.value.lastStatus.status.edit || !props.cell.editable || props.cell.kind === 'f') {
+        return false
+      }
+      if (
+        activeSheet.value.canChange ||
+        activeSheet.value.canChangeValue ||
+        activeDocument.value.user?.id === userStore.user.id
+      ) {
         return true
       }
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
@@ -149,16 +196,6 @@ export default defineComponent({
         return userDivisionIds.includes(activeDocument.value.objectId)
       }
       return userDivisionIds.includes(props.cell.rowId)
-    })
-
-    const cellKind = computed<string>(() => {
-      if (props.cell.kind in cellKinds) {
-        if (props.cell.kind === 'fl' && mode === GridMode.CHANGE) {
-          return 'String'
-        }
-        return cellKinds[props.cell.kind]
-      }
-      return 'String'
     })
 
     const componentName = computed<string>(() => `GridCell${cellKind.value}`)
@@ -170,9 +207,9 @@ export default defineComponent({
 
     const componentProps = computed(() => {
       if (componentName.value === 'GridCellFiles') {
-        return { value: props.cell.value, files: files.value || [], readonly: !canChangeValue.value }
+        return { value: cellValue.value, files: files.value || [], readonly: !canChangeValue.value }
       }
-      return { value: props.cell.value, readonly: !canChangeValue.value }
+      return { value: cellValue.value, readonly: !canChangeValue.value }
     })
 
     const componentListeners = computed<Record<string, Function>>(() => {
@@ -186,7 +223,7 @@ export default defineComponent({
       'grid__cell-content_active': props.active && ['Numeric', 'String', 'Money'].includes(cellKind.value)
     }))
 
-    return { componentName, renderComponent, componentProps, componentListeners, contentClasses }
+    return { formattedCellValue, componentName, renderComponent, componentProps, componentListeners, contentClasses }
   }
 })
 </script>
