@@ -250,7 +250,7 @@ class ExcelExtractor:
                     coordinate=cell.coordinate,
                     formula=cell.value if isinstance(cell.value, str) and cell.value and cell.value[0] == '=' else None,
                     comment=cell.comment,
-                    default=cell.value,
+                    default=str(cell.value) if cell.value is not None else None,
                     border_color={
                         p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
                         for p, c in border_color.items()
