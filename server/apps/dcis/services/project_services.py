@@ -12,12 +12,16 @@ from apps.dcis.services.divisions_services import get_user_division_ids
 
 def get_user_participant_projects(user: User) -> QuerySet[Project]:
     """Получение проектов, в которых пользователь непосредственно участвует."""
-    return Project.objects.filter(Q(user=user) | Q(period__user=user) | Q(period__periodgroup__users=user))
+    return Project.objects.filter(
+        Q(user=user) |
+        Q(period__user=user, visibility=True) |
+        Q(period__periodgroup__users=user, visibility=True)
+    )
 
 
 def get_user_privileges_projects(user: User) -> QuerySet[Project]:
     """Получение проектов, связанных с привилегиями пользователя."""
-    return Project.objects.filter(period__periodprivilege__user=user)
+    return Project.objects.filter(period__periodprivilege__user=user, visibility=True)
 
 
 def get_user_divisions_projects(user: User) -> QuerySet[Project]:
@@ -27,7 +31,8 @@ def get_user_divisions_projects(user: User) -> QuerySet[Project]:
     for division_name, division_values in divisions.items():
         projects |= Project.objects.filter(
             content_type__model=division_name,
-            period__division__object_id__in=division_values
+            period__division__object_id__in=division_values,
+            visibility=True
         )
     return projects
 
@@ -37,10 +42,11 @@ def get_user_projects(user: User) -> QuerySet[Project]:
 
     Пользователь видит проект:
       - пользователь обладает глобальной привилегией dcis.view_project
-      - пользователь участвует в проекте
-        (создал проект, или создал один из периодов проекта, или состоит в группе одного из периодов проекта)
-      - пользователь имеет привилегию для одного из периодов проекта
-      - пользователь состоит в дивизионе, который участвует в проекте
+      - пользователь создал проект
+      - проект является видимым и пользователь участвует в проекте
+        (создал один из периодов проекта, или состоит в группе одного из периодов проекта)
+      - проект является видимым и пользователь имеет привилегию для одного из периодов проекта
+      - проект является видимым и пользователь состоит в дивизионе, который участвует в проекте
     """
     if user.has_perm('dcis.view_project'):
         return Project.objects.all()
@@ -55,22 +61,25 @@ def create_project(user: User, validate_field: dict, visibility: bool) -> Projec
     """Создание периода."""
     can_add_project(user)
     return Project.objects.create(
-            name=validate_field['name'],
-            short=validate_field['short'],
-            description=validate_field['description'],
-            content_type=ContentType.objects.get_for_model(Project.DIVISION_KIND.
-                                                           get(validate_field['content_type'], Department)),
-            visibility=visibility)
+        name=validate_field['name'],
+        short=validate_field['short'],
+        description=validate_field['description'],
+        content_type=ContentType.objects.get_for_model(
+            Project.DIVISION_KIND.get(validate_field['content_type'], Department)
+        ),
+        visibility=visibility
+    )
 
 
 def change_project(
-        user: User,
-        project: Project,
-        name: str,
-        short: str,
-        description: str,
-        visibility: bool,
-        archive: bool) -> Project:
+    user: User,
+    project: Project,
+    name: str,
+    short: str,
+    description: str,
+    visibility: bool,
+    archive: bool
+) -> Project:
     """Изменение настроек проекта."""
     can_change_project(user, project)
     project.name = name

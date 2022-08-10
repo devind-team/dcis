@@ -33,6 +33,9 @@ class GetUserProjectsTestCase(TestCase):
         self.user_projects = [Project.objects.create(
             user=self.user, content_type=self.department_content_type
         ) for _ in range(3)]
+        self.user_projects_invisible = [Project.objects.create(
+            user=self.user, content_type=self.department_content_type, visibility=False
+        ) for _ in range(3)]
 
         self.user_period_projects = [Project.objects.create(
             content_type=self.department_content_type
@@ -40,29 +43,55 @@ class GetUserProjectsTestCase(TestCase):
         self.user_periods = [Period.objects.create(
             user=self.user, project=project
         ) for project in self.user_period_projects]
+        self.user_period_projects_invisible = [Project.objects.create(
+            content_type=self.department_content_type, visibility=False
+        ) for _ in range(3)]
+        self.user_periods_invisible = [Period.objects.create(
+            user=self.user, project=project
+        ) for project in self.user_period_projects_invisible]
 
         self.user_group_projects = [Project.objects.create(
             content_type=self.department_content_type
         ) for _ in range(3)]
         self.user_group_periods = [Period.objects.create(project=project) for project in self.user_group_projects]
-        self.user_groups: list[PeriodGroup] = []
-        for period in self.user_group_periods:
-            self.user_groups.append(PeriodGroup.objects.create(period=period))
-            self.user_groups[-1].users.add(self.user)
+        self.user_group_projects_invisible = [Project.objects.create(
+            content_type=self.department_content_type, visibility=False
+        ) for _ in range(3)]
+        self.user_group_periods_invisible = [Period.objects.create(
+            project=project
+        ) for project in self.user_group_projects_invisible]
+        for period in [*self.user_group_periods, *self.user_group_periods_invisible]:
+            period_group = PeriodGroup.objects.create(period=period)
+            period_group.users.add(self.user)
 
+        self.privilege = Privilege.objects.create()
         self.privilege_project = Project.objects.create(content_type=self.department_content_type)
         self.privilege_period = Period.objects.create(project=self.privilege_project)
-        self.privilege = Privilege.objects.create()
-        self.period_privilege = PeriodPrivilege.objects.create(
-            period=self.privilege_period,
-            user=self.user,
-            privilege=self.privilege,
+        self.privilege_project_invisible = Project.objects.create(
+            content_type=self.department_content_type,
+            visibility=False
         )
+        self.privilege_period_invisible = Period.objects.create(project=self.privilege_project_invisible)
+        for period in [self.privilege_period, self.privilege_period_invisible]:
+            PeriodPrivilege.objects.create(
+                period=period,
+                user=self.user,
+                privilege=self.privilege,
+            )
 
         self.department = Department.objects.create(user=self.user)
         self.department_project = Project.objects.create(content_type=self.department_content_type)
         self.department_period = Period.objects.create(project=self.department_project)
         self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
+        self.department_project_invisible = Project.objects.create(
+            content_type=self.department_content_type,
+            visibility=False
+        )
+        self.department_period_invisible = Period.objects.create(project=self.department_project_invisible)
+        self.department_division_invisible = Division.objects.create(
+            period=self.department_period_invisible,
+            object_id=self.department.id
+        )
 
         self.organization = Organization.objects.create(attributes='', user=self.user)
         self.organization_project = Project.objects.create(content_type=self.organization_content_type)
@@ -77,7 +106,7 @@ class GetUserProjectsTestCase(TestCase):
     def test_get_user_participant_projects(self) -> None:
         """Тестирование функции `get_user_participant_projects`."""
         self.assertSetEqual(
-            {*self.user_projects, *self.user_period_projects, *self.user_group_projects},
+            {*self.user_projects, *self.user_projects_invisible, *self.user_period_projects, *self.user_group_projects},
             set(get_user_participant_projects(self.user)),
         )
 
@@ -114,6 +143,7 @@ class GetUserProjectsTestCase(TestCase):
         self.assertSetEqual(
             {
                 *self.user_projects,
+                *self.user_projects_invisible,
                 *self.user_period_projects,
                 *self.user_group_projects,
                 self.department_project,
@@ -126,6 +156,7 @@ class GetUserProjectsTestCase(TestCase):
 
 class ProjectsTestCase(TestCase):
     """Тестирование проекта и прав."""
+
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
