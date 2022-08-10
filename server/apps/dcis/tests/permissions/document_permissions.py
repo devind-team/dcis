@@ -199,90 +199,102 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_can_change_value(self) -> None:
         """Тестирование функции `can_change_value`."""
-        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
-            self._test_change_value((False, False, False, False, False, False))
-        self._test_change_value((False, False, False, False, True, True))
+        with patch(
+            'apps.dcis.permissions.document_permissions.ChangeDocumentSheetBase.is_document_editable',
+            new=Mock(__bool__=lambda _: False)
+        ):
+            self._test_can_change_value((False, False, False, False, False, False))
+        self._test_can_change_value((False, False, False, False, True, True))
         with patch(
             'apps.dcis.permissions.document_permissions.can_view_document',
             new=Mock(side_effect=PermissionDenied())
         ):
-            self._test_change_value((False, False, False, False, False, False))
+            self._test_can_change_value((False, False, False, False, False, False))
         with patch(
             'apps.dcis.permissions.document_permissions.can_view_document',
             new=Mock()
         ):
-            self._test_change_value((False, False, True, False, True, True))
+            self._test_can_change_value((False, False, True, False, True, True))
             with patch(
                 'apps.dcis.permissions.document_permissions.can_change_period_sheet_base',
                 new=Mock(return_value=True)
             ):
-                self._test_change_value((False, False, True, True, True, True))
+                self._test_can_change_value((False, False, True, True, True, True))
             with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_value'):
-                self._test_change_value((False, False, True, True, True, True))
+                self._test_can_change_value((False, False, True, True, True, True))
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-                self._test_change_value((False, False, True, True, True, True))
+                self._test_can_change_value((False, False, True, True, True, True))
                 mock.assert_called_with(self.user.id, self.user_period.id, 'change_value')
             with patch(
                 'apps.dcis.permissions.document_permissions.get_user_divisions',
                 new=Mock(return_value=({'id': 1},))
             ) as mock:
-                self._test_change_value((False, False, True, False, True, True))
+                self._test_can_change_value((False, False, True, False, True, True))
                 with patch.object(self.user_period_document, 'object_id', new=1), patch.object(
                     self.user_period, 'multiple', new=True,
                 ):
-                    self._test_change_value((False, False, True, True, True, True))
+                    self._test_can_change_value((False, False, True, True, True, True))
                     mock.assert_called_with(self.user, self.user_project)
                 with patch.object(self.document_row_dimension_child, 'object_id', new=1):
-                    self._test_change_value((False, False, True, True, True, True))
+                    self._test_can_change_value((False, False, True, True, True, True))
 
     def test_can_add_child_row_dimension(self) -> None:
         """Тестирование функции `can_add_child_row_dimension`."""
-        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
-            self._test_add_child_row_dimension((False, False, False, False, False))
-        self._test_add_child_row_dimension((False, False, True, False, True))
+        with patch(
+            'apps.dcis.permissions.document_permissions.ChangeDocumentSheetBase.is_document_editable',
+            new=Mock(__bool__=lambda _: False)
+        ):
+            self._test_can_add_child_row_dimension((False, False, False, False, False))
+        self._test_can_add_child_row_dimension((False, False, True, False, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
-            self._test_add_child_row_dimension((False, False, True, True, True))
+            self._test_can_add_child_row_dimension((False, False, True, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.add_rowdimension'):
-            self._test_add_child_row_dimension((False, False, True, True, True))
+            self._test_can_add_child_row_dimension((False, False, True, True, True))
         with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-            self._test_add_child_row_dimension((False, False, True, True, True))
+            self._test_can_add_child_row_dimension((False, False, True, True, True))
             mock.assert_called_with(self.user.id, self.user_period.id, 'add_rowdimension')
         with patch(
             'apps.dcis.permissions.document_permissions.get_user_divisions',
             new=Mock(return_value=({'id': 1},))
         ) as mock:
-            self._test_add_child_row_dimension((False, False, True, False, True))
+            self._test_can_add_child_row_dimension((False, False, True, False, True))
             with patch.object(self.user_period_document, 'object_id', new=1), patch.object(
                 self.user_period, 'multiple', new=True,
             ):
-                self._test_add_child_row_dimension((False, False, True, True, True))
+                self._test_can_add_child_row_dimension((False, False, True, True, True))
             with patch.object(self.document_dynamic_row_dimension, 'object_id', new=1):
-                self._test_add_child_row_dimension((False, False, True, True, True))
+                self._test_can_add_child_row_dimension((False, False, True, True, True))
 
     def test_can_change_child_row_dimension_height(self) -> None:
         """Тестирование функции `can_change_child_row_dimension_height`."""
-        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
-            self._test_change_child_row_dimension_height((False, False, False, False))
-        self._test_change_child_row_dimension_height((False, False, True, True))
+        with patch(
+            'apps.dcis.permissions.document_permissions.ChangeDocumentSheetBase.is_document_editable',
+            new=Mock(__bool__=lambda _: False)
+        ):
+            self._test_can_change_child_row_dimension_height((False, False, False, False))
+        self._test_can_change_child_row_dimension_height((False, False, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
-            self._test_change_child_row_dimension_height((False, True, True, True))
+            self._test_can_change_child_row_dimension_height((False, True, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_rowdimension'):
-            self._test_change_child_row_dimension_height((False, True, True, True))
+            self._test_can_change_child_row_dimension_height((False, True, True, True))
         with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-            self._test_change_child_row_dimension_height((False, True, True, True))
+            self._test_can_change_child_row_dimension_height((False, True, True, True))
             mock.assert_called_with(self.user.id, self.user_period.id, 'change_rowdimension')
 
     def test_can_delete_child_row_dimension(self) -> None:
         """Тестирование функции `can_delete_child_row_dimension`."""
-        with patch('apps.dcis.permissions.document_permissions.is_document_editable', new=Mock(return_value=False)):
-            self._test_delete_child_row_dimension((False, False, False, False, False))
-        self._test_delete_child_row_dimension((False, False, False, True, True))
+        with patch(
+            'apps.dcis.permissions.document_permissions.ChangeDocumentSheetBase.is_document_editable',
+            new=Mock(__bool__=lambda _: False)
+        ):
+            self._test_can_delete_child_row_dimension((False, False, False, False, False))
+        self._test_can_delete_child_row_dimension((False, False, False, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_sheet'):
-            self._test_delete_child_row_dimension((False, False, True, True, True))
+            self._test_can_delete_child_row_dimension((False, False, True, True, True))
         with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.delete_rowdimension'):
-            self._test_delete_child_row_dimension((False, False, True, True, True))
+            self._test_can_delete_child_row_dimension((False, False, True, True, True))
         with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
-            self._test_delete_child_row_dimension((False, False, True, True, True))
+            self._test_can_delete_child_row_dimension((False, False, True, True, True))
             mock.assert_called_with(self.user.id, self.user_period.id, 'delete_rowdimension')
 
     def _test_common(self, f: Callable, *args) -> None:
@@ -309,8 +321,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 f(self.user, self.user_period_document, *args)
                 mock.assert_called_once_with(self.user.id, self.user_period.id, 'change_document')
 
-    def _test_change_value(self, values: tuple[bool, bool, bool, bool, bool, bool]) -> None:
-        """Тестирование класса `ChangeValue` для 6 типов ячеек."""
+    def _test_can_change_value(self, values: tuple[bool, bool, bool, bool, bool, bool]) -> None:
+        """Тестирование функции `can_change_value` для 6 типов ячеек."""
         for cell_obj, value in zip((
             self.not_editable_cell_obj,
             self.formula_cell_obj,
@@ -330,8 +342,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                     cell_obj['cell']
                 )
 
-    def _test_add_child_row_dimension(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
-        """Тестирование класса `AddChildRowDimension` для 5 типов строк."""
+    def _test_can_add_child_row_dimension(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
+        """Тестирование функции `can_add_child_row_dimension` для 5 типов строк."""
         for row_dimension, value in zip((
             {'document': self.user_period_document, 'row_dimension': self.row_dimension},
             {'document': self.user_period_document, 'row_dimension': self.document_row_dimension},
@@ -354,8 +366,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                     row_dimension['row_dimension']
                 )
 
-    def _test_change_child_row_dimension_height(self, values: tuple[bool, bool, bool, bool]) -> None:
-        """Тестирование класса `ChangeChildRowDimensionHeight` для 4 типов строк."""
+    def _test_can_change_child_row_dimension_height(self, values: tuple[bool, bool, bool, bool]) -> None:
+        """Тестирование функции `can_change_child_row_dimension_height` для 4 типов строк."""
         for row_dimension, value in zip((
             self.row_dimension,
             self.document_row_dimension,
@@ -372,8 +384,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                     row_dimension
                 )
 
-    def _test_delete_child_row_dimension(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
-        """Тестирование класса `DeleteChildRowDimension` для 5 типов строк."""
+    def _test_can_delete_child_row_dimension(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
+        """Тестирование функции `can_delete_child_row_dimension` для 5 типов строк."""
         for row_dimension, value in zip((
             self.row_dimension,
             self.document_row_dimension_with_child,
