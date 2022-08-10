@@ -18,6 +18,7 @@ mutation-form(
       :loading="loading"
       show-select
       hide-default-footer
+      disable-pagination
     )
 v-data-table(
   v-else
