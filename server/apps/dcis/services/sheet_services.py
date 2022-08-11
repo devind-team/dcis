@@ -233,7 +233,7 @@ class CheckCellOptions:
                     f'Значение свойства {field} не входит в разрешенный диапазон: 10 <= {value} <= 24.'
                 )
             return cls.Success(value)
-        if field in ['strong', 'italic', 'strike']:
+        if field in ['strong', 'italic', 'strike', 'editable']:
             try:
                 value = convert_str_to_bool(value)
                 return cls.Success(value)
@@ -245,7 +245,11 @@ class CheckCellOptions:
                     )
                 )
 
-    _allowed_fields = ['strong', 'italic', 'strike', 'underline', 'horizontal_align', 'vertical_align', 'size', 'kind']
+    _allowed_fields = [
+        'strong', 'italic', 'strike',
+        'underline', 'horizontal_align', 'vertical_align',
+        'editable', 'size', 'kind'
+    ]
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']
     _allowed_underline = [None, 'single', 'double', 'single_accounting', 'double_accounting']
