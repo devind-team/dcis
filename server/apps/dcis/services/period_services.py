@@ -2,9 +2,9 @@
 
 from datetime import date
 
-from devind_core.models import File
 from devind_helpers.orm_utils import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
@@ -19,6 +19,7 @@ from apps.dcis.permissions import (
     can_view_period
 )
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
+from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
 
 def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[Period]:
@@ -87,25 +88,32 @@ def get_user_period_privileges(user_id: int | str, period_id: int | str) -> Quer
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
 
 
-def create_period(name: str, user: User, project: Project, multiple: bool) -> Period:
+@transaction.atomic
+def create_period(
+    name: str,
+    user: User,
+    project: Project,
+    multiple: bool,
+    file: InMemoryUploadedFile,
+    readonly_fill_color: bool
+) -> Period:
     """Создание периода."""
     can_add_period(user, project)
-    return Period.objects.create(
-            name=name,
-            user=user,
-            project=project,
-            multiple=multiple
-        )
-
-
-def add_period_methodical_support(period: Period, file: InMemoryUploadedFile, user: User) -> File:
-    """Добавление файлов в период."""
-    return period.methodical_support.create(
-            name=file.name,
-            src=file,
-            deleted=False,
-            user=user
-        )
+    period = Period.objects.create(
+        name=name,
+        user=user,
+        project=project,
+        multiple=multiple
+    )
+    fl = period.methodical_support.create(
+        name=file.name,
+        src=file,
+        deleted=False,
+        user=user
+    )
+    extractor = ExcelExtractor(fl.src.path, readonly_fill_color)
+    extractor.save(period)
+    return period
 
 
 def add_divisions_period(user: User, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
@@ -232,4 +240,3 @@ def delete_period_groups(user: User, period_group: PeriodGroup) -> None:
     """Удаление группы периода."""
     can_change_period_groups(user, period_group.period)
     period_group.delete()
-

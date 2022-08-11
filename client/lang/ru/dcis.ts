@@ -59,6 +59,7 @@ export default {
       header: 'Добавление периода',
       name: 'Название периода',
       file: 'Файл с формой сбора',
+      readonlyFillColor: 'Запретить редактирование ячеек с заливкой',
       multiple: 'Множественное заполнение'
     },
     changePeriod: {

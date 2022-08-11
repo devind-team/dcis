@@ -287,14 +287,16 @@ type AddPeriodGroupMutationPayload {
 
 input AddPeriodMutationInput {
   clientMutationId: String
-  """Xlsx файл с проектом"""
+  """xlsx файл с проектом"""
   file: Upload!
-  """Множественность сбора"""
+  """Множественный тип сбора"""
   multiple: Boolean!
   """Название периода"""
   name: String!
   """Идентификатор проекта"""
   projectId: ID!
+  """Запретить редактирование ячеек с заливкой"""
+  readonlyFillColor: Boolean!
 }
 
 """Мутация для создания периода."""

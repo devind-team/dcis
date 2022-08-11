@@ -123,6 +123,7 @@ export type CellsOptionsType = {
   underline: string | null
   horizontalAlign: 'left' | 'center' | 'right' | null
   verticalAlign: 'top' | 'middle' | 'bottom' | null
+  editable: boolean
   size: number | null
   kind: string | null
 }
