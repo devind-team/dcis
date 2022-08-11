@@ -2,13 +2,11 @@ from datetime import date
 from typing import Any
 
 import graphene
-from devind_core.models import File
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db import transaction
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
@@ -17,11 +15,9 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.models import Period, PeriodGroup, Project
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
-from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
-    add_period_methodical_support,
     change_period_group_privileges,
     change_settings_period,
     change_user_period_groups,
@@ -40,13 +36,13 @@ class AddPeriodMutation(BaseMutation):
     class Input:
         name = graphene.String(required=True, description='Название периода')
         project_id = graphene.ID(required=True, description='Идентификатор проекта')
-        file = Upload(required=True, description='Xlsx файл с проектом')
-        multiple = graphene.Boolean(required=True, description='Множественность сбора')
+        file = Upload(required=True, description='xlsx файл с проектом')
+        multiple = graphene.Boolean(required=True, description='Множественный тип сбора')
+        readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
 
     period = graphene.Field(PeriodType, description='Добавленный период')
 
     @staticmethod
-    @transaction.atomic
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(
         root: Any,
@@ -54,14 +50,20 @@ class AddPeriodMutation(BaseMutation):
         name: str,
         project_id: str,
         file: InMemoryUploadedFile,
-        multiple: bool
+        multiple: bool,
+        readonly_fill_color: bool
     ):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
-        period: Period = create_period(name, info.context.user, project, multiple)
-        fl: File = add_period_methodical_support(period, file, info.context.user)
-        extractor: ExcelExtractor = ExcelExtractor(fl.src.path)
-        extractor.save(period)
-        return AddPeriodMutation(period=period)
+        return AddPeriodMutation(
+            period=create_period(
+                name=name,
+                user=info.context.user,
+                project=project,
+                multiple=multiple,
+                file=file,
+                readonly_fill_color=readonly_fill_color
+            )
+        )
 
 
 class ChangePeriodMutation(BaseMutation):

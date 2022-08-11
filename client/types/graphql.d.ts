@@ -310,14 +310,16 @@ export type AddPeriodGroupMutationPayload = {
 
 export type AddPeriodMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Xlsx файл с проектом */
+  /** xlsx файл с проектом */
   file: Scalars['Upload'];
-  /** Множественность сбора */
+  /** Множественный тип сбора */
   multiple: Scalars['Boolean'];
   /** Название периода */
   name: Scalars['String'];
   /** Идентификатор проекта */
   projectId: Scalars['ID'];
+  /** Запретить редактирование ячеек с заливкой */
+  readonlyFillColor: Scalars['Boolean'];
 };
 
 /** Мутация для создания периода. */
@@ -5415,6 +5417,7 @@ export type AddPeriodMutationVariables = Exact<{
   projectId: Scalars['ID'];
   file: Scalars['Upload'];
   multiple: Scalars['Boolean'];
+  readonlyFillColor: Scalars['Boolean'];
 }>;
 
 export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } | null } };

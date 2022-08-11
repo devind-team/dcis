@@ -4,7 +4,7 @@ mutation-modal-form(
   :subheader="project.name"
   :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
   :mutation="addPeriod"
-  :variables="{ name, file, projectId: project.id, multiple }"
+  :variables="{ name, file, projectId: project.id, multiple, readonlyFillColor }"
   :update="addPeriodUpdate"
   mutation-name="addPeriod"
   i18n-path="dcis.projects.addPeriod"
@@ -36,6 +36,7 @@ mutation-modal-form(
         :error-messages="errors"
         :success="valid"
       )
+    v-checkbox(v-model="readonlyFillColor" :label="$t('dcis.periods.addPeriod.readonlyFillColor')")
     v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
 </template>
 
@@ -59,6 +60,7 @@ export default defineComponent({
   setup (props) {
     const name = ref<string>('')
     const file = ref<File | null>(null)
+    const readonlyFillColor = ref<boolean>(false)
     const multiple = ref<boolean>(true)
 
     const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
@@ -72,7 +74,7 @@ export default defineComponent({
       name.value = ''
       file.value = null
     }
-    return { name, file, multiple, addPeriod, addPeriodUpdate, close }
+    return { name, file, readonlyFillColor, multiple, addPeriod, addPeriodUpdate, close }
   }
 })
 </script>
