@@ -22,7 +22,7 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_DB: collect
+          POSTGRES_DB: dcis
           POSTGRES_PASSWORD: 1234
         options: >-
           --health-cmd pg_isready
@@ -44,11 +44,14 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run python manage.py test
+        run: |
+          cp .env.example
+          poetry run python manage.py test
 
   build_server:
     name: Build server
     runs-on: ubuntu-latest
+    needs: test_server
     permissions:
       contents: read
       packages: write
