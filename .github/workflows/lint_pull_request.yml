@@ -23,6 +23,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: 672-flake8-для-сервера
           LINTER_RULES_PATH: server
-          FILTER_REGEX_INCLUDE: server/*
           PYTHON_FLAKE8_CONFIG_FILE: .flake8
           VALIDATE_PYTHON_FLAKE8: true
