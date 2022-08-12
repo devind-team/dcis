@@ -14,28 +14,23 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Install Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           check-latest: true
-      - name: flake8 Lint
-        uses: py-actions/flake8@v2
-        with:
-          max-line-length: 120
-          ignore: 'F401, SC200, ANN002, ANN003, ANN001, I100'
-          exclude: 'migrations'
-          path: ./server
-          plugins: 'flake8-annotations flake8-docstrings'
-
-#        with:
-#          fetch-depth: 0
-#      - name: Lint python code
-#        uses: github/super-linter@v4
-#        env:
-#          VALIDATE_ALL_CODEBASE: false
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          DEFAULT_BRANCH: 672-flake8-для-сервера
-#          DEFAULT_WORKSPACE: server
-#          PYTHON_FLAKE8_CONFIG_FILE: .flake8
-#          VALIDATE_PYTHON_FLAKE8: true
+      - name: Setup Poetry
+        uses: Gr1N/setup-poetry@v7
+      - name: Install dependencies
+        run: poetry install
+      - name: Lint python code
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: 672-flake8-для-сервера
+          DEFAULT_WORKSPACE: server
+          PYTHON_FLAKE8_CONFIG_FILE: .flake8
+          VALIDATE_PYTHON_FLAKE8: true
