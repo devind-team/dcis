@@ -34,19 +34,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          check-latest: true
-      - name: Setup Poetry
-        uses: Gr1N/setup-poetry@v7
-      - name: Install dependencies
-        run: poetry install
-      - name: Run tests
-        run: |
-          cp .env.example
-          poetry run python manage.py test
+      - name: Copy
+        run: ls -al
+#      - name: Install Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.10'
+#          check-latest: true
+#      - name: Setup Poetry
+#        uses: Gr1N/setup-poetry@v7
+#      - name: Install dependencies
+#        run: poetry install
+#      - name: Run tests
+#        run: |
+#          cp .env.example
+#          poetry run python manage.py test
 
   build_server:
     name: Build server
