@@ -11,6 +11,9 @@ jobs:
   lint_python:
     name: Lint python
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -22,5 +25,5 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
-          PYTHON_FLAKE8_CONFIG_FILE: server/.flake8
+          PYTHON_FLAKE8_CONFIG_FILE: .flake8
           VALIDATE_PYTHON_FLAKE8: true
