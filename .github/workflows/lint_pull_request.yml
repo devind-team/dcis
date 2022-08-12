@@ -22,10 +22,10 @@ jobs:
       - name: flake8 Lint
         uses: py-actions/flake8@v2
         with:
-          max-line-length: '120'
+          max-line-length: 120
           ignore: 'F401, SC200, ANN002, ANN003, ANN001, I100'
           exclude: 'migrations'
-          path: "server"
+          path: server
           plugins: 'flake8-annotations flake8-docstrings'
 
 #        with:
