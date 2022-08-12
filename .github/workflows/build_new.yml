@@ -22,7 +22,7 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_DB: dcis
+          POSTGRES_DB: devind
           POSTGRES_PASSWORD: 1234
         options: >-
           --health-cmd pg_isready
