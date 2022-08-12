@@ -43,10 +43,12 @@ jobs:
         uses: Gr1N/setup-poetry@v7
       - name: Install dependencies
         run: poetry install
+      - name: Copy env
+        run: cp .env.example .env
+      - name: Run migration
+        run: poetry run python manage.py migrate
       - name: Run tests
-        run: |
-          cp .env.example .env
-          poetry run python manage.py test
+        run: poetry run python manage.py test
 
   build_server:
     name: Build server
