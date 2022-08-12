@@ -25,7 +25,6 @@ jobs:
           max-line-length: 120
           ignore: 'F401, SC200, ANN002, ANN003, ANN001, I100'
           exclude: 'migrations'
-          path: server
           plugins: 'flake8-annotations flake8-docstrings'
 
 #        with:
