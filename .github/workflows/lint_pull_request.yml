@@ -22,7 +22,7 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: 672-flake8-для-сервера
-          DEFAULT_WORKSPACE: /server
-          FILTER_REGEX_INCLUDE: ./server/*.py
+          LINTER_RULES_PATH: /server/
+          FILTER_REGEX_INCLUDE: /server/*.py
           PYTHON_FLAKE8_CONFIG_FILE: .flake8
           VALIDATE_PYTHON_FLAKE8: true
