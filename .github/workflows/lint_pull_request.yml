@@ -1,29 +1,29 @@
-name: Linter pull request
+#name: Linter pull request
 #on:
 #  pull_request:
 #    branches:
 #      - main
-
-jobs:
-  lint_python:
-    name: Lint python
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: server
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          check-latest: true
-      - name: Setup Poetry
-        uses: Gr1N/setup-poetry@v7
-      - name: Install dependencies
-        run: poetry install
-      - name: Lint python code
-        run: poetry run flake8
+#
+#jobs:
+#  lint_python:
+#    name: Lint python
+#    runs-on: ubuntu-latest
+#    defaults:
+#      run:
+#        working-directory: server
+#    steps:
+#      - name: Checkout Code
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - name: Install Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.10'
+#          check-latest: true
+#      - name: Setup Poetry
+#        uses: Gr1N/setup-poetry@v7
+#      - name: Install dependencies
+#        run: poetry install
+#      - name: Lint python code
+#        run: poetry run flake8
