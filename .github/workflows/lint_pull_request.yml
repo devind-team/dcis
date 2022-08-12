@@ -11,6 +11,9 @@ jobs:
   lint_python:
     name: Lint python
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
