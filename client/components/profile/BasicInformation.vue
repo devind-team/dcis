@@ -13,51 +13,15 @@ apollo-mutation(
         v-col(cols="12" md="9")
           v-alert(type="success" :value="successUpdate") {{ $t('mutationSuccess')}}
           v-alert(type="error" :value="!!error" dismissible) {{$t('mutationBusinessLogicError', { error: error})}}
-          v-text-field(
-            :value="personalLink"
-            :label="$t('profile.personalLink')"
-            readonly)
-            template(#append-outer)
-              v-tooltip(bottom)
-                template(#activator="{ on }")
-                  v-btn(v-on="on" @click="copy(personalLink)" icon)
-                    v-icon mdi-content-copy
-                span {{ $t('copy') }}
           v-text-field(:value="user.username" :label="$t('profile.username')" readonly)
           validation-provider(:name="$t('profile.email')" rules="required|email" v-slot="{ errors, valid }")
-            v-text-field(v-model="email" :label="$t('profile.email')" :error-messages="errors" :success="valid")
+            v-text-field(v-model="email" :label="$t('profile.email')" :error-messages="errors" :success="valid" readonly)
           validation-provider(:name="$t('profile.lastName')" rules="required|min:2|max:30" v-slot="{ errors, valid }")
-            v-text-field(v-model="lastName" :label="$t('profile.lastName')" :error-messages="errors" :success="valid")
+            v-text-field(v-model="lastName" :label="$t('profile.lastName')" :error-messages="errors" :success="valid" readonly)
           validation-provider(:name="$t('profile.firstName')" rules="required|min:2|max:30" v-slot="{ errors, valid }")
-            v-text-field(v-model="firstName" :label="$t('profile.firstName')" :error-messages="errors" :success="valid")
+            v-text-field(v-model="firstName" :label="$t('profile.firstName')" :error-messages="errors" :success="valid" readonly)
           validation-provider(:name="$t('profile.sirName')" rules="required|min:2|max:30" v-slot="{ errors, valid }")
-            v-text-field(v-model="sirName" :label="$t('profile.sirName')" :error-messages="errors" :success="valid")
-          v-menu(
-            v-model="menu"
-            :close-on-content-click="false"
-            bottom max-width="290px"
-            transition="scale-transition"
-            min-width="290px"
-          )
-            template(v-slot:activator="{ on }")
-              validation-provider(
-                :name="$t('profile.birthday')"
-                rules="required"
-                v-slot="{ errors, valid }"
-                tag="div"
-              )
-                v-text-field(
-                  v-on="on"
-                  v-model="birthday"
-                  :error-messages="errors"
-                  :success="valid"
-                  :label="$t('profile.birthday')"
-                  readonly
-                )
-            v-date-picker(v-model="birthday" @input="menu = false")
-      v-row
-        v-col.text-right
-          v-btn(:disabled="invalid" :loading="loading" type="submit" color="success") {{ $t('save') }}
+            v-text-field(v-model="sirName" :label="$t('profile.sirName')" :error-messages="errors" :success="valid" readonly)
 </template>
 
 <script lang="ts">
