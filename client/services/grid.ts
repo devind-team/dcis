@@ -286,7 +286,7 @@ const getCellOptions = (cells: CellType[]): CellsOptionsType => {
   const possibleCellsOptions: (keyof CellsOptionsType)[] = [
     'strong', 'italic', 'strike',
     'underline', 'horizontalAlign', 'verticalAlign',
-    'size', 'kind'
+    'editable', 'size', 'kind'
   ]
   const result: any = { cells }
   for (const option of possibleCellsOptions) {

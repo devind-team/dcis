@@ -1,8 +1,20 @@
 #import "../../fragments/period_fields.graphql"
 #import "../../../core/fragments/user_fields.graphql"
 
-mutation AddPeriod($name: String!, $projectId: ID!, $file: Upload!, $multiple: Boolean!) {
-  addPeriod(input: {name: $name, projectId: $projectId, file: $file, multiple: $multiple}) {
+mutation AddPeriod(
+  $name: String!,
+  $projectId: ID!,
+  $file: Upload!,
+  $multiple: Boolean!,
+  $readonlyFillColor: Boolean!
+) {
+  addPeriod(input: {
+    name: $name,
+    projectId: $projectId,
+    file: $file,
+    multiple: $multiple,
+    readonlyFillColor: $readonlyFillColor
+  }) {
     success
     errors {
       field

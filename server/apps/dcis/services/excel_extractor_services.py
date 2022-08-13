@@ -4,18 +4,18 @@ from typing import Iterator
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
-from openpyxl.styles.colors import COLOR_INDEX, WHITE
+from openpyxl.styles.colors import COLOR_INDEX, Color, WHITE
 from openpyxl.utils.cell import column_index_from_string, get_column_letter
 from openpyxl.worksheet.dimensions import (
     ColumnDimension as OpenpyxlColumnDimension,
     DimensionHolder,
     RowDimension as OpenpyxlRowDimension,
 )
-from openpyxl.worksheet.merge import MergeCell, MergedCell as OpenpyxlMergedCell
+from openpyxl.worksheet.merge import MergeCell as OpenpyxlMergedCell
 from xlsx_evaluate import Evaluator, ModelCompiler
 
-from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from apps.dcis.helpers.sheet_cache import FormulaContainerCache
+from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 
 
@@ -56,6 +56,7 @@ class BuildCell(BuildStyle):
     column_id: int
     row_id: int
     kind: str
+    editable: bool
     coordinate: str | None = None
     formula: str | None = None
     comment: str | None = None
@@ -89,13 +90,14 @@ class BuildSheet:
 class ExcelExtractor:
     """Парсинг xlsx файла в структуру данных для последовательной загрузки в базу данных."""
 
-    def __init__(self, path: PosixPath):
+    def __init__(self, path: PosixPath, readonly_fill_color: bool):
         """Инициализация.
 
         :param path - путь к файлу Excel.
         """
         self.path = path
         self.work_book = load_workbook(path)
+        self.readonly_fill_color = readonly_fill_color
 
     def save(self, period: Period):
         """Сохранение обработанного файла в базу данных."""
@@ -210,7 +212,7 @@ class ExcelExtractor:
         )
 
     @staticmethod
-    def __color_transform(wb, color):
+    def __color_transform(wb: Workbook, color: Color):
         if color and color.type == 'indexed':
             if color.index == 64 or color.index == 65:
                 color = None
@@ -231,7 +233,7 @@ class ExcelExtractor:
         cells: list[BuildCell] = []
         for row in rows:
             for cell in row:
-                border_color: dict[str, int | str] = {
+                border_color: dict[str, Color] = {
                     positional: self.__color_transform(wb, getattr(cell.border, positional).color)
                     for positional in ('top', 'bottom', 'left', 'right', 'diagonal')
                 }
@@ -247,10 +249,11 @@ class ExcelExtractor:
                     column_id=cell.column,
                     row_id=cell.row,
                     kind=cell.data_type,
+                    editable=not self.readonly_fill_color or fill_color.value == '00000000',
                     coordinate=cell.coordinate,
                     formula=cell.value if isinstance(cell.value, str) and cell.value and cell.value[0] == '=' else None,
                     comment=cell.comment,
-                    default=cell.value,
+                    default=str(cell.value) if cell.value is not None else None,
                     border_color={
                         p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
                         for p, c in border_color.items()
@@ -260,7 +263,7 @@ class ExcelExtractor:
         return cells
 
     @staticmethod
-    def _parse_merged_cells(ranges: list[MergeCell]) -> list[BuildMergedCell]:
+    def _parse_merged_cells(ranges: list[OpenpyxlMergedCell]) -> list[BuildMergedCell]:
         """Парсинг объединенных ячеек."""
         return [BuildMergedCell(rng.min_col, rng.min_row, rng.max_col, rng.max_row) for rng in ranges]
 

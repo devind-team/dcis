@@ -82,8 +82,8 @@ def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) 
 
 class ValueState(TypedDict):
     """Результативное состояние для расчета новых значений по формулам."""
-    value: int | float | str | None
-    error: str | None = None
+    value: str | None
+    error: str | None
     formula: str | None
     cell: Cell
 

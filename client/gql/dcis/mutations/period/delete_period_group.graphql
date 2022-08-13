@@ -1,12 +1,12 @@
 mutation DeletePeriodGroup($id: ID!) {
-  deletePeriodGroup(id: $id) {
+  deletePeriodGroup(input: { periodGroupId: $id }) {
     success
     errors {
       field
       messages
       __typename
     }
-    found
-    deletedId
+    deleteId
+    __typename
   }
 }

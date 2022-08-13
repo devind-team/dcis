@@ -6,6 +6,7 @@ import { GridMode } from '~/types/grid'
 export const cellKinds = {
   n: 'Numeric',
   s: 'String',
+  f: 'Formula',
   text: 'Text',
   fl: 'Files',
   money: 'Money',
