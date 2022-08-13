@@ -61,6 +61,7 @@
 
 <script lang="ts">
 import { defineComponent, Ref, PropType, toRef, provide } from '#app'
+import { fromGlobalId } from '~/services/graphql-relay'
 import { GridMode, UpdateSheetType } from '~/types/grid'
 import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import {
@@ -108,7 +109,15 @@ export default defineComponent({
       if (props.mode === GridMode.CHANGE) {
         return true
       }
-      return rowDimension.parent !== null && (activeSheet.value.canChange || userStore.user.id === rowDimension.userId)
+      if (!activeDocument.value.lastStatus.status.edit) {
+        return false
+      }
+      return rowDimension.parent !== null && (
+        activeSheet.value.canChange ||
+        activeSheet.value.canChangeChildRowDimensionHeight ||
+        activeDocument.value.user?.id === userStore.user.id ||
+        rowDimension.userId === String(fromGlobalId(userStore.user.id).id)
+      )
     }
 
     const changeColumnWidth = props.mode === GridMode.CHANGE

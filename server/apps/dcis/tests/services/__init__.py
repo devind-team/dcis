@@ -1,5 +1,5 @@
 from .divisions_services import DivisionsServicesTestCase
-from .document_services import GetUserDocumentsTestCase
+from .document_services import GetUserDocumentsTestCase, DocumentTestCase
 from .period_services import GetUserPeriodsTestCase
 from .privilege_services import PrivilegeServicesTestCase
 from .project_services import GetUserProjectsTestCase

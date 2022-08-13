@@ -185,12 +185,12 @@ export default defineComponent({
       }
     }
 
-    const deletePeriodDone = ({ data: { deletePeriod: { success, deletedId } } }: DeletePeriodResultMutation) => {
+    const deletePeriodDone = ({ data: { deletePeriod: { success, deleteId } } }: DeletePeriodResultMutation) => {
       if (success) {
         router.push(localePath({
           name: 'dcis-projects-projectId-periods',
           params: { projectId: props.period.project.id },
-          query: { periodId: deletedId }
+          query: { deletePeriodId: deleteId }
         }))
       }
     }

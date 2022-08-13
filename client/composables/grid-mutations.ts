@@ -663,7 +663,7 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<Docume
             )
             if (option.field === 'size') {
               cell[option.field] = Number(option.value)
-            } else if (['strong', 'italic', 'strike'].includes(option.field)) {
+            } else if (['strong', 'italic', 'strike', 'editable'].includes(option.field)) {
               cell[option.field] = option.value === 'true'
             } else {
               cell[option.field] = option.value
@@ -823,6 +823,7 @@ const updateValues = (data: DocumentSheetQuery, values: ValueType[], updatedAt: 
     row.cells = row.cells.map((c: CellFieldsFragment) => {
       if (c.columnId in value) {
         c.value = value[c.columnId].value
+        c.error = value[c.columnId].error
         c.verified = value[c.columnId].verified
       }
       return c

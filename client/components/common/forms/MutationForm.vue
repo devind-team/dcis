@@ -20,7 +20,7 @@ apollo-mutation(
             :success-message="successMessage"
           )
           slot(name="form")
-        v-card-actions
+        v-card-actions(v-if="!hideActions")
           slot(
             name="actions"
             :button-text="buttonText"
@@ -61,7 +61,8 @@ export default defineComponent({
     i18nPath: { type: String, default: '' },
     hideAlertTimeout: { type: Number, default: 20000 },
     successMessage: { type: String, default: '' },
-    flat: { type: Boolean, default: false }
+    flat: { type: Boolean, default: false },
+    hideActions: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
     const { t } = useI18n()

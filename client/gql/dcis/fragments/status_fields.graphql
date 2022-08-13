@@ -3,5 +3,6 @@ fragment StatusFields on StatusType {
   name
   comment
   edit
+  protected
   __typename
 }

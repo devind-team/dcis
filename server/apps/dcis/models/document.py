@@ -7,8 +7,9 @@ from .project import Period
 class Status(models.Model):
     """Модель статусов документов."""
 
-    name = models.CharField(max_length=250, help_text='Наименование статуса')
-    edit = models.BooleanField(default=False, help_text='Можно ли редактировать')
+    name = models.CharField(max_length=250, help_text='Название статуса')
+    edit = models.BooleanField(default=False, help_text='Можно ли редактировать документ со статусом')
+    protected = models.BooleanField(default=True, help_text='Является ли статус защищенным от изменения')
     comment = models.TextField(null=True, help_text='Комментарий')
 
     class Meta:
@@ -53,6 +54,7 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
 
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь, добавивший документ')
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     sheets = models.ManyToManyField(Sheet)
 

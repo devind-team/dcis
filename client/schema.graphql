@@ -62,10 +62,23 @@ type ActiveStatisticsType {
   times: [DateStatisticsType]!
 }
 
+input AddBudgetClassificationMutationInput {
+  clientMutationId: String
+  """Code"""
+  code: String!
+  """Name"""
+  name: String!
+}
+
 """Мутация для добавления КБК в словарь."""
 type AddBudgetClassificationMutationPayload {
   """Добавленная КБК"""
   budgetClassification: BudgetClassificationType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input AddCategoryMutationInput {
@@ -253,10 +266,20 @@ type AddPageMutationPayload {
   success: Boolean!
 }
 
-"""Мутация на добавление группы периода."""
+input AddPeriodGroupMutationInput {
+  clientMutationId: String
+  """Название группы периода"""
+  name: String!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация на добавление группы в период."""
 type AddPeriodGroupMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Добавленная группа периода"""
   periodGroup: PeriodGroupType
   """Успех мутации"""
   success: Boolean!
@@ -264,14 +287,16 @@ type AddPeriodGroupMutationPayload {
 
 input AddPeriodMutationInput {
   clientMutationId: String
-  """Xlsx файл с проектом"""
+  """xlsx файл с проектом"""
   file: Upload!
-  """Множественность сбора"""
+  """Множественный тип сбора"""
   multiple: Boolean!
   """Название периода"""
   name: String!
   """Идентификатор проекта"""
   projectId: ID!
+  """Запретить редактирование ячеек с заливкой"""
+  readonlyFillColor: Boolean!
 }
 
 """Мутация для создания периода."""
@@ -308,8 +333,23 @@ type AddProfileMutationPayload {
   success: Boolean!
 }
 
+input AddProjectMutationInput {
+  clientMutationId: String
+  """Тип дивизиона"""
+  contentType: String!
+  """Описание проекта"""
+  description: String!
+  """Наименование проекта"""
+  name: String!
+  """Сокращенное наименование проекта"""
+  short: String!
+  """Видимость проекта"""
+  visibility: Boolean
+}
+
 """Мутация для добавления проекта."""
 type AddProjectMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Добавленный проект"""
@@ -897,9 +937,23 @@ type ChangeColumnDimensionMutationPayload {
   width: Int
 }
 
+input ChangeDocumentCommentMutationInput {
+  clientMutationId: String
+  """Комментарий"""
+  comment: String!
+  """Идентификатор документа"""
+  documentId: ID
+}
+
 """Изменение комментария версии документа."""
 type ChangeDocumentCommentMutationPayload {
+  clientMutationId: String
+  """Созданный документ"""
   document: DocumentType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input ChangeFileMutationInput {
@@ -1185,8 +1239,27 @@ type ChangePeriodGroupPrivilegesMutationPayload {
   success: Boolean!
 }
 
+input ChangePeriodMutationInput {
+  clientMutationId: String
+  """Дата окончания"""
+  expiration: Date
+  """Множественное заполнение"""
+  multiple: Boolean!
+  """Название периода"""
+  name: String!
+  """Идентификатор текущего периода"""
+  periodId: ID!
+  """Приватность полей"""
+  privately: Boolean!
+  """Дата начала"""
+  start: Date
+  """Статус проекта"""
+  status: String!
+}
+
 """Мутация на изменение настроек периода."""
 type ChangePeriodMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Измененный период"""
@@ -1235,8 +1308,25 @@ type ChangeProfileVisibilityMutationPayload {
   success: Boolean!
 }
 
+input ChangeProjectMutationInput {
+  """Архив"""
+  archive: Boolean
+  clientMutationId: String
+  """Описание проекта"""
+  description: String
+  """Наименование проекта"""
+  name: String
+  """Идентификатор проекта"""
+  projectId: ID!
+  """Сокращенное наименование проекта"""
+  short: String
+  """Видимость проекта"""
+  visibility: Boolean
+}
+
 """Мутация изменения настроек проекта."""
 type ChangeProjectMutationPayload {
+  clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Измененный проект"""
@@ -1406,7 +1496,7 @@ type ChangeUserPeriodGroupsMutationPayload {
   user: UserType!
 }
 
-input ChangeUserPeriodPrivilegesInput {
+input ChangeUserPeriodPrivilegesMutationInput {
   clientMutationId: String
   """Идентификатор периода"""
   periodId: ID!
@@ -1417,7 +1507,7 @@ input ChangeUserPeriodPrivilegesInput {
 }
 
 """Мутация на изменение отдельных привилегий пользователя в периоде."""
-type ChangeUserPeriodPrivilegesPayload {
+type ChangeUserPeriodPrivilegesMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1476,7 +1566,7 @@ type ChangeValueMutationPayload {
   """Успех мутации"""
   success: Boolean!
   """Дата изменения"""
-  updatedAt: DateTime!
+  updatedAt: DateTime
   """Измененные ячейки"""
   values: [ValueType]
 }
@@ -1626,41 +1716,6 @@ type CopyPeriodGroupsMutationPayload {
   periodGroups: [PeriodGroupType]!
   """Успех мутации"""
   success: Boolean!
-}
-
-input CreateBudgetClassificationInput {
-  """Active"""
-  active: Boolean
-  """Code"""
-  code: String!
-  """Date of end activity"""
-  end: DateTime
-  """Name"""
-  name: String!
-}
-
-input CreatePeriodGroupInput {
-  """Наименование группы периода привилегии"""
-  name: String!
-  """Период"""
-  period: ID!
-}
-
-input CreateProjectInput {
-  """Архив"""
-  archive: Boolean
-  contentType: String!
-  """Описание проекта"""
-  description: String!
-  """Наименование проекта"""
-  name: String!
-  periodSet: [ID]
-  """Сокращенное наименование проекта"""
-  short: String!
-  """Организатор сборов"""
-  user: ID
-  """Видимость проекта"""
-  visibility: Boolean
 }
 
 """
@@ -1816,26 +1871,36 @@ type DeletePageMutationPayload {
   success: Boolean!
 }
 
+input DeletePeriodGroupMutationInput {
+  clientMutationId: String
+  """Идентификатор группы периода"""
+  periodGroupId: ID!
+}
+
 """Мутация на удаление группы периода."""
 type DeletePeriodGroupMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Идентификатор удаленной группы периода"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
 
+input DeletePeriodMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
 """Мутация на удаление периода."""
 type DeletePeriodMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Идентификатор удаленного периода"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -1855,14 +1920,19 @@ type DeleteProfileMutationPayload {
   success: Boolean!
 }
 
+input DeleteProjectMutationInput {
+  clientMutationId: String
+  """Идентификатор проекта"""
+  projectId: ID!
+}
+
 """Мутация на удаление проекта."""
 type DeleteProjectMutationPayload {
-  deletedId: ID
-  deletedInputId: ID
-  deletedRawId: ID
+  clientMutationId: String
+  """Идентификатор удаленного проекта"""
+  deleteId: ID!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  found: Boolean
   """Успех мутации"""
   success: Boolean!
 }
@@ -2047,6 +2117,8 @@ type DocumentType implements Node {
   sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
+  """Пользователь, добавивший документ"""
+  user: UserType
   """Версия документа"""
   version: Int!
 }
@@ -2297,7 +2369,7 @@ type MailingType {
 """Мутации на изменение чего-либо."""
 type Mutation {
   """Добавление нового КБК"""
-  addBudgetClassification(input: CreateBudgetClassificationInput!): AddBudgetClassificationMutationPayload!
+  addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление дочерней строки."""
@@ -2316,12 +2388,12 @@ type Mutation {
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
   addPeriod(input: AddPeriodMutationInput!): AddPeriodMutationPayload!
-  """Мутация на добавление группы периода."""
-  addPeriodGroup(input: CreatePeriodGroupInput!): AddPeriodGroupMutationPayload!
+  """Мутация на добавление группы в период."""
+  addPeriodGroup(input: AddPeriodGroupMutationInput!): AddPeriodGroupMutationPayload!
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
-  addProject(input: CreateProjectInput!): AddProjectMutationPayload!
+  addProject(input: AddProjectMutationInput!): AddProjectMutationPayload!
   """Добавление строки"""
   addRowDimension(input: AddRowDimensionMutationInput!): AddRowDimensionMutationPayload!
   """Добавление секции"""
@@ -2353,7 +2425,7 @@ type Mutation {
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
   """Изменение комментария версии документа."""
-  changeDocumentComment(id: ID!, input: UpdateDocumentInput!): ChangeDocumentCommentMutationPayload!
+  changeDocumentComment(input: ChangeDocumentCommentMutationInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Изменение значения ячейки типа `Файл`"""
@@ -2381,7 +2453,7 @@ type Mutation {
   """Мутация для изменения пароля пользователя."""
   changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
   """Мутация на изменение настроек периода."""
-  changePeriod(id: ID!, input: UpdatePeriodInput!): ChangePeriodMutationPayload!
+  changePeriod(input: ChangePeriodMutationInput!): ChangePeriodMutationPayload!
   """Мутация на изменение привилегий группы."""
   changePeriodGroupPrivileges(input: ChangePeriodGroupPrivilegesMutationInput!): ChangePeriodGroupPrivilegesMutationPayload!
   """Мутация на изменение значения профиля."""
@@ -2389,7 +2461,7 @@ type Mutation {
   """Матция для изменения видимости."""
   changeProfileVisibility(input: ChangeProfileVisibilityMutationInput!): ChangeProfileVisibilityMutationPayload!
   """Мутация изменения настроек проекта."""
-  changeProject(id: ID!, input: UpdateProjectInput!): ChangeProjectMutationPayload!
+  changeProject(input: ChangeProjectMutationInput!): ChangeProjectMutationPayload!
   """Изменение строки"""
   changeRowDimension(input: ChangeRowDimensionMutationInput!): ChangeRowDimensionMutationPayload!
   """Изменение текста секции"""
@@ -2405,7 +2477,7 @@ type Mutation {
   """Мутация на изменение групп пользователя в периоде."""
   changeUserPeriodGroups(input: ChangeUserPeriodGroupsMutationInput!): ChangeUserPeriodGroupsMutationPayload!
   """Мутация на изменение отдельных привилегий пользователя в периоде."""
-  changeUserPeriodPrivileges(input: ChangeUserPeriodPrivilegesInput!): ChangeUserPeriodPrivilegesPayload!
+  changeUserPeriodPrivileges(input: ChangeUserPeriodPrivilegesMutationInput!): ChangeUserPeriodPrivilegesMutationPayload!
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
@@ -2431,13 +2503,13 @@ type Mutation {
   """Удаление страницы"""
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация на удаление периода."""
-  deletePeriod(id: ID!): DeletePeriodMutationPayload!
+  deletePeriod(input: DeletePeriodMutationInput!): DeletePeriodMutationPayload!
   """Мутация на удаление группы периода."""
-  deletePeriodGroup(id: ID!): DeletePeriodGroupMutationPayload!
+  deletePeriodGroup(input: DeletePeriodGroupMutationInput!): DeletePeriodGroupMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
   """Мутация на удаление проекта."""
-  deleteProject(id: ID!): DeleteProjectMutationPayload!
+  deleteProject(input: DeleteProjectMutationInput!): DeleteProjectMutationPayload!
   """Удаление строки"""
   deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
   """Удаление секции"""
@@ -3814,8 +3886,16 @@ type SettingType {
 
 """Тип листа."""
 type SheetType {
+  """Может ли пользователь добавлять дочерние строки для строк"""
+  canAddChildRowDimension: Boolean!
   """Может ли пользователь изменять лист"""
   canChange: Boolean!
+  """Может ли пользователь изменять высоту дочерней строки"""
+  canChangeChildRowDimensionHeight: Boolean!
+  """Может ли пользователь изменять значение ячейки"""
+  canChangeValue: Boolean!
+  """Может ли пользователь удалять дочернюю строку, не имеющую собственных дочерних строк"""
+  canDeleteChildRowDimension: Boolean!
   """Колонки"""
   columns: [ColumnDimensionType!]
   """Комментарий"""
@@ -3840,11 +3920,13 @@ type SheetType {
 type StatusType {
   """Комментарий"""
   comment: String
-  """Можно ли редактировать"""
+  """Можно ли редактировать документ со статусом"""
   edit: Boolean!
   id: ID!
-  """Наименование статуса"""
+  """Название статуса"""
   name: String!
+  """Является ли статус защищенным от изменения"""
+  protected: Boolean!
 }
 
 """Подписки на сокеты."""
@@ -3973,50 +4055,6 @@ type UnloadFileValueArchiveMutationPayload {
   src: String
   """Успех мутации"""
   success: Boolean!
-}
-
-input UpdateDocumentInput {
-  """Комментарий"""
-  comment: String!
-}
-
-input UpdatePeriodInput {
-  attributeSet: [ID]
-  divisionSet: [ID]
-  documentSet: [ID]
-  """Дата окончания"""
-  expiration: Date
-  """Множественное заполнение"""
-  multiple: Boolean
-  """Наименование периода"""
-  name: String!
-  periodgroupSet: [ID]
-  periodprivilegeSet: [ID]
-  """Приватность полей"""
-  privately: Boolean
-  sheetSet: [ID]
-  """Дата начала"""
-  start: Date
-  """Статус проекта"""
-  status: String
-  """Организатор сборов"""
-  user: ID
-}
-
-input UpdateProjectInput {
-  """Архив"""
-  archive: Boolean
-  """Описание проекта"""
-  description: String!
-  """Наименование проекта"""
-  name: String!
-  periodSet: [ID]
-  """Сокращенное наименование проекта"""
-  short: String!
-  """Организатор сборов"""
-  user: ID
-  """Видимость проекта"""
-  visibility: Boolean
 }
 
 """

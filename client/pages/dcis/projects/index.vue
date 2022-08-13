@@ -70,8 +70,8 @@ export default defineComponent({
     } = useProjects()
 
     onMounted(() => {
-      if (route.query.projectId) {
-        deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.projectId } } })
+      if (projects.value && projects.value.length && route.query.deleteProjectId) {
+        deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.deleteProjectId } } })
         router.push(localePath({ name: 'dcis-projects' }))
       }
     })

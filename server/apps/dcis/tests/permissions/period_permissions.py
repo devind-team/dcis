@@ -1,6 +1,6 @@
 """Тесты разрешений на работу с периодами проектов."""
 
-from typing import Callable, Any
+from typing import Any, Callable
 from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
@@ -39,15 +39,15 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
         self.user_period_with_documents = Period.objects.create(user=self.user, project=self.user_project)
         self.document = Document.objects.create(period=self.user_period_with_documents)
 
-    def test_view_period(self) -> None:
-        """Тестирование класса `ViewPeriod`."""
+    def test_can_view_period(self) -> None:
+        """Тестирование функции `can_view_period`."""
         self.assertRaises(PermissionDenied, can_view_period, self.user, self.period)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.view_project'):
             self.assertRaises(PermissionDenied, can_view_period, self.user, self.period)
         can_view_period(self.user, self.user_period_without_documents)
 
-    def test_add_period(self) -> None:
-        """Тестирование класса `AddPeriod`."""
+    def test_can_add_period(self) -> None:
+        """Тестирование функции `can_add_period`."""
         self.assertRaises(PermissionDenied, can_add_period, self.user, self.project)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.view_project'):
             self.assertRaises(PermissionDenied, can_add_period, self.user, self.project)
@@ -58,12 +58,12 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             self.assertRaises(PermissionDenied, can_add_period, self.user, self.period)
             can_add_period(self.user, self.user_project)
 
-    def test_change_period(self) -> None:
-        """Тестирование класса `ChangePeriod`."""
+    def test_can_change_period(self) -> None:
+        """Тестирование функции `can_change_period`."""
         self._test_change_period(can_change_period, 'dcis.change_period', 'change_period')
 
-    def test_change_period_divisions(self) -> None:
-        """Тестирование класса `ChangePeriodDivisions.`"""
+    def test_can_change_period_divisions(self) -> None:
+        """Тестирование функции `can_change_period_divisions.`"""
         self._test_change_period_element(
             can_change_period_divisions,
             'dcis.change_period',
@@ -71,8 +71,8 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             'change_period_divisions',
         )
 
-    def test_change_period_groups(self) -> None:
-        """Тестирование класса `ChangePeriodGroups`."""
+    def test_can_change_period_groups(self) -> None:
+        """Тестирование функции `can_change_period_groups`."""
         self._test_change_period_element(
             can_change_period_groups,
             'dcis.change_period',
@@ -80,8 +80,8 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             'change_period_groups',
         )
 
-    def test_change_period_users(self) -> None:
-        """Тестирование класса `ChangePeriodUsers`."""
+    def test_can_change_period_users(self) -> None:
+        """Тестирование функции `can_change_period_users`."""
         self._test_change_period_element(
             can_change_period_users,
             'dcis.change_period',
@@ -89,8 +89,8 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             'change_period_users',
         )
 
-    def test_change_period_settings(self) -> None:
-        """Тестирование класса `ChangePeriodSettings`."""
+    def test_can_change_period_settings(self) -> None:
+        """Тестирование функции `can_change_period_settings`."""
         self._test_change_period_element(
             can_change_period_settings,
             'dcis.change_period',
@@ -98,12 +98,12 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             'change_period_settings',
         )
 
-    def test_change_period_sheet(self) -> None:
-        """Тестирование класса `ChangePeriodSheet`."""
+    def test_can_change_period_sheet(self) -> None:
+        """Тестирование функции `can_change_period_sheet`."""
         self._test_change_period(can_change_period_sheet, 'dcis.change_sheet', 'change_sheet')
 
-    def test_delete_period(self) -> None:
-        """Тестирование класса `DeletePeriod`."""
+    def test_can_delete_period(self) -> None:
+        """Тестирование функции `can_delete_period`."""
         self.assertRaises(PermissionDenied, can_delete_period, self.user, self.period)
         self.assertRaises(PermissionDenied, can_delete_period, self.user, self.user_period_without_documents)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == 'dcis.delete_period'):
@@ -141,11 +141,11 @@ class PeriodPermissionsTestCase(PermissionsTestCase):
             mock.assert_called_once_with(self.user.id, self.user_period_without_documents.id, privilege)
 
     def _test_change_period_element(
-            self,
-            f: Callable[[Any, Any], None],
-            permission: str,
-            change_period_privilege: str,
-            change_period_element_privilege: str
+        self,
+        f: Callable[[Any, Any], None],
+        permission: str,
+        change_period_privilege: str,
+        change_period_element_privilege: str
     ) -> None:
         """Тестирование разрешений на изменение элемента периода."""
         self._test_change_period(f, permission, change_period_privilege)

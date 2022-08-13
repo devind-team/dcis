@@ -47,6 +47,8 @@ export default defineComponent({
     const { t, localePath } = useI18n()
     const route = useRoute()
 
+    const documentVersion = computed<string>(() =>
+      t('dcis.grid.version', { version: activeDocument.value.version }) as string)
     const documentName = computed<string>(() => {
       if (!activeDocument.value) {
         return ''
@@ -55,11 +57,10 @@ export default defineComponent({
         ? activeDocument.value.period.divisions
           .find(division => division.id === String(activeDocument.value.objectId))
         : null
-      const version = t('dcis.grid.version', { version: activeDocument.value.version }) as string
       if (division) {
-        return `${division.name}. ${version}`
+        return `${division.name}. ${documentVersion.value}`
       }
-      return version
+      return documentVersion.value
     })
 
     const bc = computed<BreadCrumbsItem[]>(() => {
@@ -80,7 +81,7 @@ export default defineComponent({
           }),
           exact: true
         }, {
-          text: documentName.value,
+          text: documentVersion.value,
           to: localePath({
             name: 'dcis-documents-documentId',
             params: { documentId: activeDocument.value.id }
