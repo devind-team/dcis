@@ -175,10 +175,10 @@ export default defineComponent({
         result,
         (
           dataCache,
-          { data: { deletePeriodGroup: { errors, deletedId } } }: DeletePeriodGroupMutationResult
+          { data: { deletePeriodGroup: { errors, deleteId } } }: DeletePeriodGroupMutationResult
         ) => {
           if (!errors.length) {
-            dataCache.period.periodGroups = dataCache.period.periodGroups.filter(g => g.id !== deletedId)
+            dataCache.period.periodGroups = dataCache.period.periodGroups.filter(g => g.id !== deleteId)
             selectedGroup.value = null
           }
           return dataCache

@@ -44,6 +44,7 @@ tbody
 
 <script lang="ts">
 import { PropType, Ref, nextTick, inject } from '#app'
+import { fromGlobalId } from '~/services/graphql-relay'
 import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
 import { GridMode, ResizingType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
@@ -116,6 +117,7 @@ export default defineComponent({
         const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
         return parent.dynamic && (
           activeSheet.value.canChange ||
+          activeSheet.value.canAddChildRowDimension ||
           activeDocument.value.user?.id === userStore.user.id ||
           canAddRowRegardingDivisions(rowDimension)
         )
@@ -131,6 +133,7 @@ export default defineComponent({
       }
       return rowDimension.dynamic && (
         activeSheet.value.canChange ||
+        activeSheet.value.canAddChildRowDimension ||
         activeDocument.value.user?.id === userStore.user.id ||
         canAddRowRegardingDivisions(rowDimension)
       )
@@ -144,8 +147,9 @@ export default defineComponent({
       }
       return rowDimension.parent !== null && rowDimension.children.length === 0 && (
         activeSheet.value.canChange ||
+        activeSheet.value.canDeleteChildRowDimension ||
         activeDocument.value.user?.id === userStore.user.id ||
-        rowDimension.userId === userStore.user.id
+        rowDimension.userId === String(fromGlobalId(userStore.user.id).id)
       )
     }
     const viewControl = (rowDimension: RowDimensionType): boolean => {

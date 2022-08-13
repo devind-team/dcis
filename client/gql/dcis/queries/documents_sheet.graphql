@@ -12,5 +12,9 @@ query DocumentsSheet($sheetId: ID!, $documentIds: [ID!]!) {
       ...RowDimensionFields
     }
     canChange
+    canChangeValue
+    canAddChildRowDimension
+    canChangeChildRowDimensionHeight
+    canDeleteChildRowDimension
   }
 }

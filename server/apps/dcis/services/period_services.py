@@ -1,10 +1,25 @@
 """Модуль, отвечающий за работу с периодами."""
 
+from datetime import date
+
+from devind_helpers.orm_utils import get_object_or_404
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Period, Privilege
-from apps.dcis.services.divisions_services import get_user_division_ids
+from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.permissions import (
+    can_add_period,
+    can_change_period_divisions,
+    can_change_period_groups,
+    can_change_period_settings,
+    can_change_period_users,
+    can_delete_period,
+    can_view_period
+)
+from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
+from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
 
 def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[Period]:
@@ -71,3 +86,157 @@ def get_period_users(period: Period | int | str) -> QuerySet[User]:
 def get_user_period_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
     """Получение отдельных привилегий пользователя в периоде."""
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
+
+
+@transaction.atomic
+def create_period(
+    name: str,
+    user: User,
+    project: Project,
+    multiple: bool,
+    file: InMemoryUploadedFile,
+    readonly_fill_color: bool
+) -> Period:
+    """Создание периода."""
+    can_add_period(user, project)
+    period = Period.objects.create(
+        name=name,
+        user=user,
+        project=project,
+        multiple=multiple
+    )
+    fl = period.methodical_support.create(
+        name=file.name,
+        src=file,
+        deleted=False,
+        user=user
+    )
+    extractor = ExcelExtractor(fl.src.path, readonly_fill_color)
+    extractor.save(period)
+    return period
+
+
+def add_divisions_period(user: User, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
+    """Добавление дивизионов в период."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_divisions(user, period)
+    division_links = Division.objects.bulk_create([
+        Division(period=period, object_id=division_id) for division_id in division_ids
+    ])
+    divisions = period.project.division.objects.filter(pk__in=[link.object_id for link in division_links])
+    return get_divisions(divisions)
+
+
+def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:
+    """Удаление дивизиона из периода."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_divisions(user, period)
+    Division.objects.get(period_id=period_id, object_id=division_id).delete()
+
+
+def copy_period_groups(
+        user: User,
+        period_id: str | int,
+        period_group_ids: list[str | int],
+        selected_period_id: str | int) -> list[PeriodGroup]:
+    """Перенос групп из другого периода."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_groups(user, period)
+    selected_period = get_object_or_404(Period, pk=selected_period_id)
+    can_view_period(user, selected_period)
+    period_groups: list[PeriodGroup] = []
+    for period_group_id in period_group_ids:
+        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+        period_groups.append(period_group)
+        new_group = PeriodGroup.objects.create(name=period_group.name, period=period)
+        new_group.users.set(period_group.users.all())
+        new_group.privileges.set(period_group.privileges.all())
+        for user in period_group.users.all():
+            for period_privilege in user.periodprivilege_set.filter(period=selected_period).all():
+                PeriodPrivilege.objects.create(period=period, user=user, privilege=period_privilege.privilege)
+    return period_groups
+
+
+def change_period_group_privileges(
+        user: User,
+        period_group_id: str | int,
+        privileges_ids: list[str | int]) -> list[Privilege]:
+    """Изменение привилегий группы."""
+    period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+    can_change_period_groups(user, period_group.period)
+    privileges: list[Privilege] = []
+    for privilege_id in privileges_ids:
+        privilege = get_object_or_404(Privilege, pk=privilege_id)
+        privileges.append(privilege)
+    period_group.privileges.set(privileges)
+    return privileges
+
+
+def change_user_period_groups(user: User, period_group_ids: list[PeriodGroup]) -> list[PeriodGroup]:
+    """Изменение групп пользователя в периоде."""
+    period_groups: list[PeriodGroup] = []
+    for period_group_id in period_group_ids:
+        period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
+        can_change_period_users(user, period_group.period)
+        period_groups.append(period_group)
+    return period_groups
+
+
+def change_user_period_privileges(
+        user: User,
+        user_id: str | int,
+        period_id: str | int,
+        privileges_ids: list[str | int]) -> list[Privilege]:
+    """Изменение отдельных привилегий пользователя в периоде."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_users(user, period)
+    PeriodPrivilege.objects.filter(period_id=period_id, user_id=user_id).delete()
+    privileges: list[Privilege] = []
+    for privileges_id in privileges_ids:
+        privilege = get_object_or_404(Privilege, pk=privileges_id)
+        PeriodPrivilege.objects.create(period_id=period_id, user_id=user_id, privilege=privilege)
+        privileges.append(privilege)
+    return privileges
+
+
+def add_period_group(user: User, name: str, period_id: str | int) -> PeriodGroup:
+    """Добавление группы в период."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_groups(user, period)
+    return PeriodGroup.objects.create(
+            name=name,
+            period_id=period_id,
+        )
+
+
+def change_settings_period(
+        user: User,
+        period: Period,
+        name: str,
+        status: str,
+        multiple: bool,
+        privately: bool,
+        start: date,
+        expiration: date) -> Period:
+    """Изменение настроек периода."""
+    can_change_period_settings(user, period)
+    period.name = name
+    period.status = status
+    period.multiple = multiple
+    period.privately = privately
+    period.start = start
+    period.expiration = expiration
+    period.save()
+    return period
+
+
+def delete_period(user: User, period: Period) -> None:
+    """Удаление периода."""
+    can_delete_period(user, period)
+    period.delete()
+
+
+def delete_period_groups(user: User, period_group: PeriodGroup) -> None:
+    """Удаление группы периода."""
+    can_change_period_groups(user, period_group.period)
+    period_group.delete()

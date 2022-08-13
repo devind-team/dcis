@@ -663,7 +663,7 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<Docume
             )
             if (option.field === 'size') {
               cell[option.field] = Number(option.value)
-            } else if (['strong', 'italic', 'strike'].includes(option.field)) {
+            } else if (['strong', 'italic', 'strike', 'editable'].includes(option.field)) {
               cell[option.field] = option.value === 'true'
             } else {
               cell[option.field] = option.value
