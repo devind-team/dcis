@@ -1,7 +1,7 @@
 <template lang="pug">
 v-row
   v-col.my-2.d-flex.align-center
-    v-btn-toggle(v-model="formatting" multiple)
+    v-btn-toggle.mr-1(v-model="formatting" multiple)
       v-btn(:disabled="disabled || readonly" value="strong" height="40")
         v-icon mdi-format-bold
       v-btn(:disabled="disabled || readonly" value="italic" height="40")
@@ -15,7 +15,7 @@ v-row
         v-icon mdi-format-align-left
       v-btn(:disabled="disabled || readonly" value="center" height="40")
         v-icon mdi-format-align-center
-      v-btn(:disabled="disabled || readonly"  value="right" height="40")
+      v-btn(:disabled="disabled || readonly" value="right" height="40")
         v-icon mdi-format-align-right
     v-btn-toggle.mx-1(v-model="verticalAlign")
       v-btn(:disabled="disabled || readonly" value="top" height="40")
@@ -24,6 +24,9 @@ v-row
         v-icon mdi-format-align-middle
       v-btn(:disabled="disabled || readonly" value="bottom" height="40")
         v-icon mdi-format-align-bottom
+    v-btn-toggle.mx-1(v-model="properties" multiple)
+      v-btn(:disabled="disabled || readonly" value="readonly" height="40")
+        v-icon mdi-pencil-off
     v-combobox.mx-1.shrink(
       v-model="size"
       :label="t('dcis.grid.sheetToolbar.fontSize')"
@@ -73,7 +76,7 @@ export default defineComponent({
 
     const formatting = computed<string[]>({
       get: () => !disabled.value
-        ? (['strong', 'italic', 'underline', 'strike'].filter(f => !!props.selectedCellsOptions[f]))
+        ? ['strong', 'italic', 'underline', 'strike'].filter(f => !!props.selectedCellsOptions[f])
         : [],
       set: (value) => {
         const diff = formatting.value.length > value.length
@@ -111,6 +114,39 @@ export default defineComponent({
       set: value => changeCellsOption(props.selectedCellsOptions.cells, 'verticalAlign', value)
     })
 
+    const properties = computed<string[]>({
+      get: () => {
+        if (disabled.value) {
+          return []
+        }
+        if (!props.selectedCellsOptions.editable) {
+          return ['readonly']
+        }
+        return []
+      },
+      set: (value) => {
+        const diff = properties.value.length > value.length
+          ? properties.value.filter(e => !value.includes(e))
+          : value.filter(v => !properties.value.includes(v))
+        if (diff.length) {
+          let field: string | null = null
+          const [intersectionFormat, intersectionValue] = properties.value.length > value.length
+            ? [properties.value, value]
+            : [value, properties.value]
+          for (const v of intersectionFormat) {
+            if (!intersectionValue.includes(v)) {
+              field = v
+              break
+            }
+          }
+          if (field === 'readonly') {
+            field = 'editable'
+          }
+          changeCellsOption(props.selectedCellsOptions.cells, field, String(!props.selectedCellsOptions[field]))
+        }
+      }
+    })
+
     const sizes = Array
       .from(new Array(19).keys())
       .map((e: number) => e + 6)
@@ -135,6 +171,7 @@ export default defineComponent({
       formatting,
       horizontalAlign,
       verticalAlign,
+      properties,
       sizes,
       size,
       kinds,

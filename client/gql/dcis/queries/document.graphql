@@ -1,3 +1,5 @@
+#import "../fragments/status_fields.graphql"
+
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
@@ -5,6 +7,10 @@ query Document($documentId: ID!) {
     version
     createdAt
     updatedAt
+    user {
+      id
+      __typename
+    }
     period {
       id
       name
@@ -29,6 +35,14 @@ query Document($documentId: ID!) {
     sheets {
       id
       name
+      __typename
+    }
+    lastStatus {
+      id
+      comment
+      status {
+        ...StatusFields
+      }
       __typename
     }
     objectId

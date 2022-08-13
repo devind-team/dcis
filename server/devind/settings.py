@@ -243,3 +243,11 @@ DEVIND_NOTIFICATION_NOTICE_INTERFACE = 'apps.notifications.schema.NoticeInterfac
 EXTERNAL_URLS = {
     'cbias': 'https://cbias.ru/sso_app/remote_auth.spf?uid=%s&ris=61'
 }
+
+SSH_CONNECT = {
+    'HOST': os.getenv('SSH_HOST'),
+    'PORT': os.getenv('SSH_PORT'),
+    'USERNAME': os.getenv('SSH_USER'),
+    'PASSWORD': os.getenv('SSH_PASSWORD'),
+    'DB_NAME': os.getenv('SSH_DB_NAME'),
+}

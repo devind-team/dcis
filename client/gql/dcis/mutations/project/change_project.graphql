@@ -8,7 +8,8 @@ mutation ChangeProject(
   $visibility: Boolean!,
   $archive: Boolean!
 ) {
-  changeProject(id: $id, input: {
+  changeProject(input: {
+    projectId: $id
     name: $name,
     short: $short,
     description: $description,

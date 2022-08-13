@@ -8,7 +8,6 @@ from devind_helpers.schema.mutations import BaseMutation
 from graphql import ResolveInfo
 
 from apps.dcis.models import ColumnDimension, RowDimension, Sheet
-from apps.dcis.permissions import can_change_period_sheet
 from apps.dcis.schema.types import CellType, GlobalIndicesInputType, RowDimensionType, SheetType
 from apps.dcis.services.sheet_services import (
     add_row_dimension,
@@ -36,8 +35,7 @@ class RenameSheetMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, sheet_id: str, name: str):
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        can_change_period_sheet(info.context.user, sheet.period)
-        sheet, cells = rename_sheet(sheet, name)
+        sheet, cells = rename_sheet(user=info.context.user, sheet=sheet, name=name)
         return RenameSheetMutation(
             sheet=sheet,
             cells=cells
@@ -73,8 +71,8 @@ class ChangeColumnDimensionMutation(BaseMutation):
         kind: str
     ):
         column_dimension = get_object_or_404(ColumnDimension, pk=column_dimension_id)
-        can_change_period_sheet(info.context.user, column_dimension.sheet.period)
         column_dimension = change_column_dimension(
+            user=info.context.user,
             column_dimension=column_dimension,
             width=width,
             fixed=fixed,
@@ -117,7 +115,6 @@ class AddRowDimensionMutation(BaseMutation):
         global_indices: list[GlobalIndicesInputType]
     ):
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        can_change_period_sheet(info.context.user, sheet.period)
         return AddRowDimensionMutation(
             row_dimension=add_row_dimension(
                 user=info.context.user,
@@ -158,8 +155,8 @@ class ChangeRowDimensionMutation(BaseMutation):
         dynamic: bool
     ):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        can_change_period_sheet(info.context.user, row_dimension.sheet.period)
         row_dimension = change_row_dimension(
+            user=info.context.user,
             row_dimension=row_dimension,
             height=height,
             fixed=fixed,
@@ -188,8 +185,10 @@ class DeleteRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        can_change_period_sheet(info.context.user, row_dimension.sheet.period)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(row_dimension))
+        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(
+            user=info.context.user,
+            row_dimension=row_dimension)
+        )
 
 
 class SheetMutations(graphene.ObjectType):

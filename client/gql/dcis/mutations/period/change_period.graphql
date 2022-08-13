@@ -11,7 +11,8 @@ mutation ChangePeriod(
   $start: Date,
   $expiration: Date
 ) {
-  changePeriod(id: $id, input: {
+  changePeriod(input: {
+    periodId: $id
     name: $name,
     status: $status,
     multiple: $multiple,
