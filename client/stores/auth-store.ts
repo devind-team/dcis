@@ -43,12 +43,8 @@ export const useAuthStore = defineStore<string, AuthStoreStateType, AuthStoreGet
     logout (): void {
       if (this.loginIn && this.user.session) {
         const { mutate } = useMutation<LogoutMutation, LogoutMutationVariables>(logoutMutation)
-        const { remove } = useCookies()
-        const mutationResult = () => {
-          remove('apollo-token')
-          this.user = null
-        }
-        mutate({ sessionId: this.user.session.id }).then(mutationResult, mutationResult)
+        mutate({ sessionId: this.user.session.id }).then()
+        this.user = null
       }
     }
   }
