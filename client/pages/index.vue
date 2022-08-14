@@ -6,7 +6,7 @@ v-container
 </template>
 
 <script lang="ts">
-import { useNuxt2Meta, defineComponent, useRouter } from '#app'
+import { useNuxt2Meta, defineComponent, useRouter, toRefs } from '#app'
 import { useAuthStore } from '~/stores'
 import { useCommonQuery, useI18n } from '~/composables'
 import segmentsQuery from '~/gql/pages/queries/segments.graphql'
@@ -21,8 +21,8 @@ export default defineComponent({
     const router = useRouter()
     useNuxt2Meta({ title: t('homePage') as string })
 
-    const { loginIn } = authStore
-    if (loginIn) {
+    const { loginIn } = toRefs(authStore)
+    if (loginIn.value) {
       router.push(localePath({ name: 'dcis-projects' }))
     }
 

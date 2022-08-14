@@ -68,7 +68,7 @@ import MutationForm from '~/components/common/forms/MutationForm.vue'
 
 export default defineComponent({
   components: { MutationForm, BreadCrumbs },
-  middleware: 'guest',
+  middleware: 'redirect-auth',
   setup () {
     const router = useRouter()
     const route = useRoute()
