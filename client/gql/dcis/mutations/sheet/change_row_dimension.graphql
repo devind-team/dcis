@@ -18,12 +18,14 @@ mutation ChangeRowDimension(
       messages
       __typename
     }
-    rowDimensionId
-    height
-    fixed
-    hidden
-    dynamic
-    updatedAt
-    __typename
+    rowDimensions {
+      id
+      height
+      fixed
+      hidden
+      dynamic
+      updatedAt
+      __typename
+    }
   }
 }

@@ -1432,21 +1432,26 @@ export type ChangeRowDimensionMutationInput = {
 export type ChangeRowDimensionMutationPayload = {
   __typename?: 'ChangeRowDimensionMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
-  /** Динамическая ли строка */
-  dynamic: Scalars['Boolean'];
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Измененные строки */
+  rowDimensions?: Maybe<Array<Maybe<ChangeRowDimensionType>>>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type ChangeRowDimensionType = {
+  __typename?: 'ChangeRowDimensionType';
+  /** Динамическая ли строка */
+  dynamic: Scalars['Boolean'];
   /** Фиксация строки */
   fixed: Scalars['Boolean'];
   /** Высота строки */
   height?: Maybe<Scalars['Int']>;
   /** Скрытие строки */
   hidden: Scalars['Boolean'];
-  /** Идентификатор строки */
-  rowDimensionId: Scalars['ID'];
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-  /** Дата обновления строки */
+  id: Scalars['ID'];
+  /** Дата обновления */
   updatedAt: Scalars['DateTime'];
 };
 
@@ -5553,7 +5558,7 @@ export type ChangeRowDimensionMutationVariables = Exact<{
   dynamic: Scalars['Boolean'];
 }>;
 
-export type ChangeRowDimensionMutation = { __typename?: 'Mutation', changeRowDimension: { __typename: 'ChangeRowDimensionMutationPayload', success: boolean, rowDimensionId: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type ChangeRowDimensionMutation = { __typename?: 'Mutation', changeRowDimension: { __typename?: 'ChangeRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimensions?: Array<{ __typename: 'ChangeRowDimensionType', id: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, updatedAt: any } | null> | null } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowDimensionId: Scalars['ID'];

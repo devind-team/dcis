@@ -508,7 +508,7 @@ export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType
     ChangeRowDimensionMutationVariables
   >(changeRowDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) {
-      updateRowDimension(updateSheet.value, dataProxy, result)
+      updateRowDimensions(updateSheet.value, dataProxy, result)
     }
   })
   return async function (rowDimension: RowDimensionType, height: number) {
@@ -526,8 +526,12 @@ export function useChangeRowDimensionHeightMutation (updateSheet: Ref<UpdateType
           __typename: 'ChangeRowDimensionMutationPayload',
           success: true,
           errors: [],
-          ...variables,
-          updatedAt: new Date().toISOString()
+          rowDimensions: [{
+            ...variables,
+            id: rowDimension.id,
+            updatedAt: new Date().toISOString(),
+            __typename: 'ChangeRowDimensionType'
+          }]
         }
       }
     })
@@ -577,7 +581,7 @@ export function useChangeChildRowDimensionHeightMutation (updateSheet: Ref<Updat
   }
 }
 
-export function updateRowDimension (
+export function updateRowDimensions (
   updateSheet: UpdateType<DocumentsSheetQuery>,
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
@@ -590,13 +594,15 @@ export function updateRowDimension (
         data: DocumentsSheetQuery,
         { data: { changeRowDimension } }: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>
       ) => {
-        const rowDimension = data.documentsSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
-          rowDimension.id === changeRowDimension.rowDimensionId)!
-        rowDimension.height = changeRowDimension.height
-        rowDimension.fixed = changeRowDimension.fixed
-        rowDimension.hidden = changeRowDimension.hidden
-        rowDimension.dynamic = changeRowDimension.dynamic
-        rowDimension.updatedAt = changeRowDimension.updatedAt
+        for (const row of changeRowDimension.rowDimensions) {
+          const rowDimension = data.documentsSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+            rowDimension.id === row.id)!
+          rowDimension.height = row.height
+          rowDimension.fixed = row.fixed
+          rowDimension.hidden = row.hidden
+          rowDimension.dynamic = row.dynamic
+          rowDimension.updatedAt = row.updatedAt
+        }
         return data
       }
     )

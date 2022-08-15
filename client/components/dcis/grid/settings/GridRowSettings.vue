@@ -81,14 +81,18 @@ export default defineComponent({
         __typename: 'ChangeRowDimensionMutationPayload',
         success: true,
         errors: [],
-        ...variables.value,
-        updatedAt: new Date().toISOString()
+        rowDimensions: [{
+          ...variables.value,
+          id: props.row.id,
+          updatedAt: new Date().toISOString(),
+          __typename: 'ChangeRowDimensionType'
+        }]
       }
     }))
 
     const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) => {
-      updateRowDimension(updateSheet.value, dataProxy, result)
+      updateRowDimensions(updateSheet.value, dataProxy, result)
     }
 
     return {

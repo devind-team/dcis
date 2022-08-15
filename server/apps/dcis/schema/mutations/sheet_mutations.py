@@ -8,14 +8,15 @@ from devind_helpers.schema.mutations import BaseMutation
 from graphql import ResolveInfo
 
 from apps.dcis.models import ColumnDimension, RowDimension, Sheet
-from apps.dcis.schema.types import CellType, GlobalIndicesInputType, RowDimensionType, SheetType
-from apps.dcis.services.sheet_services import (
-    add_row_dimension,
-    change_column_dimension,
-    change_row_dimension,
-    delete_row_dimension,
-    rename_sheet,
+from apps.dcis.schema.types import (
+    CellType,
+    ChangeRowDimensionType,
+    GlobalIndicesInputType,
+    RowDimensionType,
+    SheetType,
 )
+from apps.dcis.services.row_dimension_services import add_row_dimension, change_row_dimension, delete_row_dimension
+from apps.dcis.services.sheet_services import change_column_dimension, rename_sheet
 
 
 class RenameSheetMutation(BaseMutation):
@@ -136,12 +137,7 @@ class ChangeRowDimensionMutation(BaseMutation):
         hidden = graphene.Boolean(required=True, description='Скрытие строки')
         dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
 
-    row_dimension_id = graphene.ID(required=True, description='Идентификатор строки')
-    height = graphene.Int(description='Высота строки')
-    fixed = graphene.Boolean(required=True, description='Фиксация строки')
-    hidden = graphene.Boolean(required=True, description='Скрытие строки')
-    dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
-    updated_at = graphene.DateTime(required=True, description='Дата обновления строки')
+    row_dimensions = graphene.List(ChangeRowDimensionType, description='Измененные строки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -155,21 +151,16 @@ class ChangeRowDimensionMutation(BaseMutation):
         dynamic: bool
     ):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        row_dimension = change_row_dimension(
-            user=info.context.user,
-            row_dimension=row_dimension,
-            height=height,
-            fixed=fixed,
-            hidden=hidden,
-            dynamic=dynamic
-        )
         return ChangeRowDimensionMutation(
-            row_dimension_id=row_dimension.id,
-            height=row_dimension.height,
-            fixed=row_dimension.fixed,
-            hidden=row_dimension.hidden,
-            dynamic=row_dimension.dynamic,
-            updated_at=row_dimension.updated_at
+            row_dimensions=change_row_dimension(
+                user=info.context.user,
+                row_dimension=row_dimension,
+                height=height,
+                fixed=fixed,
+                hidden=hidden,
+                dynamic=dynamic,
+                document_ids=[]
+            )
         )
 
 

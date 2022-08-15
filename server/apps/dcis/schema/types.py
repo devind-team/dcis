@@ -6,20 +6,21 @@ from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
-from django.db.models import QuerySet
 from django.core.exceptions import PermissionDenied
+from django.db.models import QuerySet
 from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.core.schema import UserType
+from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     Attribute, AttributeValue, Document,
     DocumentStatus, Limitation, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
-    Project, Sheet, Status,
-    Value,
+    Project, RowDimension, Sheet,
+    Status, Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -32,10 +33,9 @@ from apps.dcis.permissions import (
     can_change_period_users_base,
     can_change_project_base,
     can_delete_period_base,
-    can_delete_project_base
+    can_delete_project_base,
 )
 from apps.dcis.services.divisions_services import get_period_divisions
-from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.services.document_services import get_document_last_status
 
 
@@ -427,6 +427,19 @@ class RowDimensionType(graphene.ObjectType):
     object_id = graphene.ID(description='Идентификатор дивизиона')
     user_id = graphene.ID(description='Идентификатор пользователя')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
+
+
+class ChangeRowDimensionType(DjangoObjectType):
+    class Meta:
+        model = RowDimension
+        fields = (
+            'id',
+            'height',
+            'fixed',
+            'hidden',
+            'dynamic',
+            'updated_at'
+        )
 
 
 class CellType(graphene.ObjectType):

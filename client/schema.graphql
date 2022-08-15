@@ -1352,21 +1352,25 @@ input ChangeRowDimensionMutationInput {
 """Изменение строки."""
 type ChangeRowDimensionMutationPayload {
   clientMutationId: String
-  """Динамическая ли строка"""
-  dynamic: Boolean!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Измененные строки"""
+  rowDimensions: [ChangeRowDimensionType]
+  """Успех мутации"""
+  success: Boolean!
+}
+
+type ChangeRowDimensionType {
+  """Динамическая ли строка"""
+  dynamic: Boolean!
   """Фиксация строки"""
   fixed: Boolean!
   """Высота строки"""
   height: Int
   """Скрытие строки"""
   hidden: Boolean!
-  """Идентификатор строки"""
-  rowDimensionId: ID!
-  """Успех мутации"""
-  success: Boolean!
-  """Дата обновления строки"""
+  id: ID!
+  """Дата обновления"""
   updatedAt: DateTime!
 }
 
