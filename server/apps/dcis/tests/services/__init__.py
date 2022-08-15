@@ -1,3 +1,4 @@
+from .column_dimension_services import ColumnDimensionTestCase
 from .divisions_services import DivisionsServicesTestCase
 from .document_services import DocumentTestCase, GetUserDocumentsTestCase
 from .period_services import GetUserPeriodsTestCase

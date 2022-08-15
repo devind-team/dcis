@@ -919,19 +919,23 @@ input ChangeColumnDimensionMutationInput {
 """Изменение колонки."""
 type ChangeColumnDimensionMutationPayload {
   clientMutationId: String
-  """Идентификатор колонки"""
-  columnDimensionId: ID!
+  """Измененные колонки"""
+  columnDimensions: [ChangeColumnDimensionType]
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+type ChangeColumnDimensionType {
   """Фиксация колонки"""
   fixed: Boolean!
   """Скрытие колонки"""
   hidden: Boolean!
-  """Тип значения"""
+  id: ID!
+  """Тип значений"""
   kind: String!
-  """Успех мутации"""
-  success: Boolean!
-  """Дата обновления колонки"""
+  """Дата обновления"""
   updatedAt: DateTime!
   """Ширина колонки"""
   width: Int

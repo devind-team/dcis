@@ -1,3 +1,4 @@
+"""Модуль, отвечающий за работу со строками."""
 from typing import Any
 
 from django.db import transaction
@@ -105,8 +106,8 @@ def change_row_dimension(
     document_ids: list[int]
 ) -> list[RowDimension]:
     """Изменение строки."""
-    row_dimensions: list[RowDimension] = []
     can_change_period_sheet(user, row_dimension.sheet.period)
+    row_dimensions: list[RowDimension] = []
     row_dimension.height = height
     row_dimension.hidden = hidden
     row_dimension.dynamic = dynamic
@@ -114,7 +115,7 @@ def change_row_dimension(
     row_dimensions.append(row_dimension)
     if row_dimension.fixed != fixed:
         row_dimensions = change_row_dimension_fixed(row_dimension, fixed)
-    return [row for row in set(row_dimensions) if row.document_id is None or row.document_id in document_ids]
+    return [row for row in row_dimensions if row.document_id is None or row.document_id in document_ids]
 
 
 def change_row_dimension_fixed(row_dimension: RowDimension, fixed: bool) -> list[RowDimension]:

@@ -1,33 +1,26 @@
+"""Тесты модуля, отвечающего за работу со строками."""
 from itertools import product
 from unittest.mock import patch
 
-from devind_dictionaries.models import Department
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
-from django.test import TestCase
 
-from apps.core.models import User
-from apps.dcis.models import Cell, ColumnDimension, Document, MergedCell, Period, Project, RowDimension, Sheet
+from apps.dcis.models import Cell, ColumnDimension, Document, MergedCell, RowDimension
 from apps.dcis.services.row_dimension_services import (
     change_row_dimension,
     change_row_dimension_fixed,
     get_relative_rows,
     is_ancestor,
 )
+from .common import TableTestCase
 
 
-class RowDimensionTestCase(TestCase):
-    """Тестирование сервисов для работы со строкой."""
+class RowDimensionTestCase(TableTestCase):
+    """Тесты модуля, отвечающего за работу со строками."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
-        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
+        super().setUp()
 
-        self.department_content_type = ContentType.objects.get_for_model(Department)
-
-        self.project = Project.objects.create(content_type=self.department_content_type)
-        self.period = Period.objects.create(project=self.project)
-        self.sheet = Sheet.objects.create(period=self.period)
         self.document = Document.objects.create(period=self.period)
 
         self.root_row_dimension = RowDimension.objects.create(sheet=self.sheet, dynamic=True, index=1)
@@ -118,7 +111,8 @@ class RowDimensionTestCase(TestCase):
             row.refresh_from_db()
             self.assertTrue(row.fixed)
         for changed_row in changed_rows:
-            self.assertEqual(changed_row.fixed, False)
+            self.assertFalse(changed_row.fixed)
+        self.extra_root_dimension.refresh_from_db()
         self.assertFalse(self.extra_root_dimension.fixed)
 
     def test_change_row_dimension_without_document_ids(self) -> None:

@@ -451,7 +451,7 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateTy
     ChangeColumnDimensionMutationVariables
   >(changeColumnDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) {
-      updateColumnDimension(updateSheet.value, dataProxy, result)
+      updateColumnDimensions(updateSheet.value, dataProxy, result)
     }
   })
   return async function (columnDimension: ColumnDimensionType, width: number) {
@@ -469,15 +469,19 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateTy
           __typename: 'ChangeColumnDimensionMutationPayload',
           success: true,
           errors: [],
-          ...variables,
-          updatedAt: new Date().toISOString()
+          columnDimensions: [{
+            ...variables,
+            id: columnDimension.id,
+            updatedAt: new Date().toISOString(),
+            __typename: 'ChangeColumnDimensionType'
+          }]
         }
       }
     })
   }
 }
 
-export function updateColumnDimension (
+export function updateColumnDimensions (
   updateSheet: UpdateType<DocumentsSheetQuery>,
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
@@ -490,12 +494,15 @@ export function updateColumnDimension (
         data: DocumentsSheetQuery,
         { data: { changeColumnDimension } }: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
       ) => {
-        const columnDimension = data.documentsSheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
-          columnDimension.id === changeColumnDimension.columnDimensionId)!
-        columnDimension.width = changeColumnDimension.width
-        columnDimension.fixed = changeColumnDimension.fixed
-        columnDimension.hidden = changeColumnDimension.hidden
-        columnDimension.updatedAt = changeColumnDimension.updatedAt
+        for (const column of changeColumnDimension.columnDimensions) {
+          const columnDimension = data.documentsSheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
+            columnDimension.id === column.id)!
+          columnDimension.width = column.width
+          columnDimension.fixed = column.fixed
+          columnDimension.hidden = column.hidden
+          columnDimension.kind = column.kind
+          columnDimension.updatedAt = column.updatedAt
+        }
         return data
       }
     )

@@ -16,7 +16,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
-    Attribute, AttributeValue, Document,
+    Attribute, AttributeValue, ColumnDimension, Document,
     DocumentStatus, Limitation, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
     Project, RowDimension, Sheet,
@@ -429,6 +429,21 @@ class RowDimensionType(graphene.ObjectType):
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
 
 
+class ChangeColumnDimensionType(DjangoObjectType):
+    kind = graphene.String(required=True, description='Тип значений')
+
+    class Meta:
+        model = ColumnDimension
+        fields = (
+            'id',
+            'width',
+            'fixed',
+            'hidden',
+            'kind',
+            'updated_at',
+        )
+
+
 class ChangeRowDimensionType(DjangoObjectType):
     class Meta:
         model = RowDimension
@@ -438,7 +453,7 @@ class ChangeRowDimensionType(DjangoObjectType):
             'fixed',
             'hidden',
             'dynamic',
-            'updated_at'
+            'updated_at',
         )
 
 

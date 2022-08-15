@@ -12,7 +12,7 @@ from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
 from apps.dcis.models import Period, Sheet, Value
-from apps.dcis.models.sheet import Cell, ColumnDimension
+from apps.dcis.models.sheet import Cell
 from apps.dcis.permissions import (
     can_add_budget_classification,
     can_change_period_sheet,
@@ -54,24 +54,6 @@ def rename_sheet(user: User, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]
     sheet.name = name
     sheet.save(update_fields=('name',))
     return sheet, changed_cell
-
-
-def change_column_dimension(
-    user: User,
-    column_dimension: ColumnDimension,
-    width: int | None,
-    fixed: bool,
-    hidden: bool,
-    kind: str
-) -> ColumnDimension:
-    """Изменение колонки."""
-    can_change_period_sheet(user, column_dimension.sheet.period)
-    column_dimension.width = width
-    column_dimension.fixed = fixed
-    column_dimension.hidden = hidden
-    column_dimension.kind = kind
-    column_dimension.save(update_fields=('width', 'fixed', 'hidden', 'kind', 'updated_at'))
-    return column_dimension
 
 
 class CheckCellOptions:

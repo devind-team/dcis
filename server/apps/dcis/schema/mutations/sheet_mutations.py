@@ -10,13 +10,15 @@ from graphql import ResolveInfo
 from apps.dcis.models import ColumnDimension, RowDimension, Sheet
 from apps.dcis.schema.types import (
     CellType,
+    ChangeColumnDimensionType,
     ChangeRowDimensionType,
     GlobalIndicesInputType,
     RowDimensionType,
     SheetType,
 )
+from apps.dcis.services.column_dimension_services import change_column_dimension
 from apps.dcis.services.row_dimension_services import add_row_dimension, change_row_dimension, delete_row_dimension
-from apps.dcis.services.sheet_services import change_column_dimension, rename_sheet
+from apps.dcis.services.sheet_services import rename_sheet
 
 
 class RenameSheetMutation(BaseMutation):
@@ -53,12 +55,7 @@ class ChangeColumnDimensionMutation(BaseMutation):
         hidden = graphene.Boolean(required=True, description='Скрытие колонки')
         kind = graphene.String(required=True, description='Тип значения')
 
-    column_dimension_id = graphene.ID(required=True, description='Идентификатор колонки')
-    width = graphene.Int(description='Ширина колонки')
-    fixed = graphene.Boolean(required=True, description='Фиксация колонки')
-    hidden = graphene.Boolean(required=True, description='Скрытие колонки')
-    kind = graphene.String(required=True, description='Тип значения')
-    updated_at = graphene.DateTime(required=True, description='Дата обновления колонки')
+    column_dimensions = graphene.List(ChangeColumnDimensionType, description='Измененные колонки')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -72,21 +69,15 @@ class ChangeColumnDimensionMutation(BaseMutation):
         kind: str
     ):
         column_dimension = get_object_or_404(ColumnDimension, pk=column_dimension_id)
-        column_dimension = change_column_dimension(
-            user=info.context.user,
-            column_dimension=column_dimension,
-            width=width,
-            fixed=fixed,
-            hidden=hidden,
-            kind=kind
-        )
         return ChangeColumnDimensionMutation(
-            column_dimension_id=column_dimension.pk,
-            width=column_dimension.width,
-            fixed=column_dimension.fixed,
-            hidden=column_dimension.hidden,
-            kind=column_dimension.kind,
-            updated_at=column_dimension.updated_at
+            column_dimensions=change_column_dimension(
+                user=info.context.user,
+                column_dimension=column_dimension,
+                width=width,
+                fixed=fixed,
+                hidden=hidden,
+                kind=kind
+            )
         )
 
 

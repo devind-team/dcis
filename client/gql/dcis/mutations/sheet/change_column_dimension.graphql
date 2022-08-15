@@ -18,11 +18,15 @@ mutation ChangeColumnDimension(
       messages
       __typename
     }
-    columnDimensionId
-    width
-    fixed
-    hidden
-    updatedAt
+    columnDimensions {
+      id
+      width
+      fixed
+      hidden
+      kind
+      updatedAt
+      __typename
+    }
     __typename
   }
 }
