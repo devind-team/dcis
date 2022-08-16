@@ -108,11 +108,11 @@ class AddDocumentStatusMutation(BaseMutation):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
         return AddDocumentStatusMutation(document_status=add_document_status(
-            status=status,
+            user=info.context.user,
             document=document,
+            status=status,
             comment=comment,
-            user=info.context.user)
-        )
+        ))
 
 
 class DeleteDocumentStatusMutation(BaseMutation):

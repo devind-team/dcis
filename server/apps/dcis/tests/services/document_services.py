@@ -4,11 +4,26 @@ from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import Document, DocumentStatus, Period, Project, RowDimension, Sheet, Status
-from apps.dcis.services.document_services import get_document_last_status, get_user_documents, is_document_editable
+from apps.dcis.models import Division, Document, DocumentStatus, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.permissions import (
+    can_add_document,
+    can_add_document_status,
+    can_change_document,
+    can_change_document_comment,
+)
+from apps.dcis.services.document_services import (
+    add_document_status,
+    change_document_comment,
+    create_document,
+    delete_document_status,
+    get_document_last_status,
+    get_user_documents,
+    is_document_editable,
+)
 
 
 class GetUserDocumentsTestCase(TestCase):
@@ -158,15 +173,33 @@ class DocumentTestCase(TestCase):
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
-        self.department_content_type = ContentType.objects.get_for_model(Department)
-
         self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.super_user = User.objects.create(username='super_user', email='super_user@gmain.com', is_superuser=True)
 
-        self.status = Status.objects.create()
+        self.status = Status.objects.create(name='Testing status')
+        self.status_str = Status.objects.create(name='Test status')
         self.status_edit = Status.objects.create(edit=True)
 
+        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.department = Department.objects.create(user=self.super_user)
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
+        self.department_division = Division.objects.create(period=self.period, object_id=self.department.id)
+
+        self.comment = 'Test comment'
+        self.change_comment = 'Change comment'
+        self.document = Document.objects.create(
+            user=self.super_user,
+            period=self.period,
+            comment=self.comment
+        )
+        self.document_status = DocumentStatus.objects.create(
+            user=self.super_user,
+            document=self.document,
+            status=self.status,
+            comment=self.comment
+        )
+
         self.document_without_status_document = Document.objects.create(period=self.period)
         self.document_with_last_not_edit_status = Document.objects.create(period=self.period)
         self.document_statuses_with_last_not_edit_status = self._create_document_statuses(
@@ -201,3 +234,61 @@ class DocumentTestCase(TestCase):
             ds.created_at = ds.created_at + timedelta(days=i)
             ds.save(update_fields=('created_at',))
         return document_statuses
+
+    def test_create_document(self) -> None:
+        """Тестирование функции `create_document`."""
+        with patch.object(self.super_user, 'has_perm', new=lambda perm: perm != 'dcis.add_document'):
+            self.assertRaises(
+                PermissionDenied,
+                can_add_document,
+                self.super_user,
+                self.period,
+                self.status,
+                self.department_division.id
+            )
+        self.assertEqual(
+            create_document(user=self.super_user, period=self.period, status=self.status, comment='Create document'),
+            Document.objects.get(comment='Create document'),
+            'Create document'
+        )
+
+    def test_add_document_status(self) -> None:
+        """Тестирование функции `add_document_status`."""
+        with patch.object(self.super_user, 'has_perm', new=lambda perm: perm != 'dcis.change_document'):
+            self.assertRaises(PermissionDenied, can_add_document_status, self.super_user, self.document, self.status)
+        self.assertEqual(
+            add_document_status(
+                user=self.super_user,
+                document=self.document,
+                status=self.status_str,
+                comment='Add document status'
+            ),
+            DocumentStatus.objects.get(comment='Add document status'),
+            'Add document status'
+        )
+
+    def test_change_document_comment(self) -> None:
+        """Тестирование функции `change_document_comment`."""
+        with patch.object(
+            self.super_user, 'has_perm', new=lambda perm: perm not in (
+                'dcis.change_document',
+                'dcis.add_project',
+                'dcis.add_period'
+            )
+        ):
+            self.assertRaises(PermissionDenied, can_change_document_comment, self.super_user, self.document)
+        self.assertEqual(
+            change_document_comment(user=self.super_user, document=self.document, comment=self.change_comment),
+            Document.objects.get(comment=self.change_comment),
+            'Change document comment'
+        )
+
+    def test_delete_document_status(self) -> None:
+        """Тестирование функции `delete_document_status`."""
+        with patch.object(self.super_user, 'has_perm', new=lambda perm: perm != 'dcis.change_document'):
+            self.assertRaises(PermissionDenied, can_change_document, self.super_user, self.document)
+        self.assertEqual(
+            delete_document_status(user=self.super_user, status=self.document_status),
+            None,
+            'Delete document status'
+        )
