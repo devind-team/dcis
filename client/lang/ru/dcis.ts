@@ -2,6 +2,12 @@ export default {
   home: 'Проекты сборов',
   projects: {
     name: '@:dcis.home',
+    filters: {
+      active: 'Активные проекты',
+      archive: 'Проекты в архиве',
+      hidden: 'Скрытые проекты',
+      noFiltrationMessage: 'Фильтры не заданы'
+    },
     tableHeaders: {
       name: '@:name',
       description: 'Описание',
