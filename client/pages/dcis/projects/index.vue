@@ -9,9 +9,17 @@ bread-crumbs(:items="breadCrumbs")
         add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
           template(#activator="{ on }")
             v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
-    v-card-subtitle {{ $t('shownOf', { count, totalCount }) }}
+    v-card-subtitle {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
     v-card-text
-      v-data-table(:headers="headers" :items="projects" :loading="loading" disable-pagination hide-default-footer)
+      items-data-filter(
+        v-model="selectedFilters"
+        :items="filterOptions"
+        :get-name="i => i.tr"
+        :no-filtration-message="String($t('dcis.projects.filters.noFiltrationMessage'))"
+        item-key="key"
+        multiple
+      )
+      v-data-table(:headers="headers" :items="visibleProjects" :loading="loading" disable-pagination hide-default-footer)
         template(#item.name="{ item }")
           nuxt-link(
             :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
@@ -28,11 +36,12 @@ import { useApolloHelpers, useFilters, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'
 import { useProjects } from '~/services/grapqhl/queries/dcis/projects'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
 import WaveContainer from '~/components/dcis/ui/WaveContainer.vue'
 
 export default defineComponent({
-  components: { WaveContainer, AddProject, BreadCrumbs },
+  components: { WaveContainer, AddProject, BreadCrumbs, ItemsDataFilter },
   middleware: 'auth',
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
@@ -69,6 +78,28 @@ export default defineComponent({
       deleteUpdate
     } = useProjects()
 
+    const defaultFilter = { key: 'active', tr: t('dcis.projects.filters.active') }
+
+    const filterOptions = ref([
+      defaultFilter,
+      { key: 'archive', tr: t('dcis.projects.filters.archive') }
+    ])
+
+    if (projects.value.find(x => !x.visibility)) {
+      filterOptions.value.push({ key: 'hidden', tr: t('dcis.projects.filters.hidden') })
+    }
+
+    const selectedFilters = ref([defaultFilter])
+
+    const visibleProjects = computed(() => {
+      const filterKeys = selectedFilters.value.map(x => x.key)
+      return projects.value.filter((x) => {
+        return (!x.visibility && filterKeys.includes('hidden')) ||
+          (x.archive && filterKeys.includes('archive')) ||
+          (!x.archive && x.visibility && filterKeys.includes('active'))
+      })
+    })
+
     onMounted(() => {
       if (projects.value && projects.value.length && route.query.deleteProjectId) {
         deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.deleteProjectId } } })
@@ -82,6 +113,9 @@ export default defineComponent({
       name,
       headers,
       projects,
+      filterOptions,
+      selectedFilters,
+      visibleProjects,
       divisions,
       count,
       totalCount,

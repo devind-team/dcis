@@ -17,6 +17,9 @@ django.setup()
 
 def recursive_module(mod: pdoc.doc.Module):
     """Рекурсия прохождения по всем модулям."""
+
+
+
     yield mod
     for submod in mod.submodules:
         yield from recursive_module(submod)
