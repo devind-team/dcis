@@ -269,12 +269,10 @@ class DocumentTestCase(TestCase):
 
     def test_change_document_comment(self) -> None:
         """Тестирование функции `change_document_comment`."""
-        with patch.object(
-            self.super_user, 'has_perm', new=lambda perm: perm not in (
-                'dcis.change_document',
-                'dcis.add_project',
-                'dcis.add_period'
-            )
+        with patch.object(self.document, 'user_id', new=None), patch.object(
+            self.super_user,
+            'has_perm',
+            new=lambda perm: perm != 'dcis.change_document'
         ):
             self.assertRaises(PermissionDenied, can_change_document_comment, self.super_user, self.document)
         self.assertEqual(
