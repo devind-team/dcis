@@ -1,14 +1,14 @@
 """Тесты модуля, отвечающего за работу с периодами."""
-
+import os
 from os.path import join
 from unittest.mock import Mock, patch
 
-import six
+from six import BytesIO
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
@@ -20,6 +20,7 @@ from apps.dcis.services.period_services import (
     get_user_privileges_periods,
 )
 from devind.settings import BASE_DIR
+from shutil import rmtree
 
 
 class GetUserPeriodsTestCase(TestCase):
@@ -178,15 +179,19 @@ class PeriodTestCase(TestCase):
         content: bytes,
         content_type: None
     ) -> InMemoryUploadedFile:
-        stream = six.BytesIO()
-        stream.write(content)
-        file = InMemoryUploadedFile(
-            file=stream,
+        self.stream = BytesIO()
+        self.stream.write(content)
+        self.file = InMemoryUploadedFile(
+            file=self.stream,
             field_name=None,
             name=file_name,
             content_type=content_type,
-            size=stream.tell(),
+            size=self.stream.tell(),
             charset=None
         )
-        file.seek(0)
-        return file
+        self.file.seek(0)
+        return self.file
+
+    def tearDown(self) -> None:
+        """Очистка данных тестирования."""
+        rmtree(join(BASE_DIR.parent, 'storage'))
