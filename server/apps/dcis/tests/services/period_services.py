@@ -1,19 +1,25 @@
 """Тесты модуля, отвечающего за работу с периодами."""
 
+from os.path import join
 from unittest.mock import Mock, patch
 
+import six
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase
 
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.permissions import can_add_period
 from apps.dcis.services.period_services import (
-    get_user_divisions_periods,
+    create_period, get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
     get_user_privileges_periods,
 )
+from devind.settings import BASE_DIR
 
 
 class GetUserPeriodsTestCase(TestCase):
@@ -107,3 +113,80 @@ class GetUserPeriodsTestCase(TestCase):
             },
             set(get_user_periods(self.user, self.user_is_not_creator_project.id)),
         )
+
+
+class PeriodTestCase(TestCase):
+    """Тестирование периода."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.department_content_type = ContentType.objects.get_for_model(Department)
+
+        self.user = User.objects.create(username='user', email='user@gmain.com')
+        self.super_user = User.objects.create(username='super_user', email='super_user@gmain.com', is_superuser=True)
+
+        self.user_project = Project.objects.create(user=self.super_user, content_type=self.department_content_type)
+        self.user_periods = [Period.objects.create(user=self.super_user, project=self.user_project) for _ in range(3)]
+        self.user_group_periods = [Period.objects.create(project=self.user_project) for _ in range(3)]
+        self.user_groups: list[PeriodGroup] = []
+        for period in self.user_group_periods:
+            self.user_groups.append(PeriodGroup.objects.create(period=period))
+            self.user_groups[-1].users.add(self.super_user)
+
+        self.department = Department.objects.create(user=self.super_user)
+        self.department_period = Period.objects.create(project=self.user_project)
+        self.department_divisions = [
+            Division.objects.create(period=self.department_period, object_id=department_id) for department_id in
+            range(1, 3)]
+
+        self.divisions_ids: list[str | int] = []
+        for division_id in self.department_divisions:
+            self.divisions_ids.append(division_id.id)
+
+    def test_create_period(self) -> None:
+        """Тестирование функции `get_create_period`."""
+        with patch.object(self.user_project, 'user_id', new=None), patch.object(
+            self.super_user,
+            'has_perm',
+            new=lambda perm: perm not in ('dcis.add_period', 'dcis.add_project')
+        ):
+            self.assertRaises(PermissionDenied, can_add_period, self.super_user, self.user_project)
+        with open(
+            file=join(BASE_DIR, 'apps', 'dcis', 'tests', 'resources', 'test_create_period.xlsx'),
+            mode='rb'
+        ) as file:
+            self.assertEqual(
+                create_period(
+                    user=self.super_user,
+                    name='Test period',
+                    project=self.user_project,
+                    multiple=True,
+                    file=self._create_inmemory_file(
+                        file_name=file.name,
+                        content=file.read(),
+                        content_type=None
+                    ),
+                    readonly_fill_color=False
+                ),
+                Period.objects.get(name='Test period'),
+                'Create project'
+            )
+
+    def _create_inmemory_file(
+        self,
+        file_name: str,
+        content: bytes,
+        content_type: None
+    ) -> InMemoryUploadedFile:
+        stream = six.BytesIO()
+        stream.write(content)
+        file = InMemoryUploadedFile(
+            file=stream,
+            field_name=None,
+            name=file_name,
+            content_type=content_type,
+            size=stream.tell(),
+            charset=None
+        )
+        file.seek(0)
+        return file

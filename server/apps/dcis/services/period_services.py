@@ -3,6 +3,7 @@
 from datetime import date
 
 from devind_helpers.orm_utils import get_object_or_404
+from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -90,11 +91,11 @@ def get_user_period_privileges(user_id: int | str, period_id: int | str) -> Quer
 
 @transaction.atomic
 def create_period(
-    name: str,
     user: User,
+    name: str,
     project: Project,
     multiple: bool,
-    file: InMemoryUploadedFile,
+    file: File,
     readonly_fill_color: bool
 ) -> Period:
     """Создание периода."""
