@@ -21,7 +21,6 @@ export default defineComponent({
 
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       { title: t('profile.me.profile') as string, to: 'profile-me', icon: 'face-man' },
-      { title: t('profile.settings.index') as string, to: 'profile-settings', icon: 'cogs' },
       {
         title: t('profile.activity.name') as string,
         to: 'profile-activity',
