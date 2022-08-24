@@ -10,7 +10,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 RUN apt-get update -y && \
-    pip install daphne poetry && \
+    pip install poetry && \
     pip install --upgrade pip && \
     apt-get install build-essential -y && \
     apt-get install libreoffice -y  && \
@@ -18,7 +18,7 @@ RUN apt-get update -y && \
 
 # Copy application
 COPY . /usr/src/app
-RUN poetry install
+RUN poetry install --no-dev
 
 # Enter point
 CMD ['poetry']
