@@ -23,7 +23,8 @@ import {
 import { useAuthStore } from '~/stores'
 import { GridMode, UpdateSheetType } from '~/types/grid'
 import {
-  CellType, DivisionModelType,
+  CellType,
+  DivisionModelType,
   DocumentSheetQuery,
   DocumentsSheetQuery,
   DocumentType,
@@ -156,11 +157,7 @@ export default defineComponent({
       if (props.cell.value === value || (props.cell.value === null && value === '')) {
         return
       }
-      if (mode === GridMode.CHANGE) {
-        await changeDefault(props.cell, value)
-      } else {
-        await changeValue(value)
-      }
+      mode === GridMode.CHANGE ? await changeDefault(props.cell, value) : await changeValue(value)
     }
 
     const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {
