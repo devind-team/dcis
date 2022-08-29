@@ -174,6 +174,7 @@ export default {
       version: 'Версия',
       comment: 'Комментарий',
       createdAt: 'Дата добавления',
+      updatedAt: 'Дата последнего изменения',
       organization: '@:dcis.documents.addDocument.organization',
       department: '@:dcis.documents.addDocument.department',
       lastStatus: 'Статус'

@@ -1,49 +1,50 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ $t('dcis.documents.name') }}
-    template(v-if="period.canAddDocument || userPeriodDivision.length")
-      v-spacer
-      add-document(
-        :can-add-any-document="period.canAddDocument"
-        :user-divisions="userPeriodDivision"
-        :period="period"
-        :documents="documents"
-        :update="addDocumentUpdate"
-      )
-        template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-  template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-  items-data-filter(
-    v-if="showFilter"
-    v-model="selectedDocs"
-    :items="period.divisions.map(x => ({ id: x.id, name: x.name }))"
-    :get-name="i => i.name"
-    multiple
-  )
-  v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
-    template(#item.version="{ item }")
-      nuxt-link(
-        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-      ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
-    template(#item.comment="{ item }")
-      template(v-if="item.comment")
-        template(v-if="canChangeDocument(item)")
-          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
-            a(v-on="on") {{ item.comment }}
-        template(v-else) {{ item.comment }}
-    template(#item.lastStatus="{ item }")
-      template(v-if="item.lastStatus")
-        document-statuses(
-          :can-add="canChangeDocument(item)"
-          :can-delete="canDeleteDocumentStatus(item)"
-          :update="update"
-          :document="item"
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+    template(#header) {{ $t('dcis.documents.name') }}
+      template(v-if="period.canAddDocument || userPeriodDivision.length")
+        v-spacer
+        add-document(
+          :can-add-any-document="period.canAddDocument"
+          :user-divisions="userPeriodDivision"
+          :period="period"
+          :documents="documents"
+          :update="addDocumentUpdate"
         )
           template(#activator="{ on }")
-            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-        div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
-        .font-italic {{ item.lastStatus.comment }}
-    template(#item.division="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
+            v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
+    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
+    items-data-filter(
+      v-if="showFilter"
+      v-model="selectedDocs"
+      :items="period.divisions.map(x => ({ id: x.id, name: x.name }))"
+      :get-name="i => i.name"
+      multiple
+    )
+    v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
+      template(#item.version="{ item }")
+        nuxt-link(
+          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+        ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
+      template(#item.comment="{ item }")
+        template(v-if="item.comment")
+          template(v-if="canChangeDocument(item)")
+            text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+              a(v-on="on") {{ item.comment }}
+          template(v-else) {{ item.comment }}
+      template(#item.lastStatus="{ item }")
+        template(v-if="item.lastStatus")
+          document-statuses(
+            :can-add="canChangeDocument(item)"
+            :can-delete="canDeleteDocumentStatus(item)"
+            :update="update"
+            :document="item"
+          )
+            template(#activator="{ on }")
+              a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+          div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
+          .font-italic {{ item.lastStatus.comment }}
+      template(#item.division="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
+      template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
 <script lang="ts">
@@ -51,17 +52,17 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, useNuxt2Meta } from '#app'
+import { computed, defineComponent, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useI18n } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
-  DocumentType,
-  PeriodType,
-  DivisionModelType,
   ChangeDocumentCommentMutation,
-  ChangeDocumentCommentMutationVariables
+  ChangeDocumentCommentMutationVariables,
+  DivisionModelType,
+  DocumentType,
+  PeriodType
 } from '~/types/graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
@@ -85,7 +86,6 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
-
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
@@ -118,19 +118,17 @@ export default defineComponent({
       }
     }
 
-    const { mutate: changeDocumentCommentMutate } = useMutation<
-      ChangeDocumentCommentMutation,
-      ChangeDocumentCommentMutationVariables
-    >(
-      changeDocumentCommentMutation,
-      {
-        update: (cache, result) => {
-          if (!result.errors) {
-            changeUpdate(cache, result, 'document')
+    const { mutate: changeDocumentCommentMutate } = useMutation<ChangeDocumentCommentMutation,
+      ChangeDocumentCommentMutationVariables>(
+        changeDocumentCommentMutation,
+        {
+          update: (cache, result) => {
+            if (!result.errors) {
+              changeUpdate(cache, result, 'document')
+            }
           }
         }
-      }
-    )
+      )
 
     const changeDocumentComment = (document: DocumentType, comment: string): void => {
       changeDocumentCommentMutate({ documentId: document.id, comment })
@@ -151,7 +149,9 @@ export default defineComponent({
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
         { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' }
+        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
+        { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
+        { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
       )
       return result
     })
