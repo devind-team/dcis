@@ -63,11 +63,11 @@ export default defineNuxtConfig({
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
-    '@nuxtjs/color-mode',
     '@nuxtjs/apollo',
     '@nuxtjs/i18n',
     '@nuxtjs/vuetify',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/color-mode'
   ],
   apollo: {
     includeNodeModules: true,
