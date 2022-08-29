@@ -24,9 +24,9 @@ div
 
 <script lang="ts">
 import { VTabs } from 'vuetify/lib/components/VTabs'
-import { PropType } from '#app'
-import { DocumentType, BaseSheetType, SheetType } from '~/types/graphql'
-import { UpdateSheetType, CellsOptionsType } from '~/types/grid'
+import { computed, defineComponent, PropType, ref } from '#app'
+import { BaseSheetType, DocumentType, SheetType } from '~/types/graphql'
+import { CellsOptionsType, UpdateSheetType } from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
 

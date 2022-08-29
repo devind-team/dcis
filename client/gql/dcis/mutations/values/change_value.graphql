@@ -17,5 +17,6 @@ mutation ChangeValue($documentId: ID!, $sheetId: ID!, $cellId: ID!, $value: Stri
       ...ValueFields
     }
     updatedAt
+    __typename
   }
 }

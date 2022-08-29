@@ -4,45 +4,45 @@ import { FetchResult } from '@apollo/client/link/core'
 import { Ref, unref } from '#app'
 import { UpdateType } from '~/composables/query-common'
 import {
-  DocumentsSheetQuery,
-  DocumentSheetQuery,
-  DocumentSheetQueryVariables,
-  ValueFilesQuery,
-  SheetType,
-  RowDimensionType,
-  RowDimensionFieldsFragment,
-  ColumnDimensionType,
-  ColumnDimensionFieldsFragment,
-  CellType,
-  ValueType,
-  CellFieldsFragment,
-  GlobalIndicesInputType,
-  AddRowDimensionMutation,
-  AddRowDimensionMutationVariables,
   AddChildRowDimensionMutation,
   AddChildRowDimensionMutationVariables,
-  DeleteRowDimensionMutation,
-  DeleteRowDimensionMutationVariables,
-  DeleteChildRowDimensionMutation,
-  DeleteChildRowDimensionMutationVariables,
-  ChangeColumnDimensionMutation,
-  ChangeColumnDimensionMutationVariables,
-  ChangeRowDimensionMutation,
-  ChangeRowDimensionMutationVariables,
-  ChangeChildRowDimensionHeightMutation,
-  ChangeChildRowDimensionHeightMutationVariables,
+  AddRowDimensionMutation,
+  AddRowDimensionMutationVariables,
+  CellFieldsFragment,
+  CellType,
   ChangeCellDefaultMutation,
   ChangeCellDefaultMutationVariables,
   ChangeCellsOptionMutation,
   ChangeCellsOptionMutationVariables,
-  ChangeValueMutation,
-  ChangeValueMutationVariables,
+  ChangeChildRowDimensionHeightMutation,
+  ChangeChildRowDimensionHeightMutationVariables,
+  ChangeColumnDimensionMutation,
+  ChangeColumnDimensionMutationVariables,
   ChangeFileValueMutation,
   ChangeFileValueMutationVariables,
+  ChangeRowDimensionMutation,
+  ChangeRowDimensionMutationVariables,
+  ChangeValueMutation,
+  ChangeValueMutationVariables,
+  ColumnDimensionFieldsFragment,
+  ColumnDimensionType,
+  DeleteChildRowDimensionMutation,
+  DeleteChildRowDimensionMutationVariables,
+  DeleteRowDimensionMutation,
+  DeleteRowDimensionMutationVariables,
+  DocumentSheetQuery,
+  DocumentSheetQueryVariables,
+  DocumentsSheetQuery,
+  GlobalIndicesInputType,
+  RowDimensionFieldsFragment,
+  RowDimensionType,
+  SheetType,
   UnloadFileValueArchiveMutation,
-  UnloadFileValueArchiveMutationVariables
+  UnloadFileValueArchiveMutationVariables,
+  ValueFilesQuery,
+  ValueType
 } from '~/types/graphql'
-import { parsePosition, findCell } from '~/services/grid'
+import { findCell, parsePosition } from '~/services/grid'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import addRowDimensionMutation from '~/gql/dcis/mutations/sheet/add_row_dimension.graphql'
 import addChildRowDimensionMutation from '~/gql/dcis/mutations/document/add_child_row_dimension.graphql'
@@ -50,7 +50,8 @@ import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_di
 import deleteChildRowDimensionMutation from '~/gql/dcis/mutations/document/delete_child_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
-import changeChildRowDimensionHeightMutation from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
+import changeChildRowDimensionHeightMutation
+  from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
 import changeCellDefaultMutation from '~/gql/dcis/mutations/cell/change_cell_default.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
@@ -742,6 +743,7 @@ export const useChangeValueMutation = (
               id: '',
               sheetId: sheetId.value,
               value,
+              error: null,
               verified: true,
               columnId: cell.value.columnId,
               rowId: cell.value.rowId,
