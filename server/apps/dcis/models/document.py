@@ -1,6 +1,6 @@
+from apps.core.models import User
 from django.db import models
 
-from apps.core.models import User
 from .project import Period
 
 
@@ -41,10 +41,9 @@ class Document(models.Model):
     Когда начинается сбор, берутся атрибуты и листы привязанные к периоду.
     На основе листов и атрибутов создается документ для дивизиона.
 
-    sheet - список листов в собираемом документе.
-
-    content_type - Department, Organization - выбирается из проекта.
-    object_id - идентификатор Department, Organization.
+    - sheet - список листов в собираемом документе.
+    - content_type - Department, Organization - выбирается из проекта.
+    - object_id - идентификатор Department, Organization.
         None в случае если для всех дивизионов один сбор.
     """
 
