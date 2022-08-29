@@ -16,6 +16,7 @@ bread-crumbs(:items="breadCrumbs")
         :items="filterOptions"
         :get-name="i => i.tr"
         :no-filtration-message="String($t('dcis.projects.filters.noFiltrationMessage'))"
+        :default-value="[defaultFilter]"
         item-key="key"
         multiple
       )
@@ -90,6 +91,9 @@ export default defineComponent({
     }
 
     const selectedFilters = ref([defaultFilter])
+    const clearFilters = () => {
+      selectedFilters.value = [defaultFilter]
+    }
 
     const visibleProjects = computed(() => {
       const filterKeys = selectedFilters.value.map(x => x.key)
@@ -120,6 +124,7 @@ export default defineComponent({
       count,
       totalCount,
       loading,
+      defaultFilter,
       dateTimeHM,
       addUpdate
     }
