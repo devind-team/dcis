@@ -118,7 +118,8 @@ export default defineComponent({
       default (item: Item) {
         return String(item[(this as any).itemKey])
       }
-    }
+    },
+    defaultValue: { type: [Object, Array], default: () => ([]) }
   },
   setup (props, { emit }) {
     const { tc } = useI18n()
@@ -187,8 +188,9 @@ export default defineComponent({
     })
     /** Очистка фильтра */
     const clear = () => {
-      selectedItems.value = []
+      tempItems.value = props.defaultValue
       emit('clear')
+      apply()
     }
     /** Закрытие модельного окна */
     const close = () => {
@@ -199,9 +201,10 @@ export default defineComponent({
     /** Сброс фильтра */
     const reset = () => {
       clear()
-      tempItems.value = []
+      tempItems.value = props.defaultValue
       search.value = ''
       emit('reset')
+      apply()
     }
     /** Применение фильтра */
     const apply = () => {
