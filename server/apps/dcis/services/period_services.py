@@ -7,6 +7,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
+from devind_helpers.schema.types import ErrorFieldType
+
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
@@ -18,6 +20,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period
 )
+from apps.dcis.schema.types import DivisionModelType
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
@@ -125,6 +128,17 @@ def add_divisions_period(user: User, period_id: str | int, division_ids: list[st
     ])
     divisions = period.project.division.objects.filter(pk__in=[link.object_id for link in division_links])
     return get_divisions(divisions)
+
+
+def add_divisions_from_file(
+    user: User,
+    period_id: str | int,
+    file: InMemoryUploadedFile
+) -> tuple[list[DivisionModelType], list[int], list[ErrorFieldType] | None]:
+    """Добавление дивизионов из файла формата csv/xlsx."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_divisions(user, period)
+    return [], [], None,
 
 
 def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:

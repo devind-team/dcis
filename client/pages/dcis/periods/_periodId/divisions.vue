@@ -3,11 +3,12 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   template(#header) {{ header }}
     template(v-if="period.canChangeDivisions")
       v-spacer
-      add-period-divisions(
-        :header="addHeader"
-        :button-text="addButtonText"
+      add-period-divisions-menu(
+        :add-header="addHeader"
+        :add-button-text="addButtonText"
         :period="period"
-        :update="addDivisionsUpdate"
+        :add-divisions-update="addDivisionsUpdate"
+        :add-divisions-from-file-update="addDivisionFromFileUpdate"
       )
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ addButtonText }}
@@ -58,14 +59,16 @@ import {
 import { BreadCrumbsItem } from '~/types/devind'
 import { UpdateType, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
+import { AddDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
+import AddPeriodDivisionsMenu from '~/components/dcis/periods/AddPeriodDivisionsMenu.vue'
+import { AddDivisionsFromFileMutationResult } from '~/components/dcis/periods/AddPeriodDivisionsFromFile.vue'
 
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AddPeriodDivisions, DeleteMenu },
+  components: { AddPeriodDivisionsMenu, LeftNavigatorContainer, DeleteMenu },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
@@ -129,17 +132,32 @@ export default defineComponent({
 
     const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
-    const addDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => periodUpdate(
+    const dataCacheResult = (dataCache, success: boolean, divisions: DivisionModelType[]) => {
+      if (success) {
+        dataCache.period.divisions = (
+            [...dataCache.period.divisions, ...divisions] as Required<DivisionModelType>[]
+        ).sort((d1: DivisionModelType, d2: DivisionModelType) => d1.name.localeCompare(d2.name))
+      }
+      return dataCache
+    }
+
+    const addDivisionsUpdate = (cache: DataProxy, result: AddDivisionsMutationResult) => periodUpdate(
       cache,
       result,
-      (dataCache, { data: { addDivisions: { success, divisions } } }: ChangeDivisionsMutationResult) => {
-        if (success) {
-          dataCache.period.divisions = (
-            [...dataCache.period.divisions, ...divisions] as Required<DivisionModelType>[]
-          ).sort((d1: DivisionModelType, d2: DivisionModelType) => d1.name.localeCompare(d2.name))
-        }
-        return dataCache
-      })
+      (
+        dataCache,
+        { data: { addDivisions: { success, divisions } } }: AddDivisionsMutationResult
+      ) => dataCacheResult(dataCache, success, divisions)
+    )
+
+    const addDivisionFromFileUpdate = (cache: DataProxy, result: AddDivisionsFromFileMutationResult) => periodUpdate(
+      cache,
+      result,
+      (
+        dataCache,
+        { data: { addDivisionsFromFile: { success, divisions } } }: AddDivisionsFromFileMutationResult
+      ) => dataCacheResult(dataCache, success, divisions)
+    )
 
     const { mutate: deleteDivision } = useMutation<
       DeleteDivisionMutation,
@@ -171,6 +189,7 @@ export default defineComponent({
       deleteItemName,
       tableHeaders,
       addDivisionsUpdate,
+      addDivisionFromFileUpdate,
       deleteDivision
     }
   }
