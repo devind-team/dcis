@@ -46,7 +46,7 @@ export default defineComponent({
     const upVisible: Ref<boolean> = ref<boolean>(false)
 
     const develop: string = 'Разработка и сопровождение - ' +
-      'Центр отраслевых информационно-аналитических систем Национального исследовательского университета "МЭИ"'
+      'Центр отраслевых информационно-аналитических систем "Национального исследовательского университета "МЭИ"'
     const phones: string = 'Многоканальные телефоны службы поддержки:'
     const localLinks: ForeignLinksType[] = [
       { text: 'Главная', href: '/', icon: 'mdi-home' },
