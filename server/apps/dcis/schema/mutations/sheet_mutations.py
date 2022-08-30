@@ -160,7 +160,11 @@ class ChangeRowDimensionsFixed(BaseMutation):
     """Изменение свойства fixed у строк."""
 
     class Input:
-        row_dimension_ids = graphene.Field(graphene.ID, required=True, description='Идентификатор строки')
+        row_dimension_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            required=True,
+            description='Идентификаторы строк'
+        )
         fixed = graphene.Boolean(required=True, description='Фиксация строки')
 
     row_dimensions = graphene.List(ChangeRowDimensionType, description='Измененные строки')

@@ -1,4 +1,10 @@
-import { CellType, DocumentSheetQuery, DocumentsSheetQuery } from '~/types/graphql'
+import {
+  CellType,
+  ColumnDimensionType,
+  RowDimensionType,
+  DocumentSheetQuery,
+  DocumentsSheetQuery
+} from '~/types/graphql'
 import { UpdateType } from '~/composables'
 
 export type RangeType = string
@@ -126,4 +132,16 @@ export type CellsOptionsType = {
   editable: boolean
   size: number | null
   kind: string | null
+}
+
+export type ColumnDimensionsOptionsType = {
+  columnDimensions: ColumnDimensionType[]
+  fixed: boolean
+  rectangular: boolean
+}
+
+export type RowDimensionsOptionsType = {
+  rowDimensions: RowDimensionType[]
+  fixed: boolean
+  rectangular: boolean
 }

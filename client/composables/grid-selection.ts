@@ -5,7 +5,9 @@ import {
   RangeIndicesType,
   SelectionViewType,
   SelectionType,
-  CellsOptionsType
+  CellsOptionsType,
+  ColumnDimensionsOptionsType,
+  RowDimensionsOptionsType
 } from '~/types/grid'
 import {
   parsePosition,
@@ -14,7 +16,9 @@ import {
   filterCells,
   findCell,
   getRelatedGlobalPositions,
-  getCellOptions
+  getCellOptions,
+  getRowDimensionsOptions,
+  getColumnDimensionsOptions
 } from '~/services/grid'
 
 export function useGridSelection (
@@ -133,11 +137,23 @@ export function useGridSelection (
     if (cellsSelection.value) {
       return getCellOptions(selectedCells.value)
     }
+    if (columnsSelection.value) {
+      return getCellOptions(selectedColumnsCells.value)
+    }
     if (rowsSelection.value) {
       return getCellOptions(selectedRowsCells.value)
     }
+    return null
+  })
+  const selectedColumnDimensionsOptions = computed<ColumnDimensionsOptionsType | null>(() => {
     if (columnsSelection.value) {
-      return getCellOptions(selectedColumnsCells.value)
+      return getColumnDimensionsOptions(selectedColumns.value, selectedColumnsCells.value, sheet.value.rows.length)
+    }
+    return null
+  })
+  const selectedRowDimensionsOptions = computed<RowDimensionsOptionsType | null>(() => {
+    if (rowsSelection.value) {
+      return getRowDimensionsOptions(selectedRows.value, selectedRowsCells.value, sheet.value.columns.length)
     }
     return null
   })
@@ -409,6 +425,8 @@ export function useGridSelection (
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
+    selectedColumnDimensionsOptions,
+    selectedRowDimensionsOptions,
     updateSelectionViews,
     clearSelection,
     selectAllCells,

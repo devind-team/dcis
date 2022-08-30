@@ -8,6 +8,8 @@ div
     :mode="mode"
     :update-active-sheet="updateActiveSheet"
     :selected-cells-options="selectedCellsOptions"
+    :selected-column-dimensions-options="selectedColumnDimensionsOptions"
+    :selected-row-dimensions-options="selectedRowDimensionsOptions"
   )
   v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
@@ -26,7 +28,7 @@ div
 import { VTabs } from 'vuetify/lib/components/VTabs'
 import { PropType } from '#app'
 import { DocumentType, BaseSheetType, SheetType } from '~/types/graphql'
-import { UpdateSheetType, CellsOptionsType } from '~/types/grid'
+import { UpdateSheetType, CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
 
@@ -56,12 +58,26 @@ export default defineComponent({
     const selectedCellsOptions = computed<CellsOptionsType | null>(() =>
       grid.value && grid.value.length ? grid.value[0].selectedCellsOptions : null
     )
+    const selectedColumnDimensionsOptions = computed<ColumnDimensionsOptionsType | null>(() =>
+      grid.value && grid.value.length ? grid.value[0].selectedColumnDimensionsOptions : null
+    )
+    const selectedRowDimensionsOptions = computed<RowDimensionsOptionsType | null>(() =>
+      grid.value && grid.value.length ? grid.value[0].selectedRowDimensionsOptions : null
+    )
 
     const updateSize = () => {
       tabs.value.onResize()
     }
 
-    return { tabs, grid, activeSheetIndex, selectedCellsOptions, updateSize }
+    return {
+      tabs,
+      grid,
+      activeSheetIndex,
+      selectedCellsOptions,
+      selectedColumnDimensionsOptions,
+      selectedRowDimensionsOptions,
+      updateSize
+    }
   }
 })
 </script>

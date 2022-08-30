@@ -1462,8 +1462,8 @@ export type ChangeRowDimensionsFixedInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Фиксация строки */
   fixed: Scalars['Boolean'];
-  /** Идентификатор строки */
-  rowDimensionIds: Scalars['ID'];
+  /** Идентификаторы строк */
+  rowDimensionIds: Array<Scalars['ID']>;
 };
 
 /** Изменение свойства fixed у строк. */
@@ -5588,6 +5588,13 @@ export type ChangeRowDimensionMutationVariables = Exact<{
 }>;
 
 export type ChangeRowDimensionMutation = { __typename?: 'Mutation', changeRowDimension: { __typename?: 'ChangeRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension?: { __typename: 'ChangeRowDimensionType', id: string, height?: number | null, hidden: boolean, dynamic: boolean, updatedAt: any } | null } };
+
+export type ChangeRowDimensionsFixedMutationVariables = Exact<{
+  rowDimensionIds: Array<Scalars['ID']> | Scalars['ID'];
+  fixed: Scalars['Boolean'];
+}>;
+
+export type ChangeRowDimensionsFixedMutation = { __typename?: 'Mutation', changeRowDimensionsFixed: { __typename?: 'ChangeRowDimensionsFixedPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimensions?: Array<{ __typename: 'ChangeRowDimensionType', id: string, fixed: boolean, updatedAt: any } | null> | null } };
 
 export type DeleteRowDimensionMutationVariables = Exact<{
   rowDimensionId: Scalars['ID'];

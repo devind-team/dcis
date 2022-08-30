@@ -1380,8 +1380,8 @@ input ChangeRowDimensionsFixedInput {
   clientMutationId: String
   """Фиксация строки"""
   fixed: Boolean!
-  """Идентификатор строки"""
-  rowDimensionIds: ID!
+  """Идентификаторы строк"""
+  rowDimensionIds: [ID!]!
 }
 
 """Изменение свойства fixed у строк."""

@@ -31,6 +31,8 @@ import {
   ChangeRowDimensionMutationVariables,
   ChangeChildRowDimensionHeightMutation,
   ChangeChildRowDimensionHeightMutationVariables,
+  ChangeRowDimensionsFixedMutation,
+  ChangeRowDimensionsFixedMutationVariables,
   ChangeCellDefaultMutation,
   ChangeCellDefaultMutationVariables,
   ChangeCellsOptionMutation,
@@ -51,6 +53,7 @@ import deleteChildRowDimensionMutation from '~/gql/dcis/mutations/document/delet
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeChildRowDimensionHeightMutation from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
+import changeRowDimensionsFixedMutation from '~/gql/dcis/mutations/sheet/change_row_dimensions_fixed.graphql'
 import changeCellDefaultMutation from '~/gql/dcis/mutations/cell/change_cell_default.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
 import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
@@ -581,6 +584,54 @@ export function useChangeChildRowDimensionHeightMutation (updateSheet: Ref<Updat
           errors: [],
           ...variables,
           updatedAt: new Date().toISOString()
+        }
+      }
+    })
+  }
+}
+
+export function useChangeRowDimensionsFixed (updateSheet: Ref<UpdateType<DocumentsSheetQuery>>) {
+  const { mutate } = useMutation<
+    ChangeRowDimensionsFixedMutation,
+    ChangeRowDimensionsFixedMutationVariables
+  >(changeRowDimensionsFixedMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionsFixedMutation>, 'context'>) {
+      if (result.data.changeRowDimensionsFixed.success) {
+        updateSheet.value(
+          dataProxy,
+          result, (
+            data: DocumentsSheetQuery,
+            { data: { changeRowDimensionsFixed } }: Omit<FetchResult<ChangeRowDimensionsFixedMutation>, 'context'>
+          ) => {
+            for (const row of changeRowDimensionsFixed.rowDimensions) {
+              const rowDimension = data.documentsSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+                rowDimension.id === row.id)!
+              rowDimension.fixed = row.fixed
+              rowDimension.updatedAt = row.updatedAt
+            }
+            return data
+          }
+        )
+      }
+    }
+  })
+  return async function (rowDimensions: RowDimensionType[], fixed: boolean) {
+    await mutate({
+      rowDimensionIds: rowDimensions.map((rowDimension: RowDimensionType) => rowDimension.id),
+      fixed
+    }, {
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeRowDimensionsFixed: {
+          __typename: 'ChangeRowDimensionsFixedPayload',
+          success: true,
+          errors: [],
+          rowDimensions: rowDimensions.map((rowDimension: RowDimensionType) => ({
+            id: rowDimension.id,
+            fixed,
+            updatedAt: new Date().toISOString(),
+            __typename: 'ChangeRowDimensionType'
+          }))
         }
       }
     })
