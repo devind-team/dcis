@@ -1343,8 +1343,6 @@ input ChangeRowDimensionMutationInput {
   clientMutationId: String
   """Динамическая ли строка"""
   dynamic: Boolean!
-  """Фиксация строки"""
-  fixed: Boolean!
   """Высота строки"""
   height: Int
   """Скрытие строки"""
@@ -1358,8 +1356,8 @@ type ChangeRowDimensionMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Измененные строки"""
-  rowDimensions: [ChangeRowDimensionType]
+  """Измененная строка"""
+  rowDimension: ChangeRowDimensionType
   """Успех мутации"""
   success: Boolean!
 }
@@ -1376,6 +1374,25 @@ type ChangeRowDimensionType {
   id: ID!
   """Дата обновления"""
   updatedAt: DateTime!
+}
+
+input ChangeRowDimensionsFixedInput {
+  clientMutationId: String
+  """Фиксация строки"""
+  fixed: Boolean!
+  """Идентификатор строки"""
+  rowDimensionIds: ID!
+}
+
+"""Изменение свойства fixed у строк."""
+type ChangeRowDimensionsFixedPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененные строки"""
+  rowDimensions: [ChangeRowDimensionType]
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input ChangeSectionFilesMutationInput {
@@ -2472,6 +2489,8 @@ type Mutation {
   changeProject(input: ChangeProjectMutationInput!): ChangeProjectMutationPayload!
   """Изменение строки"""
   changeRowDimension(input: ChangeRowDimensionMutationInput!): ChangeRowDimensionMutationPayload!
+  """Изменение свойства fixed у строк"""
+  changeRowDimensionsFixed(input: ChangeRowDimensionsFixedInput!): ChangeRowDimensionsFixedPayload!
   """Изменение текста секции"""
   changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
   """Изменение текста секции"""

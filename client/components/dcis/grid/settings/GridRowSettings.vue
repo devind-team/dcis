@@ -25,7 +25,6 @@ mutation-modal-form(
         :success="valid"
         :label="t('dcis.grid.rowSettings.height')"
       )
-    v-checkbox(v-model="fixed" :label="t('dcis.grid.rowSettings.fix')" color="primary")
     v-checkbox(v-model="hidden" :label="t('dcis.grid.rowSettings.hide')" color="primary")
     v-checkbox(
       v-model="dynamic"
@@ -61,7 +60,6 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
 
     const height = ref<string>(String(props.getRowHeight(props.row)))
-    const fixed = ref<boolean>(props.row.fixed)
     const hidden = ref<boolean>(props.row.hidden)
     const dynamic = ref<boolean>(props.row.dynamic)
     watch(computed<number>(() => props.getRowHeight(props.row)), (newValue: number) => {
@@ -71,7 +69,6 @@ export default defineComponent({
     const variables = computed<ChangeRowDimensionMutationVariables>(() => ({
       rowDimensionId: props.row.id,
       height: +height.value,
-      fixed: fixed.value,
       hidden: hidden.value,
       dynamic: dynamic.value
     }))
@@ -81,25 +78,24 @@ export default defineComponent({
         __typename: 'ChangeRowDimensionMutationPayload',
         success: true,
         errors: [],
-        rowDimensions: [{
+        rowDimension: {
           ...variables.value,
           id: props.row.id,
           updatedAt: new Date().toISOString(),
           __typename: 'ChangeRowDimensionType'
-        }]
+        }
       }
     }))
 
     const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) => {
-      updateRowDimensions(updateSheet.value, dataProxy, result)
+      updateRowDimension(updateSheet.value, dataProxy, result)
     }
 
     return {
       t,
       dateTimeHM,
       height,
-      fixed,
       hidden,
       dynamic,
       variables,

@@ -258,7 +258,6 @@ export default {
       header: 'Изменение свойств',
       subheader: 'Дата изменения: {updatedAt}',
       height: 'Высота',
-      fix: '@:fix',
       hide: '@:hide',
       makeDynamic: 'Разрешить дочерние строки',
       buttonText: '@:save'
