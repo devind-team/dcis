@@ -291,7 +291,7 @@ yarn run dev
           client:
             container_name: client
             image: ghcr.io/devind-team/eleden/eleden-client:latest
-            command: yarn run nuxt start
+            command: node .output/server/index.mjs
             restart: always
             ports:
               - "3000:3000"
