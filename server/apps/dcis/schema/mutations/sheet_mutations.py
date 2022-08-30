@@ -17,7 +17,12 @@ from apps.dcis.schema.types import (
     SheetType,
 )
 from apps.dcis.services.column_dimension_services import change_column_dimension
-from apps.dcis.services.row_dimension_services import add_row_dimension, change_row_dimension, delete_row_dimension
+from apps.dcis.services.row_dimension_services import (
+    add_row_dimension,
+    change_row_dimension,
+    change_row_dimensions_fixed,
+    delete_row_dimension,
+)
 from apps.dcis.services.sheet_services import rename_sheet
 
 
@@ -124,11 +129,10 @@ class ChangeRowDimensionMutation(BaseMutation):
     class Input:
         row_dimension_id = graphene.ID(required=True, description='Идентификатор строки')
         height = graphene.Int(description='Высота строки')
-        fixed = graphene.Boolean(required=True, description='Фиксация строки')
         hidden = graphene.Boolean(required=True, description='Скрытие строки')
         dynamic = graphene.Boolean(required=True, description='Динамическая ли строка')
 
-    row_dimensions = graphene.List(ChangeRowDimensionType, description='Измененные строки')
+    row_dimension = graphene.Field(ChangeRowDimensionType, description='Измененная строка')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -137,20 +141,43 @@ class ChangeRowDimensionMutation(BaseMutation):
         info: ResolveInfo,
         row_dimension_id: str,
         height: int | None,
-        fixed: bool,
         hidden: bool,
         dynamic: bool
     ):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
         return ChangeRowDimensionMutation(
-            row_dimensions=change_row_dimension(
+            row_dimension=change_row_dimension(
                 user=info.context.user,
                 row_dimension=row_dimension,
                 height=height,
-                fixed=fixed,
                 hidden=hidden,
                 dynamic=dynamic,
-                document_ids=[]
+            )
+        )
+
+
+class ChangeRowDimensionsFixed(BaseMutation):
+    """Изменение свойства fixed у строк."""
+
+    class Input:
+        row_dimension_ids = graphene.Field(graphene.ID, required=True, description='Идентификатор строки')
+        fixed = graphene.Boolean(required=True, description='Фиксация строки')
+
+    row_dimensions = graphene.List(ChangeRowDimensionType, description='Измененные строки')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        row_dimension_ids: list[str],
+        fixed: bool
+    ):
+        row_dimensions = [get_object_or_404(RowDimension, pk=row_id) for row_id in row_dimension_ids]
+        return ChangeRowDimensionsFixed(
+            row_dimensions=change_row_dimensions_fixed(
+                row_dimensions,
+                fixed
             )
         )
 
@@ -182,4 +209,8 @@ class SheetMutations(graphene.ObjectType):
 
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     change_row_dimension = ChangeRowDimensionMutation.Field(required=True, description='Изменение строки')
+    change_row_dimensions_fixed = ChangeRowDimensionsFixed.Field(
+        required=True,
+        description='Изменение свойства fixed у строк'
+    )
     delete_row_dimension = DeleteRowDimensionMutation.Field(required=True, description='Удаление строки')

@@ -100,56 +100,30 @@ def change_row_dimension(
     user: User,
     row_dimension: RowDimension,
     height: int,
-    fixed: bool,
     hidden: bool,
     dynamic: bool,
-    document_ids: list[int]
-) -> list[RowDimension]:
+) -> RowDimension:
     """Изменение строки."""
     can_change_period_sheet(user, row_dimension.sheet.period)
-    row_dimensions: list[RowDimension] = []
     row_dimension.height = height
     row_dimension.hidden = hidden
     row_dimension.dynamic = dynamic
     row_dimension.save(update_fields=('height', 'hidden', 'dynamic', 'updated_at'))
-    row_dimensions.append(row_dimension)
-    if row_dimension.fixed != fixed:
-        row_dimensions = change_row_dimension_fixed(row_dimension, fixed)
-    return [row for row in row_dimensions if row.document_id is None or row.document_id in document_ids]
+    return row_dimension
 
 
-def change_row_dimension_fixed(row_dimension: RowDimension, fixed: bool) -> list[RowDimension]:
-    """Изменение свойства fixed у строки.
+def change_row_dimensions_fixed(row_dimensions: list[RowDimension], fixed: bool) -> list[RowDimension]:
+    """Изменение свойства fixed у строк.
 
-    При добавлении фиксации фиксация также добавляется:
-      - у строк с меньшим индексом;
-      - у дочерних строк;
-      - у строк, которые делят общую ячейку со строкой.
-    При снятии фиксации фиксация также снимается:
-      - у строк с большим индексом;
-      - у дочерних строк;
-      - у строк, которые делят общую ячейку со строкой.
+    При изменении фиксации, фиксация также меняется у строк, которые делят общую ячейку со строкой.
     """
-    sheet_rows = RowDimension.objects.filter(sheet=row_dimension.sheet)
-    root_rows: list[RowDimension] = []
-    all_child_rows: list[RowDimension] = []
-    for sheet_row in sheet_rows:
-        if fixed and sheet_row.index <= row_dimension.index:
-            root_rows.append(sheet_row)
-        elif not fixed and sheet_row.index >= row_dimension.index and sheet_row.fixed:
-            root_rows.append(sheet_row)
-        elif sheet_row.parent is not None:
-            all_child_rows.append(sheet_row)
-    child_rows: list[RowDimension] = []
-    for child_row in all_child_rows:
-        for root_row in root_rows:
-            if is_ancestor(root_row, child_row):
-                child_rows.append(child_row)
-    change_rows = list({*root_rows, *child_rows, *get_relative_rows(row_dimension)})
+    change_rows = set()
+    for row_dimension in row_dimensions:
+        change_rows.update(get_relative_rows(row_dimension))
     for row in change_rows:
         row.fixed = fixed
     RowDimension.objects.bulk_update(change_rows, ('fixed',))
-    return change_rows
+    return list(change_rows)
 
 
 def change_row_dimension_height(user: User, row_dimension: RowDimension, height: int) -> RowDimension:
@@ -177,13 +151,6 @@ def delete_row_dimension(user: User, row_dimension: RowDimension) -> int:
     if not row_dimension.parent_id:
         move_merged_cells(row_dimension.sheet, row_dimension.index, -1, True)
     return row_dimension_id
-
-
-def is_ancestor(row_dimension: RowDimension, child_row_dimension: RowDimension) -> bool:
-    """Является ли строка `row_dimension` предком для строки `child_row_dimension`."""
-    if child_row_dimension.parent is None:
-        return False
-    return child_row_dimension.parent == row_dimension or is_ancestor(row_dimension, child_row_dimension.parent)
 
 
 def get_relative_rows(row_dimension: RowDimension) -> list[RowDimension]:
