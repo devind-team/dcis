@@ -42,7 +42,6 @@ type ForeignLinksType = { text: string, href: string, icon: string }
 export default defineComponent({
   components: { ThemeColor },
   setup () {
-    const counterSrc: Ref<string | null> = ref<string | null>(null)
     const upVisible: Ref<boolean> = ref<boolean>(false)
 
     const develop: string = 'Разработка и сопровождение - ' +
@@ -63,15 +62,9 @@ export default defineComponent({
       watchEffect(() => {
         upVisible.value = y.value > 200
       })
-
-      const s: number = screen.colorDepth ? screen.colorDepth : screen.pixelDepth
-      counterSrc.value = 'https://counter.yadro.ru/hit?t11.6;r' + encodeURIComponent(document.referrer) +
-      (typeof screen === 'undefined' ? '' : ';s' + screen.width + '*' + screen.height + '*' + s) +
-      ';u' + encodeURIComponent(document.URL) + ';h' +
-      encodeURIComponent(document.title.substring(0, 150)) + ';' + Math.random() as string
     })
 
-    return { counterSrc, upVisible, develop, phones, localLinks, foreignLinks }
+    return { upVisible, develop, phones, localLinks, foreignLinks }
   }
 })
 </script>
