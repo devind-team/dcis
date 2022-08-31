@@ -16,6 +16,7 @@ export default defineComponent({
       ...elementPositionToStyle(props.selectionView.position),
       width: `${props.selectionView.width}px`,
       height: `${props.selectionView.height}px`,
+      zIndex: props.selectionView.zIndex,
       ...Object.fromEntries(
         Object.entries(props.selectionView.border)
           .filter(([_, v]) => v).map(([k, _]) => [`border-${k}`, '1px solid blue'])

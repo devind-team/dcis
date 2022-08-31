@@ -95,6 +95,7 @@ export type SelectionViewType = {
   position: ElementPositionType
   width: number
   height: number
+  zIndex: number
   border: {
     top: boolean
     right: boolean

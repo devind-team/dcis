@@ -171,18 +171,19 @@ export function useGridSelection (
       const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
       const { leftColumn, topRow } = getSelectionViewLeftTopBorder(selectedCells.value)
       for (const cell of selectedCells.value) {
+        const rowDimension = sheet.value.rows.find((rowDimension: RowDimensionType) => cell.rowId === rowDimension.id)!
         const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
         const firstColumn = theadRow.cells.item(minColumn) as HTMLTableCellElement
         const lastColumn = theadRow.cells.item(maxColumn) as HTMLTableCellElement
         const firstRow = grid.value.querySelector(`tbody tr:nth-child(${minRow})`) as HTMLTableRowElement
-        const firstRowCell = firstRow.cells.item(0)
         const lastRow = grid.value.querySelector(`tbody tr:nth-child(${maxRow})`) as HTMLTableRowElement
         const lastRowCell = lastRow.cells.item(0)
         cellsSelectionView.value.push({
           id: cell.id,
-          position: { left: firstColumn.offsetLeft - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
+          position: { left: firstColumn.offsetLeft - 1, right: null, top: firstRow.offsetTop - 1, bottom: null },
           width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
           height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
+          zIndex: rowDimension.fixed ? 3 : 0,
           border: {
             top: minRow !== 1 && minRow === topRow,
             right: true,
@@ -258,6 +259,7 @@ export function useGridSelection (
         position: { left: firstColumn.offsetLeft - 1, right: null, top: firstColumn.offsetHeight - 1, bottom: null },
         width: lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft + 1,
         height: grid.value.offsetHeight - theadRow.offsetHeight + 1,
+        zIndex: 3,
         border: { top: false, right: true, bottom: true, left: firstColumnIndex !== 1 }
       }
     } else {
@@ -278,9 +280,10 @@ export function useGridSelection (
       const lastRowCell = lastRow.cells.item(0)
       rowsSelectionView.value = {
         id: 'row',
-        position: { left: firstRowCell.offsetWidth - 1, right: null, top: firstRowCell.offsetTop - 1, bottom: null },
+        position: { left: firstRowCell.offsetWidth - 1, right: null, top: firstRow.offsetTop - 1, bottom: null },
         width: grid.value.offsetWidth - firstRowCell.offsetWidth + 1,
         height: lastRow.offsetTop + lastRowCell.offsetHeight - firstRow.offsetTop + 1,
+        zIndex: 3,
         border: { top: firstRowIndex !== 1, right: true, bottom: true, left: false }
       }
     } else {
