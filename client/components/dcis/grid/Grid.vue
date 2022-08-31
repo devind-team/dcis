@@ -4,6 +4,7 @@
     table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
       grid-header(
         :row-name-column-width="rowNameColumnWidth"
+        :column-name-row-height="columnNameRowHeight"
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
         :selected-column-positions="selectedColumnsPositions"
@@ -19,6 +20,7 @@
       grid-body(
         :resizing-row="resizingRow"
         :get-row-height="getRowHeight"
+        :fixed-rows-top="fixedRowsTop"
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
@@ -136,8 +138,10 @@ export default defineComponent({
       resizingRow,
       resizingRowHeight,
       getRowHeight,
+      fixedRowsTop,
       gridWidth,
       rowNameColumnWidth,
+      columnNameRowHeight,
       activeCell,
       setActiveCell,
       cellsSelectionView,
@@ -179,8 +183,10 @@ export default defineComponent({
       resizingRow,
       resizingRowHeight,
       getRowHeight,
+      fixedRowsTop,
       gridWidth,
       rowNameColumnWidth,
+      columnNameRowHeight,
       activeCell,
       setActiveCell,
       cellsSelectionView,
@@ -267,7 +273,6 @@ div.grid__body
         z-index: 2
 
         th
-          height: 25px
           border-top: $border
           font-size: 16px
 
@@ -336,7 +341,7 @@ div.grid__body
             & > div
               background: $name-light !important
 
-          &.grid__cell_row-name_boundary-selected
+          &.grid__cell_row-name-boundary-selected
             border-right: $border-selected
 
           &.grid__cell_row-name-hover
@@ -371,6 +376,10 @@ div.grid__body
 
               &:focus
                 outline: none
+
+        tr.grid__row_fixed
+          position: sticky
+          z-index: 2
 
     div.grid__selection-view
       position: absolute

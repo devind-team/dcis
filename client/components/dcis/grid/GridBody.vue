@@ -1,6 +1,11 @@
 <template lang="pug">
 tbody
-  tr(v-for="row in activeSheet.rows" :key="row.id")
+  tr(
+    v-for="row in activeSheet.rows"
+    :key="row.id"
+    :class="{ 'grid__row_fixed': row.fixed }"
+    :style="getRowStyle(row)"
+  )
     td.grid__cell_row-name(
       :class="getRowNameCellClass(row)"
       @mouseenter="mouseenterRowName(row)"
@@ -57,6 +62,7 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
+    fixedRowsTop: { type: Object as PropType<Record<string, number>>, required: true },
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
@@ -90,10 +96,17 @@ export default defineComponent({
     const rootCount = computed<number>(() => activeSheet.value.rows
       .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
 
+    const getRowStyle = (row: RowDimensionType): Record<string, string> => {
+      if (row.fixed) {
+        return { top: `${props.fixedRowsTop[row.id]}px` }
+      }
+      return {}
+    }
+
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name_boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': !props.resizingRow
       }
     }
@@ -229,6 +242,7 @@ export default defineComponent({
       posY,
       showMenu,
       activeSheet,
+      getRowStyle,
       getRowNameCellClass,
       canChangeRowSettings,
       canAddRowBeforeOrAfter,

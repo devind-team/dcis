@@ -22,7 +22,7 @@ export function useGrid (
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
   /**
-   * Вычисляем высоту первого столбца
+   * Ширина первого столбца
    */
   const rowNameColumnWidth = computed<number>(() => {
     let maxDigits = 0
@@ -40,6 +40,11 @@ export function useGrid (
     }
     return maxDigits * 12 + maxDots * 2 + 10
   })
+  /**
+   * Высота первой строки
+   */
+  const columnNameRowHeight = 25
+
   const gridContainer = ref<HTMLDivElement | null>(null)
   const grid = ref<HTMLTableElement | null>(null)
 
@@ -104,6 +109,17 @@ export function useGrid (
     changeRowHeight
   )
   watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
+
+  const fixedRowsTop = computed<Record<string, number>>(() => {
+    const fixedRows = sheet.value.rows.filter((rowDimension: RowDimensionType) => rowDimension.fixed)
+    let height = columnNameRowHeight
+    const result = {}
+    for (const fixedRow of fixedRows) {
+      result[fixedRow.id] = height
+      height += getRowHeight(fixedRow) + 1
+    }
+    return result
+  })
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
@@ -188,8 +204,10 @@ export function useGrid (
     resizingRow,
     resizingRowHeight,
     getRowHeight,
+    fixedRowsTop,
     gridWidth,
     rowNameColumnWidth,
+    columnNameRowHeight,
     activeCell,
     setActiveCell,
     cellsSelectionView,

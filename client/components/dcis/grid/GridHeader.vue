@@ -1,6 +1,6 @@
 <template lang="pug">
 thead
-  tr
+  tr(:style="{ height: `${columnNameRowHeight}px` }")
     th(
       :class="{ 'grid__header_all_selected': allCellsSelected }"
       :style="{ width: `${rowNameColumnWidth}px` }"
@@ -39,6 +39,7 @@ export default defineComponent({
   components: { GridColumnControl },
   props: {
     rowNameColumnWidth: { type: Number, required: true },
+    columnNameRowHeight: { type: Number, required: true },
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
