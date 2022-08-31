@@ -95,7 +95,6 @@ def add_child_row_dimension(
     ).unload()[0]
 
 
-@transaction.atomic
 def change_row_dimension(
     user: User,
     row_dimension: RowDimension,
@@ -120,8 +119,8 @@ def change_row_dimensions_fixed(row_dimensions: list[RowDimension], fixed: bool)
     change_rows = set()
     for row_dimension in row_dimensions:
         change_rows.update(get_relative_rows(row_dimension))
-    for row in change_rows:
-        row.fixed = fixed
+    for row_dimension in change_rows:
+        row_dimension.fixed = fixed
     RowDimension.objects.bulk_update(change_rows, ('fixed',))
     return list(change_rows)
 

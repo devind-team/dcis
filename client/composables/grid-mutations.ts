@@ -27,6 +27,8 @@ import {
   DeleteChildRowDimensionMutationVariables,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables,
+  ChangeColumnDimensionsFixedMutation,
+  ChangeColumnDimensionsFixedMutationVariables,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables,
   ChangeChildRowDimensionHeightMutation,
@@ -51,6 +53,7 @@ import addChildRowDimensionMutation from '~/gql/dcis/mutations/document/add_chil
 import deleteRowDimensionMutation from '~/gql/dcis/mutations/sheet/delete_row_dimension.graphql'
 import deleteChildRowDimensionMutation from '~/gql/dcis/mutations/document/delete_child_row_dimension.graphql'
 import changeColumnDimensionMutation from '~/gql/dcis/mutations/sheet/change_column_dimension.graphql'
+import changeColumnDimensionsFixedMutation from '~/gql/dcis/mutations/sheet/change_column_dimensions_fixed.graphql'
 import changeRowDimensionMutation from '~/gql/dcis/mutations/sheet/change_row_dimension.graphql'
 import changeChildRowDimensionHeightMutation from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
 import changeRowDimensionsFixedMutation from '~/gql/dcis/mutations/sheet/change_row_dimensions_fixed.graphql'
@@ -454,14 +457,13 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateTy
     ChangeColumnDimensionMutationVariables
   >(changeColumnDimensionMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) {
-      updateColumnDimensions(updateSheet.value, dataProxy, result)
+      updateColumnDimension(updateSheet.value, dataProxy, result)
     }
   })
   return async function (columnDimension: ColumnDimensionType, width: number) {
     const variables: ChangeColumnDimensionMutationVariables = {
       columnDimensionId: columnDimension.id,
       width,
-      fixed: columnDimension.fixed,
       hidden: columnDimension.hidden,
       kind: columnDimension.kind
     }
@@ -472,19 +474,68 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateTy
           __typename: 'ChangeColumnDimensionMutationPayload',
           success: true,
           errors: [],
-          columnDimensions: [{
+          columnDimension: {
             ...variables,
             id: columnDimension.id,
             updatedAt: new Date().toISOString(),
             __typename: 'ChangeColumnDimensionType'
-          }]
+          }
         }
       }
     })
   }
 }
 
-export function updateColumnDimensions (
+export function useChangeColumnDimensionsFixed (updateSheet: Ref<UpdateType<DocumentsSheetQuery>>) {
+  const { mutate } = useMutation<
+    ChangeColumnDimensionsFixedMutation,
+    ChangeColumnDimensionsFixedMutationVariables
+  >(changeColumnDimensionsFixedMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionsFixedMutation>, 'context'>) {
+      if (result.data.changeColumnDimensionsFixed.success) {
+        updateSheet.value(
+          dataProxy,
+          result, (
+            data: DocumentsSheetQuery,
+            { data: { changeColumnDimensionsFixed } }: Omit<FetchResult<ChangeColumnDimensionsFixedMutation>, 'context'>
+          ) => {
+            for (const column of changeColumnDimensionsFixed.columnDimensions) {
+              const columnDimension = data.documentsSheet.columns.find(
+                (columnDimension: ColumnDimensionFieldsFragment) => columnDimension.id === column.id
+              )
+              columnDimension.fixed = column.fixed
+              columnDimension.updatedAt = column.updatedAt
+            }
+            return data
+          }
+        )
+      }
+    }
+  })
+  return async function (columnDimensions: ColumnDimensionType[], fixed: boolean) {
+    await mutate({
+      columnDimensionIds: columnDimensions.map((columnDimension: ColumnDimensionType) => columnDimension.id),
+      fixed
+    }, {
+      optimisticResponse: {
+        __typename: 'Mutation',
+        changeColumnDimensionsFixed: {
+          __typename: 'ChangeColumnDimensionsFixedPayload',
+          success: true,
+          errors: [],
+          columnDimensions: columnDimensions.map((columnDimension: ColumnDimensionType) => ({
+            id: columnDimension.id,
+            fixed,
+            updatedAt: new Date().toISOString(),
+            __typename: 'ChangeColumnDimensionType'
+          }))
+        }
+      }
+    })
+  }
+}
+
+export function updateColumnDimension (
   updateSheet: UpdateType<DocumentsSheetQuery>,
   dataProxy: DataProxy,
   result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
@@ -497,15 +548,12 @@ export function updateColumnDimensions (
         data: DocumentsSheetQuery,
         { data: { changeColumnDimension } }: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>
       ) => {
-        for (const column of changeColumnDimension.columnDimensions) {
-          const columnDimension = data.documentsSheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
-            columnDimension.id === column.id)!
-          columnDimension.width = column.width
-          columnDimension.fixed = column.fixed
-          columnDimension.hidden = column.hidden
-          columnDimension.kind = column.kind
-          columnDimension.updatedAt = column.updatedAt
-        }
+        const columnDimension = data.documentsSheet.columns.find((columnDimension: ColumnDimensionFieldsFragment) =>
+          columnDimension.id === changeColumnDimension.columnDimension.id)!
+        columnDimension.width = changeColumnDimension.columnDimension.width
+        columnDimension.hidden = changeColumnDimension.columnDimension.hidden
+        columnDimension.kind = changeColumnDimension.columnDimension.kind
+        columnDimension.updatedAt = changeColumnDimension.columnDimension.updatedAt
         return data
       }
     )

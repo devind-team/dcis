@@ -1,9 +1,9 @@
-mutation ChangeRowDimensionsFixed(
-  $rowDimensionIds: [ID!]!,
+mutation ChangeColumnDimensionsFixed(
+  $columnDimensionIds: [ID!]!,
   $fixed: Boolean!
 ) {
-  changeRowDimensionsFixed(input: {
-    rowDimensionIds: $rowDimensionIds,
+  changeColumnDimensionsFixed(input: {
+    columnDimensionIds: $columnDimensionIds,
     fixed: $fixed
   }) {
     success
@@ -12,7 +12,7 @@ mutation ChangeRowDimensionsFixed(
       messages
       __typename
     }
-    rowDimensions {
+    columnDimensions {
       id
       fixed
       updatedAt

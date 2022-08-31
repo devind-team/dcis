@@ -8,7 +8,7 @@ from apps.dcis.models import Cell, ColumnDimension, MergedCell, RowDimension
 from .common import TableTestCase
 from ...services.column_dimension_services import (
     change_column_dimension,
-    change_column_dimension_fixed,
+    change_column_dimensions_fixed,
     get_relative_columns,
 )
 
@@ -23,7 +23,6 @@ class ColumnDimensionTestCase(TableTestCase):
         self.column_dimension = ColumnDimension.objects.create(sheet=self.sheet, index=1)
         self.column_dimension_change_data = {
             'width': 10,
-            'fixed': True,
             'hidden': True,
             'kind': 'n'
         }
@@ -46,23 +45,6 @@ class ColumnDimensionTestCase(TableTestCase):
         for column in self.column_dimensions:
             self.assertEqual(self.column_dimensions, get_relative_columns(column))
 
-    def test_change_column_dimension_fixed(self) -> None:
-        """Тестирование функции `change_column_dimension_fixed`."""
-        changed_columns = change_column_dimension_fixed(self.column_dimensions[1], True)
-        self.assertEqual({self.column_dimension, *self.column_dimensions}, set(changed_columns))
-        for changed_column in changed_columns:
-            self.assertTrue(changed_column.fixed)
-        self.extra_column_dimension.refresh_from_db()
-        self.assertFalse(self.extra_column_dimension.fixed)
-        changed_columns = change_column_dimension_fixed(self.column_dimensions[1], False)
-        self.assertEqual(set(self.column_dimensions), set(changed_columns))
-        self.column_dimension.refresh_from_db()
-        self.assertTrue(self.column_dimension.fixed)
-        for changed_column in changed_columns:
-            self.assertFalse(changed_column.fixed)
-        self.extra_column_dimension.refresh_from_db()
-        self.assertFalse(self.extra_column_dimension.fixed)
-
     def test_change_column_dimension(self) -> None:
         """Тестирование функции `change_column_dimension`."""
         with patch.object(
@@ -73,11 +55,37 @@ class ColumnDimensionTestCase(TableTestCase):
                 column_dimension=self.column_dimension,
                 **self.column_dimension_change_data,
             )
-        changed_columns = change_column_dimension(
+        changed_column = change_column_dimension(
             user=self.superuser,
             column_dimension=self.column_dimension,
             **self.column_dimension_change_data,
         )
-        self.assertEqual({self.column_dimension}, set(changed_columns))
+        self.assertEqual(self.column_dimension, changed_column)
         for k, v in self.column_dimension_change_data.items():
-            self.assertEqual(v, getattr(changed_columns[0], k))
+            self.assertEqual(v, getattr(changed_column, k))
+
+    def test_change_columns_dimension_fixed_first_column(self) -> None:
+        """Тестирование функции `change_column_dimensions_fixed` для первой колонки."""
+        for value in (True, False):
+            changed_columns = change_column_dimensions_fixed([self.column_dimension], value)
+            self.assertEqual(
+                [self.column_dimension],
+                changed_columns
+            )
+            for changed_column in changed_columns:
+                self.assertEqual(changed_column.fixed, value)
+            for column in self.column_dimensions:
+                self.assertFalse(column.fixed)
+
+    def test_change_column_dimension_fixed(self) -> None:
+        """Тестирование функции `change_column_dimensions_fixed` для колонки в середине."""
+        for value in (True, False):
+            changed_columns = change_column_dimensions_fixed([self.column_dimensions[1]], value)
+            self.assertEqual(
+                set(self.column_dimensions),
+                set(changed_columns)
+            )
+            for changed_column in changed_columns:
+                self.assertEqual(changed_column.fixed, value)
+            self.column_dimension.refresh_from_db()
+            self.assertEqual(self.column_dimension.fixed, False)

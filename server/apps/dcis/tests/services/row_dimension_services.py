@@ -65,8 +65,8 @@ class RowDimensionTestCase(TableTestCase):
         for row in self.root_row_dimensions:
             self.assertEqual(self.root_row_dimensions, get_relative_rows(row))
 
-    def test_change_row_dimension_fixed_first_row(self) -> None:
-        """Тестирование функции `change_row_dimension_fixed` для первой строки."""
+    def test_change_row_dimensions_fixed_first_row(self) -> None:
+        """Тестирование функции `change_row_dimensions_fixed` для первой строки."""
         for value in (True, False):
             changed_rows = change_row_dimensions_fixed([self.root_row_dimension], value)
             self.assertEqual(
@@ -78,8 +78,8 @@ class RowDimensionTestCase(TableTestCase):
             for row in self.root_row_dimensions:
                 self.assertFalse(row.fixed)
 
-    def test_change_row_dimension_fixed_middle_row(self) -> None:
-        """Тестирование функции `change_row_dimension_fixed` для строки в середине."""
+    def test_change_row_dimensions_fixed_middle_row(self) -> None:
+        """Тестирование функции `change_row_dimensions_fixed` для строки в середине."""
         for value in (True, False):
             changed_rows = change_row_dimensions_fixed([self.root_row_dimensions[1]], value)
             self.assertEqual(

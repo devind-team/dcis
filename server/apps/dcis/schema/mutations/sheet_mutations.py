@@ -16,7 +16,7 @@ from apps.dcis.schema.types import (
     RowDimensionType,
     SheetType,
 )
-from apps.dcis.services.column_dimension_services import change_column_dimension
+from apps.dcis.services.column_dimension_services import (change_column_dimension, change_column_dimensions_fixed)
 from apps.dcis.services.row_dimension_services import (
     add_row_dimension,
     change_row_dimension,
@@ -56,11 +56,10 @@ class ChangeColumnDimensionMutation(BaseMutation):
     class Input:
         column_dimension_id = graphene.ID(required=True, description='Идентификатор колонки')
         width = graphene.Int(description='Ширина колонки')
-        fixed = graphene.Boolean(required=True, description='Фиксация колонки')
         hidden = graphene.Boolean(required=True, description='Скрытие колонки')
         kind = graphene.String(required=True, description='Тип значения')
 
-    column_dimensions = graphene.List(ChangeColumnDimensionType, description='Измененные колонки')
+    column_dimension = graphene.Field(ChangeColumnDimensionType, description='Измененная колонка')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -69,19 +68,47 @@ class ChangeColumnDimensionMutation(BaseMutation):
         info: ResolveInfo,
         column_dimension_id: str,
         width: int | None,
-        fixed: bool,
         hidden: bool,
         kind: str
     ):
         column_dimension = get_object_or_404(ColumnDimension, pk=column_dimension_id)
         return ChangeColumnDimensionMutation(
-            column_dimensions=change_column_dimension(
+            column_dimension=change_column_dimension(
                 user=info.context.user,
                 column_dimension=column_dimension,
                 width=width,
-                fixed=fixed,
                 hidden=hidden,
                 kind=kind
+            )
+        )
+
+
+class ChangeColumnDimensionsFixed(BaseMutation):
+    """Изменение свойства fixed у колонок."""
+
+    class Input:
+        column_dimension_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            required=True,
+            description='Идентификаторы колонок'
+        )
+        fixed = graphene.Boolean(required=True, description='Фиксация колонки')
+
+    column_dimensions = graphene.List(ChangeColumnDimensionType, description='Измененные колонки')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        column_dimension_ids: list[str],
+        fixed: bool
+    ):
+        column_dimensions = [get_object_or_404(ColumnDimension, pk=column_id) for column_id in column_dimension_ids]
+        return ChangeColumnDimensionsFixed(
+            column_dimensions=change_column_dimensions_fixed(
+                column_dimensions,
+                fixed
             )
         )
 
@@ -210,6 +237,10 @@ class SheetMutations(graphene.ObjectType):
     rename_sheet = RenameSheetMutation.Field(required=True, description='Изменение названия листа')
 
     change_column_dimension = ChangeColumnDimensionMutation.Field(required=True, description='Изменение колонки')
+    change_column_dimensions_fixed = ChangeColumnDimensionsFixed.Field(
+        required=True,
+        description='Изменение свойства fixed у колонок'
+    )
 
     add_row_dimension = AddRowDimensionMutation.Field(required=True, description='Добавление строки')
     change_row_dimension = ChangeRowDimensionMutation.Field(required=True, description='Изменение строки')

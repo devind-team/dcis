@@ -906,8 +906,6 @@ input ChangeColumnDimensionMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
   columnDimensionId: ID!
-  """Фиксация колонки"""
-  fixed: Boolean!
   """Скрытие колонки"""
   hidden: Boolean!
   """Тип значения"""
@@ -919,8 +917,8 @@ input ChangeColumnDimensionMutationInput {
 """Изменение колонки."""
 type ChangeColumnDimensionMutationPayload {
   clientMutationId: String
-  """Измененные колонки"""
-  columnDimensions: [ChangeColumnDimensionType]
+  """Измененная колонка"""
+  columnDimension: ChangeColumnDimensionType
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
@@ -939,6 +937,25 @@ type ChangeColumnDimensionType {
   updatedAt: DateTime!
   """Ширина колонки"""
   width: Int
+}
+
+input ChangeColumnDimensionsFixedInput {
+  clientMutationId: String
+  """Идентификаторы колонок"""
+  columnDimensionIds: [ID!]!
+  """Фиксация колонки"""
+  fixed: Boolean!
+}
+
+"""Изменение свойства fixed у колонок."""
+type ChangeColumnDimensionsFixedPayload {
+  clientMutationId: String
+  """Измененные колонки"""
+  columnDimensions: [ChangeColumnDimensionType]
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input ChangeDocumentCommentMutationInput {
@@ -2449,6 +2466,8 @@ type Mutation {
   changeChildRowDimensionHeight(input: ChangeChildRowDimensionHeightMutationInput!): ChangeChildRowDimensionHeightMutationPayload!
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
+  """Изменение свойства fixed у колонок"""
+  changeColumnDimensionsFixed(input: ChangeColumnDimensionsFixedInput!): ChangeColumnDimensionsFixedPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(input: ChangeDocumentCommentMutationInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""

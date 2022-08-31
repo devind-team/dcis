@@ -1,14 +1,12 @@
 mutation ChangeColumnDimension(
   $columnDimensionId: ID!,
   $width: Int,
-  $fixed: Boolean!,
   $hidden: Boolean!,
   $kind: String!
 ) {
   changeColumnDimension(input: {
     columnDimensionId: $columnDimensionId,
     width: $width,
-    fixed: $fixed,
     hidden: $hidden,
     kind: $kind
   }) {
@@ -18,10 +16,9 @@ mutation ChangeColumnDimension(
       messages
       __typename
     }
-    columnDimensions {
+    columnDimension {
       id
       width
-      fixed
       hidden
       kind
       updatedAt

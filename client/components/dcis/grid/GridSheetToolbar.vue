@@ -58,7 +58,13 @@ v-row
 
 <script lang="ts">
 import { computed, defineComponent, PropType, toRef } from '#app'
-import { useChangeCellsOptionMutation, useChangeRowDimensionsFixed, useI18n, UpdateType } from '~/composables'
+import {
+  useChangeCellsOptionMutation,
+  useChangeColumnDimensionsFixed,
+  useChangeRowDimensionsFixed,
+  useI18n,
+  UpdateType
+} from '~/composables'
 import { DocumentsSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType, GridMode } from '~/types/grid'
 
@@ -75,6 +81,7 @@ export default defineComponent({
 
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
+    const changeColumnDimensionsFixed = useChangeColumnDimensionsFixed(updateActiveSheet)
     const changeRowDimensionsFixed = useChangeRowDimensionsFixed(updateActiveSheet)
 
     const selectedDimensionsOptions = computed<ColumnDimensionsOptionsType | RowDimensionsOptionsType | null>(
@@ -187,7 +194,12 @@ export default defineComponent({
             }
           }
           if (field === 'fixed') {
-            if (props.selectedRowDimensionsOptions) {
+            if (props.selectedColumnDimensionsOptions) {
+              changeColumnDimensionsFixed(
+                props.selectedColumnDimensionsOptions.columnDimensions,
+                !props.selectedColumnDimensionsOptions.fixed
+              )
+            } else {
               changeRowDimensionsFixed(
                 props.selectedRowDimensionsOptions.rowDimensions,
                 !props.selectedRowDimensionsOptions.fixed

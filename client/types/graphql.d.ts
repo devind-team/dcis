@@ -965,8 +965,6 @@ export type ChangeColumnDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор колонки */
   columnDimensionId: Scalars['ID'];
-  /** Фиксация колонки */
-  fixed: Scalars['Boolean'];
   /** Скрытие колонки */
   hidden: Scalars['Boolean'];
   /** Тип значения */
@@ -979,8 +977,8 @@ export type ChangeColumnDimensionMutationInput = {
 export type ChangeColumnDimensionMutationPayload = {
   __typename?: 'ChangeColumnDimensionMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
-  /** Измененные колонки */
-  columnDimensions?: Maybe<Array<Maybe<ChangeColumnDimensionType>>>;
+  /** Измененная колонка */
+  columnDimension?: Maybe<ChangeColumnDimensionType>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
@@ -1000,6 +998,26 @@ export type ChangeColumnDimensionType = {
   updatedAt: Scalars['DateTime'];
   /** Ширина колонки */
   width?: Maybe<Scalars['Int']>;
+};
+
+export type ChangeColumnDimensionsFixedInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификаторы колонок */
+  columnDimensionIds: Array<Scalars['ID']>;
+  /** Фиксация колонки */
+  fixed: Scalars['Boolean'];
+};
+
+/** Изменение свойства fixed у колонок. */
+export type ChangeColumnDimensionsFixedPayload = {
+  __typename?: 'ChangeColumnDimensionsFixedPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Измененные колонки */
+  columnDimensions?: Maybe<Array<Maybe<ChangeColumnDimensionType>>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
 };
 
 export type ChangeDocumentCommentMutationInput = {
@@ -2594,6 +2612,8 @@ export type Mutation = {
   changeChildRowDimensionHeight: ChangeChildRowDimensionHeightMutationPayload;
   /** Изменение колонки */
   changeColumnDimension: ChangeColumnDimensionMutationPayload;
+  /** Изменение свойства fixed у колонок */
+  changeColumnDimensionsFixed: ChangeColumnDimensionsFixedPayload;
   /** Изменение комментария версии документа. */
   changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
@@ -2852,6 +2872,11 @@ export type MutationChangeChildRowDimensionHeightArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeColumnDimensionArgs = {
   input: ChangeColumnDimensionMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeColumnDimensionsFixedArgs = {
+  input: ChangeColumnDimensionsFixedInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5573,12 +5598,18 @@ export type AddRowDimensionMutation = { __typename?: 'Mutation', addRowDimension
 export type ChangeColumnDimensionMutationVariables = Exact<{
   columnDimensionId: Scalars['ID'];
   width?: InputMaybe<Scalars['Int']>;
-  fixed: Scalars['Boolean'];
   hidden: Scalars['Boolean'];
   kind: Scalars['String'];
 }>;
 
-export type ChangeColumnDimensionMutation = { __typename?: 'Mutation', changeColumnDimension: { __typename: 'ChangeColumnDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, columnDimensions?: Array<{ __typename: 'ChangeColumnDimensionType', id: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, updatedAt: any } | null> | null } };
+export type ChangeColumnDimensionMutation = { __typename?: 'Mutation', changeColumnDimension: { __typename: 'ChangeColumnDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, columnDimension?: { __typename: 'ChangeColumnDimensionType', id: string, width?: number | null, hidden: boolean, kind: string, updatedAt: any } | null } };
+
+export type ChangeColumnDimensionsFixedMutationVariables = Exact<{
+  columnDimensionIds: Array<Scalars['ID']> | Scalars['ID'];
+  fixed: Scalars['Boolean'];
+}>;
+
+export type ChangeColumnDimensionsFixedMutation = { __typename?: 'Mutation', changeColumnDimensionsFixed: { __typename?: 'ChangeColumnDimensionsFixedPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, columnDimensions?: Array<{ __typename: 'ChangeColumnDimensionType', id: string, fixed: boolean, updatedAt: any } | null> | null } };
 
 export type ChangeRowDimensionMutationVariables = Exact<{
   rowDimensionId: Scalars['ID'];
