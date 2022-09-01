@@ -1,26 +1,30 @@
 """Тесты модуля, отвечающего за работу с периодами."""
-import os
 from os.path import join
+from shutil import rmtree
 from unittest.mock import Mock, patch
 
-from six import BytesIO
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase, override_settings
+from django.test import TestCase
+from six import BytesIO
 
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
-from apps.dcis.permissions import can_add_period
+from apps.dcis.permissions import can_add_period, can_change_period_divisions, can_change_period_groups, can_view_period
 from apps.dcis.services.period_services import (
-    create_period, get_user_divisions_periods,
+    add_divisions_period,
+    add_period_group,
+    copy_period_groups,
+    create_period,
+    delete_divisions_period,
+    get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
     get_user_privileges_periods,
 )
 from devind.settings import BASE_DIR
-from shutil import rmtree
 
 
 class GetUserPeriodsTestCase(TestCase):
@@ -127,22 +131,35 @@ class PeriodTestCase(TestCase):
         self.super_user = User.objects.create(username='super_user', email='super_user@gmain.com', is_superuser=True)
 
         self.user_project = Project.objects.create(user=self.super_user, content_type=self.department_content_type)
-        self.user_periods = [Period.objects.create(user=self.super_user, project=self.user_project) for _ in range(3)]
-        self.user_group_periods = [Period.objects.create(project=self.user_project) for _ in range(3)]
+        self.user_periods = [
+            Period.objects.create(user=self.super_user, project=self.user_project, name=f'User period {number}') for
+            number in range(3)
+        ]
+        self.user_periods = [
+            Period.objects.create(project=self.user_project, name=f'Period {number + 1}') for number in range(3)
+        ]
         self.user_groups: list[PeriodGroup] = []
-        for period in self.user_group_periods:
-            self.user_groups.append(PeriodGroup.objects.create(period=period))
+        for period in self.user_periods:
+            self.user_groups.append(PeriodGroup.objects.create(period=period, name=f'Group {period.name}'))
             self.user_groups[-1].users.add(self.super_user)
 
-        self.department = Department.objects.create(user=self.super_user)
-        self.department_period = Period.objects.create(project=self.user_project)
-        self.department_divisions = [
-            Division.objects.create(period=self.department_period, object_id=department_id) for department_id in
-            range(1, 3)]
+        self.user_groups_id: list[str | int] = []
+        self.user_groups_id.append(self.user_groups[0].id)
+
+        self.departaments = [
+            Department.objects.create(user=self.super_user, name=f'Departament {number}') for number in range(3)
+        ]
+        self.department_period = Period.objects.create(
+            user=self.super_user,
+            project=self.user_project,
+            name='Departament period'
+        )
+        self.department_divisions = [Division.objects.create(period=self.department_period, object_id=departament.id)
+                                     for departament in self.departaments]
 
         self.divisions_ids: list[str | int] = []
         for division_id in self.department_divisions:
-            self.divisions_ids.append(division_id.id)
+            self.divisions_ids.append(division_id.object_id)
 
     def test_create_period(self) -> None:
         """Тестирование функции `get_create_period`."""
@@ -170,7 +187,7 @@ class PeriodTestCase(TestCase):
                     readonly_fill_color=False
                 ),
                 Period.objects.get(name='Test period'),
-                'Create project'
+                'Create period'
             )
 
     def _create_inmemory_file(
@@ -192,6 +209,64 @@ class PeriodTestCase(TestCase):
         self.file.seek(0)
         return self.file
 
+    def test_add_divisions_period(self) -> None:
+        """Тестирование функции `add_divisions_period`."""
+        self._check_can_change_period(period=self.user_periods[0], permission=can_change_period_divisions)
+        add_divisions_period(user=self.super_user, period_id=self.user_periods[0].id, division_ids=self.divisions_ids)
+
+    def _check_can_change_period(self, period: Period, permission) -> None:
+        """Тестирование permissions.
+
+        `can_change_period_divisions`,
+        `can_change_period_groups`
+        """
+        with patch.object(period.project, 'user_id', new=None), patch.object(
+            period,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.super_user,
+            'has_perm',
+            new=lambda perm: perm not in ('dcis.change_period', 'dcis.add_project', 'dcis.add_period')
+        ):
+            self.assertRaises(PermissionDenied, permission, self.super_user, period)
+
+    def test_delete_divisions_period(self) -> None:
+        """Тестирование функции `delete_divisions_period`."""
+        self._check_can_change_period(period=self.department_period, permission=can_change_period_divisions)
+        self.assertEqual(
+            delete_divisions_period(
+                user=self.super_user,
+                period_id=self.department_period.id,
+                division_id=self.divisions_ids[0]
+            ),
+            None,
+            'Delete divisions'
+        )
+
+    def test_add_period_group(self) -> None:
+        """Тестирование функции `add_period_group`."""
+        self._check_can_change_period(period=self.department_period, permission=can_change_period_groups)
+        self.assertEqual(
+            add_period_group(user=self.super_user, name='Group departament', period_id=self.department_period.id),
+            PeriodGroup.objects.get(name='Group departament'),
+            'Create period group'
+        )
+
+    def test_copy_period_groups(self) -> None:
+        """Тестирование функции `copy_period_groups`."""
+        self._check_can_change_period(period=self.department_period, permission=can_change_period_groups)
+        self.copy_group = copy_period_groups(
+            user=self.super_user,
+            period_id=self.department_period.id,
+            period_group_ids=self.user_groups_id,
+            selected_period_id=self.user_periods[0].id
+        )
+        self.verify_group: list[PeriodGroup] = []
+        self.verify_group.append((PeriodGroup.objects.get(period_id=self.department_period.id)))
+        for (copy, verify) in zip(self.copy_group, self.verify_group):
+            self.assertEqual(first=copy.name, second=verify.name, msg='Copy group')
+
     def tearDown(self) -> None:
         """Очистка данных тестирования."""
-        rmtree(join(BASE_DIR.parent, 'storage'))
+        rmtree(join(BASE_DIR.parent, 'storage'), ignore_errors=True)
