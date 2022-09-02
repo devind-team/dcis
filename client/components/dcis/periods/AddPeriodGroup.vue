@@ -6,6 +6,7 @@ mutation-modal-form(
   :mutation="addPeriodGroupMutation"
   :variables="{ name, periodId: period.id }"
   :update="update"
+  i18n-path="dcis.periods.groups.addGroup"
   mutation-name="addPeriodGroup"
   errors-in-alert
   @close="close"

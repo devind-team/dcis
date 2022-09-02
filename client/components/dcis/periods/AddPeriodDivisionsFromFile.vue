@@ -8,13 +8,21 @@ mutation-modal-form(
   :update="update"
   width="40vw"
   mutation-name="addDivisionsFromFile"
+  i18n-path="dcis.periods.addDivisions"
   errors-in-alert
   @close="$emit('close')"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
   template(#form)
-    v-file-input(v-model="file" placeholder="Выберете файл" clearable)
+    validation-provider(v-slot="{ error, valid }" :name="String($t('dcis.periods.file'))" rules="required")
+      v-file-input(
+        v-model="file"
+        :label="String($t('dcis.periods.addDivisions.file'))"
+        placeholder="Выберете файл"
+        hint="Файл в формате xlsx"
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        persistent-hint clearable)
 </template>
 
 <script lang="ts">
