@@ -43,7 +43,6 @@ export default defineComponent({
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
-    boundarySelectedColumnsPositions: { type: Array as PropType<number[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },
     mouseenterColumnName: {
       type: Function as PropType<(column: ColumnDimensionType) => void>,
@@ -68,7 +67,6 @@ export default defineComponent({
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
-        'grid__header_boundary-selected': props.boundarySelectedColumnsPositions.includes(column.index),
         grid__header_hover: !props.resizingColumn
       }
     }

@@ -90,20 +90,6 @@ export type ElementPositionType = {
   bottom: number | null
 }
 
-export type SelectionViewType = {
-  id: string
-  position: ElementPositionType
-  width: number
-  height: number
-  zIndex: number
-  border: {
-    top: boolean
-    right: boolean
-    bottom: boolean
-    left: boolean
-  }
-}
-
 export type ElementResizingType = {
   visible: boolean
   position: ElementPositionType

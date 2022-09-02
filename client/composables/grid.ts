@@ -55,18 +55,12 @@ export function useGrid (
 
   const {
     selectionState,
-    cellsSelectionView,
-    rowsSelectionView,
-    columnsSelectionView,
-    boundarySelectedColumnsPositions,
-    boundarySelectedRowsPositions,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
     selectedColumnDimensionsOptions,
     selectedRowDimensionsOptions,
-    updateSelectionViews,
     clearSelection,
     selectAllCells,
     gridContainerScroll,
@@ -93,7 +87,6 @@ export function useGrid (
     'x',
     changeColumnWidth
   )
-  watch(resizingColumnWidth, () => updateSelectionViews(), { deep: true })
   const {
     resizing: resizingRow,
     elementResizing: resizingRowHeight,
@@ -108,7 +101,6 @@ export function useGrid (
     'y',
     changeRowHeight
   )
-  watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
 
   const fixedRowsTop = computed<Record<string, number>>(() => {
     const fixedRows = sheet.value.rows.filter((rowDimension: RowDimensionType) => rowDimension.fixed)
@@ -210,11 +202,6 @@ export function useGrid (
     columnNameRowHeight,
     activeCell,
     setActiveCell,
-    cellsSelectionView,
-    rowsSelectionView,
-    columnsSelectionView,
-    boundarySelectedColumnsPositions,
-    boundarySelectedRowsPositions,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,

@@ -8,7 +8,6 @@
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
         :selected-column-positions="selectedColumnsPositions"
-        :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
         :all-cells-selected="allCellsSelected"
         :mouseenter-column-name="mouseenterColumnName"
         :mousemove-column-name="mousemoveColumnName"
@@ -24,7 +23,6 @@
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
-        :boundary-selected-rows-positions="boundarySelectedRowsPositions"
         :clear-selection="clearSelection"
         :mouseenter-row-name="mouseenterRowName"
         :mousemove-row-name="mousemoveRowName"
@@ -34,22 +32,6 @@
         :mousedown-cell="mousedownCell"
         :mouseenter-cell="mouseenterCell"
         :mouseup-cell="mouseupCell"
-      )
-    grid-selection-view(
-      v-if="columnsSelectionView"
-      :key="columnsSelectionView.id"
-      :selection-view="columnsSelectionView"
-    )
-    grid-selection-view(
-      v-if="rowsSelectionView"
-      :key="rowsSelectionView.id"
-      :selection-view="rowsSelectionView"
-    )
-    template(v-if="cellsSelectionView")
-      grid-selection-view(
-        v-for="view in cellsSelectionView"
-        :selection-view="view"
-        :key="view.id"
       )
   grid-element-resizing(
     :message="String(t('dcis.grid.columnWidth'))"
@@ -77,14 +59,12 @@ import {
 import { useAuthStore } from '~/stores'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
-import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
 
 export default defineComponent({
   components: {
     GridHeader,
     GridBody,
-    GridSelectionView,
     GridElementResizing
   },
   props: {
@@ -144,11 +124,6 @@ export default defineComponent({
       columnNameRowHeight,
       activeCell,
       setActiveCell,
-      cellsSelectionView,
-      rowsSelectionView,
-      columnsSelectionView,
-      boundarySelectedColumnsPositions,
-      boundarySelectedRowsPositions,
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
@@ -189,11 +164,6 @@ export default defineComponent({
       columnNameRowHeight,
       activeCell,
       setActiveCell,
-      cellsSelectionView,
-      rowsSelectionView,
-      columnsSelectionView,
-      boundarySelectedColumnsPositions,
-      boundarySelectedRowsPositions,
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
@@ -311,9 +281,6 @@ div.grid__body
             & > div
               background: $name-light !important
 
-          &.grid__header_boundary-selected
-            border-bottom: $border-selected
-
           &.grid__header_hover
             cursor: $arrow-down-cursor
 
@@ -340,9 +307,6 @@ div.grid__body
 
             & > div
               background: $name-light !important
-
-          &.grid__cell_row-name-boundary-selected
-            border-right: $border-selected
 
           &.grid__cell_row-name-hover
             cursor: $arrow-right-cursor
