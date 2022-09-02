@@ -281,10 +281,14 @@ class PeriodTestCase(TestCase):
     def test_change_period_group_privileges(self) -> None:
         """Тестирование функции `change_period_group_privileges`."""
         self._check_can_change_period(period=self.departament_period, permission=can_change_period_groups)
-        change_period_group_privileges(
-            user=self.super_user,
-            period_group_id=self.departament_period_group.id,
-            privileges_ids=self.period_group_privileges_ids[: -1]
+        self.assertEqual(
+            first=change_period_group_privileges(
+                user=self.super_user,
+                period_group_id=self.departament_period_group.id,
+                privileges_ids=self.period_group_privileges_ids[: -1]
+            ),
+            second=list(self.departament_period_group.privileges.filter(periodgroup=self.departament_period_group)),
+            msg='Change period group privileges'
         )
 
     def tearDown(self) -> None:
