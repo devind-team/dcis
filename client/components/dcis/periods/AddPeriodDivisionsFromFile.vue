@@ -10,7 +10,7 @@ mutation-modal-form(
   mutation-name="addDivisionsFromFile"
   i18n-path="dcis.periods.addDivisions"
   errors-in-alert
-  @close="$emit('close')"
+  @close="close"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
@@ -44,9 +44,14 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true },
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
-  setup () {
+  setup (_, { emit }) {
     const file = ref<File | null>(null)
-    return { addPeriodDivisionsFromFileMutation, file }
+
+    const close = () => {
+      file.value = null
+      emit('close')
+    }
+    return { addPeriodDivisionsFromFileMutation, file, close }
   }
 })
 </script>

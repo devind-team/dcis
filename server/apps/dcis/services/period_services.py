@@ -1,14 +1,19 @@
 """Модуль, отвечающий за работу с периодами."""
 
 from datetime import date
+from io import BytesIO
+from typing import Type
 
 from devind_helpers.orm_utils import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
+from devind_helpers.import_from_file import ExcelReader
+from devind_helpers.utils import convert_str_to_int
 from devind_helpers.schema.types import ErrorFieldType
 
+from devind_dictionaries.models import Organization
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
@@ -133,12 +138,43 @@ def add_divisions_period(user: User, period_id: str | int, division_ids: list[st
 def add_divisions_from_file(
     user: User,
     period_id: str | int,
-    file: InMemoryUploadedFile
-) -> tuple[list[DivisionModelType], list[int], list[ErrorFieldType] | None]:
+    file: InMemoryUploadedFile,
+    field: str = 'orgs_id'
+) -> tuple[list[dict[str, int | str]], list[int], list[ErrorFieldType] | None]:
     """Добавление дивизионов из файла формата csv/xlsx."""
     period = get_object_or_404(Period, pk=period_id)
     can_change_period_divisions(user, period)
-    return [], [], None,
+    reader: ExcelReader = ExcelReader(BytesIO(file.read())) # noqa
+    divisions_id: dict[int, int] = {}
+    for item in reader.items:
+        division_id: int | None = convert_str_to_int(item.get(field))
+        if division_id:
+            divisions_id[division_id] = 0
+    if not divisions_id:
+        return [], [], [
+            ErrorFieldType('file', [f'Не найдено ни одной организации или отсутствует поле {field} в заголовке'])
+        ],
+    project: Project = period.project
+    # 1. Подбираем найденные дивизионы
+    divisions: dict[int, Type[project.division]] = project.division.objects \
+        .filter(pk__in=divisions_id.keys()).in_bulk()
+    # 2. Определяем переданные, но не найденные в базе данных
+    for division_id in divisions:
+        divisions_id[division_id] = 1
+    missing_divisions = [division_id for division_id, freq in divisions_id.items() if freq == 0]
+    # 3. Подбираем существующие дивизионы
+    divisions_exist = period.division_set.values_list('object_id', flat=True)
+    for division_exist in divisions_exist:
+        divisions_id[division_exist] = 2
+    # 4. Сохраняем в БД необходимые дивизионы
+    income_divisions: dict[int, Type[project.division]] = {
+        division_id: divisions[division_id]
+        for division_id, freq in divisions_id.items() if freq == 1
+    }
+    with transaction.atomic():
+        for income_division in income_divisions:
+            period.division_set.create(object_id=income_division)
+    return get_divisions(income_divisions.values()), missing_divisions, None,
 
 
 def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:

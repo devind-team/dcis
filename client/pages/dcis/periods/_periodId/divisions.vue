@@ -40,6 +40,14 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
                   v-btn(v-on="{ ...onMenu, ...onTooltip }" color="error" icon)
                     v-icon mdi-delete
                 span {{ $t('dcis.periods.divisions.deleteDivision.tooltip') }}
+  v-bottom-sheet(v-model="activeMissing")
+    v-card(style="position: relative" height="300px" flat)
+      v-btn(icon absolute top right @click="activeMissing = false")
+        v-icon mdi-close
+      v-card-title Идентификаторы организаций, которые не удалось найти
+      v-card-text
+        v-list
+          v-list-item(v-for="md in missingDivisions" :key="md") {{ md }}
 </template>
 
 <script lang="ts">
@@ -76,6 +84,9 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+
+    const activeMissing = ref<boolean>(false)
+    const missingDivisions = ref<number[]>([])
 
     const search = ref<string>('')
     const divisionsCount = ref<number>(props.period.divisions.length)
@@ -155,8 +166,14 @@ export default defineComponent({
       result,
       (
         dataCache,
-        { data: { addDivisionsFromFile: { success, divisions } } }: AddDivisionsFromFileMutationResult
-      ) => dataCacheResult(dataCache, success, divisions)
+        { data: { addDivisionsFromFile: { success, divisions, missingDivisions: md } } }: AddDivisionsFromFileMutationResult
+      ) => {
+        if (md.length) {
+          activeMissing.value = true
+          missingDivisions.value = md
+        }
+        return dataCacheResult(dataCache, success, divisions)
+      }
     )
 
     const { mutate: deleteDivision } = useMutation<
@@ -179,6 +196,8 @@ export default defineComponent({
       })
 
     return {
+      activeMissing,
+      missingDivisions,
       search,
       divisionsCount,
       pagination,
