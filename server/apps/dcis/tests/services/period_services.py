@@ -12,11 +12,11 @@ from six import BytesIO
 
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
-from apps.dcis.permissions import can_add_period, can_change_period_divisions, can_change_period_groups, can_view_period
+from apps.dcis.permissions import can_add_period, can_change_period_divisions, can_change_period_groups
 from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
-    copy_period_groups,
+    change_period_group_privileges, copy_period_groups,
     create_period,
     delete_divisions_period,
     get_user_divisions_periods,
@@ -135,27 +135,38 @@ class PeriodTestCase(TestCase):
             Period.objects.create(user=self.super_user, project=self.user_project, name=f'User period {number}') for
             number in range(3)
         ]
-        self.user_periods = [
-            Period.objects.create(project=self.user_project, name=f'Period {number + 1}') for number in range(3)
-        ]
-        self.user_groups: list[PeriodGroup] = []
+        self.user_period_groups: list[PeriodGroup] = []
         for period in self.user_periods:
-            self.user_groups.append(PeriodGroup.objects.create(period=period, name=f'Group {period.name}'))
-            self.user_groups[-1].users.add(self.super_user)
+            self.user_period_groups.append(PeriodGroup.objects.create(period=period, name=f'Group {period.name}'))
+            self.user_period_groups[-1].users.add(self.super_user)
+        self.user_period_group_id: list[str | int] = []
+        self.user_period_group_id.append(self.user_period_groups[0].id)
 
-        self.user_groups_id: list[str | int] = []
-        self.user_groups_id.append(self.user_groups[0].id)
+        self.period_group_privileges: list[Privilege] = [
+            Privilege.objects.create(name=f'Privilege {number + 1}', key=f'privilege_{number + 1}') for number in
+            range(3)
+        ]
+        self.period_group_privileges_ids: list[str | int] = []
+        for period_group_privilege_id in self.period_group_privileges:
+            self.period_group_privileges_ids.append(period_group_privilege_id.id)
 
         self.departaments = [
             Department.objects.create(user=self.super_user, name=f'Departament {number}') for number in range(3)
         ]
-        self.department_period = Period.objects.create(
+        self.departament_period = Period.objects.create(
             user=self.super_user,
             project=self.user_project,
             name='Departament period'
         )
-        self.department_divisions = [Division.objects.create(period=self.department_period, object_id=departament.id)
-                                     for departament in self.departaments]
+        self.departament_period_group = PeriodGroup.objects.create(
+            period=self.departament_period,
+            name='Group departament'
+        )
+        self.departament_period_group.privileges.set(self.period_group_privileges)
+        self.department_divisions = [
+            Division.objects.create(period=self.departament_period, object_id=departament.id)
+            for departament in self.departaments
+        ]
 
         self.divisions_ids: list[str | int] = []
         for division_id in self.department_divisions:
@@ -233,11 +244,11 @@ class PeriodTestCase(TestCase):
 
     def test_delete_divisions_period(self) -> None:
         """Тестирование функции `delete_divisions_period`."""
-        self._check_can_change_period(period=self.department_period, permission=can_change_period_divisions)
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_divisions)
         self.assertEqual(
             delete_divisions_period(
                 user=self.super_user,
-                period_id=self.department_period.id,
+                period_id=self.departament_period.id,
                 division_id=self.divisions_ids[0]
             ),
             None,
@@ -246,26 +257,35 @@ class PeriodTestCase(TestCase):
 
     def test_add_period_group(self) -> None:
         """Тестирование функции `add_period_group`."""
-        self._check_can_change_period(period=self.department_period, permission=can_change_period_groups)
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_groups)
         self.assertEqual(
-            add_period_group(user=self.super_user, name='Group departament', period_id=self.department_period.id),
+            add_period_group(user=self.super_user, name='Group departament', period_id=self.departament_period.id),
             PeriodGroup.objects.get(name='Group departament'),
             'Create period group'
         )
 
     def test_copy_period_groups(self) -> None:
         """Тестирование функции `copy_period_groups`."""
-        self._check_can_change_period(period=self.department_period, permission=can_change_period_groups)
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_groups)
         self.copy_group = copy_period_groups(
             user=self.super_user,
-            period_id=self.department_period.id,
-            period_group_ids=self.user_groups_id,
+            period_id=self.departament_period.id,
+            period_group_ids=self.user_period_group_id,
             selected_period_id=self.user_periods[0].id
         )
         self.verify_group: list[PeriodGroup] = []
-        self.verify_group.append((PeriodGroup.objects.get(period_id=self.department_period.id)))
+        self.verify_group.append((PeriodGroup.objects.get(period_id=self.departament_period.id)))
         for (copy, verify) in zip(self.copy_group, self.verify_group):
             self.assertEqual(first=copy.name, second=verify.name, msg='Copy group')
+
+    def test_change_period_group_privileges(self) -> None:
+        """Тестирование функции `change_period_group_privileges`."""
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_groups)
+        change_period_group_privileges(
+            user=self.super_user,
+            period_group_id=self.departament_period_group.id,
+            privileges_ids=self.period_group_privileges_ids[: -1]
+        )
 
     def tearDown(self) -> None:
         """Очистка данных тестирования."""
