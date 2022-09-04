@@ -3,7 +3,7 @@ import { computed, ref, Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
 import { GridMode, ScrollInfoType, FixedInfoType } from '~/types/grid'
-import { letterToPosition, parsePosition } from '~/services/grid'
+import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -154,6 +154,51 @@ export function useGrid (
     return getColumnFixedInfo(column)
   }
 
+  const borderFixedColumn = computed<ColumnDimensionType | null>(() => {
+    let width = 0
+    let fixedWidth = 0
+    let borderColumn: ColumnDimensionType | null = null
+    for (const column of sheet.value.columns) {
+      if (column.fixed && scroll.value.left > width - fixedWidth) {
+        fixedWidth += getColumnWidth(column)
+        borderColumn = column
+      }
+      width += getColumnWidth(column)
+    }
+    return borderColumn
+  })
+  const borderFixedRow = computed<RowDimensionType | null>(() => {
+    let height = 0
+    let fixedHeight = 0
+    let borderRow: RowDimensionType | null = null
+    for (const row of sheet.value.rows) {
+      if (row.fixed && scroll.value.top > height - fixedHeight) {
+        fixedHeight += getRowHeight(row) + 1
+        borderRow = row
+      }
+      height += getRowHeight(row) + 1
+    }
+    return borderRow
+  })
+  const isColumnFixedBorder = (column: ColumnDimensionType): boolean => {
+    if (!borderFixedColumn.value) {
+      return false
+    }
+    return borderFixedColumn.value.id === column.id
+  }
+  const isRowFixedBorder = (row: RowDimensionType): boolean => {
+    if (!borderFixedRow.value) {
+      return false
+    }
+    return borderFixedRow.value.id === row.id
+  }
+  const isCellFixedBorderRight = (cell: CellType): boolean => {
+    return isColumnFixedBorder(sheet.value.columns[positionsToRangeIndices(cell.relatedGlobalPositions).maxColumn - 1])
+  }
+  const isCellFixedBorderBottom = (cell: CellType): boolean => {
+    return isRowFixedBorder(sheet.value.rows[positionsToRangeIndices(cell.relatedGlobalPositions).maxRow - 1])
+  }
+
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
       sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
@@ -243,6 +288,12 @@ export function useGrid (
     getColumnFixedInfo,
     getRowFixedInfo,
     getCellFixedInfo,
+    borderFixedColumn,
+    borderFixedRow,
+    isColumnFixedBorder,
+    isRowFixedBorder,
+    isCellFixedBorderRight,
+    isCellFixedBorderBottom,
     gridWidth,
     rowNameColumnWidth,
     columnNameRowHeight,

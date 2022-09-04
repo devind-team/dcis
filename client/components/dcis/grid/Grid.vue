@@ -8,6 +8,9 @@
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
         :get-column-fixed-info="getColumnFixedInfo"
+        :border-fixed-column="borderFixedColumn"
+        :border-fixed-row="borderFixedRow"
+        :is-column-fixed-border="isColumnFixedBorder"
         :selected-column-positions="selectedColumnsPositions"
         :all-cells-selected="allCellsSelected"
         :mouseenter-column-name="mouseenterColumnName"
@@ -22,6 +25,11 @@
         :get-row-height="getRowHeight"
         :get-row-fixed-info="getRowFixedInfo"
         :get-cell-fixed-info="getCellFixedInfo"
+        :border-fixed-column="borderFixedColumn"
+        :border-fixed-row="borderFixedRow"
+        :is-row-fixed-border="isRowFixedBorder"
+        :is-cell-fixed-border-right="isCellFixedBorderRight"
+        :is-cell-fixed-border-bottom="isCellFixedBorderBottom"
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
@@ -123,6 +131,12 @@ export default defineComponent({
       getColumnFixedInfo,
       getRowFixedInfo,
       getCellFixedInfo,
+      borderFixedColumn,
+      borderFixedRow,
+      isColumnFixedBorder,
+      isRowFixedBorder,
+      isCellFixedBorderRight,
+      isCellFixedBorderBottom,
       gridWidth,
       rowNameColumnWidth,
       columnNameRowHeight,
@@ -164,6 +178,12 @@ export default defineComponent({
       getColumnFixedInfo,
       getRowFixedInfo,
       getCellFixedInfo,
+      borderFixedColumn,
+      borderFixedRow,
+      isColumnFixedBorder,
+      isRowFixedBorder,
+      isCellFixedBorderRight,
+      isCellFixedBorderBottom,
       gridWidth,
       rowNameColumnWidth,
       columnNameRowHeight,
@@ -206,6 +226,7 @@ export default defineComponent({
   cursor: row-resize !important
 
 $border: 1px solid silver
+$fixed-border: 1.5px solid gray
 $border-selected: 1px solid blue
 $name-light: map-get($grey, 'lighten-3')
 $name-dark: map-get($grey, 'lighten-2')
@@ -301,6 +322,12 @@ div.grid__body
             position: sticky
             z-index: 1
 
+        th.grid__header_fixed-border-right
+          border-right: $fixed-border
+
+        th.grid__header_fixed-border-bottom
+          border-bottom: $fixed-border
+
       tbody
         td.grid__cell_row-name
           position: sticky
@@ -357,7 +384,9 @@ div.grid__body
           position: sticky
           z-index: 1
 
-    div.grid__selection-view
-      position: absolute
-      pointer-events: none
+        td.grid__cell_fixed-border-right
+          border-right: $fixed-border
+
+        td.grid__cell_fixed-border-bottom
+          border-bottom: $fixed-border
 </style>

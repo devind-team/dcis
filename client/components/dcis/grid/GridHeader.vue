@@ -2,7 +2,7 @@
 thead
   tr(:style="{ height: `${columnNameRowHeight}px` }")
     th(
-      :class="{ 'grid__header_all_selected': allCellsSelected }"
+      :class="firstHeaderClass"
       :style="{ width: `${rowNameColumnWidth}px` }"
       @click="selectAllCells"
     )
@@ -32,7 +32,7 @@ thead
 <script lang="ts">
 import { nextTick, PropType, Ref } from '#app'
 import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
-import { SheetType, ColumnDimensionType } from '~/types/graphql'
+import { SheetType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -43,6 +43,9 @@ export default defineComponent({
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
     getColumnFixedInfo: { type: Function as PropType<(column: ColumnDimensionType) => FixedInfoType>, required: true },
+    borderFixedColumn: { type: Object as PropType<ColumnDimensionType>, default: null },
+    borderFixedRow: { type: Object as PropType<RowDimensionType>, default: null },
+    isColumnFixedBorder: { type: Function as PropType<(column: ColumnDimensionType) => boolean>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },
     mouseenterColumnName: {
@@ -65,11 +68,19 @@ export default defineComponent({
     const mode = inject<GridMode>('mode')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
+    const firstHeaderClass = computed<Record<string, boolean>>(() => ({
+      grid__header_all_selected: props.allCellsSelected,
+      'grid__header_fixed-border-right': props.borderFixedColumn === null,
+      'grid__header_fixed-border-bottom': props.borderFixedRow === null
+    }))
+
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
         grid__header_hover: !props.resizingColumn,
-        grid__header_fixed: props.getColumnFixedInfo(column).fixed
+        grid__header_fixed: props.getColumnFixedInfo(column).fixed,
+        'grid__header_fixed-border-right': props.isColumnFixedBorder(column),
+        'grid__header_fixed-border-bottom': props.borderFixedRow === null
       }
     }
     const getHeaderStyle = (column: ColumnDimensionType): Record<string, string> => {
@@ -92,7 +103,18 @@ export default defineComponent({
       })
     }
 
-    return { GridMode, mode, activeSheet, getHeaderClass, getHeaderStyle, posX, posY, currentCol, showMenu }
+    return {
+      GridMode,
+      mode,
+      activeSheet,
+      firstHeaderClass,
+      getHeaderClass,
+      getHeaderStyle,
+      posX,
+      posY,
+      currentCol,
+      showMenu
+    }
   }
 })
 </script>
