@@ -108,7 +108,14 @@ export type SelectionType<T> = {
   last: T,
 }
 
-export type FixedInfo = {
+export type ScrollInfoType = {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+export type FixedInfoType = {
   fixed: boolean,
   position: number | null
 }

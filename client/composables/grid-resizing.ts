@@ -1,9 +1,15 @@
 import { useEventListener } from '@vueuse/core'
 import { computed, ref, Ref, UnwrapRef } from '#app'
-import { ElementPositionType, ElementResizingType, MousePositionType, ResizingType } from '~/types/grid'
+import {
+  ElementPositionType,
+  ElementResizingType,
+  MousePositionType,
+  ResizingType,
+  ScrollInfoType
+} from '~/types/grid'
 
 export function useGridResizing<T extends { id: string, width?: number, height?: number }> (
-  gridContainer: Ref<HTMLDivElement>,
+  scroll: Ref<ScrollInfoType>,
   defaultSize: number,
   direction: 'x' | 'y',
   changeSize: (dimension: T, size: number) => Promise<void> | null
@@ -90,11 +96,11 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   const getElementPositionX = (event: MouseEvent, target: HTMLDivElement | HTMLTableCellElement) => {
     const cell = target.closest('th')
     if (
-      cell.offsetLeft - gridContainer.value.scrollLeft +
+      cell.offsetLeft - scroll.value.left +
       event.offsetX < document.body.offsetWidth - 150
     ) {
       return {
-        left: cell.offsetLeft - gridContainer.value.scrollLeft + event.offsetX,
+        left: cell.offsetLeft - scroll.value.left + event.offsetX,
         right: null,
         top: cell.offsetTop + event.offsetY - 25,
         bottom: null
@@ -114,7 +120,7 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     return {
       left: target.offsetLeft + event.offsetX,
       right: null,
-      top: row.offsetTop - gridContainer.value.scrollTop + event.offsetY - 25,
+      top: row.offsetTop - scroll.value.top + event.offsetY - 25,
       bottom: null
     }
   }

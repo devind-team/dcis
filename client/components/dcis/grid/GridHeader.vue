@@ -31,7 +31,7 @@ thead
 
 <script lang="ts">
 import { nextTick, PropType, Ref } from '#app'
-import { GridMode, ResizingType, FixedInfo } from '~/types/grid'
+import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
 import { SheetType, ColumnDimensionType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
@@ -42,7 +42,7 @@ export default defineComponent({
     columnNameRowHeight: { type: Number, required: true },
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
-    getColumnFixedInfo: { type: Function as PropType<(column: ColumnDimensionType) => FixedInfo>, required: true },
+    getColumnFixedInfo: { type: Function as PropType<(column: ColumnDimensionType) => FixedInfoType>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },
     mouseenterColumnName: {

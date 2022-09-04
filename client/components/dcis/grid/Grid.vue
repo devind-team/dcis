@@ -1,6 +1,6 @@
 <template lang="pug">
 .grid__body
-  div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
+  div.grid__container(ref="gridContainer")
     table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
       grid-header(
         :row-name-column-width="rowNameColumnWidth"
@@ -136,7 +136,6 @@ export default defineComponent({
       selectedRowDimensionsOptions,
       clearSelection,
       selectAllCells,
-      gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
@@ -178,7 +177,6 @@ export default defineComponent({
       selectedRowDimensionsOptions,
       clearSelection,
       selectAllCells,
-      gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,

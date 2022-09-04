@@ -22,7 +22,6 @@ import {
 
 export function useGridSelection (
   sheet: Ref<SheetType>,
-  _gridContainer: Ref<HTMLDivElement | null>,
   _grid: Ref<HTMLTableElement | null>,
   setActiveCell: (cell: CellType | null) => void
 ) {
@@ -202,8 +201,6 @@ export function useGridSelection (
     }
   }, { deep: true })
 
-  const gridContainerScroll = () => {}
-
   const mousedownCell = (cell: CellType): void => {
     selectionState.value = 'cell'
     cellsSelection.value = {
@@ -266,7 +263,6 @@ export function useGridSelection (
     selectedRowDimensionsOptions,
     clearSelection,
     selectAllCells,
-    gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,

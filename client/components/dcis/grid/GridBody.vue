@@ -52,7 +52,7 @@ tbody
 import { PropType, Ref, nextTick, inject } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
-import { GridMode, ResizingType, FixedInfo } from '~/types/grid'
+import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
@@ -63,8 +63,8 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
-    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => FixedInfo>, required: true },
-    getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfo>, required: true },
+    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => FixedInfoType>, required: true },
+    getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfoType>, required: true },
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
