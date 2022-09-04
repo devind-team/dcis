@@ -7,6 +7,7 @@
         :column-name-row-height="columnNameRowHeight"
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
+        :get-column-fixed-info="getColumnFixedInfo"
         :selected-column-positions="selectedColumnsPositions"
         :all-cells-selected="allCellsSelected"
         :mouseenter-column-name="mouseenterColumnName"
@@ -19,7 +20,8 @@
       grid-body(
         :resizing-row="resizingRow"
         :get-row-height="getRowHeight"
-        :fixed-rows-top="fixedRowsTop"
+        :get-row-fixed-info="getRowFixedInfo"
+        :get-cell-fixed-info="getCellFixedInfo"
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
@@ -118,7 +120,9 @@ export default defineComponent({
       resizingRow,
       resizingRowHeight,
       getRowHeight,
-      fixedRowsTop,
+      getColumnFixedInfo,
+      getRowFixedInfo,
+      getCellFixedInfo,
       gridWidth,
       rowNameColumnWidth,
       columnNameRowHeight,
@@ -158,7 +162,9 @@ export default defineComponent({
       resizingRow,
       resizingRowHeight,
       getRowHeight,
-      fixedRowsTop,
+      getColumnFixedInfo,
+      getRowFixedInfo,
+      getCellFixedInfo,
       gridWidth,
       rowNameColumnWidth,
       columnNameRowHeight,
@@ -240,7 +246,7 @@ div.grid__body
       thead
         position: sticky
         top: 0
-        z-index: 4
+        z-index: 2
 
         th
           border-top: $border
@@ -293,6 +299,10 @@ div.grid__body
             justify-content: center
             align-items: center
 
+          &.grid__header_fixed
+            position: sticky
+            z-index: 1
+
       tbody
         td.grid__cell_row-name
           position: sticky
@@ -344,6 +354,10 @@ div.grid__body
         tr.grid__row_fixed
           position: sticky
           z-index: 2
+
+        td.grid__cell_fixed
+          position: sticky
+          z-index: 1
 
     div.grid__selection-view
       position: absolute

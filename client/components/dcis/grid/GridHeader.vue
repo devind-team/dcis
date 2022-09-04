@@ -11,7 +11,7 @@ thead
       v-for="column in activeSheet.columns"
       :key="column.id"
       :class="getHeaderClass(column)"
-      :style="{ 'width': `${getColumnWidth(column)}px` }"
+      :style="getHeaderStyle(column)"
       @mouseenter="mouseenterColumnName(column)"
       @mousemove="mousemoveColumnName(column, $event)"
       @mouseleave="mouseleaveColumnName"
@@ -31,7 +31,7 @@ thead
 
 <script lang="ts">
 import { nextTick, PropType, Ref } from '#app'
-import { GridMode, ResizingType } from '~/types/grid'
+import { GridMode, ResizingType, FixedInfo } from '~/types/grid'
 import { SheetType, ColumnDimensionType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
@@ -42,6 +42,7 @@ export default defineComponent({
     columnNameRowHeight: { type: Number, required: true },
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
+    getColumnFixedInfo: { type: Function as PropType<(column: ColumnDimensionType) => FixedInfo>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },
     mouseenterColumnName: {
@@ -67,7 +68,14 @@ export default defineComponent({
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
-        grid__header_hover: !props.resizingColumn
+        grid__header_hover: !props.resizingColumn,
+        grid__header_fixed: props.getColumnFixedInfo(column).fixed
+      }
+    }
+    const getHeaderStyle = (column: ColumnDimensionType): Record<string, string> => {
+      return {
+        width: `${props.getColumnWidth(column)}px`,
+        left: `${props.getColumnFixedInfo(column).position}px`
       }
     }
 
@@ -84,7 +92,7 @@ export default defineComponent({
       })
     }
 
-    return { GridMode, mode, activeSheet, posX, posY, currentCol, showMenu, getHeaderClass }
+    return { GridMode, mode, activeSheet, getHeaderClass, getHeaderStyle, posX, posY, currentCol, showMenu }
   }
 })
 </script>

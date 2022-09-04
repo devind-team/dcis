@@ -3,7 +3,7 @@ tbody
   tr(
     v-for="row in activeSheet.rows"
     :key="row.id"
-    :class="{ 'grid__row_fixed': row.fixed }"
+    :class="{ 'grid__row_fixed': getRowFixedInfo(row).fixed }"
     :style="getRowStyle(row)"
   )
     td.grid__cell_row-name(
@@ -18,6 +18,7 @@ tbody
     td(
       v-for="cell in row.cells"
       :key="cell.id"
+      :class="{ 'grid__cell_fixed': getCellFixedInfo(cell).fixed }"
       :colspan="cell.colspan"
       :rowspan="cell.rowspan"
       :style="getCellStyle(cell)"
@@ -51,7 +52,7 @@ tbody
 import { PropType, Ref, nextTick, inject } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
-import { GridMode, ResizingType } from '~/types/grid'
+import { GridMode, ResizingType, FixedInfo } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
@@ -62,7 +63,8 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
-    fixedRowsTop: { type: Object as PropType<Record<string, number>>, required: true },
+    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => FixedInfo>, required: true },
+    getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfo>, required: true },
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
@@ -96,8 +98,9 @@ export default defineComponent({
       .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
 
     const getRowStyle = (row: RowDimensionType): Record<string, string> => {
-      if (row.fixed) {
-        return { top: `${props.fixedRowsTop[row.id]}px` }
+      const fixedInfo = props.getRowFixedInfo(row)
+      if (fixedInfo.fixed) {
+        return { top: `${fixedInfo.position}px` }
       }
       return {}
     }
@@ -173,6 +176,10 @@ export default defineComponent({
     const getCellStyle = (cell: CellType): Record<string, string> => {
       const textDecoration: string[] = []
       const style: Record<string, string> = {}
+      const fixedInfo = props.getCellFixedInfo(cell)
+      if (fixedInfo.fixed) {
+        style.left = `${fixedInfo.position}px`
+      }
       if (cell.strong) { style['font-weight'] = 'bold' }
       if (cell.italic) { style['font-style'] = 'italic' }
       if (cell.strike) { textDecoration.push('line-through') }

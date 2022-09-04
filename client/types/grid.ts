@@ -108,6 +108,11 @@ export type SelectionType<T> = {
   last: T,
 }
 
+export type FixedInfo = {
+  fixed: boolean,
+  position: number | null
+}
+
 export type CellsOptionsType = {
   cells: CellType[]
   strong: boolean | null

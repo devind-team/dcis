@@ -1,7 +1,8 @@
-import { computed, ref, Ref, watch } from '#app'
+import { computed, ref, Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
-import { GridMode } from '~/types/grid'
+import { GridMode, FixedInfo } from '~/types/grid'
+import { letterToPosition, parsePosition } from '~/services/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -102,6 +103,16 @@ export function useGrid (
     changeRowHeight
   )
 
+  const fixedColumnsLeft = computed<Record<string, number>>(() => {
+    const fixedColumns = sheet.value.columns.filter((columnDimension: ColumnDimensionType) => columnDimension.fixed)
+    let width = rowNameColumnWidth.value
+    const result = {}
+    for (const fixedColumn of fixedColumns) {
+      result[fixedColumn.id] = width
+      width += getColumnWidth(fixedColumn)
+    }
+    return result
+  })
   const fixedRowsTop = computed<Record<string, number>>(() => {
     const fixedRows = sheet.value.rows.filter((rowDimension: RowDimensionType) => rowDimension.fixed)
     let height = columnNameRowHeight
@@ -112,6 +123,22 @@ export function useGrid (
     }
     return result
   })
+  const getColumnFixedInfo = (column: ColumnDimensionType): FixedInfo => {
+    if (column.fixed) {
+      return { fixed: true, position: fixedColumnsLeft.value[column.id] }
+    }
+    return { fixed: false, position: null }
+  }
+  const getRowFixedInfo = (row: RowDimensionType): FixedInfo => {
+    if (row.fixed) {
+      return { fixed: true, position: fixedRowsTop.value[row.id] }
+    }
+    return { fixed: false, position: null }
+  }
+  const getCellFixedInfo = (cell: CellType): FixedInfo => {
+    const column = sheet.value.columns[letterToPosition(parsePosition(cell.globalPosition).column) - 1]
+    return getColumnFixedInfo(column)
+  }
 
   const gridWidth = computed<number>(
     () => rowNameColumnWidth.value +
@@ -196,7 +223,9 @@ export function useGrid (
     resizingRow,
     resizingRowHeight,
     getRowHeight,
-    fixedRowsTop,
+    getColumnFixedInfo,
+    getRowFixedInfo,
+    getCellFixedInfo,
     gridWidth,
     rowNameColumnWidth,
     columnNameRowHeight,
