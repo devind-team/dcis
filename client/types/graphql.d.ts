@@ -145,6 +145,28 @@ export type AddChildRowDimensionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddDivisionsFromFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Файл в формате xlsx, csv */
+  file?: InputMaybe<Scalars['Upload']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Мутация для добавления дивизионов из файла. */
+export type AddDivisionsFromFileMutationPayload = {
+  __typename?: 'AddDivisionsFromFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Новые дивизионы */
+  divisions: Array<Maybe<DivisionModelType>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Не найденные дивизионы */
+  missingDivisions: Array<Maybe<Scalars['Int']>>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddDivisionsMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификаторы дивизионов */
@@ -2518,6 +2540,8 @@ export type Mutation = {
   addChildRowDimension: AddChildRowDimensionMutationPayload;
   /** Мутация на добавление дивизионов в период. */
   addDivisions: AddDivisionsMutationPayload;
+  /** Мутация для добавления дивизионов из файла. */
+  addDivisionsFromFile: AddDivisionsFromFileMutationPayload;
   /** Добавление документа. */
   addDocument: AddDocumentMutationPayload;
   /** Добавление статуса документа. */
@@ -2702,6 +2726,11 @@ export type MutationAddChildRowDimensionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddDivisionsArgs = {
   input: AddDivisionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddDivisionsFromFileArgs = {
+  input: AddDivisionsFromFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5412,6 +5441,13 @@ export type AddDivisionsMutationVariables = Exact<{
 
 export type AddDivisionsMutation = { __typename?: 'Mutation', addDivisions: { __typename: 'AddDivisionsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, divisions: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> } };
 
+export type AddDivisionsFromFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  file: Scalars['Upload'];
+}>;
+
+export type AddDivisionsFromFileMutation = { __typename?: 'Mutation', addDivisionsFromFile: { __typename: 'AddDivisionsFromFileMutationPayload', success: boolean, missingDivisions: Array<number | null>, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, divisions: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> } };
+
 export type AddPeriodMutationVariables = Exact<{
   name: Scalars['String'];
   projectId: Scalars['ID'];
@@ -5586,7 +5622,7 @@ export type ChangeValueMutationVariables = Exact<{
   value: Scalars['String'];
 }>;
 
-export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename?: 'ChangeValueMutationPayload', success: boolean, updatedAt?: any | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, verified: boolean, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
+export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename: 'ChangeValueMutationPayload', success: boolean, updatedAt?: any | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, verified: boolean, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];

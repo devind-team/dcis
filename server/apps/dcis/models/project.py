@@ -42,7 +42,7 @@ class Project(models.Model):
         ordering = ('-created_at',)
 
     @property
-    def division(self) -> Type[Department] | Type[Organization]:
+    def division(self) -> Type[Department | Organization]:
         return self.DIVISION_KIND.get(cast(str, self.content_type.model), Department)
 
 

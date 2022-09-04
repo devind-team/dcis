@@ -8,6 +8,7 @@ mutation-modal-form(
   :variables="variables"
   :update="update"
   :mutation-name="['changeUserPeriodGroups', 'changeUserPeriodPrivileges']"
+  i18n-path="dcis.periods.users.addUser"
   errors-in-alert
   @close="close"
 )

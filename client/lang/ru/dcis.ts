@@ -60,6 +60,9 @@ export default {
       open: 'Открыто',
       close: 'Закрыто'
     },
+    addDivisions: {
+      file: 'Выберете файл'
+    },
     addPeriod: {
       buttonText: 'Добавить период',
       header: 'Добавление периода',
