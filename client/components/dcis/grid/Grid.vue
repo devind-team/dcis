@@ -12,6 +12,7 @@
         :border-fixed-row="borderFixedRow"
         :is-column-fixed-border="isColumnFixedBorder"
         :selected-column-positions="selectedColumnsPositions"
+        :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
         :all-cells-selected="allCellsSelected"
         :mouseenter-column-name="mouseenterColumnName"
         :mousemove-column-name="mousemoveColumnName"
@@ -33,6 +34,7 @@
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
+        :boundary-selected-rows-positions="boundarySelectedRowsPositions"
         :clear-selection="clearSelection"
         :mouseenter-row-name="mouseenterRowName"
         :mousemove-row-name="mousemoveRowName"
@@ -43,7 +45,22 @@
         :mouseenter-cell="mouseenterCell"
         :mouseup-cell="mouseupCell"
       )
-    selection-line(v-for="(line, i) in selectionLines" :key="i" :line="line")
+    grid-selection-view(
+      v-if="columnsSelectionView"
+      :key="columnsSelectionView.id"
+      :selection-view="columnsSelectionView"
+    )
+    grid-selection-view(
+      v-if="rowsSelectionView"
+      :key="rowsSelectionView.id"
+      :selection-view="rowsSelectionView"
+    )
+    template(v-if="cellsSelectionView")
+      grid-selection-view(
+        v-for="view in cellsSelectionView"
+        :selection-view="view"
+        :key="view.id"
+      )
   grid-element-resizing(
     :message="String(t('dcis.grid.columnWidth'))"
     :element-resizing="resizingColumnWidth"
@@ -71,14 +88,14 @@ import { useAuthStore } from '~/stores'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
-import SelectionLine from '~/components/dcis/grid/SelectionLine.vue'
+import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
 
 export default defineComponent({
   components: {
     GridHeader,
     GridBody,
     GridElementResizing,
-    SelectionLine
+    GridSelectionView
   },
   props: {
     mode: { type: Number, required: true },
@@ -146,10 +163,14 @@ export default defineComponent({
       isRowFixedBorder,
       isCellFixedBorderRight,
       isCellFixedBorderBottom,
+      cellsSelectionView,
+      rowsSelectionView,
+      columnsSelectionView,
+      boundarySelectedColumnsPositions,
+      boundarySelectedRowsPositions,
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
-      selectionLines,
       selectedCellsOptions,
       selectedColumnDimensionsOptions,
       selectedRowDimensionsOptions,
@@ -202,10 +223,14 @@ export default defineComponent({
       isRowFixedBorder,
       isCellFixedBorderRight,
       isCellFixedBorderBottom,
+      cellsSelectionView,
+      rowsSelectionView,
+      columnsSelectionView,
+      boundarySelectedColumnsPositions,
+      boundarySelectedRowsPositions,
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
-      selectionLines,
       selectedCellsOptions,
       selectedColumnDimensionsOptions,
       selectedRowDimensionsOptions,
@@ -240,8 +265,8 @@ export default defineComponent({
   cursor: row-resize !important
 
 $border: 1px solid silver
+$border-selected: 1px solid blue
 $border-fixed: 1.5px solid gray
-$background-selected: blue
 $name-light: map-get($grey, 'lighten-3')
 $name-dark: map-get($grey, 'lighten-2')
 $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
@@ -320,6 +345,9 @@ div.grid__body
             & > div
               background: $name-light !important
 
+          &.grid__header_boundary-selected
+            border-bottom: $border-selected
+
           &.grid__header_hover
             cursor: $arrow-down-cursor
 
@@ -356,6 +384,9 @@ div.grid__body
 
             & > div
               background: $name-light !important
+
+          &.grid__cell_row-name-boundary-selected
+            border-right: $border-selected
 
           &.grid__cell_row-name-hover
             cursor: $arrow-right-cursor
@@ -404,8 +435,7 @@ div.grid__body
         td.grid__cell_fixed-border-bottom
           border-bottom: $border-fixed
 
-    div.grid__selection-line
+    div.grid__selection-view
       position: absolute
       pointer-events: none
-      background: $background-selected
 </style>

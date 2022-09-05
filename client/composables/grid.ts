@@ -1,4 +1,4 @@
-import { useEventListener, useElementSize } from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { computed, ref, Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
@@ -65,7 +65,6 @@ export function useGrid (
     height: 0,
     width: 0
   })
-  const size = useElementSize(gridContainer)
   const updateScroll = () => {
     scroll.value.left = gridContainer.value.scrollLeft
     scroll.value.top = gridContainer.value.scrollTop
@@ -88,6 +87,7 @@ export function useGrid (
     'x',
     changeColumnWidth
   )
+  watch(resizingColumnWidth, () => updateSelectionViews(), { deep: true })
   const {
     resizing: resizingRow,
     elementResizing: resizingRowHeight,
@@ -102,6 +102,7 @@ export function useGrid (
     'y',
     changeRowHeight
   )
+  watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
 
   const fixedColumnsLeft = computed<Record<string, number>>(() => {
     const fixedColumns = sheet.value.columns.filter((columnDimension: ColumnDimensionType) => columnDimension.fixed)
@@ -187,13 +188,18 @@ export function useGrid (
 
   const {
     selectionState,
+    cellsSelectionView,
+    rowsSelectionView,
+    columnsSelectionView,
+    boundarySelectedColumnsPositions,
+    boundarySelectedRowsPositions,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
-    selectionLines,
     selectedCellsOptions,
     selectedColumnDimensionsOptions,
     selectedRowDimensionsOptions,
+    updateSelectionViews,
     clearSelection,
     selectAllCells,
     mousedownCell,
@@ -206,10 +212,6 @@ export function useGrid (
   } = useGridSelection(
     sheet,
     scroll,
-    size,
-    getColumnWidth,
-    fixedColumnsLeft,
-    borderFixedColumn,
     grid,
     setActiveCell
   )
@@ -307,10 +309,14 @@ export function useGrid (
     isRowFixedBorder,
     isCellFixedBorderRight,
     isCellFixedBorderBottom,
+    cellsSelectionView,
+    rowsSelectionView,
+    columnsSelectionView,
+    boundarySelectedColumnsPositions,
+    boundarySelectedRowsPositions,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
-    selectionLines,
     selectedCellsOptions,
     selectedColumnDimensionsOptions,
     selectedRowDimensionsOptions,

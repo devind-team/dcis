@@ -80,6 +80,7 @@ export default defineComponent({
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
+    boundarySelectedRowsPositions: { type: Array as PropType<number[]>, required: true },
     clearSelection: { type: Function as PropType<() => void>, required: true },
     mouseenterRowName: {
       type: Function as PropType<(row: RowDimensionType) => void>,
@@ -125,6 +126,7 @@ export default defineComponent({
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': !props.resizingRow,
         'grid__cell_fixed-border-right': props.borderFixedColumn === null,
         'grid__cell_fixed-border-bottom': props.isRowFixedBorder(row)

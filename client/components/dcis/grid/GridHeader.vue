@@ -47,6 +47,7 @@ export default defineComponent({
     borderFixedRow: { type: Object as PropType<RowDimensionType>, default: null },
     isColumnFixedBorder: { type: Function as PropType<(column: ColumnDimensionType) => boolean>, required: true },
     selectedColumnPositions: { type: Array as PropType<number[]>, required: true },
+    boundarySelectedColumnsPositions: { type: Array as PropType<number[]>, required: true },
     allCellsSelected: { type: Boolean, required: true },
     mouseenterColumnName: {
       type: Function as PropType<(column: ColumnDimensionType) => void>,
@@ -77,6 +78,7 @@ export default defineComponent({
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
+        'grid__header_boundary-selected': props.boundarySelectedColumnsPositions.includes(column.index),
         grid__header_hover: !props.resizingColumn,
         grid__header_fixed: props.getColumnFixedInfo(column).fixed,
         'grid__header_fixed-border-right': props.isColumnFixedBorder(column),
