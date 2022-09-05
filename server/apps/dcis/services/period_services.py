@@ -186,7 +186,7 @@ def change_period_group_privileges(
     return privileges
 
 
-def change_user_period_groups(user: User, period_group_ids: list[PeriodGroup]) -> list[PeriodGroup]:
+def change_user_period_groups(user: User, period_group_ids: list[str | int]) -> list[PeriodGroup]:
     """Изменение групп пользователя в периоде."""
     period_groups: list[PeriodGroup] = []
     for period_group_id in period_group_ids:

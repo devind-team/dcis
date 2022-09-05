@@ -267,7 +267,7 @@ class ChangeUserPeriodGroupsMutation(BaseMutation):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_group_ids: list[PeriodGroup]):
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_group_ids: list[str | int]):
         user = get_object_or_404(User, pk=from_global_id(user_id)[1])
         user.periodgroup_set.set(change_user_period_groups(user=info.context.user, period_group_ids=period_group_ids))
         return ChangeUserPeriodGroupsMutation(
