@@ -27,6 +27,18 @@ v-menu(v-model="active" transition="slide-y-transition" offset-y left)
           v-list-item-icon
             v-icon mdi-file
           v-list-item-content {{ addButtonText }} из файла
+    add-period-divisions-from-period(
+      @close="close"
+      :header="addHeader"
+      :button-text="addButtonText"
+      :period="period"
+      :update="addDivisionsFromPeriodUpdate"
+    )
+      template(#activator="{ on }")
+        v-list-item(v-on="on")
+          v-list-item-icon
+            v-icon mdi-table-settings
+          v-list-item-content {{ addButtonText }} из другого периода
 </template>
 
 <script lang="ts">
@@ -37,19 +49,26 @@ import { PeriodType } from '~/types/graphql'
 import AddPeriodDivisionsFromFile, {
   AddDivisionsFromFileMutationResult
 } from '~/components/dcis/periods/AddPeriodDivisionsFromFile.vue'
+import AddPeriodDivisionsFromPeriod, {
+  AddDivisionsFromPeriodMutationsResult
+} from '~/components/dcis/periods/AddPeriodDivisionsFromPeriod.vue'
 
 export default defineComponent({
-  components: { AddPeriodDivisionsFromFile, AddPeriodDivisions },
+  components: { AddPeriodDivisionsFromPeriod, AddPeriodDivisionsFromFile, AddPeriodDivisions },
   props: {
     addHeader: { type: String, required: true },
     addButtonText: { type: String, required: true },
-    period: { type: Object as PropType<PeriodType> },
+    period: { type: Object as PropType<PeriodType>, required: true },
     addDivisionsUpdate: {
       type: Function as PropType<(cache: DataProxy, result: AddDivisionsMutationResult) => void>,
       required: true
     },
     addDivisionsFromFileUpdate: {
       type: Function as PropType<(cache: DataProxy, result: AddDivisionsFromFileMutationResult) => void>,
+      required: true
+    },
+    addDivisionsFromPeriodUpdate: {
+      type: Function as PropType<(cache: DataProxy, result: AddDivisionsFromPeriodMutationsResult) => void>,
       required: true
     }
   },

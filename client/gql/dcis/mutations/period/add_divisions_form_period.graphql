@@ -1,0 +1,16 @@
+#import "../../fragments/division_model_fields.graphql"
+
+mutation AddDivisionFromPeriod($periodId: ID!, $periodFromId: ID!) {
+  addDivisionsFromPeriod(input: {periodId: $periodId, periodFromId: $periodFromId}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    divisions {
+      ...DivisionModelFields
+    }
+    __typename
+  }
+}

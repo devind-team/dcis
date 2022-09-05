@@ -91,9 +91,6 @@ export default defineComponent({
     }
 
     const selectedFilters = ref([defaultFilter])
-    const clearFilters = () => {
-      selectedFilters.value = [defaultFilter]
-    }
 
     const visibleProjects = computed(() => {
       const filterKeys = selectedFilters.value.map(x => x.key)
