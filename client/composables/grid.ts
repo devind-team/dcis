@@ -1,4 +1,4 @@
-import { useEventListener } from '@vueuse/core'
+import { useEventListener, useElementSize } from '@vueuse/core'
 import { computed, ref, Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
@@ -19,6 +19,8 @@ export const cellKinds = {
 export function useGrid (
   mode: GridMode,
   sheet: Ref<SheetType>,
+  gridContainer: Ref<HTMLDivElement | null>,
+  grid: Ref<HTMLTableElement | null>,
   canChangeRowHeight: (rowDimension: RowDimensionType) => boolean,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void> | null,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
@@ -47,8 +49,10 @@ export function useGrid (
    */
   const columnNameRowHeight = 25
 
-  const gridContainer = ref<HTMLDivElement | null>(null)
-  const grid = ref<HTMLTableElement | null>(null)
+  const gridWidth = computed<number>(
+    () => rowNameColumnWidth.value +
+      sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
+  )
 
   const activeCell = ref<CellType | null>(null)
   const setActiveCell = (cell: CellType | null) => {
@@ -61,6 +65,7 @@ export function useGrid (
     height: 0,
     width: 0
   })
+  const size = useElementSize(gridContainer)
   const updateScroll = () => {
     scroll.value.left = gridContainer.value.scrollLeft
     scroll.value.top = gridContainer.value.scrollTop
@@ -68,26 +73,6 @@ export function useGrid (
     scroll.value.width = gridContainer.value.scrollWidth
   }
   useEventListener(gridContainer, 'scroll', updateScroll)
-
-  const {
-    selectionState,
-    allCellsSelected,
-    selectedColumnsPositions,
-    selectedRowsPositions,
-    selectionLines,
-    selectedCellsOptions,
-    selectedColumnDimensionsOptions,
-    selectedRowDimensionsOptions,
-    clearSelection,
-    selectAllCells,
-    mousedownCell,
-    mouseenterCell,
-    mouseupCell,
-    mouseenterColumnName,
-    mouseDownColumnName: mouseDownColumnNameSelection,
-    mouseenterRowName,
-    mousedownRowName: mouseDownRowNameSelection
-  } = useGridSelection(sheet, scroll, grid, setActiveCell)
 
   const {
     resizing: resizingColumn,
@@ -200,9 +185,33 @@ export function useGrid (
     return isRowFixedBorder(sheet.value.rows[positionsToRangeIndices(cell.relatedGlobalPositions).maxRow - 1])
   }
 
-  const gridWidth = computed<number>(
-    () => rowNameColumnWidth.value +
-      sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
+  const {
+    selectionState,
+    allCellsSelected,
+    selectedColumnsPositions,
+    selectedRowsPositions,
+    selectionLines,
+    selectedCellsOptions,
+    selectedColumnDimensionsOptions,
+    selectedRowDimensionsOptions,
+    clearSelection,
+    selectAllCells,
+    mousedownCell,
+    mouseenterCell,
+    mouseupCell,
+    mouseenterColumnName,
+    mouseDownColumnName: mouseDownColumnNameSelection,
+    mouseenterRowName,
+    mousedownRowName: mouseDownRowNameSelection
+  } = useGridSelection(
+    sheet,
+    scroll,
+    size,
+    getColumnWidth,
+    fixedColumnsLeft,
+    borderFixedColumn,
+    grid,
+    setActiveCell
   )
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
@@ -278,8 +287,11 @@ export function useGrid (
   })
 
   return {
-    gridContainer,
-    grid,
+    rowNameColumnWidth,
+    columnNameRowHeight,
+    gridWidth,
+    activeCell,
+    setActiveCell,
     resizingColumn,
     resizingColumnWidth,
     getColumnWidth,
@@ -295,11 +307,6 @@ export function useGrid (
     isRowFixedBorder,
     isCellFixedBorderRight,
     isCellFixedBorderBottom,
-    gridWidth,
-    rowNameColumnWidth,
-    columnNameRowHeight,
-    activeCell,
-    setActiveCell,
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,

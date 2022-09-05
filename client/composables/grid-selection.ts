@@ -1,4 +1,4 @@
-import { useEventListener } from '@vueuse/core'
+import { useEventListener, useElementSize } from '@vueuse/core'
 import { Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import {
@@ -26,6 +26,10 @@ import {
 export function useGridSelection (
   sheet: Ref<SheetType>,
   scroll: Ref<ScrollInfoType>,
+  size: ReturnType<typeof useElementSize>,
+  getColumnWidth: (column: ColumnDimensionType) => number,
+  fixedColumnsLeft: Ref<Record<string, number>>,
+  borderFixedColumn: Ref<ColumnDimensionType | null>,
   grid: Ref<HTMLTableElement | null>,
   setActiveCell: (cell: CellType | null) => void
 ) {
@@ -139,18 +143,31 @@ export function useGridSelection (
       const firstColumnIndex = Math.min(...indices)
       const firstColumn = theadRow.value.cells.item(firstColumnIndex) as HTMLTableCellElement
       const lastColumn = theadRow.value.cells.item(Math.max(...indices)) as HTMLTableCellElement
-      const left = firstColumn.offsetLeft - 1
+      const borderLeft = borderFixedColumn.value
+        ? fixedColumnsLeft.value[borderFixedColumn.value.id] + getColumnWidth(borderFixedColumn.value)
+        : 0
+      const lines: SelectionLineType[] = []
       const top = scroll.value.top + firstColumn.offsetHeight - 1
-      const width = lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft
       const height = grid.value.offsetHeight - theadRow.value.offsetHeight - scroll.value.top
-      const lines = [
-        { start: { left, top }, length: height, direction: Direction.VERTICAL, zIndex: 3 },
-        { start: { left: left + width, top }, length: height, direction: Direction.VERTICAL, zIndex: 3 }
-      ]
+      const expectedWidth = lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft
+      const expectedLeft = firstColumn.offsetLeft - 1
+      let left = expectedLeft
+      if (borderLeft > expectedLeft - scroll.value.left) {
+        left = borderLeft + scroll.value.left
+      }
+      const right = expectedLeft + expectedWidth
+      const width = right - left
+      if (width < 0) {
+        return []
+      }
+      if (left === expectedLeft) {
+        lines.push({ start: { left, top }, length: height, direction: Direction.VERTICAL, zIndex: 3 })
+      }
+      lines.push({ start: { left: right, top }, length: height, direction: Direction.VERTICAL, zIndex: 3 })
       if (scroll.value.top === 0) {
         lines.push({ start: { left, top }, length: width, direction: Direction.HORIZONTAL, zIndex: 3 })
       }
-      if (scroll.value.top === scroll.value.height) {
+      if (scroll.value.height - (scroll.value.top + size.height.value) < 1) {
         lines.push({ start: { left, top: top + height }, length: width, direction: Direction.HORIZONTAL, zIndex: 3 })
       }
       return lines

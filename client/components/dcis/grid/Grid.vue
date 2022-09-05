@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, PropType, toRef, provide } from '#app'
+import { defineComponent, Ref, PropType, toRef, provide, ref } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { GridMode, UpdateSheetType } from '~/types/grid'
 import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
@@ -100,6 +100,9 @@ export default defineComponent({
     provide('updateActiveSheet', updateActiveSheet)
     provide('activeDocument', activeDocument)
 
+    const gridContainer = ref<HTMLDivElement | null>(null)
+    const grid = ref<HTMLTableElement | null>(null)
+
     const canChangeRowHeight = (rowDimension: RowDimensionType) => {
       if (props.mode === GridMode.CHANGE) {
         return true
@@ -123,8 +126,11 @@ export default defineComponent({
       : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const {
-      gridContainer,
-      grid,
+      rowNameColumnWidth,
+      columnNameRowHeight,
+      gridWidth,
+      activeCell,
+      setActiveCell,
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
@@ -140,11 +146,6 @@ export default defineComponent({
       isRowFixedBorder,
       isCellFixedBorderRight,
       isCellFixedBorderBottom,
-      gridWidth,
-      rowNameColumnWidth,
-      columnNameRowHeight,
-      activeCell,
-      setActiveCell,
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
@@ -167,12 +168,25 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(props.mode, activeSheet, canChangeRowHeight, changeColumnWidth, changeRowHeight)
+    } = useGrid(
+      props.mode,
+      activeSheet,
+      gridContainer,
+      grid,
+      canChangeRowHeight,
+      changeColumnWidth,
+      changeRowHeight
+    )
 
     return {
       t,
       gridContainer,
       grid,
+      rowNameColumnWidth,
+      columnNameRowHeight,
+      gridWidth,
+      activeCell,
+      setActiveCell,
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
@@ -188,11 +202,6 @@ export default defineComponent({
       isRowFixedBorder,
       isCellFixedBorderRight,
       isCellFixedBorderBottom,
-      gridWidth,
-      rowNameColumnWidth,
-      columnNameRowHeight,
-      activeCell,
-      setActiveCell,
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
