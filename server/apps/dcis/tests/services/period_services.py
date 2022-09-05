@@ -12,11 +12,16 @@ from six import BytesIO
 
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
-from apps.dcis.permissions import can_add_period, can_change_period_divisions, can_change_period_groups
+from apps.dcis.permissions import (
+    can_add_period,
+    can_change_period_divisions,
+    can_change_period_groups,
+    can_change_period_users,
+)
 from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
-    change_period_group_privileges, copy_period_groups,
+    change_period_group_privileges, change_user_period_groups, copy_period_groups,
     create_period,
     delete_divisions_period,
     get_user_divisions_periods,
@@ -158,11 +163,14 @@ class PeriodTestCase(TestCase):
             project=self.user_project,
             name='Departament period'
         )
-        self.departament_period_group = PeriodGroup.objects.create(
+        self.departament_period_groups = [PeriodGroup.objects.create(
             period=self.departament_period,
-            name='Group departament'
-        )
-        self.departament_period_group.privileges.set(self.period_group_privileges)
+            name=f'Group departament {number + 1}'
+        ) for number in range(3)]
+        self.departament_period_group_ids: list[str | int] = []
+        for period_group in self.departament_period_groups:
+            self.departament_period_group_ids.append(period_group.id)
+        self.departament_period_groups[0].privileges.set(self.period_group_privileges)
         self.department_divisions = [
             Division.objects.create(period=self.departament_period, object_id=departament.id)
             for departament in self.departaments
@@ -229,7 +237,8 @@ class PeriodTestCase(TestCase):
         """Тестирование permissions.
 
         `can_change_period_divisions`,
-        `can_change_period_groups`
+        `can_change_period_groups`,
+        `can_change_period_users`
         """
         with patch.object(period.project, 'user_id', new=None), patch.object(
             period,
@@ -284,12 +293,19 @@ class PeriodTestCase(TestCase):
         self.assertEqual(
             first=change_period_group_privileges(
                 user=self.super_user,
-                period_group_id=self.departament_period_group.id,
+                period_group_id=self.departament_period_groups[0].id,
                 privileges_ids=self.period_group_privileges_ids[: -1]
             ),
-            second=list(self.departament_period_group.privileges.filter(periodgroup=self.departament_period_group)),
+            second=list(
+                self.departament_period_groups[0].privileges.filter(periodgroup=self.departament_period_groups[0])
+            ),
             msg='Change period group privileges'
         )
+
+    def test_change_user_period_groups(self) -> None:
+        """Тестирование функции `change_user_period_groups`."""
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_users)
+        change_user_period_groups(user=self.super_user, period_group_ids=self.departament_period_group_ids)
 
     def tearDown(self) -> None:
         """Очистка данных тестирования."""
