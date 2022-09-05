@@ -55,25 +55,6 @@ export function useGrid (
     activeCell.value = cell
   }
 
-  const {
-    selectionState,
-    allCellsSelected,
-    selectedColumnsPositions,
-    selectedRowsPositions,
-    selectedCellsOptions,
-    selectedColumnDimensionsOptions,
-    selectedRowDimensionsOptions,
-    clearSelection,
-    selectAllCells,
-    mousedownCell,
-    mouseenterCell,
-    mouseupCell,
-    mouseenterColumnName,
-    mouseDownColumnName: mouseDownColumnNameSelection,
-    mouseenterRowName,
-    mousedownRowName: mouseDownRowNameSelection
-  } = useGridSelection(sheet, grid, setActiveCell)
-
   const scroll = ref<ScrollInfoType>({
     left: 0,
     top: 0,
@@ -87,6 +68,26 @@ export function useGrid (
     scroll.value.width = gridContainer.value.scrollWidth
   }
   useEventListener(gridContainer, 'scroll', updateScroll)
+
+  const {
+    selectionState,
+    allCellsSelected,
+    selectedColumnsPositions,
+    selectedRowsPositions,
+    selectionLines,
+    selectedCellsOptions,
+    selectedColumnDimensionsOptions,
+    selectedRowDimensionsOptions,
+    clearSelection,
+    selectAllCells,
+    mousedownCell,
+    mouseenterCell,
+    mouseupCell,
+    mouseenterColumnName,
+    mouseDownColumnName: mouseDownColumnNameSelection,
+    mouseenterRowName,
+    mousedownRowName: mouseDownRowNameSelection
+  } = useGridSelection(sheet, scroll, grid, setActiveCell)
 
   const {
     resizing: resizingColumn,
@@ -302,6 +303,7 @@ export function useGrid (
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
+    selectionLines,
     selectedCellsOptions,
     selectedColumnDimensionsOptions,
     selectedRowDimensionsOptions,

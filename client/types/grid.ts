@@ -108,6 +108,23 @@ export type SelectionType<T> = {
   last: T,
 }
 
+export type SelectionLinePositionType = {
+  left: number,
+  top: number
+}
+
+export enum Direction {
+  VERTICAL,
+  HORIZONTAL
+}
+
+export type SelectionLineType = {
+  start: SelectionLinePositionType
+  length: number
+  direction: Direction
+  zIndex: number
+}
+
 export type ScrollInfoType = {
   left: number
   top: number

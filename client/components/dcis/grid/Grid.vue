@@ -43,6 +43,7 @@
         :mouseenter-cell="mouseenterCell"
         :mouseup-cell="mouseupCell"
       )
+    selection-line(v-for="(line, i) in selectionLines" :key="i" :line="line")
   grid-element-resizing(
     :message="String(t('dcis.grid.columnWidth'))"
     :element-resizing="resizingColumnWidth"
@@ -70,12 +71,14 @@ import { useAuthStore } from '~/stores'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
+import SelectionLine from '~/components/dcis/grid/SelectionLine.vue'
 
 export default defineComponent({
   components: {
     GridHeader,
     GridBody,
-    GridElementResizing
+    GridElementResizing,
+    SelectionLine
   },
   props: {
     mode: { type: Number, required: true },
@@ -145,6 +148,7 @@ export default defineComponent({
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
+      selectionLines,
       selectedCellsOptions,
       selectedColumnDimensionsOptions,
       selectedRowDimensionsOptions,
@@ -192,6 +196,7 @@ export default defineComponent({
       allCellsSelected,
       selectedColumnsPositions,
       selectedRowsPositions,
+      selectionLines,
       selectedCellsOptions,
       selectedColumnDimensionsOptions,
       selectedRowDimensionsOptions,
@@ -226,8 +231,8 @@ export default defineComponent({
   cursor: row-resize !important
 
 $border: 1px solid silver
-$fixed-border: 1.5px solid gray
-$border-selected: 1px solid blue
+$border-fixed: 1.5px solid gray
+$background-selected: blue
 $name-light: map-get($grey, 'lighten-3')
 $name-dark: map-get($grey, 'lighten-2')
 $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
@@ -323,10 +328,10 @@ div.grid__body
             z-index: 1
 
         th.grid__header_fixed-border-right
-          border-right: $fixed-border
+          border-right: $border-fixed
 
         th.grid__header_fixed-border-bottom
-          border-bottom: $fixed-border
+          border-bottom: $border-fixed
 
       tbody
         td.grid__cell_row-name
@@ -385,8 +390,13 @@ div.grid__body
           z-index: 1
 
         td.grid__cell_fixed-border-right
-          border-right: $fixed-border
+          border-right: $border-fixed
 
         td.grid__cell_fixed-border-bottom
-          border-bottom: $fixed-border
+          border-bottom: $border-fixed
+
+    div.grid__selection-line
+      position: absolute
+      pointer-events: none
+      background: $background-selected
 </style>

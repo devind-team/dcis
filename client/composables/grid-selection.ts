@@ -1,28 +1,32 @@
 import { useEventListener } from '@vueuse/core'
 import { Ref } from '#app'
-import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import {
-  RangeIndicesType,
-  SelectionType,
   CellsOptionsType,
   ColumnDimensionsOptionsType,
-  RowDimensionsOptionsType
+  Direction,
+  RangeIndicesType,
+  RowDimensionsOptionsType,
+  ScrollInfoType,
+  SelectionLineType,
+  SelectionType
 } from '~/types/grid'
 import {
-  parsePosition,
-  positionsToRangeIndices,
-  rangeIndicesToPositions,
   filterCells,
   findCell,
-  getRelatedGlobalPositions,
   getCellOptions,
+  getColumnDimensionsOptions,
+  getRelatedGlobalPositions,
   getRowDimensionsOptions,
-  getColumnDimensionsOptions
+  parsePosition,
+  positionsToRangeIndices,
+  rangeIndicesToPositions
 } from '~/services/grid'
 
 export function useGridSelection (
   sheet: Ref<SheetType>,
-  _grid: Ref<HTMLTableElement | null>,
+  scroll: Ref<ScrollInfoType>,
+  grid: Ref<HTMLTableElement | null>,
   setActiveCell: (cell: CellType | null) => void
 ) {
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
@@ -120,6 +124,36 @@ export function useGridSelection (
       return Array.from({
         length: selectedRangeIndices.value.maxRow - selectedRangeIndices.value.minRow + 1
       }).map((_, i) => i + selectedRangeIndices.value.minRow)
+    }
+    return []
+  })
+
+  const theadRow = ref<HTMLTableRowElement | null>(null)
+  onMounted(() => {
+    theadRow.value = grid.value.querySelector('thead tr') as HTMLTableRowElement
+  })
+
+  const selectionLines = computed<SelectionLineType[]>(() => {
+    if (columnsSelection.value) {
+      const indices = [columnsSelection.value.first.index, columnsSelection.value.last.index]
+      const firstColumnIndex = Math.min(...indices)
+      const firstColumn = theadRow.value.cells.item(firstColumnIndex) as HTMLTableCellElement
+      const lastColumn = theadRow.value.cells.item(Math.max(...indices)) as HTMLTableCellElement
+      const left = firstColumn.offsetLeft - 1
+      const top = scroll.value.top + firstColumn.offsetHeight - 1
+      const width = lastColumn.offsetLeft + lastColumn.offsetWidth - firstColumn.offsetLeft
+      const height = grid.value.offsetHeight - theadRow.value.offsetHeight - scroll.value.top
+      const lines = [
+        { start: { left, top }, length: height, direction: Direction.VERTICAL, zIndex: 3 },
+        { start: { left: left + width, top }, length: height, direction: Direction.VERTICAL, zIndex: 3 }
+      ]
+      if (scroll.value.top === 0) {
+        lines.push({ start: { left, top }, length: width, direction: Direction.HORIZONTAL, zIndex: 3 })
+      }
+      if (scroll.value.top === scroll.value.height) {
+        lines.push({ start: { left, top: top + height }, length: width, direction: Direction.HORIZONTAL, zIndex: 3 })
+      }
+      return lines
     }
     return []
   })
@@ -258,6 +292,7 @@ export function useGridSelection (
     allCellsSelected,
     selectedColumnsPositions,
     selectedRowsPositions,
+    selectionLines,
     selectedCellsOptions,
     selectedColumnDimensionsOptions,
     selectedRowDimensionsOptions,
