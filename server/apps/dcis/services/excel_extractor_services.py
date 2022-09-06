@@ -5,7 +5,7 @@ from typing import Iterator
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, Color, WHITE
-from openpyxl.utils.cell import column_index_from_string, get_column_letter
+from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
 from openpyxl.worksheet.dimensions import (
     ColumnDimension as OpenpyxlColumnDimension,
     DimensionHolder,
@@ -38,7 +38,6 @@ class BuildStyle:
 class BuildColumnDimension:
     """Построение колонки."""
     width: int
-    fixed: bool
     hidden: bool
     style: BuildStyle
 
@@ -77,7 +76,9 @@ class BuildMergedCell:
 class BuildSheet:
     name: str
     columns_dimension: dict[int, BuildColumnDimension]
+    fixed_column: int | None
     rows_dimension: dict[int, BuildRowDimension]
+    fixed_row: int | None
     cells: list[BuildCell]
     merged_cells: list[BuildMergedCell]
 
@@ -121,7 +122,10 @@ class ExcelExtractor:
                 rows_styles[row_id] = {}
 
                 if column_id not in columns_mapper:
-                    column_parameters = {'index': column_id}
+                    column_parameters = {
+                        'index': column_id,
+                        'fixed': extract_sheet.fixed_column is not None and column_id < extract_sheet.fixed_column
+                    }
                     if column_id in extract_sheet.columns_dimension:
                         cd: dict = asdict(extract_sheet.columns_dimension[column_id])
                         columns_styles[column_id] = cd.pop('style')
@@ -130,7 +134,10 @@ class ExcelExtractor:
                     columns_mapper[column_id] = column.id
 
                 if row_id not in rows_mapper:
-                    row_parameters = {'index': row_id}
+                    row_parameters = {
+                        'index': row_id,
+                        'fixed': extract_sheet.fixed_row is not None and row_id < extract_sheet.fixed_row
+                    }
                     if row_id in extract_sheet.rows_dimension:
                         rd = asdict(extract_sheet.rows_dimension[row_id])
                         rows_styles[row_id] = rd.pop('style')
@@ -164,12 +171,17 @@ class ExcelExtractor:
             rows_dimension: dict[int, BuildRowDimension] = self._parse_rows_dimension(sheet.row_dimensions)
             cells: list[BuildCell] = self._parse_cells(self.work_book, sheet.rows)
             merged_cells: list[BuildMergedCell] = self._parse_merged_cells(sheet.merged_cells.ranges)
+            [fixed_column_name, fixed_row_index] = coordinate_from_string(
+                sheet.freeze_panes
+            ) if sheet.freeze_panes is not None else (None, None)
             sheets.append(BuildSheet(
-                name,
-                columns_dimension,
-                rows_dimension,
-                cells,
-                merged_cells
+                name=name,
+                columns_dimension=columns_dimension,
+                fixed_column=column_index_from_string(fixed_column_name) if fixed_column_name else None,
+                rows_dimension=rows_dimension,
+                fixed_row=fixed_row_index,
+                cells=cells,
+                merged_cells=merged_cells
             ))
         return self.evaluate_cells(sheets)
 
@@ -178,7 +190,6 @@ class ExcelExtractor:
         return {
             column_index_from_string(col_letter): BuildColumnDimension(
                 column.width * 7,
-                False,
                 column.hidden,
                 self.__border_style(column)
             ) for col_letter, column in holder.items()
