@@ -2,37 +2,36 @@
 v-row
   v-col.my-2.d-flex.align-center
     v-btn-toggle.mr-1(v-model="formatting" multiple)
-      v-btn(:disabled="disabled || readonly" value="strong" height="40")
+      v-btn(:disabled="disabled" value="strong" height="40")
         v-icon mdi-format-bold
-      v-btn(:disabled="disabled || readonly" value="italic" height="40")
+      v-btn(:disabled="disabled" value="italic" height="40")
         v-icon mdi-format-italic
-      v-btn(:disabled="disabled || readonly" value="underline" height="40")
+      v-btn(:disabled="disabled" value="underline" height="40")
         v-icon mdi-format-underline
-      v-btn(:disabled="disabled || readonly" value="strike" height="40")
+      v-btn(:disabled="disabled" value="strike" height="40")
         v-icon mdi-format-strikethrough
     v-btn-toggle.mx-1(v-model="horizontalAlign")
-      v-btn(:disabled="disabled || readonly" value="left" height="40")
+      v-btn(:disabled="disabled" value="left" height="40")
         v-icon mdi-format-align-left
-      v-btn(:disabled="disabled || readonly" value="center" height="40")
+      v-btn(:disabled="disabled" value="center" height="40")
         v-icon mdi-format-align-center
-      v-btn(:disabled="disabled || readonly" value="right" height="40")
+      v-btn(:disabled="disabled" value="right" height="40")
         v-icon mdi-format-align-right
     v-btn-toggle.mx-1(v-model="verticalAlign")
-      v-btn(:disabled="disabled || readonly" value="top" height="40")
+      v-btn(:disabled="disabled" value="top" height="40")
         v-icon mdi-format-align-top
-      v-btn(:disabled="disabled || readonly" value="middle" height="40")
+      v-btn(:disabled="disabled" value="middle" height="40")
         v-icon mdi-format-align-middle
-      v-btn(:disabled="disabled || readonly" value="bottom" height="40")
+      v-btn(:disabled="disabled" value="bottom" height="40")
         v-icon mdi-format-align-bottom
     v-btn-toggle.mx-1(v-model="properties" multiple)
-      v-btn(:disabled="disabled || readonly" value="readonly" height="40")
+      v-btn(:disabled="disabled" value="readonly" height="40")
         v-icon mdi-pencil-off
     v-combobox.mx-1.shrink(
       v-model="size"
       :label="t('dcis.grid.sheetToolbar.fontSize')"
       :items="sizes"
       :disabled="disabled"
-      :readonly="readonly"
       style="width: 170px"
       filled
       outlined
@@ -44,7 +43,6 @@ v-row
       :label="t('dcis.grid.sheetToolbar.kind')"
       :items="kinds"
       :disabled="disabled"
-      :readonly="readonly"
       style="width: 170px"
       filled
       outlined
@@ -52,7 +50,7 @@ v-row
       dense
     )
     v-btn-toggle.ml-1(v-model="dimensionsProperties" multiple)
-      v-btn(:disabled="fixedDisabled || readonly" value="fixed" height="40")
+      v-btn(:disabled="fixedDisabled" value="fixed" height="40")
         v-icon mdi-table-lock
 </template>
 
@@ -66,11 +64,10 @@ import {
   UpdateType
 } from '~/composables'
 import { DocumentsSheetQuery } from '~/types/graphql'
-import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType, GridMode } from '~/types/grid'
+import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
 
 export default defineComponent({
   props: {
-    mode: { type: Number, required: true },
     updateActiveSheet: { type: Function as PropType<UpdateType<DocumentsSheetQuery>>, required: true },
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null },
     selectedColumnDimensionsOptions: { type: Object as PropType<ColumnDimensionsOptionsType>, default: null },
@@ -93,7 +90,6 @@ export default defineComponent({
     const fixedDisabled = computed<boolean>(
       () => dimensionsDisabled.value || !selectedDimensionsOptions.value.rectangular
     )
-    const readonly = computed<boolean>(() => props.mode === GridMode.WRITE)
 
     const formatting = computed<string[]>({
       get: () => !disabled.value
@@ -114,7 +110,7 @@ export default defineComponent({
               break
             }
           }
-          let val: string | null = null
+          let val: string | null
           if (field === 'underline') {
             val = props.selectedCellsOptions.underline ? null : 'single'
           } else {
@@ -231,7 +227,6 @@ export default defineComponent({
       t,
       disabled,
       fixedDisabled,
-      readonly,
       formatting,
       horizontalAlign,
       verticalAlign,
