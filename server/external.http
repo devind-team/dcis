@@ -1,5 +1,9 @@
 # Интеграционные запросы для Портала https://cbias.ru
 
+
+#######################
+## Выгрузка проектов ##
+#######################
 # curl -X 'GET'
 #  'http://localhost:8000/external/v1/projects'
 #  -H 'accept: application/json'
@@ -7,3 +11,15 @@
 
 GET http://localhost:8000/external/v1/projects
 Authorization: 78MOl7ynTbcAPPZZDg5R
+
+
+#######################
+## Выгрузка периодов ##
+#######################
+# curl -X 'GET'
+#  'http://localhost:8000/external/v1/periods'
+#  -H 'accept: application/json'
+#  -H 'X-CSRFToken: B5cjpZx2ahVgAvcVge7rNgtyRgpay93CSyWDvZtH98LggkEE5VmmKy7hIDnrN8Zf'
+GET http://localhost:8000/external/v1/periods?project_id=10
+Authorization: 78MOl7ynTbcAPPZZDg5R
+
