@@ -89,7 +89,7 @@ export default defineComponent({
           search: debounceSearch.value
         }
         if (debounceSearch.value) {
-          result.first = undefined
+          result.first = 100
         }
         return result
       }
@@ -101,7 +101,7 @@ export default defineComponent({
       { text: t('dcis.periods.divisions.addDivisions.name') as string, value: 'name' }
     ]
 
-    const addDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => {
+    const addDivisionsUpdate = (cache: DataProxy, result: AddDivisionsMutationResult) => {
       if (result.data.addDivisions.success) {
         props.update(cache, result)
       }
