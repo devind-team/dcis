@@ -1,11 +1,11 @@
 <template lang="pug">
 div
-  v-tabs(ref="tabs" v-model="activeSheetIndex")
+  v-tabs(ref="tabs" :class="{ 'mb-2': mode === GridMode.WRITE }" v-model="activeSheetIndex")
     slot(name="settings")
     slot(name="tabs" :sheets="sheets" :update-size="updateSize")
       v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(
-    :mode="mode"
+    v-if="mode === GridMode.CHANGE"
     :update-active-sheet="updateActiveSheet"
     :selected-cells-options="selectedCellsOptions"
     :selected-column-dimensions-options="selectedColumnDimensionsOptions"
@@ -28,7 +28,13 @@ div
 import { VTabs } from 'vuetify/lib/components/VTabs'
 import { computed, defineComponent, PropType, ref } from '#app'
 import { BaseSheetType, DocumentType, SheetType } from '~/types/graphql'
-import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType, UpdateSheetType } from '~/types/grid'
+import {
+  CellsOptionsType,
+  ColumnDimensionsOptionsType,
+  GridMode,
+  RowDimensionsOptionsType,
+  UpdateSheetType
+} from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
 
@@ -70,6 +76,7 @@ export default defineComponent({
     }
 
     return {
+      GridMode,
       tabs,
       grid,
       activeSheetIndex,
