@@ -17,10 +17,6 @@ export default <Middleware> async function ({ app: { $apolloHelpers, apolloProvi
       query: meQuery,
       fetchPolicy: 'network-only'
     }).then(({ data }) => data.me as UserType)
-    if (user) {
-      authStore.user = user as UserType
-    } else {
-      authStore.user = null
-    }
+    authStore.user = user ? user as UserType : null
   }
 }

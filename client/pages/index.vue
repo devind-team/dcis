@@ -16,9 +16,10 @@ import PageSegment from '~/components/pages/PageSegment.vue'
 export default defineComponent({
   components: { PageSegment },
   setup () {
-    const authStore = useAuthStore()
     const { t, localePath } = useI18n()
     const router = useRouter()
+    const authStore = useAuthStore()
+
     useNuxt2Meta({ title: t('homePage') as string })
 
     const { loginIn } = toRefs(authStore)

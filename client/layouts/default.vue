@@ -25,7 +25,6 @@ export default defineComponent({
   setup () {
     const authStore = useAuthStore()
     const { vuetify, isDark } = useVuetify()
-
     const { user, loginIn } = toRefs<{ user: UserType, loginIn: boolean }>(authStore)
 
     const drawer = ref<boolean>(false)
