@@ -112,10 +112,13 @@ export default defineComponent({
 
     const getRowClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
-        grid__row_fixed: props.getRowFixedInfo(row).fixed
+        grid__row_fixed: mode === GridMode.WRITE && props.getRowFixedInfo(row).fixed
       }
     }
     const getRowStyle = (row: RowDimensionType): Record<string, string> => {
+      if (mode === GridMode.CHANGE) {
+        return {}
+      }
       const fixedInfo = props.getRowFixedInfo(row)
       if (fixedInfo.fixed) {
         return { top: `${fixedInfo.position}px` }
@@ -128,8 +131,8 @@ export default defineComponent({
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': !props.resizingRow,
-        'grid__cell_fixed-border-right': props.borderFixedColumn === null,
-        'grid__cell_fixed-border-bottom': props.isRowFixedBorder(row)
+        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
+        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)
       }
     }
 
@@ -196,17 +199,19 @@ export default defineComponent({
 
     const getCellClass = (cell: CellType): Record<string, boolean> => {
       return {
-        grid__cell_fixed: props.getCellFixedInfo(cell).fixed,
-        'grid__cell_fixed-border-right': props.isCellFixedBorderRight(cell),
-        'grid__cell_fixed-border-bottom': props.isCellFixedBorderBottom(cell)
+        grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
+        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
+        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
       }
     }
     const getCellStyle = (cell: CellType): Record<string, string> => {
       const textDecoration: string[] = []
       const style: Record<string, string> = {}
-      const fixedInfo = props.getCellFixedInfo(cell)
-      if (fixedInfo.fixed) {
-        style.left = `${fixedInfo.position}px`
+      if (mode === GridMode.WRITE) {
+        const fixedInfo = props.getCellFixedInfo(cell)
+        if (fixedInfo.fixed) {
+          style.left = `${fixedInfo.position}px`
+        }
       }
       if (cell.strong) { style['font-weight'] = 'bold' }
       if (cell.italic) { style['font-style'] = 'italic' }

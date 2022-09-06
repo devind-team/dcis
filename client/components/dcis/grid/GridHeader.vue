@@ -31,8 +31,8 @@ thead
 
 <script lang="ts">
 import { nextTick, PropType, Ref } from '#app'
-import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
-import { SheetType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
+import { FixedInfoType, GridMode, ResizingType } from '~/types/grid'
+import { ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -71,8 +71,8 @@ export default defineComponent({
 
     const firstHeaderClass = computed<Record<string, boolean>>(() => ({
       grid__header_all_selected: props.allCellsSelected,
-      'grid__header_fixed-border-right': props.borderFixedColumn === null,
-      'grid__header_fixed-border-bottom': props.borderFixedRow === null
+      'grid__header_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
+      'grid__header_fixed-border-bottom': mode === GridMode.WRITE && props.borderFixedRow === null
     }))
 
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
@@ -80,9 +80,9 @@ export default defineComponent({
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
         'grid__header_boundary-selected': props.boundarySelectedColumnsPositions.includes(column.index),
         grid__header_hover: !props.resizingColumn,
-        grid__header_fixed: props.getColumnFixedInfo(column).fixed,
-        'grid__header_fixed-border-right': props.isColumnFixedBorder(column),
-        'grid__header_fixed-border-bottom': props.borderFixedRow === null
+        grid__header_fixed: mode === GridMode.WRITE && props.getColumnFixedInfo(column).fixed,
+        'grid__header_fixed-border-right': mode === GridMode.WRITE && props.isColumnFixedBorder(column),
+        'grid__header_fixed-border-bottom': mode === GridMode.WRITE && props.borderFixedRow === null
       }
     }
     const getHeaderStyle = (column: ColumnDimensionType): Record<string, string> => {

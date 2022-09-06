@@ -222,7 +222,7 @@ export function useGridSelection (
     return result
   })
   const boundarySelectedRowsPositions = computed<number[]>(() => {
-    if (scroll.value.top) {
+    if (scroll.value.left) {
       return []
     }
     if (rowsSelection.value) {
