@@ -14,10 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls import url
+from django.urls import include, re_path
 from graphene_file_upload.django import FileUploadGraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from .schema import schema
 
 urlpatterns = [
     url(r'^graphql/$', csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True, schema=schema))),
+    re_path('', include('devind.swagger')),
+    re_path('^external/v1/', include('apps.dcis.urls')),
 ]

@@ -14,4 +14,4 @@ class DatabaseRequestsMiddleware:
         response: HttpResponse = self.get_response(request)
         pprint(len(connection.queries))
         print(connection.queries)
-        return  response
+        return response
