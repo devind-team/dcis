@@ -4,6 +4,7 @@ from django.db.models import Q
 
 from apps.core.models import User
 from apps.dcis.models import Period, Project
+from django.contrib.postgres.search import SearchQuery, SearchVector
 
 
 def get_user_divisions(user: User, project: Project | int | str | None = None) -> list[dict[str, int | str]]:
@@ -53,9 +54,15 @@ def get_period_possible_divisions(
     search: str = ''
 ) -> list[dict[str, int | str]]:
     """Получение списка возможных обобщенных дивизионов периода."""
-    return get_divisions(period.project.division.objects.filter(
-        name__contains=search
-    ).exclude(pk__in=period.division_set.values_list('object_id', flat=True)))
+    if search == '':
+        divisions = period.project.division.objects.all()
+    else:
+        divisions = period.project.division.objects.annotate(
+            search=SearchVector('name', config='russian'),
+        ).filter(
+            search=SearchQuery(search, config='russian')
+        )
+    return get_divisions(divisions.exclude(pk__in=period.division_set.values_list('object_id', flat=True)))
 
 
 def get_divisions(instances) -> list[dict[str, int | str]]:
