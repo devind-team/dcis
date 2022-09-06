@@ -1,12 +1,19 @@
 """Модуль, отвечающий за работу с периодами."""
 
 from datetime import date
+from io import BytesIO
+from typing import Type
 
 from devind_helpers.orm_utils import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
+from devind_helpers.import_from_file import ExcelReader
+from devind_helpers.utils import convert_str_to_int
+from devind_helpers.schema.types import ErrorFieldType
+
+from devind_dictionaries.models import Organization
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
@@ -18,6 +25,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period
 )
+from apps.dcis.schema.types import DivisionModelType
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
@@ -125,6 +133,81 @@ def add_divisions_period(user: User, period_id: str | int, division_ids: list[st
     ])
     divisions = period.project.division.objects.filter(pk__in=[link.object_id for link in division_links])
     return get_divisions(divisions)
+
+
+def add_divisions_from_file(
+    user: User,
+    period_id: str | int,
+    file: InMemoryUploadedFile,
+    field: str = 'orgs_id'
+) -> tuple[list[dict[str, int | str]], list[int], list[ErrorFieldType] | None]:
+    """Добавление дивизионов из файла формата csv/xlsx."""
+    period = get_object_or_404(Period, pk=period_id)
+    can_change_period_divisions(user, period)
+    reader: ExcelReader = ExcelReader(BytesIO(file.read())) # noqa
+    divisions_id: dict[int, int] = {}
+    for item in reader.items:
+        division_id: int | None = convert_str_to_int(item.get(field))
+        if division_id:
+            divisions_id[division_id] = 0
+    if not divisions_id:
+        return [], [], [
+            ErrorFieldType('file', [f'Не найдено ни одной организации или отсутствует поле {field} в заголовке'])
+        ],
+    project: Project = period.project
+    # 1. Подбираем найденные дивизионы
+    divisions: dict[int, Type[project.division]] = project.division.objects \
+        .filter(pk__in=divisions_id.keys()).in_bulk()
+    # 2. Определяем переданные, но не найденные в базе данных
+    for division_id in divisions:
+        divisions_id[division_id] = 1
+    missing_divisions = [division_id for division_id, freq in divisions_id.items() if freq == 0]
+    # 3. Подбираем существующие дивизионы
+    divisions_exist = period.division_set.values_list('object_id', flat=True)
+    for division_exist in divisions_exist:
+        divisions_id[division_exist] = 2
+    # 4. Сохраняем в БД необходимые дивизионы
+    income_divisions: dict[int, Type[project.division]] = {
+        division_id: divisions[division_id]
+        for division_id, freq in divisions_id.items() if freq == 1
+    }
+    with transaction.atomic():
+        for income_division in income_divisions:
+            period.division_set.create(object_id=income_division)
+    return get_divisions(income_divisions.values()), missing_divisions, None,
+
+
+def add_divisions_from_period(
+    user: User,
+    period_id: str | int,
+    period_from_id: str | int
+) -> tuple[list[dict[str, int | str]], list[ErrorFieldType] | None]:
+    """Добавляем в период дивизионы из других периодов."""
+    periods: dict[int, Period] = Period.objects \
+        .filter(pk__in=[period_id, period_from_id]) \
+        .select_related('project').in_bulk()
+    if len(periods) != 2:
+        return [], [ErrorFieldType('period_from_id', [f'Период не найден: {period_from_id}'])]
+    period: Period = periods[period_id]
+    period_from: Period = periods[period_from_id]
+    can_change_period_divisions(user, period)
+    can_change_period_divisions(user, period_from)
+    if period.project.division != period_from.project.division:
+        return [], [ErrorFieldType('period_from_id', ['Проекты имеют разные дивизионы'])]
+    period_divisions_from: dict[int, int] = {
+        division_id: 0 for division_id in period_from.division_set.values_list('object_id', flat=True)
+    }
+    period_divisions: list[int] = period.division_set.values_list('object_id', flat=True)
+    for period_division in period_divisions:
+        period_divisions_from[period_division] = 1
+    Division = period.project.division # noqa
+    divisions: dict[int, Type[Division]] = Division.objects \
+        .filter(pk__in=[division_id for division_id, freq in period_divisions_from.items() if freq == 0]) \
+        .in_bulk()
+    with transaction.atomic():
+        for division_id in divisions:
+            period.division_set.create(object_id=division_id)
+    return get_divisions(divisions.values()), None
 
 
 def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:

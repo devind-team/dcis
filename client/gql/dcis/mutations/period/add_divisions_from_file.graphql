@@ -1,0 +1,17 @@
+#import "../../fragments/division_model_fields.graphql"
+
+mutation AddDivisionsFromFile($periodId: ID!, $file: Upload!) {
+  addDivisionsFromFile(input: {periodId: $periodId, file: $file}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    divisions {
+      ...DivisionModelFields
+    }
+    missingDivisions
+    __typename
+  }
+}

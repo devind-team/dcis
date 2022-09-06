@@ -53,6 +53,7 @@ def update_or_create_value(
     values = recalculate_cells(document, val)
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
+    Document.objects.filter(pk=document.pk).update(updated_at=updated_at)
     return UpdateOrCrateValuesResult(values=values, updated_at=updated_at)
 
 
@@ -127,6 +128,7 @@ def update_or_create_file_value(
     )
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
+    Document.objects.filter(pk=document.pk).update(updated_at=updated_at)
     return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
 
 

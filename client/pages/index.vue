@@ -6,7 +6,8 @@ v-container
 </template>
 
 <script lang="ts">
-import { useNuxt2Meta, defineComponent } from '#app'
+import { useNuxt2Meta, defineComponent, useRouter, toRefs } from '#app'
+import { useAuthStore } from '~/stores'
 import { useCommonQuery, useI18n } from '~/composables'
 import segmentsQuery from '~/gql/pages/queries/segments.graphql'
 import { SegmentsQuery, SegmentsQueryVariables } from '~/types/graphql'
@@ -15,8 +16,15 @@ import PageSegment from '~/components/pages/PageSegment.vue'
 export default defineComponent({
   components: { PageSegment },
   setup () {
-    const { t } = useI18n()
+    const authStore = useAuthStore()
+    const { t, localePath } = useI18n()
+    const router = useRouter()
     useNuxt2Meta({ title: t('homePage') as string })
+
+    const { loginIn } = toRefs(authStore)
+    if (loginIn.value) {
+      router.push(localePath({ name: 'dcis-projects' }))
+    }
 
     const { data: segments, loading } = useCommonQuery<SegmentsQuery, SegmentsQueryVariables>({
       document: segmentsQuery

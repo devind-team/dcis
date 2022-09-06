@@ -97,6 +97,7 @@ class ChangeFileValueMutation(BaseMutation):
         try:
             can_change_value(info.context.user, document, cell)
         except PermissionDenied as e:
+            # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
             return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
         result = update_or_create_file_value(
             user=info.context.user,

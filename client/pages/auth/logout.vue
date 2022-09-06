@@ -7,7 +7,7 @@ v-container
 </template>
 
 <script lang="ts">
-import { defineComponent, useNuxt2Meta, useRouter } from '#app'
+import { defineComponent, toRefs, useNuxt2Meta, useRouter } from '#app'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'
 
@@ -17,13 +17,15 @@ export default defineComponent({
     const router = useRouter()
     const { t, localePath } = useI18n()
     const { onLogout, defaultClient } = useApolloHelpers()
-    const userStore = useAuthStore()
-
+    const authStore = useAuthStore()
+    const { loginIn } = toRefs(authStore)
     useNuxt2Meta({ title: t('auth.logout.logout') as string })
 
-    if (userStore.loginIn) {
-      userStore.logout()
-      onLogout(defaultClient, true)
+    if (loginIn.value) {
+      authStore.logout()
+      setTimeout(() => {
+        onLogout(defaultClient, true)
+      }, 0)
     }
     // Необходимо для нормальной перезагрузки сокетов
     router.push(localePath({ name: 'index' }))

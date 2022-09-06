@@ -6,6 +6,7 @@ mutation-modal-form(
   :mutation="copyPeriodGroupsMutation"
   :variables="variables"
   :update="copyPeriodGroupsUpdate"
+  i18n-path="dcis.periods.groups.copyGroups"
   mutation-name="copyPeriodGroups"
   errors-in-alert
   @close="close"

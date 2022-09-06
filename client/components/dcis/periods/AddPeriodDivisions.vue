@@ -32,7 +32,7 @@ mutation-modal-form(
 import { DataTableHeader } from 'vuetify'
 import { UseQueryOptions, VariablesParameter } from '@vue/apollo-composable/dist/useQuery'
 import { DataProxy } from 'apollo-cache'
-import { defineComponent, PropType, ref } from '#app'
+import { defineComponent, onMounted, PropType, ref, watch } from '#app'
 import {
   DivisionModelType,
   PeriodType,
@@ -45,8 +45,8 @@ import { useDebounceSearch, useI18n } from '~/composables'
 import periodPossibleDivisionsQuery from '~/gql/dcis/queries/period_possible_divisions.graphql'
 import addDivisionsMutation from '~/gql/dcis/mutations/period/add_divisions.graphql'
 
-export type ChangeDivisionsMutationResult = { data: { addDivisions: AddDivisionsMutationPayload } }
-type UpdateFunction = (cache: DataProxy | any, result: AddDivisionsMutationPayload | any) => DataProxy | any
+export type AddDivisionsMutationResult = { data: { addDivisions: AddDivisionsMutationPayload } }
+type UpdateFunction = (cache: DataProxy | any, result: AddDivisionsMutationResult | any) => DataProxy | any
 
 export default defineComponent({
   components: { MutationModalForm },
@@ -56,7 +56,7 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true },
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const { t } = useI18n()
 
     const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
@@ -110,6 +110,7 @@ export default defineComponent({
     const close = () => {
       selectedDivisions.value = []
       search.value = ''
+      emit('close')
     }
 
     return {

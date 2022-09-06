@@ -15,4 +15,6 @@ RUN yarn
 ENV NODE_ENV=production
 RUN yarn build
 
+RUN rm -rf $(ls -A | grep -v .output)
+
 EXPOSE 3000

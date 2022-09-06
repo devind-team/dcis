@@ -129,6 +129,46 @@ type AddChildRowDimensionMutationPayload {
   success: Boolean!
 }
 
+input AddDivisionsFromFileMutationInput {
+  clientMutationId: String
+  """Файл в формате xlsx, csv"""
+  file: Upload
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация для добавления дивизионов из файла."""
+type AddDivisionsFromFileMutationPayload {
+  clientMutationId: String
+  """Новые дивизионы"""
+  divisions: [DivisionModelType]!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Не найденные дивизионы"""
+  missingDivisions: [Int]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddDivisionsFromPeriodMutationInput {
+  clientMutationId: String
+  """Идентификатор периода отдачи"""
+  periodFromId: ID!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация для добавления дивизионов из других периодов."""
+type AddDivisionsFromPeriodMutationPayload {
+  clientMutationId: String
+  """Новые дивизионы"""
+  divisions: [DivisionModelType]!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDivisionsMutationInput {
   clientMutationId: String
   """Идентификаторы дивизионов"""
@@ -2418,6 +2458,10 @@ type Mutation {
   addChildRowDimension(input: AddChildRowDimensionMutationInput!): AddChildRowDimensionMutationPayload!
   """Мутация на добавление дивизионов в период."""
   addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
+  """Мутация для добавления дивизионов из файла."""
+  addDivisionsFromFile(input: AddDivisionsFromFileMutationInput!): AddDivisionsFromFileMutationPayload!
+  """Мутация для добавления дивизионов из других периодов."""
+  addDivisionsFromPeriod(input: AddDivisionsFromPeriodMutationInput!): AddDivisionsFromPeriodMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
   """Добавление статуса документа."""

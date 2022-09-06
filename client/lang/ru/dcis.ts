@@ -2,6 +2,12 @@ export default {
   home: 'Проекты сборов',
   projects: {
     name: '@:dcis.home',
+    filters: {
+      active: 'Активные проекты',
+      archive: 'Проекты в архиве',
+      hidden: 'Скрытые проекты',
+      noFiltrationMessage: 'Фильтры не заданы'
+    },
     tableHeaders: {
       name: '@:name',
       description: 'Описание',
@@ -35,6 +41,8 @@ export default {
   },
   periods: {
     name: 'Периоды',
+    choicePeriod: 'Выбрать период',
+    file: 'Выберете файл',
     tableHeaders: {
       name: '@:name',
       status: 'Статус',
@@ -53,6 +61,9 @@ export default {
       preparation: 'Подготовка',
       open: 'Открыто',
       close: 'Закрыто'
+    },
+    addDivisions: {
+      file: 'Выберете файл'
     },
     addPeriod: {
       buttonText: 'Добавить период',
@@ -168,6 +179,7 @@ export default {
       version: 'Версия',
       comment: 'Комментарий',
       createdAt: 'Дата добавления',
+      updatedAt: 'Дата последнего изменения',
       organization: '@:dcis.documents.addDocument.organization',
       department: '@:dcis.documents.addDocument.department',
       lastStatus: 'Статус'

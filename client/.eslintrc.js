@@ -33,14 +33,18 @@ module.exports = {
     rules: {
       'no-use-before-define': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
-      'vue/multi-word-component-names': 'off'
+      'vue/multi-word-component-names': 'off',
+      'vue/valid-attribute-name': 'off',
+      'vue/valid-model-definition': 'off'
     }
   },
   {
     files: ['**/*.ts'],
     rules: {
       'no-undef': 'off',
-      'import/no-mutable-exports': 'off'
+      'import/no-mutable-exports': 'off',
+      'vue/valid-attribute-name': 'off',
+      'vue/valid-model-definition': 'off'
     }
   },
   {

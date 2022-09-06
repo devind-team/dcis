@@ -3,11 +3,13 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   template(#header) {{ header }}
     template(v-if="period.canChangeDivisions")
       v-spacer
-      add-period-divisions(
-        :header="addHeader"
-        :button-text="addButtonText"
+      add-period-divisions-menu(
+        :add-header="addHeader"
+        :add-button-text="addButtonText"
         :period="period"
-        :update="addDivisionsUpdate"
+        :add-divisions-update="addDivisionsUpdate"
+        :add-divisions-from-file-update="addDivisionFromFileUpdate"
+        :add-divisions-from-period-update="addDivisionFromPeriodUpdate"
       )
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ addButtonText }}
@@ -39,6 +41,14 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
                   v-btn(v-on="{ ...onMenu, ...onTooltip }" color="error" icon)
                     v-icon mdi-delete
                 span {{ $t('dcis.periods.divisions.deleteDivision.tooltip') }}
+  v-bottom-sheet(v-model="activeMissing")
+    v-card(style="position: relative" height="300px" flat)
+      v-btn(icon absolute top right @click="activeMissing = false")
+        v-icon mdi-close
+      v-card-title Идентификаторы организаций, которые не удалось найти
+      v-card-text
+        v-list
+          v-list-item(v-for="md in missingDivisions" :key="md") {{ md }}
 </template>
 
 <script lang="ts">
@@ -58,14 +68,17 @@ import {
 import { BreadCrumbsItem } from '~/types/devind'
 import { UpdateType, useI18n } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import AddPeriodDivisions, { ChangeDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
+import { AddDivisionsMutationResult } from '~/components/dcis/periods/AddPeriodDivisions.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
+import AddPeriodDivisionsMenu from '~/components/dcis/periods/AddPeriodDivisionsMenu.vue'
+import { AddDivisionsFromFileMutationResult } from '~/components/dcis/periods/AddPeriodDivisionsFromFile.vue'
+import { AddDivisionsFromPeriodMutationsResult } from '~/components/dcis/periods/AddPeriodDivisionsFromPeriod.vue'
 
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AddPeriodDivisions, DeleteMenu },
+  components: { AddPeriodDivisionsMenu, LeftNavigatorContainer, DeleteMenu },
   middleware: 'auth',
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
@@ -73,6 +86,9 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+
+    const activeMissing = ref<boolean>(false)
+    const missingDivisions = ref<number[]>([])
 
     const search = ref<string>('')
     const divisionsCount = ref<number>(props.period.divisions.length)
@@ -129,17 +145,46 @@ export default defineComponent({
 
     const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
-    const addDivisionsUpdate = (cache: DataProxy, result: ChangeDivisionsMutationResult) => periodUpdate(
+    const dataCacheResult = (dataCache, success: boolean, divisions: DivisionModelType[]) => {
+      if (success) {
+        dataCache.period.divisions = (
+            [...dataCache.period.divisions, ...divisions] as Required<DivisionModelType>[]
+        ).sort((d1: DivisionModelType, d2: DivisionModelType) => d1.name.localeCompare(d2.name))
+      }
+      return dataCache
+    }
+
+    const addDivisionsUpdate = (cache: DataProxy, result: AddDivisionsMutationResult) => periodUpdate(
       cache,
       result,
-      (dataCache, { data: { addDivisions: { success, divisions } } }: ChangeDivisionsMutationResult) => {
-        if (success) {
-          dataCache.period.divisions = (
-            [...dataCache.period.divisions, ...divisions] as Required<DivisionModelType>[]
-          ).sort((d1: DivisionModelType, d2: DivisionModelType) => d1.name.localeCompare(d2.name))
+      (
+        dataCache,
+        { data: { addDivisions: { success, divisions } } }: AddDivisionsMutationResult
+      ) => dataCacheResult(dataCache, success, divisions)
+    )
+
+    const addDivisionFromFileUpdate = (cache: DataProxy, result: AddDivisionsFromFileMutationResult) => periodUpdate(
+      cache,
+      result,
+      (
+        dataCache,
+        { data: { addDivisionsFromFile: { success, divisions, missingDivisions: md } } }: AddDivisionsFromFileMutationResult
+      ) => {
+        if (md.length) {
+          activeMissing.value = true
+          missingDivisions.value = md
         }
-        return dataCache
-      })
+        return dataCacheResult(dataCache, success, divisions)
+      }
+    )
+
+    const addDivisionFromPeriodUpdate = (cache: DataProxy, result: AddDivisionsFromPeriodMutationsResult) => periodUpdate(
+      cache,
+      result,
+      (
+        dataCache, { data: { addDivisionsFromPeriod: { success, divisions } } }: AddDivisionsFromPeriodMutationsResult
+      ) => dataCacheResult(dataCache, success, divisions)
+    )
 
     const { mutate: deleteDivision } = useMutation<
       DeleteDivisionMutation,
@@ -161,6 +206,8 @@ export default defineComponent({
       })
 
     return {
+      activeMissing,
+      missingDivisions,
       search,
       divisionsCount,
       pagination,
@@ -171,6 +218,8 @@ export default defineComponent({
       deleteItemName,
       tableHeaders,
       addDivisionsUpdate,
+      addDivisionFromFileUpdate,
+      addDivisionFromPeriodUpdate,
       deleteDivision
     }
   }

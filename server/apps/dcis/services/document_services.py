@@ -30,12 +30,14 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         позволяющей просматривать все документы конкретного периода
     """
     period = Period.objects.get(pk=period) if type(period) in (int, str) else period
-    if any((
-        user.has_perm('dcis.view_document'),
-        has_privilege(user.id, period.id, 'view_document'),
-        period.project.user_id == user.id,
-        period.user_id == user.id
-    )):
+    if any(
+        (
+            user.has_perm('dcis.view_document'),
+            has_privilege(user.id, period.id, 'view_document'),
+            period.project.user_id == user.id,
+            period.user_id == user.id
+        )
+    ):
         return Document.objects.filter(period_id=period.id)
     division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
     if period.multiple:
@@ -82,7 +84,7 @@ def create_document(
     can_add_document(user, period, status, division_id)
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     document = Document.objects.create(
-        version=(get_documents_max_version(period.id, division_id) or 0) + 1,
+        version=(_get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
         user=user,
@@ -101,13 +103,13 @@ def create_document(
                 parent__isnull=True
             ).values_list('id', flat=True)
             for parent_row_id in parent_row_ids:
-                rows_transform.update(transfer_rows(user, sheet, source_document, document, parent_row_id))
-            transfer_cells(rows_transform)
-            transfer_values(sheet, document, source_document, rows_transform)
+                rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
+            _transfer_cells(rows_transform)
+            _transfer_values(sheet, document, source_document, rows_transform)
     return document
 
 
-def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+def _get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
     """Получение максимальной версии документа для периода."""
     return Document.objects.filter(
         period_id=period_id,
@@ -115,16 +117,16 @@ def get_documents_max_version(period_id: int | str, division_id: int | str | Non
     ).aggregate(version=Max('version'))['version']
 
 
-def transfer_cells(rows_transform: dict[int, int]) -> None:
+def _transfer_cells(rows_transform: dict[int, int]) -> None:
     """Перенос ячеек дочерних строк."""
     for cell in Cell.objects.filter(row_id__in=rows_transform.keys()):
         cell_id = cell.id
         cell.pk, cell.row_id = None, rows_transform[cell.row_id]
         cell.save()
-        transfer_limitations(cell_id, cell.id)
+        _transfer_limitations(cell_id, cell.id)
 
 
-def transfer_values(
+def _transfer_values(
     sheet: Sheet,
     document: Document,
     source_document: Document,
@@ -136,7 +138,7 @@ def transfer_values(
         value.save()
 
 
-def transfer_rows(
+def _transfer_rows(
     user: User,
     sheet: Sheet,
     source_document: Document,
@@ -169,11 +171,11 @@ def transfer_rows(
             parent_id=parent_ids.get(parent_id, parent_id)
         )
         rows_transform[row.id] = document_row.id
-        rows_transform.update(transfer_rows(user, sheet, source_document, document, row.id, rows_transform))
+        rows_transform.update(_transfer_rows(user, sheet, source_document, document, row.id, rows_transform))
     return rows_transform
 
 
-def transfer_limitations(
+def _transfer_limitations(
     cell_original: int,
     cell: int,
     parent_id_original: int | None = None,
@@ -190,17 +192,17 @@ def transfer_limitations(
         limitation_parent = limitation.pk
         limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
         limitation.save()
-        transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
+        _transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
 
 
-def add_document_status(status: Status, document: Document, comment: str, user: User) -> DocumentStatus:
+def add_document_status(user: User, document: Document, status: Status, comment: str, ) -> DocumentStatus:
     """Добавление статуса документа."""
     can_add_document_status(user, document, status)
     return DocumentStatus.objects.create(
-        status=status,
+        user=user,
         document=document,
+        status=status,
         comment=comment,
-        user=user
     )
 
 
@@ -213,6 +215,6 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
 
 
 def delete_document_status(user: User, status: DocumentStatus) -> None:
-    """Изменение комментария версии документа."""
+    """Удаление статуса документа."""
     can_change_document(user, status.document)
     status.delete()
