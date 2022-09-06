@@ -188,6 +188,7 @@ export function useGrid (
 
   const {
     selectionState,
+    selectedCells,
     cellsSelectionView,
     rowsSelectionView,
     columnsSelectionView,
@@ -234,7 +235,7 @@ export function useGrid (
   const mousedownColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     if (resizingColumn.value) {
       mousedownColumnNameResizing(event)
-    } else {
+    } else if (mode === GridMode.CHANGE) {
       mouseDownColumnNameSelection(column)
     }
   }
@@ -258,7 +259,7 @@ export function useGrid (
   const mousedownRowName = (row: RowDimensionType, event: MouseEvent) => {
     if (resizingRow.value) {
       mousedownRowNameResizing(event)
-    } else {
+    } else if (mode === GridMode.CHANGE) {
       mouseDownRowNameSelection(row)
     }
   }
@@ -309,6 +310,7 @@ export function useGrid (
     isRowFixedBorder,
     isCellFixedBorderRight,
     isCellFixedBorderBottom,
+    selectedCells,
     cellsSelectionView,
     rowsSelectionView,
     columnsSelectionView,

@@ -412,6 +412,7 @@ export function useGridSelection (
 
   return {
     selectionState,
+    selectedCells,
     cellsSelectionView,
     rowsSelectionView,
     columnsSelectionView,

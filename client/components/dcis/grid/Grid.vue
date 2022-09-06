@@ -31,6 +31,7 @@
         :is-row-fixed-border="isRowFixedBorder"
         :is-cell-fixed-border-right="isCellFixedBorderRight"
         :is-cell-fixed-border-bottom="isCellFixedBorderBottom"
+        :selected-cells="selectedCells"
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
@@ -45,22 +46,23 @@
         :mouseenter-cell="mouseenterCell"
         :mouseup-cell="mouseupCell"
       )
-    grid-selection-view(
-      v-if="columnsSelectionView"
-      :key="columnsSelectionView.id"
-      :selection-view="columnsSelectionView"
-    )
-    grid-selection-view(
-      v-if="rowsSelectionView"
-      :key="rowsSelectionView.id"
-      :selection-view="rowsSelectionView"
-    )
-    template(v-if="cellsSelectionView")
+    template(v-if="mode === GridMode.CHANGE")
       grid-selection-view(
-        v-for="view in cellsSelectionView"
-        :selection-view="view"
-        :key="view.id"
+        v-if="columnsSelectionView"
+        :key="columnsSelectionView.id"
+        :selection-view="columnsSelectionView"
       )
+      grid-selection-view(
+        v-if="rowsSelectionView"
+        :key="rowsSelectionView.id"
+        :selection-view="rowsSelectionView"
+      )
+      template(v-if="cellsSelectionView")
+        grid-selection-view(
+          v-for="view in cellsSelectionView"
+          :selection-view="view"
+          :key="view.id"
+        )
   grid-element-resizing(
     :message="String(t('dcis.grid.columnWidth'))"
     :element-resizing="resizingColumnWidth"
@@ -163,6 +165,7 @@ export default defineComponent({
       isRowFixedBorder,
       isCellFixedBorderRight,
       isCellFixedBorderBottom,
+      selectedCells,
       cellsSelectionView,
       rowsSelectionView,
       columnsSelectionView,
@@ -200,6 +203,7 @@ export default defineComponent({
     )
 
     return {
+      GridMode,
       t,
       gridContainer,
       grid,
@@ -223,6 +227,7 @@ export default defineComponent({
       isRowFixedBorder,
       isCellFixedBorderRight,
       isCellFixedBorderBottom,
+      selectedCells,
       cellsSelectionView,
       rowsSelectionView,
       columnsSelectionView,
@@ -403,6 +408,11 @@ div.grid__body
         td:not(.grid__cell_row-name)
           cursor: cell
           position: relative
+
+          &.grid__cell_selected
+
+            & > div
+              background: $name-light
 
           .grid__cell-content
             display: flex

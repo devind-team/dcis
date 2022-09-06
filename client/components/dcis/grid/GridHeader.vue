@@ -79,7 +79,7 @@ export default defineComponent({
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
         'grid__header_boundary-selected': props.boundarySelectedColumnsPositions.includes(column.index),
-        grid__header_hover: !props.resizingColumn,
+        grid__header_hover: mode === GridMode.CHANGE && !props.resizingColumn,
         grid__header_fixed: mode === GridMode.WRITE && props.getColumnFixedInfo(column).fixed,
         'grid__header_fixed-border-right': mode === GridMode.WRITE && props.isColumnFixedBorder(column),
         'grid__header_fixed-border-bottom': mode === GridMode.WRITE && props.borderFixedRow === null

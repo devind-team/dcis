@@ -77,6 +77,7 @@ export default defineComponent({
     isRowFixedBorder: { type: Function as PropType<(row: RowDimensionType) => boolean>, required: true },
     isCellFixedBorderRight: { type: Function as PropType<(cell: CellType) => boolean>, required: true },
     isCellFixedBorderBottom: { type: Function as PropType<(cell: CellType) => boolean>, required: true },
+    selectedCells: { type: Array as PropType<CellType[]>, required: true },
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
@@ -130,7 +131,7 @@ export default defineComponent({
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-hover': !props.resizingRow,
+        'grid__cell_row-name-hover': mode === GridMode.CHANGE && !props.resizingRow,
         'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
         'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)
       }
@@ -199,6 +200,9 @@ export default defineComponent({
 
     const getCellClass = (cell: CellType): Record<string, boolean> => {
       return {
+        grid__cell_selected: mode === GridMode.WRITE && Boolean(
+          props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
+        ),
         grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
         'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
         'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
