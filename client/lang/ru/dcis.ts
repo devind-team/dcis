@@ -41,6 +41,8 @@ export default {
   },
   periods: {
     name: 'Периоды',
+    choicePeriod: 'Выбрать период',
+    file: 'Выберете файл',
     tableHeaders: {
       name: '@:name',
       status: 'Статус',

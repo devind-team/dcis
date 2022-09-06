@@ -177,6 +177,39 @@ def add_divisions_from_file(
     return get_divisions(income_divisions.values()), missing_divisions, None,
 
 
+def add_divisions_from_period(
+    user: User,
+    period_id: str | int,
+    period_from_id: str | int
+) -> tuple[list[dict[str, int | str]], list[ErrorFieldType] | None]:
+    """Добавляем в период дивизионы из других периодов."""
+    periods: dict[int, Period] = Period.objects \
+        .filter(pk__in=[period_id, period_from_id]) \
+        .select_related('project').in_bulk()
+    if len(periods) != 2:
+        return [], [ErrorFieldType('period_from_id', [f'Период не найден: {period_from_id}'])]
+    period: Period = periods[period_id]
+    period_from: Period = periods[period_from_id]
+    can_change_period_divisions(user, period)
+    can_change_period_divisions(user, period_from)
+    if period.project.division != period_from.project.division:
+        return [], [ErrorFieldType('period_from_id', ['Проекты имеют разные дивизионы'])]
+    period_divisions_from: dict[int, int] = {
+        division_id: 0 for division_id in period_from.division_set.values_list('object_id', flat=True)
+    }
+    period_divisions: list[int] = period.division_set.values_list('object_id', flat=True)
+    for period_division in period_divisions:
+        period_divisions_from[period_division] = 1
+    Division = period.project.division # noqa
+    divisions: dict[int, Type[Division]] = Division.objects \
+        .filter(pk__in=[division_id for division_id, freq in period_divisions_from.items() if freq == 0]) \
+        .in_bulk()
+    with transaction.atomic():
+        for division_id in divisions:
+            period.division_set.create(object_id=division_id)
+    return get_divisions(divisions.values()), None
+
+
 def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:
     """Удаление дивизиона из периода."""
     period = get_object_or_404(Period, pk=period_id)

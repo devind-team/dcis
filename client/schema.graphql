@@ -150,6 +150,25 @@ type AddDivisionsFromFileMutationPayload {
   success: Boolean!
 }
 
+input AddDivisionsFromPeriodMutationInput {
+  clientMutationId: String
+  """Идентификатор периода отдачи"""
+  periodFromId: ID!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Мутация для добавления дивизионов из других периодов."""
+type AddDivisionsFromPeriodMutationPayload {
+  clientMutationId: String
+  """Новые дивизионы"""
+  divisions: [DivisionModelType]!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDivisionsMutationInput {
   clientMutationId: String
   """Идентификаторы дивизионов"""
@@ -2399,6 +2418,8 @@ type Mutation {
   addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
   """Мутация для добавления дивизионов из файла."""
   addDivisionsFromFile(input: AddDivisionsFromFileMutationInput!): AddDivisionsFromFileMutationPayload!
+  """Мутация для добавления дивизионов из других периодов."""
+  addDivisionsFromPeriod(input: AddDivisionsFromPeriodMutationInput!): AddDivisionsFromPeriodMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
   """Добавление статуса документа."""

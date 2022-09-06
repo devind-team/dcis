@@ -26,7 +26,6 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
-
 import { defineComponent, PropType, ref } from '#app'
 import { DataProxy } from 'apollo-cache'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'

@@ -19,6 +19,7 @@ from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
     add_divisions_from_file,
+    add_divisions_from_period,
     change_period_group_privileges,
     change_settings_period,
     change_user_period_groups,
@@ -169,6 +170,31 @@ class AddDivisionsFromFileMutation(BaseMutation):
             success=not errors,
             divisions=divisions,
             missing_divisions=missing_divisions,
+            errors=errors
+        )
+
+
+class AddDivisionsFromPeriodMutation(BaseMutation):
+    """Мутация для добавления дивизионов из других периодов."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        period_from_id = graphene.ID(required=True, description='Идентификатор периода отдачи')
+
+    divisions = graphene.List(DivisionModelType, required=True, description='Новые дивизионы')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, period_from_id: str):
+        """Реализация мутации для загрузки дивизионов из других периодов."""
+        divisions, errors = add_divisions_from_period(
+            info.context.user,
+            int(period_id),
+            int(period_from_id)
+        )
+        return AddDivisionsFromPeriodMutation(
+            success=not errors,
+            divisions=divisions,
             errors=errors
         )
 
@@ -342,6 +368,7 @@ class PeriodMutations(graphene.ObjectType):
 
     add_divisions = AddDivisionsMutation.Field(required=True)
     add_divisions_from_file = AddDivisionsFromFileMutation.Field(required=True)
+    add_divisions_from_period = AddDivisionsFromPeriodMutation.Field(required=True)
     delete_division = DeleteDivisionMutation.Field(required=True)
 
     add_period_group = AddPeriodGroupMutation.Field(required=True)

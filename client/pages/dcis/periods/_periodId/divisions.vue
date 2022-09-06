@@ -9,6 +9,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         :period="period"
         :add-divisions-update="addDivisionsUpdate"
         :add-divisions-from-file-update="addDivisionFromFileUpdate"
+        :add-divisions-from-period-update="addDivisionFromPeriodUpdate"
       )
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ addButtonText }}
@@ -72,6 +73,7 @@ import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import deleteDivisionMutation from '~/gql/dcis/mutations/period/delete_division.graphql'
 import AddPeriodDivisionsMenu from '~/components/dcis/periods/AddPeriodDivisionsMenu.vue'
 import { AddDivisionsFromFileMutationResult } from '~/components/dcis/periods/AddPeriodDivisionsFromFile.vue'
+import { AddDivisionsFromPeriodMutationsResult } from '~/components/dcis/periods/AddPeriodDivisionsFromPeriod.vue'
 
 export type DeleteDivisionMutationResult = { data?: { deleteDivision: DeleteDivisionMutationPayload } }
 
@@ -176,6 +178,14 @@ export default defineComponent({
       }
     )
 
+    const addDivisionFromPeriodUpdate = (cache: DataProxy, result: AddDivisionsFromPeriodMutationsResult) => periodUpdate(
+      cache,
+      result,
+      (
+        dataCache, { data: { addDivisionsFromPeriod: { success, divisions } } }: AddDivisionsFromPeriodMutationsResult
+      ) => dataCacheResult(dataCache, success, divisions)
+    )
+
     const { mutate: deleteDivision } = useMutation<
       DeleteDivisionMutation,
       DeleteDivisionMutationVariables
@@ -209,6 +219,7 @@ export default defineComponent({
       tableHeaders,
       addDivisionsUpdate,
       addDivisionFromFileUpdate,
+      addDivisionFromPeriodUpdate,
       deleteDivision
     }
   }
