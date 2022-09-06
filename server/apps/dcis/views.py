@@ -1,9 +1,12 @@
 """Модуль описания внешних запросов."""
 
-
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
+from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from .models import Project, Period
+from .models import Project, Period, Division
 from .serializers import ProjectSerializer, PeriodSerializer
 
 
@@ -22,3 +25,14 @@ class PeriodsView(ListAPIView):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ('project_id',)
 
+
+@api_view(['get'])
+def get_divisions(request: Request, period_id: int) -> Response:
+    period: Period = get_object_or_404(Period, pk=period_id)
+    divisions = period.project.division.objects \
+        .filter(pk__in=period.division_set.values_list('object_id', flat=True)) \
+        .values('id', 'name')
+    return Response({
+        '$type': period.project.content_type.model,
+        'divisions': divisions
+    })
