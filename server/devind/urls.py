@@ -21,5 +21,6 @@ from .schema import schema
 
 urlpatterns = [
     url(r'^graphql/$', csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True, schema=schema))),
-    re_path('', include('devind.swagger'))
+    re_path('', include('devind.swagger')),
+    re_path('^external/v1/', include('apps.dcis.urls')),
 ]

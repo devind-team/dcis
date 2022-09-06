@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'apps.dcis.middleware.ExternalTokenMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'devind_core.middleware.SessionMiddleware',
     'devind_core.middleware.TimeRequestMiddleware',
@@ -253,3 +254,5 @@ SSH_CONNECT = {
     'PASSWORD': os.getenv('SSH_PASSWORD'),
     'DB_NAME': os.getenv('SSH_DB_NAME'),
 }
+
+EXTERNAL_TOKEN: str = os.getenv('EXTERNAL_TOKEN', None)
