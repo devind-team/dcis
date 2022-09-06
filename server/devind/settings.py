@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'rest_framework',
     'graphene_django',
     'oauth2_provider',
     'corsheaders',
@@ -64,7 +65,8 @@ INSTALLED_APPS = [
     'apps.dashboard',
     'apps.dcis',
     'push_notifications',
-    'auditlog'
+    'drf_yasg',
+    'auditlog',
 ]
 
 
