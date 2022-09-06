@@ -25,7 +25,7 @@ v-app-bar(app clipped-left)
       avatar-menu
     template(v-else)
       slot(name="notAuthorized")
-        v-btn(:to="localePath({ name:'auth-login' })" text) {{ $t('auth.login.login') }}
+        v-btn(:to="localePath({ name: 'auth-login' })" text) {{ $t('auth.login.login') }}
 </template>
 
 <script lang="ts">
