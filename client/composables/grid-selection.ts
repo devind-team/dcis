@@ -3,9 +3,12 @@ import { Ref } from '#app'
 import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 import {
   RangeIndicesType,
-  SelectionViewType,
   SelectionType,
-  CellsOptionsType
+  SelectionViewType,
+  ScrollInfoType,
+  CellsOptionsType,
+  ColumnDimensionsOptionsType,
+  RowDimensionsOptionsType
 } from '~/types/grid'
 import {
   parsePosition,
@@ -14,12 +17,14 @@ import {
   filterCells,
   findCell,
   getRelatedGlobalPositions,
-  getCellOptions
+  getCellOptions,
+  getColumnDimensionsOptions,
+  getRowDimensionsOptions
 } from '~/services/grid'
 
 export function useGridSelection (
   sheet: Ref<SheetType>,
-  gridContainer: Ref<HTMLDivElement | null>,
+  scroll: Ref<ScrollInfoType>,
   grid: Ref<HTMLTableElement | null>,
   setActiveCell: (cell: CellType | null) => void
 ) {
@@ -32,9 +37,6 @@ export function useGridSelection (
   const cellsSelectionView = ref<SelectionViewType[] | null>(null)
   const columnsSelectionView = ref<SelectionViewType | null>(null)
   const rowsSelectionView = ref<SelectionViewType | null>(null)
-
-  const boundarySelectedColumnsPositions = ref<number[]>([])
-  const boundarySelectedRowsPositions = ref<number[]>([])
 
   const selectedCells = computed<CellType[]>(() => {
     if (!cellsSelection.value) {
@@ -141,6 +143,18 @@ export function useGridSelection (
     }
     return null
   })
+  const selectedColumnDimensionsOptions = computed<ColumnDimensionsOptionsType | null>(() => {
+    if (columnsSelection.value) {
+      return getColumnDimensionsOptions(selectedColumns.value, selectedColumnsCells.value, sheet.value.rows.length)
+    }
+    return null
+  })
+  const selectedRowDimensionsOptions = computed<RowDimensionsOptionsType | null>(() => {
+    if (rowsSelection.value) {
+      return getRowDimensionsOptions(selectedRows.value, selectedRowsCells.value, sheet.value.columns.length)
+    }
+    return null
+  })
 
   const updateSelectionViews = () => {
     nextTick(() => {
@@ -178,58 +192,60 @@ export function useGridSelection (
     } else {
       cellsSelectionView.value = null
     }
-    updateBoundarySelectedColumnsPositions()
-    updateBoundarySelectedRowsPositions()
   }
-  const updateBoundarySelectedColumnsPositions = () => {
-    if (gridContainer.value.scrollTop) {
-      boundarySelectedColumnsPositions.value = []
-    } else if (
+  const boundarySelectedColumnsPositions = computed<number[]>(() => {
+    if (scroll.value.top) {
+      return []
+    }
+    if (
       rowsSelection.value &&
       [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex].includes(1)
     ) {
-      boundarySelectedColumnsPositions.value = sheet.value.columns.map((column: ColumnDimensionType) => column.index)
-    } else if (columnsSelection.value) {
-      boundarySelectedColumnsPositions.value = selectedColumnsPositions.value
-    } else {
-      boundarySelectedColumnsPositions.value = []
-      let i = 0
-      let offset = 0
-      while (i < sheet.value.columns.length) {
-        const cell = sheet.value.rows[0].cells[i - offset]
-        if (selectedCellsPositions.value.includes(cell.globalPosition)) {
-          boundarySelectedColumnsPositions.value.push(...sheet.value.columns.slice(i, i + cell.colspan)
-            .map((column: ColumnDimensionType) => column.index)
-          )
-        }
-        offset += cell.colspan - 1
-        i += cell.colspan
-      }
+      return sheet.value.columns.map((column: ColumnDimensionType) => column.index)
     }
-  }
-  const updateBoundarySelectedRowsPositions = () => {
-    if (gridContainer.value.scrollLeft) {
-      boundarySelectedRowsPositions.value = []
-    } else if (rowsSelection.value) {
-      boundarySelectedRowsPositions.value = selectedRowsPositions.value
-    } else if (
+    if (columnsSelection.value) {
+      return selectedColumnsPositions.value
+    }
+    const result = []
+    let i = 0
+    let offset = 0
+    while (i < sheet.value.columns.length) {
+      const cell = sheet.value.rows[0].cells[i - offset]
+      if (selectedCellsPositions.value.includes(cell.globalPosition)) {
+        result.push(...sheet.value.columns.slice(i, i + cell.colspan)
+          .map((column: ColumnDimensionType) => column.index)
+        )
+      }
+      offset += cell.colspan - 1
+      i += cell.colspan
+    }
+    return result
+  })
+  const boundarySelectedRowsPositions = computed<number[]>(() => {
+    if (scroll.value.left) {
+      return []
+    }
+    if (rowsSelection.value) {
+      return selectedRowsPositions.value
+    }
+    if (
       columnsSelection.value &&
       [columnsSelection.value.first.index, columnsSelection.value.last.index].includes(1)
     ) {
-      boundarySelectedRowsPositions.value = sheet.value.rows.map((row: RowDimensionType) => row.globalIndex)
-    } else {
-      boundarySelectedRowsPositions.value = []
-      let i = 0
-      while (i < sheet.value.rows.length) {
-        const cell = sheet.value.rows[i].cells[0]
-        if (selectedCellsPositions.value.includes(cell.globalPosition)) {
-          boundarySelectedRowsPositions.value.push(...sheet.value.rows.slice(i, i + cell.rowspan)
-            .map((row: RowDimensionType) => row.globalIndex))
-        }
-        i += cell.rowspan
-      }
+      return sheet.value.rows.map((row: RowDimensionType) => row.globalIndex)
     }
-  }
+    const result: number[] = []
+    let i = 0
+    while (i < sheet.value.rows.length) {
+      const cell = sheet.value.rows[i].cells[0]
+      if (selectedCellsPositions.value.includes(cell.globalPosition)) {
+        result.push(...sheet.value.rows.slice(i, i + cell.rowspan)
+          .map((row: RowDimensionType) => row.globalIndex))
+      }
+      i += cell.rowspan
+    }
+    return result
+  })
   const updateColumnsSelectionView = () => {
     if (columnsSelection.value) {
       const theadRow = grid.value.querySelector('thead tr') as HTMLTableRowElement
@@ -342,10 +358,6 @@ export function useGridSelection (
     }
   }, { deep: true })
 
-  const gridContainerScroll = () => {
-    updateSelectionViews()
-  }
-
   const mousedownCell = (cell: CellType): void => {
     selectionState.value = 'cell'
     cellsSelection.value = {
@@ -400,6 +412,7 @@ export function useGridSelection (
 
   return {
     selectionState,
+    selectedCells,
     cellsSelectionView,
     rowsSelectionView,
     columnsSelectionView,
@@ -409,10 +422,11 @@ export function useGridSelection (
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
+    selectedColumnDimensionsOptions,
+    selectedRowDimensionsOptions,
     updateSelectionViews,
     clearSelection,
     selectAllCells,
-    gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,

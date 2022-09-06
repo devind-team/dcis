@@ -39,7 +39,7 @@ v-row
       hide-details
       dense
     )
-    v-combobox.ml-1.shrink(
+    v-combobox.mx-1.shrink(
       v-model="kind"
       :label="t('dcis.grid.sheetToolbar.kind')"
       :items="kinds"
@@ -51,27 +51,48 @@ v-row
       hide-details
       dense
     )
+    v-btn-toggle.ml-1(v-model="dimensionsProperties" multiple)
+      v-btn(:disabled="fixedDisabled || readonly" value="fixed" height="40")
+        v-icon mdi-table-lock
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType, toRef } from '#app'
-import { useChangeCellsOptionMutation, useI18n, UpdateType } from '~/composables'
+import {
+  useChangeCellsOptionMutation,
+  useChangeColumnDimensionsFixed,
+  useChangeRowDimensionsFixed,
+  useI18n,
+  UpdateType
+} from '~/composables'
 import { DocumentsSheetQuery } from '~/types/graphql'
-import { CellsOptionsType, GridMode } from '~/types/grid'
+import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType, GridMode } from '~/types/grid'
 
 export default defineComponent({
   props: {
     mode: { type: Number, required: true },
     updateActiveSheet: { type: Function as PropType<UpdateType<DocumentsSheetQuery>>, required: true },
-    selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
+    selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null },
+    selectedColumnDimensionsOptions: { type: Object as PropType<ColumnDimensionsOptionsType>, default: null },
+    selectedRowDimensionsOptions: { type: Object as PropType<RowDimensionsOptionsType>, default: null }
   },
   setup (props) {
     const { t } = useI18n()
 
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
+    const changeColumnDimensionsFixed = useChangeColumnDimensionsFixed(updateActiveSheet)
+    const changeRowDimensionsFixed = useChangeRowDimensionsFixed(updateActiveSheet)
+
+    const selectedDimensionsOptions = computed<ColumnDimensionsOptionsType | RowDimensionsOptionsType | null>(
+      () => props.selectedColumnDimensionsOptions || props.selectedRowDimensionsOptions || null
+    )
 
     const disabled = computed<boolean>(() => !props.selectedCellsOptions)
+    const dimensionsDisabled = computed<boolean>(() => !selectedDimensionsOptions.value)
+    const fixedDisabled = computed<boolean>(
+      () => dimensionsDisabled.value || !selectedDimensionsOptions.value.rectangular
+    )
     const readonly = computed<boolean>(() => props.mode === GridMode.WRITE)
 
     const formatting = computed<string[]>({
@@ -147,6 +168,48 @@ export default defineComponent({
       }
     })
 
+    const dimensionsProperties = computed<string[]>({
+      get: () => {
+        if (dimensionsDisabled.value || fixedDisabled.value) {
+          return []
+        }
+        if (selectedDimensionsOptions.value.fixed) {
+          return ['fixed']
+        }
+        return []
+      },
+      set: (value) => {
+        const diff = dimensionsProperties.value.length > value.length
+          ? dimensionsProperties.value.filter(e => !value.includes(e))
+          : value.filter(v => !dimensionsProperties.value.includes(v))
+        if (diff.length) {
+          let field: string | null = null
+          const [intersectionFormat, intersectionValue] = dimensionsProperties.value.length > value.length
+            ? [dimensionsProperties.value, value]
+            : [value, dimensionsProperties.value]
+          for (const v of intersectionFormat) {
+            if (!intersectionValue.includes(v)) {
+              field = v
+              break
+            }
+          }
+          if (field === 'fixed') {
+            if (props.selectedColumnDimensionsOptions) {
+              changeColumnDimensionsFixed(
+                props.selectedColumnDimensionsOptions.columnDimensions,
+                !props.selectedColumnDimensionsOptions.fixed
+              )
+            } else {
+              changeRowDimensionsFixed(
+                props.selectedRowDimensionsOptions.rowDimensions,
+                !props.selectedRowDimensionsOptions.fixed
+              )
+            }
+          }
+        }
+      }
+    })
+
     const sizes = Array
       .from(new Array(19).keys())
       .map((e: number) => e + 6)
@@ -167,11 +230,13 @@ export default defineComponent({
     return {
       t,
       disabled,
+      fixedDisabled,
       readonly,
       formatting,
       horizontalAlign,
       verticalAlign,
       properties,
+      dimensionsProperties,
       sizes,
       size,
       kinds,

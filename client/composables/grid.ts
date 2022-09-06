@@ -1,7 +1,9 @@
-import { computed, ref, Ref, watch } from '#app'
+import { useEventListener } from '@vueuse/core'
+import { computed, ref, Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
-import { GridMode } from '~/types/grid'
+import { GridMode, ScrollInfoType, FixedInfoType } from '~/types/grid'
+import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -17,12 +19,14 @@ export const cellKinds = {
 export function useGrid (
   mode: GridMode,
   sheet: Ref<SheetType>,
+  gridContainer: Ref<HTMLDivElement | null>,
+  grid: Ref<HTMLTableElement | null>,
   canChangeRowHeight: (rowDimension: RowDimensionType) => boolean,
   changeColumnWidth: (columnDimension: ColumnDimensionType, width: number) => Promise<void> | null,
   changeRowHeight: (rowDimension: RowDimensionType, height: number) => Promise<void>
 ) {
   /**
-   * Вычисляем высоту первого столбца
+   * Ширина первого столбца
    */
   const rowNameColumnWidth = computed<number>(() => {
     let maxDigits = 0
@@ -40,37 +44,34 @@ export function useGrid (
     }
     return maxDigits * 12 + maxDots * 2 + 10
   })
-  const gridContainer = ref<HTMLDivElement | null>(null)
-  const grid = ref<HTMLTableElement | null>(null)
+  /**
+   * Высота первой строки
+   */
+  const columnNameRowHeight = 25
+
+  const gridWidth = computed<number>(
+    () => rowNameColumnWidth.value +
+      sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
+  )
 
   const activeCell = ref<CellType | null>(null)
   const setActiveCell = (cell: CellType | null) => {
     activeCell.value = cell
   }
 
-  const {
-    selectionState,
-    cellsSelectionView,
-    rowsSelectionView,
-    columnsSelectionView,
-    boundarySelectedColumnsPositions,
-    boundarySelectedRowsPositions,
-    allCellsSelected,
-    selectedColumnsPositions,
-    selectedRowsPositions,
-    selectedCellsOptions,
-    updateSelectionViews,
-    clearSelection,
-    selectAllCells,
-    gridContainerScroll,
-    mousedownCell,
-    mouseenterCell,
-    mouseupCell,
-    mouseenterColumnName,
-    mouseDownColumnName: mouseDownColumnNameSelection,
-    mouseenterRowName,
-    mousedownRowName: mouseDownRowNameSelection
-  } = useGridSelection(sheet, gridContainer, grid, setActiveCell)
+  const scroll = ref<ScrollInfoType>({
+    left: 0,
+    top: 0,
+    height: 0,
+    width: 0
+  })
+  const updateScroll = () => {
+    scroll.value.left = gridContainer.value.scrollLeft
+    scroll.value.top = gridContainer.value.scrollTop
+    scroll.value.height = gridContainer.value.scrollHeight
+    scroll.value.width = gridContainer.value.scrollWidth
+  }
+  useEventListener(gridContainer, 'scroll', updateScroll)
 
   const {
     resizing: resizingColumn,
@@ -81,7 +82,7 @@ export function useGrid (
     mousedown: mousedownColumnNameResizing,
     mouseup: mouseupColumnNameResizing
   } = useGridResizing<ColumnDimensionType>(
-    gridContainer,
+    scroll,
     64,
     'x',
     changeColumnWidth
@@ -96,16 +97,124 @@ export function useGrid (
     mousedown: mousedownRowNameResizing,
     mouseup: mouseupRowNameResizing
   } = useGridResizing<RowDimensionType>(
-    gridContainer,
+    scroll,
     25,
     'y',
     changeRowHeight
   )
   watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
 
-  const gridWidth = computed<number>(
-    () => rowNameColumnWidth.value +
-      sheet.value.columns.reduce((sum: number, column: ColumnDimensionType) => sum + getColumnWidth(column), 0)
+  const fixedColumnsLeft = computed<Record<string, number>>(() => {
+    const fixedColumns = sheet.value.columns.filter((columnDimension: ColumnDimensionType) => columnDimension.fixed)
+    let width = rowNameColumnWidth.value
+    const result = {}
+    for (const fixedColumn of fixedColumns) {
+      result[fixedColumn.id] = width
+      width += getColumnWidth(fixedColumn)
+    }
+    return result
+  })
+  const fixedRowsTop = computed<Record<string, number>>(() => {
+    const fixedRows = sheet.value.rows.filter((rowDimension: RowDimensionType) => rowDimension.fixed)
+    let height = columnNameRowHeight
+    const result = {}
+    for (const fixedRow of fixedRows) {
+      result[fixedRow.id] = height
+      height += getRowHeight(fixedRow) + 1
+    }
+    return result
+  })
+  const getColumnFixedInfo = (column: ColumnDimensionType): FixedInfoType => {
+    if (column.fixed) {
+      return { fixed: true, position: fixedColumnsLeft.value[column.id] }
+    }
+    return { fixed: false, position: null }
+  }
+  const getRowFixedInfo = (row: RowDimensionType): FixedInfoType => {
+    if (row.fixed) {
+      return { fixed: true, position: fixedRowsTop.value[row.id] }
+    }
+    return { fixed: false, position: null }
+  }
+  const getCellFixedInfo = (cell: CellType): FixedInfoType => {
+    const column = sheet.value.columns[letterToPosition(parsePosition(cell.globalPosition).column) - 1]
+    return getColumnFixedInfo(column)
+  }
+
+  const borderFixedColumn = computed<ColumnDimensionType | null>(() => {
+    let width = 0
+    let fixedWidth = 0
+    let borderColumn: ColumnDimensionType | null = null
+    for (const column of sheet.value.columns) {
+      if (column.fixed && scroll.value.left > width - fixedWidth) {
+        fixedWidth += getColumnWidth(column)
+        borderColumn = column
+      }
+      width += getColumnWidth(column)
+    }
+    return borderColumn
+  })
+  const borderFixedRow = computed<RowDimensionType | null>(() => {
+    let height = 0
+    let fixedHeight = 0
+    let borderRow: RowDimensionType | null = null
+    for (const row of sheet.value.rows) {
+      if (row.fixed && scroll.value.top > height - fixedHeight) {
+        fixedHeight += getRowHeight(row) + 1
+        borderRow = row
+      }
+      height += getRowHeight(row) + 1
+    }
+    return borderRow
+  })
+  const isColumnFixedBorder = (column: ColumnDimensionType): boolean => {
+    if (!borderFixedColumn.value) {
+      return false
+    }
+    return borderFixedColumn.value.id === column.id
+  }
+  const isRowFixedBorder = (row: RowDimensionType): boolean => {
+    if (!borderFixedRow.value) {
+      return false
+    }
+    return borderFixedRow.value.id === row.id
+  }
+  const isCellFixedBorderRight = (cell: CellType): boolean => {
+    return isColumnFixedBorder(sheet.value.columns[positionsToRangeIndices(cell.relatedGlobalPositions).maxColumn - 1])
+  }
+  const isCellFixedBorderBottom = (cell: CellType): boolean => {
+    return isRowFixedBorder(sheet.value.rows[positionsToRangeIndices(cell.relatedGlobalPositions).maxRow - 1])
+  }
+
+  const {
+    selectionState,
+    selectedCells,
+    cellsSelectionView,
+    rowsSelectionView,
+    columnsSelectionView,
+    boundarySelectedColumnsPositions,
+    boundarySelectedRowsPositions,
+    allCellsSelected,
+    selectedColumnsPositions,
+    selectedRowsPositions,
+    selectedCellsOptions,
+    selectedColumnDimensionsOptions,
+    selectedRowDimensionsOptions,
+    updateSelectionViews,
+    clearSelection,
+    selectAllCells,
+    mousedownCell,
+    mouseenterCell,
+    mouseupCell,
+    mouseenterColumnName,
+    mouseDownColumnName: mouseDownColumnNameSelection,
+    mouseenterRowName,
+    mousedownRowName: mouseDownRowNameSelection
+  } = useGridSelection(
+    sheet,
+    scroll,
+    grid,
+    setActiveCell
   )
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
@@ -126,7 +235,7 @@ export function useGrid (
   const mousedownColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     if (resizingColumn.value) {
       mousedownColumnNameResizing(event)
-    } else {
+    } else if (mode === GridMode.CHANGE) {
       mouseDownColumnNameSelection(column)
     }
   }
@@ -150,7 +259,7 @@ export function useGrid (
   const mousedownRowName = (row: RowDimensionType, event: MouseEvent) => {
     if (resizingRow.value) {
       mousedownRowNameResizing(event)
-    } else {
+    } else if (mode === GridMode.CHANGE) {
       mouseDownRowNameSelection(row)
     }
   }
@@ -175,21 +284,33 @@ export function useGrid (
     }
     return null
   })
-  onMounted(() => useOverlyingClass(document.body, cursorClass))
+  onMounted(() => {
+    updateScroll()
+    useOverlyingClass(document.body, cursorClass)
+  })
 
   return {
-    gridContainer,
-    grid,
+    rowNameColumnWidth,
+    columnNameRowHeight,
+    gridWidth,
+    activeCell,
+    setActiveCell,
     resizingColumn,
     resizingColumnWidth,
     getColumnWidth,
     resizingRow,
     resizingRowHeight,
     getRowHeight,
-    gridWidth,
-    rowNameColumnWidth,
-    activeCell,
-    setActiveCell,
+    getColumnFixedInfo,
+    getRowFixedInfo,
+    getCellFixedInfo,
+    borderFixedColumn,
+    borderFixedRow,
+    isColumnFixedBorder,
+    isRowFixedBorder,
+    isCellFixedBorderRight,
+    isCellFixedBorderBottom,
+    selectedCells,
     cellsSelectionView,
     rowsSelectionView,
     columnsSelectionView,
@@ -199,9 +320,10 @@ export function useGrid (
     selectedColumnsPositions,
     selectedRowsPositions,
     selectedCellsOptions,
+    selectedColumnDimensionsOptions,
+    selectedRowDimensionsOptions,
     clearSelection,
     selectAllCells,
-    gridContainerScroll,
     mousedownCell,
     mouseenterCell,
     mouseupCell,

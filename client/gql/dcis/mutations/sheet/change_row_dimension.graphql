@@ -1,14 +1,12 @@
 mutation ChangeRowDimension(
   $rowDimensionId: ID!,
   $height: Int,
-  $fixed: Boolean!,
   $hidden: Boolean!,
   $dynamic: Boolean!
 ) {
   changeRowDimension(input: {
     rowDimensionId: $rowDimensionId,
     height: $height,
-    fixed: $fixed,
     hidden: $hidden,
     dynamic: $dynamic
   }) {
@@ -18,12 +16,13 @@ mutation ChangeRowDimension(
       messages
       __typename
     }
-    rowDimensionId
-    height
-    fixed
-    hidden
-    dynamic
-    updatedAt
-    __typename
+    rowDimension {
+      id
+      height
+      hidden
+      dynamic
+      updatedAt
+      __typename
+    }
   }
 }

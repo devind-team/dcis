@@ -1,11 +1,16 @@
 <template lang="pug">
 .grid__body
-  div.grid__container(ref="gridContainer" @scroll="gridContainerScroll")
+  div.grid__container(ref="gridContainer")
     table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
       grid-header(
         :row-name-column-width="rowNameColumnWidth"
+        :column-name-row-height="columnNameRowHeight"
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
+        :get-column-fixed-info="getColumnFixedInfo"
+        :border-fixed-column="borderFixedColumn"
+        :border-fixed-row="borderFixedRow"
+        :is-column-fixed-border="isColumnFixedBorder"
         :selected-column-positions="selectedColumnsPositions"
         :boundary-selected-columns-positions="boundarySelectedColumnsPositions"
         :all-cells-selected="allCellsSelected"
@@ -19,6 +24,14 @@
       grid-body(
         :resizing-row="resizingRow"
         :get-row-height="getRowHeight"
+        :get-row-fixed-info="getRowFixedInfo"
+        :get-cell-fixed-info="getCellFixedInfo"
+        :border-fixed-column="borderFixedColumn"
+        :border-fixed-row="borderFixedRow"
+        :is-row-fixed-border="isRowFixedBorder"
+        :is-cell-fixed-border-right="isCellFixedBorderRight"
+        :is-cell-fixed-border-bottom="isCellFixedBorderBottom"
+        :selected-cells="selectedCells"
         :active-cell="activeCell"
         :set-active-cell="setActiveCell"
         :selected-rows-positions="selectedRowsPositions"
@@ -33,22 +46,23 @@
         :mouseenter-cell="mouseenterCell"
         :mouseup-cell="mouseupCell"
       )
-    grid-selection-view(
-      v-if="columnsSelectionView"
-      :key="columnsSelectionView.id"
-      :selection-view="columnsSelectionView"
-    )
-    grid-selection-view(
-      v-if="rowsSelectionView"
-      :key="rowsSelectionView.id"
-      :selection-view="rowsSelectionView"
-    )
-    template(v-if="cellsSelectionView")
+    template(v-if="mode === GridMode.CHANGE")
       grid-selection-view(
-        v-for="view in cellsSelectionView"
-        :selection-view="view"
-        :key="view.id"
+        v-if="columnsSelectionView"
+        :key="columnsSelectionView.id"
+        :selection-view="columnsSelectionView"
       )
+      grid-selection-view(
+        v-if="rowsSelectionView"
+        :key="rowsSelectionView.id"
+        :selection-view="rowsSelectionView"
+      )
+      template(v-if="cellsSelectionView")
+        grid-selection-view(
+          v-for="view in cellsSelectionView"
+          :selection-view="view"
+          :key="view.id"
+        )
   grid-element-resizing(
     :message="String(t('dcis.grid.columnWidth'))"
     :element-resizing="resizingColumnWidth"
@@ -60,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, PropType, toRef, provide } from '#app'
+import { defineComponent, Ref, PropType, toRef, provide, ref } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { GridMode, UpdateSheetType } from '~/types/grid'
 import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
@@ -75,15 +89,15 @@ import {
 import { useAuthStore } from '~/stores'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
-import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
+import GridSelectionView from '~/components/dcis/grid/GridSelectionView.vue'
 
 export default defineComponent({
   components: {
     GridHeader,
     GridBody,
-    GridSelectionView,
-    GridElementResizing
+    GridElementResizing,
+    GridSelectionView
   },
   props: {
     mode: { type: Number, required: true },
@@ -104,6 +118,9 @@ export default defineComponent({
     provide('activeSheet', activeSheet)
     provide('updateActiveSheet', updateActiveSheet)
     provide('activeDocument', activeDocument)
+
+    const gridContainer = ref<HTMLDivElement | null>(null)
+    const grid = ref<HTMLTableElement | null>(null)
 
     const canChangeRowHeight = (rowDimension: RowDimensionType) => {
       if (props.mode === GridMode.CHANGE) {
@@ -128,18 +145,27 @@ export default defineComponent({
       : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const {
-      gridContainer,
-      grid,
+      rowNameColumnWidth,
+      columnNameRowHeight,
+      gridWidth,
+      activeCell,
+      setActiveCell,
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
       resizingRow,
       resizingRowHeight,
       getRowHeight,
-      gridWidth,
-      rowNameColumnWidth,
-      activeCell,
-      setActiveCell,
+      getColumnFixedInfo,
+      getRowFixedInfo,
+      getCellFixedInfo,
+      borderFixedColumn,
+      borderFixedRow,
+      isColumnFixedBorder,
+      isRowFixedBorder,
+      isCellFixedBorderRight,
+      isCellFixedBorderBottom,
+      selectedCells,
       cellsSelectionView,
       rowsSelectionView,
       columnsSelectionView,
@@ -149,9 +175,10 @@ export default defineComponent({
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
+      selectedColumnDimensionsOptions,
+      selectedRowDimensionsOptions,
       clearSelection,
       selectAllCells,
-      gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
@@ -165,22 +192,42 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(props.mode, activeSheet, canChangeRowHeight, changeColumnWidth, changeRowHeight)
+    } = useGrid(
+      props.mode,
+      activeSheet,
+      gridContainer,
+      grid,
+      canChangeRowHeight,
+      changeColumnWidth,
+      changeRowHeight
+    )
 
     return {
+      GridMode,
       t,
       gridContainer,
       grid,
+      rowNameColumnWidth,
+      columnNameRowHeight,
+      gridWidth,
+      activeCell,
+      setActiveCell,
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
       resizingRow,
       resizingRowHeight,
       getRowHeight,
-      gridWidth,
-      rowNameColumnWidth,
-      activeCell,
-      setActiveCell,
+      getColumnFixedInfo,
+      getRowFixedInfo,
+      getCellFixedInfo,
+      borderFixedColumn,
+      borderFixedRow,
+      isColumnFixedBorder,
+      isRowFixedBorder,
+      isCellFixedBorderRight,
+      isCellFixedBorderBottom,
+      selectedCells,
       cellsSelectionView,
       rowsSelectionView,
       columnsSelectionView,
@@ -190,9 +237,10 @@ export default defineComponent({
       selectedColumnsPositions,
       selectedRowsPositions,
       selectedCellsOptions,
+      selectedColumnDimensionsOptions,
+      selectedRowDimensionsOptions,
       clearSelection,
       selectAllCells,
-      gridContainerScroll,
       mousedownCell,
       mouseenterCell,
       mouseupCell,
@@ -223,6 +271,7 @@ export default defineComponent({
 
 $border: 1px solid silver
 $border-selected: 1px solid blue
+$border-fixed: 1.5px solid gray
 $name-light: map-get($grey, 'lighten-3')
 $name-dark: map-get($grey, 'lighten-2')
 $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
@@ -263,7 +312,6 @@ div.grid__body
         z-index: 2
 
         th
-          height: 25px
           border-top: $border
           font-size: 16px
 
@@ -317,6 +365,16 @@ div.grid__body
             justify-content: center
             align-items: center
 
+          &.grid__header_fixed
+            position: sticky
+            z-index: 1
+
+        th.grid__header_fixed-border-right
+          border-right: $border-fixed
+
+        th.grid__header_fixed-border-bottom
+          border-bottom: $border-fixed
+
       tbody
         td.grid__cell_row-name
           position: sticky
@@ -332,7 +390,7 @@ div.grid__body
             & > div
               background: $name-light !important
 
-          &.grid__cell_row-name_boundary-selected
+          &.grid__cell_row-name-boundary-selected
             border-right: $border-selected
 
           &.grid__cell_row-name-hover
@@ -351,6 +409,11 @@ div.grid__body
           cursor: cell
           position: relative
 
+          &.grid__cell_selected
+
+            & > div
+              background: $name-light
+
           .grid__cell-content
             display: flex
 
@@ -367,6 +430,20 @@ div.grid__body
 
               &:focus
                 outline: none
+
+        tr.grid__row_fixed
+          position: sticky
+          z-index: 2
+
+        td.grid__cell_fixed
+          position: sticky
+          z-index: 1
+
+        td.grid__cell_fixed-border-right
+          border-right: $border-fixed
+
+        td.grid__cell_fixed-border-bottom
+          border-bottom: $border-fixed
 
     div.grid__selection-view
       position: absolute

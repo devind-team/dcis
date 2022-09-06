@@ -1,6 +1,11 @@
 <template lang="pug">
 tbody
-  tr(v-for="row in activeSheet.rows" :key="row.id")
+  tr(
+    v-for="row in activeSheet.rows"
+    :key="row.id"
+    :class="getRowClass(row)"
+    :style="getRowStyle(row)"
+  )
     td.grid__cell_row-name(
       :class="getRowNameCellClass(row)"
       @mouseenter="mouseenterRowName(row)"
@@ -13,9 +18,10 @@ tbody
     td(
       v-for="cell in row.cells"
       :key="cell.id"
+      :class="getCellClass(cell)"
+      :style="getCellStyle(cell)"
       :colspan="cell.colspan"
       :rowspan="cell.rowspan"
-      :style="getCellStyle(cell)"
       @mousedown="mousedownCell(cell)"
       @mouseenter="mouseenterCell(cell)"
       @mouseup="mouseupCell(cell)"
@@ -45,8 +51,15 @@ tbody
 <script lang="ts">
 import { PropType, Ref, nextTick, inject } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
-import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
-import { GridMode, ResizingType } from '~/types/grid'
+import {
+  CellType,
+  ColumnDimensionType,
+  DivisionModelType,
+  DocumentType,
+  RowDimensionType,
+  SheetType
+} from '~/types/graphql'
+import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
@@ -57,6 +70,14 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
+    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => FixedInfoType>, required: true },
+    getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfoType>, required: true },
+    borderFixedColumn: { type: Object as PropType<ColumnDimensionType>, default: null },
+    borderFixedRow: { type: Object as PropType<RowDimensionType>, default: null },
+    isRowFixedBorder: { type: Function as PropType<(row: RowDimensionType) => boolean>, required: true },
+    isCellFixedBorderRight: { type: Function as PropType<(cell: CellType) => boolean>, required: true },
+    isCellFixedBorderBottom: { type: Function as PropType<(cell: CellType) => boolean>, required: true },
+    selectedCells: { type: Array as PropType<CellType[]>, required: true },
     activeCell: { type: Object as PropType<CellType>, default: null },
     setActiveCell: { type: Function as PropType<(cell: CellType | null) => void>, required: true },
     selectedRowsPositions: { type: Array as PropType<number[]>, required: true },
@@ -90,11 +111,29 @@ export default defineComponent({
     const rootCount = computed<number>(() => activeSheet.value.rows
       .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
 
+    const getRowClass = (row: RowDimensionType): Record<string, boolean> => {
+      return {
+        grid__row_fixed: mode === GridMode.WRITE && props.getRowFixedInfo(row).fixed
+      }
+    }
+    const getRowStyle = (row: RowDimensionType): Record<string, string> => {
+      if (mode === GridMode.CHANGE) {
+        return {}
+      }
+      const fixedInfo = props.getRowFixedInfo(row)
+      if (fixedInfo.fixed) {
+        return { top: `${fixedInfo.position}px` }
+      }
+      return {}
+    }
+
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name_boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-hover': !props.resizingRow
+        'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-hover': mode === GridMode.CHANGE && !props.resizingRow,
+        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
+        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)
       }
     }
 
@@ -159,9 +198,25 @@ export default defineComponent({
         canDeleteRow(rowDimension)
     }
 
+    const getCellClass = (cell: CellType): Record<string, boolean> => {
+      return {
+        grid__cell_selected: mode === GridMode.WRITE && Boolean(
+          props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
+        ),
+        grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
+        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
+        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
+      }
+    }
     const getCellStyle = (cell: CellType): Record<string, string> => {
       const textDecoration: string[] = []
       const style: Record<string, string> = {}
+      if (mode === GridMode.WRITE) {
+        const fixedInfo = props.getCellFixedInfo(cell)
+        if (fixedInfo.fixed) {
+          style.left = `${fixedInfo.position}px`
+        }
+      }
       if (cell.strong) { style['font-weight'] = 'bold' }
       if (cell.italic) { style['font-style'] = 'italic' }
       if (cell.strike) { textDecoration.push('line-through') }
@@ -229,12 +284,15 @@ export default defineComponent({
       posY,
       showMenu,
       activeSheet,
+      getRowClass,
+      getRowStyle,
       getRowNameCellClass,
       canChangeRowSettings,
       canAddRowBeforeOrAfter,
       canDeleteRow,
       canAddRowInside,
       viewControl,
+      getCellClass,
       getCellStyle,
       getCellContentStyle
     }

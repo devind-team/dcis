@@ -26,8 +26,6 @@ mutation-modal-form(
         :label="t('dcis.grid.columnSettings.width')"
       )
     v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" color="primary")
-    //- В разработке
-    v-checkbox(v-model="fixed" :label="t('dcis.grid.columnSettings.fix')" color="primary")
     v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" color="primary")
 </template>
 
@@ -35,7 +33,7 @@ mutation-modal-form(
 import { DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { PropType, Ref } from '#app'
-import { updateColumnDimension, UpdateType } from '~/composables'
+import { UpdateType } from '~/composables'
 import { cellKinds } from '~/composables/grid'
 import {
   DocumentsSheetQuery,
@@ -58,7 +56,6 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
 
     const width = ref<string>(String(props.getColumnWidth(props.column)))
-    const fixed = ref<boolean>(props.column.fixed)
     const hidden = ref<boolean>(props.column.hidden)
     watch(computed<number>(() => props.getColumnWidth(props.column)), (newValue: number) => {
       width.value = String(newValue)
@@ -75,7 +72,6 @@ export default defineComponent({
     const variables = computed<ChangeColumnDimensionMutationVariables>(() => ({
       columnDimensionId: props.column.id,
       width: +width.value,
-      fixed: fixed.value,
       hidden: hidden.value,
       kind: kind.value.value
     }))
@@ -85,21 +81,24 @@ export default defineComponent({
         __typename: 'ChangeColumnDimensionMutationPayload',
         success: true,
         errors: [],
-        ...variables.value,
-        updatedAt: new Date().toISOString()
+        columnDimension: {
+          ...variables.value,
+          id: props.column.id,
+          updatedAt: new Date().toISOString(),
+          __typename: 'ChangeColumnDimensionType'
+        }
       }
     }))
 
     const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeColumnDimensionMutation>, 'context'>) => {
-      updateColumnDimension(updateSheet.value, dataProxy, result)
+      updateColumnDimensions(updateSheet.value, dataProxy, result)
     }
 
     return {
       t,
       dateTimeHM,
       width,
-      fixed,
       hidden,
       kinds,
       kind,

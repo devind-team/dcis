@@ -6,7 +6,6 @@
 import { PropType } from '#app'
 import { SelectionViewType } from '~/types/grid'
 import { elementPositionToStyle } from '~/services/grid'
-
 export default defineComponent({
   props: {
     selectionView: { type: Object as PropType<SelectionViewType>, required: true }

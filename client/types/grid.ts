@@ -1,4 +1,10 @@
-import { CellType, DocumentSheetQuery, DocumentsSheetQuery } from '~/types/graphql'
+import {
+  CellType,
+  ColumnDimensionType,
+  RowDimensionType,
+  DocumentSheetQuery,
+  DocumentsSheetQuery
+} from '~/types/graphql'
 import { UpdateType } from '~/composables'
 
 export type RangeType = string
@@ -84,19 +90,6 @@ export type ElementPositionType = {
   bottom: number | null
 }
 
-export type SelectionViewType = {
-  id: string
-  position: ElementPositionType
-  width: number
-  height: number
-  border: {
-    top: boolean
-    right: boolean
-    bottom: boolean
-    left: boolean
-  }
-}
-
 export type ElementResizingType = {
   visible: boolean
   position: ElementPositionType
@@ -115,6 +108,31 @@ export type SelectionType<T> = {
   last: T,
 }
 
+export type SelectionViewType = {
+  id: string
+  position: ElementPositionType
+  width: number
+  height: number
+  border: {
+    top: boolean
+    right: boolean
+    bottom: boolean
+    left: boolean
+  }
+}
+
+export type ScrollInfoType = {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+export type FixedInfoType = {
+  fixed: boolean,
+  position: number | null
+}
+
 export type CellsOptionsType = {
   cells: CellType[]
   strong: boolean | null
@@ -126,4 +144,16 @@ export type CellsOptionsType = {
   editable: boolean
   size: number | null
   kind: string | null
+}
+
+export type ColumnDimensionsOptionsType = {
+  columnDimensions: ColumnDimensionType[]
+  fixed: boolean
+  rectangular: boolean
+}
+
+export type RowDimensionsOptionsType = {
+  rowDimensions: RowDimensionType[]
+  fixed: boolean
+  rectangular: boolean
 }

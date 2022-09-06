@@ -946,8 +946,6 @@ input ChangeColumnDimensionMutationInput {
   clientMutationId: String
   """Идентификатор колонки"""
   columnDimensionId: ID!
-  """Фиксация колонки"""
-  fixed: Boolean!
   """Скрытие колонки"""
   hidden: Boolean!
   """Тип значения"""
@@ -959,22 +957,45 @@ input ChangeColumnDimensionMutationInput {
 """Изменение колонки."""
 type ChangeColumnDimensionMutationPayload {
   clientMutationId: String
-  """Идентификатор колонки"""
-  columnDimensionId: ID!
+  """Измененная колонка"""
+  columnDimension: ChangeColumnDimensionType
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+type ChangeColumnDimensionType {
   """Фиксация колонки"""
   fixed: Boolean!
   """Скрытие колонки"""
   hidden: Boolean!
-  """Тип значения"""
+  id: ID!
+  """Тип значений"""
   kind: String!
-  """Успех мутации"""
-  success: Boolean!
-  """Дата обновления колонки"""
+  """Дата обновления"""
   updatedAt: DateTime!
   """Ширина колонки"""
   width: Int
+}
+
+input ChangeColumnDimensionsFixedInput {
+  clientMutationId: String
+  """Идентификаторы колонок"""
+  columnDimensionIds: [ID!]!
+  """Фиксация колонки"""
+  fixed: Boolean!
+}
+
+"""Изменение свойства fixed у колонок."""
+type ChangeColumnDimensionsFixedPayload {
+  clientMutationId: String
+  """Измененные колонки"""
+  columnDimensions: [ChangeColumnDimensionType]
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input ChangeDocumentCommentMutationInput {
@@ -1379,8 +1400,6 @@ input ChangeRowDimensionMutationInput {
   clientMutationId: String
   """Динамическая ли строка"""
   dynamic: Boolean!
-  """Фиксация строки"""
-  fixed: Boolean!
   """Высота строки"""
   height: Int
   """Скрытие строки"""
@@ -1392,22 +1411,45 @@ input ChangeRowDimensionMutationInput {
 """Изменение строки."""
 type ChangeRowDimensionMutationPayload {
   clientMutationId: String
-  """Динамическая ли строка"""
-  dynamic: Boolean!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Измененная строка"""
+  rowDimension: ChangeRowDimensionType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+type ChangeRowDimensionType {
+  """Динамическая ли строка"""
+  dynamic: Boolean!
   """Фиксация строки"""
   fixed: Boolean!
   """Высота строки"""
   height: Int
   """Скрытие строки"""
   hidden: Boolean!
-  """Идентификатор строки"""
-  rowDimensionId: ID!
+  id: ID!
+  """Дата обновления"""
+  updatedAt: DateTime!
+}
+
+input ChangeRowDimensionsFixedInput {
+  clientMutationId: String
+  """Фиксация строки"""
+  fixed: Boolean!
+  """Идентификаторы строк"""
+  rowDimensionIds: [ID!]!
+}
+
+"""Изменение свойства fixed у строк."""
+type ChangeRowDimensionsFixedPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененные строки"""
+  rowDimensions: [ChangeRowDimensionType]
   """Успех мутации"""
   success: Boolean!
-  """Дата обновления строки"""
-  updatedAt: DateTime!
 }
 
 input ChangeSectionFilesMutationInput {
@@ -2468,6 +2510,8 @@ type Mutation {
   changeChildRowDimensionHeight(input: ChangeChildRowDimensionHeightMutationInput!): ChangeChildRowDimensionHeightMutationPayload!
   """Изменение колонки"""
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
+  """Изменение свойства fixed у колонок"""
+  changeColumnDimensionsFixed(input: ChangeColumnDimensionsFixedInput!): ChangeColumnDimensionsFixedPayload!
   """Изменение комментария версии документа."""
   changeDocumentComment(input: ChangeDocumentCommentMutationInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
@@ -2508,6 +2552,8 @@ type Mutation {
   changeProject(input: ChangeProjectMutationInput!): ChangeProjectMutationPayload!
   """Изменение строки"""
   changeRowDimension(input: ChangeRowDimensionMutationInput!): ChangeRowDimensionMutationPayload!
+  """Изменение свойства fixed у строк"""
+  changeRowDimensionsFixed(input: ChangeRowDimensionsFixedInput!): ChangeRowDimensionsFixedPayload!
   """Изменение текста секции"""
   changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
   """Изменение текста секции"""

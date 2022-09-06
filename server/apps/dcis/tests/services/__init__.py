@@ -1,5 +1,7 @@
+from .column_dimension_services import ColumnDimensionTestCase
 from .divisions_services import DivisionsServicesTestCase
-from .document_services import GetUserDocumentsTestCase, DocumentTestCase
+from .document_services import DocumentTestCase, GetUserDocumentsTestCase
 from .period_services import GetUserPeriodsTestCase
 from .privilege_services import PrivilegeServicesTestCase
 from .project_services import GetUserProjectsTestCase
+from .row_dimension_services import RowDimensionTestCase

@@ -1,0 +1,22 @@
+mutation ChangeColumnDimensionsFixed(
+  $columnDimensionIds: [ID!]!,
+  $fixed: Boolean!
+) {
+  changeColumnDimensionsFixed(input: {
+    columnDimensionIds: $columnDimensionIds,
+    fixed: $fixed
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    columnDimensions {
+      id
+      fixed
+      updatedAt
+      __typename
+    }
+  }
+}

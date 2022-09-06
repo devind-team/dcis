@@ -1,4 +1,4 @@
-import { SheetType, CellType } from '~/types/graphql'
+import { SheetType, CellType, RowDimensionType, ColumnDimensionType } from '~/types/graphql'
 import {
   RangeType,
   PositionPartsType,
@@ -8,7 +8,9 @@ import {
   RangeIndicesType,
   RangeSpanType,
   ElementPositionType,
-  CellsOptionsType
+  CellsOptionsType,
+  ColumnDimensionsOptionsType,
+  RowDimensionsOptionsType
 } from '~/types/grid'
 
 const positionExp = /^[$]?([A-Za-z]{1,3})[$]?(\d+)$/
@@ -299,6 +301,92 @@ const getCellOptions = (cells: CellType[]): CellsOptionsType => {
   return result
 }
 
+/**
+ * Получение опций колонок
+ * @param columnDimensions
+ * @param cells
+ * @param rowsCount
+ */
+const getColumnDimensionsOptions = (
+  columnDimensions: ColumnDimensionType[],
+  cells: CellType[],
+  rowsCount: number
+): ColumnDimensionsOptionsType => {
+  return {
+    columnDimensions,
+    fixed: columnDimensions.every((columnDimension: ColumnDimensionType) => columnDimension.fixed),
+    rectangular: isColumnDimensionRectangular(columnDimensions, cells, rowsCount)
+  }
+}
+
+/**
+ * Является ли ячейки колонок прямоугольником
+ * @param columnDimensions
+ * @param cells
+ * @param rowsCount
+ */
+const isColumnDimensionRectangular = (
+  columnDimensions: ColumnDimensionType[],
+  cells: CellType[],
+  rowsCount: number
+): boolean => {
+  const relatedGlobalPositions = getRelatedGlobalPositions(cells)
+  const rowsIndices = Array.from({ length: rowsCount }).map((_, i: number) => i + 1)
+  for (const columnDimension of columnDimensions) {
+    for (const rowIndex of rowsIndices) {
+      const index = relatedGlobalPositions.indexOf(`${columnDimension.name}${rowIndex}`)
+      if (index === -1) {
+        return false
+      }
+      relatedGlobalPositions.splice(index, 1)
+    }
+  }
+  return relatedGlobalPositions.length === 0
+}
+
+/**
+ * Получение опций строк
+ * @param rowDimensions
+ * @param cells
+ * @param columnsCount
+ */
+const getRowDimensionsOptions = (
+  rowDimensions: RowDimensionType[],
+  cells: CellType[],
+  columnsCount: number
+): RowDimensionsOptionsType => {
+  return {
+    rowDimensions,
+    fixed: rowDimensions.every((rowDimension: RowDimensionType) => rowDimension.fixed),
+    rectangular: isRowDimensionsRectangular(rowDimensions, cells, columnsCount)
+  }
+}
+
+/**
+ * Является ли ячейки строк прямоугольником
+ * @param rowDimensions
+ * @param cells
+ * @param columnsCount
+ */
+const isRowDimensionsRectangular = (
+  rowDimensions: RowDimensionType[],
+  cells: CellType[],
+  columnsCount: number
+): boolean => {
+  const relatedGlobalPositions = getRelatedGlobalPositions(cells)
+  const columnsPositions = Array.from({ length: columnsCount }).map((_, i: number) => positionToLetter(i + 1))
+  for (const rowDimension of rowDimensions) {
+    for (const columnPosition of columnsPositions) {
+      const index = relatedGlobalPositions.indexOf(`${columnPosition}${rowDimension.globalIndex}`)
+      if (index === -1) {
+        return false
+      }
+      relatedGlobalPositions.splice(index, 1)
+    }
+  }
+  return relatedGlobalPositions.length === 0
+}
+
 export {
   positionToLetter,
   letterToPosition,
@@ -315,5 +403,7 @@ export {
   filterCells,
   findCell,
   getRelatedGlobalPositions,
-  getCellOptions
+  getCellOptions,
+  getRowDimensionsOptions,
+  getColumnDimensionsOptions
 }
