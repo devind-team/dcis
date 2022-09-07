@@ -156,7 +156,7 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
                     state[formula]['value'] = ''
                     state[formula]['error'] = 'Деление на 0'
                 else:
-                    state[formula]['value'] = str(evaluator.evaluate(formula))
+                    state[formula]['value'] = str(value)
             except RuntimeError as e:
                 if 'Cycle detected' in str(e):
                     state[formula]['value'] = ''
