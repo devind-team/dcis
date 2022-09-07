@@ -1,6 +1,7 @@
 <template lang="pug">
 v-container
-  v-row
+  page-segment(v-if="!loading" v-for="segment in segments" :key="segment.id" :segment="segment")
+  v-row(v-else)
     v-progress-circular.mt-12.mx-auto(size="60" color="primary" indeterminate)
 </template>
 

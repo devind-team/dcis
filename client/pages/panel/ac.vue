@@ -27,6 +27,18 @@ export default defineComponent({
 
     const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
       {
+        title: t('panel.ac.users.name') as string,
+        to: 'panel-ac-users',
+        permissions: 'core.view_user',
+        icon: 'account-multiple'
+      },
+      {
+        title: t('panel.ac.groups.name') as string,
+        to: 'panel-ac-groups',
+        permissions: 'auth.view_group',
+        icon: 'account-group'
+      },
+      {
         title: t('panel.ac.permissions.name') as string,
         to: 'panel-ac-permissions',
         permissions: 'auth.view_permission',

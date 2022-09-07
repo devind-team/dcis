@@ -24,9 +24,20 @@ v-row
         v-icon mdi-format-align-middle
       v-btn(:disabled="disabled" value="bottom" height="40")
         v-icon mdi-format-align-bottom
-    v-btn-toggle.mx-1(v-model="properties" multiple)
-      v-btn(:disabled="disabled" value="readonly" height="40")
-        v-icon mdi-pencil-off
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
+          v-btn-toggle.mx-1(v-model="properties" multiple)
+            v-btn(:disabled="disabled" value="readonly" height="40")
+              v-icon mdi-pencil-off
+      span Только для чтения
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
+          v-btn-toggle.ml-1(v-model="dimensionsProperties" multiple)
+            v-btn(:disabled="fixedDisabled" value="fixed" height="40")
+              v-icon mdi-table-lock
+      span Закрепление столбцов/строк
     v-combobox.mx-1.shrink(
       v-model="size"
       :label="t('dcis.grid.sheetToolbar.fontSize')"
@@ -49,9 +60,6 @@ v-row
       hide-details
       dense
     )
-    v-btn-toggle.ml-1(v-model="dimensionsProperties" multiple)
-      v-btn(:disabled="fixedDisabled" value="fixed" height="40")
-        v-icon mdi-table-lock
 </template>
 
 <script lang="ts">
