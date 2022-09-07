@@ -1,4 +1,5 @@
 """Тесты модуля, отвечающего за работу с периодами."""
+from datetime import date, timedelta
 from os.path import join
 from shutil import rmtree
 from unittest.mock import Mock, patch
@@ -16,15 +17,19 @@ from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
     can_change_period_groups,
-    can_change_period_users,
+    can_change_period_settings, can_change_period_users, can_delete_period,
 )
 from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
-    change_period_group_privileges, change_user_period_groups, change_user_period_privileges, copy_period_groups,
+    change_period_group_privileges,
+    change_settings_period,
+    change_user_period_groups,
+    change_user_period_privileges,
+    copy_period_groups,
     create_period,
     delete_divisions_period,
-    get_user_divisions_periods,
+    delete_period, delete_period_groups, get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
     get_user_privileges_periods,
@@ -172,7 +177,8 @@ class PeriodTestCase(TestCase):
             self.departament_period_group_ids.append(period_group.id)
         self.departament_period_groups[0].privileges.set(self.period_group_privileges)
         self.departament_period_users_privileges = [
-            Privilege.objects.create(name=f'Privileges user {number}', key=f'privileges_user_{number}') for number in range(3)
+            Privilege.objects.create(name=f'Privileges user {number}', key=f'privileges_user_{number}') for number in
+            range(3)
         ]
         self.departament_period_users_privileges_ids: list[str | int] = []
         for departament_period_users_privilege_id in self.departament_period_users_privileges:
@@ -243,7 +249,8 @@ class PeriodTestCase(TestCase):
 
         `can_change_period_divisions`,
         `can_change_period_groups`,
-        `can_change_period_users`
+        `can_change_period_users`,
+        `can_change_period_settings`
         """
         with patch.object(period.project, 'user_id', new=None), patch.object(
             period,
@@ -320,6 +327,51 @@ class PeriodTestCase(TestCase):
             user_id=self.super_user.id,
             period_id=self.departament_period.id,
             privileges_ids=self.departament_period_users_privileges_ids
+        )
+
+    def test_change_settings_period(self) -> None:
+        """Тестирование функции `change_settings_period`."""
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_settings)
+        self.assertEqual(
+            change_settings_period(
+                user=self.super_user,
+                period=self.departament_period,
+                name='Departament',
+                status='В планах',
+                multiple=True,
+                privately=False,
+                start=date.today(),
+                expiration=date.today() + timedelta(days=7)
+            ),
+            Period.objects.get(name='Departament'),
+            'Change period'
+        )
+
+    def test_delete_period_groups(self) -> None:
+        """Тестирование функции `delete_period_groups`."""
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_groups)
+        self.assertEqual(
+            delete_period_groups(user=self.super_user, period_group=self.departament_period_groups[0]),
+            None,
+            'Delete period_groups'
+        )
+
+    def test_delete_period(self) -> None:
+        """Тестирование функции `delete_period`."""
+        with patch.object(self.user_project, 'user_id', new=None), patch.object(
+            self.departament_period,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.super_user,
+            'has_perm',
+            new=lambda perm: perm not in ('dcis.delete_period', 'dcis.add_project', 'dcis.add_period')
+        ):
+            self.assertRaises(PermissionDenied, can_delete_period, self.super_user, self.departament_period)
+        self.assertEqual(
+            delete_period(user=self.super_user, period=self.departament_period),
+            None,
+            'Delete period'
         )
 
     def tearDown(self) -> None:
