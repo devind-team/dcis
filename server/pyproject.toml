@@ -54,6 +54,7 @@ xlsx-evaluate = "^0.4.6"
 docutils = "^0.19"
 SnakeMD = "^0.10.1"
 pdoc = "^12.1.0"
+six = "^1.16.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0.4"
