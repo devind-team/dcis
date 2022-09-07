@@ -21,7 +21,7 @@ from apps.dcis.permissions import (
 from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
-    change_period_group_privileges, change_user_period_groups, copy_period_groups,
+    change_period_group_privileges, change_user_period_groups, change_user_period_privileges, copy_period_groups,
     create_period,
     delete_divisions_period,
     get_user_divisions_periods,
@@ -171,11 +171,16 @@ class PeriodTestCase(TestCase):
         for period_group in self.departament_period_groups:
             self.departament_period_group_ids.append(period_group.id)
         self.departament_period_groups[0].privileges.set(self.period_group_privileges)
+        self.departament_period_users_privileges = [
+            Privilege.objects.create(name=f'Privileges user {number}', key=f'privileges_user_{number}') for number in range(3)
+        ]
+        self.departament_period_users_privileges_ids: list[str | int] = []
+        for departament_period_users_privilege_id in self.departament_period_users_privileges:
+            self.departament_period_users_privileges_ids.append(departament_period_users_privilege_id.id)
         self.department_divisions = [
             Division.objects.create(period=self.departament_period, object_id=departament.id)
             for departament in self.departaments
         ]
-
         self.divisions_ids: list[str | int] = []
         for division_id in self.department_divisions:
             self.divisions_ids.append(division_id.object_id)
@@ -306,6 +311,16 @@ class PeriodTestCase(TestCase):
         """Тестирование функции `change_user_period_groups`."""
         self._check_can_change_period(period=self.departament_period, permission=can_change_period_users)
         change_user_period_groups(user=self.super_user, period_group_ids=self.departament_period_group_ids)
+
+    def test_change_user_period_privileges(self) -> None:
+        """Тестирование функции `change_user_period_privileges`."""
+        self._check_can_change_period(period=self.departament_period, permission=can_change_period_users)
+        change_user_period_privileges(
+            user=self.super_user,
+            user_id=self.super_user.id,
+            period_id=self.departament_period.id,
+            privileges_ids=self.departament_period_users_privileges_ids
+        )
 
     def tearDown(self) -> None:
         """Очистка данных тестирования."""
