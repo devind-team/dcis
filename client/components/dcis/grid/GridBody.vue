@@ -59,7 +59,7 @@ import {
   RowDimensionType,
   SheetType
 } from '~/types/graphql'
-import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
+import { GridMode, ResizingType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
@@ -70,7 +70,7 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
-    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => FixedInfoType>, required: true },
+    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => RowFixedInfoType>, required: true },
     getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfoType>, required: true },
     borderFixedColumn: { type: Object as PropType<ColumnDimensionType>, default: null },
     borderFixedRow: { type: Object as PropType<RowDimensionType>, default: null },
@@ -122,7 +122,10 @@ export default defineComponent({
       }
       const fixedInfo = props.getRowFixedInfo(row)
       if (fixedInfo.fixed) {
-        return { top: `${fixedInfo.position}px` }
+        return {
+          top: `${fixedInfo.position}px`,
+          zIndex: `${2 + fixedInfo.reverseIndex}`
+        }
       }
       return {}
     }

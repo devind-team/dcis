@@ -433,7 +433,6 @@ div.grid__body
 
         tr.grid__row_fixed
           position: sticky
-          z-index: 2
 
         td.grid__cell_fixed
           position: sticky

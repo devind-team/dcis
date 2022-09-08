@@ -133,6 +133,10 @@ export type FixedInfoType = {
   position: number | null
 }
 
+export type RowFixedInfoType = FixedInfoType & {
+  reverseIndex: number | null
+}
+
 export type CellsOptionsType = {
   cells: CellType[]
   strong: boolean | null
