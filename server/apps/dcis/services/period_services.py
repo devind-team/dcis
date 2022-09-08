@@ -6,6 +6,7 @@ from typing import Type
 
 from devind_helpers.orm_utils import get_object_or_404
 from django.core.files.base import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
@@ -13,7 +14,6 @@ from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.utils import convert_str_to_int
 from devind_helpers.schema.types import ErrorFieldType
 
-from devind_dictionaries.models import Organization
 from apps.core.models import User
 from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
