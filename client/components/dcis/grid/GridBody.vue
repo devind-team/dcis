@@ -130,7 +130,8 @@ export default defineComponent({
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-boundary-selected': mode === GridMode.CHANGE &&
+          props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': mode === GridMode.CHANGE && !props.resizingRow,
         'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
         'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)

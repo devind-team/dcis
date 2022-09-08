@@ -9,6 +9,7 @@ from openpyxl.utils.cell import get_column_letter, column_index_from_string
 from openpyxl.utils.cell import coordinate_from_string
 from apps.dcis.models import Cell, Document, Sheet, Value
 from .sheet_cache import FormulaContainerCache
+from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
 
 
 def get_dependency_cells(
@@ -150,7 +151,12 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
         evaluator = Evaluator(model)
         for formula in model.formulae:
             try:
-                state[formula]['value'] = str(evaluator.evaluate(formula))
+                value = evaluator.evaluate(formula)
+                if isinstance(value, DivZeroExcelError):
+                    state[formula]['value'] = ''
+                    state[formula]['error'] = 'Деление на 0'
+                else:
+                    state[formula]['value'] = str(value)
             except RuntimeError as e:
                 if 'Cycle detected' in str(e):
                     state[formula]['value'] = ''

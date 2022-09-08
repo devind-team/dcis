@@ -78,7 +78,8 @@ export default defineComponent({
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
-        'grid__header_boundary-selected': props.boundarySelectedColumnsPositions.includes(column.index),
+        'grid__header_boundary-selected': mode === GridMode.CHANGE &&
+          props.boundarySelectedColumnsPositions.includes(column.index),
         grid__header_hover: mode === GridMode.CHANGE && !props.resizingColumn,
         grid__header_fixed: mode === GridMode.WRITE && props.getColumnFixedInfo(column).fixed,
         'grid__header_fixed-border-right': mode === GridMode.WRITE && props.isColumnFixedBorder(column),
