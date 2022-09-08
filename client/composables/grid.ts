@@ -2,7 +2,7 @@ import { useEventListener } from '@vueuse/core'
 import { computed, ref, Ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
-import { GridMode, ScrollInfoType, FixedInfoType } from '~/types/grid'
+import { GridMode, ScrollInfoType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
 import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
 
 export const cellKinds = {
@@ -104,21 +104,27 @@ export function useGrid (
   )
   watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
 
+  const fixedColumns = computed<ColumnDimensionType[]>(() =>
+    sheet.value.columns.filter((columnDimension: ColumnDimensionType) => columnDimension.fixed))
+  const fixedRows = computed<RowDimensionType[]>(() =>
+    sheet.value.rows.filter((rowDimension: RowDimensionType) => rowDimension.fixed))
+  const fixedRowsIndex = computed<Record<string, number>>(() =>
+    fixedRows.value.reduce((acc: Record<string, number>, row: RowDimensionType, index: number) => ({
+      ...acc, [row.id]: index
+    }), {}))
   const fixedColumnsLeft = computed<Record<string, number>>(() => {
-    const fixedColumns = sheet.value.columns.filter((columnDimension: ColumnDimensionType) => columnDimension.fixed)
     let width = rowNameColumnWidth.value
     const result = {}
-    for (const fixedColumn of fixedColumns) {
+    for (const fixedColumn of fixedColumns.value) {
       result[fixedColumn.id] = width
       width += getColumnWidth(fixedColumn)
     }
     return result
   })
   const fixedRowsTop = computed<Record<string, number>>(() => {
-    const fixedRows = sheet.value.rows.filter((rowDimension: RowDimensionType) => rowDimension.fixed)
     let height = columnNameRowHeight
     const result = {}
-    for (const fixedRow of fixedRows) {
+    for (const fixedRow of fixedRows.value) {
       result[fixedRow.id] = height
       height += getRowHeight(fixedRow) + 1
     }
@@ -130,11 +136,15 @@ export function useGrid (
     }
     return { fixed: false, position: null }
   }
-  const getRowFixedInfo = (row: RowDimensionType): FixedInfoType => {
+  const getRowFixedInfo = (row: RowDimensionType): RowFixedInfoType => {
     if (row.fixed) {
-      return { fixed: true, position: fixedRowsTop.value[row.id] }
+      return {
+        fixed: true,
+        position: fixedRowsTop.value[row.id],
+        reverseIndex: fixedRows.value.length - fixedRowsIndex.value[row.id]
+      }
     }
-    return { fixed: false, position: null }
+    return { fixed: false, position: null, reverseIndex: null }
   }
   const getCellFixedInfo = (cell: CellType): FixedInfoType => {
     const column = sheet.value.columns[letterToPosition(parsePosition(cell.globalPosition).column) - 1]
