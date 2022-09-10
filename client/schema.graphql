@@ -188,6 +188,29 @@ type AddDivisionsMutationPayload {
   success: Boolean!
 }
 
+input AddDocumentDataMutationInput {
+  clientMutationId: String
+  """Комментарий"""
+  comment: String
+  """Файл с данными"""
+  file: Upload!
+  """Идентификатор периода"""
+  periodId: ID!
+  """Статус"""
+  statusId: ID!
+}
+
+"""Загрузка данных из файла."""
+type AddDocumentDataMutationPayload {
+  clientMutationId: String
+  """Список созданных документов"""
+  documents: [DocumentType]
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDocumentMutationInput {
   clientMutationId: String
   """Комментарий"""
@@ -2464,6 +2487,8 @@ type Mutation {
   addDivisionsFromPeriod(input: AddDivisionsFromPeriodMutationInput!): AddDivisionsFromPeriodMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
+  """Загрузка данных из файла."""
+  addDocumentData(input: AddDocumentDataMutationInput!): AddDocumentDataMutationPayload!
   """Добавление статуса документа."""
   addDocumentStatus(input: AddDocumentStatusMutationInput!): AddDocumentStatusMutationPayload!
   """Мутация для загрузки файлов"""

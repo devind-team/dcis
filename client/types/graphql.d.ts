@@ -207,6 +207,30 @@ export type AddDivisionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddDocumentDataMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Комментарий */
+  comment?: InputMaybe<Scalars['String']>;
+  /** Файл с данными */
+  file: Scalars['Upload'];
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+  /** Статус */
+  statusId: Scalars['ID'];
+};
+
+/** Загрузка данных из файла. */
+export type AddDocumentDataMutationPayload = {
+  __typename?: 'AddDocumentDataMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Список созданных документов */
+  documents?: Maybe<Array<Maybe<DocumentType>>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddDocumentMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Комментарий */
@@ -2612,6 +2636,8 @@ export type Mutation = {
   addDivisionsFromPeriod: AddDivisionsFromPeriodMutationPayload;
   /** Добавление документа. */
   addDocument: AddDocumentMutationPayload;
+  /** Загрузка данных из файла. */
+  addDocumentData: AddDocumentDataMutationPayload;
   /** Добавление статуса документа. */
   addDocumentStatus: AddDocumentStatusMutationPayload;
   /** Мутация для загрузки файлов */
@@ -2813,6 +2839,11 @@ export type MutationAddDivisionsFromPeriodArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddDocumentArgs = {
   input: AddDocumentMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddDocumentDataArgs = {
+  input: AddDocumentDataMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */

@@ -1,0 +1,30 @@
+#import "../../fragments/document_fields.graphql"
+#import "../../fragments/status_fields.graphql"
+
+mutation AddDocumentData($periodId: ID!, $file: Upload!, $statusId: ID!, $comment: String!) {
+  addDocumentData(input: {periodId: $periodId, file: $file, statusId: $statusId, comment: $comment}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    documents {
+      ...DocumentFields
+      user {
+        id
+        __typename
+      }
+      lastStatus {
+        id
+        comment
+        createdAt
+        status {
+          ...StatusFields
+        }
+        __typename
+      }
+    }
+    __typename
+  }
+}

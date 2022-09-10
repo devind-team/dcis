@@ -1,6 +1,8 @@
 from typing import Any
 
 import graphene
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from graphene_file_upload.scalars import Upload
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -131,6 +133,30 @@ class DeleteDocumentStatusMutation(BaseMutation):
         return DeleteDocumentStatusMutation(id=document_status_id)
 
 
+class AddDocumentDataMutation(BaseMutation):
+    """Загрузка данных из файла."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        file = Upload(required=True, description='Файл с данными')
+        status_id = graphene.ID(required=True, description='Статус')
+        comment = graphene.String(description='Комментарий')
+
+    documents = graphene.List(DocumentType, description='Список созданных документов')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        file: InMemoryUploadedFile,
+        status_id: str,
+        comment: str
+    ) -> 'AddDocumentDataMutation':
+        return AddDocumentDataMutation()
+
+
 class UnloadDocumentMutation(BaseMutation):
     """Выгрузка документа."""
 
@@ -246,6 +272,7 @@ class DocumentMutations(graphene.ObjectType):
     add_document_status = AddDocumentStatusMutation.Field(required=True)
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
+    add_document_data = AddDocumentDataMutation.Field(required=True)
 
     add_child_row_dimension = AddChildRowDimensionMutation.Field(required=True)
     change_child_row_dimension_height = ChangeChildRowDimensionHeightMutation.Field(required=True)

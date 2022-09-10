@@ -190,6 +190,7 @@ export default {
     },
     addDocument: {
       buttonText: 'Добавить документ',
+      formText: 'Добавить новый документ',
       header: 'Добавление документа',
       comment: 'Комментарий',
       status: 'Статус',

@@ -3,15 +3,14 @@
     template(#header) {{ $t('dcis.documents.name') }}
       template(v-if="period.canAddDocument || userPeriodDivision.length")
         v-spacer
-        add-document(
-          :can-add-any-document="period.canAddDocument"
-          :user-divisions="userPeriodDivision"
+        add-document-menu(
+          v-slot="{ on, attrs }"
           :period="period"
           :documents="documents"
-          :update="addDocumentUpdate"
+          :add-document-update="addDocumentUpdate"
+          :user-divisions="userPeriodDivision"
         )
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
+          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
     template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
     items-data-filter(
       v-if="showFilter"
@@ -70,9 +69,11 @@ import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
+import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 
 export default defineComponent({
   components: {
+    AddDocumentMenu,
     LeftNavigatorContainer,
     ItemsDataFilter,
     AddDocument,
