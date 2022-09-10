@@ -11,10 +11,20 @@ v-menu(v-model="active" transition="slide-y-transition" offset-y left)
       :update="addDocumentUpdate"
     )
       template(#activator="{ on }")
-        v-list-item(v-on="on" color="primary")
+        v-list-item(v-on="on")
           v-list-item-icon
             v-icon mdi-form-select
           v-list-item-content {{ $t('dcis.documents.addDocument.formText') }}
+    add-document-data(
+      v-if="period.canAddDocument"
+      :period="period"
+      :update="addDocumentUpdate"
+    )
+      template(#activator="{ on }")
+        v-list-item(v-on="on" )
+          v-list-item-icon
+            v-icon mdi-import
+          v-list-item-content {{ $t('dcis.documents.addDocumentData.header') }}
 </template>
 
 <script lang="ts">
@@ -22,9 +32,10 @@ import { defineComponent, PropType, ref } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { DivisionModelType, DocumentType, PeriodType } from '~/types/graphql'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import AddDocumentData from '~/components/dcis/documents/AddDocumentData.vue'
 
 export default defineComponent({
-  components: { AddDocument },
+  components: { AddDocumentData, AddDocument },
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
     userDivisions: { type: Array as PropType<DivisionModelType[]>, required: true },

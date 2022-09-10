@@ -199,6 +199,13 @@ export default {
       lastDocument: 'Значения из документа',
       version: '@:dcis.documents.version'
     },
+    addDocumentData: {
+      buttonText: 'Загрузить данные',
+      header: 'Импорт документов',
+      file: 'Выберете файл',
+      status: '@:dcis.documents.addDocument.status',
+      comment: '@:dcis.documents.addDocument.comment'
+    },
     status: {
       header: 'Изменение статусов',
       readonlyHeader: 'Статусы',
