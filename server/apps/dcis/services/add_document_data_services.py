@@ -4,16 +4,15 @@ from functools import lru_cache
 from io import BytesIO
 from dataclasses import dataclass
 import datetime
-from typing import Iterable, Union, Type
-from django.db.models import Q
+from typing import Iterable, Union
+from django.db.models import Q, Max
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
-from devind_dictionaries.models import Department, Organization
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.orm_utils import get_object_or_404
 from apps.core.models import User
-from apps.dcis.models import Document, Period, Status, Sheet, Cell
+from apps.dcis.models import Document, Period, Status, Sheet, Cell, Value
 from apps.dcis.permissions import can_add_any_document
 
 DIVISION_NAME: str = 'idlistedu'  # Идентификатор поля для получения идентификатора дивизиона
@@ -112,7 +111,15 @@ def add_document_data(
     # 3. Строим структуру данных
     documents_data = get_documents_data(reader, sheets, DIVISION_NAME)
     # 4. Создаем документы
-    documents: list[Document] = add_documents(period, documents_data)
+    documents: list[Document] = add_documents(
+        user,
+        period,
+        sheets,
+        status,
+        documents_data,
+        divisions,
+        comment
+    )
     return documents, []
 
 
@@ -171,9 +178,49 @@ def get_documents_data(
     return document_data
 
 
-def add_documents(period: Period, documents_data: dict[int, dict[str, list[CellData]]]) -> list[Document]:
+def add_documents(
+    user: User,
+    period: Period,
+    sheets: dict[str, Sheet],
+    status: Status,
+    documents_data: dict[int, dict[str, list[CellData]]],
+    divisions: list[int],
+    comment: str
+) -> list[Document]:
     """Создание и запись документов со значениями."""
+    max_versions: dict[int, int] = {
+        version['object_id']: version['version__max'] + 1
+        for version in Document.objects.filter(
+            period=period,
+            object_id__in=divisions
+        ).values('object_id').annotate(Max('version')).order_by()
+    }
     documents: list[Document] = []
+    values: list[Value] = []
+    for division_id, sheets_data in documents_data.items():
+        document: Document = Document.objects.create(
+            comment=comment,
+            version=max_versions.get(division_id, 1),
+            user=user,
+            period=period,
+            sheets=sheets.values(),
+            object_id=division_id
+        )
+        document.documentstatus_set.create(comment=comment, status=status, user=user)
+        cell_data: CellData
+        values.extend([
+            Value(
+                value=cell_data.value,
+                document=document,
+                sheet=sheets[sheet_name],
+                column_id=cell_data.column_id,
+                row_id=cell_data.row_id
+            )
+            for sheet_name, cells_data in sheets_data.items()
+            for cell_data in cells_data if cell_data.value != cell_data.default_value
+        ])
+        documents.append(document)
+    Value.objects.bulk_create(values)
     return documents
 
 
