@@ -312,7 +312,7 @@ class ExcelExtractor:
     def _get_cell_kind(cell: OpenpyxlCell) -> str:
         """Получение типа ячейки.
 
-        Если в Excel пометить ячейку с числом текстовым форматом, то он не изменят тип ячейки на 's',
+        Если в Excel пометить ячейку с числом текстовым форматом, то он не изменяет тип ячейки на 's',
         а устанавливает number_format в значение '@', где @ - placeholder for text.
         """
         if cell.data_type == 'n' and cell.number_format == '@':
