@@ -175,6 +175,18 @@ export default {
   documents: {
     name: 'Документы',
     version: 'Версия {version}',
+    divisionFilterOrganization: {
+      title: 'Фильтр организаций',
+      noFiltrationMessage: 'Все организации',
+      multipleMessage: '{name} и еще {restLength} организаций | {name} и еще {restLength} организация |' +
+        ' {name} и еще {restLength} организации'
+    },
+    divisionFilterDepartment: {
+      title: 'Фильтр департаментов',
+      noFiltrationMessage: 'Все департаменты',
+      multipleMessage: '{name} и еще {restLength} департаментов | {name} и еще {restLength} департамент |' +
+        ' {name} и еще {restLength} департамента'
+    },
     tableHeaders: {
       version: 'Версия',
       comment: 'Комментарий',
@@ -242,6 +254,8 @@ export default {
       addRow: 'Добавить строку'
     },
     sheetToolbar: {
+      readonly: 'Только для чтения',
+      fix: 'Закрепление столбцов/строк',
       fontSize: 'Шрифт',
       kind: 'Тип'
     },

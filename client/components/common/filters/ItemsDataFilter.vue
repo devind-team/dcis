@@ -103,8 +103,8 @@ export default defineComponent({
       }
     },
     multipleMessageFunction: {
-      type: Function as PropType<MultipleMessageFunction>,
-      required: false
+      type: Function as PropType<MultipleMessageFunction | null>,
+      default: null
     },
     searchLabel: {
       type: String,
