@@ -203,9 +203,9 @@ def add_documents(
             version=max_versions.get(division_id, 1),
             user=user,
             period=period,
-            sheets=sheets.values(),
             object_id=division_id
         )
+        document.sheets.add(*sheets.values())
         document.documentstatus_set.create(comment=comment, status=status, user=user)
         cell_data: CellData
         values.extend([
@@ -217,7 +217,7 @@ def add_documents(
                 row_id=cell_data.row_id
             )
             for sheet_name, cells_data in sheets_data.items()
-            for cell_data in cells_data if cell_data.value != cell_data.default_value
+            for cell_data in cells_data if cell_data.value and cell_data.value != cell_data.default_value
         ])
         documents.append(document)
     Value.objects.bulk_create(values)

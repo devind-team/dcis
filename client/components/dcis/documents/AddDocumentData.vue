@@ -12,14 +12,17 @@ mutation-modal-form(
   template(#activator="{ on }")
     slot(name="activator" :on="on")
   template(#form)
-    validation-provider(v-slot="{ error, valid }" :name="String($t('dcis.documents.addDocumentData.file'))" rules="required")
+    validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.documents.addDocumentData.file'))" rules="required")
       v-file-input(
         v-model="file"
         :label="String($t('dcis.documents.addDocumentData.file'))"
+        :error-messages="errors"
+        :success="valid"
         placeholder="Выберете файл"
         hint="Файл в формате xlsx"
         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        persistent-hint clearable)
+        persistent-hint clearable
+      )
     validation-provider(
       v-slot="{ errors, valid }"
       :name="String($t('dcis.documents.addDocumentData.status'))"
