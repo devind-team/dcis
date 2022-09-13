@@ -36,7 +36,7 @@
 | [Redis](https://redis.io/docs/getting-started/installation/) | latest |
 
 Для Windows Redis официально не поддерживается,
-поэтому необходимо или установить WSL, как это описано на 
+поэтому необходимо или установить WSL, как это описано на
 [сайте Redis](https://redis.io/docs/getting-started/installation/install-redis-on-windows/),
 или воспользоваться [неофициальном портом](https://github.com/tporadowski/redis/releases).
 
@@ -60,7 +60,7 @@ cd server
 
 Имя базы данных по умолчанию - `devind`.
 
-2. Создать `.env` файл в папке `server`.  
+2. Создать `.env` файл в папке `server`.
 
 Создать файл можно путем копирования файла `.env.example` с новым названием `.env`.
 
@@ -73,7 +73,7 @@ cd server
 
 3. Установить зависимости Python
 
-Для установки зависимостей Python необходимо выполнить команду:  
+Для установки зависимостей Python необходимо выполнить команду:
 ```shell
 poetry install
 ```
@@ -99,10 +99,10 @@ brew services start redis
 ```shell
 # Unix
 poetry run python3 manage.py migrate
-poetry run python3 manage.py fs
+poetry run python3 manage.py load_fixtures
 # Windows
 poetry run python manage.py migrate
-poetry run python manage.py fs
+poetry run python manage.py load_fixtures
 ```
 
 Далее сервис может быть запущен следующей командой:
@@ -169,7 +169,7 @@ Pycharm должен автоматически определить путь к
 
 2. Установить зависимости Node.js.
 
-Для установки зависимостей Node.js необходимо перейти в папку `client` и выполнить команду:  
+Для установки зависимостей Node.js необходимо перейти в папку `client` и выполнить команду:
 ```shell
 yarn
 ```
@@ -231,7 +231,7 @@ yarn run dev
 | [docker-compose](https://docs.docker.com/compose/install/compose-desktop)     |  latest  |
 | [Nginx](https://www.nginx.com/resources/wiki/start/topics/tutorials/install/) |  latest  |
 
-## Развертка и настройка электронной образовательной среды
+## Развертка и настройка DCIS
 
 После установки всех зависомостей необходимо:
 1. [Аутентифицироваться в реестре контейнеров](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry):
@@ -241,13 +241,13 @@ yarn run dev
 2. Создать директорию для хранения файлов и конфигурационные файлы для развертывания элетронной образовательной среды:
    1. Создание директории:
         ```shell
-        sudo mkdir /var/www/eleden/storage 
+        sudo mkdir /var/www/eleden/storage
         ```
    2. Создать файл `.env` со следующим содержимом:
         ```env_file
         # Client settings
         # Data connection
-        APP_NAME='Электронная образовательная среда'
+        APP_NAME='DCIS'
         URL=https://example.ru
         API_URL=http://192.168.1.3:8000/graphql/
         API_URL_BROWSER=https://example.ru/graphql/
@@ -286,7 +286,7 @@ yarn run dev
    3. Создать файл `docker-compose.yml` со следующим содержимом:
         ```yml
         version: '3.7'
-        
+
         services:
           client:
             container_name: client
@@ -296,7 +296,7 @@ yarn run dev
             ports:
               - "3000:3000"
             env_file: .env
-        
+
           api:
             container_name: api
             image: ghcr.io/devind-team/eleden/eleden-server:latest
@@ -307,7 +307,7 @@ yarn run dev
             env_file: .env
             volumes:
               - "/var/www/eleden/storage:/usr/src/app/storage"
-        
+
           celery:
             container_name: celery
             image: ghcr.io/devind-team/eleden/eleden-server:latest
@@ -316,7 +316,7 @@ yarn run dev
             env_file: .env
             volumes:
               - "/var/www/eleden/storage:/usr/src/app/storage"
-        
+
           redis:
             image: redis
             restart: always
@@ -362,38 +362,38 @@ yarn run dev
     upstream channels-site {
         server localhost:8000;
     }
-    
+
     server {
         listen 443 ssl http2;
         server_name site.ru www.site.ru;
-    
+
         access_log /var/log/nginx/site.ru.access.log;
         error_log /var/log/nginx/site.ru.error.log;
-    
+
         client_max_body_size 32m;
-    
+
         #ssl on;
         ssl_certificate /etc/ssl/certificate/site.crt;
         ssl_certificate_key /etc/ssl/certificate/site.key;
-    
+
         location /storage/ {
             alias /var/www/site/storage/;
         }
-    
+
         location /graphql/ {
             proxy_pass http://channels-site;
-    
+
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
-    
+
             proxy_redirect off;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Host $server_name;
         }
-    
+
         location / {
             proxy_pass http://localhost:3000;
             proxy_set_header Host $host;
@@ -401,7 +401,7 @@ yarn run dev
             proxy_set_header X-Real-IP $remote_addr;
         }
     }
-    
+
     server {
         listen 80;
         server_name site.ru www.site.ru;
