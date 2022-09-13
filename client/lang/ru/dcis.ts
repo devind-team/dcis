@@ -187,6 +187,12 @@ export default {
       multipleMessage: '{name} и еще {restLength} департаментов | {name} и еще {restLength} департамент |' +
         ' {name} и еще {restLength} департамента'
     },
+    statusFilter: {
+      title: 'Фильтр статусов',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
     tableHeaders: {
       version: 'Версия',
       comment: 'Комментарий',

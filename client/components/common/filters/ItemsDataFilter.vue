@@ -192,7 +192,7 @@ export default defineComponent({
       emit('clear')
       apply()
     }
-    /** Закрытие модельного окна */
+    /** Закрытие модального окна */
     const close = () => {
       tempItems.value = []
       search.value = ''
