@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import Any
 
 import graphene
@@ -13,6 +14,7 @@ from graphql_relay import from_global_id
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
+from apps.dcis.services.add_document_data_services import add_document_data
 from apps.dcis.services.document_services import (
     add_document_status,
     change_document_comment,
@@ -152,9 +154,20 @@ class AddDocumentDataMutation(BaseMutation):
         period_id: str,
         file: InMemoryUploadedFile,
         status_id: str,
-        comment: str
+        comment: str = None
     ) -> 'AddDocumentDataMutation':
-        return AddDocumentDataMutation()
+        documents, errors = add_document_data(
+            info.context.user,
+            period_id,
+            BytesIO(file.read()),
+            status_id,
+            comment
+        )
+        return AddDocumentDataMutation(
+            success=not errors,
+            errors=errors,
+            documents=documents
+        )
 
 
 class UnloadDocumentMutation(BaseMutation):

@@ -25,7 +25,6 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
-from apps.dcis.schema.types import DivisionModelType
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
