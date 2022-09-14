@@ -1,0 +1,11 @@
+[
+  {
+    "model": "dcis.PeriodGroup",
+    "pk": 1,
+    "fields": {
+      "name": "Группа периода",
+      "created_at": "2021-01-01T12:00:00.000Z",
+      "period_id": 1
+    }
+  }
+]
