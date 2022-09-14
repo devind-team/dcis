@@ -127,7 +127,7 @@ export default defineComponent({
     const {
       data: documents,
       loading,
-      pagination: { totalCount },
+      pagination: { count, totalCount },
       update,
       addUpdate,
       changeUpdate
@@ -221,6 +221,7 @@ export default defineComponent({
       canDeleteDocumentStatus,
       documents,
       loading,
+      count,
       totalCount,
       update,
       addDocumentUpdate,
