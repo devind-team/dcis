@@ -60,7 +60,8 @@ def get_period_possible_divisions(
         divisions = period.project.division.objects.annotate(
             search=SearchVector('name', config='russian'),
         ).filter(
-            search=SearchQuery(search, config='russian')
+            Q(name__icontains=search) |
+            Q(search=SearchQuery(search, config='russian'))
         )
     return get_divisions(divisions.exclude(pk__in=period.division_set.values_list('object_id', flat=True)))
 
