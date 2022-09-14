@@ -30,14 +30,14 @@ v-row
           v-btn-toggle.mx-1(v-model="properties" multiple)
             v-btn(:disabled="disabled" value="readonly" height="40")
               v-icon mdi-pencil-off
-      span Только для чтения
+      span {{ t('dcis.grid.sheetToolbar.readonly') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
-          v-btn-toggle.ml-1(v-model="dimensionsProperties" multiple)
+          v-btn-toggle.mx-1(v-model="dimensionsProperties" multiple)
             v-btn(:disabled="fixedDisabled" value="fixed" height="40")
               v-icon mdi-table-lock
-      span Закрепление столбцов/строк
+      span {{ t('dcis.grid.sheetToolbar.fix') }}
     v-combobox.mx-1.shrink(
       v-model="size"
       :label="t('dcis.grid.sheetToolbar.fontSize')"

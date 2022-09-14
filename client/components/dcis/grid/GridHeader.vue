@@ -87,10 +87,14 @@ export default defineComponent({
       }
     }
     const getHeaderStyle = (column: ColumnDimensionType): Record<string, string> => {
-      return {
-        width: `${props.getColumnWidth(column)}px`,
-        left: `${props.getColumnFixedInfo(column).position}px`
+      const style: Record<string, string> = {
+        width: `${props.getColumnWidth(column)}px`
       }
+      const fixedInfo = props.getColumnFixedInfo(column)
+      if (fixedInfo.fixed) {
+        style.left = `${fixedInfo.position}px`
+      }
+      return style
     }
 
     const currentCol = ref<ColumnDimensionType>(null)

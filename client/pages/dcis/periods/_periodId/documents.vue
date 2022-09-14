@@ -12,13 +12,26 @@
         )
           template(#activator="{ on }")
             v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
+    template(#subheader) {{ $t('shownOf', { count: visibleDocs.length, totalCount }) }}
     items-data-filter(
-      v-if="showFilter"
-      v-model="selectedDocs"
-      :items="period.divisions.map(x => ({ id: x.id, name: x.name }))"
-      :get-name="i => i.name"
+      v-if="showDivisionFilter"
+      v-model="selectedDivisions"
+      v-bind="divisionFilterMessages"
+      :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
+      :get-name="d => d.name"
+      message-container-class="mr-1"
       multiple
+      has-select-all
+    )
+    query-data-filter(
+      v-model="selectedStatuses"
+      v-bind="statusFilterMessages"
+      :query="statusesQuery"
+      :update="data => data.statuses"
+      :get-name="status => status.name"
+      message-container-class="mr-1"
+      multiple
+      has-select-all
     )
     v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
       template(#item.version="{ item }")
@@ -43,7 +56,9 @@
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
           div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
           .font-italic {{ item.lastStatus.comment }}
-      template(#item.division="{ item }") {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
+      template(
+        #item.division="{ item }"
+      ) {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
       template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
@@ -62,19 +77,24 @@ import {
   ChangeDocumentCommentMutationVariables,
   DivisionModelType,
   DocumentType,
-  PeriodType
+  PeriodType,
+  StatusType
 } from '~/types/graphql'
+import { FilterMessages } from '~/types/filters'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
+import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 
 export default defineComponent({
   components: {
     LeftNavigatorContainer,
     ItemsDataFilter,
+    QueryDataFilter,
     AddDocument,
     DocumentStatuses,
     TextMenu
@@ -85,7 +105,7 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const { t } = useI18n()
+    const { t, tc } = useI18n()
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
@@ -134,13 +154,34 @@ export default defineComponent({
       changeDocumentCommentMutate({ documentId: document.id, comment })
     }
 
-    const showFilter = computed<boolean>(() => {
+    const divisionFilterMessages = computed<FilterMessages>(() => {
+      const filterName = props.period.project.contentType.model === 'department'
+        ? 'divisionFilterOrganization'
+        : 'divisionFilterDepartment'
+      return getFilterMessages(filterName, true)
+    })
+    const statusFilterMessages = computed<FilterMessages>(() => {
+      return getFilterMessages('statusFilter', true)
+    })
+
+    const getFilterMessages = (filterName: string, multiple: boolean = false): FilterMessages => {
+      return {
+        title: t(`dcis.documents.${filterName}.title`) as string,
+        noFiltrationMessage: t(`dcis.documents.${filterName}.noFiltrationMessage`) as string,
+        multipleMessageFunction: multiple
+          ? (name, restLength) =>
+              tc(`dcis.documents.${filterName}.multipleMessage`, restLength, { name, restLength }) as string
+          : undefined
+      }
+    }
+
+    const showDivisionFilter = computed<boolean>(() => {
       return props.period.multiple && documents.value && new Set(
         documents.value.map((document: DocumentType) => document.objectId)
       ).size > 1
     })
     const headers = computed<DataTableHeader[]>(() => {
-      const result: DataTableHeader[] = showFilter.value
+      const result: DataTableHeader[] = showDivisionFilter.value
         ? [{
             text: t(`dcis.documents.tableHeaders.${props.period.project.contentType.model}`) as string,
             value: 'division'
@@ -156,17 +197,24 @@ export default defineComponent({
       return result
     })
 
-    const selectedDocs = ref<DivisionModelType[]>([])
+    const selectedDivisions = ref<DivisionModelType[]>([])
+    const selectedStatuses = ref<StatusType[]>([])
+
     const visibleDocs = computed<DocumentType[]>(() => {
-      return selectedDocs.value.length > 0
-        ? documents.value.filter(x => selectedDocs.value.map(x => x.id).includes(x.objectId))
-        : documents.value
-    })
-    const count = computed(() => {
-      return selectedDocs.value.length > 0 ? visibleDocs.value.length : totalCount.value
+      let docs = documents.value
+      if (selectedDivisions.value.length > 0) {
+        const selectedDivisionIds = selectedDivisions.value.map(division => division.id)
+        docs = docs.filter(doc => selectedDivisionIds.includes(doc.objectId))
+      }
+      if (selectedStatuses.value.length > 0) {
+        const selectedStatusesIds = selectedStatuses.value.map(status => status.id)
+        docs = docs.filter(doc => selectedStatusesIds.includes(doc.lastStatus.status.id))
+      }
+      return docs
     })
 
     return {
+      statusesQuery,
       userPeriodDivision,
       canChangeDocument,
       canDeleteDocumentStatus,
@@ -177,11 +225,14 @@ export default defineComponent({
       addDocumentUpdate,
       dateTimeHM,
       changeDocumentComment,
-      showFilter,
+      divisionFilterMessages,
+      statusFilterMessages,
+      getFilterMessages,
+      showDivisionFilter,
       headers,
-      selectedDocs,
-      visibleDocs,
-      count
+      selectedDivisions,
+      selectedStatuses,
+      visibleDocs
     }
   }
 })
