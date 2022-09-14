@@ -208,6 +208,7 @@ export default defineComponent({
           props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
         ),
         grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
+        grid__cell_readonly: !cell.editable,
         'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
         'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
       }
