@@ -1,7 +1,7 @@
 <template lang="pug">
 bread-crumbs(:items="bc" fluid)
   v-card(v-if="!activeDocumentLoading")
-    v-card-title {{ activeDocument.objectName }}
+    v-card-subtitle {{ activeDocument.objectName }}
     v-card-text
       grid-sheets(
         v-model="activeSheetIndex"
