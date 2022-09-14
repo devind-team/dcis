@@ -260,7 +260,7 @@ class ExcelExtractor:
                 cells.append(BuildCell(
                     column_id=cell.column,
                     row_id=cell.row,
-                    kind=cell.data_type,
+                    kind=self._get_cell_kind(cell),
                     editable=not self.readonly_fill_color or fill_color.value == '00000000',
                     coordinate=cell.coordinate,
                     formula=cell.value if isinstance(cell.value, str) and cell.value and cell.value[0] == '=' else None,
@@ -307,3 +307,14 @@ class ExcelExtractor:
     def coordinate(sheet: str, column: int, row: int):
         """Получаем координату."""
         return f'{sheet}!{get_column_letter(column)}{row}'
+
+    @staticmethod
+    def _get_cell_kind(cell: OpenpyxlCell) -> str:
+        """Получение типа ячейки.
+
+        Если в Excel пометить ячейку с числом текстовым форматом, то он не изменяет тип ячейки на 's',
+        а устанавливает number_format в значение '@', где @ - placeholder for text.
+        """
+        if cell.data_type == 'n' and cell.number_format == '@':
+            return 's'
+        return cell.data_type
