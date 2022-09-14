@@ -2216,6 +2216,8 @@ type DocumentType implements Node {
   lastStatus: DocumentStatusType
   """Идентификатор дивизиона"""
   objectId: ID
+  """Название дивизиона"""
+  objectName: String
   """Период сбора"""
   period: PeriodType
   """Листы"""

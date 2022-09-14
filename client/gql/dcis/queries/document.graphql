@@ -46,6 +46,7 @@ query Document($documentId: ID!) {
       __typename
     }
     objectId
+    objectName
     __typename
   }
 }

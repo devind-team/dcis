@@ -100,9 +100,10 @@ def add_document_data(
         if DIVISION_NAME not in reader.get_headers(sheet_name):
             return None, [ErrorFieldType('file', [f'В листе {sheet_name} не найдено поле {DIVISION_NAME}'])]
         divisions_id.update({division_id: True for division_id in reader.column_items(sheet_name, DIVISION_NAME)})
-    divisions: list[int] = period.project.division.objects \
-        .filter(pk__in=divisions_id.keys()) \
-        .values_list('pk', flat=True)
+    divisions: dict[int, str] = {
+        d['pk']: d['name']
+        for d in period.project.division.objects.filter(pk__in=divisions_id.keys()).values('pk', 'name')
+    }
     for division in divisions:
         divisions_id[division] = False
     mismatch_divisions: list[str] = [str(division_id) for division_id, freq in divisions_id.items() if freq]
@@ -184,7 +185,7 @@ def add_documents(
     sheets: dict[str, Sheet],
     status: Status,
     documents_data: dict[int, dict[str, list[CellData]]],
-    divisions: list[int],
+    divisions: dict[int, str],
     comment: str
 ) -> list[Document]:
     """Создание и запись документов со значениями."""
@@ -192,7 +193,7 @@ def add_documents(
         version['object_id']: version['version__max'] + 1
         for version in Document.objects.filter(
             period=period,
-            object_id__in=divisions
+            object_id__in=divisions.keys()
         ).values('object_id').annotate(Max('version')).order_by()
     }
     documents: list[Document] = []
@@ -203,7 +204,8 @@ def add_documents(
             version=max_versions.get(division_id, 1),
             user=user,
             period=period,
-            object_id=division_id
+            object_id=division_id,
+            object_name=divisions[division_id]
         )
         document.sheets.add(*sheets.values())
         document.documentstatus_set.create(comment=comment, status=status, user=user)

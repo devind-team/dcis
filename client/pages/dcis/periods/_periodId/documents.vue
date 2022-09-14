@@ -48,16 +48,14 @@
           document-statuses(
             :can-add="canChangeDocument(item)"
             :can-delete="canDeleteDocumentStatus(item)"
-            :update="update"
+            :update="updateDocuments"
             :document="item"
           )
             template(#activator="{ on }")
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
           div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
           .font-italic {{ item.lastStatus.comment }}
-      template(
-        #item.division="{ item }"
-      ) {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
+      template(#item.division="{ item }") {{ item.objectName }}
       template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
@@ -66,7 +64,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { computed, defineComponent, useNuxt2Meta, useRoute } from '#app'
+import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useI18n } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
@@ -128,7 +126,7 @@ export default defineComponent({
       data: documents,
       loading,
       pagination: { count, totalCount },
-      update,
+      update: updateDocuments,
       addUpdate,
       changeUpdate
     } = useDocumentsQuery(route.params.periodId)
@@ -223,7 +221,7 @@ export default defineComponent({
       loading,
       count,
       totalCount,
-      update,
+      updateDocuments,
       addDocumentUpdate,
       dateTimeHM,
       changeDocumentComment,
