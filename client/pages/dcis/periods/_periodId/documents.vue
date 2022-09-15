@@ -33,11 +33,12 @@
       multiple
       has-select-all
     )
-    v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.version="{ item }")
+    v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-sort disable-pagination hide-default-footer)
+      template(#item.division="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
+        ) {{ item.objectName }} ({{ item.objectId }})
+      template(#item.version="{ item }") {{ item.version }}
       template(#item.comment="{ item }")
         template(v-if="item.comment")
           template(v-if="canChangeDocument(item)")
@@ -56,7 +57,6 @@
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
           div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
           .font-italic {{ item.lastStatus.comment }}
-      template(#item.division="{ item }") {{ item.objectName }}
       template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
@@ -195,7 +195,7 @@ export default defineComponent({
         : []
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
+        // { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
