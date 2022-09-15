@@ -75,7 +75,7 @@ import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
 import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
-import { useFilters, useI18n } from '~/composables'
+import { useFilters, useI18n, useCursorPagination } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -144,7 +144,10 @@ export default defineComponent({
     } = useDocumentsQuery(
       route.params.periodId,
       computed(() => selectedDivisions.value.map(division => division.id)),
-      computed(() => selectedStatuses.value.map(status => status.id))
+      computed(() => selectedStatuses.value.map(status => status.id)), {
+        pagination: useCursorPagination(),
+        fetchScroll: typeof document === 'undefined' ? null : document
+      }
     )
 
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
