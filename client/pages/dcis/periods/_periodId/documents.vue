@@ -34,10 +34,15 @@
       multiple
       has-select-all
     )
-    v-data-table(:headers="headers" :items="documents" :loading="loading" disable-sort disable-pagination hide-default-footer)
+    v-data-table(
+      :headers="headers"
+      :items="documents"
+      :loading="loading"
+      disable-sort
+      disable-pagination
+      hide-default-footer
+    )
       template(#item.division="{ item }")
-    v-data-table(:headers="headers" :items="documents" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.version="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
         ) {{ item.objectName }} ({{ item.objectId }})
