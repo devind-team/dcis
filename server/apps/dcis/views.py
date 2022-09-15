@@ -1,13 +1,14 @@
 """Модуль описания внешних запросов."""
 
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.generics import ListAPIView
-from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from .models import Project, Period, Division
-from .serializers import ProjectSerializer, PeriodSerializer
+from rest_framework.decorators import api_view
+from rest_framework.generics import ListAPIView
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from .models import Period, Project
+from .serializers import PeriodSerializer, ProjectSerializer
 
 
 class ProjectsView(ListAPIView):

@@ -19,7 +19,8 @@
       v-bind="divisionFilterMessages"
       :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
       :get-name="d => d.name"
-      message-container-class="mr-1"
+      :search-function="(d, s) => d.name.toLocaleLowerCase().includes(s.toLocaleLowerCase())"
+      message-container-class="mr-1 mb-1"
       multiple
       has-select-all
     )
@@ -29,11 +30,18 @@
       :query="statusesQuery"
       :update="data => data.statuses"
       :get-name="status => status.name"
-      message-container-class="mr-1"
+      message-container-class="mr-1 mb-1"
       multiple
       has-select-all
     )
-    v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-sort disable-pagination hide-default-footer)
+    v-data-table(
+      :headers="headers"
+      :items="documents"
+      :loading="loading"
+      disable-sort
+      disable-pagination
+      hide-default-footer
+    )
       template(#item.division="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
@@ -80,15 +88,15 @@ import {
 } from '~/types/graphql'
 import { FilterMessages } from '~/types/filters'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
+import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
+import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
-import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
-import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
-import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 
 export default defineComponent({
   components: {
@@ -123,6 +131,9 @@ export default defineComponent({
       return document.canChange
     }
 
+    const selectedDivisions = ref<DivisionModelType[]>([])
+    const selectedStatuses = ref<StatusType[]>([])
+
     const {
       data: documents,
       loading,
@@ -130,7 +141,11 @@ export default defineComponent({
       update: updateDocuments,
       addUpdate,
       changeUpdate
-    } = useDocumentsQuery(route.params.periodId)
+    } = useDocumentsQuery(
+      route.params.periodId,
+      computed(() => selectedDivisions.value.map(division => division.id)),
+      computed(() => selectedStatuses.value.map(status => status.id))
+    )
 
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
       if (!result.data.addDocument.errors.length) {
@@ -181,11 +196,7 @@ export default defineComponent({
       }
     }
 
-    const showDivisionFilter = computed<boolean>(() => {
-      return props.period.multiple && documents.value && new Set(
-        documents.value.map((document: DocumentType) => document.objectId)
-      ).size > 1
-    })
+    const showDivisionFilter = computed<boolean>(() => props.period.multiple)
     const headers = computed<DataTableHeader[]>(() => {
       const result: DataTableHeader[] = showDivisionFilter.value
         ? [{
@@ -195,7 +206,7 @@ export default defineComponent({
         : []
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-        // { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
+        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
@@ -203,27 +214,13 @@ export default defineComponent({
       return result
     })
 
-    const selectedDivisions = ref<DivisionModelType[]>([])
-    const selectedStatuses = ref<StatusType[]>([])
-
-    const visibleDocs = computed<DocumentType[]>(() => {
-      let docs = documents.value
-      if (selectedDivisions.value.length > 0) {
-        const selectedDivisionIds = selectedDivisions.value.map(division => division.id)
-        docs = docs.filter(doc => selectedDivisionIds.includes(doc.objectId))
-      }
-      if (selectedStatuses.value.length > 0) {
-        const selectedStatusesIds = selectedStatuses.value.map(status => status.id)
-        docs = docs.filter(doc => selectedStatusesIds.includes(doc.lastStatus.status.id))
-      }
-      return docs
-    })
-
     return {
       statusesQuery,
       userPeriodDivision,
       canChangeDocument,
       canDeleteDocumentStatus,
+      selectedDivisions,
+      selectedStatuses,
       documents,
       loading,
       count,
@@ -237,10 +234,7 @@ export default defineComponent({
       statusFilterMessages,
       getFilterMessages,
       showDivisionFilter,
-      headers,
-      selectedDivisions,
-      selectedStatuses,
-      visibleDocs
+      headers
     }
   }
 })

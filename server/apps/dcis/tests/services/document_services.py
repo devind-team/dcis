@@ -20,9 +20,7 @@ from apps.dcis.services.document_services import (
     change_document_comment,
     create_document,
     delete_document_status,
-    get_document_last_status,
     get_user_documents,
-    is_document_editable,
 )
 
 
@@ -212,19 +210,19 @@ class DocumentTestCase(TestCase):
             [self.status, self.status, self.status_edit]
         )
 
-    def test_get_document_last_status(self) -> None:
-        """Тестирование функции `get_document_last_status`."""
-        self.assertIs(None, get_document_last_status(self.document_without_status_document))
+    def test_last_status(self) -> None:
+        """Тестирование свойства `last_status`."""
+        self.assertIs(None, self.document_without_status_document.last_status)
         self.assertEqual(
             self.document_statuses_with_last_not_edit_status[2],
-            get_document_last_status(self.document_with_last_not_edit_status)
+            self.document_with_last_not_edit_status.last_status
         )
 
-    def test_is_document_editable(self) -> None:
-        """Тестирование функции `is_document_editable`."""
-        self.assertFalse(is_document_editable(self.document_without_status_document))
-        self.assertFalse(is_document_editable(self.document_with_last_not_edit_status))
-        self.assertTrue(is_document_editable(self.document_with_last_edit_status))
+    def test_is_editable(self) -> None:
+        """Тестирование свойства `is_editable`."""
+        self.assertFalse(self.document_without_status_document.is_editable)
+        self.assertFalse(self.document_with_last_not_edit_status.is_editable)
+        self.assertTrue(self.document_with_last_edit_status.is_editable)
 
     def _create_document_statuses(self, document: Document, statuses: list[Status]) -> list[DocumentStatus]:
         """Создание статусов документов."""
