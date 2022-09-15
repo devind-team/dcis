@@ -135,9 +135,8 @@ class ChangeDocumentSheetBase:
     @property
     def is_document_editable(self) -> bool:
         """Является ли документ редактируемым."""
-        from apps.dcis.services.document_services import is_document_editable
         if self._is_document_editable is None:
-            self._is_document_editable = is_document_editable(self._document)
+            self._is_document_editable = self._document.is_editable
         return self._is_document_editable
 
     @property

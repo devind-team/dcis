@@ -3409,8 +3409,10 @@ type Query {
   documents(
     after: String
     before: String
+    divisionId_In: [ID]
     first: Int
     last: Int
+    lastStatus_StatusId_In: [ID]
     offset: Int
     """Идентификатор периода"""
     periodId: ID!

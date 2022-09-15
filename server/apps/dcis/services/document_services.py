@@ -47,22 +47,6 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
     return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
 
 
-def get_document_last_status(document: Document) -> DocumentStatus | None:
-    """Получение последнего статуса документа."""
-    try:
-        return document.documentstatus_set.latest('created_at')
-    except DocumentStatus.DoesNotExist:
-        return None
-
-
-def is_document_editable(document: Document) -> bool:
-    """Является ли документ редактируемым."""
-    last_status = get_document_last_status(document)
-    if last_status is None or not last_status.status.edit:
-        return False
-    return True
-
-
 @transaction.atomic
 def create_document(
     user: User,

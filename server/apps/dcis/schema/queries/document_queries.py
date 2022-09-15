@@ -61,7 +61,7 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_documents(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Document]:
+    def resolve_documents(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs) -> QuerySet[Document]:
         return get_user_documents(info.context.user, from_global_id(period_id)[1])
 
     @staticmethod

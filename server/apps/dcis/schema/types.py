@@ -14,6 +14,7 @@ from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.core.schema import UserType
+from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     Attribute, AttributeValue, ColumnDimension, Document,
@@ -36,7 +37,6 @@ from apps.dcis.permissions import (
     can_delete_project_base,
 )
 from apps.dcis.services.divisions_services import get_period_divisions
-from apps.dcis.services.document_services import get_document_last_status
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -312,16 +312,12 @@ class DocumentType(DjangoObjectType):
             'object_id',
             'last_status',
         )
-        filter_fields = {}
+        filterset_class = DocumentFilter
         connection_class = CountableConnection
 
     @staticmethod
     def resolve_sheets(document: Document, info: ResolveInfo) -> QuerySet[Sheet]:
         return document.sheets.all()
-
-    @staticmethod
-    def resolve_last_status(document: Document, info: ResolveInfo) -> DocumentStatus | None:
-        return get_document_last_status(document)
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:

@@ -1,6 +1,8 @@
-from apps.core.models import User
+from typing import Optional
+
 from django.db import models
 
+from apps.core.models import User
 from .project import Period
 
 
@@ -58,6 +60,20 @@ class Document(models.Model):
     sheets = models.ManyToManyField(Sheet)
 
     object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
+
+    @property
+    def last_status(self) -> Optional['DocumentStatus']:
+        try:
+            return self.documentstatus_set.latest('created_at')
+        except DocumentStatus.DoesNotExist:
+            return None
+
+    @property
+    def is_editable(self) -> bool:
+        last_status = self.last_status
+        if last_status is None or not last_status.status.edit:
+            return False
+        return True
 
     class Meta:
         ordering = ('-version', '-created_at',)
