@@ -3913,10 +3913,10 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text-align/-/extension-text-align-2.0.0-beta.29.tgz#31df3d23e7c66caf401a1850a80b88f5cedab0a8"
   integrity sha512-FNGpl0tVtgG7AK9kVWF/+CGYHta05NpoME4/j6+vhNlZLBNXRA+AKg7W5T8UxmtaC9yGoJsBs2X8M9eCxWVaEQ==
 
-"@tiptap/extension-text-style@^2.0.0-beta.23":
-  version "2.0.0-beta.23"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-text-style/-/extension-text-style-2.0.0-beta.23.tgz#7f6ef918c6c21c3dd01b7a8d0f4f04be9960c080"
-  integrity sha512-h/7o//RB4WRrLKWV7E5eFk7tZnfjH0Wt9klixOmvTmus6dm00a7r6wTuaT1GNjfPOgClP3K185lTA5rrdgrxRA==
+"@tiptap/extension-text-style@^2.0.0-beta.26":
+  version "2.0.0-beta.26"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-text-style/-/extension-text-style-2.0.0-beta.26.tgz#f46105d687e817563e4acac5d67457e67e73d3ad"
+  integrity sha512-sHUlj5j86W53jvj9ijhXGyqxDdT2c9B7lVwdmDtksvSIrRYuCFqn7hFBzlypNBb56zePqBlIFymUmhK283L6fQ==
 
 "@tiptap/extension-text@^2.0.0-beta.15":
   version "2.0.0-beta.15"
