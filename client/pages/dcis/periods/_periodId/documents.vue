@@ -12,7 +12,7 @@
           :user-divisions="userPeriodDivision"
         )
           v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-    template(#subheader) {{ $t('shownOf', { count: documents.length, totalCount }) }}
+    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
     items-data-filter(
       v-if="showDivisionFilter"
       v-model="selectedDivisions"
