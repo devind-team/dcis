@@ -91,6 +91,6 @@ export default defineComponent({
 
 <style lang="sass">
 .grid-sheet__tabs-items
-  height: calc(100vh - 337px)
+  height: calc(100vh - 285px)
   overflow: visible !important
 </style>

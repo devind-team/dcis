@@ -65,12 +65,19 @@ def create_document(
     :param document_id: идентификатор документа, от которого создавать копию
     :param division_id: идентификатор дивизиона
     """
+    from devind_dictionaries.models import Department, Organization
+
     can_add_document(user, period, status, division_id)
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
+    try:
+        object_name: str = period.project.division.objects.get(pk=division_id).name
+    except (Department.DoesNotExist, Organization.DoesNotExist):
+        object_name = ''
     document = Document.objects.create(
         version=(_get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
+        object_name=object_name,
         user=user,
         period=period
     )

@@ -73,12 +73,13 @@ mutation-modal-form(
         v-list-item-content
           v-list-item-title {{ $t('dcis.documents.addDocument.version', { version: item.version }) }}
           v-list-item-subtitle {{ item.comment }}
+    pre {{ divisionId }}
 </template>
 
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
-import { computed, ref } from '#app'
+import { computed, defineComponent, ref } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import {
   PeriodType,
@@ -124,6 +125,9 @@ export default defineComponent({
       if (!props.period.multiple) {
         return null
       }
+      if (props.canAddAnyDocument) {
+        return division.value?.id
+      }
       return props.userDivisions.length === 1 ? props.userDivisions[0].id : division.value?.id
     })
 
@@ -167,6 +171,7 @@ export default defineComponent({
     }
 
     return {
+      divisionId,
       divisionLabel,
       comment,
       status,

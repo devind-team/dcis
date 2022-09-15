@@ -1,7 +1,7 @@
 <template lang="pug">
 bread-crumbs(:items="bc" fluid)
   v-card(v-if="!activeDocumentLoading")
-    v-card-title {{ documentName }}
+    v-card-subtitle {{ activeDocument.objectName }}
     v-card-text
       grid-sheets(
         v-model="activeSheetIndex"
@@ -49,19 +49,6 @@ export default defineComponent({
 
     const documentVersion = computed<string>(() =>
       t('dcis.grid.version', { version: activeDocument.value.version }) as string)
-    const documentName = computed<string>(() => {
-      if (!activeDocument.value) {
-        return ''
-      }
-      const division = activeDocument.value.period.multiple
-        ? activeDocument.value.period.divisions
-          .find(division => division.id === String(activeDocument.value.objectId))
-        : null
-      if (division) {
-        return `${division.name}. ${documentVersion.value}`
-      }
-      return documentVersion.value
-    })
 
     const bc = computed<BreadCrumbsItem[]>(() => {
       const result: BreadCrumbsItem[] = [...props.breadCrumbs]
@@ -126,7 +113,6 @@ export default defineComponent({
 
     return {
       GridMode,
-      documentName,
       bc,
       activeSheetIndex,
       activeDocument,

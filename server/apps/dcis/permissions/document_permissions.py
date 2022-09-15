@@ -66,6 +66,13 @@ class AddDocumentBase:
         return self.can_add_any_document or (division_id and self.can_add_restricted_document(status, division_id))
 
 
+def can_add_any_document(user: User, period: Period):
+    """Пропускает пользователей, которые могут добавлять любой документ."""
+    if AddDocumentBase(user, period).can_add_any_document:
+        return
+    raise PermissionDenied('Недостаточно прав для добавления документа в период.')
+
+
 def can_add_document(user: User, period: Period, status: Status, division_id: int | str | None):
     """Пропускает пользователей, которые могут просматривать период и добавлять в него документы."""
     can_view_period(user, period)

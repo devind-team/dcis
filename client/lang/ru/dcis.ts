@@ -208,6 +208,7 @@ export default {
     },
     addDocument: {
       buttonText: 'Добавить документ',
+      formText: 'Добавить новый документ',
       header: 'Добавление документа',
       comment: 'Комментарий',
       status: 'Статус',
@@ -215,6 +216,13 @@ export default {
       organization: 'Организация',
       lastDocument: 'Значения из документа',
       version: '@:dcis.documents.version'
+    },
+    addDocumentData: {
+      buttonText: 'Загрузить данные',
+      header: 'Импорт документов',
+      file: 'Выберете файл',
+      status: '@:dcis.documents.addDocument.status',
+      comment: '@:dcis.documents.addDocument.comment'
     },
     status: {
       header: 'Изменение статусов',

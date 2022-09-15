@@ -60,6 +60,7 @@ class Document(models.Model):
     sheets = models.ManyToManyField(Sheet)
 
     object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
+    object_name = models.CharField(max_length=512, null=True, help_text='Название дивизиона')
 
     @property
     def last_status(self) -> Optional['DocumentStatus']:

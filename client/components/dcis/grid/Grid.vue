@@ -288,7 +288,7 @@ div.grid__body
   .grid__container
     position: relative
     overflow: auto
-    height: calc(100vh - 337px)
+    height: calc(100vh - 285px)
 
     table.grid__table
       height: 1px

@@ -33,7 +33,7 @@ export default defineNuxtConfig({
     ASK: process.env.ASK
   },
   head: {
-    title: 'Home page',
+    title: 'Главная',
     titleTemplate: '%s - Информационная система сбора данных',
     meta: [
       { charset: 'utf-8' },
