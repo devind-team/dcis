@@ -140,7 +140,7 @@ def add_divisions_from_file(
     user: User,
     period_id: str | int,
     file: InMemoryUploadedFile,
-    field: str = 'orgs_id'
+    field: str = 'idlistedu'
 ) -> tuple[list[dict[str, int | str]], list[int], list[ErrorFieldType] | None]:
     """Добавление дивизионов из файла формата csv/xlsx."""
     period = get_object_or_404(Period, pk=period_id)
