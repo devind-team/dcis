@@ -155,8 +155,8 @@ export default defineComponent({
 
     const divisionFilterMessages = computed<FilterMessages>(() => {
       const filterName = props.period.project.contentType.model === 'department'
-        ? 'divisionFilterOrganization'
-        : 'divisionFilterDepartment'
+        ? 'divisionFilterDepartment'
+        : 'divisionFilterOrganization'
       return getFilterMessages(filterName, true)
     })
     const statusFilterMessages = computed<FilterMessages>(() => {
