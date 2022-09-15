@@ -5,6 +5,7 @@ mutation-modal-form(
   :button-text="String($t('dcis.documents.addDocumentData.buttonText'))"
   :mutation="require('~/gql/dcis/mutations/document/add_document_data.graphql')"
   :variables="variables"
+  :update="update"
   mutation-name="addDocumentData"
   i18n-path="dcis.documents.addDocumentData"
   @close="close"
@@ -66,14 +67,14 @@ import {
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
-export type AddDocumentDataResultType = { data: { addDocumentData: AddDocumentDataMutationPayload } }
+export type AddDocumentsDataMutationsResultType = { data: { addDocumentData: AddDocumentDataMutationPayload } }
 
 export default defineComponent({
   components: { MutationModalForm },
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
     update: {
-      type: Function as PropType<(cache: DataProxy, result: AddDocumentDataResultType) => void>,
+      type: Function as PropType<(cache: DataProxy, result: AddDocumentsDataMutationsResultType) => void>,
       required: true
     }
   },

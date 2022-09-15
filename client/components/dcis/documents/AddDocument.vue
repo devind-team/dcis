@@ -79,7 +79,7 @@ mutation-modal-form(
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
-import { computed, ref } from '#app'
+import { computed, defineComponent, ref } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import {
   PeriodType,

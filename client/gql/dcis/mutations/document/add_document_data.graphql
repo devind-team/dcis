@@ -11,6 +11,7 @@ mutation AddDocumentData($periodId: ID!, $file: Upload!, $statusId: ID!, $commen
     }
     documents {
       ...DocumentFields
+      canChange
       user {
         id
         __typename

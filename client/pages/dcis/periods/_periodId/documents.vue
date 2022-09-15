@@ -8,6 +8,7 @@
           :period="period"
           :documents="documents"
           :add-document-update="addDocumentUpdate"
+          :add-document-data-update="addDocumentDataUpdate"
           :user-divisions="userPeriodDivision"
         )
           v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
@@ -82,11 +83,12 @@ import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
-import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
+import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 
 export default defineComponent({
   components: {
@@ -94,7 +96,6 @@ export default defineComponent({
     LeftNavigatorContainer,
     ItemsDataFilter,
     QueryDataFilter,
-    AddDocument,
     DocumentStatuses,
     TextMenu
   },
@@ -134,6 +135,12 @@ export default defineComponent({
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
       if (!result.data.addDocument.errors.length) {
         addUpdate(cache, result, 'document')
+      }
+    }
+
+    const addDocumentDataUpdate = (cache: DataProxy, result: AddDocumentsDataMutationsResultType) => {
+      if (!result.data.addDocumentData.errors.length) {
+        addUpdate(cache, result, 'documents')
       }
     }
 
@@ -223,6 +230,7 @@ export default defineComponent({
       totalCount,
       updateDocuments,
       addDocumentUpdate,
+      addDocumentDataUpdate,
       dateTimeHM,
       changeDocumentComment,
       divisionFilterMessages,

@@ -18,7 +18,7 @@ v-menu(v-model="active" transition="slide-y-transition" offset-y left)
     add-document-data(
       v-if="period.canAddDocument"
       :period="period"
-      :update="addDocumentUpdate"
+      :update="addDocumentDataUpdate"
     )
       template(#activator="{ on }")
         v-list-item(v-on="on" )
@@ -32,7 +32,7 @@ import { defineComponent, PropType, ref } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { DivisionModelType, DocumentType, PeriodType } from '~/types/graphql'
 import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
-import AddDocumentData from '~/components/dcis/documents/AddDocumentData.vue'
+import AddDocumentData, { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 
 export default defineComponent({
   components: { AddDocumentData, AddDocument },
@@ -41,6 +41,10 @@ export default defineComponent({
     userDivisions: { type: Array as PropType<DivisionModelType[]>, required: true },
     addDocumentUpdate: {
       type: Function as PropType<(cache: DataProxy, result: AddDocumentMutationResultType) => void>,
+      required: true
+    },
+    addDocumentDataUpdate: {
+      type: Function as PropType<(cache: DataProxy, result: AddDocumentsDataMutationsResultType) => void>,
       required: true
     },
     documents: { type: Array as PropType<DocumentType[]>, default: () => ([]) }
