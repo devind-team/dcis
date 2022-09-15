@@ -1,11 +1,13 @@
 import { Ref, unref } from '#app'
+import { QueryRelayOptions } from '~/composables'
 import { DocumentsQuery, DocumentsQueryVariables, DocumentType } from '~/types/graphql'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 
 export const useDocumentsQuery = (
   periodId: Ref<string> | string,
   divisionIds: Ref<string[]>,
-  lastStatusIds: Ref<string[]>
+  lastStatusIds: Ref<string[]>,
+  queryOptions: QueryRelayOptions
 ) => {
   return useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
     document: documentsQuery,
@@ -14,5 +16,5 @@ export const useDocumentsQuery = (
       divisionIds: unref(divisionIds),
       lastStatusIds: unref(lastStatusIds)
     })
-  })
+  }, queryOptions)
 }
