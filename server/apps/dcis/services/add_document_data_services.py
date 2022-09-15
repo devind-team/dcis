@@ -109,6 +109,12 @@ def add_document_data(
     mismatch_divisions: list[str] = [str(division_id) for division_id, freq in divisions_id.items() if freq]
     if mismatch_divisions:
         return None, [ErrorFieldType('file', [f'Следующие дивизионы не найдены: {", ".join(mismatch_divisions)}'])]
+    exist_divisions: list[int] = period.division_set.values_list('object_id', flat=True)
+    for exist_division in exist_divisions:
+        divisions_id[exist_division] = True
+    for income_division, exist in divisions_id.items():
+        if not exist:
+            period.division_set.create(object_id=income_division)
     # 3. Строим структуру данных
     documents_data = get_documents_data(reader, sheets, DIVISION_NAME)
     # 4. Создаем документы
