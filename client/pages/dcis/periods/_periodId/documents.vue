@@ -3,16 +3,16 @@
     template(#header) {{ $t('dcis.documents.name') }}
       template(v-if="period.canAddDocument || userPeriodDivision.length")
         v-spacer
-        add-document(
-          :can-add-any-document="period.canAddDocument"
-          :user-divisions="userPeriodDivision"
+        add-document-menu(
+          v-slot="{ on, attrs }"
           :period="period"
           :documents="documents"
-          :update="addDocumentUpdate"
+          :add-document-update="addDocumentUpdate"
+          :add-document-data-update="addDocumentDataUpdate"
+          :user-divisions="userPeriodDivision"
         )
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-    template(#subheader) {{ $t('shownOf', { count: visibleDocs.length, totalCount }) }}
+          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
+    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
     items-data-filter(
       v-if="showDivisionFilter"
       v-model="selectedDivisions"
@@ -33,11 +33,12 @@
       multiple
       has-select-all
     )
-    v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-pagination hide-default-footer)
-      template(#item.version="{ item }")
+    v-data-table(:headers="headers" :items="visibleDocs" :loading="loading" disable-sort disable-pagination hide-default-footer)
+      template(#item.division="{ item }")
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) {{ $t('dcis.documents.tableItems.version', { version: item.version }) }}
+        ) {{ item.objectName }} ({{ item.objectId }})
+      template(#item.version="{ item }") {{ item.version }}
       template(#item.comment="{ item }")
         template(v-if="item.comment")
           template(v-if="canChangeDocument(item)")
@@ -49,16 +50,13 @@
           document-statuses(
             :can-add="canChangeDocument(item)"
             :can-delete="canDeleteDocumentStatus(item)"
-            :update="update"
+            :update="updateDocuments"
             :document="item"
           )
             template(#activator="{ on }")
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
           div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
           .font-italic {{ item.lastStatus.comment }}
-      template(
-        #item.division="{ item }"
-      ) {{ item.objectId ? period.divisions.find(x => x.id === item.objectId).name : '-' }}
       template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
@@ -67,7 +65,7 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { computed, defineComponent, useNuxt2Meta, useRoute } from '#app'
+import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useI18n } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
@@ -85,17 +83,19 @@ import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
-import AddDocument, { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
+import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
+import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 
 export default defineComponent({
   components: {
+    AddDocumentMenu,
     LeftNavigatorContainer,
     ItemsDataFilter,
     QueryDataFilter,
-    AddDocument,
     DocumentStatuses,
     TextMenu
   },
@@ -126,8 +126,8 @@ export default defineComponent({
     const {
       data: documents,
       loading,
-      pagination: { totalCount },
-      update,
+      pagination: { count, totalCount },
+      update: updateDocuments,
       addUpdate,
       changeUpdate
     } = useDocumentsQuery(route.params.periodId)
@@ -135,6 +135,12 @@ export default defineComponent({
     const addDocumentUpdate = (cache: DataProxy, result: AddDocumentMutationResultType) => {
       if (!result.data.addDocument.errors.length) {
         addUpdate(cache, result, 'document')
+      }
+    }
+
+    const addDocumentDataUpdate = (cache: DataProxy, result: AddDocumentsDataMutationsResultType) => {
+      if (!result.data.addDocumentData.errors.length) {
+        addUpdate(cache, result, 'documents')
       }
     }
 
@@ -189,7 +195,7 @@ export default defineComponent({
         : []
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
+        // { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
@@ -220,9 +226,11 @@ export default defineComponent({
       canDeleteDocumentStatus,
       documents,
       loading,
+      count,
       totalCount,
-      update,
+      updateDocuments,
       addDocumentUpdate,
+      addDocumentDataUpdate,
       dateTimeHM,
       changeDocumentComment,
       divisionFilterMessages,

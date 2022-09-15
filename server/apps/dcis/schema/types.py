@@ -310,6 +310,7 @@ class DocumentType(DjangoObjectType):
             'period',
             'sheets',
             'object_id',
+            'object_name',
             'last_status',
         )
         filter_fields = {}

@@ -2,7 +2,7 @@
 v-footer(padless)
   v-container
     v-row
-      v-col
+      v-col(cols="12" md="8")
         v-list(style="background: inherit;" dense)
           v-list-item(v-for="localLink in localLinks" :key="localLink.icon" :href="localLink.href")
             v-list-item-icon
@@ -13,7 +13,7 @@ v-footer(padless)
               v-list-item-icon
                 v-icon mdi-theme-light-dark
               v-list-item-content {{ $t('index.theme.change') }}
-      v-col(cols="4")
+      v-col(cols="12" md="4")
         v-list(style="background: inherit;" dense)
           v-list-item(v-for="foreignLink in foreignLinks" :key="foreignLink.icon" :href="foreignLink.href")
             v-list-item-icon

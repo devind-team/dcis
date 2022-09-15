@@ -25,7 +25,6 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
-from apps.dcis.schema.types import DivisionModelType
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
@@ -141,7 +140,7 @@ def add_divisions_from_file(
     user: User,
     period_id: str | int,
     file: InMemoryUploadedFile,
-    field: str = 'orgs_id'
+    field: str = 'idlistedu'
 ) -> tuple[list[dict[str, int | str]], list[int], list[ErrorFieldType] | None]:
     """Добавление дивизионов из файла формата csv/xlsx."""
     period = get_object_or_404(Period, pk=period_id)

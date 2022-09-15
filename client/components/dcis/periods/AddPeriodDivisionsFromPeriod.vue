@@ -6,7 +6,7 @@ mutation-modal-form(
   :mutation="addPeriodDivisionsFromPeriodMutation"
   :variables="{ periodId: period.id, periodFromId}"
   :update="update"
-  width="20vw"
+  width="40vw"
   mutation-name="addDivisionsFromPeriod"
   errors-in-alert
   @close="$emit('close')"

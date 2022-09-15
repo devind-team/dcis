@@ -1,5 +1,8 @@
-from apps.core.models import User
+from typing import Type
 from django.db import models
+from devind_helpers.orm_utils import get_object_or_none
+from devind_dictionaries.models import Department, Organization
+from apps.core.models import User
 
 from .project import Period
 
@@ -58,6 +61,7 @@ class Document(models.Model):
     sheets = models.ManyToManyField(Sheet)
 
     object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
+    object_name = models.CharField(max_length=512, null=True, help_text='Название дивизиона')
 
     class Meta:
         ordering = ('-version', '-created_at',)
