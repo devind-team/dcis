@@ -23,6 +23,7 @@ v-footer(padless)
     v-row
       v-col
         .caption.mt-auto {{ develop }}
+        .caption.mt-auto {{ release }}
       v-col(cols="4")
         ul.caption.text-right(style="list-style-type: none") {{ phones }}
           li +7(495) 225-14-43
@@ -46,6 +47,7 @@ export default defineComponent({
 
     const develop: string = 'Разработка и сопровождение - ' +
       'Центр отраслевых информационно-аналитических систем "Национального исследовательского университета "МЭИ"'
+    const release: string = 'Версия релиза: 0.14.1'
     const phones: string = 'Многоканальные телефоны службы поддержки:'
     const localLinks: ForeignLinksType[] = [
       { text: 'Главная', href: '/', icon: 'mdi-home' },
@@ -64,7 +66,7 @@ export default defineComponent({
       })
     })
 
-    return { upVisible, develop, phones, localLinks, foreignLinks }
+    return { upVisible, develop, release, phones, localLinks, foreignLinks }
   }
 })
 </script>
