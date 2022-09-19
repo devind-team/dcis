@@ -236,7 +236,9 @@ def check_value(cell_data: CellData) -> bool:
     """Проверяем на возможность добавления значения."""
     if cell_data.value == cell_data.default_value:
         return False
-    return True
+    if str(cell_data.value):
+        return True
+    return False
 
 
 def get_coordinate(position: str) -> tuple[int, int]:
