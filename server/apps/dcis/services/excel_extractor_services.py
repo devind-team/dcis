@@ -228,9 +228,8 @@ class ExcelExtractor:
             if color.index == 64 or color.index == 65:
                 color = None
             else:
-                color.type = 'rgb'
                 color.value = COLOR_INDEX[color.index]
-        if color and color.type == 'theme':
+        elif color and color.type == 'theme':
             color.type = 'rgb'
             color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
         return color
