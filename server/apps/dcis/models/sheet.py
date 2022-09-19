@@ -234,6 +234,7 @@ class Cell(Style, KindCell, models.Model):
 
     editable = models.BooleanField(default=True, help_text='Редактируемая ячейка')
     formula = models.TextField(null=True, help_text='Формула')
+    number_format = models.TextField(null=True, help_text='Форматирование чисел')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
