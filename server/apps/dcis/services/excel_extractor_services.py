@@ -224,15 +224,18 @@ class ExcelExtractor:
 
     @staticmethod
     def __color_transform(wb: Workbook, color: Color):
-        if color and color.type == 'indexed':
-            if color.index == 64 or color.index == 65:
-                color = None
-            else:
-                color.value = COLOR_INDEX[color.index]
-        elif color and color.type == 'theme':
-            color.type = 'rgb'
-            color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
-        return color
+        try:
+            if color and color.type == 'indexed':
+                if color.index == 64 or color.index == 65:
+                    color = None
+                else:
+                    color.value = COLOR_INDEX[color.index]
+            elif color and color.type == 'theme':
+                color.type = 'rgb'
+                color.value = theme_and_tint_to_rgb(wb, color.theme, color.tint)
+            return color
+        except TypeError:
+            return None
 
     def _parse_cells(self, wb: Workbook, rows: Iterator[tuple[OpenpyxlCell | OpenpyxlMergedCell]]) -> list[BuildCell]:
         """Парсинг ячеек.
