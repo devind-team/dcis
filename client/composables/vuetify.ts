@@ -6,7 +6,6 @@ export function useVuetify () {
   const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
 
   const isDark = computed<boolean>(() => (vm.$colorMode.value === 'dark'))
-
   return {
     vuetify: vm.$vuetify,
     colorMode: vm.$colorMode,

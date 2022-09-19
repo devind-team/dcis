@@ -1,0 +1,23 @@
+# Интеграционные запросы для Портала https://cbias.ru
+
+
+#######################
+## Выгрузка проектов ##
+#######################
+
+GET http://localhost:8000/external/v1/projects
+Authorization: 78MOl7ynTbcAPPZZDg5R
+
+
+#######################
+## Выгрузка периодов ##
+#######################
+GET http://localhost:8000/external/v1/periods?project_id=10
+Authorization: 78MOl7ynTbcAPPZZDg5R
+
+#######################
+## Выгрузка дивизионов ##
+#######################
+
+GET http://localhost:8000/external/v1/divisions/46/  # Идентификатор дивизиона
+Authorization: 78MOl7ynTbcAPPZZDg5R

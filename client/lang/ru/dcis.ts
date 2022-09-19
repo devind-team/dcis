@@ -175,6 +175,24 @@ export default {
   documents: {
     name: 'Документы',
     version: 'Версия {version}',
+    divisionFilterOrganization: {
+      title: 'Фильтр организаций',
+      noFiltrationMessage: 'Все организации',
+      multipleMessage: '{name} и еще {restLength} организаций | {name} и еще {restLength} организация |' +
+        ' {name} и еще {restLength} организации'
+    },
+    divisionFilterDepartment: {
+      title: 'Фильтр департаментов',
+      noFiltrationMessage: 'Все департаменты',
+      multipleMessage: '{name} и еще {restLength} департаментов | {name} и еще {restLength} департамент |' +
+        ' {name} и еще {restLength} департамента'
+    },
+    statusFilter: {
+      title: 'Фильтр статусов',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
     tableHeaders: {
       version: 'Версия',
       comment: 'Комментарий',
@@ -190,6 +208,7 @@ export default {
     },
     addDocument: {
       buttonText: 'Добавить документ',
+      formText: 'Добавить новый документ',
       header: 'Добавление документа',
       comment: 'Комментарий',
       status: 'Статус',
@@ -197,6 +216,13 @@ export default {
       organization: 'Организация',
       lastDocument: 'Значения из документа',
       version: '@:dcis.documents.version'
+    },
+    addDocumentData: {
+      buttonText: 'Загрузить данные',
+      header: 'Импорт документов',
+      file: 'Выберете файл',
+      status: '@:dcis.documents.addDocument.status',
+      comment: '@:dcis.documents.addDocument.comment'
     },
     status: {
       header: 'Изменение статусов',
@@ -242,6 +268,8 @@ export default {
       addRow: 'Добавить строку'
     },
     sheetToolbar: {
+      readonly: 'Только для чтения',
+      fix: 'Закрепление столбцов/строк',
       fontSize: 'Шрифт',
       kind: 'Тип'
     },

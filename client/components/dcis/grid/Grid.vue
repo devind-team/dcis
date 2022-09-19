@@ -272,8 +272,9 @@ export default defineComponent({
 $border: 1px solid silver
 $border-selected: 1px solid blue
 $border-fixed: 1.5px solid gray
-$name-light: map-get($grey, 'lighten-3')
-$name-dark: map-get($grey, 'lighten-2')
+$selected-light: #F3FAFF
+$selected-dark: #DBF0FE
+$readonly: map-get($grey, 'lighten-4')
 $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
 $arrow-down-cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
@@ -287,7 +288,7 @@ div.grid__body
   .grid__container
     position: relative
     overflow: auto
-    height: calc(100vh - 337px)
+    height: calc(100vh - 285px)
 
     table.grid__table
       height: 1px
@@ -337,18 +338,18 @@ div.grid__body
           &.grid__header_all_selected
 
             & > div
-              border-color: transparent transparent $name-light transparent
+              border-color: transparent transparent $selected-light transparent
 
           &:hover
 
             & > div
-              border-color: transparent transparent $name-dark transparent
+              border-color: transparent transparent $selected-dark transparent
 
         th:not(:first-child)
           &.grid__header_selected
 
             & > div
-              background: $name-light !important
+              background: $selected-light !important
 
           &.grid__header_boundary-selected
             border-bottom: $border-selected
@@ -357,7 +358,7 @@ div.grid__body
             cursor: $arrow-down-cursor
 
             &:hover > div
-              background: $name-dark !important
+              background: $selected-dark !important
               cursor: $arrow-down-cursor
 
           & > div
@@ -388,7 +389,7 @@ div.grid__body
           &.grid__cell_row-name-selected
 
             & > div
-              background: $name-light !important
+              background: $selected-light !important
 
           &.grid__cell_row-name-boundary-selected
             border-right: $border-selected
@@ -397,7 +398,7 @@ div.grid__body
             cursor: $arrow-right-cursor
 
             &:hover > div
-              background: $name-dark !important
+              background: $selected-dark !important
               cursor: $arrow-right-cursor
 
           & > div
@@ -412,7 +413,12 @@ div.grid__body
           &.grid__cell_selected
 
             & > div
-              background: $name-light
+              background: $selected-light !important
+
+          &.grid__cell_readonly
+
+            & > div
+              background: $readonly
 
           .grid__cell-content
             display: flex
@@ -433,7 +439,6 @@ div.grid__body
 
         tr.grid__row_fixed
           position: sticky
-          z-index: 2
 
         td.grid__cell_fixed
           position: sticky

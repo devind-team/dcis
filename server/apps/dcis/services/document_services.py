@@ -47,22 +47,6 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
     return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
 
 
-def get_document_last_status(document: Document) -> DocumentStatus | None:
-    """Получение последнего статуса документа."""
-    try:
-        return document.documentstatus_set.latest('created_at')
-    except DocumentStatus.DoesNotExist:
-        return None
-
-
-def is_document_editable(document: Document) -> bool:
-    """Является ли документ редактируемым."""
-    last_status = get_document_last_status(document)
-    if last_status is None or not last_status.status.edit:
-        return False
-    return True
-
-
 @transaction.atomic
 def create_document(
     user: User,
@@ -81,12 +65,19 @@ def create_document(
     :param document_id: идентификатор документа, от которого создавать копию
     :param division_id: идентификатор дивизиона
     """
+    from devind_dictionaries.models import Department, Organization
+
     can_add_document(user, period, status, division_id)
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
+    try:
+        object_name: str = period.project.division.objects.get(pk=division_id).name
+    except (Department.DoesNotExist, Organization.DoesNotExist):
+        object_name = ''
     document = Document.objects.create(
         version=(_get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
+        object_name=object_name,
         user=user,
         period=period
     )

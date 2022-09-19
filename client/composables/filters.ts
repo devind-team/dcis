@@ -24,7 +24,7 @@ export function useFilters () {
       hour: '2-digit',
       minute: '2-digit'
     })
-    return formatter.format(new Date(rd))
+    return formatter.format(new Date(rd)).replace(',', '')
   }
 
   const textLength = (text: string, length: number): string => text.slice(0, length) + (length < text.length ? '...' : '')

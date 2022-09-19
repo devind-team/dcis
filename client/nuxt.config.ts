@@ -33,7 +33,7 @@ export default defineNuxtConfig({
     ASK: process.env.ASK
   },
   head: {
-    title: 'Home page',
+    title: 'Главная',
     titleTemplate: '%s - Информационная система сбора данных',
     meta: [
       { charset: 'utf-8' },
@@ -64,9 +64,9 @@ export default defineNuxtConfig({
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     '@nuxtjs/i18n',
+    '@nuxtjs/vuetify',
     '@nuxtjs/color-mode',
     '@nuxtjs/apollo',
-    '@nuxtjs/vuetify',
     '@pinia/nuxt'
   ],
   apollo: {

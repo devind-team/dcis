@@ -103,8 +103,8 @@ export default defineComponent({
       }
     },
     multipleMessageFunction: {
-      type: Function as PropType<MultipleMessageFunction>,
-      required: false
+      type: Function as PropType<MultipleMessageFunction | null>,
+      default: null
     },
     searchLabel: {
       type: String,
@@ -192,7 +192,7 @@ export default defineComponent({
       emit('clear')
       apply()
     }
-    /** Закрытие модельного окна */
+    /** Закрытие модального окна */
     const close = () => {
       tempItems.value = []
       search.value = ''

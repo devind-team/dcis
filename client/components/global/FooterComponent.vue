@@ -2,7 +2,7 @@
 v-footer(padless)
   v-container
     v-row
-      v-col
+      v-col(cols="12" md="8")
         v-list(style="background: inherit;" dense)
           v-list-item(v-for="localLink in localLinks" :key="localLink.icon" :href="localLink.href")
             v-list-item-icon
@@ -13,7 +13,7 @@ v-footer(padless)
               v-list-item-icon
                 v-icon mdi-theme-light-dark
               v-list-item-content {{ $t('index.theme.change') }}
-      v-col(cols="4")
+      v-col(cols="12" md="4")
         v-list(style="background: inherit;" dense)
           v-list-item(v-for="foreignLink in foreignLinks" :key="foreignLink.icon" :href="foreignLink.href")
             v-list-item-icon
@@ -23,6 +23,7 @@ v-footer(padless)
     v-row
       v-col
         .caption.mt-auto {{ develop }}
+        .caption.mt-auto {{ release }}
       v-col(cols="4")
         ul.caption.text-right(style="list-style-type: none") {{ phones }}
           li +7(495) 225-14-43
@@ -46,6 +47,7 @@ export default defineComponent({
 
     const develop: string = 'Разработка и сопровождение - ' +
       'Центр отраслевых информационно-аналитических систем "Национального исследовательского университета "МЭИ"'
+    const release: string = 'Версия релиза: 0.14.1'
     const phones: string = 'Многоканальные телефоны службы поддержки:'
     const localLinks: ForeignLinksType[] = [
       { text: 'Главная', href: '/', icon: 'mdi-home' },
@@ -64,7 +66,7 @@ export default defineComponent({
       })
     })
 
-    return { upVisible, develop, phones, localLinks, foreignLinks }
+    return { upVisible, develop, release, phones, localLinks, foreignLinks }
   }
 })
 </script>

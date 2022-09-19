@@ -59,7 +59,7 @@ import {
   RowDimensionType,
   SheetType
 } from '~/types/graphql'
-import { GridMode, ResizingType, FixedInfoType } from '~/types/grid'
+import { GridMode, ResizingType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import { useAuthStore } from '~/stores'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
@@ -70,7 +70,7 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
-    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => FixedInfoType>, required: true },
+    getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => RowFixedInfoType>, required: true },
     getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfoType>, required: true },
     borderFixedColumn: { type: Object as PropType<ColumnDimensionType>, default: null },
     borderFixedRow: { type: Object as PropType<RowDimensionType>, default: null },
@@ -122,7 +122,10 @@ export default defineComponent({
       }
       const fixedInfo = props.getRowFixedInfo(row)
       if (fixedInfo.fixed) {
-        return { top: `${fixedInfo.position}px` }
+        return {
+          top: `${fixedInfo.position}px`,
+          zIndex: `${2 + fixedInfo.reverseIndex}`
+        }
       }
       return {}
     }
@@ -130,7 +133,8 @@ export default defineComponent({
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-boundary-selected': props.boundarySelectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-boundary-selected': mode === GridMode.CHANGE &&
+          props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': mode === GridMode.CHANGE && !props.resizingRow,
         'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
         'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)
@@ -204,6 +208,7 @@ export default defineComponent({
           props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
         ),
         grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
+        grid__cell_readonly: !cell.editable,
         'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
         'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
       }

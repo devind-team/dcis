@@ -13,13 +13,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "@babel/preset-env": "^7.18.10",
+    "@babel/preset-env": "^7.19.1",
     "@nuxtjs/apollo": "^4.0.1-rc.5",
     "@nuxtjs/i18n": "^7.3.0",
     "@nuxtjs/vuetify": "^1.12.3",
     "@pinia/nuxt": "^0.4.1",
     "@vue/apollo-composable": "^4.0.0-alpha.19",
-    "@vueuse/core": "^9.1.1",
+    "@vueuse/core": "^9.2.0",
     "@vueuse/integrations": "^9.2.0",
     "accounting": "^0.4.1",
     "apexcharts": "^3.35.5",
@@ -28,15 +28,15 @@
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.4",
     "nuxt-edge": "latest",
-    "pinia": "^2.0.21",
+    "pinia": "^2.0.22",
     "scule": "^0.3.2",
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
     "vue-apexcharts": "^1.6.2",
-    "vuetify": "^2.6.9"
+    "vuetify": "^2.6.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.19.0",
+    "@babel/core": "^7.19.1",
     "@babel/eslint-parser": "^7.18.9",
     "@babel/plugin-proposal-decorators": "^7.18.10",
     "@babel/plugin-proposal-optional-chaining": "^7.18.9",
@@ -60,7 +60,7 @@
     "@tiptap/extension-gapcursor": "^2.0.0-beta.34",
     "@tiptap/extension-hard-break": "^2.0.0-beta.30",
     "@tiptap/extension-heading": "^2.0.0-beta.26",
-    "@tiptap/extension-highlight": "^2.0.0-beta.33",
+    "@tiptap/extension-highlight": "^2.0.0-beta.35",
     "@tiptap/extension-history": "^2.0.0-beta.21",
     "@tiptap/extension-image": "^2.0.0-beta.27",
     "@tiptap/extension-italic": "^2.0.0-beta.26",
@@ -77,17 +77,17 @@
     "@tiptap/extension-text-align": "^2.0.0-beta.29",
     "@tiptap/extension-text-style": "^2.0.0-beta.23",
     "@tiptap/extension-underline": "^2.0.0-beta.23",
-    "@tiptap/starter-kit": "^2.0.0-beta.185",
+    "@tiptap/starter-kit": "^2.0.0-beta.195",
     "@tiptap/vue-2": "^2.0.0-beta.79",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.2",
-    "core-js": "^3.25.0",
+    "core-js": "^3.25.2",
     "eslint": "8.22.0",
-    "eslint-import-resolver-typescript": "^3.5.0",
+    "eslint-import-resolver-typescript": "^3.5.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-nuxt": "^4.0.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.3"
   }
 }
