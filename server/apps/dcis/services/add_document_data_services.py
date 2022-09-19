@@ -225,11 +225,20 @@ def add_documents(
                 row_id=cell_data.row_id
             )
             for sheet_name, cells_data in sheets_data.items()
-            for cell_data in cells_data if cell_data.value and cell_data.value != cell_data.default_value
+            for cell_data in cells_data if check_value(cell_data)
         ])
         documents.append(document)
     Value.objects.bulk_create(values)
     return documents
+
+
+def check_value(cell_data: CellData) -> bool:
+    """Проверяем на возможность добавления значения."""
+    if cell_data.value == cell_data.default_value:
+        return False
+    if str(cell_data.value):
+        return True
+    return False
 
 
 def get_coordinate(position: str) -> tuple[int, int]:
