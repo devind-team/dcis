@@ -58,6 +58,7 @@ class BuildCell(BuildStyle):
     editable: bool
     coordinate: str | None = None
     formula: str | None = None
+    number_format: str | None = None
     comment: str | None = None
     default: str | None = None
     border_color: dict[str, str] = None
@@ -245,10 +246,6 @@ class ExcelExtractor:
         cells: list[BuildCell] = []
         for row in rows:
             for cell in row:
-                border_color: dict[str, Color] = {
-                    positional: self.__color_transform(wb, getattr(cell.border, positional).color)
-                    for positional in ('top', 'bottom', 'left', 'right', 'diagonal')
-                }
                 fill_color = self.__color_transform(wb, cell.fill.fgColor)
                 font_color = self.__color_transform(wb, cell.font.color)
 
@@ -257,19 +254,18 @@ class ExcelExtractor:
                         (font_color and font_color.index == 1 and fill_color.value == WHITE):
                     font_color.type = 'rgb'
                     font_color.value = '00000000'
+                kind = self._get_cell_kind(cell)
                 cells.append(BuildCell(
                     column_id=cell.column,
                     row_id=cell.row,
-                    kind=self._get_cell_kind(cell),
+                    kind=kind,
                     editable=not self.readonly_fill_color or fill_color.value == '00000000',
                     coordinate=cell.coordinate,
-                    formula=cell.value if isinstance(cell.value, str) and cell.value and cell.value[0] == '=' else None,
+                    formula=self._get_cell_formula(cell),
+                    number_format=self._get_cell_number_format(cell, kind),
                     comment=cell.comment,
-                    default=str(cell.value) if cell.value is not None else None,
-                    border_color={
-                        p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
-                        for p, c in border_color.items()
-                    },
+                    default=self._get_cell_default(cell),
+                    border_color=self._get_cell_border_color(wb, cell),
                     **asdict(self.__border_style(cell))
                 ))
         return cells
@@ -318,3 +314,35 @@ class ExcelExtractor:
         if cell.data_type == 'n' and cell.number_format == '@':
             return 's'
         return cell.data_type
+
+    @staticmethod
+    def _get_cell_formula(cell: OpenpyxlCell) -> str | None:
+        """Получение формулы для ячейки."""
+        if isinstance(cell.value, str) and cell.value and cell.value[0] == '=':
+            return cell.value
+        return None
+
+    @staticmethod
+    def _get_cell_number_format(cell: OpenpyxlCell, kind: str) -> str | None:
+        """Получение форматирование чисел для ячейки."""
+        if kind == 'n' or kind == 'd':
+            return cell.number_format
+        return None
+
+    @staticmethod
+    def _get_cell_default(cell: OpenpyxlCell) -> str | None:
+        """Получение значения по умолчанию для ячейки."""
+        if cell.value is not None:
+            return str(cell.value)
+        return None
+
+    def _get_cell_border_color(self, wb: Workbook, cell: OpenpyxlCell) -> dict[str, str]:
+        """Получение цвета границы для ячейки."""
+        border_color = {
+            positional: self.__color_transform(wb, getattr(cell.border, positional).color)
+            for positional in ('top', 'bottom', 'left', 'right', 'diagonal')
+        }
+        return {
+            p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
+            for p, c in border_color.items()
+        }

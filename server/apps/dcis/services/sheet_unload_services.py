@@ -121,12 +121,13 @@ class SheetRowsUnloader(DataUnloader):
     )
     _cells_fields = (
         'id', 'kind', 'editable',
-        'formula', 'comment', 'default',
-        'mask', 'tooltip', 'column_id',
-        'row_id', 'horizontal_align', 'vertical_align',
-        'size', 'strong', 'italic',
-        'strike', 'underline', 'color',
-        'background', 'border_style', 'border_color',
+        'formula', 'number_format', 'comment',
+        'default', 'mask', 'tooltip',
+        'column_id', 'row_id', 'horizontal_align',
+        'vertical_align', 'size', 'strong',
+        'italic', 'strike', 'underline',
+        'color', 'background', 'border_style',
+        'border_color',
     )
     _values_fields = (
         'column_id', 'row_id', 'value', 'verified', 'error',

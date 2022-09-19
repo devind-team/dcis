@@ -3,6 +3,7 @@ fragment CellFields on CellType {
   kind
   editable
   formula
+  numberFormat
   comment
   mask
   tooltip
