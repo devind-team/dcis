@@ -231,12 +231,17 @@ export default defineComponent({
         style.color = 'red'
       } else if (cell.color) { style.color = cell.color }
       if (cell.background) { style['background-color'] = cell.background }
-      style['text-decoration'] = textDecoration.join(' ')
+      if (textDecoration.length) {
+        style['text-decoration'] = textDecoration.join(' ')
+      }
       const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
       for (const position of ['top', 'right', 'bottom', 'left']) {
         if (borderColor[position]) {
           style[`border-${position}`] = `1 px solid ${borderColor[position] || 'black'}`
         }
+      }
+      if (cell.numberFormat) {
+        style['mso-number-format'] = cell.numberFormat
       }
       return style
     }

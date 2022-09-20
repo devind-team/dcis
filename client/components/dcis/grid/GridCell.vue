@@ -12,6 +12,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, Ref } from '#app'
 import { useApolloClient } from '@vue/apollo-composable'
+import numfmt from 'numfmt'
 import {
   UpdateType,
   useChangeCellDefaultMutation,
@@ -123,7 +124,7 @@ export default defineComponent({
       return 'String'
     })
 
-    const cellValue = computed<string | number | null>(() => {
+    const cellValue = computed<string | number | Date | null>(() => {
       if (props.cell.error) {
         return props.cell.error
       }
@@ -140,14 +141,15 @@ export default defineComponent({
         }
         return numberValue
       }
+      if (props.cell.kind === 'd' || props.cell.kind === 'time') {
+        return new Date(props.cell.value)
+      }
       return props.cell.value
     })
     const formattedCellValue = computed<string>(() => {
-      if (typeof cellValue.value === 'number') {
-        return new Intl.NumberFormat('ru-RU', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }).format(cellValue.value)
+      if (props.cell.numberFormat) {
+        const fmt = numfmt(props.cell.numberFormat, { locale: 'ru' })
+        return fmt(cellValue.value)
       }
       return cellValue.value
     })

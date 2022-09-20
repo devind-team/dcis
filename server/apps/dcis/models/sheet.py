@@ -99,6 +99,7 @@ class KindCell(models.Model):
     DATE = 'd'
 
     # Дополнительный набор
+    TIME = 'time'
     TEXT = 'text'
     MONEY = 'money'
     BIG_MONEY = 'bigMoney'

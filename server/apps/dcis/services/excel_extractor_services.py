@@ -254,7 +254,7 @@ class ExcelExtractor:
                         (font_color and font_color.index == 1 and fill_color.value == WHITE):
                     font_color.type = 'rgb'
                     font_color.value = '00000000'
-                kind = self._get_cell_kind(cell)
+                kind, number_format = self._get_cell_kind_and_number_format(cell)
                 cells.append(BuildCell(
                     column_id=cell.column,
                     row_id=cell.row,
@@ -262,7 +262,7 @@ class ExcelExtractor:
                     editable=not self.readonly_fill_color or fill_color.value == '00000000',
                     coordinate=cell.coordinate,
                     formula=self._get_cell_formula(cell),
-                    number_format=self._get_cell_number_format(cell, kind),
+                    number_format=number_format,
                     comment=cell.comment,
                     default=self._get_cell_default(cell),
                     border_color=self._get_cell_border_color(wb, cell),
@@ -304,29 +304,18 @@ class ExcelExtractor:
         """Получаем координату."""
         return f'{sheet}!{get_column_letter(column)}{row}'
 
-    @staticmethod
-    def _get_cell_kind(cell: OpenpyxlCell) -> str:
-        """Получение типа ячейки.
-
-        Если в Excel пометить ячейку с числом текстовым форматом, то он не изменяет тип ячейки на 's',
-        а устанавливает number_format в значение '@', где @ - placeholder for text.
-        """
-        if cell.data_type == 'n' and cell.number_format == '@':
-            return 's'
-        return cell.data_type
+    def _get_cell_kind_and_number_format(self, cell: OpenpyxlCell) -> tuple[str, str | None]:
+        """Получение типа и форматирования чисел для ячейки."""
+        if cell.data_type == 'n' or cell.data_type == 'd':
+            k = self._NUMBER_FORMAT_KIND_MAP.get(cell.number_format)
+            return k or (cell.data_type, cell.number_format)
+        return cell.data_type, None
 
     @staticmethod
     def _get_cell_formula(cell: OpenpyxlCell) -> str | None:
         """Получение формулы для ячейки."""
         if isinstance(cell.value, str) and cell.value and cell.value[0] == '=':
             return cell.value
-        return None
-
-    @staticmethod
-    def _get_cell_number_format(cell: OpenpyxlCell, kind: str) -> str | None:
-        """Получение форматирование чисел для ячейки."""
-        if kind == 'n' or kind == 'd':
-            return cell.number_format
         return None
 
     @staticmethod
@@ -346,3 +335,11 @@ class ExcelExtractor:
             p: f'#{c.value[2:]}' if c and c.type == 'rgb' else None
             for p, c in border_color.items()
         }
+
+    _NUMBER_FORMAT_KIND_MAP = {
+        'General': ('n', '0.00'),
+        '@': ('s', None),
+        'mm-dd-yy': ('d', 'dd.mm.yyyy'),
+        '[$-F800]dddd\,\ mmmm\ dd\,\ yyyy': ('d', 'dd.mm.yyyy'),
+        '[$-F400]h:mm:ss\ AM/PM': ('time', 'hh:mm:ss'),
+    }
