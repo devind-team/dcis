@@ -17,6 +17,7 @@ from xlsx_evaluate import Evaluator, ModelCompiler
 from apps.dcis.helpers.sheet_cache import FormulaContainerCache
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
+from ..models.sheet import KindCell
 
 
 @dataclass
@@ -306,7 +307,7 @@ class ExcelExtractor:
 
     def _get_cell_kind_and_number_format(self, cell: OpenpyxlCell) -> tuple[str, str | None]:
         """Получение типа и форматирования чисел для ячейки."""
-        if cell.data_type == 'n' or cell.data_type == 'd':
+        if cell.data_type == KindCell.NUMERIC or cell.data_type == KindCell.DATE:
             k = self._NUMBER_FORMAT_KIND_MAP.get(cell.number_format)
             return k or (cell.data_type, cell.number_format)
         return cell.data_type, None
@@ -337,9 +338,9 @@ class ExcelExtractor:
         }
 
     _NUMBER_FORMAT_KIND_MAP = {
-        'General': ('n', '0.00'),
-        '@': ('s', None),
-        'mm-dd-yy': ('d', 'dd.mm.yyyy'),
-        '[$-F800]dddd\,\ mmmm\ dd\,\ yyyy': ('d', 'dd.mm.yyyy'),
-        '[$-F400]h:mm:ss\ AM/PM': ('time', 'hh:mm:ss'),
+        'General': (KindCell.NUMERIC, '0.00'),
+        '@': (KindCell.STRING, None),
+        'mm-dd-yy': (KindCell.DATE, 'dd.mm.yyyy'),
+        '[$-F800]dddd\,\ mmmm\ dd\,\ yyyy': (KindCell.DATE, 'dd.mm.yyyy'),
+        '[$-F400]h:mm:ss\ AM/PM': (KindCell.TIME, 'hh:mm:ss'),
     }
