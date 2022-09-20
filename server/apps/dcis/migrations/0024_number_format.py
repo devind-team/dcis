@@ -3,8 +3,8 @@
 from django.db import migrations, models
 
 
-def forward_func(apps, schema_editor):
-    """Добавление форматирование чисел к ячейке."""
+def set_number_format(apps, schema_editor):
+    """Добавление форматирования чисел к ячейке."""
     from apps.dcis.models.sheet import KindCell
     Cell = apps.get_model('dcis', 'Cell')
     for cell in Cell.objects.all():
@@ -14,6 +14,11 @@ def forward_func(apps, schema_editor):
         if cell.kind == KindCell.DATE:
             cell.number_format = 'dd.mm.yyyy'
             cell.save(update_fields=('number_format',))
+
+
+def empty_reverse(apps, schema_editor):
+    """Пустая функция для отката миграции, т.к. поле `number_format` является вычисляемым."""
+    pass
 
 
 class Migration(migrations.Migration):
@@ -28,5 +33,5 @@ class Migration(migrations.Migration):
             name='number_format',
             field=models.TextField(help_text='Форматирование чисел', null=True),
         ),
-        migrations.RunPython(forward_func)
+        migrations.RunPython(set_number_format, empty_reverse)
     ]
