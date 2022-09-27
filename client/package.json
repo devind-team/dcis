@@ -20,7 +20,7 @@
     "@pinia/nuxt": "^0.4.1",
     "@vue/apollo-composable": "^4.0.0-alpha.19",
     "@vueuse/core": "^9.2.0",
-    "@vueuse/integrations": "^9.2.0",
+    "@vueuse/integrations": "^9.3.0",
     "accounting": "^0.4.1",
     "apexcharts": "^3.35.5",
     "cross-undici-fetch": "^0.4.14",
