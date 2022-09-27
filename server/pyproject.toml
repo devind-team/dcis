@@ -55,7 +55,7 @@ docutils = "^0.19"
 SnakeMD = "^0.11.0"
 pdoc = "^12.1.0"
 six = "^1.16.0"
-drf-yasg = "^1.21.3"
+drf-yasg = "^1.21.4"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0.4"
