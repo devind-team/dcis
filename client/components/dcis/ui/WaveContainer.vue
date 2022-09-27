@@ -26,7 +26,7 @@
   color: white
 
   &_inner
-    height: 8vh
+    height: 12vh
     width: 100%
     margin: 0
     padding: 0
