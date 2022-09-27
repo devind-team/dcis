@@ -29,6 +29,11 @@ fragment PeriodFields on PeriodType {
     name
     showHead
     showChild
+    comment
+    createdAt
+    position
+    updatedAt
+    __typename
     __typename
   }
   canAddDocument

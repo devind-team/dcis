@@ -1,5 +1,5 @@
 <template lang="pug">
-v-menu(v-model="active" bottom)
+v-menu(v-model="active" origin="center center" transition="scale-transition")
   template(#activator="{ on, attrs }")
     slot(name="default" :on="on" :attr="attrs")
   v-list

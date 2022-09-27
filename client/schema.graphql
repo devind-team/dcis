@@ -1565,6 +1565,27 @@ type ChangeSettingsMutationPayload {
   success: Boolean!
 }
 
+input ChangeShowSheetMutationInput {
+  clientMutationId: String
+  """Выбор: showHead, showChild"""
+  field: String!
+  """Идентификатор листа"""
+  sheetId: ID!
+  """Значение"""
+  value: Boolean!
+}
+
+"""Изменение показа листа."""
+type ChangeShowSheetMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный лист"""
+  sheet: BaseSheetType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeUserGroupsMutationInput {
   clientMutationId: String
   """Идентификатор групп"""
@@ -2595,6 +2616,8 @@ type Mutation {
   changeSectionText(input: ChangeSectionTextMutationInput!): ChangeSectionTextMutationPayload!
   """Мутация для изменения настроек"""
   changeSettings(input: ChangeSettingsMutationInput!): ChangeSettingsMutationPayload!
+  """Показ листов"""
+  changeShowSheet(input: ChangeShowSheetMutationInput!): ChangeShowSheetMutationPayload!
   """Мутация для изменения групп конкретного пользователя."""
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация на изменение групп пользователя в периоде."""

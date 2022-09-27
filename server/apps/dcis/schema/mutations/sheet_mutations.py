@@ -1,12 +1,15 @@
 from typing import Any
 
 import graphene
+from graphene.utils.str_converters import to_snake_case
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.schema.types import ErrorFieldType
 from graphql import ResolveInfo
 
+from apps.dcis.permissions.period_permissions import can_change_period
 from apps.dcis.models import ColumnDimension, RowDimension, Sheet
 from apps.dcis.schema.types import (
     CellType,
@@ -15,6 +18,7 @@ from apps.dcis.schema.types import (
     GlobalIndicesInputType,
     RowDimensionType,
     SheetType,
+    BaseSheetType,
 )
 from apps.dcis.services.column_dimension_services import (change_column_dimension, change_column_dimensions_fixed)
 from apps.dcis.services.row_dimension_services import (
@@ -50,6 +54,38 @@ class RenameSheetMutation(BaseMutation):
         )
 
 
+class ChangeShowSheetMutation(BaseMutation):
+    """Изменение показа листа."""
+
+    class Input:
+        sheet_id = graphene.ID(required=True, description='Идентификатор листа')
+        field = graphene.String(required=True, description='Выбор: showHead, showChild')
+        value = graphene.Boolean(required=True, description='Значение')
+
+    sheet = graphene.Field(BaseSheetType, description='Измененный лист')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        sheet_id: str,
+        field: str,
+        value: bool
+    ) -> 'ChangeShowSheetMutation':
+        if field not in ['showHead', 'showChild']:
+            return ChangeShowSheetMutation(
+                success=False,
+                errors=[ErrorFieldType('field', ['Поле должно быть: showHead, showChild'])]
+            )
+        field = to_snake_case(field)
+        sheet: Sheet = get_object_or_404(Sheet, pk=sheet_id)
+        can_change_period(info.context.user, sheet.period)
+        setattr(sheet, field, value)
+        sheet.save(update_fields=(field,))
+        return ChangeShowSheetMutation(sheet=sheet)
+
+
 class ChangeColumnDimensionMutation(BaseMutation):
     """Изменение колонки."""
 
@@ -70,7 +106,7 @@ class ChangeColumnDimensionMutation(BaseMutation):
         width: int | None,
         hidden: bool,
         kind: str
-    ):
+    ) -> 'ChangeColumnDimensionMutation':
         column_dimension = get_object_or_404(ColumnDimension, pk=column_dimension_id)
         return ChangeColumnDimensionMutation(
             column_dimension=change_column_dimension(
@@ -235,6 +271,7 @@ class SheetMutations(graphene.ObjectType):
     """Список мутаций для работы с листами документа."""
 
     rename_sheet = RenameSheetMutation.Field(required=True, description='Изменение названия листа')
+    change_show_sheet = ChangeShowSheetMutation.Field(required=True, description='Показ листов')
 
     change_column_dimension = ChangeColumnDimensionMutation.Field(required=True, description='Изменение колонки')
     change_column_dimensions_fixed = ChangeColumnDimensionsFixed.Field(
