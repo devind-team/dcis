@@ -21,3 +21,9 @@ Authorization: 78MOl7ynTbcAPPZZDg5R
 
 GET http://localhost:8000/external/v1/divisions/46/  # Идентификатор дивизиона
 Authorization: 78MOl7ynTbcAPPZZDg5R
+
+
+###
+
+
+GET https://reestr.cbias.ru/org_list_xml

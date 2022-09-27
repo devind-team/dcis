@@ -659,6 +659,10 @@ export type BaseSheetType = {
   period?: Maybe<PeriodType>;
   /** Позиция */
   position: Scalars['Int'];
+  /** Показывать ли подведомственным */
+  showChild: Scalars['Boolean'];
+  /** Показвать ли головам */
+  showHead: Scalars['Boolean'];
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
 };
@@ -1652,6 +1656,28 @@ export type ChangeSettingsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeShowSheetMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Выбор: showHead, showChild */
+  field: Scalars['String'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
+  /** Значение */
+  value: Scalars['Boolean'];
+};
+
+/** Изменение показа листа. */
+export type ChangeShowSheetMutationPayload = {
+  __typename?: 'ChangeShowSheetMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Измененный лист */
+  sheet?: Maybe<BaseSheetType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type ChangeUserGroupsMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор групп */
@@ -2207,6 +2233,8 @@ export type DeleteSessionsMutationPayload = {
 /** Graphene object type for Department. */
 export type DepartmentType = {
   __typename?: 'DepartmentType';
+  /** Children departments. */
+  children?: Maybe<Array<Maybe<DepartmentType>>>;
   /** Code of department */
   code?: Maybe<Scalars['Int']>;
   /** Created date */
@@ -2738,6 +2766,8 @@ export type Mutation = {
   changeSectionText: ChangeSectionTextMutationPayload;
   /** Мутация для изменения настроек */
   changeSettings: ChangeSettingsMutationPayload;
+  /** Показ листов */
+  changeShowSheet: ChangeShowSheetMutationPayload;
   /** Мутация для изменения групп конкретного пользователя. */
   changeUserGroups: ChangeUserGroupsMutationPayload;
   /** Мутация на изменение групп пользователя в периоде. */
@@ -3091,6 +3121,11 @@ export type MutationChangeSectionTextArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeSettingsArgs = {
   input: ChangeSettingsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeShowSheetArgs = {
+  input: ChangeShowSheetMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3642,6 +3677,8 @@ export type OrganizationType = Node & {
   address?: Maybe<Scalars['String']>;
   /** Additional fields */
   attributes: Scalars['JSONString'];
+  /** Children of organization */
+  children?: Maybe<Array<Maybe<OrganizationType>>>;
   /** Created date */
   createdAt: Scalars['DateTime'];
   /** Departments. */
@@ -4863,6 +4900,10 @@ export type SheetType = {
   position: Scalars['Int'];
   /** Строки */
   rows?: Maybe<Array<RowDimensionType>>;
+  /** Показывать ли подведомственным */
+  showChild: Scalars['Boolean'];
+  /** Показвать ли головам */
+  showHead: Scalars['Boolean'];
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
 };
@@ -5448,7 +5489,7 @@ export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, c
 
 export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
 
-export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> };
+export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> };
 
 export type PeriodGroupFieldsFragment = { __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null };
 
@@ -5458,7 +5499,7 @@ export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, nam
 
 export type RowDimensionFieldsFragment = { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> };
 
-export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any };
+export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any };
 
 export type StatusFieldsFragment = { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean, protected: boolean };
 
@@ -5594,7 +5635,7 @@ export type AddPeriodMutationVariables = Exact<{
   readonlyFillColor: Scalars['Boolean'];
 }>;
 
-export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } | null } };
+export type AddPeriodMutation = { __typename?: 'Mutation', addPeriod: { __typename: 'AddPeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> } | null } };
 
 export type AddPeriodGroupMutationVariables = Exact<{
   name: Scalars['String'];
@@ -5622,7 +5663,7 @@ export type ChangePeriodMutationVariables = Exact<{
   expiration?: InputMaybe<Scalars['Date']>;
 }>;
 
-export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } | null } };
+export type ChangePeriodMutation = { __typename?: 'Mutation', changePeriod: { __typename: 'ChangePeriodMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, period?: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> } | null } };
 
 export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
   periodGroupId: Scalars['ID'];
@@ -5630,6 +5671,14 @@ export type ChangePeriodGroupPrivilegesMutationVariables = Exact<{
 }>;
 
 export type ChangePeriodGroupPrivilegesMutation = { __typename?: 'Mutation', changePeriodGroupPrivileges: { __typename: 'ChangePeriodGroupPrivilegesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, privileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any } | null> } };
+
+export type ChangeShowSheetMutationVariables = Exact<{
+  sheetId: Scalars['ID'];
+  field: Scalars['String'];
+  value: Scalars['Boolean'];
+}>;
+
+export type ChangeShowSheetMutation = { __typename?: 'Mutation', changeShowSheet: { __typename: 'ChangeShowSheetMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, sheet?: { __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null } };
 
 export type ChangeUserPeriodGroupsMutationVariables = Exact<{
   userId: Scalars['ID'];
@@ -5815,7 +5864,7 @@ export type DocumentSheetQueryVariables = Exact<{
   sheetId: Scalars['ID'];
 }>;
 
-export type DocumentSheetQuery = { __typename?: 'Query', documentSheet: { __typename: 'SheetType', canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> }> | null } };
+export type DocumentSheetQuery = { __typename?: 'Query', documentSheet: { __typename: 'SheetType', canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> }> | null } };
 
 export type DocumentStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
@@ -5838,7 +5887,7 @@ export type DocumentsSheetQueryVariables = Exact<{
   documentIds: Array<Scalars['ID']> | Scalars['ID'];
 }>;
 
-export type DocumentsSheetQuery = { __typename?: 'Query', documentsSheet: { __typename: 'SheetType', canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, id: string, name: string, position: number, comment: string, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> }> | null } };
+export type DocumentsSheetQuery = { __typename?: 'Query', documentsSheet: { __typename: 'SheetType', canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> }> | null } };
 
 export type OrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5848,7 +5897,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> } };
 
 export type PeriodPossibleDivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];
@@ -5868,7 +5917,7 @@ export type PeriodsQueryVariables = Exact<{
   projectId: Scalars['ID'];
 }>;
 
-export type PeriodsQuery = { __typename?: 'Query', periods: Array<{ __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null> }> };
+export type PeriodsQuery = { __typename?: 'Query', periods: Array<{ __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, start?: any | null, expiration?: any | null, createdAt: any, canAddDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> }> };
 
 export type PrivilegesQueryVariables = Exact<{ [key: string]: never; }>;
 

@@ -309,5 +309,13 @@ export default {
       newFiles: 'Новые файлы',
       uploadArchive: 'Скачать архив'
     }
+  },
+  sheets: {
+    settings: {
+      show: 'Настройки вывода',
+      name: 'Название листов',
+      showHead: 'Отображать головным учреждениям',
+      showChild: 'Отображать филиалам'
+    }
   }
 }

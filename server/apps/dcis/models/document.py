@@ -25,6 +25,9 @@ class Sheet(models.Model):
     position = models.PositiveIntegerField(default=0, help_text='Позиция')
     comment = models.TextField(max_length=1023, help_text='Комментарий')
 
+    show_head = models.BooleanField(default=True, null=False, help_text='Показывать ли головам')
+    show_child = models.BooleanField(default=True, null=False, help_text='Показывать ли подведомственным')
+
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
 
