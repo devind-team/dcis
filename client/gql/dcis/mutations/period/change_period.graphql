@@ -9,7 +9,8 @@ mutation ChangePeriod(
   $multiple: Boolean!,
   $privately: Boolean!,
   $start: Date,
-  $expiration: Date
+  $expiration: Date,
+  $versioning: Boolean!
 ) {
   changePeriod(input: {
     periodId: $id
@@ -18,7 +19,8 @@ mutation ChangePeriod(
     multiple: $multiple,
     privately: $privately,
     start: $start,
-    expiration: $expiration
+    expiration: $expiration,
+    versioning: $versioning
   }) {
     success
     errors {
