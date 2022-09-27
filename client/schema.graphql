@@ -624,6 +624,10 @@ type BaseSheetType {
   period: PeriodType
   """Позиция"""
   position: Int!
+  """Показывать ли подведомственным"""
+  showChild: Boolean!
+  """Показвать ли головам"""
+  showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
 }
@@ -2089,6 +2093,8 @@ type DeleteSessionsMutationPayload {
 
 """Graphene object type for Department."""
 type DepartmentType {
+  """Children departments."""
+  children: [DepartmentType]
   """Code of department"""
   code: Int
   """Created date"""
@@ -3027,6 +3033,8 @@ type OrganizationType implements Node {
   address: String
   """Additional fields"""
   attributes: JSONString!
+  """Children of organization"""
+  children: [OrganizationType]
   """Created date"""
   createdAt: DateTime!
   """Departments."""
@@ -4031,6 +4039,10 @@ type SheetType {
   position: Int!
   """Строки"""
   rows: [RowDimensionType!]
+  """Показывать ли подведомственным"""
+  showChild: Boolean!
+  """Показвать ли головам"""
+  showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
 }

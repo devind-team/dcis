@@ -1,29 +1,32 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.sheets.name') }}
-  template
-    grid-sheets(
-      v-model="activeSheetIndex"
-      :mode="GridMode.CHANGE"
-      :sheets="period.sheets"
-      :active-sheet="activeSheet"
-      :update-active-sheet="updateActiveSheet"
-    )
-      template(#tabs="{ sheets, updateSize }")
-        template(v-for="sheet in sheets")
-          sheet-control(
-            v-slot="{ on, attrs }"
-            :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
-            :key="sheet.id"
-          )
-            v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
+    v-spacer
+    settings-period-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
+      v-btn(v-on="on" v-bind="attrs" icon)
+        v-icon mdi-cog
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="GridMode.CHANGE"
+    :sheets="period.sheets"
+    :active-sheet="activeSheet"
+    :update-active-sheet="updateActiveSheet"
+  )
+    template(#tabs="{ sheets, updateSize }")
+      template(v-for="sheet in sheets")
+        sheet-control(
+          v-slot="{ on, attrs }"
+          :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
+          :key="sheet.id"
+        )
+          v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
 </template>
 
 <script lang="ts">
 import { ApolloCache } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
-import { inject, PropType, ref } from '#app'
-import { UpdateType } from '~/composables'
+import { computed, defineComponent, inject, PropType, ref } from '#app'
+import { UpdateType, useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -37,9 +40,10 @@ import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
+import SettingsPeriodMenu from '~/components/dcis/periods/SettingsPeriodMenu.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, SheetControl, GridSheets },
+  components: { SettingsPeriodMenu, LeftNavigatorContainer, SheetControl, GridSheets },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }

@@ -659,6 +659,10 @@ export type BaseSheetType = {
   period?: Maybe<PeriodType>;
   /** Позиция */
   position: Scalars['Int'];
+  /** Показывать ли подведомственным */
+  showChild: Scalars['Boolean'];
+  /** Показвать ли головам */
+  showHead: Scalars['Boolean'];
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
 };
@@ -2207,6 +2211,8 @@ export type DeleteSessionsMutationPayload = {
 /** Graphene object type for Department. */
 export type DepartmentType = {
   __typename?: 'DepartmentType';
+  /** Children departments. */
+  children?: Maybe<Array<Maybe<DepartmentType>>>;
   /** Code of department */
   code?: Maybe<Scalars['Int']>;
   /** Created date */
@@ -3642,6 +3648,8 @@ export type OrganizationType = Node & {
   address?: Maybe<Scalars['String']>;
   /** Additional fields */
   attributes: Scalars['JSONString'];
+  /** Children of organization */
+  children?: Maybe<Array<Maybe<OrganizationType>>>;
   /** Created date */
   createdAt: Scalars['DateTime'];
   /** Departments. */
@@ -4863,6 +4871,10 @@ export type SheetType = {
   position: Scalars['Int'];
   /** Строки */
   rows?: Maybe<Array<RowDimensionType>>;
+  /** Показывать ли подведомственным */
+  showChild: Scalars['Boolean'];
+  /** Показвать ли головам */
+  showHead: Scalars['Boolean'];
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
 };

@@ -309,5 +309,10 @@ export default {
       newFiles: 'Новые файлы',
       uploadArchive: 'Скачать архив'
     }
+  },
+  sheets: {
+    settings: {
+      show: 'Настройки вывода'
+    }
   }
 }

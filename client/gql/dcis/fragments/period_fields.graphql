@@ -27,6 +27,8 @@ fragment PeriodFields on PeriodType {
   sheets {
     id
     name
+    showHead
+    showChild
     __typename
   }
   canAddDocument
