@@ -3,6 +3,7 @@
 from devind_helpers.orm_utils import get_object_or_none
 from django.db import transaction
 from django.db.models import Max, QuerySet
+from django.core.exceptions import ValidationError
 
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
@@ -68,6 +69,9 @@ def create_document(
     from devind_dictionaries.models import Department, Organization
 
     can_add_document(user, period, status, division_id)
+    version = (get_documents_max_version(period.id, division_id) or 0) + 1
+    if version > 1 and not period.versioning:
+        raise ValidationError({'version': ['Допустима только версия 1']})
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     try:
         object_name: str = period.project.division.objects.get(pk=division_id).name
