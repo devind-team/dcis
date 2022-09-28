@@ -63,6 +63,11 @@ export default defineComponent({
       if (period.value) {
         if (period.value.canChangeSheet) {
           result.push({
+            title: t('dcis.periods.links.attributes') as string,
+            to: 'dcis-periods-periodId-attributes',
+            icon: 'page-next'
+          })
+          result.push({
             title: t('dcis.periods.links.sheets') as string,
             to: 'dcis-periods-periodId-sheets',
             icon: 'table'

@@ -1,6 +1,6 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-  template(#header) Атрибуты
+  template(#header) {{ $t('dcis.periods.links.attributes') }}
 </template>
 
 <script lang="ts">
@@ -19,12 +19,16 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const { localePath } = useI18n()
+    const { t, localePath } = useI18n()
     useNuxt2Meta({ title: props.period.name })
 
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
-      { text: 'Атрибуты', to: localePath({ name: 'dcis-periods-periodId-attributes' }), exact: true }
+      {
+        text: t('dcis.periods.links.attributes') as string,
+        to: localePath({ name: 'dcis-periods-periodId-attributes' }),
+        exact: true
+      }
     ]))
     return { bc }
   }

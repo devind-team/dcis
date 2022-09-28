@@ -54,6 +54,7 @@ export default {
       organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
+      attributes: 'Общие сведения',
       sheets: 'Таблица',
       settings: '@:settings'
     },
