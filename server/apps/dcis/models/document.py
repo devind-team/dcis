@@ -112,18 +112,28 @@ class Attribute(models.Model):
         - MONEY - поле для ввода денег
     """
 
-    TEXT = 0
-    MONEY = 1
+    TEXT = 'text'
+    MONEY = 'money'
+    BOOL = 'bool'
+    BIG_MONEY = 'bigMoney'
+    FILES = 'files'
+    NUMERIC = 'numeric'
+    DATE = 'date'
 
     KIND_ATTRIBUTE = (
         (TEXT, 'text'),
         (MONEY, 'money'),
+        (BOOL, 'boolean'),
+        (BIG_MONEY, 'bigMoney'),
+        (FILES, 'files'),
+        (NUMERIC, 'numeric'),
+        (DATE, 'date')
     )
 
     name = models.CharField(max_length=100, help_text='Наименование атрибута')
     placeholder = models.CharField(max_length=100, help_text='Подсказка')
     key = models.CharField(max_length=30, help_text='Ключ')
-    kind = models.PositiveIntegerField(default=TEXT, choices=KIND_ATTRIBUTE, help_text='Тип атрибута')
+    kind = models.CharField(max_length=10, default=TEXT, choices=KIND_ATTRIBUTE, help_text='Тип атрибута')
     default = models.TextField(help_text='Значение по умолчанию')
     mutable = models.BooleanField(default=True, help_text='Можно ли изменять')
 
