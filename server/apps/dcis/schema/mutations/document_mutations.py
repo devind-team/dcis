@@ -8,6 +8,7 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.schema.types import ErrorFieldType
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -27,6 +28,8 @@ from apps.dcis.services.row_dimension_services import (
     change_row_dimension_height,
     delete_row_dimension,
 )
+
+from server.apps.dcis.services.document_services import get_documents_max_version
 
 
 class AddDocumentMutation(BaseMutation):
@@ -64,13 +67,20 @@ class AddDocumentMutation(BaseMutation):
         period = get_object_or_404(Period, pk=period_id)
         status = get_object_or_404(Status, pk=status_id)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
+        version = (get_documents_max_version(period.id, division_id) or 0) + 1
+        if version > 1 and not period.versioning:
+            return AddDocumentMutation(
+                success=False,
+                errors=[ErrorFieldType('version', ['Допустима только версия 1'])]
+            )
         document = create_document(
             user=info.context.user,
             period=period,
             status=status,
             comment=comment,
             document_id=document_id,
-            division_id=division_id
+            division_id=division_id,
+            version=version
         )
         return AddDocumentMutation(document=document)
 

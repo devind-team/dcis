@@ -74,7 +74,7 @@ def create_document(
     except (Department.DoesNotExist, Organization.DoesNotExist):
         object_name = ''
     document = Document.objects.create(
-        version=(_get_documents_max_version(period.id, division_id) or 0) + 1,
+        version=(get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
         object_name=object_name,
@@ -98,14 +98,6 @@ def create_document(
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
     return document
-
-
-def _get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
-    """Получение максимальной версии документа для периода."""
-    return Document.objects.filter(
-        period_id=period_id,
-        object_id=division_id
-    ).aggregate(version=Max('version'))['version']
 
 
 def _transfer_cells(rows_transform: dict[int, int]) -> None:
@@ -209,3 +201,11 @@ def delete_document_status(user: User, status: DocumentStatus) -> None:
     """Удаление статуса документа."""
     can_change_document(user, status.document)
     status.delete()
+
+
+def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+    """Получение максимальной версии документа для периода."""
+    return Document.objects.filter(
+        period_id=period_id,
+        object_id=division_id
+    ).aggregate(version=Max('version'))['version']
