@@ -3,6 +3,8 @@ fragment SheetFields on SheetType {
   name
   position
   comment
+  showHead
+  showChild
   createdAt
   updatedAt
   __typename

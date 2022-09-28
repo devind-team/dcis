@@ -533,6 +533,8 @@ class BaseSheetType(graphene.ObjectType):
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
+    show_head = graphene.Boolean(required=True, description='Показвать ли головам')
+    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
     period = graphene.Field(PeriodType, description='Период')

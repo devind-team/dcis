@@ -24,7 +24,7 @@ def rename_sheet(user: User, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]
     """Переименование листа с учетом формул.
 
     sheet.name -> name
-
+    :param user - пользователь
     :param sheet - лист
     :param name - новое имя листа
     """

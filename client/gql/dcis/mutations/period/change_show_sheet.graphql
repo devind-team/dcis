@@ -1,0 +1,26 @@
+mutation ChangeShowSheet($sheetId: ID!, $field: String!, $value: Boolean!) {
+  changeShowSheet(input: {
+    sheetId: $sheetId,
+    field: $field,
+    value: $value
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    sheet {
+      id
+      name
+      showHead
+      showChild
+      comment
+      createdAt
+      position
+      updatedAt
+      __typename
+    }
+    __typename
+  }
+}
