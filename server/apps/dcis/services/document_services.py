@@ -3,7 +3,7 @@
 from devind_helpers.orm_utils import get_object_or_none
 from django.db import transaction
 from django.db.models import Max, QuerySet
-from django.core.exceptions import ValidationError
+from devind_helpers.schema.types import ErrorFieldType
 
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
@@ -56,7 +56,7 @@ def create_document(
     comment: str,
     document_id: int | str | None = None,
     division_id: int | str | None = None
-) -> Document:
+) -> tuple[Document | None, list[ErrorFieldType]]:
     """Добавление нового документа.
 
     :param user: пользователь, который создает документ
@@ -71,7 +71,7 @@ def create_document(
     can_add_document(user, period, status, division_id)
     version = (get_documents_max_version(period.id, division_id) or 0) + 1
     if version > 1 and not period.versioning:
-        errors = ValidationError({'version': ['Допустима только версия 1']})
+        return None, [ErrorFieldType('version', ['Допустима только версия 1'])]
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     try:
         object_name: str = period.project.division.objects.get(pk=division_id).name
@@ -101,7 +101,7 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
-    return document, errors
+    return document, []
 
 
 def _transfer_cells(rows_transform: dict[int, int]) -> None:

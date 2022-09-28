@@ -28,8 +28,6 @@ from apps.dcis.services.row_dimension_services import (
     delete_row_dimension,
 )
 
-from server.apps.dcis.services.document_services import get_documents_max_version
-
 
 class AddDocumentMutation(BaseMutation):
     """Добавление документа."""
@@ -74,7 +72,7 @@ class AddDocumentMutation(BaseMutation):
             document_id=document_id,
             division_id=division_id
         )
-        return AddDocumentMutation(document=document, errors=errors)
+        return AddDocumentMutation(success=not errors, errors=errors, document=document)
 
 
 class ChangeDocumentCommentMutation(BaseMutation):
