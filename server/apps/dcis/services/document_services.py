@@ -71,7 +71,11 @@ def create_document(
     can_add_document(user, period, status, division_id)
     version = (get_documents_max_version(period.id, division_id) or 0) + 1
     if version > 1 and not period.versioning:
-        return None, [ErrorFieldType('version', ['Допустима только версия 1'])]
+        message: str = 'Допустима только версия 1'
+        return None, [
+            ErrorFieldType('organization', [message]),
+            ErrorFieldType('department', [message]),
+        ]
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     try:
         object_name: str = period.project.division.objects.get(pk=division_id).name
