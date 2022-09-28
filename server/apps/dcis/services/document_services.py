@@ -71,7 +71,7 @@ def create_document(
     can_add_document(user, period, status, division_id)
     version = (get_documents_max_version(period.id, division_id) or 0) + 1
     if version > 1 and not period.versioning:
-        raise ValidationError({'version': ['Допустима только версия 1']})
+        errors = ValidationError({'version': ['Допустима только версия 1']})
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     try:
         object_name: str = period.project.division.objects.get(pk=division_id).name
@@ -101,7 +101,7 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
-    return document
+    return document, errors
 
 
 def _transfer_cells(rows_transform: dict[int, int]) -> None:

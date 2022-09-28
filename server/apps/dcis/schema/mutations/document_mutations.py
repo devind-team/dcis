@@ -3,13 +3,11 @@ from typing import Any
 
 import graphene
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.exceptions import ValidationError
 from graphene_file_upload.scalars import Upload
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
-from devind_helpers.schema.types import ErrorFieldType
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -68,21 +66,15 @@ class AddDocumentMutation(BaseMutation):
         period = get_object_or_404(Period, pk=period_id)
         status = get_object_or_404(Status, pk=status_id)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
-        try:
-            document = create_document(
-                user=info.context.user,
-                period=period,
-                status=status,
-                comment=comment,
-                document_id=document_id,
-                division_id=division_id
-            )
-            return AddDocumentMutation(document=document)
-        except ValidationError as error:
-            return AddDocumentMutation(
-                success=False,
-                errors=ErrorFieldType.from_messages_dict(error.message_dict)
-            )
+        document, errors = create_document(
+            user=info.context.user,
+            period=period,
+            status=status,
+            comment=comment,
+            document_id=document_id,
+            division_id=division_id
+        )
+        return AddDocumentMutation(document=document, errors=errors)
 
 
 class ChangeDocumentCommentMutation(BaseMutation):
