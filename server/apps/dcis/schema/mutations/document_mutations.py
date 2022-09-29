@@ -64,7 +64,7 @@ class AddDocumentMutation(BaseMutation):
         period = get_object_or_404(Period, pk=period_id)
         status = get_object_or_404(Status, pk=status_id)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
-        document = create_document(
+        document, errors = create_document(
             user=info.context.user,
             period=period,
             status=status,
@@ -72,7 +72,7 @@ class AddDocumentMutation(BaseMutation):
             document_id=document_id,
             division_id=division_id
         )
-        return AddDocumentMutation(document=document)
+        return AddDocumentMutation(success=not errors, errors=errors, document=document)
 
 
 class ChangeDocumentCommentMutation(BaseMutation):

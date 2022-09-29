@@ -6,14 +6,16 @@ mutation AddPeriod(
   $projectId: ID!,
   $file: Upload!,
   $multiple: Boolean!,
-  $readonlyFillColor: Boolean!
+  $readonlyFillColor: Boolean!,
+  $versioning: Boolean!
 ) {
   addPeriod(input: {
     name: $name,
     projectId: $projectId,
     file: $file,
     multiple: $multiple,
-    readonlyFillColor: $readonlyFillColor
+    readonlyFillColor: $readonlyFillColor,
+    versioning: $versioning
   }) {
     success
     errors {

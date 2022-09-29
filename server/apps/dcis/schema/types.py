@@ -135,6 +135,7 @@ class PeriodType(DjangoObjectType):
             'name',
             'status',
             'multiple',
+            'versioning',
             'privately',
             'start',
             'expiration',

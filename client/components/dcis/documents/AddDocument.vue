@@ -73,7 +73,6 @@ mutation-modal-form(
         v-list-item-content
           v-list-item-title {{ $t('dcis.documents.addDocument.version', { version: item.version }) }}
           v-list-item-subtitle {{ item.comment }}
-    pre {{ divisionId }}
 </template>
 
 <script lang="ts">

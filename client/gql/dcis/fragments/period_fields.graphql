@@ -9,6 +9,7 @@ fragment PeriodFields on PeriodType {
   status
   multiple
   privately
+  versioning
   start
   expiration
   createdAt

@@ -360,6 +360,8 @@ input AddPeriodMutationInput {
   projectId: ID!
   """Запретить редактирование ячеек с заливкой"""
   readonlyFillColor: Boolean!
+  """Разрешить множество версий"""
+  versioning: Boolean!
 }
 
 """Мутация для создания периода."""
@@ -1343,6 +1345,8 @@ input ChangePeriodMutationInput {
   start: Date
   """Статус проекта"""
   status: String!
+  """Разрешить множество версий"""
+  versioning: Boolean!
 }
 
 """Мутация на изменение настроек периода."""
@@ -3251,6 +3255,8 @@ type PeriodType {
   updatedAt: DateTime!
   """Пользователь"""
   user: UserType!
+  """Множество версий"""
+  versioning: Boolean!
 }
 
 """Привилегия пользователя или группы пользователей."""

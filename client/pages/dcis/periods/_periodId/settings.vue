@@ -3,7 +3,7 @@ bread-crumbs(:items="bc")
   apollo-mutation(
     v-slot="{ mutate, loading, error }"
     :mutation="require('~/gql/dcis/mutations/period/change_period.graphql')"
-    :variables="{ id: period.id, name, status, start, expiration, multiple, privately }"
+    :variables="{ id: period.id, name, status, start, expiration, multiple, privately, versioning }"
     :update="changePeriodUpdate"
     tag
   )
@@ -78,6 +78,8 @@ bread-crumbs(:items="bc")
                   v-checkbox(v-model="multiple" :label="$t('dcis.periods.changePeriod.multiple')")
                 v-col(cols="12" md="6")
                   v-checkbox(v-model="privately" :label="$t('dcis.periods.changePeriod.privately')")
+                v-col(cols="12" md="6")
+                  v-checkbox(v-model="versioning" :label="$t('dcis.periods.changePeriod.versioning')")
             v-card-actions
               v-btn(
                 :disabled="invalid"
@@ -153,6 +155,7 @@ export default defineComponent({
     const name = ref<string>(props.period.name)
     const multiple = ref<boolean>(props.period.multiple)
     const privately = ref<boolean>(props.period.privately)
+    const versioning = ref<boolean>(props.period.versioning)
     const start = ref<string>(props.period.start)
     const expiration = ref<string>(props.period.expiration)
 
@@ -200,6 +203,7 @@ export default defineComponent({
       name,
       multiple,
       privately,
+      versioning,
       start,
       expiration,
       status,

@@ -3,6 +3,7 @@
 from devind_helpers.orm_utils import get_object_or_none
 from django.db import transaction
 from django.db.models import Max, QuerySet
+from devind_helpers.schema.types import ErrorFieldType
 
 from apps.core.models import User
 from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
@@ -55,7 +56,7 @@ def create_document(
     comment: str,
     document_id: int | str | None = None,
     division_id: int | str | None = None
-) -> Document:
+) -> tuple[Document | None, list[ErrorFieldType]]:
     """Добавление нового документа.
 
     :param user: пользователь, который создает документ
@@ -68,13 +69,20 @@ def create_document(
     from devind_dictionaries.models import Department, Organization
 
     can_add_document(user, period, status, division_id)
+    version = (get_documents_max_version(period.id, division_id) or 0) + 1
+    if version > 1 and not period.versioning:
+        message: str = 'Допустима только версия 1'
+        return None, [
+            ErrorFieldType('organization', [message]),
+            ErrorFieldType('department', [message]),
+        ]
     source_document: Document | None = get_object_or_none(Document, pk=document_id)
     try:
         object_name: str = period.project.division.objects.get(pk=division_id).name
     except (Department.DoesNotExist, Organization.DoesNotExist):
         object_name = ''
     document = Document.objects.create(
-        version=(_get_documents_max_version(period.id, division_id) or 0) + 1,
+        version=(get_documents_max_version(period.id, division_id) or 0) + 1,
         comment=comment,
         object_id=division_id,
         object_name=object_name,
@@ -97,15 +105,7 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
-    return document
-
-
-def _get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
-    """Получение максимальной версии документа для периода."""
-    return Document.objects.filter(
-        period_id=period_id,
-        object_id=division_id
-    ).aggregate(version=Max('version'))['version']
+    return document, []
 
 
 def _transfer_cells(rows_transform: dict[int, int]) -> None:
@@ -209,3 +209,11 @@ def delete_document_status(user: User, status: DocumentStatus) -> None:
     """Удаление статуса документа."""
     can_change_document(user, status.document)
     status.delete()
+
+
+def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+    """Получение максимальной версии документа для периода."""
+    return Document.objects.filter(
+        period_id=period_id,
+        object_id=division_id
+    ).aggregate(version=Max('version'))['version']
