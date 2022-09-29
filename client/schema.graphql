@@ -572,6 +572,47 @@ type ApplicationType implements Node {
   user: UserType
 }
 
+"""An enumeration."""
+enum AttributeKind {
+  """bigMoney"""
+  BIGMONEY
+  """boolean"""
+  BOOL
+  """date"""
+  DATE
+  """files"""
+  FILES
+  """money"""
+  MONEY
+  """numeric"""
+  NUMERIC
+  """text"""
+  TEXT
+}
+
+"""Тип атрибутов для документов."""
+type AttributeType {
+  """Дочерние элементы"""
+  children: [AttributeType]
+  """Значение по умолчанию"""
+  default: String!
+  id: ID!
+  """Ключ"""
+  key: String!
+  """Тип атрибута"""
+  kind: AttributeKind!
+  """Можно ли изменять"""
+  mutable: Boolean!
+  """Наименование атрибута"""
+  name: String!
+  """Родительский атрибут"""
+  parent: AttributeType
+  """Период"""
+  period: PeriodType
+  """Подсказка"""
+  placeholder: String!
+}
+
 input AuthCbiasMutationInput {
   """Открытый идентификатор приложения"""
   clientId: String
@@ -3423,6 +3464,11 @@ type Query {
   activeStatistics: ActiveStatisticsType!
   """Приложения"""
   applications: [ApplicationType!]!
+  """Получение атрибутов, привязанных к периоду"""
+  attributes(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [AttributeType]!
   budgetClassifications(
     after: String
     before: String

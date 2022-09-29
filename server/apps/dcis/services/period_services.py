@@ -15,7 +15,7 @@ from devind_helpers.utils import convert_str_to_int
 from devind_helpers.schema.types import ErrorFieldType
 
 from apps.core.models import User
-from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project, Attribute
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -88,6 +88,12 @@ def get_period_users(period: Period | int | str) -> QuerySet[User]:
         Q(periodgroup__period__id=period.id) |
         Q(periodprivilege__period__id=period.id)
     ).distinct()
+
+
+def get_period_attributes(period: Period | int | str) -> QuerySet[Attribute]:
+    """Получение атрибутов, связанных с периодом."""
+    period = Period.objects.get(pk=period) if type(period) in (int, str) else period
+    return period.attribute_set.filter(parent__isnull=True).all()
 
 
 def get_user_period_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:

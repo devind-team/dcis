@@ -604,6 +604,47 @@ export type ApplicationType = Node & {
   user?: Maybe<UserType>;
 };
 
+/** An enumeration. */
+export type AttributeKind =
+  /** bigMoney */
+  | 'BIGMONEY'
+  /** boolean */
+  | 'BOOL'
+  /** date */
+  | 'DATE'
+  /** files */
+  | 'FILES'
+  /** money */
+  | 'MONEY'
+  /** numeric */
+  | 'NUMERIC'
+  /** text */
+  | 'TEXT';
+
+/** Тип атрибутов для документов. */
+export type AttributeType = {
+  __typename?: 'AttributeType';
+  /** Дочерние элементы */
+  children?: Maybe<Array<Maybe<AttributeType>>>;
+  /** Значение по умолчанию */
+  default: Scalars['String'];
+  id: Scalars['ID'];
+  /** Ключ */
+  key: Scalars['String'];
+  /** Тип атрибута */
+  kind: AttributeKind;
+  /** Можно ли изменять */
+  mutable: Scalars['Boolean'];
+  /** Наименование атрибута */
+  name: Scalars['String'];
+  /** Родительский атрибут */
+  parent?: Maybe<AttributeType>;
+  /** Период */
+  period?: Maybe<PeriodType>;
+  /** Подсказка */
+  placeholder: Scalars['String'];
+};
+
 export type AuthCbiasMutationInput = {
   /** Открытый идентификатор приложения */
   clientId?: InputMaybe<Scalars['String']>;
@@ -4063,6 +4104,8 @@ export type Query = {
   activeStatistics: ActiveStatisticsType;
   /** Приложения */
   applications: Array<ApplicationType>;
+  /** Получение атрибутов, привязанных к периоду */
+  attributes: Array<Maybe<AttributeType>>;
   budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Категории */
   categories: CategoryTypeConnection;
@@ -4163,6 +4206,11 @@ export type QueryActiveBudgetClassificationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryAttributesArgs = {
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -5477,6 +5525,8 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
+export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default: string, mutable: boolean };
+
 export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null };
 
 export type ColumnDimensionFieldsFragment = { __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any };
@@ -5840,6 +5890,12 @@ export type ActiveBudgetClassificationsQueryVariables = Exact<{
 }>;
 
 export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBudgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
+
+export type AttributesQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default: string, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default: string, mutable: boolean } | null> | null } | null> };
 
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;

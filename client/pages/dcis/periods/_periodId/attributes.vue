@@ -1,14 +1,18 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.links.attributes') }}
+  v-row(v-if="!loading")
+    v-col
+      pre {{ attributes }}
 </template>
 
 <script lang="ts">
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
-import { useI18n } from '~/composables'
+import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType } from '~/types/graphql'
+import { AttributesQuery, AttributesQueryVariables, PeriodType } from '~/types/graphql'
+import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 export default defineComponent({
@@ -30,7 +34,15 @@ export default defineComponent({
         exact: true
       }
     ]))
-    return { bc }
+
+    const { data: attributes, loading } = useCommonQuery<AttributesQuery, AttributesQueryVariables, 'attributes'>({
+      document: attributesQuery,
+      variables: () => ({
+        periodId: props.period.id
+      })
+    })
+
+    return { bc, attributes, loading }
   }
 })
 </script>
