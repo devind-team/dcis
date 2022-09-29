@@ -244,10 +244,12 @@ class DocumentTestCase(TestCase):
                 self.status,
                 self.department_division.id
             )
-        document = create_document(user=self.super_user,
-                                   period=self.period,
-                                   status=self.status,
-                                   comment='Create document')[0]
+        document, _ = create_document(
+            user=self.super_user,
+            period=self.period,
+            status=self.status,
+            comment='Create document'
+        )
         self.assertEqual(
             document,
             Document.objects.get(comment='Create document'),
