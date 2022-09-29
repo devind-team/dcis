@@ -205,6 +205,8 @@ def add_documents(
     documents: list[Document] = []
     values: list[Value] = []
     for division_id, sheets_data in documents_data.items():
+        if max_versions.get(division_id, 1) and not period.versioning:
+            continue
         document: Document = Document.objects.create(
             comment=comment,
             version=max_versions.get(division_id, 1),
