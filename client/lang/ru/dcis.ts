@@ -72,7 +72,8 @@ export default {
       name: 'Название периода',
       file: 'Файл с формой сбора',
       readonlyFillColor: 'Запретить редактирование ячеек с заливкой',
-      multiple: 'Множественное заполнение'
+      multiple: 'Множественное заполнение',
+      versioning: 'Разрешить множество версий'
     },
     changePeriod: {
       header: 'Настройки периода',
@@ -82,6 +83,7 @@ export default {
       expiration: 'Дата окончания периода',
       multiple: 'Множественное заполнение',
       privately: 'Приватность полей',
+      versioning: 'Разрешить множество версий',
       save: '@:save'
     },
     deletePeriod: {

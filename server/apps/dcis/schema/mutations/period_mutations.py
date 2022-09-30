@@ -41,6 +41,7 @@ class AddPeriodMutation(BaseMutation):
         file = Upload(required=True, description='xlsx файл с проектом')
         multiple = graphene.Boolean(required=True, description='Множественный тип сбора')
         readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
+        versioning = graphene.Boolean(required=True, description='Разрешить множество версий')
 
     period = graphene.Field(PeriodType, description='Добавленный период')
 
@@ -53,7 +54,8 @@ class AddPeriodMutation(BaseMutation):
         project_id: str,
         file: InMemoryUploadedFile,
         multiple: bool,
-        readonly_fill_color: bool
+        readonly_fill_color: bool,
+        versioning: bool
     ):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
         return AddPeriodMutation(
@@ -63,7 +65,8 @@ class AddPeriodMutation(BaseMutation):
                 project=project,
                 multiple=multiple,
                 file=file,
-                readonly_fill_color=readonly_fill_color
+                readonly_fill_color=readonly_fill_color,
+                versioning=versioning
             )
         )
 
@@ -79,6 +82,7 @@ class ChangePeriodMutation(BaseMutation):
         privately = graphene.Boolean(required=True, description='Приватность полей')
         start = graphene.Date(required=False, description='Дата начала')
         expiration = graphene.Date(required=False, description='Дата окончания')
+        versioning = graphene.Boolean(required=True, description='Разрешить множество версий')
 
     period = graphene.Field(PeriodType, description='Измененный период')
 
@@ -93,7 +97,8 @@ class ChangePeriodMutation(BaseMutation):
         multiple: bool,
         privately: bool,
         start: date,
-        expiration: date
+        expiration: date,
+        versioning: bool
     ):
         period = get_object_or_404(Period, pk=period_id)
         return ChangePeriodMutation(
@@ -105,7 +110,8 @@ class ChangePeriodMutation(BaseMutation):
                 multiple=multiple,
                 privately=privately,
                 start=start,
-                expiration=expiration
+                expiration=expiration,
+                versioning=versioning
             )
         )
 

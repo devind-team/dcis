@@ -107,6 +107,7 @@ def create_period(
     name: str,
     project: Project,
     multiple: bool,
+    versioning: bool,
     file: File,
     readonly_fill_color: bool
 ) -> Period:
@@ -116,7 +117,8 @@ def create_period(
         name=name,
         user=user,
         project=project,
-        multiple=multiple
+        multiple=multiple,
+        versioning=versioning
     )
     fl = period.methodical_support.create(
         name=file.name,
@@ -308,6 +310,7 @@ def change_settings_period(
     name: str,
     status: str,
     multiple: bool,
+    versioning: bool,
     privately: bool,
     start: date,
     expiration: date
@@ -317,6 +320,7 @@ def change_settings_period(
     period.name = name
     period.status = status
     period.multiple = multiple
+    period.versioning = versioning
     period.privately = privately
     period.start = start
     period.expiration = expiration
