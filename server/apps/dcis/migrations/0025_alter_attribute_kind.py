@@ -15,4 +15,9 @@ class Migration(migrations.Migration):
             name='kind',
             field=models.CharField(choices=[('text', 'text'), ('money', 'money'), ('bool', 'boolean'), ('bigMoney', 'bigMoney'), ('files', 'files'), ('numeric', 'numeric'), ('date', 'date')], default='text', help_text='Тип атрибута', max_length=10),
         ),
+        migrations.AddField(
+            model_name='period',
+            name='versioning',
+            field=models.BooleanField(default=False, help_text='Множество версий'),
+        ),
     ]
