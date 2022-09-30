@@ -75,6 +75,31 @@ export type ActiveStatisticsType = {
   times: Array<Maybe<DateStatisticsType>>;
 };
 
+export type AddAttributeMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  default?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['ID']>;
+  /** Ключ */
+  key: Scalars['String'];
+  /** Тип атрибута */
+  kind: Scalars['String'];
+  /** Можно ли изменять */
+  mutable?: InputMaybe<Scalars['Boolean']>;
+  /** Наименование атрибута */
+  name: Scalars['String'];
+  parent?: InputMaybe<Scalars['ID']>;
+  period: Scalars['ID'];
+  /** Подсказка */
+  placeholder: Scalars['String'];
+};
+
+export type AddAttributeMutationPayload = {
+  __typename?: 'AddAttributeMutationPayload';
+  attribute?: Maybe<AttributeType>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  errors?: Maybe<Array<Maybe<ErrorType>>>;
+};
+
 export type AddBudgetClassificationMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Code */
@@ -629,7 +654,7 @@ export type AttributeType = {
   /** Дочерние элементы */
   children?: Maybe<Array<Maybe<AttributeType>>>;
   /** Значение по умолчанию */
-  default: Scalars['String'];
+  default?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   /** Ключ */
   key: Scalars['String'];
@@ -896,6 +921,31 @@ export type CellType = {
   verified: Scalars['Boolean'];
   /** Вертикальное выравнивание */
   verticalAlign?: Maybe<Scalars['ID']>;
+};
+
+export type ChangeAttributeMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  default?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['ID']>;
+  /** Ключ */
+  key: Scalars['String'];
+  /** Тип атрибута */
+  kind: Scalars['String'];
+  /** Можно ли изменять */
+  mutable?: InputMaybe<Scalars['Boolean']>;
+  /** Наименование атрибута */
+  name: Scalars['String'];
+  parent?: InputMaybe<Scalars['ID']>;
+  /** Подсказка */
+  placeholder: Scalars['String'];
+};
+
+/** Мутация для изменения периода. */
+export type ChangeAttributeMutationPayload = {
+  __typename?: 'ChangeAttributeMutationPayload';
+  attribute?: Maybe<AttributeType>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  errors?: Maybe<Array<Maybe<ErrorType>>>;
 };
 
 export type ChangeAvatarMutationInput = {
@@ -2697,6 +2747,7 @@ export type MailingType = {
 /** Мутации на изменение чего-либо. */
 export type Mutation = {
   __typename?: 'Mutation';
+  addAttribute: AddAttributeMutationPayload;
   /** Добавление нового КБК */
   addBudgetClassification: AddBudgetClassificationMutationPayload;
   /** Мутация для добавления категории */
@@ -2741,6 +2792,8 @@ export type Mutation = {
   addTag: AddTagMutationPayload;
   /** Авторизация через портал https://cbias.ru */
   authCbias?: Maybe<AuthCbiasMutationOutput>;
+  /** Мутация для изменения периода. */
+  changeAttribute: ChangeAttributeMutationPayload;
   /** Мутация для изменения аватара пользователя. */
   changeAvatar: ChangeAvatarMutationPayload;
   /** Мутации для изменения категории */
@@ -2884,6 +2937,11 @@ export type Mutation = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationAddAttributeArgs = {
+  input: AddAttributeMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationAddBudgetClassificationArgs = {
   input: AddBudgetClassificationMutationInput;
 };
@@ -2991,6 +3049,11 @@ export type MutationAddTagArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAuthCbiasArgs = {
   payload: AuthCbiasMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeAttributeArgs = {
+  input: ChangeAttributeMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5532,7 +5595,7 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
-export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default: string, mutable: boolean };
+export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean };
 
 export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null };
 
@@ -5561,6 +5624,31 @@ export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: s
 export type StatusFieldsFragment = { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean, protected: boolean };
 
 export type ValueFieldsFragment = { __typename: 'ValueType', id: string, value: string, payload?: string | null, verified: boolean, error?: string | null, columnId: string, rowId: string, sheetId: string };
+
+export type AddAttributeMutationVariables = Exact<{
+  period: Scalars['ID'];
+  name: Scalars['String'];
+  placeholder: Scalars['String'];
+  key: Scalars['String'];
+  kind: Scalars['String'];
+  default: Scalars['String'];
+  mutable?: InputMaybe<Scalars['Boolean']>;
+  parent?: InputMaybe<Scalars['ID']>;
+}>;
+
+export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } | null } };
+
+export type ChangeAttributeMutationVariables = Exact<{
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  placeholder: Scalars['String'];
+  key: Scalars['String'];
+  kind: Scalars['String'];
+  default: Scalars['String'];
+  mutable?: InputMaybe<Scalars['Boolean']>;
+}>;
+
+export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } | null } };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
@@ -5904,7 +5992,7 @@ export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default: string, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default: string, mutable: boolean } | null> | null } | null> };
+export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } | null> };
 
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;

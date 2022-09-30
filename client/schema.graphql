@@ -62,6 +62,30 @@ type ActiveStatisticsType {
   times: [DateStatisticsType]!
 }
 
+input AddAttributeMutationInput {
+  clientMutationId: String
+  default: String
+  id: ID
+  """Ключ"""
+  key: String!
+  """Тип атрибута"""
+  kind: String!
+  """Можно ли изменять"""
+  mutable: Boolean
+  """Наименование атрибута"""
+  name: String!
+  parent: ID
+  period: ID!
+  """Подсказка"""
+  placeholder: String!
+}
+
+type AddAttributeMutationPayload {
+  attribute: AttributeType
+  clientMutationId: String
+  errors: [ErrorType]
+}
+
 input AddBudgetClassificationMutationInput {
   clientMutationId: String
   """Code"""
@@ -597,7 +621,7 @@ type AttributeType {
   """Дочерние элементы"""
   children: [AttributeType]
   """Значение по умолчанию"""
-  default: String!
+  default: String
   id: ID!
   """Ключ"""
   key: String!
@@ -842,6 +866,30 @@ type CellType {
   verified: Boolean!
   """Вертикальное выравнивание"""
   verticalAlign: ID
+}
+
+input ChangeAttributeMutationInput {
+  clientMutationId: String
+  default: String
+  id: ID
+  """Ключ"""
+  key: String!
+  """Тип атрибута"""
+  kind: String!
+  """Можно ли изменять"""
+  mutable: Boolean
+  """Наименование атрибута"""
+  name: String!
+  parent: ID
+  """Подсказка"""
+  placeholder: String!
+}
+
+"""Мутация для изменения периода."""
+type ChangeAttributeMutationPayload {
+  attribute: AttributeType
+  clientMutationId: String
+  errors: [ErrorType]
 }
 
 input ChangeAvatarMutationInput {
@@ -2547,6 +2595,7 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
   addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
@@ -2591,6 +2640,8 @@ type Mutation {
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
+  """Мутация для изменения периода."""
+  changeAttribute(input: ChangeAttributeMutationInput!): ChangeAttributeMutationPayload!
   """Мутация для изменения аватара пользователя."""
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
   """Мутации для изменения категории"""

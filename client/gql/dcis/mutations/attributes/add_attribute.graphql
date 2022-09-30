@@ -1,0 +1,35 @@
+#import "../../fragments/attribute_fields.graphql"
+
+mutation AddAttribute(
+  $period: ID!,
+  $name: String!,
+  $placeholder: String!,
+  $key: String!,
+  $kind: String!,
+  $default: String!,
+  $mutable: Boolean,
+  $parent: ID
+) {
+  addAttribute(input: {
+    period: $period,
+    name: $name,
+    placeholder: $placeholder,
+    key: $key,
+    kind: $kind,
+    default: $default,
+    mutable: $mutable,
+    parent: $parent
+  }) {
+    errors {
+      field
+      messages
+    	__typename
+    }
+    attribute {
+     ...AttributeFields
+      children {
+        ...AttributeFields
+      }
+    }
+  }
+}

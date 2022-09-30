@@ -134,7 +134,7 @@ class Attribute(models.Model):
     placeholder = models.CharField(max_length=100, help_text='Подсказка')
     key = models.CharField(max_length=30, help_text='Ключ')
     kind = models.CharField(max_length=10, default=TEXT, choices=KIND_ATTRIBUTE, help_text='Тип атрибута')
-    default = models.TextField(help_text='Значение по умолчанию')
+    default = models.TextField(null=True, help_text='Значение по умолчанию')
     mutable = models.BooleanField(default=True, help_text='Можно ли изменять')
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
