@@ -10,7 +10,7 @@ def add_attribute(period: Period):
     pass
 
 
-def delete_attribute(user: User, period: Period, attribute: Attribute):
+def delete_attribute(user: User, attribute: Attribute):
     """Удаление атрибута."""
-    can_change_period_attributes(user, period)
+    can_change_period_attributes(user, attribute.period)
     attribute.delete()

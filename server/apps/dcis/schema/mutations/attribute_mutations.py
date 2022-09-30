@@ -45,7 +45,6 @@ class ChangeAttributeMutation(DjangoModelFormMutation):
 class DeleteAttributeMutation(graphene.ObjectType):
     """Мутация для удаления атрибута"""
     class Input:
-        period_id = graphene.ID(required=True, description='Идентификатор периода')
         attribute_id = graphene.ID(required=True, description='Идентификатор атрибута')
 
     delete_id = graphene.ID(required=True, description='Идентификатор удаленного атрибута')
@@ -53,9 +52,8 @@ class DeleteAttributeMutation(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, attribute_id: str):
-        period = get_object_or_404(Period, pk=period_id)
         attribute = get_object_or_404(Attribute, pk=attribute_id)
-        delete_attribute(user=info.context.user, period=period, attribute=attribute)
+        delete_attribute(user=info.context.user, attribute=attribute)
         return DeleteAttributeMutation(delete_id=attribute_id)
 
 

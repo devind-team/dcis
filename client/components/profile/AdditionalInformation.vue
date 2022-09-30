@@ -1,8 +1,5 @@
 <template lang="pug">
-v-card(
-  v-if="!profilesValueLoading && !profilesLoading"
-  flat
-)
+v-card(v-if="!profilesValueLoading && !profilesLoading" flat)
   v-row(v-for="profile in profiles" :key="profile.id")
     v-col(cols="12" md="3") {{ profile.name }}
     v-col(cols="12" md="9")
