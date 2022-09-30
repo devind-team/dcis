@@ -89,6 +89,7 @@ class PeriodQueries(graphene.ObjectType):
     attributes = graphene.List(
         AttributeType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        parent=graphene.Boolean(default_value=True, description='Вытягивать только родителей'),
         required=True,
         description='Получение атрибутов, привязанных к периоду'
     )
@@ -165,8 +166,9 @@ class PeriodQueries(graphene.ObjectType):
     def resolve_attributes(
         root: Any,
         info: ResolveInfo,
-        period_id: str
+        period_id: str,
+        parent: bool = True
     ) -> QuerySet[Attribute]:
         period = get_object_or_404(Period, pk=period_id)
         can_view_period(info.context.user, period)
-        return get_period_attributes(period)
+        return get_period_attributes(period, parent=parent)

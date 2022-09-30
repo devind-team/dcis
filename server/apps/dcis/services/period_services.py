@@ -90,10 +90,10 @@ def get_period_users(period: Period | int | str) -> QuerySet[User]:
     ).distinct()
 
 
-def get_period_attributes(period: Period | int | str) -> QuerySet[Attribute]:
+def get_period_attributes(period: Period | int | str, parent: bool = True) -> QuerySet[Attribute]:
     """Получение атрибутов, связанных с периодом."""
     period = Period.objects.get(pk=period) if type(period) in (int, str) else period
-    return period.attribute_set.filter(parent__isnull=True).all()
+    return (period.attribute_set.filter(parent__isnull=True) if parent else period.attribute_set).all()
 
 
 def get_user_period_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
