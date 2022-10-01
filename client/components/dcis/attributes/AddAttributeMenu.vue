@@ -9,10 +9,10 @@ v-menu(v-model="active")
           v-list-item-icon
             v-icon mdi-form-select
           v-list-item-content Заполнить форму
-    v-list-item
-      v-list-item-icon
-        v-icon mdi-file
-      v-list-item-content Выбрать из файла
+    // v-list-item
+    //  v-list-item-icon
+    //    v-icon mdi-file
+    //  v-list-item-content Выбрать из файла
 </template>
 
 <script lang="ts">

@@ -347,7 +347,7 @@ export default {
     tableHeaders: {
       name: 'Название параметра',
       key: 'Ключ',
-      value: 'По умолчанию',
+      default: 'По умолчанию',
       placeholder: 'Подсказка',
       action: 'Действие'
     }
