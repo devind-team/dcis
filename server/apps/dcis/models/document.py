@@ -136,12 +136,13 @@ class Attribute(models.Model):
     kind = models.CharField(max_length=10, default=TEXT, choices=KIND_ATTRIBUTE, help_text='Тип атрибута')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
     mutable = models.BooleanField(default=True, help_text='Можно ли изменять')
+    position = models.PositiveIntegerField(default=0, help_text='Позиция в выводе')
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительские данные для сбора')
 
     class Meta:
-        ordering = ('key', 'id',)
+        ordering = ('position',)
 
 
 class AttributeValue(models.Model):

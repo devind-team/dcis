@@ -17,11 +17,13 @@ class AddAttributeForm(forms.ModelForm):
             'kind',
             'default',
             'mutable',
+            'position',
             'period',
-            'parent'
+            'parent',
         )
 
     default = forms.CharField(max_length=512, required=False)
+    position = forms.IntegerField(default=0, required=False)
     parent = forms.ModelChoiceField(queryset=Attribute.objects.all(), required=False)
 
 
