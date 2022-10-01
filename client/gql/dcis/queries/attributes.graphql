@@ -3,8 +3,5 @@
 query Attributes($periodId: ID!) {
   attributes(periodId: $periodId) {
     ...AttributeFields
-    children {
-      ...AttributeFields
-    }
   }
 }

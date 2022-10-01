@@ -23,7 +23,7 @@ class AddAttributeForm(forms.ModelForm):
         )
 
     default = forms.CharField(max_length=512, required=False)
-    position = forms.IntegerField(default=0, required=False)
+    position = forms.IntegerField(required=False)
     parent = forms.ModelChoiceField(queryset=Attribute.objects.all(), required=False)
 
 

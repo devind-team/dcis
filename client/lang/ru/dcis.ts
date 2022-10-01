@@ -326,10 +326,29 @@ export default {
     add: 'Добавить атрибут',
     change: 'Изменить',
     delete: 'Удалить',
+    addMenu: {
+      header: 'Добавление атрибута',
+      buttonText: 'Добавить',
+      name: 'Наименование',
+      placeholder: 'Подсказка',
+      key: 'Ключ',
+      kind: 'Тип',
+      default: 'Значение по умолчанию',
+      mutable: 'Разрешить изменение',
+      text: 'Текст',
+      bigmoney: 'Тысячи',
+      bool: 'Переключатель',
+      data: 'Дата',
+      files: 'Файл',
+      money: 'Рубли',
+      numeric: 'Цифра',
+      all: 'Ошибка добавления'
+    },
     tableHeaders: {
       name: 'Название параметра',
       key: 'Ключ',
       value: 'По умолчанию',
+      placeholder: 'Подсказка',
       action: 'Действие'
     }
   }

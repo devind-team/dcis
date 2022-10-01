@@ -91,6 +91,7 @@ export type AddAttributeMutationInput = {
   period: Scalars['ID'];
   /** Подсказка */
   placeholder: Scalars['String'];
+  position?: InputMaybe<Scalars['Int']>;
 };
 
 export type AddAttributeMutationPayload = {
@@ -938,6 +939,7 @@ export type ChangeAttributeMutationInput = {
   parent?: InputMaybe<Scalars['ID']>;
   /** Подсказка */
   placeholder: Scalars['String'];
+  position?: InputMaybe<Scalars['Int']>;
 };
 
 /** Мутация для изменения периода. */
@@ -5636,7 +5638,7 @@ export type AddAttributeMutationVariables = Exact<{
   parent?: InputMaybe<Scalars['ID']>;
 }>;
 
-export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } | null } };
+export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
 
 export type ChangeAttributeMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -5648,7 +5650,7 @@ export type ChangeAttributeMutationVariables = Exact<{
   mutable?: InputMaybe<Scalars['Boolean']>;
 }>;
 
-export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } | null } };
+export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
@@ -5992,7 +5994,7 @@ export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, children?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } | null> };
+export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> };
 
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;

@@ -27,9 +27,6 @@ mutation AddAttribute(
     }
     attribute {
      ...AttributeFields
-      children {
-        ...AttributeFields
-      }
     }
   }
 }

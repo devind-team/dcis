@@ -143,6 +143,7 @@ class Attribute(models.Model):
 
     class Meta:
         ordering = ('position',)
+        unique_together = (('key', 'period',),)
 
 
 class AttributeValue(models.Model):

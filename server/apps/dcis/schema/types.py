@@ -354,7 +354,7 @@ class AttributeType(DjangoObjectType):
 
     class Meta:
         model = Attribute
-        fields = (
+        fields: tuple[str] = (
             'id',
             'name',
             'placeholder',

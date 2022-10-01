@@ -26,9 +26,6 @@ mutation ChangeAttribute(
     }
     attribute {
      ...AttributeFields
-      children {
-        ...AttributeFields
-      }
     }
   }
 }

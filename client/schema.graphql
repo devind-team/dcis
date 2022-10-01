@@ -78,6 +78,7 @@ input AddAttributeMutationInput {
   period: ID!
   """Подсказка"""
   placeholder: String!
+  position: Int
 }
 
 type AddAttributeMutationPayload {
@@ -883,6 +884,7 @@ input ChangeAttributeMutationInput {
   parent: ID
   """Подсказка"""
   placeholder: String!
+  position: Int
 }
 
 """Мутация для изменения периода."""
