@@ -1965,6 +1965,31 @@ value as specified by
 """
 scalar DateTime
 
+input DeleteAttributeMutationInput {
+  """
+  Идентификатор модели "Не табличные данные хранятся в атрибутах.
+  
+      Модель содержит список не табличных данных для организации сбора в указанный период.
+      Информация о типах:
+          - TEXT - тестовое поле
+          - MONEY - поле для ввода денег
+      "
+  """
+  attributeId: ID!
+  clientMutationId: String
+}
+
+"""
+Удаление записи модели "Attribute"
+"""
+type DeleteAttributeMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteCategoryMutationInput {
   """Идентификатор мутации"""
   categoryId: ID!
@@ -2730,6 +2755,10 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
+  """
+  Удаление записи модели "Attribute"
+  """
+  deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление дочерней строки."""

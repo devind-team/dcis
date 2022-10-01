@@ -2070,6 +2070,30 @@ export type DateStatisticsType = {
   value: Scalars['Float'];
 };
 
+export type DeleteAttributeMutationInput = {
+  /**
+   * Идентификатор модели "Не табличные данные хранятся в атрибутах.
+   *
+   *     Модель содержит список не табличных данных для организации сбора в указанный период.
+   *     Информация о типах:
+   *         - TEXT - тестовое поле
+   *         - MONEY - поле для ввода денег
+   *     "
+   */
+  attributeId: Scalars['ID'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+};
+
+/** Удаление записи модели "Attribute" */
+export type DeleteAttributeMutationPayload = {
+  __typename?: 'DeleteAttributeMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteCategoryMutationInput = {
   /** Идентификатор мутации */
   categoryId: Scalars['ID'];
@@ -2882,6 +2906,8 @@ export type Mutation = {
   confirmEmail: ConfirmEmailMutationPayload;
   /** Мутация на перенос групп с пользователями из другого периода. */
   copyPeriodGroups: CopyPeriodGroupsMutationPayload;
+  /** Удаление записи модели "Attribute" */
+  deleteAttribute: DeleteAttributeMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
   /** Удаление дочерней строки. */
@@ -3271,6 +3297,11 @@ export type MutationConfirmEmailArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationCopyPeriodGroupsArgs = {
   input: CopyPeriodGroupsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteAttributeArgs = {
+  input: DeleteAttributeMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5651,6 +5682,12 @@ export type ChangeAttributeMutationVariables = Exact<{
 }>;
 
 export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
+
+export type DeleteAttributeMutationVariables = Exact<{
+  attributeId: Scalars['ID'];
+}>;
+
+export type DeleteAttributeMutation = { __typename?: 'Mutation', deleteAttribute: { __typename?: 'DeleteAttributeMutationPayload', success: boolean } };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];

@@ -7,6 +7,7 @@ from graphql import ResolveInfo
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.mutation_factories import DeleteMutation
 
 from apps.dcis.permissions import can_change_period_sheet
 from apps.dcis.models import Attribute, Period
@@ -42,23 +43,9 @@ class ChangeAttributeMutation(DjangoModelFormMutation):
         return super().mutate_and_get_payload(root, info, **data)
 
 
-class DeleteAttributeMutation(graphene.ObjectType):
-    """Мутация для удаления атрибута"""
-    class Input:
-        attribute_id = graphene.ID(required=True, description='Идентификатор атрибута')
-
-    delete_id = graphene.ID(required=True, description='Идентификатор удаленного атрибута')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, attribute_id: str):
-        attribute = get_object_or_404(Attribute, pk=attribute_id)
-        delete_attribute(user=info.context.user, attribute=attribute)
-        return DeleteAttributeMutation(delete_id=attribute_id)
-
-
 class AttributeMutations(graphene.ObjectType):
     """Мутации, связанные с атрибутами."""
 
     add_attribute = AddAttributeMutation.Field(required=True)
     change_attribute = ChangeAttributeMutation.Field(required=True)
+    delete_attribute = DeleteMutation(Attribute).Field(required=True)

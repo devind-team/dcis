@@ -14,29 +14,38 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     hide-default-footer
   )
     template(#item.action="{ item }")
-      v-menu(bottom)
-        template(#activator="{ on, attrs}")
-          v-btn(v-on="on" v-bind="attrs" icon)
-            v-icon mdi-dots-vertical
-        v-list
-          v-list-item {{ $t('dcis.attributes.change') }}
-          v-list-item {{ $t('dcis.attributes.delete') }}
+      delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
+        v-tooltip(bottom)
+          template(#activator="{ on: onTooltip, attrs}")
+            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" icon)
+              v-icon mdi-delete
+          span {{ $t('dcis.attributes.delete') }}
 </template>
 
 <script lang="ts">
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import { DataTableHeader } from 'vuetify'
+import { useMutation } from '@vue/apollo-composable'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { AttributesQuery, AttributesQueryVariables, PeriodType } from '~/types/graphql'
+import {
+  AttributesQuery,
+  AttributesQueryVariables, AttributeType, DeleteAttributeMutation,
+  DeleteAttributeMutationInput,
+  DeleteAttributeMutationPayload,
+  PeriodType
+} from '~/types/graphql'
 import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
+import deleteAttributeMutation from '~/gql/dcis/mutations/attributes/delete_attribute.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddAttributeMenu from '~/components/dcis/attributes/AddAttributeMenu.vue'
 import { AddAttributeMutationResult } from '~/components/dcis/attributes/AddAttribute.vue'
+import ConfirmMenu from '~/components/common/menu/ConfirmMenu.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({
-  components: { AddAttributeMenu, LeftNavigatorContainer },
+  components: { DeleteMenu, ConfirmMenu, AddAttributeMenu, LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -57,15 +66,16 @@ export default defineComponent({
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
       { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '45%' },
-      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '20%' },
       { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '25%' },
       { text: t('dcis.attributes.tableHeaders.key') as string, value: 'key', width: '10%' },
+      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '20%' },
       { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '10%' }
     ]))
 
     const {
       data: attributes,
       addUpdate,
+      deleteUpdate,
       loading
     } = useCommonQuery<AttributesQuery, AttributesQueryVariables, 'attributes'>({
       document: attributesQuery,
@@ -74,13 +84,23 @@ export default defineComponent({
       })
     })
 
+    const deleteAttribute = (attribute: AttributeType) => {
+      useMutation<DeleteAttributeMutation, DeleteAttributeMutationInput>(deleteAttributeMutation, {
+        update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload }}) => {
+          if (result.data.deleteAttribute.success) {
+            deleteUpdate(cache, { data: { deleteAttribute: { id: attribute.id } } })
+          }
+        }
+      }).mutate({ attributeId: attribute.id })
+    }
+
     const addAttributeUpdate = (cache, result: AddAttributeMutationResult) => {
       if (!result.data.addAttribute.errors.length) {
         addUpdate(cache, result, 'attribute')
       }
     }
 
-    return { bc, headers, attributes, loading, addAttributeUpdate }
+    return { bc, headers, attributes, loading, addAttributeUpdate, deleteAttribute }
   }
 })
 </script>
