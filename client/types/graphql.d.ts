@@ -671,6 +671,29 @@ export type AttributeType = {
   period?: Maybe<PeriodType>;
   /** Подсказка */
   placeholder: Scalars['String'];
+  /** Значение документа */
+  value?: Maybe<AttributeValueType>;
+};
+
+/** Тип атрибутов для документов. */
+export type AttributeTypeValueArgs = {
+  documentId: Scalars['ID'];
+};
+
+/** Тип со значениями атрибутов. */
+export type AttributeValueType = {
+  __typename?: 'AttributeValueType';
+  /** Атрибут */
+  attribute?: Maybe<AttributeType>;
+  /** Дата создания */
+  createdAt: Scalars['DateTime'];
+  /** Документ */
+  document?: Maybe<DocumentType>;
+  id: Scalars['ID'];
+  /** Дата обновления */
+  updatedAt: Scalars['DateTime'];
+  /** Значение */
+  value: Scalars['String'];
 };
 
 export type AuthCbiasMutationInput = {
@@ -4208,6 +4231,8 @@ export type Query = {
   applications: Array<ApplicationType>;
   /** Получение атрибутов, привязанных к периоду */
   attributes: Array<Maybe<AttributeType>>;
+  /** Атрибуты со значениями документа */
+  attributesValues: Array<Maybe<AttributeType>>;
   budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Категории */
   categories: CategoryTypeConnection;
@@ -4314,6 +4339,11 @@ export type QueryActiveBudgetClassificationsArgs = {
 export type QueryAttributesArgs = {
   parent?: InputMaybe<Scalars['Boolean']>;
   periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryAttributesValuesArgs = {
+  documentId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -6032,6 +6062,12 @@ export type AttributesQueryVariables = Exact<{
 }>;
 
 export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> };
+
+export type AttributesValuesQueryVariables = Exact<{
+  documentId: Scalars['ID'];
+}>;
+
+export type AttributesValuesQuery = { __typename?: 'Query', attributesValues: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, value?: { __typename: 'AttributeValueType', id: string, value: string, createdAt: any, updatedAt: any } | null } | null> };
 
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;

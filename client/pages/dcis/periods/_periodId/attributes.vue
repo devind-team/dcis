@@ -65,11 +65,11 @@ export default defineComponent({
     ]))
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
-      { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '45%' },
-      { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '25%' },
+      { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '40%' },
+      { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '20%' },
       { text: t('dcis.attributes.tableHeaders.key') as string, value: 'key', width: '10%' },
       { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '20%' },
-      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '10%' }
+      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '20%', align: 'center' }
     ]))
 
     const {

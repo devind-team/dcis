@@ -1,6 +1,7 @@
 from typing import Any
 
 import graphene
+from django.db.models import Prefetch
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -15,7 +16,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Period, Privilege, Sheet, Attribute
+from apps.dcis.models import Period, Privilege, Sheet, Attribute, Document
 from apps.dcis.permissions import can_change_period_sheet, can_view_period
 from apps.dcis.schema.types import DivisionModelTypeConnection, PeriodType, PrivilegeType, SheetType, AttributeType
 from apps.dcis.services.divisions_services import get_period_possible_divisions
@@ -92,6 +93,13 @@ class PeriodQueries(graphene.ObjectType):
         parent=graphene.Boolean(default_value=True, description='Вытягивать только родителей'),
         required=True,
         description='Получение атрибутов, привязанных к периоду'
+    )
+
+    attributes_values = graphene.List(
+        AttributeType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        required=True,
+        description='Атрибуты со значениями документа'
     )
 
     @staticmethod
@@ -172,3 +180,15 @@ class PeriodQueries(graphene.ObjectType):
         period = get_object_or_404(Period, pk=period_id)
         can_view_period(info.context.user, period)
         return get_period_attributes(period, parent=parent)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_attributes_values(
+        root: Any,
+        info: ResolveInfo,
+        document_id: str
+    ) -> QuerySet[Attribute]:
+        document: Document = Document.objects.select_related('period').get(pk=from_global_id(document_id)[1])
+        can_view_period(info.context.user, document.period)
+        return Attribute.objects.filter(period=document.period).prefetch_related(Prefetch('attributevalue_set', queryset=AttributeValue.objects.filter(document=d), to_attr='value'))
+        return get_period_attributes(document.period)

@@ -12,6 +12,8 @@ from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
 
+from devind_helpers.orm_utils import get_object_or_none
+
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
@@ -352,6 +354,12 @@ class AttributeType(DjangoObjectType):
     parent = graphene.Field(lambda: AttributeType, description='Родительский атрибут')
     children = graphene.List(lambda: AttributeType, description='Дочерние элементы')
 
+    value = graphene.Field(
+        lambda: AttributeValueType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        description='Значение документа'
+    )
+
     class Meta:
         model = Attribute
         fields: tuple[str] = (
@@ -368,7 +376,7 @@ class AttributeType(DjangoObjectType):
 
     @staticmethod
     @resolver_hints(model_field='attribute_set')
-    def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs):
+    def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs) -> QuerySet[Attribute]:
         return attribute.attribute_set.all()
 
 
@@ -383,7 +391,7 @@ class AttributeValueType(DjangoObjectType):
         fields = (
             'id',
             'value',
-            'created_at',
+            'updated_at',
             'created_at',
             'document',
             'attribute',

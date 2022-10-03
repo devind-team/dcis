@@ -638,6 +638,26 @@ type AttributeType {
   period: PeriodType
   """Подсказка"""
   placeholder: String!
+  """Значение документа"""
+  value(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): AttributeValueType
+}
+
+"""Тип со значениями атрибутов."""
+type AttributeValueType {
+  """Атрибут"""
+  attribute: AttributeType
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  id: ID!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Значение"""
+  value: String!
 }
 
 input AuthCbiasMutationInput {
@@ -3558,6 +3578,11 @@ type Query {
     parent: Boolean = true
     """Идентификатор периода"""
     periodId: ID!
+  ): [AttributeType]!
+  """Атрибуты со значениями документа"""
+  attributesValues(
+    """Идентификатор документа"""
+    documentId: ID!
   ): [AttributeType]!
   budgetClassifications(
     after: String

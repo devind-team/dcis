@@ -3,6 +3,7 @@ div
   v-tabs(ref="tabs" :class="{ 'mb-2': mode === GridMode.WRITE }" v-model="activeSheetIndex")
     slot(name="settings")
     slot(name="tabs" :sheets="sheets" :update-size="updateSize")
+      v-tab(key="attributes") Атрибуты
       v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(
     v-if="mode === GridMode.CHANGE"
@@ -12,6 +13,9 @@ div
     :selected-row-dimensions-options="selectedRowDimensionsOptions"
   )
   v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
+    v-tab-item(key="attributes")
+      pre(v-if="!attributesLoading") {{ attributes }}
+      v-progress-circular(v-else color="primary" indeterminate)
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
         v-if="activeSheet && activeSheet.id === sheet.id"
@@ -27,7 +31,7 @@ div
 <script lang="ts">
 import { VTabs } from 'vuetify/lib/components/VTabs'
 import { computed, defineComponent, PropType, ref } from '#app'
-import { BaseSheetType, DocumentType, SheetType } from '~/types/graphql'
+import { AttributeType, AttributeValueType, BaseSheetType, DocumentType, SheetType } from '~/types/graphql'
 import {
   CellsOptionsType,
   ColumnDimensionsOptionsType,
@@ -46,7 +50,9 @@ export default defineComponent({
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true },
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
-    activeDocument: { type: Object as PropType<DocumentType>, default: null }
+    activeDocument: { type: Object as PropType<DocumentType>, default: null },
+    attributes: { type: Array as PropType<(AttributeType & { value: AttributeValueType })[]>, default: () => ([]) },
+    attributesLoading: { type: Boolean, required: true }
   },
   setup (props, { emit }) {
     const tabs = ref<InstanceType<typeof VTabs> | null>(null)

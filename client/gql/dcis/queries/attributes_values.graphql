@@ -1,0 +1,14 @@
+#import "../fragments/attribute_fields.graphql"
+
+query AttributesValues($documentId: ID!) {
+  attributesValues(documentId: $documentId) {
+    ...AttributeFields
+    value (documentId: $documentId) {
+      id
+      value
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+}

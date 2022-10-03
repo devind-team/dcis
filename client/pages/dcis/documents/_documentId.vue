@@ -10,6 +10,8 @@ bread-crumbs(:items="bc" fluid)
         :active-sheet="activeSheet"
         :update-active-sheet="updateActiveSheet"
         :active-document="activeDocument"
+        :attributes="attributes"
+        :attributes-loading="attributesLoading"
       )
         template(#settings)
           settings-document(:document="activeDocument")
@@ -20,12 +22,14 @@ bread-crumbs(:items="bc" fluid)
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onUnmounted, PropType, ref, useRoute } from '#app'
+import { computed, defineComponent, inject, onUnmounted, PropType, ref, useRoute } from '#app'
 import { toGlobalId } from '~/services/graphql-relay'
-import { useCommonQuery } from '~/composables'
+import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
 import type {
+  AttributesValuesQuery,
+  AttributesValuesQueryVariables,
   DocumentQuery,
   DocumentQueryVariables,
   DocumentSheetQuery,
@@ -33,6 +37,7 @@ import type {
 } from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
+import attributesValuesQuery from '~/gql/dcis/queries/attributes_values.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
@@ -97,11 +102,24 @@ export default defineComponent({
       document: documentSheetQuery,
       variables: () => ({
         documentId: route.params.documentId,
-        sheetId: activeDocument.value ? activeDocument.value.sheets[activeSheetIndex.value].id : ''
+        // activeSheetIndex.value - 1 - 0 индекс принадлежит атрибутам
+        sheetId: activeDocument.value?.sheets[activeSheetIndex.value - 1]?.id
       }),
       options: () => ({
-        enabled: !activeDocumentLoading.value,
+        enabled: !activeDocumentLoading.value && !!activeDocument.value?.sheets[activeSheetIndex.value - 1]?.id,
         fetchPolicy: 'cache-and-network'
+      })
+    })
+    const { data: attributes, loading: attributesLoading, update: updateAttributes } = useCommonQuery<
+      AttributesValuesQuery,
+      AttributesValuesQueryVariables
+    >({
+      document: attributesValuesQuery,
+      variables: () => ({
+        documentId: route.params.documentId
+      }),
+      options: () => ({
+        enabled: !activeDocumentLoading.value
       })
     })
 
@@ -119,7 +137,10 @@ export default defineComponent({
       activeDocumentLoading,
       activeSheet,
       activeSheetLoading,
-      updateActiveSheet
+      updateActiveSheet,
+      attributes,
+      attributesLoading,
+      updateAttributes
     }
   }
 })
