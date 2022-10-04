@@ -112,26 +112,38 @@ class Attribute(models.Model):
         - MONEY - поле для ввода денег
     """
 
-    TEXT = 0
-    MONEY = 1
+    TEXT = 'text'
+    MONEY = 'money'
+    BOOL = 'bool'
+    BIG_MONEY = 'bigMoney'
+    FILES = 'files'
+    NUMERIC = 'numeric'
+    DATE = 'date'
 
     KIND_ATTRIBUTE = (
         (TEXT, 'text'),
         (MONEY, 'money'),
+        (BOOL, 'boolean'),
+        (BIG_MONEY, 'bigMoney'),
+        (FILES, 'files'),
+        (NUMERIC, 'numeric'),
+        (DATE, 'date')
     )
 
     name = models.CharField(max_length=100, help_text='Наименование атрибута')
     placeholder = models.CharField(max_length=100, help_text='Подсказка')
     key = models.CharField(max_length=30, help_text='Ключ')
-    kind = models.PositiveIntegerField(default=TEXT, choices=KIND_ATTRIBUTE, help_text='Тип атрибута')
-    default = models.TextField(help_text='Значение по умолчанию')
+    kind = models.CharField(max_length=10, default=TEXT, choices=KIND_ATTRIBUTE, help_text='Тип атрибута')
+    default = models.TextField(null=True, help_text='Значение по умолчанию')
     mutable = models.BooleanField(default=True, help_text='Можно ли изменять')
+    position = models.PositiveIntegerField(default=0, help_text='Позиция в выводе')
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительские данные для сбора')
 
     class Meta:
-        ordering = ('key', 'id',)
+        ordering = ('position',)
+        unique_together = (('key', 'period',),)
 
 
 class AttributeValue(models.Model):

@@ -139,6 +139,12 @@ def can_change_period_sheet(user: User, period: Period):
     can_change_period_sheet_base(user, period)
 
 
+def can_change_period_attributes(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру атрибутов."""
+    can_view_period(user, period)
+    can_change_period_sheet_base(user, period)
+
+
 def can_delete_period_base(user: User, period: Period):
     """Пропускает пользователей, которые могут удалять период, без проверки возможности просмотра."""
     if user.has_perm('dcis.delete_period') or (
