@@ -675,11 +675,6 @@ export type AttributeType = {
   value?: Maybe<AttributeValueType>;
 };
 
-/** Тип атрибутов для документов. */
-export type AttributeTypeValueArgs = {
-  documentId: Scalars['ID'];
-};
-
 /** Тип со значениями атрибутов. */
 export type AttributeValueType = {
   __typename?: 'AttributeValueType';

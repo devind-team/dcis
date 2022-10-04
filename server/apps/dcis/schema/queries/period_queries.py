@@ -190,5 +190,4 @@ class PeriodQueries(graphene.ObjectType):
     ) -> QuerySet[Attribute]:
         document: Document = Document.objects.select_related('period').get(pk=from_global_id(document_id)[1])
         can_view_period(info.context.user, document.period)
-        return Attribute.objects.filter(period=document.period).prefetch_related(Prefetch('attributevalue_set', queryset=AttributeValue.objects.filter(document=d), to_attr='value'))
         return get_period_attributes(document.period)

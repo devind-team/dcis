@@ -639,10 +639,7 @@ type AttributeType {
   """Подсказка"""
   placeholder: String!
   """Значение документа"""
-  value(
-    """Идентификатор документа"""
-    documentId: ID!
-  ): AttributeValueType
+  value: AttributeValueType
 }
 
 """Тип со значениями атрибутов."""

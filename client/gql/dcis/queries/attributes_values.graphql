@@ -3,7 +3,7 @@
 query AttributesValues($documentId: ID!) {
   attributesValues(documentId: $documentId) {
     ...AttributeFields
-    value (documentId: $documentId) {
+    value {
       id
       value
       createdAt

@@ -1,6 +1,8 @@
 import json
 
 import graphene
+from devind_helpers.orm_utils import get_object_or_none
+from devind_helpers.utils import gid2int
 from devind_core.schema.types import ContentTypeType, FileType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
@@ -11,8 +13,6 @@ from django.db.models import QuerySet
 from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
-
-from devind_helpers.orm_utils import get_object_or_none
 
 from apps.core.models import User
 from apps.core.schema import UserType
@@ -354,11 +354,7 @@ class AttributeType(DjangoObjectType):
     parent = graphene.Field(lambda: AttributeType, description='Родительский атрибут')
     children = graphene.List(lambda: AttributeType, description='Дочерние элементы')
 
-    value = graphene.Field(
-        lambda: AttributeValueType,
-        document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        description='Значение документа'
-    )
+    value = graphene.Field(lambda: AttributeValueType, description='Значение документа')
 
     class Meta:
         model = Attribute
@@ -378,6 +374,17 @@ class AttributeType(DjangoObjectType):
     @resolver_hints(model_field='attribute_set')
     def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs) -> QuerySet[Attribute]:
         return attribute.attribute_set.all()
+
+    @staticmethod
+    def resolve_value(attribute: Attribute, info: ResolveInfo, *args, **kwargs) -> AttributeValue | None:
+        """Получение значения аттрибута.
+
+        В параметрах должен передаваться documentId.
+        """
+        document_id = gid2int(info.variable_values.get('documentId', None))
+        if document_id:
+            return get_object_or_none(AttributeValue, attribute=attribute, document_id=document_id)
+        return None
 
 
 class AttributeValueType(DjangoObjectType):
