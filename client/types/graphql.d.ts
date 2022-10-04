@@ -968,6 +968,30 @@ export type ChangeAttributeMutationPayload = {
   errors?: Maybe<Array<Maybe<ErrorType>>>;
 };
 
+export type ChangeAttributeValueMutationInput = {
+  /** Идентификатор атрибута */
+  attributeId: Scalars['ID'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Значение атрибута. */
+  value?: InputMaybe<Scalars['String']>;
+};
+
+/** Мутация для установки или изменения формы. */
+export type ChangeAttributeValueMutationPayload = {
+  __typename?: 'ChangeAttributeValueMutationPayload';
+  /** Измененное или созданное значение */
+  attributeValue?: Maybe<AttributeValueType>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Измененные значения листов */
+  values?: Maybe<Array<Maybe<ValueType>>>;
+};
+
 export type ChangeAvatarMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Загружаемый файл аватара */
@@ -2791,6 +2815,7 @@ export type MailingType = {
 /** Мутации на изменение чего-либо. */
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Добавление атрибута */
   addAttribute: AddAttributeMutationPayload;
   /** Добавление нового КБК */
   addBudgetClassification: AddBudgetClassificationMutationPayload;
@@ -2836,8 +2861,10 @@ export type Mutation = {
   addTag: AddTagMutationPayload;
   /** Авторизация через портал https://cbias.ru */
   authCbias?: Maybe<AuthCbiasMutationOutput>;
-  /** Мутация для изменения периода. */
+  /** Изменение атрибута */
   changeAttribute: ChangeAttributeMutationPayload;
+  /** Изменение значения */
+  changeAttributeValue: ChangeAttributeValueMutationPayload;
   /** Мутация для изменения аватара пользователя. */
   changeAvatar: ChangeAvatarMutationPayload;
   /** Мутации для изменения категории */
@@ -2924,7 +2951,7 @@ export type Mutation = {
   confirmEmail: ConfirmEmailMutationPayload;
   /** Мутация на перенос групп с пользователями из другого периода. */
   copyPeriodGroups: CopyPeriodGroupsMutationPayload;
-  /** Удаление записи модели "Attribute" */
+  /** Удаление атрибута */
   deleteAttribute: DeleteAttributeMutationPayload;
   /** Мутация для удаления категории */
   deleteCategory: DeleteCategoryMutationPayload;
@@ -3100,6 +3127,11 @@ export type MutationAuthCbiasArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeAttributeArgs = {
   input: ChangeAttributeMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeAttributeValueArgs = {
+  input: ChangeAttributeValueMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5707,6 +5739,14 @@ export type ChangeAttributeMutationVariables = Exact<{
 }>;
 
 export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
+
+export type ChangeAttributeValueMutationVariables = Exact<{
+  attributeId: Scalars['ID'];
+  documentId: Scalars['ID'];
+  value?: InputMaybe<Scalars['String']>;
+}>;
+
+export type ChangeAttributeValueMutation = { __typename?: 'Mutation', changeAttributeValue: { __typename: 'ChangeAttributeValueMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, attributeValue?: { __typename: 'AttributeValueType', id: string, value: string, createdAt: any, updatedAt: any } | null, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, verified: boolean, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
 
 export type DeleteAttributeMutationVariables = Exact<{
   attributeId: Scalars['ID'];

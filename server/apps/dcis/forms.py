@@ -1,7 +1,7 @@
-
+"""Модуль описания форм."""
 
 from django import forms
-from apps.dcis.models import Attribute
+from apps.dcis.models import Attribute, AttributeValue
 
 
 class AddAttributeForm(forms.ModelForm):

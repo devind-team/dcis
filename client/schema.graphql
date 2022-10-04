@@ -911,6 +911,29 @@ type ChangeAttributeMutationPayload {
   errors: [ErrorType]
 }
 
+input ChangeAttributeValueMutationInput {
+  """Идентификатор атрибута"""
+  attributeId: ID!
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Значение атрибута."""
+  value: String
+}
+
+"""Мутация для установки или изменения формы."""
+type ChangeAttributeValueMutationPayload {
+  """Измененное или созданное значение"""
+  attributeValue: AttributeValueType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененные значения листов"""
+  values: [ValueType]
+}
+
 input ChangeAvatarMutationInput {
   clientMutationId: String
   """Загружаемый файл аватара"""
@@ -2639,6 +2662,7 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Добавление атрибута"""
   addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
   addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
@@ -2684,8 +2708,10 @@ type Mutation {
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
-  """Мутация для изменения периода."""
+  """Изменение атрибута"""
   changeAttribute(input: ChangeAttributeMutationInput!): ChangeAttributeMutationPayload!
+  """Изменение значения"""
+  changeAttributeValue(input: ChangeAttributeValueMutationInput!): ChangeAttributeValueMutationPayload!
   """Мутация для изменения аватара пользователя."""
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
   """Мутации для изменения категории"""
@@ -2772,9 +2798,7 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
-  """
-  Удаление записи модели "Attribute"
-  """
+  """Удаление атрибута"""
   deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
