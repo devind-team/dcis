@@ -13,9 +13,11 @@ div
     :selected-row-dimensions-options="selectedRowDimensionsOptions"
   )
   v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
-    v-tab-item(key="attributes")
-      pre(v-if="!attributesLoading") {{ attributes }}
-      v-progress-circular(v-else color="primary" indeterminate)
+    attributes-values-tab-item(
+      :attributes-loading="attributesLoading"
+      :attributes="attributes"
+      :readonly="mode === GridMode.CHANGE"
+    )
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
         v-if="activeSheet && activeSheet.id === sheet.id"
@@ -41,9 +43,10 @@ import {
 } from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
+import AttributesValuesTabItem from '~/components/dcis/attributes/AttributesValuesTabItem.vue'
 
 export default defineComponent({
-  components: { GridSheetToolbar, Grid },
+  components: { AttributesValuesTabItem, GridSheetToolbar, Grid },
   props: {
     value: { type: Number, required: true },
     mode: { type: Number, required: true },
