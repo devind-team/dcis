@@ -1,7 +1,6 @@
 <template lang="pug">
 bread-crumbs(:items="breadCrumbs")
-  wave-container
-    h2 {{ divisions }}
+  h2 {{ divisions }}
   v-card
     v-card-title {{ $t('dcis.projects.name') }}
       template(v-if="hasPerm('dcis.add_project')")
