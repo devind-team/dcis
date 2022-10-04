@@ -18,6 +18,12 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         v-tooltip(bottom)
           template(#activator="{ on: onTooltip, attrs}")
             v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" icon)
+              v-icon mdi-pencil
+          span {{ $t('dcis.attributes.change') }}
+      delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
+        v-tooltip(bottom)
+          template(#activator="{ on: onTooltip, attrs}")
+            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" icon)
               v-icon mdi-delete
           span {{ $t('dcis.attributes.delete') }}
 </template>
@@ -65,11 +71,11 @@ export default defineComponent({
     ]))
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
-      { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '45%' },
+      { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '40%' },
       { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '25%' },
       { text: t('dcis.attributes.tableHeaders.key') as string, value: 'key', width: '10%' },
-      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '20%' },
-      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '10%' }
+      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '15%' },
+      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '20%' }
     ]))
 
     const {

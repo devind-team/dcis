@@ -42,7 +42,8 @@ export default defineComponent({
     update: {
       type: Function as PropType<(cache: DataProxy, result: AddAttributeMutationResult) => void>,
       required: true
-    }
+    },
+    attributeId: { type: Number, required: true }
   },
   setup (_, { emit }) {
     const { t } = useI18n()
