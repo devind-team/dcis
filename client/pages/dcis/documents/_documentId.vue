@@ -119,7 +119,8 @@ export default defineComponent({
         documentId: route.params.documentId
       }),
       options: () => ({
-        enabled: !activeDocumentLoading.value
+        enabled: !activeDocumentLoading.value,
+        fetchPolicy: 'network-only'
       })
     })
 
