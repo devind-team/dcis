@@ -14,6 +14,12 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     hide-default-footer
   )
     template(#item.action="{ item }")
+      change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
+        v-tooltip(bottom)
+          template(#activator="{ on: onTooltip, attrs}")
+            v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" icon)
+              v-icon mdi-pencil
+          span {{ $t('dcis.attributes.change') }}
       delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
         v-tooltip(bottom)
           template(#activator="{ on: onTooltip, attrs}")
@@ -43,9 +49,10 @@ import AddAttributeMenu from '~/components/dcis/attributes/AddAttributeMenu.vue'
 import { AddAttributeMutationResult } from '~/components/dcis/attributes/AddAttribute.vue'
 import ConfirmMenu from '~/components/common/menu/ConfirmMenu.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
+import ChangeAttribute, { ChangeAttributeMutationResult } from '~/components/dcis/attributes/ChangeAttribute.vue'
 
 export default defineComponent({
-  components: { DeleteMenu, ConfirmMenu, AddAttributeMenu, LeftNavigatorContainer },
+  components: { ChangeAttribute, DeleteMenu, ConfirmMenu, AddAttributeMenu, LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -66,15 +73,16 @@ export default defineComponent({
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
       { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '40%' },
-      { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '20%' },
+      { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '25%' },
       { text: t('dcis.attributes.tableHeaders.key') as string, value: 'key', width: '10%' },
-      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '20%' },
-      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '20%', align: 'center' }
+      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '15%' },
+      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '20%' }
     ]))
 
     const {
       data: attributes,
       addUpdate,
+      changeUpdate,
       deleteUpdate,
       loading
     } = useCommonQuery<AttributesQuery, AttributesQueryVariables, 'attributes'>({
@@ -100,7 +108,13 @@ export default defineComponent({
       }
     }
 
-    return { bc, headers, attributes, loading, addAttributeUpdate, deleteAttribute }
+    const changeAttributeUpdate = (cache, result: ChangeAttributeMutationResult) => {
+      if (!result.data.changeAttribute.errors.length) {
+        changeUpdate(cache, result, 'attribute')
+      }
+    }
+
+    return { bc, headers, attributes, loading, changeAttributeUpdate, addAttributeUpdate, deleteAttribute }
   }
 })
 </script>

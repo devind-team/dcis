@@ -338,11 +338,21 @@ export default {
       text: 'Текст',
       bigmoney: 'Тысячи',
       bool: 'Переключатель',
-      data: 'Дата',
+      date: 'Дата',
       files: 'Файл',
       money: 'Рубли',
       numeric: 'Цифра',
       all: 'Ошибка добавления'
+    },
+    changeMenu: {
+      header: 'Изменение атрибута',
+      buttonText: 'Изменить',
+      name: 'Наименование',
+      placeholder: 'Подсказка',
+      key: 'Ключ',
+      kind: 'Тип',
+      default: 'Значение по умолчанию',
+      mutable: 'Разрешить изменение'
     },
     tableHeaders: {
       name: 'Название параметра',
