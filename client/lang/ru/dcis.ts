@@ -271,7 +271,9 @@ export default {
       readonly: 'Только для чтения',
       fix: 'Закрепление столбцов/строк',
       fontSize: 'Шрифт',
-      kind: 'Тип'
+      kind: 'Тип',
+      commaDecrease: 'Уменьшить разрядность',
+      commaIncrease: 'Увеличить разрядность'
     },
     columnWidth: 'Ширина: ',
     rowHeight: 'Высота: ',

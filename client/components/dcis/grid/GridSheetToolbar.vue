@@ -60,6 +60,15 @@ v-row
       hide-details
       dense
     )
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="patchCommaOn(on)" v-bind="attrs")
+          v-btn-toggle.mx-1
+            v-btn(:disabled="commaDisabled" height="40")
+              v-icon mdi-decimal-comma-decrease
+            v-btn(:disabled="commaDisabled" height="40")
+              v-icon mdi-decimal-comma-increase
+      span {{ commaMessage }}
 </template>
 
 <script lang="ts">
@@ -73,6 +82,8 @@ import {
 } from '~/composables'
 import { DocumentsSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
+
+type Listeners = Record<string, (e: MouseEvent) => void>
 
 export default defineComponent({
   props: {
@@ -98,6 +109,7 @@ export default defineComponent({
     const fixedDisabled = computed<boolean>(
       () => dimensionsDisabled.value || !selectedDimensionsOptions.value.rectangular
     )
+    const commaDisabled = computed<boolean>(() => disabled.value || kind.value == null || kind.value.value !== 'n')
 
     const formatting = computed<string[]>({
       get: () => !disabled.value
@@ -231,10 +243,35 @@ export default defineComponent({
       set: value => changeCellsOption(props.selectedCellsOptions.cells, 'kind', value.value)
     })
 
+    const commaHover = ref<'commaDecrease' | 'commaIncrease' | null>(null)
+    const commaMessage = computed<string>(() =>
+      commaHover.value ? t(`dcis.grid.sheetToolbar.${commaHover.value}`) as string : ''
+    )
+    const patchCommaOn = (on: Listeners): Listeners => {
+      const update = (e: MouseEvent) => {
+        const div = e.currentTarget as HTMLDivElement
+        const divRect = div.getBoundingClientRect()
+        if (e.pageX - divRect.left <= div.offsetWidth / 2) {
+          commaHover.value = 'commaDecrease'
+        } else {
+          commaHover.value = 'commaIncrease'
+        }
+      }
+      return {
+        ...on,
+        mouseenter: (e) => {
+          update(e)
+          on.mouseenter(e)
+        },
+        mousemove: update
+      }
+    }
+
     return {
       t,
       disabled,
       fixedDisabled,
+      commaDisabled,
       formatting,
       horizontalAlign,
       verticalAlign,
@@ -243,7 +280,9 @@ export default defineComponent({
       sizes,
       size,
       kinds,
-      kind
+      kind,
+      commaMessage,
+      patchCommaOn
     }
   }
 })
