@@ -62,13 +62,18 @@ v-row
     )
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
-        div(v-on="patchCommaOn(on)" v-bind="attrs")
-          v-btn-toggle.mx-1
-            v-btn(:disabled="commaDisabled" height="40")
+        div(v-on="on" v-bind="attrs")
+          .v-btn-toggle.ml-1(:class="themeClass" style="border-radius: 4px 0 0 4px")
+            v-btn(:disabled="commaDisabled" height="40" @click="commaDecrease")
               v-icon mdi-decimal-comma-decrease
-            v-btn(:disabled="commaDisabled" height="40")
+      span {{ t('dcis.grid.sheetToolbar.commaDecrease') }}
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
+          .v-btn-toggle.mr-1(:class="themeClass" style="border-radius: 0 4px 4px 0")
+            v-btn(:disabled="commaDisabled" height="40" style="border-left-width: 0" @click="commaIncrease")
               v-icon mdi-decimal-comma-increase
-      span {{ commaMessage }}
+      span {{ t('dcis.grid.sheetToolbar.commaIncrease') }}
 </template>
 
 <script lang="ts">
@@ -77,13 +82,12 @@ import {
   useChangeCellsOptionMutation,
   useChangeColumnDimensionsFixed,
   useChangeRowDimensionsFixed,
+  useVuetify,
   useI18n,
   UpdateType
 } from '~/composables'
 import { DocumentsSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
-
-type Listeners = Record<string, (e: MouseEvent) => void>
 
 export default defineComponent({
   props: {
@@ -94,6 +98,9 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
+    const { isDark } = useVuetify()
+
+    const themeClass = computed<string>(() => isDark ? 'theme--light' : 'theme--dark')
 
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
@@ -109,7 +116,11 @@ export default defineComponent({
     const fixedDisabled = computed<boolean>(
       () => dimensionsDisabled.value || !selectedDimensionsOptions.value.rectangular
     )
-    const commaDisabled = computed<boolean>(() => disabled.value || kind.value == null || kind.value.value !== 'n')
+    const commaDisabled = computed<boolean>(() =>
+      disabled.value ||
+      props.selectedCellsOptions.kind !== 'n' ||
+      !/^0\.0*$/.test(props.selectedCellsOptions.numberFormat)
+    )
 
     const formatting = computed<string[]>({
       get: () => !disabled.value
@@ -243,32 +254,17 @@ export default defineComponent({
       set: value => changeCellsOption(props.selectedCellsOptions.cells, 'kind', value.value)
     })
 
-    const commaHover = ref<'commaDecrease' | 'commaIncrease' | null>(null)
-    const commaMessage = computed<string>(() =>
-      commaHover.value ? t(`dcis.grid.sheetToolbar.${commaHover.value}`) as string : ''
-    )
-    const patchCommaOn = (on: Listeners): Listeners => {
-      const update = (e: MouseEvent) => {
-        const div = e.currentTarget as HTMLDivElement
-        const divRect = div.getBoundingClientRect()
-        if (e.pageX - divRect.left <= div.offsetWidth / 2) {
-          commaHover.value = 'commaDecrease'
-        } else {
-          commaHover.value = 'commaIncrease'
-        }
-      }
-      return {
-        ...on,
-        mouseenter: (e) => {
-          update(e)
-          on.mouseenter(e)
-        },
-        mousemove: update
-      }
+    const commaDecrease = () => {
+      console.log('commaDecrease')
+    }
+
+    const commaIncrease = () => {
+      console.log('commaIncrease')
     }
 
     return {
       t,
+      themeClass,
       disabled,
       fixedDisabled,
       commaDisabled,
@@ -281,8 +277,8 @@ export default defineComponent({
       size,
       kinds,
       kind,
-      commaMessage,
-      patchCommaOn
+      commaDecrease,
+      commaIncrease
     }
   }
 })
