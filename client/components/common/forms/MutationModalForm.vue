@@ -84,7 +84,7 @@ export default defineComponent({
               ? props.mutationName
               : [props.mutationName]
           ) as string[]
-          const success = mutationNames.every((mutationName: string) => result.data[mutationName].success)
+          const success = mutationNames.every((mutationName: string) => result.data[mutationName].success || !result.data[mutationName].errors.length)
           if (success && props.successClose) {
             close()
           }

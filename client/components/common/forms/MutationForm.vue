@@ -90,7 +90,8 @@ export default defineComponent({
     }
 
     const setFormErrors = (errors: ErrorFieldType[], showInAlert: boolean = false): void => {
-      if (showInAlert) {
+      const allFields = errors.map((e: ErrorFieldType) => e.field).includes('__all__')
+      if (allFields || showInAlert) {
         const errorString: string = errors.reduce((a: string, c: ErrorFieldType) =>
           a ? `${a}, ${c.messages.join(', ')}` : c.messages.join(', '), '')
         setError(errorString, 'BusinessLogicError')

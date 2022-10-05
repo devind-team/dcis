@@ -1,0 +1,10 @@
+fragment AttributeFields on AttributeType {
+  id
+  name
+  placeholder
+  key
+  kind
+  default
+  mutable
+  __typename
+}
