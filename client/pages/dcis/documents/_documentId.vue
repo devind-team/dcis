@@ -12,6 +12,8 @@ bread-crumbs(:items="bc" fluid)
         :active-document="activeDocument"
         :attributes="attributes"
         :attributes-loading="attributesLoading"
+        :attributes-values="attributesValues"
+        :attributes-values-loading="attributesValuesLoading"
       )
         template(#settings)
           settings-document(:document="activeDocument")
@@ -28,6 +30,8 @@ import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
 import type {
+  AttributesQuery,
+  AttributesQueryVariables,
   AttributesValuesQuery,
   AttributesValuesQueryVariables,
   DocumentQuery,
@@ -37,6 +41,7 @@ import type {
 } from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
+import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
 import attributesValuesQuery from '~/gql/dcis/queries/attributes_values.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
@@ -110,18 +115,20 @@ export default defineComponent({
         fetchPolicy: 'cache-and-network'
       })
     })
-    const { data: attributes, loading: attributesLoading, update: updateAttributes } = useCommonQuery<
+
+    const { data: attributes, loading: attributesLoading } = useCommonQuery<AttributesQuery, AttributesQueryVariables>({
+      document: attributesQuery,
+      variables: () => ({ periodId: activeDocument.value?.period.id }),
+      options: () => ({ enabled: !activeDocumentLoading.value })
+    })
+
+    const { data: attributesValues, loading: attributesValuesLoading, update: updateAttributesValues } = useCommonQuery<
       AttributesValuesQuery,
       AttributesValuesQueryVariables
     >({
       document: attributesValuesQuery,
-      variables: () => ({
-        documentId: route.params.documentId
-      }),
-      options: () => ({
-        enabled: !activeDocumentLoading.value,
-        fetchPolicy: 'network-only'
-      })
+      variables: () => ({ documentId: route.params.documentId }),
+      options: () => ({ enabled: !activeDocumentLoading.value })
     })
 
     const setFooter = inject<(state: boolean) => void>('setFooter')
@@ -141,7 +148,9 @@ export default defineComponent({
       updateActiveSheet,
       attributes,
       attributesLoading,
-      updateAttributes
+      attributesValues,
+      attributesValuesLoading,
+      updateAttributesValues
     }
   }
 })

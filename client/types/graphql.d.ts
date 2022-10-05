@@ -671,8 +671,6 @@ export type AttributeType = {
   period?: Maybe<PeriodType>;
   /** Подсказка */
   placeholder: Scalars['String'];
-  /** Значение документа */
-  value?: Maybe<AttributeValueType>;
 };
 
 /** Тип со значениями атрибутов. */
@@ -680,10 +678,14 @@ export type AttributeValueType = {
   __typename?: 'AttributeValueType';
   /** Атрибут */
   attribute?: Maybe<AttributeType>;
+  /** Идентификатор документа */
+  attributeId?: Maybe<Scalars['Int']>;
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** Документ */
   document?: Maybe<DocumentType>;
+  /** Идентификатор документа */
+  documentId?: Maybe<Scalars['Int']>;
   id: Scalars['ID'];
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
@@ -4259,7 +4261,7 @@ export type Query = {
   /** Получение атрибутов, привязанных к периоду */
   attributes: Array<Maybe<AttributeType>>;
   /** Атрибуты со значениями документа */
-  attributesValues: Array<Maybe<AttributeType>>;
+  attributesValues: Array<Maybe<AttributeValueType>>;
   budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Категории */
   categories: CategoryTypeConnection;
@@ -6102,7 +6104,7 @@ export type AttributesValuesQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type AttributesValuesQuery = { __typename?: 'Query', attributesValues: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, value?: { __typename: 'AttributeValueType', id: string, value: string, createdAt: any, updatedAt: any } | null } | null> };
+export type AttributesValuesQuery = { __typename?: 'Query', attributesValues: Array<{ __typename: 'AttributeValueType', id: string, value: string, createdAt: any, updatedAt: any } | null> };
 
 export type BudgetClassificationsQueryVariables = Exact<{
   code?: InputMaybe<Scalars['String']>;

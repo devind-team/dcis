@@ -638,18 +638,20 @@ type AttributeType {
   period: PeriodType
   """Подсказка"""
   placeholder: String!
-  """Значение документа"""
-  value: AttributeValueType
 }
 
 """Тип со значениями атрибутов."""
 type AttributeValueType {
   """Атрибут"""
   attribute: AttributeType
+  """Идентификатор документа"""
+  attributeId: Int
   """Дата создания"""
   createdAt: DateTime!
   """Документ"""
   document: DocumentType
+  """Идентификатор документа"""
+  documentId: Int
   id: ID!
   """Дата обновления"""
   updatedAt: DateTime!
@@ -3604,7 +3606,7 @@ type Query {
   attributesValues(
     """Идентификатор документа"""
     documentId: ID!
-  ): [AttributeType]!
+  ): [AttributeValueType]!
   budgetClassifications(
     after: String
     before: String

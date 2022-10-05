@@ -1,14 +1,11 @@
-#import "../fragments/attribute_fields.graphql"
 
 query AttributesValues($documentId: ID!) {
   attributesValues(documentId: $documentId) {
-    ...AttributeFields
-    value {
-      id
-      value
-      createdAt
-      updatedAt
-      __typename
-    }
+    id
+    value
+    createdAt
+    updatedAt
+    attributeId
+    __typename
   }
 }

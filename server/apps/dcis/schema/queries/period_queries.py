@@ -12,13 +12,15 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
 
+from devind_helpers.utils import gid2int
+
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Period, Privilege, Sheet, Attribute, Document
+from apps.dcis.models import AttributeValue, Period, Privilege, Sheet, Attribute, Document
 from apps.dcis.permissions import can_change_period_sheet, can_view_period
-from apps.dcis.schema.types import DivisionModelTypeConnection, PeriodType, PrivilegeType, SheetType, AttributeType
+from apps.dcis.schema.types import DivisionModelTypeConnection, PeriodType, PrivilegeType, SheetType, AttributeType, AttributeValueType
 from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
     get_period_users,
@@ -96,7 +98,7 @@ class PeriodQueries(graphene.ObjectType):
     )
 
     attributes_values = graphene.List(
-        AttributeType,
+        AttributeValueType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
         required=True,
         description='Атрибуты со значениями документа'
@@ -165,7 +167,7 @@ class PeriodQueries(graphene.ObjectType):
         can_change_period_sheet(info.context.user, sheet.period)
         return DocumentsSheetUnloader(
             sheet=sheet,
-            document_ids=[from_global_id(document_id)[1] for document_id in document_ids],
+            document_ids=[gid2int(document_id) for document_id in document_ids],
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
 
@@ -177,7 +179,7 @@ class PeriodQueries(graphene.ObjectType):
         period_id: str,
         parent: bool = True
     ) -> QuerySet[Attribute]:
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         return get_period_attributes(period, parent=parent)
 
@@ -188,6 +190,6 @@ class PeriodQueries(graphene.ObjectType):
         info: ResolveInfo,
         document_id: str
     ) -> QuerySet[Attribute]:
-        document: Document = Document.objects.select_related('period').get(pk=from_global_id(document_id)[1])
+        document: Document = Document.objects.select_related('period').get(pk=gid2int(document_id))
         can_view_period(info.context.user, document.period)
-        return get_period_attributes(document.period)
+        return AttributeValue.objects.filter(document=document).all()

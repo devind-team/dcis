@@ -14,8 +14,9 @@ div
   )
   v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
     attributes-values-tab-item(
-      :attributes-loading="attributesLoading"
+      :loading="attributesLoading || attributesValuesLoading"
       :attributes="attributes"
+      :attributes-values="attributesValues"
       :readonly="mode === GridMode.CHANGE"
     )
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
@@ -54,8 +55,10 @@ export default defineComponent({
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
     activeDocument: { type: Object as PropType<DocumentType>, default: null },
-    attributes: { type: Array as PropType<(AttributeType & { value: AttributeValueType })[]>, default: () => ([]) },
-    attributesLoading: { type: Boolean, required: true }
+    attributes: { type: Array as PropType<AttributeType[]>, default: () => ([]) },
+    attributesLoading: { type: Boolean, required: true },
+    attributesValues: { type: Array as PropType<AttributeValueType[]>, default: () => ([]) },
+    attributesValuesLoading: { type: Boolean, required: true }
   },
   setup (props, { emit }) {
     const tabs = ref<InstanceType<typeof VTabs> | null>(null)

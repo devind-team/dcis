@@ -4,7 +4,7 @@ v-text-field(
   :placeholder="attribute.placeholder"
   :key="attribute.key"
   :readonly="!attribute.mutable || readonly"
-  :value="attribute.value && attribute.value.value || attribute.default"
+  :value="attributeValue && attributeValue.value || attribute.default"
   clearable
 )
 </template>
@@ -15,7 +15,8 @@ import { AttributeType, AttributeValueType } from '~/types/graphql'
 
 export default defineComponent({
   props: {
-    attribute: { type: Object as PropType<AttributeType & { value: AttributeValueType }>, required: true },
+    attribute: { type: Object as PropType<AttributeType>, required: true },
+    attributeValue: { type: Object as PropType<AttributeValueType>, default: null },
     readonly: { type: Boolean, default: false }
   }
 })
