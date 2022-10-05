@@ -64,7 +64,7 @@ v-row
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
           .v-btn-toggle.ml-1(:class="themeClass" style="border-radius: 4px 0 0 4px")
-            v-btn(:disabled="commaDisabled" height="40" @click="commaDecrease")
+            v-btn(:disabled="commaDecreaseDisabled" height="40" @click="commaDecrease")
               v-icon mdi-decimal-comma-decrease
       span {{ t('dcis.grid.sheetToolbar.commaDecrease') }}
     v-tooltip(bottom)
@@ -119,7 +119,10 @@ export default defineComponent({
     const commaDisabled = computed<boolean>(() =>
       disabled.value ||
       props.selectedCellsOptions.kind !== 'n' ||
-      !/^0\.0*$/.test(props.selectedCellsOptions.numberFormat)
+      !/^(0\.0+)|(0)$/.test(props.selectedCellsOptions.numberFormat)
+    )
+    const commaDecreaseDisabled = computed<boolean>(
+      () => commaDisabled.value || props.selectedCellsOptions.numberFormat === '0'
     )
 
     const formatting = computed<string[]>({
@@ -255,11 +258,21 @@ export default defineComponent({
     })
 
     const commaDecrease = () => {
-      console.log('commaDecrease')
+      changeCellsOption(
+        props.selectedCellsOptions.cells,
+        'numberFormat',
+        props.selectedCellsOptions.numberFormat === '0.0'
+          ? '0'
+          : props.selectedCellsOptions.numberFormat.slice(0, -1)
+      )
     }
 
     const commaIncrease = () => {
-      console.log('commaIncrease')
+      changeCellsOption(
+        props.selectedCellsOptions.cells,
+        'numberFormat',
+        props.selectedCellsOptions.numberFormat === '0' ? '0.0' : props.selectedCellsOptions.numberFormat + '0'
+      )
     }
 
     return {
@@ -268,6 +281,7 @@ export default defineComponent({
       disabled,
       fixedDisabled,
       commaDisabled,
+      commaDecreaseDisabled,
       formatting,
       horizontalAlign,
       verticalAlign,

@@ -120,6 +120,7 @@ class KindCell(models.Model):
         (ERROR, 'e'),
         (FORMULA_CACHE_STRING, 'str'),
         (DATE, 'd'),
+        (TIME, 'time'),
         (TEXT, 'text'),
         (MONEY, 'money'),
         (BIG_MONEY, 'bigMoney'),

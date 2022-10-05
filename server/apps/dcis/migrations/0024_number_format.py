@@ -33,5 +33,31 @@ class Migration(migrations.Migration):
             name='number_format',
             field=models.TextField(help_text='Форматирование чисел', null=True),
         ),
+        migrations.AlterField(
+            model_name='cell',
+            name='kind',
+            field=models.CharField(
+                choices=[('n', 'n'), ('s', 's'), ('f', 'f'), ('b', 'b'), ('inlineStr', 'inlineStr'), ('e', 'e'),
+                         ('str', 'str'), ('d', 'd'), ('time', 'time'), ('text', 'text'), ('money', 'money'),
+                         ('bigMoney', 'bigMoney'), ('fl', 'fl'), ('user', 'user'), ('department', 'department'),
+                         ('organization', 'organization'), ('classification', 'classification')],
+                default='s',
+                help_text='Тип значения',
+                max_length=30
+                ),
+        ),
+        migrations.AlterField(
+            model_name='columndimension',
+            name='kind',
+            field=models.CharField(
+                choices=[('n', 'n'), ('s', 's'), ('f', 'f'), ('b', 'b'), ('inlineStr', 'inlineStr'), ('e', 'e'),
+                         ('str', 'str'), ('d', 'd'), ('time', 'time'), ('text', 'text'), ('money', 'money'),
+                         ('bigMoney', 'bigMoney'), ('fl', 'fl'), ('user', 'user'), ('department', 'department'),
+                         ('organization', 'organization'), ('classification', 'classification')],
+                default='s',
+                help_text='Тип значения',
+                max_length=30
+                ),
+        ),
         migrations.RunPython(set_number_format, empty_reverse)
     ]
