@@ -14,10 +14,10 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     hide-default-footer
   )
     template(#item.action="{ item }")
-      delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
+      change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
         v-tooltip(bottom)
           template(#activator="{ on: onTooltip, attrs}")
-            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" icon)
+            v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" icon)
               v-icon mdi-pencil
           span {{ $t('dcis.attributes.change') }}
       delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
@@ -49,9 +49,10 @@ import AddAttributeMenu from '~/components/dcis/attributes/AddAttributeMenu.vue'
 import { AddAttributeMutationResult } from '~/components/dcis/attributes/AddAttribute.vue'
 import ConfirmMenu from '~/components/common/menu/ConfirmMenu.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
+import ChangeAttribute, { ChangeAttributeMutationResult } from '~/components/dcis/attributes/ChangeAttribute.vue'
 
 export default defineComponent({
-  components: { DeleteMenu, ConfirmMenu, AddAttributeMenu, LeftNavigatorContainer },
+  components: { ChangeAttribute, DeleteMenu, ConfirmMenu, AddAttributeMenu, LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -81,6 +82,7 @@ export default defineComponent({
     const {
       data: attributes,
       addUpdate,
+      changeUpdate,
       deleteUpdate,
       loading
     } = useCommonQuery<AttributesQuery, AttributesQueryVariables, 'attributes'>({
@@ -106,7 +108,13 @@ export default defineComponent({
       }
     }
 
-    return { bc, headers, attributes, loading, addAttributeUpdate, deleteAttribute }
+    const changeAttributeUpdate = (cache, result: ChangeAttributeMutationResult) => {
+      if (!result.data.changeAttribute.errors.length) {
+        changeUpdate(cache, result, 'attribute')
+      }
+    }
+
+    return { bc, headers, attributes, loading, changeAttributeUpdate, addAttributeUpdate, deleteAttribute }
   }
 })
 </script>
