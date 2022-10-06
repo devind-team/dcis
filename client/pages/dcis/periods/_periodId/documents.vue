@@ -46,7 +46,12 @@
         nuxt-link(
           :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
         ) {{ item.objectName }} ({{ item.objectId }})
-      template(#item.version="{ item }") {{ item.version }}
+      template(#item.version="{ item }")
+        template(v-if="period.multiple") {{ item.version }}
+        nuxt-link(
+          v-else
+          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+        ) {{ item.version }}
       template(#item.comment="{ item }")
         template(v-if="item.comment")
           template(v-if="canChangeDocument(item)")
