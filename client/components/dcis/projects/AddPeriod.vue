@@ -37,7 +37,11 @@ mutation-modal-form(
         :success="valid"
       )
     v-checkbox(v-model="readonlyFillColor" :label="$t('dcis.periods.addPeriod.readonlyFillColor')")
-    v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
+    v-checkbox(
+      v-if="project.contentType.model === 'department'"
+      v-model="multiple"
+      :label="$t('dcis.periods.addPeriod.multiple')"
+    )
     v-checkbox(v-model="versioning" :label="$t('dcis.periods.addPeriod.versioning')")
 </template>
 
