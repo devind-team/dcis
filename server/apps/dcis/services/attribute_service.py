@@ -34,8 +34,11 @@ def change_attribute_value(
     #     # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
     #     return ChangeAttributeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
 
-    attribute_value: AttributeValue = AttributeValue.objects.update_or_create(document=document, attribute=attribute, defaults={
-        'value': value
-    })
+    attribute_value, created = AttributeValue.objects.update_or_create(
+        document=document,
+        attribute=attribute, defaults={
+            'value': value
+        }
+    )
 
     return attribute_value, []

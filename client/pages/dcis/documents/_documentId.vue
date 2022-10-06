@@ -10,16 +10,21 @@ bread-crumbs(:items="bc" fluid)
         :active-sheet="activeSheet"
         :update-active-sheet="updateActiveSheet"
         :active-document="activeDocument"
-        :attributes="attributes"
-        :attributes-loading="attributesLoading"
-        :attributes-values="attributesValues"
-        :attributes-values-loading="attributesValuesLoading"
+        show-attributes
       )
         template(#settings)
           settings-document(:document="activeDocument")
             template(#activator="{ on, attrs }")
               v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
                 v-icon mdi-cog
+        template(#attributes)
+          attributes-values-tab-item(
+            :document-id="activeDocument.id"
+            :loading="attributesLoading || attributesValuesLoading"
+            :attributes="attributes"
+            :attributes-values="attributesValues"
+            :change-update-attributes-values="changeUpdateAttributesValues"
+          )
   v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
@@ -47,9 +52,10 @@ import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
+import AttributesValuesTabItem from '~/components/dcis/attributes/AttributesValuesTabItem.vue'
 
 export default defineComponent({
-  components: { BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
+  components: { AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
@@ -122,7 +128,7 @@ export default defineComponent({
       options: () => ({ enabled: !activeDocumentLoading.value })
     })
 
-    const { data: attributesValues, loading: attributesValuesLoading, update: updateAttributesValues } = useCommonQuery<
+    const { data: attributesValues, loading: attributesValuesLoading, changeUpdate: changeUpdateAttributesValues } = useCommonQuery<
       AttributesValuesQuery,
       AttributesValuesQueryVariables
     >({
@@ -150,7 +156,7 @@ export default defineComponent({
       attributesLoading,
       attributesValues,
       attributesValuesLoading,
-      updateAttributesValues
+      changeUpdateAttributesValues
     }
   }
 })

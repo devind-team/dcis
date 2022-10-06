@@ -2,9 +2,7 @@
 from typing import Any
 
 import graphene
-from django.core.exceptions import PermissionDenied
 from devind_helpers.utils import gid2int
-from devind_helpers.schema.types import ErrorFieldType
 from graphene_django.forms.mutation import DjangoModelFormMutation
 from devind_helpers.schema.mutations import BaseMutation
 from graphql import ResolveInfo
@@ -14,12 +12,10 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.mutation_factories import DeleteMutation
 
 from apps.dcis.services.attribute_service import change_attribute_value
-from apps.dcis.permissions import can_change_value
 from apps.dcis.permissions import can_change_period_sheet
-from apps.dcis.models import Attribute, AttributeValue, Period, Document
+from apps.dcis.models import Attribute, Period, Document
 from apps.dcis.forms import AddAttributeForm, ChangeAttributeForm
 from apps.dcis.schema.types import AttributeValueType, ValueType
-from apps.dcis.services.attribute_service import delete_attribute
 
 
 class AddAttributeMutation(DjangoModelFormMutation):
@@ -71,11 +67,10 @@ class ChangeAttributeValueMutation(BaseMutation):
         document_id: str,
         *args, **kwargs
     ) -> 'ChangeAttributeValueMutation':
-        document_id: int | None = gid2int(document_id)
-        document: Document = get_object_or_404(Document, pk=document_id)
-        attribute: Attribute = get_object_or_404(Attribute, pk=attribute_id)
-        attribute_value, value = change_attribute_value(info.context.user, attribute, document, value)
-        return ChangeAttributeValueMutation(attribute_value=attribute_value, values=[])
+        document: Document = get_object_or_404(Document, pk=gid2int(document_id))
+        attribute: Attribute = get_object_or_404(Attribute, pk=gid2int(attribute_id))
+        attribute_value, values = change_attribute_value(info.context.user, attribute, document, value)
+        return ChangeAttributeValueMutation(attribute_value=attribute_value, values=values)
 
 
 class AttributeMutations(graphene.ObjectType):

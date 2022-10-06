@@ -13,6 +13,7 @@ mutation ChangeAttributeValue($attributeId: ID!, $documentId: ID!, $value: Strin
       value
       createdAt
       updatedAt
+      attributeId
       __typename
     }
     values {
