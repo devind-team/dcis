@@ -24,12 +24,12 @@ import AddAttribute, { AddAttributeMutationResult } from '~/components/dcis/attr
 
 export const getAttributeKinds = t => ([
   'TEXT',
+  'NUMERIC',
   'BIGMONEY',
   'BOOL',
   'DATE',
   'FILES',
-  'MONEY',
-  'NUMERIC'
+  'MONEY'
 ].map<{text: TranslateResult, value: AttributeKind}>((tp: AttributeKind) => ({
   text: t(`dcis.attributes.addMenu.${tp.toLowerCase()}`),
   value: tp

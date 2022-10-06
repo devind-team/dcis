@@ -341,7 +341,7 @@ export default {
       date: 'Дата',
       files: 'Файл',
       money: 'Рубли',
-      numeric: 'Цифра',
+      numeric: 'Числовое значение',
       all: 'Ошибка добавления'
     },
     changeMenu: {

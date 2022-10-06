@@ -42,7 +42,9 @@ export default defineComponent({
     readonly: { type: Boolean, default: false }
   },
   setup (props) {
-    const values = computed<Record<number, AttributeValueType>>(() => (props.attributesValues.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {})))
+    const values = computed<Record<number, AttributeValueType>>(() => (
+      props.attributesValues.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {}))
+    )
     return { AttributeValueComponents, values }
   }
 })
