@@ -35,7 +35,7 @@ v-footer(padless)
 <script lang="ts">
 import { useScroll } from '@vueuse/core'
 import type { Ref } from '#app'
-import { defineComponent, ref, onMounted, watchEffect } from '#app'
+import { defineComponent, ref, onMounted, watchEffect, useRuntimeConfig } from '#app'
 import ThemeColor from '~/components/global/ThemeColor.vue'
 
 type ForeignLinksType = { text: string, href: string, icon: string }
@@ -43,11 +43,12 @@ type ForeignLinksType = { text: string, href: string, icon: string }
 export default defineComponent({
   components: { ThemeColor },
   setup () {
+    const { VERSION } = useRuntimeConfig()
     const upVisible: Ref<boolean> = ref<boolean>(false)
 
     const develop: string = 'Разработка и сопровождение - ' +
       'Центр отраслевых информационно-аналитических систем "Национального исследовательского университета "МЭИ"'
-    const release: string = 'Версия релиза: 0.14.1'
+    const release: string = `Версия релиза: ${VERSION}`
     const phones: string = 'Многоканальные телефоны службы поддержки:'
     const localLinks: ForeignLinksType[] = [
       { text: 'Главная', href: '/', icon: 'mdi-home' },
