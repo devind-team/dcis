@@ -1,6 +1,8 @@
 import json
 
 import graphene
+from devind_helpers.orm_utils import get_object_or_none
+from devind_helpers.utils import gid2int
 from devind_core.schema.types import ContentTypeType, FileType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
@@ -368,7 +370,7 @@ class AttributeType(DjangoObjectType):
 
     @staticmethod
     @resolver_hints(model_field='attribute_set')
-    def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs):
+    def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs) -> QuerySet[Attribute]:
         return attribute.attribute_set.all()
 
 
@@ -377,16 +379,20 @@ class AttributeValueType(DjangoObjectType):
 
     document = graphene.Field(DocumentType, description='Документ')
     attribute = graphene.Field(AttributeType, description='Атрибут')
+    document_id = graphene.Int(description='Идентификатор документа')
+    attribute_id = graphene.Int(description='Идентификатор документа')
 
     class Meta:
         model = AttributeValue
         fields = (
             'id',
             'value',
-            'created_at',
+            'updated_at',
             'created_at',
             'document',
             'attribute',
+            'document_id',
+            'attribute_id',
         )
 
 

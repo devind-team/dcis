@@ -640,6 +640,25 @@ type AttributeType {
   placeholder: String!
 }
 
+"""Тип со значениями атрибутов."""
+type AttributeValueType {
+  """Атрибут"""
+  attribute: AttributeType
+  """Идентификатор документа"""
+  attributeId: Int
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  """Идентификатор документа"""
+  documentId: Int
+  id: ID!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Значение"""
+  value: String!
+}
+
 input AuthCbiasMutationInput {
   """Открытый идентификатор приложения"""
   clientId: String
@@ -892,6 +911,29 @@ type ChangeAttributeMutationPayload {
   attribute: AttributeType
   clientMutationId: String
   errors: [ErrorType]
+}
+
+input ChangeAttributeValueMutationInput {
+  """Идентификатор атрибута"""
+  attributeId: ID!
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Значение атрибута."""
+  value: String
+}
+
+"""Мутация для установки или изменения формы."""
+type ChangeAttributeValueMutationPayload {
+  """Измененное или созданное значение"""
+  attributeValue: AttributeValueType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененные значения листов"""
+  values: [ValueType]
 }
 
 input ChangeAvatarMutationInput {
@@ -2622,6 +2664,7 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Добавление атрибута"""
   addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
   addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
@@ -2667,8 +2710,10 @@ type Mutation {
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
-  """Мутация для изменения периода."""
+  """Изменение атрибута"""
   changeAttribute(input: ChangeAttributeMutationInput!): ChangeAttributeMutationPayload!
+  """Изменение значения"""
+  changeAttributeValue(input: ChangeAttributeValueMutationInput!): ChangeAttributeValueMutationPayload!
   """Мутация для изменения аватара пользователя."""
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
   """Мутации для изменения категории"""
@@ -2755,9 +2800,7 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
-  """
-  Удаление записи модели "Attribute"
-  """
+  """Удаление атрибута"""
   deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
@@ -3559,6 +3602,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): [AttributeType]!
+  """Атрибуты со значениями документа"""
+  attributesValues(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [AttributeValueType]!
   budgetClassifications(
     after: String
     before: String

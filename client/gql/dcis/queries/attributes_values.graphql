@@ -1,0 +1,11 @@
+
+query AttributesValues($documentId: ID!) {
+  attributesValues(documentId: $documentId) {
+    id
+    value
+    createdAt
+    updatedAt
+    attributeId
+    __typename
+  }
+}

@@ -1,0 +1,24 @@
+#import "../../fragments/value_fields.graphql"
+
+mutation ChangeAttributeValue($attributeId: ID!, $documentId: ID!, $value: String) {
+  changeAttributeValue(input: {attributeId: $attributeId, documentId: $documentId, value: $value}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    attributeValue {
+      id
+      value
+      createdAt
+      updatedAt
+      attributeId
+      __typename
+    }
+    values {
+      ...ValueFields
+    }
+    __typename
+  }
+}
