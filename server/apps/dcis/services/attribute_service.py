@@ -20,7 +20,6 @@ def delete_attribute(user: User, attribute: Attribute):
 
 def change_attribute_value(
     user: User,
-    period: Period,
     attribute: Attribute,
     document: Document,
     value: str
@@ -30,7 +29,7 @@ def change_attribute_value(
     Кроме этого, необходимо собрать контекст из существующих атрибутов и перерендерить.
     """
     try:
-        can_change_period_attributes(user, period)
+        can_change_period_attributes(user, document.period)
     except PermissionDenied as error:
         raise PermissionDenied({'value': str(error)})
 
