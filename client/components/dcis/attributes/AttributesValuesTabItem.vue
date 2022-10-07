@@ -27,6 +27,10 @@ import changeAttributeValueMutation from '~/gql/dcis/mutations/attributes/change
 import AttributeValueMoney from '~/components/dcis/attributes/fields/AttributeValueMoney.vue'
 import AttributeValueNumeric from '~/components/dcis/attributes/fields/AttributeValueNumeric.vue'
 import AttributeValueText from '~/components/dcis/attributes/fields/AttributeValueText.vue'
+import AttributeValueBigmoney from '~/components/dcis/attributes/fields/AttributeValueBigmoney.vue'
+import AttributeValueBool from '~/components/dcis/attributes/fields/AttributeValueBool.vue'
+import AttributeValueFiles from '~/components/dcis/attributes/fields/AttributeValueFiles.vue'
+import AttributeValueDate from '~/components/dcis/attributes/fields/AttributeValueDate.vue'
 
 type AttributeComponentsType = typeof AttributeValueNumeric | typeof AttributeValueMoney | typeof AttributeValueText
 
@@ -36,10 +40,10 @@ const AttributeValueComponents: Record<AttributeKind, AttributeComponentsType> =
   NUMERIC: AttributeValueNumeric,
 
   // По умолчанию
-  BIGMONEY: AttributeValueText,
-  BOOL: AttributeValueText,
-  FILES: AttributeValueText,
-  DATE: AttributeValueText
+  BIGMONEY: AttributeValueBigmoney,
+  BOOL: AttributeValueBool,
+  FILES: AttributeValueFiles,
+  DATE: AttributeValueDate
 }
 
 export type ChangeAttributeValueMutationResult = { data: Pick<ChangeAttributeValueMutation, 'changeAttributeValue'> }

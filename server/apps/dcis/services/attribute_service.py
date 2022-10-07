@@ -2,8 +2,9 @@
 
 from typing import Sequence
 
-from apps.dcis.models import Period, Attribute, Document, AttributeValue, Value
+from django.core.exceptions import PermissionDenied
 from apps.core.models import User
+from apps.dcis.models import Period, Attribute, Document, AttributeValue, Value
 from apps.dcis.permissions import can_change_period_attributes
 
 
@@ -19,6 +20,7 @@ def delete_attribute(user: User, attribute: Attribute):
 
 def change_attribute_value(
     user: User,
+    period: Period,
     attribute: Attribute,
     document: Document,
     value: str
@@ -27,12 +29,10 @@ def change_attribute_value(
 
     Кроме этого, необходимо собрать контекст из существующих атрибутов и перерендерить.
     """
-    # TODO: Роман, нужно на примере изменений ячейки изменить пермишен на атрибут
-    # try:
-    #     can_change_value(info.context.user, document, attribute)
-    # except PermissionDenied as e:
-    #     # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
-    #     return ChangeAttributeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
+    try:
+        can_change_period_attributes(user, period)
+    except PermissionDenied as error:
+        raise PermissionDenied({'value': str(error)})
 
     attribute_value, created = AttributeValue.objects.update_or_create(
         document=document,
