@@ -9,6 +9,7 @@ import { defineComponent, useRouter } from '#app'
 import { useI18n } from '~/composables'
 
 export default defineComponent({
+  name: 'ProjectIndex',
   middleware: 'auth',
   setup () {
     const { localePath } = useI18n()

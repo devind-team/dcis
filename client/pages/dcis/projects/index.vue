@@ -19,7 +19,14 @@ bread-crumbs(:items="breadCrumbs")
         item-key="key"
         multiple
       )
-      v-data-table(:headers="headers" :items="visibleProjects" :loading="loading" disable-pagination hide-default-footer)
+      v-data-table(
+        :headers="headers"
+        :items="projects"
+        :loading="loading"
+        disable-pagination
+        disable-filtering
+        hide-default-footer
+      )
         template(#item.name="{ item }")
           nuxt-link(
             :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
@@ -38,10 +45,10 @@ import { useProjects } from '~/services/grapqhl/queries/dcis/projects'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
-import WaveContainer from '~/components/dcis/ui/WaveContainer.vue'
 
 export default defineComponent({
-  components: { WaveContainer, AddProject, BreadCrumbs, ItemsDataFilter },
+  name: 'DcisProjects',
+  components: { AddProject, BreadCrumbs, ItemsDataFilter },
   middleware: 'auth',
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
@@ -101,7 +108,7 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      if (projects.value && projects.value.length && route.query.deleteProjectId) {
+      if (route.query.deleteProjectId) {
         deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.deleteProjectId } } })
         router.push(localePath({ name: 'dcis-projects' }))
       }

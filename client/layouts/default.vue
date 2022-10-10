@@ -21,6 +21,7 @@ import Navigation from '~/components/global/Navigation.vue'
 import FooterComponent from '~/components/global/FooterComponent.vue'
 
 export default defineComponent({
+  name: 'DefaultLayout',
   components: { AppBar, Navigation, FooterComponent },
   setup () {
     const authStore = useAuthStore()

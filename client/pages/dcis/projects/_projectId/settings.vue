@@ -110,6 +110,7 @@ type DeleteProjectResultMutation = { data: { deleteProject: DeleteProjectMutatio
 type ChangeProjectUpdateType = (cache: DataProxy, result: ChangeProjectResultMutation) => DataProxy
 
 export default defineComponent({
+  name: 'ProjectSettings',
   components: { BreadCrumbs, DeleteMenu },
   middleware: 'auth',
   props: {
