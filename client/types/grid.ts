@@ -148,6 +148,7 @@ export type CellsOptionsType = {
   editable: boolean
   size: number | null
   kind: string | null
+  numberFormat: string | null
 }
 
 export type ColumnDimensionsOptionsType = {

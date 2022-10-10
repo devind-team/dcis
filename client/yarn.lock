@@ -12476,6 +12476,11 @@ number-is-nan@^1.0.0:
   resolved "https://registry.yarnpkg.com/number-is-nan/-/number-is-nan-1.0.1.tgz#097b602b53422a522c1afb8790318336941a011d"
   integrity sha1-CXtgK1NCKlIsGvuHkDGDNpQaAR0=
 
+numfmt@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-2.4.1.tgz#873ea24d30a7b8cbbe4c821e7cc34c0132784dbf"
+  integrity sha512-nvLnizOwkflfDz/D3mZhY44Tg4ZBXco+qqXOIs9zv8tQgpnjsXyJ5QCoJsu7BTwugcsKFxa+GOrGht7fdEwh/w==
+
 "nuxi@npm:nuxi-edge@3.0.0-27460489.53fbca7":
   version "3.0.0-27460489.53fbca7"
   resolved "https://registry.yarnpkg.com/nuxi-edge/-/nuxi-edge-3.0.0-27460489.53fbca7.tgz#716180bc10cdde40bf19c90f4e88e7b08043108f"

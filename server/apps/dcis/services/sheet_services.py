@@ -98,11 +98,14 @@ class CheckCellOptions:
                         field, value, ['yes', 'true', 't', 'y', '1', 'no', 'false', 'f', 'n', '0']
                     )
                 )
+        if field == 'number_format':
+            return cls.Success(value)
 
     _allowed_fields = [
         'strong', 'italic', 'strike',
         'underline', 'horizontal_align', 'vertical_align',
-        'editable', 'size', 'kind'
+        'editable', 'size', 'kind',
+        'number_format'
     ]
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']

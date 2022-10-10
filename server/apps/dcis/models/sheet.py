@@ -99,6 +99,7 @@ class KindCell(models.Model):
     DATE = 'd'
 
     # Дополнительный набор
+    TIME = 'time'
     TEXT = 'text'
     MONEY = 'money'
     BIG_MONEY = 'bigMoney'
@@ -119,6 +120,7 @@ class KindCell(models.Model):
         (ERROR, 'e'),
         (FORMULA_CACHE_STRING, 'str'),
         (DATE, 'd'),
+        (TIME, 'time'),
         (TEXT, 'text'),
         (MONEY, 'money'),
         (BIG_MONEY, 'bigMoney'),
@@ -236,6 +238,7 @@ class Cell(Style, KindCell, models.Model):
 
     editable = models.BooleanField(default=True, help_text='Редактируемая ячейка')
     formula = models.TextField(null=True, help_text='Формула')
+    number_format = models.TextField(null=True, help_text='Форматирование чисел')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
