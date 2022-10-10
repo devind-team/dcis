@@ -1,21 +1,24 @@
 <template lang="pug">
 v-tab-item
   template(v-if="!loading")
-    component(
-      v-for="attribute in attributes"
-      :key="attribute.id"
-      :is="AttributeValueComponents[attribute.kind]"
-      :attribute="attribute"
-      :attribute-value="attribute.id in values ? values[attribute.id] : null"
-      :readonly="readonly"
-      @change="changeValue(attribute, $event)"
-    )
+    template(v-if="attributes.length")
+      component(
+        v-for="attribute in attributes"
+        :key="attribute.id"
+        :is="AttributeValueComponents[attribute.kind]"
+        :attribute="attribute"
+        :attribute-value="attribute.id in values ? values[attribute.id] : null"
+        :readonly="readonly"
+        @change="changeValue(attribute, $event)"
+      )
+    v-alert(v-else type="info") Атрибутов нет
   v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '#app'
-import { useMutation } from '@vue/apollo-composable'
+import { useApolloClient, useMutation } from '@vue/apollo-composable'
+import { client } from 'websocket'
 import {
   AttributeKind,
   AttributeType,
@@ -23,6 +26,7 @@ import {
   ChangeAttributeValueMutation,
   ChangeAttributeValueMutationVariables
 } from '~/types/graphql'
+import { UpdateSheetType } from '~/types/grid'
 import changeAttributeValueMutation from '~/gql/dcis/mutations/attributes/change_attribute_value.graphql'
 import AttributeValueMoney from '~/components/dcis/attributes/fields/AttributeValueMoney.vue'
 import AttributeValueNumeric from '~/components/dcis/attributes/fields/AttributeValueNumeric.vue'
@@ -31,6 +35,7 @@ import AttributeValueBigmoney from '~/components/dcis/attributes/fields/Attribut
 import AttributeValueBool from '~/components/dcis/attributes/fields/AttributeValueBool.vue'
 import AttributeValueFiles from '~/components/dcis/attributes/fields/AttributeValueFiles.vue'
 import AttributeValueDate from '~/components/dcis/attributes/fields/AttributeValueDate.vue'
+import { changeSheetValues } from '~/composables'
 
 type AttributeComponentsType = typeof AttributeValueNumeric | typeof AttributeValueMoney | typeof AttributeValueText
 
@@ -59,9 +64,11 @@ export default defineComponent({
     changeUpdateAttributesValues: {
       type: Function as PropType<(cache, result: ChangeAttributeValueMutationResult, key: string) => void>,
       required: true
-    }
+    },
+    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true }
   },
   setup (props) {
+    const { client } = useApolloClient()
     const values = computed<Record<number, AttributeValueType>>(() => (
       props.attributesValues.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {}))
     )
@@ -71,6 +78,9 @@ export default defineComponent({
         update: (cache, result: ChangeAttributeValueMutationResult) => {
           if (!result.data.changeAttributeValue.errors.length) {
             props.changeUpdateAttributesValues(cache, result, 'attributeValue')
+            const { values } = result.data.changeAttributeValue
+            console.log(values)
+            changeSheetValues(values, client, props.documentId)
           }
         }
       }

@@ -22,15 +22,16 @@ import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
 import { defineComponent, onMounted, useRoute, useRouter } from '#app'
-import { useApolloHelpers, useFilters, useI18n } from '~/composables'
-import { ProjectType } from '~/types/graphql'
+import { useApolloHelpers, useCommonQuery, useFilters, useI18n } from '~/composables'
+import { PeriodsQuery, PeriodsQueryVariables, ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
 import { BreadCrumbsItem } from '~/types/devind'
+import periodsQuery from '~/gql/dcis/queries/periods.graphql'
 import AddPeriod, { AddPeriodMutationResult } from '~/components/dcis/projects/AddPeriod.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import { usePeriodsQuery } from '~/services/grapqhl/queries/dcis/periods'
 
 export default defineComponent({
+  name: 'ProjectPeriods',
   components: { LeftNavigatorContainer, AddPeriod },
   middleware: 'auth',
   props: {
@@ -58,7 +59,10 @@ export default defineComponent({
       loading,
       addUpdate,
       update
-    } = usePeriodsQuery(route.params.projectId)
+    } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
+      document: periodsQuery,
+      variables: { projectId: route.params.projectId }
+    })
 
     const addPeriodUpdate = (
       cache: DataProxy,
@@ -66,7 +70,7 @@ export default defineComponent({
     ) => addUpdate(cache, result, 'period')
 
     onMounted(() => {
-      if (periods.value && route.query.deletePeriodId) {
+      if (route.query.deletePeriodId) {
         update(
           defaultClient.cache,
           { data: { deletePeriod: { id: route.query.deletePeriodId } } },

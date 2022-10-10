@@ -42,7 +42,7 @@ export default defineComponent({
           icon: 'file-table-box-multiple-outline'
         }
       ]
-      if (period.value) {
+      if (!loading.value) {
         result.push({
           title: period.value.project.contentType.model === 'department'
             ? t('dcis.periods.links.departments') as string
@@ -60,7 +60,7 @@ export default defineComponent({
         to: 'dcis-periods-periodId-users',
         icon: 'account-multiple'
       })
-      if (period.value) {
+      if (!loading.value) {
         if (period.value.canChangeSheet) {
           result.push({
             title: t('dcis.periods.links.attributes') as string,

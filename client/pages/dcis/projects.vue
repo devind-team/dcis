@@ -9,6 +9,7 @@ import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 
 export default defineComponent({
+  name: 'DcisProjects',
   middleware: 'auth',
   setup () {
     const { t, localePath } = useI18n()

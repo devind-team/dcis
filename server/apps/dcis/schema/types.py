@@ -1,8 +1,6 @@
 import json
 
 import graphene
-from devind_helpers.orm_utils import get_object_or_none
-from devind_helpers.utils import gid2int
 from devind_core.schema.types import ContentTypeType, FileType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
@@ -475,6 +473,7 @@ class CellType(graphene.ObjectType):
     comment = graphene.String(description='Комментарий')
     mask = graphene.String(description='Маска для ввода значений')
     tooltip = graphene.String(description='Подсказка')
+    is_template = graphene.Boolean(description='Является ли поле шаблоном')
     column_id = graphene.ID(description='Идентификатор колонки')
     row_id = graphene.ID(description='Идентификатор строки')
 

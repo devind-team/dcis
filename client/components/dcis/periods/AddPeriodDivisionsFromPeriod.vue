@@ -28,9 +28,10 @@ mutation-modal-form(
 <script lang="ts">
 import { DataProxy } from 'apollo-cache'
 import { defineComponent, PropType, ref } from '#app'
-import { AddDivisionsFromPeriodMutationPayload, PeriodType } from '~/types/graphql'
-import { usePeriodsQuery } from '~/services/grapqhl/queries/dcis/periods'
+import { AddDivisionsFromPeriodMutationPayload, PeriodsQuery, PeriodsQueryVariables, PeriodType } from '~/types/graphql'
 import addPeriodDivisionsFromPeriodMutation from '~/gql/dcis/mutations/period/add_divisions_form_period.graphql'
+import { useCommonQuery } from '~/composables'
+import periodsQuery from '~/gql/dcis/queries/periods.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddDivisionsFromPeriodMutationsResult = { data: { addDivisionsFromPeriod: AddDivisionsFromPeriodMutationPayload } }
@@ -46,7 +47,10 @@ export default defineComponent({
   },
   setup (props) {
     const periodFromId = ref<number | string | null>(null)
-    const { data: periods, loading } = usePeriodsQuery(props.period.project.id)
+    const { data: periods, loading } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
+      document: periodsQuery,
+      variables: { projectId: props.period.project.id }
+    })
     return { periods, loading, periodFromId, addPeriodDivisionsFromPeriodMutation }
   }
 })

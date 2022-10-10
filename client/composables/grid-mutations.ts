@@ -792,6 +792,34 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<Docume
   }
 }
 
+export const changeSheetValues = (values: ValueType[], client: ApolloClient<DocumentSheetQuery>, documentId: Ref<string | null> | string, updatedAt: string | null = null) => {
+  const sheetValue = values.reduce<Record<number, ValueType[]>>((a, v) => {
+    if (!(v.sheetId in a)) { a[v.sheetId] = [] }
+    a[v.sheetId].push(v)
+    return a
+  }, {})
+  for (const [sid, vs] of Object.entries(sheetValue)) {
+    try {
+      const data = client.readQuery<DocumentSheetQuery, DocumentSheetQueryVariables>({
+        query: documentSheetQuery,
+        variables: {
+          documentId: unref(documentId),
+          sheetId: sid
+        }
+      })
+      updateValues(data, vs, updatedAt)
+      client.writeQuery<DocumentSheetQuery, DocumentSheetQueryVariables>({
+        query: documentSheetQuery,
+        variables: {
+          documentId: unref(documentId),
+          sheetId: sid
+        },
+        data
+      })
+    } catch { }
+  }
+}
+
 export const useChangeValueMutation = (
   documentId: Ref<string | null>,
   sheetId: Ref<string>,
@@ -812,32 +840,7 @@ export const useChangeValueMutation = (
       update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
         if (result.data.changeValue.success) {
           const { values, updatedAt } = result.data.changeValue
-          const sheetValue = values.reduce<Record<number, ValueType[]>>((a, v) => {
-            if (!(v.sheetId in a)) { a[v.sheetId] = [] }
-            a[v.sheetId].push(v)
-            return a
-          }, {})
-          // Читаем все sheet для которых пришли ответные данные изменение ячеек
-          for (const [sid, vs] of Object.entries(sheetValue)) {
-            try {
-              const data = client.readQuery<DocumentSheetQuery, DocumentSheetQueryVariables>({
-                query: documentSheetQuery,
-                variables: {
-                  documentId: unref(documentId),
-                  sheetId: sid
-                }
-              })
-              updateValues(data, vs, updatedAt)
-              client.writeQuery<DocumentSheetQuery, DocumentSheetQueryVariables>({
-                query: documentSheetQuery,
-                variables: {
-                  documentId: unref(documentId),
-                  sheetId: sid
-                },
-                data
-              })
-            } catch { }
-          }
+          changeSheetValues(values, client, documentId, updatedAt)
         }
       },
       optimisticResponse: {
@@ -921,7 +924,7 @@ export function useChangeFileValueMutation (
  * @param values
  * @param updatedAt
  */
-const updateValues = (data: DocumentSheetQuery, values: ValueType[], updatedAt: string): void => {
+const updateValues = (data: DocumentSheetQuery, values: ValueType[], updatedAt: string | null = null): void => {
   const rowValues = values.reduce<Record<number, Record<number, ValueType>>>((a, v) => {
     if (!(v.rowId in a)) { a[v.rowId] = {} }
     a[v.rowId][v.columnId] = v
@@ -929,7 +932,9 @@ const updateValues = (data: DocumentSheetQuery, values: ValueType[], updatedAt: 
   }, {})
   for (const [rowId, value] of Object.entries<Record<number, ValueType>>(rowValues)) {
     const row = data.documentSheet.rows.find((r: RowDimensionFieldsFragment) => r.id === rowId)
-    row.updatedAt = updatedAt
+    if (updatedAt) {
+      row.updatedAt = updatedAt
+    }
     row.cells = row.cells.map((c: CellFieldsFragment) => {
       if (c.columnId in value) {
         c.value = value[c.columnId].value

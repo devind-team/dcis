@@ -32,8 +32,8 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
       )
         template(#item.actions="{ item }")
           delete-menu(
-            :item-name="deleteItemName"
             @confirm="deleteDivision({ periodId: period.id, divisionId: item.id })"
+            :item-name="deleteItemName"
           )
             template(#default="{ on: onMenu }")
               v-tooltip(bottom)

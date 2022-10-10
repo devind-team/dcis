@@ -22,6 +22,7 @@ import AdditionalInformation from '~/components/profile/AdditionalInformation.vu
 import BasicInformation from '~/components/profile/BasicInformation.vue'
 
 export default defineComponent({
+  name: 'ProfileMe',
   components: { AvatarView, AdditionalInformation, BasicInformation },
   middleware: 'auth',
   setup () {

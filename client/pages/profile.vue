@@ -13,6 +13,7 @@ import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import TwoColumns from '~/components/common/grid/TwoColumns.vue'
 
 export default defineComponent({
+  name: 'PagesProfile',
   components: { TwoColumns, BreadCrumbs },
   middleware: 'auth',
   setup () {
