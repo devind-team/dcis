@@ -6,7 +6,7 @@
     v-on="componentListeners"
     :is="componentName"
   )
-  div(v-else) {{ formattedCellValue }}
+  div(v-else style="white-space: pre") {{ formattedCellValue }}
 </template>
 
 <script lang="ts">

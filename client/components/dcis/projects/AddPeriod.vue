@@ -4,7 +4,7 @@ mutation-modal-form(
   :subheader="project.name"
   :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
   :mutation="addPeriod"
-  :variables="{ name, file, projectId: project.id, multiple, readonlyFillColor }"
+  :variables="{ name, file, projectId: project.id, multiple, readonlyFillColor, versioning }"
   :update="addPeriodUpdate"
   mutation-name="addPeriod"
   i18n-path="dcis.projects.addPeriod"
@@ -37,7 +37,12 @@ mutation-modal-form(
         :success="valid"
       )
     v-checkbox(v-model="readonlyFillColor" :label="$t('dcis.periods.addPeriod.readonlyFillColor')")
-    v-checkbox(v-model="multiple" :label="$t('dcis.periods.addPeriod.multiple')" readonly)
+    v-checkbox(
+      v-if="project.contentType.model === 'department'"
+      v-model="multiple"
+      :label="$t('dcis.periods.addPeriod.multiple')"
+    )
+    v-checkbox(v-model="versioning" :label="$t('dcis.periods.addPeriod.versioning')")
 </template>
 
 <script lang="ts">
@@ -62,6 +67,7 @@ export default defineComponent({
     const file = ref<File | null>(null)
     const readonlyFillColor = ref<boolean>(false)
     const multiple = ref<boolean>(true)
+    const versioning = ref<boolean>(false)
 
     const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
       const { success } = result.data.addPeriod
@@ -74,7 +80,7 @@ export default defineComponent({
       name.value = ''
       file.value = null
     }
-    return { name, file, readonlyFillColor, multiple, addPeriod, addPeriodUpdate, close }
+    return { name, file, readonlyFillColor, multiple, versioning, addPeriod, addPeriodUpdate, close }
   }
 })
 </script>

@@ -30,6 +30,7 @@ from .period_permissions import (
     can_change_period_settings,
     can_change_period_settings_base,
     can_change_period_sheet,
+    can_change_period_attributes,
     can_change_period_sheet_base,
     can_change_period_users,
     can_change_period_users_base,

@@ -15,7 +15,7 @@ from devind_helpers.utils import convert_str_to_int
 from devind_helpers.schema.types import ErrorFieldType
 
 from apps.core.models import User
-from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project, Attribute
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -90,6 +90,12 @@ def get_period_users(period: Period | int | str) -> QuerySet[User]:
     ).distinct()
 
 
+def get_period_attributes(period: Period | int | str, parent: bool = True) -> QuerySet[Attribute]:
+    """Получение атрибутов, связанных с периодом."""
+    period = Period.objects.get(pk=period) if type(period) in (int, str) else period
+    return (period.attribute_set.filter(parent__isnull=True) if parent else period.attribute_set).all()
+
+
 def get_user_period_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
     """Получение отдельных привилегий пользователя в периоде."""
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
@@ -101,6 +107,7 @@ def create_period(
     name: str,
     project: Project,
     multiple: bool,
+    versioning: bool,
     file: File,
     readonly_fill_color: bool
 ) -> Period:
@@ -110,7 +117,8 @@ def create_period(
         name=name,
         user=user,
         project=project,
-        multiple=multiple
+        multiple=multiple,
+        versioning=versioning
     )
     fl = period.methodical_support.create(
         name=file.name,
@@ -302,6 +310,7 @@ def change_settings_period(
     name: str,
     status: str,
     multiple: bool,
+    versioning: bool,
     privately: bool,
     start: date,
     expiration: date
@@ -311,6 +320,7 @@ def change_settings_period(
     period.name = name
     period.status = status
     period.multiple = multiple
+    period.versioning = versioning
     period.privately = privately
     period.start = start
     period.expiration = expiration

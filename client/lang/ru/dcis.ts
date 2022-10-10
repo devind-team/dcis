@@ -54,6 +54,7 @@ export default {
       organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
+      attributes: 'Атрибуты',
       sheets: 'Таблица',
       settings: '@:settings'
     },
@@ -71,7 +72,8 @@ export default {
       name: 'Название периода',
       file: 'Файл с формой сбора',
       readonlyFillColor: 'Запретить редактирование ячеек с заливкой',
-      multiple: 'Множественное заполнение'
+      multiple: 'Множественное заполнение',
+      versioning: 'Разрешить множество версий'
     },
     changePeriod: {
       header: 'Настройки периода',
@@ -81,6 +83,7 @@ export default {
       expiration: 'Дата окончания периода',
       multiple: 'Множественное заполнение',
       privately: 'Приватность полей',
+      versioning: 'Разрешить множество версий',
       save: '@:save'
     },
     deletePeriod: {
@@ -310,6 +313,55 @@ export default {
       file: 'Файл №{number}',
       newFiles: 'Новые файлы',
       uploadArchive: 'Скачать архив'
+    }
+  },
+  sheets: {
+    settings: {
+      show: 'Настройки вывода',
+      name: 'Название листов',
+      showHead: 'Отображать головным учреждениям',
+      showChild: 'Отображать филиалам'
+    }
+  },
+  attributes: {
+    adds: 'Добавить атрибуты',
+    add: 'Добавить атрибут',
+    change: 'Изменить',
+    delete: 'Удалить',
+    addMenu: {
+      header: 'Добавление атрибута',
+      buttonText: 'Добавить',
+      name: 'Наименование',
+      placeholder: 'Подсказка',
+      key: 'Ключ',
+      kind: 'Тип',
+      default: 'Значение по умолчанию',
+      mutable: 'Разрешить изменение',
+      text: 'Текст',
+      bigmoney: 'Тысячи',
+      bool: 'Переключатель',
+      date: 'Дата',
+      files: 'Файл',
+      money: 'Рубли',
+      numeric: 'Числовое значение',
+      all: 'Ошибка добавления'
+    },
+    changeMenu: {
+      header: 'Изменение атрибута',
+      buttonText: 'Изменить',
+      name: 'Наименование',
+      placeholder: 'Подсказка',
+      key: 'Ключ',
+      kind: 'Тип',
+      default: 'Значение по умолчанию',
+      mutable: 'Разрешить изменение'
+    },
+    tableHeaders: {
+      name: 'Название параметра',
+      key: 'Ключ',
+      default: 'По умолчанию',
+      placeholder: 'Подсказка',
+      action: 'Действие'
     }
   }
 }

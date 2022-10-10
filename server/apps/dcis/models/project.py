@@ -70,6 +70,7 @@ class Period(models.Model):
     name = models.CharField(max_length=250, help_text='Наименование периода')
     status = models.CharField(max_length=16, choices=KIND_PERIOD, default=PREPARATION, help_text='Статус проекта')
     multiple = models.BooleanField(default=False, help_text='Множественное заполнение')
+    versioning = models.BooleanField(default=False, help_text='Множество версий')
     privately = models.BooleanField(default=False, help_text='Приватность полей')
 
     start = models.DateField(null=True, help_text='Дата начала')

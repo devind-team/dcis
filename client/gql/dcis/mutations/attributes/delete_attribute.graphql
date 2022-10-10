@@ -1,0 +1,5 @@
+mutation DeleteAttribute($attributeId: ID!) {
+  deleteAttribute(input: {attributeId: $attributeId}) {
+    success
+  }
+}

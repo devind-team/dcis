@@ -62,6 +62,31 @@ type ActiveStatisticsType {
   times: [DateStatisticsType]!
 }
 
+input AddAttributeMutationInput {
+  clientMutationId: String
+  default: String
+  id: ID
+  """Ключ"""
+  key: String!
+  """Тип атрибута"""
+  kind: String!
+  """Можно ли изменять"""
+  mutable: Boolean
+  """Наименование атрибута"""
+  name: String!
+  parent: ID
+  period: ID!
+  """Подсказка"""
+  placeholder: String!
+  position: Int
+}
+
+type AddAttributeMutationPayload {
+  attribute: AttributeType
+  clientMutationId: String
+  errors: [ErrorType]
+}
+
 input AddBudgetClassificationMutationInput {
   clientMutationId: String
   """Code"""
@@ -360,6 +385,8 @@ input AddPeriodMutationInput {
   projectId: ID!
   """Запретить редактирование ячеек с заливкой"""
   readonlyFillColor: Boolean!
+  """Разрешить множество версий"""
+  versioning: Boolean!
 }
 
 """Мутация для создания периода."""
@@ -572,6 +599,66 @@ type ApplicationType implements Node {
   user: UserType
 }
 
+"""An enumeration."""
+enum AttributeKind {
+  """bigMoney"""
+  BIGMONEY
+  """boolean"""
+  BOOL
+  """date"""
+  DATE
+  """files"""
+  FILES
+  """money"""
+  MONEY
+  """numeric"""
+  NUMERIC
+  """text"""
+  TEXT
+}
+
+"""Тип атрибутов для документов."""
+type AttributeType {
+  """Дочерние элементы"""
+  children: [AttributeType]
+  """Значение по умолчанию"""
+  default: String
+  id: ID!
+  """Ключ"""
+  key: String!
+  """Тип атрибута"""
+  kind: AttributeKind!
+  """Можно ли изменять"""
+  mutable: Boolean!
+  """Наименование атрибута"""
+  name: String!
+  """Родительский атрибут"""
+  parent: AttributeType
+  """Период"""
+  period: PeriodType
+  """Подсказка"""
+  placeholder: String!
+}
+
+"""Тип со значениями атрибутов."""
+type AttributeValueType {
+  """Атрибут"""
+  attribute: AttributeType
+  """Идентификатор документа"""
+  attributeId: Int
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  """Идентификатор документа"""
+  documentId: Int
+  id: ID!
+  """Дата обновления"""
+  updatedAt: DateTime!
+  """Значение"""
+  value: String!
+}
+
 input AuthCbiasMutationInput {
   """Открытый идентификатор приложения"""
   clientId: String
@@ -624,6 +711,10 @@ type BaseSheetType {
   period: PeriodType
   """Позиция"""
   position: Int!
+  """Показывать ли подведомственным"""
+  showChild: Boolean!
+  """Показвать ли головам"""
+  showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
 }
@@ -797,6 +888,54 @@ type CellType {
   verified: Boolean!
   """Вертикальное выравнивание"""
   verticalAlign: ID
+}
+
+input ChangeAttributeMutationInput {
+  clientMutationId: String
+  default: String
+  id: ID
+  """Ключ"""
+  key: String!
+  """Тип атрибута"""
+  kind: String!
+  """Можно ли изменять"""
+  mutable: Boolean
+  """Наименование атрибута"""
+  name: String!
+  parent: ID
+  """Подсказка"""
+  placeholder: String!
+  position: Int
+}
+
+"""Мутация для изменения периода."""
+type ChangeAttributeMutationPayload {
+  attribute: AttributeType
+  clientMutationId: String
+  errors: [ErrorType]
+}
+
+input ChangeAttributeValueMutationInput {
+  """Идентификатор атрибута"""
+  attributeId: ID!
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Значение атрибута."""
+  value: String
+}
+
+"""Мутация для установки или изменения формы."""
+type ChangeAttributeValueMutationPayload {
+  """Измененное или созданное значение"""
+  attributeValue: AttributeValueType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+  """Измененные значения листов"""
+  values: [ValueType]
 }
 
 input ChangeAvatarMutationInput {
@@ -1342,6 +1481,8 @@ input ChangePeriodMutationInput {
   start: Date
   """Статус проекта"""
   status: String!
+  """Разрешить множество версий"""
+  versioning: Boolean!
 }
 
 """Мутация на изменение настроек периода."""
@@ -1560,6 +1701,27 @@ type ChangeSettingsMutationPayload {
   errors: [ErrorFieldType!]!
   """Измененная настройка"""
   setting: SettingType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeShowSheetMutationInput {
+  clientMutationId: String
+  """Выбор: showHead, showChild"""
+  field: String!
+  """Идентификатор листа"""
+  sheetId: ID!
+  """Значение"""
+  value: Boolean!
+}
+
+"""Изменение показа листа."""
+type ChangeShowSheetMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный лист"""
+  sheet: BaseSheetType
   """Успех мутации"""
   success: Boolean!
 }
@@ -1848,6 +2010,31 @@ value as specified by
 """
 scalar DateTime
 
+input DeleteAttributeMutationInput {
+  """
+  Идентификатор модели "Не табличные данные хранятся в атрибутах.
+  
+      Модель содержит список не табличных данных для организации сбора в указанный период.
+      Информация о типах:
+          - TEXT - тестовое поле
+          - MONEY - поле для ввода денег
+      "
+  """
+  attributeId: ID!
+  clientMutationId: String
+}
+
+"""
+Удаление записи модели "Attribute"
+"""
+type DeleteAttributeMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteCategoryMutationInput {
   """Идентификатор мутации"""
   categoryId: ID!
@@ -2092,6 +2279,8 @@ type DeleteSessionsMutationPayload {
 
 """Graphene object type for Department."""
 type DepartmentType {
+  """Children departments."""
+  children: [DepartmentType]
   """Code of department"""
   code: Int
   """Created date"""
@@ -2478,6 +2667,8 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Добавление атрибута"""
+  addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
   addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
   """Мутация для добавления категории"""
@@ -2522,6 +2713,10 @@ type Mutation {
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
+  """Изменение атрибута"""
+  changeAttribute(input: ChangeAttributeMutationInput!): ChangeAttributeMutationPayload!
+  """Изменение значения"""
+  changeAttributeValue(input: ChangeAttributeValueMutationInput!): ChangeAttributeValueMutationPayload!
   """Мутация для изменения аватара пользователя."""
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
   """Мутации для изменения категории"""
@@ -2592,6 +2787,8 @@ type Mutation {
   changeSectionText(input: ChangeSectionTextMutationInput!): ChangeSectionTextMutationPayload!
   """Мутация для изменения настроек"""
   changeSettings(input: ChangeSettingsMutationInput!): ChangeSettingsMutationPayload!
+  """Показ листов"""
+  changeShowSheet(input: ChangeShowSheetMutationInput!): ChangeShowSheetMutationPayload!
   """Мутация для изменения групп конкретного пользователя."""
   changeUserGroups(input: ChangeUserGroupsMutationInput!): ChangeUserGroupsMutationPayload!
   """Мутация на изменение групп пользователя в периоде."""
@@ -2606,6 +2803,8 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
+  """Удаление атрибута"""
+  deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
   """Мутация для удаления категории"""
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление дочерней строки."""
@@ -3030,6 +3229,8 @@ type OrganizationType implements Node {
   address: String
   """Additional fields"""
   attributes: JSONString!
+  """Children of organization"""
+  children: [OrganizationType]
   """Created date"""
   createdAt: DateTime!
   """Departments."""
@@ -3223,6 +3424,8 @@ type PeriodType {
   updatedAt: DateTime!
   """Пользователь"""
   user: UserType!
+  """Множество версий"""
+  versioning: Boolean!
 }
 
 """Привилегия пользователя или группы пользователей."""
@@ -3395,6 +3598,18 @@ type Query {
   activeStatistics: ActiveStatisticsType!
   """Приложения"""
   applications: [ApplicationType!]!
+  """Получение атрибутов, привязанных к периоду"""
+  attributes(
+    """Вытягивать только родителей"""
+    parent: Boolean = true
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [AttributeType]!
+  """Атрибуты со значениями документа"""
+  attributesValues(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [AttributeValueType]!
   budgetClassifications(
     after: String
     before: String
@@ -4034,6 +4249,10 @@ type SheetType {
   position: Int!
   """Строки"""
   rows: [RowDimensionType!]
+  """Показывать ли подведомственным"""
+  showChild: Boolean!
+  """Показвать ли головам"""
+  showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
 }

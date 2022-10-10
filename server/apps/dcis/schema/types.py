@@ -1,6 +1,8 @@
 import json
 
 import graphene
+from devind_helpers.orm_utils import get_object_or_none
+from devind_helpers.utils import gid2int
 from devind_core.schema.types import ContentTypeType, FileType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
@@ -135,6 +137,7 @@ class PeriodType(DjangoObjectType):
             'name',
             'status',
             'multiple',
+            'versioning',
             'privately',
             'start',
             'expiration',
@@ -353,7 +356,7 @@ class AttributeType(DjangoObjectType):
 
     class Meta:
         model = Attribute
-        fields = (
+        fields: tuple[str] = (
             'id',
             'name',
             'placeholder',
@@ -367,7 +370,7 @@ class AttributeType(DjangoObjectType):
 
     @staticmethod
     @resolver_hints(model_field='attribute_set')
-    def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs):
+    def resolve_children(attribute: Attribute, info: ResolveInfo, *args, **kwargs) -> QuerySet[Attribute]:
         return attribute.attribute_set.all()
 
 
@@ -376,16 +379,20 @@ class AttributeValueType(DjangoObjectType):
 
     document = graphene.Field(DocumentType, description='Документ')
     attribute = graphene.Field(AttributeType, description='Атрибут')
+    document_id = graphene.Int(description='Идентификатор документа')
+    attribute_id = graphene.Int(description='Идентификатор документа')
 
     class Meta:
         model = AttributeValue
         fields = (
             'id',
             'value',
-            'created_at',
+            'updated_at',
             'created_at',
             'document',
             'attribute',
+            'document_id',
+            'attribute_id',
         )
 
 
@@ -533,6 +540,8 @@ class BaseSheetType(graphene.ObjectType):
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
+    show_head = graphene.Boolean(required=True, description='Показвать ли головам')
+    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
     period = graphene.Field(PeriodType, description='Период')
