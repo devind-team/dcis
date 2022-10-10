@@ -447,7 +447,7 @@ dev = ["PyTest (<5)", "PyTest-Cov (<2.6)", "bump2version (<1)", "configparser (<
 
 [[package]]
 name = "devind-core"
-version = "0.7.3"
+version = "0.7.4"
 description = "Devind core."
 category = "main"
 optional = false
@@ -456,7 +456,7 @@ python-versions = ">=3.9,<4.0"
 [package.dependencies]
 celery = ">=5.2.7,<6.0.0"
 channels = ">=3.0.4,<4.0.0"
-devind_helpers = ">=0.5,<0.6"
+devind_helpers = ">=0.6,<0.7"
 Django = ">=3,<4"
 django-auditlog = ">=2.0.0,<3.0.0"
 django-channels-graphql-ws = ">=0.9.1,<0.10.0"
@@ -485,7 +485,7 @@ requests = ">=2.27.1,<3.0.0"
 
 [[package]]
 name = "devind-helpers"
-version = "0.5.0"
+version = "0.6.0"
 description = "Devind helpers."
 category = "main"
 optional = false
@@ -2014,7 +2014,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "40278c88fe02794af11b5ed2a2168ac2fd601a99f059ee4ad95f7f82978eea9e"
+content-hash = "0146fe366ddb6953bf9817ac3d199e3241226e3bfcb7bed560ca7b9a9c19ee67"
 
 [metadata.files]
 aiohttp = [
@@ -2258,7 +2258,10 @@ channels = [
     {file = "channels-3.0.5-py3-none-any.whl", hash = "sha256:3813b8025bf85509769793aca720e6c3b1c5bde1cb253a961252bf0242b60a26"},
     {file = "channels-3.0.5.tar.gz", hash = "sha256:a3dc3339cc033e7c2afe083fb3dedf74fc5009815967e317e080e7bfdc92ea26"},
 ]
-channels-redis = []
+channels-redis = [
+    {file = "channels_redis-3.4.1-py3-none-any.whl", hash = "sha256:ba7e2ad170f273c372812dd32aaac102d68d4e508172abb1cfda3160b7333890"},
+    {file = "channels_redis-3.4.1.tar.gz", hash = "sha256:78e4a2f2b2a744fe5a87848ec36b5ee49f522c6808cefe6c583663d0d531faa8"},
+]
 charset-normalizer = [
     {file = "charset-normalizer-2.1.1.tar.gz", hash = "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845"},
     {file = "charset_normalizer-2.1.1-py3-none-any.whl", hash = "sha256:83e9a75d1911279afd89352c68b45348559d1fc0506b054b346651b5e7fee29f"},
@@ -2332,16 +2335,16 @@ deprecated = [
     {file = "Deprecated-1.2.13.tar.gz", hash = "sha256:43ac5335da90c31c24ba028af536a91d41d53f9e6901ddb021bcc572ce44e38d"},
 ]
 devind-core = [
-    {file = "devind_core-0.7.3-py3-none-any.whl", hash = "sha256:c34e6c226ca0d9fae2dde9710480241bad18339509baa198acc72ca04706f457"},
-    {file = "devind_core-0.7.3.tar.gz", hash = "sha256:0b821480e3d30100c5585221d64c8763df6c6dc5982e97df6e769eaf7a6c161f"},
+    {file = "devind_core-0.7.4-py3-none-any.whl", hash = "sha256:af968374e4aa5e1f2b5f8b1447f9ea27d3fb2db5471e26ff11aac5de7cf72caa"},
+    {file = "devind_core-0.7.4.tar.gz", hash = "sha256:adf6d507fa312333cab9ebefae80412b08797fab80723fec9cbe27796a72be61"},
 ]
 devind-dictionaries = [
     {file = "devind_dictionaries-0.7.0-py3-none-any.whl", hash = "sha256:4045809f0c37541972cdc091120bf4d459b55bc479e81f84e7a47a08cf43c7b2"},
     {file = "devind_dictionaries-0.7.0.tar.gz", hash = "sha256:90ff2aece540c743ab21b5c45120e3f7a271284046a1455b0ec5dafc5624a724"},
 ]
 devind-helpers = [
-    {file = "devind_helpers-0.5.0-py3-none-any.whl", hash = "sha256:1256d85543e20a1352388fd3ce072ce37e54ce357ba75c8ba47f1efe09599418"},
-    {file = "devind_helpers-0.5.0.tar.gz", hash = "sha256:9c73ecb8d6829c1524084d9c3159c35b7b7dbb4e2a1f381741450e01f3d8318e"},
+    {file = "devind_helpers-0.6.0-py3-none-any.whl", hash = "sha256:8f5b6ffe799b79382adf165398f5feec961db78366a90f282c473e0fdcfa7ade"},
+    {file = "devind_helpers-0.6.0.tar.gz", hash = "sha256:4d549a2e9498ce66a4fb977c2044aa8982de9930ae580b429d94c98d9e49c14d"},
 ]
 devind-notifications = [
     {file = "devind_notifications-0.4.2-py3-none-any.whl", hash = "sha256:1945008e0e5e2bbdc4acb2188dfefeb02abd619fb6956009370bbb7f71277912"},
@@ -2410,7 +2413,10 @@ djangorestframework = [
     {file = "djangorestframework-3.14.0-py3-none-any.whl", hash = "sha256:eb63f58c9f218e1a7d064d17a70751f528ed4e1d35547fdade9aaf4cd103fd08"},
     {file = "djangorestframework-3.14.0.tar.gz", hash = "sha256:579a333e6256b09489cbe0a067e66abe55c6595d8926be6b99423786334350c8"},
 ]
-docutils = []
+docutils = [
+    {file = "docutils-0.19-py3-none-any.whl", hash = "sha256:5e1de4d849fee02c63b040a4a3fd567f4ab104defd8a5511fbbc24a8a017efbc"},
+    {file = "docutils-0.19.tar.gz", hash = "sha256:33995a6753c30b7f577febfc2c50411fec6aac7f7ffeb7c4cfe5991072dcf9e6"},
+]
 drf-yasg = [
     {file = "drf-yasg-1.21.4.tar.gz", hash = "sha256:887c9f79e64f46aa48974234e61029b1bea6b12ea628a8fc8a3697589add1d3e"},
     {file = "drf_yasg-1.21.4-py3-none-any.whl", hash = "sha256:4a156d195fdccc51b40a227955588d982ca43c2e327927c7713bf967f5589913"},
@@ -2981,8 +2987,8 @@ pillow = [
     {file = "Pillow-9.2.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:37ff6b522a26d0538b753f0b4e8e164fdada12db6c6f00f62145d732d8a3152e"},
     {file = "Pillow-9.2.0-cp310-cp310-win32.whl", hash = "sha256:c79698d4cd9318d9481d89a77e2d3fcaeff5486be641e60a4b49f3d2ecca4e28"},
     {file = "Pillow-9.2.0-cp310-cp310-win_amd64.whl", hash = "sha256:254164c57bab4b459f14c64e93df11eff5ded575192c294a0c49270f22c5d93d"},
-    {file = "Pillow-9.2.0-cp311-cp311-macosx_10_10_universal2.whl", hash = "sha256:408673ed75594933714482501fe97e055a42996087eeca7e5d06e33218d05aa8"},
-    {file = "Pillow-9.2.0-cp311-cp311-macosx_11_0_universal2.whl", hash = "sha256:727dd1389bc5cb9827cbd1f9d40d2c2a1a0c9b32dd2261db522d22a604a6eec9"},
+    {file = "Pillow-9.2.0-cp311-cp311-macosx_10_10_x86_64.whl", hash = "sha256:adabc0bce035467fb537ef3e5e74f2847c8af217ee0be0455d4fec8adc0462fc"},
+    {file = "Pillow-9.2.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:336b9036127eab855beec9662ac3ea13a4544a523ae273cbf108b228ecac8437"},
     {file = "Pillow-9.2.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:50dff9cc21826d2977ef2d2a205504034e3a4563ca6f5db739b0d1026658e004"},
     {file = "Pillow-9.2.0-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:cb6259196a589123d755380b65127ddc60f4c64b21fc3bb46ce3a6ea663659b0"},
     {file = "Pillow-9.2.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7b0554af24df2bf96618dac71ddada02420f946be943b181108cac55a7a2dcd4"},
@@ -3426,7 +3432,10 @@ wrapt = [
     {file = "wrapt-1.14.1-cp39-cp39-win_amd64.whl", hash = "sha256:dee60e1de1898bde3b238f18340eec6148986da0455d8ba7848d50470a7a32fb"},
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
-xlsx-evaluate = []
+xlsx-evaluate = [
+    {file = "xlsx_evaluate-0.4.6-py3-none-any.whl", hash = "sha256:33ecf0187cdcd2c658dbfd2a96658d6a6a3194ed2f96d26ede815d5a616616a6"},
+    {file = "xlsx_evaluate-0.4.6.tar.gz", hash = "sha256:8e8bc507d43efdd87955da5bd09d31d4774448e63b1078f39b99407211dc967f"},
+]
 yarl = [
     {file = "yarl-1.8.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:abc06b97407868ef38f3d172762f4069323de52f2b70d133d096a48d72215d28"},
     {file = "yarl-1.8.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:07b21e274de4c637f3e3b7104694e53260b5fc10d51fb3ec5fed1da8e0f754e3"},
