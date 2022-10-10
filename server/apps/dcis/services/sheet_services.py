@@ -127,7 +127,7 @@ def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     """Изменение значения ячейки по умолчанию."""
     can_change_period_sheet(user, cell.row.sheet.period)
     cell.default = default
-    cell.save(update_fields=('default',))
+    cell.save(update_fields=('default', 'is_template',))
     return cell
 
 

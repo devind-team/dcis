@@ -2,6 +2,8 @@
 
 from typing import Sequence
 
+from django.template import Context, Template
+
 from django.core.exceptions import PermissionDenied
 from apps.core.models import User
 from apps.dcis.models import Period, Attribute, Document, AttributeValue, Value
@@ -41,3 +43,9 @@ def change_attribute_value(
     )
 
     return attribute_value, []
+
+
+def rerender_values(period: Period, document: Document) -> Sequence[Value]:
+    """Функция для ререндера параметров."""
+    ...
+

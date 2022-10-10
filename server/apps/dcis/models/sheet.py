@@ -232,12 +232,15 @@ class RowDimension(models.Model):
 class Cell(Style, KindCell, models.Model):
     """Модель ячейки."""
 
+    TEMPLATE_FIELD = [KindCell.STRING, KindCell.TEXT]
+
     editable = models.BooleanField(default=True, help_text='Редактируемая ячейка')
     formula = models.TextField(null=True, help_text='Формула')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
     tooltip = models.TextField(null=True, help_text='Подсказка')
+    is_template = models.BooleanField(default=False, help_text='Является ли поле шаблоном')
 
     column = models.ForeignKey(ColumnDimension, on_delete=models.CASCADE, help_text='Колонка')
     row = models.ForeignKey(RowDimension, on_delete=models.CASCADE, help_text='Строка')
