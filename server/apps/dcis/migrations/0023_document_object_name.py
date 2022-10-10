@@ -9,8 +9,6 @@ def set_objects_name(apps, schema_editor):
     1. У нас тип дивизиона находиться в проекте и чтобы добраться до дивизиона необходимо получить
         document.period.project.division.objects.get(pk=document.object_id) - если выгружаем 100 документов то долго
     2. Может произойти смена названия дивизиона, что будет означать, что в документах резко поменяется название.
-
-    Поле вычисляемое, обратной миграции нет.
     """
     from apps.dcis.models import Project
     Document = apps.get_model('dcis', 'Document')
@@ -20,6 +18,11 @@ def set_objects_name(apps, schema_editor):
         if names:
             document.object_name = names[0]
             document.save(update_fields=('object_name',))
+
+
+def empty_reverse(apps, schema_editor):
+    """Пустая функция для отката миграции, т.к. поле `object_name` является вычисляемым."""
+    pass
 
 
 class Migration(migrations.Migration):
@@ -34,5 +37,5 @@ class Migration(migrations.Migration):
             name='object_name',
             field=models.CharField(help_text='Название дивизиона', max_length=512, null=True),
         ),
-        migrations.RunPython(set_objects_name)
+        migrations.RunPython(set_objects_name, empty_reverse)
     ]

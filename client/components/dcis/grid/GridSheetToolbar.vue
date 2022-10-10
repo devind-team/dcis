@@ -60,6 +60,20 @@ v-row
       hide-details
       dense
     )
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
+          .v-btn-toggle.ml-1(:class="themeClass" style="border-radius: 4px 0 0 4px")
+            v-btn(:disabled="commaDecreaseDisabled" height="40" @click="commaDecrease")
+              v-icon mdi-decimal-comma-decrease
+      span {{ t('dcis.grid.sheetToolbar.commaDecrease') }}
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
+          .v-btn-toggle.mr-1(:class="themeClass" style="border-radius: 0 4px 4px 0")
+            v-btn(:disabled="commaDisabled" height="40" style="border-left-width: 0" @click="commaIncrease")
+              v-icon mdi-decimal-comma-increase
+      span {{ t('dcis.grid.sheetToolbar.commaIncrease') }}
 </template>
 
 <script lang="ts">
@@ -68,6 +82,7 @@ import {
   useChangeCellsOptionMutation,
   useChangeColumnDimensionsFixed,
   useChangeRowDimensionsFixed,
+  useVuetify,
   useI18n,
   UpdateType
 } from '~/composables'
@@ -83,6 +98,9 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
+    const { isDark } = useVuetify()
+
+    const themeClass = computed<string>(() => isDark ? 'theme--light' : 'theme--dark')
 
     const updateActiveSheet = toRef(props, 'updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
@@ -97,6 +115,14 @@ export default defineComponent({
     const dimensionsDisabled = computed<boolean>(() => !selectedDimensionsOptions.value)
     const fixedDisabled = computed<boolean>(
       () => dimensionsDisabled.value || !selectedDimensionsOptions.value.rectangular
+    )
+    const commaDisabled = computed<boolean>(() =>
+      disabled.value ||
+      props.selectedCellsOptions.kind !== 'n' ||
+      !/^(0\.0+)|(0)$/.test(props.selectedCellsOptions.numberFormat)
+    )
+    const commaDecreaseDisabled = computed<boolean>(
+      () => commaDisabled.value || props.selectedCellsOptions.numberFormat === '0'
     )
 
     const formatting = computed<string[]>({
@@ -231,10 +257,31 @@ export default defineComponent({
       set: value => changeCellsOption(props.selectedCellsOptions.cells, 'kind', value.value)
     })
 
+    const commaDecrease = () => {
+      changeCellsOption(
+        props.selectedCellsOptions.cells,
+        'numberFormat',
+        props.selectedCellsOptions.numberFormat === '0.0'
+          ? '0'
+          : props.selectedCellsOptions.numberFormat.slice(0, -1)
+      )
+    }
+
+    const commaIncrease = () => {
+      changeCellsOption(
+        props.selectedCellsOptions.cells,
+        'numberFormat',
+        props.selectedCellsOptions.numberFormat === '0' ? '0.0' : props.selectedCellsOptions.numberFormat + '0'
+      )
+    }
+
     return {
       t,
+      themeClass,
       disabled,
       fixedDisabled,
+      commaDisabled,
+      commaDecreaseDisabled,
       formatting,
       horizontalAlign,
       verticalAlign,
@@ -243,7 +290,9 @@ export default defineComponent({
       sizes,
       size,
       kinds,
-      kind
+      kind,
+      commaDecrease,
+      commaIncrease
     }
   }
 })

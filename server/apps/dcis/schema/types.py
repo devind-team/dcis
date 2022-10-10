@@ -471,6 +471,7 @@ class CellType(graphene.ObjectType):
     # apps.dcis.models.Cell
     editable = graphene.Boolean(required=True, description='Редактируемая ячейка')
     formula = graphene.String(description='Формула')
+    number_format = graphene.String(description='Форматирование чисел')
     comment = graphene.String(description='Комментарий')
     mask = graphene.String(description='Маска для ввода значений')
     tooltip = graphene.String(description='Подсказка')

@@ -52,9 +52,10 @@ class ChangeCellsOptionMutation(BaseMutation):
         - vertical_align - ['top', 'middle', 'bottom']
         - size - число от 6 до 24
         - kind - [
-            'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'text', 'money',
+            'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
             'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
         ]
+        - number_format - форматирование чисел
     """
 
     class Input:
