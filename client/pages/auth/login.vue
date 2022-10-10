@@ -55,10 +55,9 @@ import {
   defineComponent,
   ref,
   useNuxt2Meta,
-  useRoute,
-  useRouter,
   useRuntimeConfig
 } from '#app'
+import { useRoute, useRouter } from '#imports'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { GetTokenMutation, GetTokenMutationVariables, UserType } from '~/types/graphql'
 import { useAuthStore } from '~/stores'

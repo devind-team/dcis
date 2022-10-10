@@ -37,7 +37,8 @@ bread-crumbs(:items="breadCrumbs")
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
+import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta } from '#app'
+import { useRoute, useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'

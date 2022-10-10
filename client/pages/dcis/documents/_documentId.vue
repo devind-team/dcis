@@ -30,7 +30,8 @@ bread-crumbs(:items="bc" fluid)
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onUnmounted, PropType, ref, useRoute } from '#app'
+import { computed, defineComponent, inject, onUnmounted, PropType, ref } from '#app'
+import { useRoute } from '#imports'
 import { toGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'

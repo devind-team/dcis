@@ -17,7 +17,8 @@ page-container(v-if="!loading" :bread-crumbs="bc" :category="page && page.catego
 <script lang="ts">
 import { ApolloQueryResult } from '@apollo/client'
 import type { ComputedRef } from '#app'
-import { Ref, computed, defineComponent, onUnmounted, toRef, useNuxt2Meta, useRoute } from '#app'
+import { Ref, computed, defineComponent, onUnmounted, toRef, useNuxt2Meta } from '#app'
+import { useRoute } from '#imports'
 import { useCommonQuery, useI18n, usePage } from '~/composables'
 import { HasPermissionFnType, useAuthStore, usePageStore } from '~/stores'
 import { PageQuery, PageQueryVariables } from '~/types/graphql'
