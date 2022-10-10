@@ -24,6 +24,7 @@ bread-crumbs(:items="bc" fluid)
             :attributes="attributes"
             :attributes-values="attributesValues"
             :change-update-attributes-values="changeUpdateAttributesValues"
+            :update-active-sheet="updateActiveSheet"
           )
   v-progress-circular(v-else color="primary" indeterminate)
 </template>
