@@ -6,7 +6,7 @@ from django.db.models import Max, QuerySet
 from devind_helpers.schema.types import ErrorFieldType
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import Cell, Document, DocumentStatus, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
     can_add_document_status, can_change_document, can_change_document_comment,
@@ -111,10 +111,8 @@ def create_document(
 def _transfer_cells(rows_transform: dict[int, int]) -> None:
     """Перенос ячеек дочерних строк."""
     for cell in Cell.objects.filter(row_id__in=rows_transform.keys()):
-        cell_id = cell.id
         cell.pk, cell.row_id = None, rows_transform[cell.row_id]
         cell.save()
-        _transfer_limitations(cell_id, cell.id)
 
 
 def _transfer_values(
@@ -164,26 +162,6 @@ def _transfer_rows(
         rows_transform[row.id] = document_row.id
         rows_transform.update(_transfer_rows(user, sheet, source_document, document, row.id, rows_transform))
     return rows_transform
-
-
-def _transfer_limitations(
-    cell_original: int,
-    cell: int,
-    parent_id_original: int | None = None,
-    parent_id: int | None = None
-) -> None:
-    """Рекурсивно переносим ограничения ячеек.
-
-    :param cell_original: оригинальная ячейка
-    :param cell: ячейка в которую переносим ограничения
-    :param parent_id_original: идентификатор оригинального переносимого ограничения
-    :param parent_id: идентификатор переносимого ограничения
-    """
-    for limitation in Limitation.objects.filter(cell_id=cell_original, parent_id=parent_id_original):
-        limitation_parent = limitation.pk
-        limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
-        limitation.save()
-        _transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
 
 
 def add_document_status(user: User, document: Document, status: Status, comment: str, ) -> DocumentStatus:

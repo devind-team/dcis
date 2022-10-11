@@ -2,6 +2,7 @@ from django.db import models
 from openpyxl.utils.cell import get_column_letter
 
 from apps.core.models import User
+from .project import Period
 from .document import Document, Sheet
 
 
@@ -256,35 +257,12 @@ class Cell(Style, KindCell, models.Model):
 
 
 class Limitation(models.Model):
-    """Накладываемые на ячейку ограничения."""
+    """Ограничения, накладываемые на период."""
 
-    AND = 'and'
-    OR = 'or'
+    formula = models.TextField(help_text='Формула')
+    error_message = models.TextField(help_text='Сообщение ошибки')
 
-    KIND_OPERATOR = (
-        (AND, 'and'),
-        (OR, 'or')
-    )
-
-    LT = 'lt'
-    GT = 'gt'
-    EQUAL = 'equal'
-    LTE = 'lte'
-    GTE = 'gte'
-
-    KIND_CONDITION = (
-        (LT, '<'),
-        (GT, '>'),
-        (EQUAL, '='),
-        (LTE, '<='),
-        (GTE, '>=')
-    )
-    operator = models.CharField(max_length=3, default=AND, choices=KIND_OPERATOR, help_text='Оператор')
-    condition = models.CharField(max_length=8, default=EQUAL, choices=KIND_CONDITION, help_text='Состояние')
-    value = models.TextField(help_text='Значение')
-
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
-    cell = models.ForeignKey(Cell, on_delete=models.CASCADE, help_text='Ячейка')
+    period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
 
 
 class MergedCell(models.Model):

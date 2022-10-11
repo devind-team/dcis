@@ -17,8 +17,8 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
-    Attribute, AttributeValue, ColumnDimension, Document,
-    DocumentStatus, Limitation, Period,
+    Attribute, AttributeValue, ColumnDimension,
+    Document, DocumentStatus, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
     Project, RowDimension, Sheet,
     Status, Value,
@@ -565,23 +565,6 @@ class SheetType(BaseSheetType):
         required=True,
         description='Может ли пользователь удалять дочернюю строку, не имеющую собственных дочерних строк'
     )
-
-
-class LimitationType(DjangoObjectType):
-    """Ограничения на ячейку."""
-
-    cell = graphene.Field(CellType, description='Ячейка')
-
-    class Meta:
-        model = Limitation
-        fields = (
-            'id',
-            'operator',
-            'condition',
-            'value',
-            'cell',
-        )
-        convert_choices_to_enum = False
 
 
 class ChangedCellOption(graphene.ObjectType):
