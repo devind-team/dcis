@@ -2,7 +2,6 @@ from django.db import models
 from openpyxl.utils.cell import get_column_letter
 
 from apps.core.models import User
-from .project import Period
 from .document import Document, Sheet
 
 
@@ -257,12 +256,12 @@ class Cell(Style, KindCell, models.Model):
 
 
 class Limitation(models.Model):
-    """Ограничения, накладываемые на период."""
+    """Ограничения, накладываемые на лист."""
 
     formula = models.TextField(help_text='Формула')
     error_message = models.TextField(help_text='Сообщение ошибки')
 
-    period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 
 
 class MergedCell(models.Model):
