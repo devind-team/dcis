@@ -11,11 +11,29 @@ class Status(models.Model):
 
     name = models.CharField(max_length=250, help_text='Название статуса')
     edit = models.BooleanField(default=False, help_text='Можно ли редактировать документ со статусом')
-    protected = models.BooleanField(default=True, help_text='Является ли статус защищенным от изменения')
     comment = models.TextField(null=True, help_text='Комментарий')
 
     class Meta:
         ordering = ('id',)
+
+
+class ChangeStatus(models.Model):
+    """Модель, определяющая сценарии изменения статусов."""
+
+    from_status = models.ForeignKey(
+        Status,
+        on_delete=models.CASCADE,
+        related_name='from_change_statuses',
+        help_text='Изначальный статус'
+    )
+    to_status = models.ForeignKey(
+        Status,
+        on_delete=models.CASCADE,
+        related_name='to_change_statuses',
+        help_text='Новый статус'
+    )
+    roles = models.JSONField(help_text='Роли пользователей, которые могут изменять статус')
+    check = models.CharField(max_length=250, help_text='Функция, проверяющая может ли статус быть изменен')
 
 
 class Sheet(models.Model):

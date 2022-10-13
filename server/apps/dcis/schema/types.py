@@ -282,7 +282,7 @@ class StatusType(DjangoObjectType):
 
     class Meta:
         model = Status
-        fields = ('id', 'name', 'edit', 'protected', 'comment',)
+        fields = ('id', 'name', 'edit', 'comment',)
 
 
 class DocumentType(DjangoObjectType):
