@@ -1,15 +1,15 @@
 """Модуль, отвечающий за работу с документами."""
 
 from devind_helpers.orm_utils import get_object_or_none
+from devind_helpers.schema.types import ErrorFieldType
 from django.db import transaction
 from django.db.models import Max, QuerySet
-from devind_helpers.schema.types import ErrorFieldType
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, DocumentStatus, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import Cell, Document, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
-    can_add_document_status, can_change_document, can_change_document_comment,
+    can_change_document_comment,
 )
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
@@ -164,29 +164,12 @@ def _transfer_rows(
     return rows_transform
 
 
-def add_document_status(user: User, document: Document, status: Status, comment: str, ) -> DocumentStatus:
-    """Добавление статуса документа."""
-    can_add_document_status(user, document, status)
-    return DocumentStatus.objects.create(
-        user=user,
-        document=document,
-        status=status,
-        comment=comment,
-    )
-
-
 def change_document_comment(user: User, document: Document, comment: str) -> Document:
     """Изменение комментария версии документа."""
     can_change_document_comment(user, document)
     document.comment = comment
     document.save(update_fields=('comment', 'updated_at'))
     return document
-
-
-def delete_document_status(user: User, status: DocumentStatus) -> None:
-    """Удаление статуса документа."""
-    can_change_document(user, status.document)
-    status.delete()
 
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:

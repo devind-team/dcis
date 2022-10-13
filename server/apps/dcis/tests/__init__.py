@@ -11,7 +11,8 @@ from .services import (
     GetUserPeriodsTestCase,
     GetUserProjectsTestCase,
     PeriodTestCase,
-    ProjectTestCase,
     PrivilegeServicesTestCase,
+    ProjectTestCase,
     RowDimensionTestCase,
+    StatusTestCase,
 )

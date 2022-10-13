@@ -57,9 +57,9 @@ class AddDocumentBase:
             )
         return self._can_add_any_document
 
-    def can_add_restricted_document(self, status: Status, division_id: int | str) -> bool:
+    def can_add_restricted_document(self, _: Status, division_id: int | str) -> bool:
         """Может ли пользователь добавлять документ с конкретным дивизионом и статусом."""
-        return not status.protected and int(division_id) in self.user_division_ids
+        return int(division_id) in self.user_division_ids
 
     def has_object_permission(self, status: Status, division_id: int | str | None) -> bool:
         """Получение разрешения."""
@@ -111,9 +111,9 @@ def can_change_document_comment(user: User, document: Document):
     can_change_document_comment_base(user, document)
 
 
-def can_add_document_status_base(user: User, document: Document, status: Status):
+def can_add_document_status_base(user: User, document: Document, _: Status):
     """Пропускает пользователей, которые могут добавлять статус документа, без проверки возможности просмотра."""
-    if not status.protected and document.user_id == user.id:
+    if document.user_id == user.id:
         return
     can_change_document_base(user, document)
 

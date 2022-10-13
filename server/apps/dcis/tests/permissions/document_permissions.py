@@ -31,8 +31,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
 
-        self.status_edit = Status.objects.create(edit=True, protected=False)
-        self.protected_status_edit = Status.objects.create(edit=True, protected=True)
+        self.status_edit = Status.objects.create(edit=True)
 
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
@@ -160,7 +159,6 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
             self.period, 'multiple', new=True,
         ):
             can_add_document(self.user, self.period, self.status_edit, 1)
-            self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.protected_status_edit, 1)
             self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 2)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
             self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
@@ -189,13 +187,6 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         """Тестирование функции `can_add_document_status`."""
         self._test_common(can_add_document_status, self.status_edit)
         can_add_document_status(self.user, self.user_document, self.status_edit)
-        self.assertRaises(
-            PermissionDenied,
-            can_add_document_status,
-            self.user,
-            self.user_document,
-            self.protected_status_edit
-        )
 
     def test_can_change_value(self) -> None:
         """Тестирование функции `can_change_value`."""

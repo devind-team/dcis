@@ -15,12 +15,8 @@ from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, She
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
 from apps.dcis.services.add_document_data_services import add_document_data
-from apps.dcis.services.document_services import (
-    add_document_status,
-    change_document_comment,
-    create_document,
-    delete_document_status,
-)
+from apps.dcis.services.document_services import change_document_comment, create_document
+from apps.dcis.services.status_services import add_document_status, delete_document_status
 from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
