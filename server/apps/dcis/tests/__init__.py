@@ -10,6 +10,8 @@ from .services import (
     GetUserDocumentsTestCase,
     GetUserPeriodsTestCase,
     GetUserProjectsTestCase,
+    PeriodTestCase,
+    ProjectTestCase,
     PrivilegeServicesTestCase,
     RowDimensionTestCase,
 )

@@ -16,10 +16,10 @@ from apps.core.schema import UserType
 from apps.dcis.models import Period, PeriodGroup, Project
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
 from apps.dcis.services.period_services import (
-    add_divisions_period,
-    add_period_group,
     add_divisions_from_file,
     add_divisions_from_period,
+    add_divisions_period,
+    add_period_group,
     change_period_group_privileges,
     change_settings_period,
     change_user_period_groups,
@@ -38,10 +38,11 @@ class AddPeriodMutation(BaseMutation):
     class Input:
         name = graphene.String(required=True, description='Название периода')
         project_id = graphene.ID(required=True, description='Идентификатор проекта')
-        file = Upload(required=True, description='xlsx файл с проектом')
         multiple = graphene.Boolean(required=True, description='Множественный тип сбора')
-        readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
         versioning = graphene.Boolean(required=True, description='Разрешить множество версий')
+        readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
+        xlsx_file = Upload(required=True, description='xlsx файл с проектом')
+        limitations_file = Upload(description='json файл c ограничениями, накладываемыми на лист')
 
     period = graphene.Field(PeriodType, description='Добавленный период')
 
@@ -52,10 +53,11 @@ class AddPeriodMutation(BaseMutation):
         info: ResolveInfo,
         name: str,
         project_id: str,
-        file: InMemoryUploadedFile,
         multiple: bool,
+        versioning: bool,
         readonly_fill_color: bool,
-        versioning: bool
+        xlsx_file: InMemoryUploadedFile,
+        limitations_file: InMemoryUploadedFile
     ):
         project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
         return AddPeriodMutation(
@@ -64,12 +66,12 @@ class AddPeriodMutation(BaseMutation):
                 user=info.context.user,
                 project=project,
                 multiple=multiple,
-                file=file,
+                versioning=versioning,
+                xlsx_file=xlsx_file,
+                limitations_file=limitations_file,
                 readonly_fill_color=readonly_fill_color,
-                versioning=versioning
             )
         )
-
 
 class ChangePeriodMutation(BaseMutation):
     """Мутация на изменение настроек периода."""

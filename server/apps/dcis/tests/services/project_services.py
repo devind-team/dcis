@@ -154,7 +154,7 @@ class GetUserProjectsTestCase(TestCase):
         )
 
 
-class ProjectsTestCase(TestCase):
+class ProjectTestCase(TestCase):
     """Тестирование проекта и прав."""
 
     def setUp(self) -> None:
