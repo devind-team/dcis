@@ -17,12 +17,13 @@ class Status(models.Model):
         ordering = ('id',)
 
 
-class ChangeStatus(models.Model):
-    """Модель, определяющая сценарии изменения статусов."""
+class AddStatus(models.Model):
+    """Модель, определяющая сценарии добавления статусов."""
 
     from_status = models.ForeignKey(
         Status,
         on_delete=models.CASCADE,
+        null=True,
         related_name='from_change_statuses',
         help_text='Изначальный статус'
     )
