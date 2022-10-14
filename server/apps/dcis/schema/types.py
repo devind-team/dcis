@@ -17,7 +17,7 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
-    Attribute, AttributeValue, ColumnDimension, Document,
+    Attribute, AttributeValue, ColumnDimension, CuratorGroup, Document,
     DocumentStatus, Limitation, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
     Project, RowDimension, Sheet,
@@ -246,6 +246,17 @@ class PrivilegeType(DjangoObjectType):
     class Meta:
         model = Privilege
         fields = ('id', 'name', 'created_at', 'key',)
+
+
+class CuratorGroupType(DjangoObjectType):
+    """Тип групп кураторов."""
+
+    organization = DjangoListField(OrganizationOriginalType, description='Организация группы')
+    users = DjangoListField(UserType, description='Пользователи в кураторской группе')
+
+    class Meta:
+        model = CuratorGroup
+        fields = ('id', 'name', 'users', 'organization')
 
 
 class PeriodGroupType(DjangoObjectType):
