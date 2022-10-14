@@ -1,4 +1,7 @@
-from .models import DocumentModelTestCase
+from .models import (
+    DocumentModelTestCase,
+    ProjectModelTestCase
+)
 from .permissions import (
     DocumentPermissionsTestCase,
     PeriodPermissionsTestCase,
