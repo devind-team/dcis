@@ -11,7 +11,7 @@ from apps.dcis.models import Project
 from apps.dcis.services.divisions_services import get_user_division_ids, get_user_divisions
 
 
-class DivisionsServicesTestCase(TestCase):
+class DivisionTestCase(TestCase):
     """Тесты модуля, отвечающего за работу с дивизионами."""
 
     def setUp(self) -> None:

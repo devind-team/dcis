@@ -1,3 +1,4 @@
+from .models import DocumentModelTestCase
 from .permissions import (
     DocumentPermissionsTestCase,
     PeriodPermissionsTestCase,
@@ -5,13 +6,13 @@ from .permissions import (
 )
 from .services import (
     ColumnDimensionTestCase,
-    DivisionsServicesTestCase,
+    DivisionTestCase,
     DocumentTestCase,
     GetUserDocumentsTestCase,
     GetUserPeriodsTestCase,
     GetUserProjectsTestCase,
     PeriodTestCase,
-    PrivilegeServicesTestCase,
+    PrivilegeTestCase,
     ProjectTestCase,
     RowDimensionTestCase,
     StatusTestCase,
