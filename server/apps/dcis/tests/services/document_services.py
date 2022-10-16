@@ -1,13 +1,13 @@
 """Тестирование модуля, отвечающего за работу с документами."""
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import Division, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import CuratorGroup, Division, Document, Period, Project, RowDimension, Sheet, Status
 from apps.dcis.permissions import (
     can_add_document,
     can_change_document_comment,
@@ -16,6 +16,7 @@ from apps.dcis.services.document_services import (
     change_document_comment,
     create_document,
     get_user_documents,
+    get_user_roles,
 )
 
 
@@ -166,57 +167,98 @@ class DocumentTestCase(TestCase):
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
-        self.super_user = User.objects.create(username='super_user', email='super_user@gmain.com', is_superuser=True)
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
+        self.organization_member = User.objects.create(
+            username='organization_member',
+            email='organization_member@gmail.com',
+        )
+        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
 
         self.status = Status.objects.create(name='Testing status')
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
-        self.department = Department.objects.create(user=self.super_user)
-        self.project = Project.objects.create(content_type=self.department_content_type)
-        self.period = Period.objects.create(project=self.project)
-        self.department_division = Division.objects.create(period=self.period, object_id=self.department.id)
+        self.department = Department.objects.create(user=self.superuser)
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.organization = Organization.objects.create(name=f'Организация', attributes='')
+        self.organization.users.add(self.organization_member)
+
+        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа')
+        self.curator_group.users.add(self.curator)
+        self.curator_group.organization.add(self.organization)
+
+        self.department_project = Project.objects.create(content_type=self.department_content_type)
+        self.department_period = Period.objects.create(project=self.department_project)
+        self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
+
+        self.organization_project = Project.objects.create(content_type=self.organization_content_type)
+        self.organization_period = Period.objects.create(project=self.organization_project)
+        self.organization_multiple_period = Period.objects.create(project=self.organization_project, multiple=True)
+        for period in [self.organization_period, self.organization_multiple_period]:
+            Division.objects.create(period=period, object_id=self.organization.id)
 
         self.comment = 'Test comment'
         self.change_comment = 'Change comment'
-        self.document = Document.objects.create(
-            user=self.super_user,
-            period=self.period,
+
+        self.document = Document.objects.create(period=self.department_period)
+        self.user_document = Document.objects.create(user=self.user, period=self.department_period)
+        self.organization_document = Document.objects.create(period=self.organization_period)
+        self.organization_multiple_document = Document.objects.create(
+            period=self.organization_multiple_period,
+            object_id=self.organization.id
+        )
+
+        self.superuser_document = Document.objects.create(
+            user=self.superuser,
+            period=self.department_period,
             comment=self.comment
         )
 
     def test_create_document(self) -> None:
         """Тестирование функции `create_document`."""
-        with patch.object(self.super_user, 'has_perm', new=lambda perm: perm != 'dcis.add_document'):
+        with patch.object(self.superuser, 'has_perm', new=lambda perm: perm != 'dcis.add_document'):
             self.assertRaises(
                 PermissionDenied,
                 can_add_document,
-                self.super_user,
-                self.period,
+                self.superuser,
+                self.department_period,
                 self.status,
                 self.department_division.id
             )
-        document, _ = create_document(
-            user=self.super_user,
-            period=self.period,
+        actual_document, _ = create_document(
+            user=self.superuser,
+            period=self.department_period,
             status=self.status,
             comment='Create document'
         )
+        expected_document = Document.objects.get(comment='Create document')
+        self.assertEqual(expected_document, actual_document)
+
+    def test_get_user_roles(self) -> None:
+        """Тестирование функции `get_user_roles`."""
+        self.assertEqual([], get_user_roles(self.user, self.document))
+        self.assertEqual(['creator'], get_user_roles(self.user, self.user_document))
+        self.assertEqual([], get_user_roles(self.user, self.organization_multiple_document))
+        self.assertEqual(['curator'], get_user_roles(self.curator, self.organization_multiple_document))
+        self.assertEqual(['division_member'], get_user_roles(self.organization_member, self.organization_document))
         self.assertEqual(
-            document,
-            Document.objects.get(comment='Create document'),
-            'Create document'
+            ['division_member'],
+            get_user_roles(self.organization_member, self.organization_multiple_document)
         )
 
     def test_change_document_comment(self) -> None:
         """Тестирование функции `change_document_comment`."""
-        with patch.object(self.document, 'user_id', new=None), patch.object(
-            self.super_user,
+        with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
+            self.superuser,
             'has_perm',
             new=lambda perm: perm != 'dcis.change_document'
         ):
-            self.assertRaises(PermissionDenied, can_change_document_comment, self.super_user, self.document)
-        self.assertEqual(
-            change_document_comment(user=self.super_user, document=self.document, comment=self.change_comment),
-            Document.objects.get(comment=self.change_comment),
-            'Change document comment'
+            self.assertRaises(PermissionDenied, can_change_document_comment, self.superuser, self.superuser_document)
+        actual_document = change_document_comment(
+            user=self.superuser,
+            document=self.superuser_document,
+            comment=self.change_comment
         )
+        expected_document = Document.objects.get(comment=self.change_comment)
+        self.assertEqual(expected_document, actual_document)

@@ -6,12 +6,13 @@ from django.db import transaction
 from django.db.models import Max, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import Cell, Division, Document, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
     can_change_document_comment,
 )
-from apps.dcis.services.divisions_services import get_user_divisions
+from apps.dcis.services.curator_services import is_document_curator
+from apps.dcis.services.divisions_services import get_user_division_ids, get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
 
@@ -46,6 +47,26 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
     else:
         divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
     return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
+
+
+def get_user_roles(user: User, document: Document) -> list[str]:
+    """Получение роли пользователя для документа."""
+    roles: list[str] = []
+    if document.user_id == user.id:
+        roles.append('creator')
+    if is_document_curator(user, document):
+        roles.append('curator')
+    user_division_ids = get_user_division_ids(user, document.period.project).get(
+        document.period.project.division_name, []
+    )
+    if (
+        (document.period.multiple and document.object_id in user_division_ids) or
+        (not document.period.multiple and Division.objects.filter(
+            period=document.period, object_id__in=user_division_ids
+        ).count() > 0)
+    ):
+        roles.append('division_member')
+    return roles
 
 
 @transaction.atomic
@@ -108,6 +129,22 @@ def create_document(
     return document, []
 
 
+def change_document_comment(user: User, document: Document, comment: str) -> Document:
+    """Изменение комментария версии документа."""
+    can_change_document_comment(user, document)
+    document.comment = comment
+    document.save(update_fields=('comment', 'updated_at'))
+    return document
+
+
+def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+    """Получение максимальной версии документа для периода."""
+    return Document.objects.filter(
+        period_id=period_id,
+        object_id=division_id
+    ).aggregate(version=Max('version'))['version']
+
+
 def _transfer_cells(rows_transform: dict[int, int]) -> None:
     """Перенос ячеек дочерних строк."""
     for cell in Cell.objects.filter(row_id__in=rows_transform.keys()):
@@ -123,7 +160,7 @@ def _transfer_values(
 ) -> None:
     """Перенос значений."""
     for value in Value.objects.filter(sheet=sheet, document=source_document):
-        value.id, value.document, value.row_id = None, document, rows_transform.get(value.row_id, value.row_id)
+        value.id, value.superuser_document, value.row_id = None, document, rows_transform.get(value.row_id, value.row_id)
         value.save()
 
 
@@ -162,19 +199,3 @@ def _transfer_rows(
         rows_transform[row.id] = document_row.id
         rows_transform.update(_transfer_rows(user, sheet, source_document, document, row.id, rows_transform))
     return rows_transform
-
-
-def change_document_comment(user: User, document: Document, comment: str) -> Document:
-    """Изменение комментария версии документа."""
-    can_change_document_comment(user, document)
-    document.comment = comment
-    document.save(update_fields=('comment', 'updated_at'))
-    return document
-
-
-def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
-    """Получение максимальной версии документа для периода."""
-    return Document.objects.filter(
-        period_id=period_id,
-        object_id=division_id
-    ).aggregate(version=Max('version'))['version']
