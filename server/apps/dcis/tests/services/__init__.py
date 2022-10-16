@@ -1,4 +1,5 @@
 from .column_dimension_services import ColumnDimensionTestCase
+from .curator_services import CuratorTestCase
 from .divisions_services import DivisionTestCase
 from .document_services import DocumentTestCase, GetUserDocumentsTestCase
 from .period_services import GetUserPeriodsTestCase, PeriodTestCase

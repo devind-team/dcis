@@ -23,7 +23,11 @@ class DivisionTestCase(TestCase):
         self.department_division = {'id': self.department.id, 'name': 'Тестовый департамент', 'model': 'department'}
         self.organization = Organization.objects.create(name='Тестовая организация', attributes='', user=self.admin)
         self.organization.users.add(self.user)
-        self.organization_division = {'id': self.department.id, 'name': 'Тестовая организация', 'model': 'organization'}
+        self.organization_division = {
+            'id': self.organization.id,
+            'name': 'Тестовая организация',
+            'model': 'organization',
+        }
         self.department_project = Project.objects.create(
             name='Тестовый проект департамента',
             content_type=ContentType.objects.get_for_model(Department),

@@ -1,6 +1,6 @@
 from .models import (
     DocumentModelTestCase,
-    ProjectModelTestCase
+    ProjectModelTestCase,
 )
 from .permissions import (
     DocumentPermissionsTestCase,
@@ -9,6 +9,7 @@ from .permissions import (
 )
 from .services import (
     ColumnDimensionTestCase,
+    CuratorTestCase,
     DivisionTestCase,
     DocumentTestCase,
     GetUserDocumentsTestCase,
