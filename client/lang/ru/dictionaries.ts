@@ -11,8 +11,25 @@ export default {
     header: 'Привилегии',
     tableHeaders: {
       id: '@:id',
-      name: 'Название',
+      name: '@:name',
       key: 'Ключ',
+      createdAt: 'Дата создания'
+    }
+  },
+  organizations: {
+    header: 'Организации',
+    tableHeaders: {
+      id: '@:id',
+      name: '@:name',
+      createdAt: 'Дата создания'
+    }
+  },
+  departments: {
+    header: 'Департаменты',
+    tableHeaders: {
+      id: '@:id',
+      name: '@:name',
+      code: 'Код',
       createdAt: 'Дата создания'
     }
   }

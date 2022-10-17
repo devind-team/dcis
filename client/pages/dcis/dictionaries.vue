@@ -23,10 +23,20 @@ export default defineComponent({
         title: t('dictionaries.privileges.header') as string,
         to: 'dcis-dictionaries-privileges',
         icon: 'file-document-multiple-outline'
+      },
+      {
+        title: t('dictionaries.organizations.header') as string,
+        to: 'dcis-dictionaries-organizations',
+        icon: 'file-document-multiple-outline'
+      },
+      {
+        title: t('dictionaries.departments.header') as string,
+        to: 'dcis-dictionaries-departments',
+        icon: 'file-document-multiple-outline'
       }
     ]))
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
-      { text: t('dcis.home') as string, to: localePath({ name: 'dcis' }), exact: true }
+      { text: t('dictionaries.dcis') as string, to: localePath({ name: 'dcis' }), exact: true }
     ]))
     return { active, bc, links }
   }
