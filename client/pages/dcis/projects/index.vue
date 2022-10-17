@@ -3,7 +3,7 @@ bread-crumbs(:items="breadCrumbs")
   v-card
     v-tabs(grow)
       v-tab {{ $t('dcis.projects.name') }}
-      v-tab {{ $t('dcis.projects.divisions') }}
+      v-tab(v-if="user.divisions.length") {{ $t('dcis.projects.divisions') }}
       v-tab-item
         v-card(flat)
           v-card-title(v-if="hasPerm('dcis.add_project')")
@@ -35,7 +35,7 @@ bread-crumbs(:items="breadCrumbs")
                   :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
                 ) {{ item.name }}
               template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
-      v-tab-item
+      v-tab-item(v-if="user.divisions.length")
         v-list
           v-list-item(v-for="division in user.divisions" :key="division.id")
             v-list-item-content {{ division.name }} ({{ division.id }})
@@ -66,7 +66,7 @@ export default defineComponent({
     const route = useRoute()
     const { defaultClient } = useApolloHelpers()
     const { t, localePath } = useI18n()
-    const { dateTimeHM, getUserFullName } = useFilters()
+    const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: t('dcis.home') as string })
     const active = ref<boolean>(false)
     const name = ref<string>('')
