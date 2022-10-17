@@ -1,10 +1,10 @@
 """Модуль, отвечающий за работу с дивизионами."""
 
 from django.db.models import Q
+from django.contrib.postgres.search import SearchQuery, SearchVector
 
 from apps.core.models import User
 from apps.dcis.models import Period, Project
-from django.contrib.postgres.search import SearchQuery, SearchVector
 
 
 def get_user_divisions(user: User, project: Project | int | str | None = None) -> list[dict[str, int | str]]:
@@ -41,11 +41,17 @@ def get_user_division_ids(user: User, project: Project | int | str | None = None
     return {dn: dv for dn, dv in divisions.items() if dv}
 
 
-def get_period_divisions(period: Period, search: str = '') -> list[dict[str, int | str]]:
+def get_period_divisions(user: User, period: Period, search: str = '') -> list[dict[str, int | str]]:
     """Получение списка обобщенных дивизионов периода."""
+    from apps.dcis.helpers.exceptions import check_permission_wrapper
+    from apps.dcis.permissions import can_view_period
+
+    division_ids = [division['id'] for division in get_user_divisions(user, period.project)] \
+        if check_permission_wrapper(can_view_period, user=user, period=period) \
+        else period.division_set.values_list('object_id', flat=True)
     return get_divisions(period.project.division.objects.filter(
         name__contains=search,
-        pk__in=period.division_set.values_list('object_id', flat=True)
+        pk__in=division_ids
     ))
 
 

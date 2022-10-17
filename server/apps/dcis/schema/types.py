@@ -150,7 +150,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     @resolver_hints(model_field='division_set')
     def resolve_divisions(period: Period, info: ResolveInfo) -> list[dict[str, int | str]]:
-        return get_period_divisions(period)
+        return get_period_divisions(info.context.user, period)
 
     @staticmethod
     @resolver_hints(model_field='periodgroup_set')
