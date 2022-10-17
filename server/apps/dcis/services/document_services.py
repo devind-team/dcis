@@ -45,7 +45,8 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         divisions_documents = Document.objects.filter(period=period, object_id__in=division_ids)
     else:
         divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
-    return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
+    return divisions_documents.all()
+    # return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
 
 
 @transaction.atomic

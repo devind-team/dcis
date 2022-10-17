@@ -1,37 +1,44 @@
 <template lang="pug">
 bread-crumbs(:items="breadCrumbs")
-  h2 {{ divisions }}
   v-card
-    v-card-title {{ $t('dcis.projects.name') }}
-      template(v-if="hasPerm('dcis.add_project')")
-        v-spacer
-        add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
-          template(#activator="{ on }")
-            v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
-    v-card-subtitle {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
-    v-card-text
-      items-data-filter(
-        v-model="selectedFilters"
-        :items="filterOptions"
-        :get-name="i => i.tr"
-        :no-filtration-message="String($t('dcis.projects.filters.noFiltrationMessage'))"
-        :default-value="[defaultFilter]"
-        item-key="key"
-        multiple
-      )
-      v-data-table(
-        :headers="headers"
-        :items="projects"
-        :loading="loading"
-        disable-pagination
-        disable-filtering
-        hide-default-footer
-      )
-        template(#item.name="{ item }")
-          nuxt-link(
-            :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
-          ) {{ item.name }}
-        template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+    v-tabs(grow)
+      v-tab {{ $t('dcis.projects.name') }}
+      v-tab {{ $t('dcis.projects.divisions') }}
+      v-tab-item
+        v-card(flat)
+          v-card-title(v-if="hasPerm('dcis.add_project')")
+            v-spacer
+            add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
+              template(#activator="{ on }")
+                v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
+          v-card-subtitle {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
+          v-card-text
+            items-data-filter(
+              v-model="selectedFilters"
+              :items="filterOptions"
+              :get-name="i => i.tr"
+              :no-filtration-message="String($t('dcis.projects.filters.noFiltrationMessage'))"
+              :default-value="[defaultFilter]"
+              item-key="key"
+              multiple
+            )
+            v-data-table(
+              :headers="headers"
+              :items="projects"
+              :loading="loading"
+              disable-pagination
+              disable-filtering
+              hide-default-footer
+            )
+              template(#item.name="{ item }")
+                nuxt-link(
+                  :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
+                ) {{ item.name }}
+              template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
+      v-tab-item
+        v-list
+          v-list-item(v-for="division in user.divisions" :key="division.id")
+            v-list-item-content {{ division.name }} ({{ division.id }})
 </template>
 
 <script lang="ts">
@@ -70,12 +77,6 @@ export default defineComponent({
     ]
     const user = toRef(authStore, 'user')
     const hasPerm = toRef(authStore, 'hasPerm')
-
-    const divisions = computed<string>(() => (
-      user.value.divisions && user.value.divisions.length
-        ? user.value.divisions.map(d => `${d.name} (${d.id})`).join(', ')
-        : getUserFullName(user)
-    ))
 
     const {
       data: projects,
@@ -123,11 +124,11 @@ export default defineComponent({
       filterOptions,
       selectedFilters,
       visibleProjects,
-      divisions,
       count,
       totalCount,
       loading,
       defaultFilter,
+      user,
       dateTimeHM,
       addUpdate
     }
