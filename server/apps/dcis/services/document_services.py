@@ -9,7 +9,9 @@ from apps.core.models import User
 from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
-    can_add_document_status, can_change_document, can_change_document_comment,
+    can_add_document_status,
+    can_change_document,
+    can_change_document_comment
 )
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
