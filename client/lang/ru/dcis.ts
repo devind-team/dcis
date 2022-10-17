@@ -2,6 +2,7 @@ export default {
   home: 'Проекты сборов',
   projects: {
     name: '@:dcis.home',
+    divisions: 'Мои организации',
     filters: {
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
