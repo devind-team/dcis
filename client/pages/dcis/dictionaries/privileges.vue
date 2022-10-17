@@ -4,9 +4,9 @@ universal-dictionary(
   :bread-crumbs="bc"
   :query="require('~/gql/dcis/queries/privileges.graphql')"
   :headers="['id', 'name', 'key', 'createdAt']"
+  :convert-item="{ createdAt: dateTimeHM }"
   query-name="privileges"
 )
-  template(#item.createdAt="{ item }")
 </template>
 
 <script lang="ts">
@@ -23,6 +23,7 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+    const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: t('dictionaries.privileges.header') as string })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
@@ -32,7 +33,7 @@ export default defineComponent({
         exact: true
       }
     ]))
-    return { bc, useFilters }
+    return { bc, dateTimeHM }
   }
 })
 </script>
