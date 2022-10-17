@@ -16,7 +16,6 @@ def get_user_divisions(user: User, project: Project | int | str | None = None) -
     :param project: объект проекта, или идентификатор проекта, или None
     :return [{'id': int, name: string, 'model': 'department' | 'organization'}, ...]
     """
-
     def get_slave_divisions(mdl, parent_divisions) -> QuerySet | list:
         if hasattr(mdl, 'parent_id'):
             return mdl.objects.filter(parent_id__in=[
@@ -56,14 +55,15 @@ def get_user_division_ids(user: User, project: Project | int | str | None = None
 def get_period_divisions(user: User, period: Period, search: str = '') -> list[dict[str, int | str]]:
     """Получение списка обобщенных дивизионов периода."""
     from apps.dcis.helpers.exceptions import check_permission_wrapper
-    from apps.dcis.permissions import can_view_period
+    from apps.dcis.permissions import can_change_period_divisions
 
-    division_ids = [division['id'] for division in get_user_divisions(user, period.project)] \
-        if check_permission_wrapper(can_view_period, user=user, period=period) \
-        else period.division_set.values_list('object_id', flat=True)
+    limitations = Q()
+    if not check_permission_wrapper(can_change_period_divisions, user=user, period=period):
+        limitations = Q(object_id__in=[division['id'] for division in get_user_divisions(user, period.project)])
+
     return get_divisions(period.project.division.objects.filter(
         name__contains=search,
-        pk__in=division_ids
+        pk__in=period.division_set.filter(limitations).values_list('object_id', flat=True)
     ))
 
 
