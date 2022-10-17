@@ -143,7 +143,7 @@ class GetUserDocumentsTestCase(TestCase):
         """
         for period in self._get_period(self.multiple_period):
             self.assertSetEqual(
-                {self.multiple_period_user_document, *self.department_documents},
+                {*self.department_documents},
                 set(get_user_documents(self.user, period))
             )
 
@@ -154,7 +154,7 @@ class GetUserDocumentsTestCase(TestCase):
         """
         for period in self._get_period(self.single_period):
             self.assertSetEqual(
-                {self.single_period_user_document, self.department_row_document},
+                {self.department_row_document},
                 set(get_user_documents(self.user, period))
             )
 
