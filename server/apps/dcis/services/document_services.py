@@ -160,7 +160,7 @@ def _transfer_values(
 ) -> None:
     """Перенос значений."""
     for value in Value.objects.filter(sheet=sheet, document=source_document):
-        value.id, value.superuser_document, value.row_id = None, document, rows_transform.get(value.row_id, value.row_id)
+        value.id, value.document, value.row_id = None, document, rows_transform.get(value.row_id, value.row_id)
         value.save()
 
 

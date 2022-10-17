@@ -7,16 +7,16 @@ from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 
-from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import AddStatus, Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet, Status
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
     can_add_document,
     can_add_document_status,
     can_change_child_row_dimension_height,
-    can_change_document,
     can_change_document_comment,
     can_change_value,
     can_delete_child_row_dimension,
+    can_delete_document_status,
     can_view_document,
 )
 from .common import PermissionsTestCase
@@ -32,6 +32,11 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         self.department_content_type = ContentType.objects.get_for_model(Department)
 
         self.status_edit = Status.objects.create(edit=True)
+        self.add_status = AddStatus.objects.create(
+            from_status=self.status_edit,
+            to_status=Status.objects.create(),
+            roles=['creator']
+        )
 
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
@@ -174,10 +179,6 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
                 self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
                 can_add_document(self.user, self.user_period, self.status_edit, 1)
 
-    def test_can_change_document(self) -> None:
-        """Тестирование функции `can_change_document`."""
-        self._test_common(can_change_document)
-
     def test_can_change_document_comment(self) -> None:
         """Тестирование функции `can_change_document_comment`."""
         self._test_common(can_change_document_comment)
@@ -185,8 +186,12 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_can_add_document_status(self) -> None:
         """Тестирование функции `can_add_document_status`."""
-        self._test_common(can_add_document_status, self.status_edit)
-        can_add_document_status(self.user, self.user_document, self.status_edit)
+        self._test_common(can_add_document_status, self.add_status)
+        can_add_document_status(self.user, self.user_document, self.add_status)
+
+    def test_can_delete_document_status(self) -> None:
+        """Тестирование функции `can_delete_document_status`."""
+        self._test_common(can_delete_document_status)
 
     def test_can_change_value(self) -> None:
         """Тестирование функции `can_change_value`."""
@@ -247,7 +252,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         with patch(
             'apps.dcis.permissions.document_permissions.get_user_divisions',
             new=Mock(return_value=({'id': 1},))
-        ) as mock:
+        ):
             self._test_can_add_child_row_dimension((False, False, True, False, True))
             with patch.object(self.user_period_document, 'object_id', new=1), patch.object(
                 self.user_period, 'multiple', new=True,
@@ -294,7 +299,7 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         self.assertRaises(PermissionDenied, f, self.user, self.user_period_document, *args)
         with patch(
             'apps.dcis.permissions.document_permissions.can_view_document',
-            new=Mock()
+            new=Mock(return_value=True)
         ):
             self.assertRaises(PermissionDenied, f, self.user, self.document, *args)
             self.assertRaises(PermissionDenied, f, self.user, self.user_period_document, *args)
