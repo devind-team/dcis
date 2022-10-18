@@ -2,7 +2,7 @@ import json
 
 import graphene
 from devind_core.schema.types import ContentTypeType, FileType
-from devind_dictionaries.models import Organization
+from devind_dictionaries.models import Organization, Department
 from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
@@ -37,6 +37,7 @@ from apps.dcis.permissions import (
     can_delete_project_base,
 )
 from apps.dcis.services.divisions_services import get_period_divisions
+from apps.dcis.services.document_services import get_document_sheets
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -319,7 +320,7 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_sheets(document: Document, info: ResolveInfo) -> QuerySet[Sheet]:
-        return document.sheets.all()
+        return get_document_sheets(document)
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:

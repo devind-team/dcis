@@ -1,12 +1,25 @@
 """Модуль, отвечающий за работу с документами."""
 
+from typing import Type
 from devind_helpers.orm_utils import get_object_or_none
 from django.db import transaction
-from django.db.models import Max, QuerySet
+from django.db.models import Max, QuerySet, Q
 from devind_helpers.schema.types import ErrorFieldType
 
+from devind_dictionaries.models import Organization, Department
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import (
+    Cell,
+    Document,
+    DocumentStatus,
+    Limitation,
+    Period,
+    RowDimension,
+    Sheet,
+    Status,
+    Value,
+    Project
+)
 from apps.dcis.permissions import (
     can_add_document,
     can_add_document_status,
@@ -220,3 +233,12 @@ def get_documents_max_version(period_id: int | str, division_id: int | str | Non
         period_id=period_id,
         object_id=division_id
     ).aggregate(version=Max('version'))['version']
+
+
+def get_document_sheets(document: Document) -> QuerySet[Sheet]:
+    project: Project = document.period.project
+    division_model: Type[Organization | Department] = project.division
+    division = division_model.objects.get(pk=document.object_id)
+    is_child: bool = hasattr(division, 'parent_id') and getattr(division, 'parent_id') is not None
+    sheet_filter = Q(show_child=True) if is_child else Q(show_head=True)
+    return document.sheets.filter(sheet_filter).all()
