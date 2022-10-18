@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 from graphene_django import DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
+from devind_helpers.utils import gid2int
 from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
@@ -32,7 +32,7 @@ class DocumentQueries(graphene.ObjectType):
     document = graphene.Field(
         DocumentType,
         description='Документ',
-        document_id=graphene.ID(description='Идентификатор документа')
+        document_id=graphene.ID(required=True, description='Идентификатор документа')
     )
 
     statuses = DjangoListField(StatusType, description='Статусы')
@@ -62,12 +62,12 @@ class DocumentQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_documents(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs) -> QuerySet[Document]:
-        return get_user_documents(info.context.user, from_global_id(period_id)[1])
+        return get_user_documents(info.context.user, gid2int(period_id))
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_document(root, info: ResolveInfo, document_id: str) -> Document:
-        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         return document
 
@@ -79,7 +79,7 @@ class DocumentQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_document_statuses(root, info: ResolveInfo, document_id: str) -> QuerySet[DocumentStatus]:
-        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         return document.documentstatus_set.all()
 
@@ -91,7 +91,7 @@ class DocumentQueries(graphene.ObjectType):
         document_id: str,
         sheet_id: str
     ) -> list[dict] | dict:
-        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         return DocumentSheetUnloader(
             info.context,
@@ -110,7 +110,7 @@ class DocumentQueries(graphene.ObjectType):
         column_id: str,
         row_id: str,
     ):
-        document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         value = Value.objects.filter(
             document_id=document.id,
