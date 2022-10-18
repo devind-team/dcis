@@ -111,6 +111,10 @@ class KindCell(models.Model):
     ORGANIZATION = 'organization'
     CLASSIFICATION = 'classification'
 
+    # Поля агрегации
+
+    AGGREGATION = 'aggregation'
+
     KIND_VALUE = (
         (NUMERIC, 'n'),
         (STRING, 's'),
@@ -128,7 +132,8 @@ class KindCell(models.Model):
         (USER, 'user'),
         (DEPARTMENT, 'department'),
         (ORGANIZATION, 'organization'),
-        (CLASSIFICATION, 'classification')
+        (CLASSIFICATION, 'classification'),
+        (AGGREGATION, 'aggregation'),
     )
 
     kind = models.CharField(
@@ -248,11 +253,25 @@ class Cell(Style, KindCell, models.Model):
     column = models.ForeignKey(ColumnDimension, on_delete=models.CASCADE, help_text='Колонка')
     row = models.ForeignKey(RowDimension, on_delete=models.CASCADE, help_text='Строка')
 
+    cells = models.ManyToManyField(
+        'self',
+        through='RelationshipCells',
+        symmetrical=False,
+        related_name='related_cells'
+    )
+
     class Meta:
         unique_together = (('column', 'row'),)
         indexes = [
             models.Index(fields=['column'])
         ]
+
+
+class RelationshipCells(models.Model):
+    """Модель много ко многим для ячеек."""
+
+    from_cell = models.ForeignKey(Cell, related_name='from_cells', on_delete=models.CASCADE)
+    to_cell = models.ForeignKey(Cell, related_name='to_cells', on_delete=models.CASCADE)
 
 
 class Limitation(models.Model):
@@ -336,6 +355,7 @@ class Value(models.Model):
     """
 
     value = models.TextField(help_text='Значение')
+    extra_value = models.TextField(null=True, help_text='Дополнительное значение')
     payload = models.JSONField(null=True, help_text='Дополнительные данные')
     verified = models.BooleanField(default=True, help_text='Валидно ли поле')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
