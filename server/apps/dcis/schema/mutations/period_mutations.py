@@ -42,7 +42,7 @@ class AddPeriodMutation(BaseMutation):
         versioning = graphene.Boolean(required=True, description='Разрешить множество версий')
         readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
         xlsx_file = Upload(required=True, description='xlsx файл с проектом')
-        limitations_file = Upload(description='json файл c ограничениями, накладываемыми на лист')
+        limitations_file = Upload(description='json файл c ограничениями, накладываемыми на листы')
 
     period = graphene.Field(PeriodType, description='Добавленный период')
 
