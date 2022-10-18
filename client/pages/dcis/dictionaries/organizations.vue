@@ -5,6 +5,7 @@ universal-dictionary(
   :query="require('~/gql/dcis/queries/organizations.graphql')"
   :headers="['id', 'name', 'createdAt']"
   :convert-item="{ createdAt: dateTimeHM }"
+  :page-size="20"
   query-name="organizations"
 )
 </template>

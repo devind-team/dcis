@@ -22,17 +22,17 @@ export default defineComponent({
       {
         title: t('dictionaries.privileges.header') as string,
         to: 'dcis-dictionaries-privileges',
-        icon: 'file-document-multiple-outline'
+        icon: 'human-queue'
       },
       {
         title: t('dictionaries.organizations.header') as string,
         to: 'dcis-dictionaries-organizations',
-        icon: 'file-document-multiple-outline'
+        icon: 'home-city'
       },
       {
         title: t('dictionaries.departments.header') as string,
         to: 'dcis-dictionaries-departments',
-        icon: 'file-document-multiple-outline'
+        icon: 'briefcase'
       }
     ]))
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
