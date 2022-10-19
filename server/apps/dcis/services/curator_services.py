@@ -3,9 +3,9 @@ from devind_helpers.orm_utils import get_object_or_404
 from apps.dcis.models import CuratorGroup
 
 
-def add_curator_group(name: str) -> CuratorGroup:
+def add_curator_group(name: str, group_id: str | int) -> CuratorGroup:
     """Добавление кураторской группы."""
-    return CuratorGroup.objects.create(name=name)
+    return CuratorGroup.objects.create(name=name, group_id=group_id)
 
 
 def delete_curator_group(curator_group_id: str | int) -> None:

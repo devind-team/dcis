@@ -1,7 +1,7 @@
 import json
 
 import graphene
-from devind_core.schema.types import ContentTypeType, FileType
+from devind_core.schema.types import ContentTypeType, FileType, GroupType
 from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType
 from devind_helpers.optimized import OptimizedDjangoObjectType
@@ -17,11 +17,22 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
-    Attribute, AttributeValue, ColumnDimension, CuratorGroup, Document,
-    DocumentStatus, Limitation, Period,
-    PeriodGroup, PeriodPrivilege, Privilege,
-    Project, RowDimension, Sheet,
-    Status, Value,
+    Attribute,
+    AttributeValue,
+    ColumnDimension,
+    CuratorGroup,
+    Document,
+    DocumentStatus,
+    Limitation,
+    Period,
+    PeriodGroup,
+    PeriodPrivilege,
+    Privilege,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+    Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -251,12 +262,13 @@ class PrivilegeType(DjangoObjectType):
 class CuratorGroupType(DjangoObjectType):
     """Тип групп кураторов."""
 
+    group = graphene.Field(GroupType, description='Привилегии кураторской группы')
     organization = DjangoListField(OrganizationOriginalType, description='Организация группы')
     users = DjangoListField(UserType, description='Пользователи в кураторской группе')
 
     class Meta:
         model = CuratorGroup
-        fields = ('id', 'name', 'users', 'organization')
+        fields = ('id', 'name', 'group', 'users', 'organization')
 
 
 class PeriodGroupType(DjangoObjectType):

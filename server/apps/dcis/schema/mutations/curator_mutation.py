@@ -20,15 +20,17 @@ class AddCuratorGroupMutation(BaseMutation):
 
     class Input:
         name = graphene.String(required=True, description='Название группы периода')
+        group_id = graphene.ID(required=True, description='Идентификатор группы привилегий')
 
     curator_group = graphene.Field(CuratorGroupType, description='Добавленная кураторская группа')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str):
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, group_id: str):
         return AddCuratorGroupMutation(
             curator_group=add_curator_group(
-                name=name
+                name=name,
+                group_id=group_id,
             )
         )
 
