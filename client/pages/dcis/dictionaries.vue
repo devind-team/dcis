@@ -33,6 +33,11 @@ export default defineComponent({
         title: t('dictionaries.departments.header') as string,
         to: 'dcis-dictionaries-departments',
         icon: 'briefcase'
+      },
+      {
+        title: t('dictionaries.budgetClassifications.header') as string,
+        to: 'dcis-dictionaries-budget_classifications',
+        icon: 'cash-multiple'
       }
     ]))
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([

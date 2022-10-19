@@ -32,5 +32,13 @@ export default {
       code: 'Код',
       createdAt: 'Дата создания'
     }
+  },
+  budgetClassifications: {
+    header: 'Классификации бюджетов',
+    tableHeaders: {
+      id: '@:id',
+      code: 'Код',
+      name: '@:name'
+    }
   }
 }
