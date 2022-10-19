@@ -1,0 +1,7 @@
+query CuratorGroups {
+  curatorGroups {
+    id
+    name
+    __typename
+  }
+}

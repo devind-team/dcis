@@ -2,6 +2,7 @@ import main from '~/lang/ru/main'
 import auth from '~/lang/ru/auth'
 import avatarMenu from '~/lang/ru/avatar-menu'
 import core from '~/lang/ru/core'
+import curators from '~/lang/ru/curators'
 import dashboard from '~/lang/ru/dashboard'
 import index from '~/lang/ru/index'
 import pages from '~/lang/ru/pages'
@@ -23,6 +24,7 @@ export default {
   auth,
   avatarMenu,
   core,
+  curators,
   dashboard,
   index,
   pages,

@@ -16,13 +16,12 @@ from apps.dcis.schema.types import (
 class CuratorGroupQueries(graphene.ObjectType):
     """Запросы записей, связанных с группами кураторов."""
 
-    curator_groups: CuratorGroup = DjangoListField(
+    curator_groups = DjangoListField(
         CuratorGroupType,
         required=True,
         description='Кураторские группы'
     )
-
-    curator_group: CuratorGroup = graphene.Field(
+    curator_group = graphene.Field(
         CuratorGroupType,
         curator_group_id=graphene.ID(required=True, description='Идентификатор кураторской группы'),
         required=True,
@@ -32,5 +31,5 @@ class CuratorGroupQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_curator_group(root: Any, info: ResolveInfo, curator_group_id: str) -> CuratorGroup:
-        curator_group: CuratorGroup = get_object_or_404(CuratorGroup, pk=curator_group_id)
+        curator_group = get_object_or_404(CuratorGroup, pk=curator_group_id)
         return curator_group

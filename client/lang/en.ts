@@ -2,6 +2,7 @@ import main from '~/lang/en/main'
 import auth from '~/lang/en/auth'
 import avatarMenu from '~/lang/en/avatar-menu'
 import core from '~/lang/en/core'
+import curators from '~/lang/en/curators'
 import dashboard from '~/lang/en/dashboard'
 import index from '~/lang/en/index'
 import pages from '~/lang/en/pages'
@@ -23,6 +24,7 @@ export default {
   auth,
   avatarMenu,
   core,
+  curators,
   dashboard,
   index,
   pages,

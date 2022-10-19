@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы измнения связей между записями в базе данных
+Типы изменения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -150,6 +150,23 @@ type AddChildRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Добавленная строка"""
   rowDimension: RowDimensionType!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddCuratorGroupMutationInput {
+  clientMutationId: String
+  """Название группы периода"""
+  name: String!
+}
+
+"""Мутация на добавление кураторской группы."""
+type AddCuratorGroupMutationPayload {
+  clientMutationId: String
+  """Добавленная кураторская группа"""
+  curatorGroup: CuratorGroupType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -315,6 +332,25 @@ type AddGroupMutationPayload {
   errors: [ErrorFieldType!]!
   """Добавленная группа"""
   group: GroupType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddOrganizationCuratorGroupInput {
+  clientMutationId: String
+  """Идентификатор кураторской группы"""
+  curatorGroupId: ID!
+  """Идентификатор организации"""
+  organizationId: ID!
+}
+
+"""Мутация на добавление организации в кураторскую группу."""
+type AddOrganizationCuratorGroupPayload {
+  """Идентификатор организации"""
+  addOrganizationId: ID!
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -546,6 +582,25 @@ type AddTagMutationPayload {
   success: Boolean!
   """Добавленный тег"""
   tag: TagType
+}
+
+input AddUserCuratorGroupInput {
+  clientMutationId: String
+  """Идентификатор кураторской группы"""
+  curatorGroupId: ID!
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация на добавление пользователей в кураторскую группу."""
+type AddUserCuratorGroupPayload {
+  """Идентификатор пользователя"""
+  addUserId: ID!
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 """An enumeration."""
@@ -856,6 +911,8 @@ type CellType {
   horizontalAlign: ID
   """Идентификатор"""
   id: ID!
+  """Является ли поле шаблоном"""
+  isTemplate: Boolean
   """Курсив"""
   italic: Boolean!
   """Тип значения"""
@@ -1941,7 +1998,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатет, готовиться отправить сообщение
+- TYPING - Печатает, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -1986,6 +2043,17 @@ type CopyPeriodGroupsMutationPayload {
   periodGroups: [PeriodGroupType]!
   """Успех мутации"""
   success: Boolean!
+}
+
+"""Тип групп кураторов."""
+type CuratorGroupType {
+  id: ID!
+  """Наименование кураторской группы"""
+  name: String!
+  """Организация группы"""
+  organization: [OrganizationOriginalType!]
+  """Пользователи в кураторской группе"""
+  users: [UserType!]
 }
 
 """
@@ -2063,6 +2131,23 @@ type DeleteChildRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Идентификатор удаленной строки"""
   rowDimensionId: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteCuratorGroupMutationInput {
+  clientMutationId: String
+  """Идентификатор кураторской группы"""
+  curatorGroupId: ID!
+}
+
+"""Мутация удаления кураторской группы."""
+type DeleteCuratorGroupMutationPayload {
+  clientMutationId: String
+  """Идентификатор удаленной кураторской группы"""
+  deleteId: ID!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -2277,6 +2362,44 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
+input DeleteUOrganizationCuratorGroupInput {
+  clientMutationId: String
+  """Идентификатор кураторской группы"""
+  curatorGroupId: ID!
+  """Идентификатор организации"""
+  organizationId: ID!
+}
+
+"""Мутация на добавление пользователей в кураторскую группу."""
+type DeleteUOrganizationCuratorGroupPayload {
+  clientMutationId: String
+  """Идентификатор организации"""
+  deleteId: ID!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input DeleteUserCuratorGroupInput {
+  clientMutationId: String
+  """Идентификатор кураторской группы"""
+  curatorGroupId: ID!
+  """Идентификатор пользователя"""
+  userId: ID!
+}
+
+"""Мутация на добавление пользователей в кураторскую группу."""
+type DeleteUserCuratorGroupPayload {
+  clientMutationId: String
+  """Идентификатор пользователя"""
+  deleteId: ID!
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Graphene object type for Department."""
 type DepartmentType {
   """Children departments."""
@@ -2439,7 +2562,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы"""
+"""Ошибка в поле формы."""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2675,6 +2798,8 @@ type Mutation {
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление дочерней строки."""
   addChildRowDimension(input: AddChildRowDimensionMutationInput!): AddChildRowDimensionMutationPayload!
+  """Мутация на добавление кураторской группы."""
+  addCuratorGroup(input: AddCuratorGroupMutationInput!): AddCuratorGroupMutationPayload!
   """Мутация на добавление дивизионов в период."""
   addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
   """Мутация для добавления дивизионов из файла."""
@@ -2691,6 +2816,8 @@ type Mutation {
   addFile(input: AddFileMutationInput!): AddFileMutationPayload!
   """Мутация для добавления группы."""
   addGroup(input: AddGroupMutationInput!): AddGroupMutationPayload!
+  """Мутация на добавление организации в кураторскую группу."""
+  addOrganizationCuratorGroup(input: AddOrganizationCuratorGroupInput!): AddOrganizationCuratorGroupPayload!
   """Добавление страницы"""
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
@@ -2711,6 +2838,8 @@ type Mutation {
   addSectionText(input: AddSectionTextMutationInput!): AddSectionTextMutationPayload!
   """Добавление тега"""
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
+  """Мутация на добавление пользователей в кураторскую группу."""
+  addUserCuratorGroup(input: AddUserCuratorGroupInput!): AddUserCuratorGroupPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
   """Изменение атрибута"""
@@ -2809,6 +2938,8 @@ type Mutation {
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление дочерней строки."""
   deleteChildRowDimension(input: DeleteChildRowDimensionMutationInput!): DeleteChildRowDimensionMutationPayload!
+  """Мутация удаления кураторской группы."""
+  deleteCuratorGroup(input: DeleteCuratorGroupMutationInput!): DeleteCuratorGroupMutationPayload!
   """Мутация на удаление дивизиона из периода."""
   deleteDivision(input: DeleteDivisionMutationInput!): DeleteDivisionMutationPayload!
   """Удаление статуса документа."""
@@ -2819,6 +2950,8 @@ type Mutation {
   deleteGroup(input: DeleteGroupMutationInput!): DeleteGroupMutationPayload!
   """Удаление уведомления"""
   deleteNotice(input: DeleteNoticeMutationInput!): DeleteNoticeMutationPayload!
+  """Мутация на добавление пользователей в кураторскую группу."""
+  deleteOrganizationCuratorGroup(input: DeleteUOrganizationCuratorGroupInput!): DeleteUOrganizationCuratorGroupPayload!
   """Удаление страницы"""
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация на удаление периода."""
@@ -2835,6 +2968,8 @@ type Mutation {
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
   deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
+  """Мутация на добавление пользователей в кураторскую группу."""
+  deleteUserCuratorGroup(input: DeleteUserCuratorGroupInput!): DeleteUserCuratorGroupPayload!
   """Мутация для получения токена авторизации."""
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
@@ -3623,6 +3758,13 @@ type Query {
   categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
   """Категория"""
   category(categoryId: ID!): CategoryType!
+  """Кураторская группа"""
+  curatorGroup(
+    """Идентификатор кураторской группы"""
+    curatorGroupId: ID!
+  ): CuratorGroupType!
+  """Кураторские группы"""
+  curatorGroups: [CuratorGroupType!]!
   department(
     """Department ID"""
     departmentId: Int!
@@ -4315,7 +4457,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представлющий собой таблицу."""
+"""Документ, представляющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!
