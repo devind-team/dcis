@@ -2,7 +2,7 @@
 left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('curators.name') }}
     v-spacer
-    add-curator-group-menu(:update="addUpdate")
+    add-curator-group-menu(v-if="hasPerm('dcis.add_curatorgroup')" :update="addUpdate")
       template(#activator="{ on }")
         v-btn(v-on="on" color="primary") {{ $t('curators.addCuratorGroup.buttonText') }}
   template(#subheader)
@@ -33,6 +33,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import { computed, defineComponent, PropType } from '#app'
+import { useAuthStore } from '~/stores'
 import { CuratorGroupsQuery, CuratorGroupsQueryVariables } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useCommonQuery } from '~/composables'
@@ -51,6 +52,8 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
 
+    const { hasPerm } = useAuthStore()
+
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       { text: t('curators.name') as string, to: localePath({ name: 'panel-ac-curator_groups' }), exact: true }
@@ -67,6 +70,7 @@ export default defineComponent({
     })
 
     return {
+      hasPerm,
       bc,
       headers,
       curatorGroups,

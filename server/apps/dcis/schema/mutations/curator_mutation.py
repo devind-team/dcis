@@ -31,6 +31,7 @@ class AddCuratorGroupMutation(BaseMutation):
     def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, group_id: str):
         return AddCuratorGroupMutation(
             curator_group=add_curator_group(
+                user=info.context.user,
                 name=name,
                 group_id=group_id,
             )

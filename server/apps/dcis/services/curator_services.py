@@ -1,10 +1,13 @@
 from devind_helpers.orm_utils import get_object_or_404
 
+from apps.core.models import User
 from apps.dcis.models import CuratorGroup
+from apps.dcis.permissions.curator_permissions import can_add_curator_group
 
 
-def add_curator_group(name: str, group_id: str | int) -> CuratorGroup:
+def add_curator_group(user: User, name: str, group_id: str | int) -> CuratorGroup:
     """Добавление кураторской группы."""
+    can_add_curator_group(user)
     return CuratorGroup.objects.create(name=name, group_id=group_id)
 
 
