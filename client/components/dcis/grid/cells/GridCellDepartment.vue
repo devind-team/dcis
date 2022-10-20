@@ -16,6 +16,8 @@ v-dialog(v-model="active" width="600px" persistent scrollable)
 
 <script lang="ts">
 import type { Ref } from '#app'
+import { defineComponent, ref } from '#app'
+import { useCommonQuery, useI18n } from '~/composables'
 import { DepartmentsQuery, DepartmentsQueryVariables, DepartmentFieldFragment } from '~/types/graphql'
 import departmentQuery from '~/gql/dcis/queries/departments.graphql'
 

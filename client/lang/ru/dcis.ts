@@ -266,7 +266,8 @@ export default {
       fl: 'Файл',
       money: 'Деньги',
       department: 'Департаменты',
-      classification: 'КБК'
+      classification: 'КБК',
+      aggregation: 'Агрегация'
     },
     toolbar: {
       addRow: 'Добавить строку'
@@ -345,6 +346,7 @@ export default {
       files: 'Файл',
       money: 'Рубли',
       numeric: 'Числовое значение',
+      aggregation: 'Агрегация',
       all: 'Ошибка добавления'
     },
     changeMenu: {

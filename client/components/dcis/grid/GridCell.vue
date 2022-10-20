@@ -34,6 +34,7 @@ import {
   ValueFilesQueryVariables
 } from '~/types/graphql'
 import { cellKinds } from '~/composables/grid'
+import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
 import GridCellNumeric from '~/components/dcis/grid/cells/GridCellNumeric.vue'
 import GridCellString from '~/components/dcis/grid/cells/GridCellString.vue'
 import GridCellText from '~/components/dcis/grid/cells/GridCellText.vue'
@@ -41,7 +42,7 @@ import GridCellFiles from '~/components/dcis/grid/cells/GridCellFiles.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
 import GridCellClassification from '~/components/dcis/grid/cells/GridCellClassification.vue'
-import valueFilesQuery from '~/gql/dcis/queries/value_files.graphql'
+import GridCellAggregation from '~/components/dcis/grid/cells/GridCellAggregation.vue'
 
 export default defineComponent({
   components: {
@@ -51,7 +52,8 @@ export default defineComponent({
     GridCellFiles,
     GridCellMoney,
     GridCellDepartment,
-    GridCellClassification
+    GridCellClassification,
+    GridCellAggregation
   },
   props: {
     cell: { type: Object as PropType<CellType>, required: true },

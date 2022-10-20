@@ -13,7 +13,8 @@ export const cellKinds = {
   fl: 'Files',
   money: 'Money',
   department: 'Department',
-  classification: 'Classification'
+  classification: 'Classification',
+  aggregation: 'Aggregation'
 }
 
 export function useGrid (
