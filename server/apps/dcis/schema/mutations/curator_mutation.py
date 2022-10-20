@@ -9,9 +9,11 @@ from graphql import ResolveInfo
 from apps.dcis.schema.types import CuratorGroupType
 from apps.dcis.services.curator_services import (
     add_curator_group,
-    add_organization_curator_group, add_user_curator_group,
+    add_organization_curator_group,
+    add_user_curator_group,
     delete_curator_group,
-    delete_organization_curator_group, delete_user_curator_group,
+    delete_organization_curator_group,
+    delete_user_curator_group,
 )
 
 

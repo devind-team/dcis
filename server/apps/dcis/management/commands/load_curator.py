@@ -1,7 +1,7 @@
 """Модуль с командой."""
 import datetime
 from os.path import join
-
+from django.contrib.auth.models import Group
 from devind_core.models import Profile, ProfileValue
 from devind_dictionaries.models import Organization
 from devind_helpers.orm_utils import get_object_or_none
@@ -32,10 +32,7 @@ class Command(BaseCommand):
         return Organization.objects.get(pk=0)
 
     @classmethod
-    def check_user(
-        cls,
-        row: tuple
-    ) -> int:
+    def check_user(cls, row: tuple) -> int:
         organization = cls.change_organization()
         user = get_object_or_none(
             User,
@@ -60,6 +57,17 @@ class Command(BaseCommand):
         organization.users.add(user.id)
         return user.id
 
+    @classmethod
+    def check_group(cls,) -> str | int:
+        group = get_object_or_none(
+            Group,
+            name='Кураторы'
+        )
+        if group is None:
+            group = Group.objects.create(name='Кураторы')
+
+        return group.id
+
     def handle(self, *args, **options) -> None:
         """Описание команды."""
 
@@ -69,6 +77,7 @@ class Command(BaseCommand):
         kur_groups: Worksheet = workbook[sheets[0]]
         users_id: list[int] = []
         curator_groups: list[str] = []
+        group_id: str = self.check_group()
         for i, row in enumerate(kur_groups):
             if i == 0:
                 continue
@@ -76,7 +85,7 @@ class Command(BaseCommand):
             curator_groups.append(row[1].value)
 
         for group_name in zip(curator_groups, users_id):
-            group: CuratorGroup = CuratorGroup.objects.create(name=group_name[0].replace('  ', ' '))
+            group: CuratorGroup = CuratorGroup.objects.create(name=group_name[0].replace('  ', ' '), group_id=group_id)
             group.users.add(group_name[1])
 
         kur_groups_orgs: Worksheet = workbook[sheets[1]]
