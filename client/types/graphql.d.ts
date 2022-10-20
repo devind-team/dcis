@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы измнения связей между записями в базе данных
+ * Типы изменения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -174,7 +174,7 @@ export type AddChildRowDimensionMutationPayload = {
 export type AddCuratorGroupMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор группы привилегий */
-  groupId: Scalars['ID'];
+  groupId?: InputMaybe<Scalars['ID']>;
   /** Название группы периода */
   name: Scalars['String'];
 };
@@ -2110,7 +2110,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатет, готовиться отправить сообщение
+ * - TYPING - Печатает, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -2705,7 +2705,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы */
+/** Ошибка в поле формы. */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -5371,7 +5371,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представлющий собой таблицу. */
+/** Документ, представляющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
@@ -5978,6 +5978,13 @@ export type ChangeCellsOptionMutationVariables = Exact<{
 
 export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value?: string | null }> | null } };
 
+export type AddCuratorGroupMutationVariables = Exact<{
+  name: Scalars['String'];
+  groupId?: InputMaybe<Scalars['ID']>;
+}>;
+
+export type AddCuratorGroupMutation = { __typename?: 'Mutation', addCuratorGroup: { __typename?: 'AddCuratorGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, curatorGroup?: { __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename: 'GroupType', id: string, name: string } | null } | null } };
+
 export type AddChildRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['ID'];
@@ -6308,7 +6315,7 @@ export type BudgetClassificationsQuery = { __typename?: 'Query', budgetClassific
 
 export type CuratorGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type CuratorGroupsQuery = { __typename?: 'Query', curatorGroups: Array<{ __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename?: 'GroupType', name: string } | null }> };
+export type CuratorGroupsQuery = { __typename?: 'Query', curatorGroups: Array<{ __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename: 'GroupType', id: string, name: string } | null }> };
 
 export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 

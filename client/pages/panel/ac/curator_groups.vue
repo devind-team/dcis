@@ -2,12 +2,16 @@
 left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('curators.name') }}
     v-spacer
-    v-btn(color="primary") {{ $t('curators.addCuratorGroup.buttonText') }}
+    add-curator-group-menu(:update="addUpdate")
+      template(#activator="{ on }")
+        v-btn(v-on="on" color="primary") {{ $t('curators.addCuratorGroup.buttonText') }}
   template(#subheader)
     template(v-if="curatorGroups")
       | {{ $t('shownOf', { count: curatorGroups.length, totalCount: curatorGroups.length }) }}
   v-data-table(:headers="headers" :items="curatorGroups" disable-pagination hide-default-footer)
-    template(#item.group="{ item }") {{ (item.group.name) }}
+    template(#item.group="{ item }")
+      template(v-if="item.group") {{ item.group.name }}
+      strong(v-else) &ndash;
     template(#item.actions="{ item }")
       v-tooltip(bottom)
         template(#activator="{ on, attrs }")
@@ -34,10 +38,12 @@ import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useCommonQuery } from '~/composables'
 import curatorGroupsQuery from '~/gql/dcis/queries/curator_groups.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
+import AddCuratorGroupMenu from '~/components/dcis/curators/AddCuratorGroupMenu.vue'
 
 export default defineComponent({
   components: {
-    LeftNavigatorContainer
+    LeftNavigatorContainer,
+    AddCuratorGroupMenu
   },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
@@ -56,14 +62,15 @@ export default defineComponent({
       { text: t('curators.tableHeaders.actions') as string, value: 'actions', align: 'center', sortable: false }
     ]
 
-    const { data: curatorGroups } = useCommonQuery<CuratorGroupsQuery, CuratorGroupsQueryVariables>({
+    const { data: curatorGroups, addUpdate } = useCommonQuery<CuratorGroupsQuery, CuratorGroupsQueryVariables>({
       document: curatorGroupsQuery
     })
 
     return {
       bc,
       headers,
-      curatorGroups
+      curatorGroups,
+      addUpdate
     }
   }
 })

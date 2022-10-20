@@ -1,0 +1,23 @@
+mutation AddCuratorGroup($name: String!, $groupId: ID) {
+  addCuratorGroup(input: {
+    name: $name,
+    groupId: $groupId
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    curatorGroup {
+      id
+      name
+      group {
+        id
+        name
+        __typename
+      }
+      __typename
+    }
+  }
+}

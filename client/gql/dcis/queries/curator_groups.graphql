@@ -3,7 +3,9 @@ query CuratorGroups {
     id
     name
     group {
+      id
       name
+      __typename
     }
     __typename
   }

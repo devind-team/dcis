@@ -11,6 +11,9 @@ export default {
     delete: '@:delete'
   },
   addCuratorGroup: {
+    header: 'Добавление кураторской группы',
+    name: '@:name',
+    group: 'Группа прав',
     buttonText: 'Добавить кураторскую группу'
   }
 }

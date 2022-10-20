@@ -22,7 +22,7 @@ class AddCuratorGroupMutation(BaseMutation):
 
     class Input:
         name = graphene.String(required=True, description='Название группы периода')
-        group_id = graphene.ID(required=True, description='Идентификатор группы привилегий')
+        group_id = graphene.ID(description='Идентификатор группы привилегий')
 
     curator_group = graphene.Field(CuratorGroupType, description='Добавленная кураторская группа')
 
