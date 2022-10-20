@@ -7,6 +7,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     template(v-if="curatorGroups")
       | {{ $t('shownOf', { count: curatorGroups.length, totalCount: curatorGroups.length }) }}
   v-data-table(:headers="headers" :items="curatorGroups" disable-pagination hide-default-footer)
+    template(#item.group="{ item }") {{ (item.group.name) }}
     template(#item.actions="{ item }")
       v-tooltip(bottom)
         template(#activator="{ on, attrs }")
@@ -51,6 +52,7 @@ export default defineComponent({
 
     const headers: DataTableHeader[] = [
       { text: t('curators.tableHeaders.name') as string, value: 'name' },
+      { text: t('curators.tableHeaders.group') as string, value: 'group' },
       { text: t('curators.tableHeaders.actions') as string, value: 'actions', align: 'center', sortable: false }
     ]
 

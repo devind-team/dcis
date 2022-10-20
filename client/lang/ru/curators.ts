@@ -2,6 +2,7 @@ export default {
   name: 'Кураторские группы',
   tableHeaders: {
     name: '@:name',
+    group: 'Группа привилегий',
     actions: '@:actions'
   },
   tooltips: {

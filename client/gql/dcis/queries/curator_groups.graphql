@@ -2,6 +2,9 @@ query CuratorGroups {
   curatorGroups {
     id
     name
+    group {
+      name
+    }
     __typename
   }
 }

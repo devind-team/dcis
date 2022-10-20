@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы изменения связей между записями в базе данных
+ * Типы измнения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -173,6 +173,8 @@ export type AddChildRowDimensionMutationPayload = {
 
 export type AddCuratorGroupMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор группы привилегий */
+  groupId: Scalars['ID'];
   /** Название группы периода */
   name: Scalars['String'];
 };
@@ -2108,7 +2110,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатает, готовиться отправить сообщение
+ * - TYPING - Печатет, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -2171,6 +2173,8 @@ export type CopyPeriodGroupsMutationPayload = {
 /** Тип групп кураторов. */
 export type CuratorGroupType = {
   __typename?: 'CuratorGroupType';
+  /** Привилегии кураторской группы */
+  group?: Maybe<GroupType>;
   id: Scalars['ID'];
   /** Наименование кураторской группы */
   name: Scalars['String'];
@@ -2701,7 +2705,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы. */
+/** Ошибка в поле формы */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -2807,6 +2811,8 @@ export type GlobalIndicesInputType = {
 /** Группа пользователей. */
 export type GroupType = {
   __typename?: 'GroupType';
+  /** Привилегии группы */
+  curatorgroupSet: Array<CuratorGroupType>;
   id: Scalars['ID'];
   name: Scalars['String'];
   permissions: Array<PermissionType>;
@@ -5365,7 +5371,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представляющий собой таблицу. */
+/** Документ, представлющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
@@ -6302,7 +6308,7 @@ export type BudgetClassificationsQuery = { __typename?: 'Query', budgetClassific
 
 export type CuratorGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type CuratorGroupsQuery = { __typename?: 'Query', curatorGroups: Array<{ __typename: 'CuratorGroupType', id: string, name: string }> };
+export type CuratorGroupsQuery = { __typename?: 'Query', curatorGroups: Array<{ __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename?: 'GroupType', name: string } | null }> };
 
 export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 

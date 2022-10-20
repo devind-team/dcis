@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы изменения связей между записями в базе данных
+Типы измнения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -156,6 +156,8 @@ type AddChildRowDimensionMutationPayload {
 
 input AddCuratorGroupMutationInput {
   clientMutationId: String
+  """Идентификатор группы привилегий"""
+  groupId: ID!
   """Название группы периода"""
   name: String!
 }
@@ -1998,7 +2000,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатает, готовиться отправить сообщение
+- TYPING - Печатет, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -2047,6 +2049,8 @@ type CopyPeriodGroupsMutationPayload {
 
 """Тип групп кураторов."""
 type CuratorGroupType {
+  """Привилегии кураторской группы"""
+  group: GroupType
   id: ID!
   """Наименование кураторской группы"""
   name: String!
@@ -2562,7 +2566,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы."""
+"""Ошибка в поле формы"""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2661,6 +2665,8 @@ input GlobalIndicesInputType {
 
 """Группа пользователей."""
 type GroupType {
+  """Привилегии группы"""
+  curatorgroupSet: [CuratorGroupType!]!
   id: ID!
   name: String!
   permissions: [PermissionType!]!
@@ -4457,7 +4463,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представляющий собой таблицу."""
+"""Документ, представлющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!
