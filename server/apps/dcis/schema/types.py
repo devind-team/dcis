@@ -477,6 +477,7 @@ class CellType(graphene.ObjectType):
     is_template = graphene.Boolean(description='Является ли поле шаблоном')
     column_id = graphene.ID(description='Идентификатор колонки')
     row_id = graphene.ID(description='Идентификатор строки')
+    aggregation = graphene.String(description='Метод агрегации')
 
     # apps.dcis.models.Style
     horizontal_align = graphene.ID(description='Горизонтальное выравнивание')

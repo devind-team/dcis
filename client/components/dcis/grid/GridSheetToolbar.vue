@@ -25,6 +25,24 @@ v-row
       v-btn(:disabled="disabled" value="bottom" height="40")
         v-icon mdi-format-align-bottom
     v-tooltip(bottom)
+      template(#activator="{ on: onTooltip, attrs }")
+        div(v-on="onTooltip" v-bind="attrs")
+          aggregation-property(
+            v-on="onTooltip"
+            v-bind="attrs"
+            v-slot="{ on: onAggregation }" :cell="aggregationCell"
+          )
+            v-btn(
+              v-on="onAggregation"
+              :disabled="disabled || !aggregationCell"
+              :class="[{ 'v-btn--active': aggregationCell && aggregationCell.aggregation }, themeClass]"
+              class="v-btn--has-bg theme--light v-size--default"
+              width="40"
+              height="40"
+            )
+              v-icon mdi-sigma
+      span Агрегация ячейки
+    v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
           v-btn-toggle.mx-1(v-model="properties" multiple)
@@ -86,10 +104,12 @@ import {
   useI18n,
   UpdateType
 } from '~/composables'
-import { DocumentsSheetQuery } from '~/types/graphql'
+import { CellType, DocumentsSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
+import AggregationProperty from '~/components/dcis/grid/properties/AggregationProperty.vue'
 
 export default defineComponent({
+  components: { AggregationProperty },
   props: {
     updateActiveSheet: { type: Function as PropType<UpdateType<DocumentsSheetQuery>>, required: true },
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null },
@@ -198,6 +218,12 @@ export default defineComponent({
       }
     })
 
+    const aggregationCell = computed<CellType | null>(() => (
+      props.selectedCellsOptions && props.selectedCellsOptions.cells.length === 1
+        ? props.selectedCellsOptions.cells[0]
+        : null)
+    )
+
     const dimensionsProperties = computed<string[]>({
       get: () => {
         if (dimensionsDisabled.value || fixedDisabled.value) {
@@ -286,6 +312,7 @@ export default defineComponent({
       horizontalAlign,
       verticalAlign,
       properties,
+      aggregationCell,
       dimensionsProperties,
       sizes,
       size,

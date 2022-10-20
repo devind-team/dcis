@@ -42,7 +42,6 @@ import GridCellFiles from '~/components/dcis/grid/cells/GridCellFiles.vue'
 import GridCellMoney from '~/components/dcis/grid/cells/GridCellMoney.vue'
 import GridCellDepartment from '~/components/dcis/grid/cells/GridCellDepartment.vue'
 import GridCellClassification from '~/components/dcis/grid/cells/GridCellClassification.vue'
-import GridCellAggregation from '~/components/dcis/grid/cells/GridCellAggregation.vue'
 
 export default defineComponent({
   components: {
@@ -52,8 +51,7 @@ export default defineComponent({
     GridCellFiles,
     GridCellMoney,
     GridCellDepartment,
-    GridCellClassification,
-    GridCellAggregation
+    GridCellClassification
   },
   props: {
     cell: { type: Object as PropType<CellType>, required: true },

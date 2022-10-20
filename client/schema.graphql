@@ -830,6 +830,8 @@ type CategoryTypeEdge {
 
 """Тип ячейки."""
 type CellType {
+  """Метод агрегации"""
+  aggregation: String
   """Цвет фона"""
   background: String!
   """Цвет границ"""
@@ -856,6 +858,8 @@ type CellType {
   horizontalAlign: ID
   """Идентификатор"""
   id: ID!
+  """Является ли поле шаблоном"""
+  isTemplate: Boolean
   """Курсив"""
   italic: Boolean!
   """Тип значения"""
@@ -3636,7 +3640,7 @@ type Query {
   """Документ"""
   document(
     """Идентификатор документа"""
-    documentId: ID
+    documentId: ID!
   ): DocumentType
   """Выгрузка листа с несколькими документами"""
   documentSheet(
@@ -3803,6 +3807,11 @@ type Query {
   ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+  """Ячейка и ее зависимости"""
+  valueCells(
+    """Идентификатор ячейки"""
+    cellId: ID!
+  ): [CellType]
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор колонки"""

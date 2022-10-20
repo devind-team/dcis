@@ -28,5 +28,6 @@ fragment CellFields on CellType {
   value
   verified
   error
+  aggregation
   __typename
 }

@@ -111,10 +111,6 @@ class KindCell(models.Model):
     ORGANIZATION = 'organization'
     CLASSIFICATION = 'classification'
 
-    # Поля агрегации
-
-    AGGREGATION = 'aggregation'
-
     KIND_VALUE = (
         (NUMERIC, 'n'),
         (STRING, 's'),
@@ -133,7 +129,6 @@ class KindCell(models.Model):
         (DEPARTMENT, 'department'),
         (ORGANIZATION, 'organization'),
         (CLASSIFICATION, 'classification'),
-        (AGGREGATION, 'aggregation'),
     )
 
     kind = models.CharField(
@@ -238,6 +233,17 @@ class RowDimension(models.Model):
 
 class Cell(Style, KindCell, models.Model):
     """Модель ячейки."""
+    AGGREGATION_SUM = 'sum'
+    AGGREGATION_AVG = 'avg'
+    AGGREGATION_MIN = 'min'
+    AGGREGATION_MAX = 'max'
+
+    KIND_AGGREGATION = (
+        (AGGREGATION_SUM, 'sum'),
+        (AGGREGATION_AVG, 'avg'),
+        (AGGREGATION_MIN, 'min'),
+        (AGGREGATION_MAX, 'max'),
+    )
 
     TEMPLATE_FIELD = [KindCell.STRING, KindCell.TEXT]
 
@@ -249,6 +255,13 @@ class Cell(Style, KindCell, models.Model):
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
     tooltip = models.TextField(null=True, help_text='Подсказка')
     is_template = models.BooleanField(default=False, help_text='Является ли поле шаблоном')
+    aggregation = models.CharField(
+        max_length=5,
+        choices=KIND_AGGREGATION,
+        null=True,
+        default=None,
+        help_text='Механизм агрегации'
+    )
 
     column = models.ForeignKey(ColumnDimension, on_delete=models.CASCADE, help_text='Колонка')
     row = models.ForeignKey(RowDimension, on_delete=models.CASCADE, help_text='Строка')
@@ -265,6 +278,11 @@ class Cell(Style, KindCell, models.Model):
         indexes = [
             models.Index(fields=['column'])
         ]
+
+    @property
+    def is_aggregation(self) -> bool:
+        """Является ли ячейка агрегационной."""
+        return self.aggregation is None
 
 
 class RelationshipCells(models.Model):

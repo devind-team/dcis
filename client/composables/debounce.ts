@@ -1,10 +1,10 @@
 import defu from 'defu'
-import { ref, watch } from '#app'
+import { ref, unref, watch } from '#app'
 import type { Ref } from '#app'
 import { debouncedWatch } from '@vueuse/core'
 
 export type DebounceCallbackFn = () => void | undefined
-export type DebounceOptions = { debounce?: number, callback?: DebounceCallbackFn }
+export type DebounceOptions = { debounce?: number, callback?: DebounceCallbackFn, defaultValue?: string }
 export interface DebounceSearchInterface {
   search: Ref<string | null>
   debounceSearch: Ref<string | null>
@@ -13,12 +13,13 @@ export interface DebounceSearchInterface {
 export function useDebounceSearch (debounceOptions: DebounceOptions = {}): DebounceSearchInterface {
   const defaultOptions: DebounceOptions = {
     debounce: 700,
-    callback: undefined
+    callback: undefined,
+    defaultValue: null
   }
-  const { debounce, callback }: DebounceOptions = defu(debounceOptions, defaultOptions)
+  const { debounce, callback, defaultValue }: DebounceOptions = defu(debounceOptions, defaultOptions)
 
-  const search: Ref<string | null> = ref<string | null>(null)
-  const debounceSearch: Ref<string | null> = ref<string | null>(null)
+  const search: Ref<string | null> = ref<string | null>(unref(defaultValue))
+  const debounceSearch: Ref<string | null> = ref<string | null>(unref(defaultValue))
 
   // Если у нас значение пустое, то устанавливаем сразу
   watch(search, () => {
