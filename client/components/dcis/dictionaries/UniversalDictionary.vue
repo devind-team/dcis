@@ -41,9 +41,9 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
 import { DataTableHeader } from 'vuetify'
 import { getObjectValueByPath } from 'vuetify/lib/util/helpers'
 import { DocumentNode } from 'graphql'
-import { PropType, useNuxtApp } from '#app'
+import { computed, defineComponent, PropType, useNuxtApp } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useI18n, useCommonQuery, useQueryRelay, useCursorPagination } from '~/composables'
+import { useI18n, useCommonQuery, useQueryRelay, useCursorPagination, useDebounceSearch } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 
 type QueryVariables = {
@@ -62,7 +62,7 @@ export default defineComponent({
     headers: { required: true, type: Array as PropType<Header[]> },
     booleanHeaders: { type: Array as PropType<Header[]>, default: () => [] },
     convertItem: { type: Object as PropType<{ [key: string]: Function }>, default: () => ({}) },
-    convertItems: { type: Function as PropType<(items: any) => any | undefined> },
+    convertItems: { type: Function as PropType<(items: any) => any | undefined>, default: undefined },
     pageSize: { type: Number, default: 0 },
     searchVariables: { type: Object as PropType<{ [key: string]: any }>, default: () => ({}) }
   },
@@ -75,7 +75,6 @@ export default defineComponent({
         return props.searchVariables
       }
       const queryVariables: QueryVariables = {
-        offset: 0,
         search: debounceSearch.value ? debounceSearch.value : ''
       }
       return queryVariables
@@ -83,8 +82,7 @@ export default defineComponent({
 
     const result = isRelayQuery.value
       ? useQueryRelay({
-        document: props.query,
-        variables: () => variables.value
+        document: props.query
       },
       {
         pagination: useCursorPagination({ pageSize: props.pageSize }),
