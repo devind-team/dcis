@@ -10,9 +10,8 @@ import { defineComponent, computed, useNuxt2Meta, ref } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
-import UniversalDictionary from '~/components/dcis/dictionaries/UniversalDictionary.vue'
 export default defineComponent({
-  components: { LeftNavigatorDriver, UniversalDictionary },
+  components: { LeftNavigatorDriver },
   middleware: ['auth'],
   setup () {
     const { t, localePath } = useI18n()
