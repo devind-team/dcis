@@ -49,7 +49,7 @@ class DeleteCuratorGroupMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, curator_group_id: str | int):
-        delete_curator_group(curator_group_id=curator_group_id)
+        delete_curator_group(user=info.context.user, curator_group_id=curator_group_id)
         return DeleteCuratorGroupMutation(delete_id=curator_group_id)
 
 
@@ -63,10 +63,11 @@ class AddUserCuratorGroup(BaseMutation):
     add_user_id = graphene.ID(required=True, description='Идентификатор пользователя')
 
     @staticmethod
-    # @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, curator_group_id: str | int, user_id: str | int):
         return AddUserCuratorGroup(
             add_user_id=add_user_curator_group(
+                user=info.context.user,
                 curator_group_id=curator_group_id,
                 user_id=user_id
             )
@@ -83,9 +84,9 @@ class DeleteUserCuratorGroup(BaseMutation):
     delete_id = graphene.ID(required=True, description='Идентификатор пользователя')
 
     @staticmethod
-    # @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, curator_group_id: str | int, user_id: str | int):
-        delete_user_curator_group(curator_group_id=curator_group_id, user_id=user_id)
+        delete_user_curator_group(user=info.context.user, curator_group_id=curator_group_id, user_id=user_id)
         return AddUserCuratorGroup(delete_id=user_id)
 
 
@@ -99,10 +100,11 @@ class AddOrganizationCuratorGroup(BaseMutation):
     add_organization_id = graphene.ID(required=True, description='Идентификатор организации')
 
     @staticmethod
-    # @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, curator_group_id: str | int, organization_id: str | int):
         return AddOrganizationCuratorGroup(
             add_user_id=add_organization_curator_group(
+                user=info.context.user,
                 curator_group_id=curator_group_id,
                 organization_id=organization_id
             )
@@ -119,9 +121,13 @@ class DeleteUOrganizationCuratorGroup(BaseMutation):
     delete_id = graphene.ID(required=True, description='Идентификатор организации')
 
     @staticmethod
-    # @permission_classes((IsAuthenticated,))
+    @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, curator_group_id: str | int, organization_id: str | int):
-        delete_organization_curator_group(curator_group_id=curator_group_id, organization_id=organization_id)
+        delete_organization_curator_group(
+            user=info.context.user,
+            curator_group_id=curator_group_id,
+            organization_id=organization_id
+        )
         return AddUserCuratorGroup(delete_id=organization_id)
 
 

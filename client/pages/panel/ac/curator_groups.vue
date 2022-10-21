@@ -13,17 +13,17 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
       template(v-if="item.group") {{ item.group.name }}
       strong(v-else) &ndash;
     template(#item.actions="{ item }")
-      v-tooltip(bottom)
+      v-tooltip(v-if="hasPerm('dcis.change_curatorgroup')" bottom)
         template(#activator="{ on, attrs }")
           v-btn.mr-1(v-on="on" v-bind="attrs" icon color="primary")
             v-icon mdi-account-edit
         span {{ $t('curators.tooltips.changeUsers') }}
-      v-tooltip(bottom)
+      v-tooltip(v-if="hasPerm('dcis.change_curatorgroup')" bottom)
         template(#activator="{ on, attrs }")
           v-btn.mx-1(v-on="on" v-bind="attrs" icon color="primary")
             v-icon mdi-briefcase-edit-outline
         span {{ $t('curators.tooltips.changeOrganizations') }}
-      v-tooltip(bottom)
+      v-tooltip(v-if="hasPerm('dcis.delete_curatorgroup')" bottom)
         template(#activator="{ on, attrs }")
           v-btn.ml-1(v-on="on" v-bind="attrs" icon color="error")
             v-icon mdi-delete
@@ -59,11 +59,21 @@ export default defineComponent({
       { text: t('curators.name') as string, to: localePath({ name: 'panel-ac-curator_groups' }), exact: true }
     ]))
 
-    const headers: DataTableHeader[] = [
-      { text: t('curators.tableHeaders.name') as string, value: 'name' },
-      { text: t('curators.tableHeaders.group') as string, value: 'group' },
-      { text: t('curators.tableHeaders.actions') as string, value: 'actions', align: 'center', sortable: false }
-    ]
+    const headers = computed<DataTableHeader[]>(() => {
+      const result: DataTableHeader[] = [
+        { text: t('curators.tableHeaders.name') as string, value: 'name' },
+        { text: t('curators.tableHeaders.group') as string, value: 'group' }
+      ]
+      if (hasPerm(['dcis.change_curatorgroup', 'dcis.delete_curatorgroup'], true)) {
+        result.push({
+          text: t('curators.tableHeaders.actions') as string,
+          value: 'actions',
+          align: 'center',
+          sortable: false
+        })
+      }
+      return result
+    })
 
     const { data: curatorGroups, addUpdate } = useCommonQuery<CuratorGroupsQuery, CuratorGroupsQueryVariables>({
       document: curatorGroupsQuery

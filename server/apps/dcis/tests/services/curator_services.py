@@ -56,14 +56,31 @@ class CuratorGroupTestCase(TestCase):
 
     def test_delete_curator_group(self) -> None:
         """Тестирование функции `delete_curator_group`."""
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm != 'dcis.delete_curatorgroup'
+        ), self.assertRaises(PermissionDenied):
+            delete_curator_group(user=self.superuser, curator_group_id=self.curator_group.id)
         self.assertEqual(
             None,
-            delete_curator_group(curator_group_id=self.curator_group.id)
+            delete_curator_group(user=self.superuser, curator_group_id=self.curator_group.id)
         )
 
     def test_add_user_curator_group(self) -> None:
         """Тестирование функции `add_user_curator_group`."""
-        user_curator_group: str | int = add_user_curator_group(
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm != 'dcis.change_curatorgroup'
+        ), self.assertRaises(PermissionDenied):
+            add_user_curator_group(
+                user=self.superuser,
+                curator_group_id=self.curator_group.id,
+                user_id=self.superuser.id
+            )
+        user_curator_group = add_user_curator_group(
+            user=self.superuser,
             curator_group_id=self.curator_group.id,
             user_id=self.superuser.id
         )
@@ -74,14 +91,39 @@ class CuratorGroupTestCase(TestCase):
 
     def test_delete_user_curator_group(self) -> None:
         """Тестирование функции `delete_user_curator_group`."""
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm != 'dcis.change_curatorgroup'
+        ), self.assertRaises(PermissionDenied):
+            delete_user_curator_group(
+                user=self.superuser,
+                curator_group_id=self.curator_group_2.id,
+                user_id=self.superuser.id
+            )
         self.assertEqual(
             None,
-            delete_user_curator_group(curator_group_id=self.curator_group_2.id, user_id=self.superuser.id)
+            delete_user_curator_group(
+                user=self.superuser,
+                curator_group_id=self.curator_group_2.id,
+                user_id=self.superuser.id
+            )
         )
 
     def test_add_organization_curator_group(self) -> None:
         """Тестирование функции `add_organization_curator_group`."""
-        organization_curator_group: str | int = add_organization_curator_group(
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm != 'dcis.change_curatorgroup'
+        ), self.assertRaises(PermissionDenied):
+            add_organization_curator_group(
+                user=self.superuser,
+                curator_group_id=self.curator_group.id,
+                organization_id=self.organization.id
+            )
+        organization_curator_group = add_organization_curator_group(
+            user=self.superuser,
             curator_group_id=self.curator_group.id,
             organization_id=self.organization.id
         )
@@ -92,9 +134,20 @@ class CuratorGroupTestCase(TestCase):
 
     def test_delete_organization_curator_group(self) -> None:
         """Тестирование функции `delete_organization_curator_group`."""
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm != 'dcis.change_curatorgroup'
+        ), self.assertRaises(PermissionDenied):
+            delete_organization_curator_group(
+                user=self.superuser,
+                curator_group_id=self.curator_group_2.id,
+                organization_id=self.organization_2.id
+            )
         self.assertEqual(
             None,
             delete_organization_curator_group(
+                user=self.superuser,
                 curator_group_id=self.curator_group_2.id,
                 organization_id=self.organization_2.id
             )
