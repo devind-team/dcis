@@ -21,7 +21,7 @@ from apps.dcis.models import (
     DocumentStatus, Limitation, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
     Project, RowDimension, Sheet,
-    Status, Value,
+    Status, Value, Cell,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -440,6 +440,7 @@ class ChangeColumnDimensionType(DjangoObjectType):
         fields = (
             'id',
             'width',
+            'index',
             'fixed',
             'hidden',
             'kind',
@@ -453,11 +454,44 @@ class ChangeRowDimensionType(DjangoObjectType):
         fields = (
             'id',
             'height',
+            'index',
             'fixed',
             'hidden',
             'dynamic',
             'updated_at',
         )
+
+
+class ChangeCellType(DjangoObjectType):
+    """Оригинальные тип мета данных ячейки."""
+
+    row = graphene.Field(lambda: ChangeRowDimensionType, description='Строка')
+    column = graphene.Field(lambda: ChangeColumnDimensionType, description='Колонка')
+
+    sheet = graphene.Field(lambda: SheetType, description='Лист')
+
+    class Meta:
+        model = Cell
+        fields = (
+            'id',
+            'kind',
+            'editable',
+            'formula',
+            'number_format',
+            'comment',
+            'default',
+            'mask',
+            'tooltip',
+            'is_template',
+            'aggregation',
+            'column',
+            'row',
+        )
+
+    @staticmethod
+    def resolve_sheet(cell: Cell, info: ResolveInfo) -> Sheet:
+        """Возвращаем лист через колонку."""
+        return cell.column.sheet
 
 
 class CellType(graphene.ObjectType):

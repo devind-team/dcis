@@ -281,6 +281,7 @@ export default {
       aggregation: 'Агрегация ячеек',
       aggregationTitle: 'Настройки агрегации',
       aggregationChoice: 'Метод агрегации',
+      aggregationDefault: 'Значение по умолчанию: {value}',
       aggregationKind: {
         empty: 'Не задано',
         sum: 'Сумма',

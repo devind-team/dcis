@@ -583,6 +583,26 @@ export type AddTagMutationPayload = {
   tag?: Maybe<TagType>;
 };
 
+export type AddValuesCellsMutationInput = {
+  /** Целевая ячейка */
+  cellId: Scalars['ID'];
+  /** Связываем ячейки */
+  cellsId: Array<Scalars['ID']>;
+  clientMutationId?: InputMaybe<Scalars['String']>;
+};
+
+/** Добавление связной ячейки к агрегирующей. */
+export type AddValuesCellsMutationPayload = {
+  __typename?: 'AddValuesCellsMutationPayload';
+  /** Добавленные ячейки */
+  cells?: Maybe<Array<Maybe<ChangeCellType>>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 /** An enumeration. */
 export type ApplicationAlgorithm =
   /** No OIDC support */
@@ -883,6 +903,54 @@ export type CategoryTypeEdge = {
   node?: Maybe<CategoryType>;
 };
 
+/** An enumeration. */
+export type CellAggregation =
+  /** avg */
+  | 'AVG'
+  /** max */
+  | 'MAX'
+  /** min */
+  | 'MIN'
+  /** sum */
+  | 'SUM';
+
+/** An enumeration. */
+export type CellKind =
+  /** b */
+  | 'B'
+  /** bigMoney */
+  | 'BIGMONEY'
+  /** classification */
+  | 'CLASSIFICATION'
+  /** d */
+  | 'D'
+  /** department */
+  | 'DEPARTMENT'
+  /** e */
+  | 'E'
+  /** f */
+  | 'F'
+  /** fl */
+  | 'FL'
+  /** inlineStr */
+  | 'INLINESTR'
+  /** money */
+  | 'MONEY'
+  /** n */
+  | 'N'
+  /** organization */
+  | 'ORGANIZATION'
+  /** s */
+  | 'S'
+  /** str */
+  | 'STR'
+  /** text */
+  | 'TEXT'
+  /** time */
+  | 'TIME'
+  /** user */
+  | 'USER';
+
 /** Тип ячейки. */
 export type CellType = {
   __typename?: 'CellType';
@@ -1116,6 +1184,38 @@ export type ChangeCellDefaultPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Оригинальные тип мета данных ячейки. */
+export type ChangeCellType = {
+  __typename?: 'ChangeCellType';
+  /** Механизм агрегации */
+  aggregation?: Maybe<CellAggregation>;
+  /** Колонка */
+  column?: Maybe<ChangeColumnDimensionType>;
+  /** Комментарий */
+  comment?: Maybe<Scalars['String']>;
+  /** Значение по умолчанию */
+  default?: Maybe<Scalars['String']>;
+  /** Редактируемая ячейка */
+  editable: Scalars['Boolean'];
+  /** Формула */
+  formula?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  /** Является ли поле шаблоном */
+  isTemplate: Scalars['Boolean'];
+  /** Тип значения */
+  kind: CellKind;
+  /** Маска для ввода значений */
+  mask?: Maybe<Scalars['String']>;
+  /** Форматирование чисел */
+  numberFormat?: Maybe<Scalars['String']>;
+  /** Строка */
+  row?: Maybe<ChangeRowDimensionType>;
+  /** Лист */
+  sheet?: Maybe<SheetType>;
+  /** Подсказка */
+  tooltip?: Maybe<Scalars['String']>;
+};
+
 export type ChangeCellsOptionMutationInput = {
   /** Идентификаторы ячеек */
   cellIds: Array<Scalars['ID']>;
@@ -1208,6 +1308,8 @@ export type ChangeColumnDimensionType = {
   /** Скрытие колонки */
   hidden: Scalars['Boolean'];
   id: Scalars['ID'];
+  /** Индекс колонки */
+  index: Scalars['Int'];
   /** Тип значений */
   kind: Scalars['String'];
   /** Дата обновления */
@@ -1690,6 +1792,8 @@ export type ChangeRowDimensionType = {
   /** Скрытие строки */
   hidden: Scalars['Boolean'];
   id: Scalars['ID'];
+  /** Индекс строки */
+  index: Scalars['Int'];
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
 };
@@ -2402,6 +2506,26 @@ export type DeleteSessionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteValuesCellMutationInput = {
+  /** Агрегирующая ячейка */
+  cellId: Scalars['ID'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Целевая ячейка */
+  targetCellId: Scalars['ID'];
+};
+
+/** Удаление агрегирующий ячейки. */
+export type DeleteValuesCellMutationPayload = {
+  __typename?: 'DeleteValuesCellMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленной ячейки */
+  id?: Maybe<Scalars['ID']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 /** Graphene object type for Department. */
 export type DepartmentType = {
   __typename?: 'DepartmentType';
@@ -2868,6 +2992,8 @@ export type Mutation = {
   addSectionText: AddSectionTextMutationPayload;
   /** Добавление тега */
   addTag: AddTagMutationPayload;
+  /** Добавляем агрегирование ячейки */
+  addValuesCells: AddValuesCellsMutationPayload;
   /** Авторизация через портал https://cbias.ru */
   authCbias?: Maybe<AuthCbiasMutationOutput>;
   /** Изменение атрибута */
@@ -2992,6 +3118,8 @@ export type Mutation = {
   deleteSection: DeleteSectionMutationPayload;
   /** Мутация для удаления всех сессий кроме текущей. */
   deleteSessions: DeleteSessionsMutationPayload;
+  /** Удаление агрегированной ячейки */
+  deleteValuesCell: DeleteValuesCellMutationPayload;
   /** Мутация для получения токена авторизации. */
   getToken: GetTokenMutationPayload;
   /** Мутация выхода */
@@ -3126,6 +3254,11 @@ export type MutationAddSectionTextArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddTagArgs = {
   input: AddTagMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddValuesCellsArgs = {
+  input: AddValuesCellsMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3436,6 +3569,11 @@ export type MutationDeleteSectionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteSessionsArgs = {
   input: DeleteSessionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteValuesCellArgs = {
+  input: DeleteValuesCellMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4358,7 +4496,7 @@ export type Query = {
   /** Пользователи приложения */
   users: UserTypeConnection;
   /** Ячейка и ее зависимости */
-  valueCells?: Maybe<Array<Maybe<CellType>>>;
+  valueCells?: Maybe<Array<Maybe<ChangeCellType>>>;
   /** Файлы значения ячейки типа `Файл` */
   valueFiles?: Maybe<Array<FileType>>;
 };
@@ -5800,6 +5938,13 @@ export type ChangeCellsOptionMutationVariables = Exact<{
 
 export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value?: string | null }> | null } };
 
+export type DeleteValueCellMutationVariables = Exact<{
+  cellId: Scalars['ID'];
+  targetCellId: Scalars['ID'];
+}>;
+
+export type DeleteValueCellMutation = { __typename?: 'Mutation', deleteValuesCell: { __typename: 'DeleteValuesCellMutationPayload', success: boolean, id?: string | null } };
+
 export type AddChildRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['ID'];
@@ -6228,6 +6373,12 @@ export type UserPeriodPrivilegesQueryVariables = Exact<{
 }>;
 
 export type UserPeriodPrivilegesQuery = { __typename?: 'Query', userPeriodPrivileges: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> };
+
+export type ValueCellsQueryVariables = Exact<{
+  cellId: Scalars['ID'];
+}>;
+
+export type ValueCellsQuery = { __typename?: 'Query', valueCells?: Array<{ __typename: 'ChangeCellType', id: string, kind: CellKind, tooltip?: string | null, comment?: string | null, aggregation?: CellAggregation | null, default?: string | null, column?: { __typename: 'ChangeColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'ChangeRowDimensionType', id: string, index: number } | null, sheet?: { __typename: 'SheetType', id: string, name: string } | null } | null> | null };
 
 export type ValueFilesQueryVariables = Exact<{
   documentId: Scalars['ID'];

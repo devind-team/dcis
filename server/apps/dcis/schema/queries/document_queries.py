@@ -15,8 +15,9 @@ from stringcase import snakecase
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Document, DocumentStatus, Sheet, Status, Value, Cell
 from apps.dcis.permissions import can_view_document
-from apps.dcis.schema.types import DocumentStatusType, DocumentType, SheetType, StatusType, CellType
+from apps.dcis.schema.types import DocumentStatusType, DocumentType, SheetType, StatusType, ChangeCellType
 from apps.dcis.services.document_services import get_user_documents
+from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
 from apps.dcis.services.value_services import get_file_value_files
 
@@ -60,7 +61,7 @@ class DocumentQueries(graphene.ObjectType):
     )
 
     value_cells = graphene.List(
-        CellType,
+        ChangeCellType,
         cell_id=graphene.ID(required=True, description='Идентификатор ячейки'),
         description='Ячейка и ее зависимости'
     )
@@ -128,5 +129,6 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_value_cells(root, info: ResolveInfo, cell_id: str):
+    def resolve_value_cells(root, info: ResolveInfo, cell_id: str) -> list[Cell]:
         cell = get_object_or_404(Cell, pk=gid2int(cell_id))
+        return get_aggregation_cells(info.context.user, cell)
