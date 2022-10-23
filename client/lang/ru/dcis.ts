@@ -277,7 +277,17 @@ export default {
       fontSize: 'Шрифт',
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
-      commaIncrease: 'Увеличить разрядность'
+      commaIncrease: 'Увеличить разрядность',
+      aggregation: 'Агрегация ячеек',
+      aggregationTitle: 'Настройки агрегации',
+      aggregationChoice: 'Метод агрегации',
+      aggregationKind: {
+        empty: 'Не задано',
+        sum: 'Сумма',
+        avg: 'Среднее арифметическое',
+        max: 'Максимальное значение',
+        min: 'Минимальное значение'
+      }
     },
     columnWidth: 'Ширина: ',
     rowHeight: 'Высота: ',

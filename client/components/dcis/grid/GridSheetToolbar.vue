@@ -28,20 +28,11 @@ v-row
       template(#activator="{ on: onTooltip, attrs }")
         div(v-on="onTooltip" v-bind="attrs")
           aggregation-property(
-            v-on="onTooltip"
-            v-bind="attrs"
-            v-slot="{ on: onAggregation }" :cell="aggregationCell"
+            :cell="aggregationCell"
+            :disabled="disabled"
+            :themeClass="themeClass"
           )
-            v-btn(
-              v-on="onAggregation"
-              :disabled="disabled || !aggregationCell"
-              :class="[{ 'v-btn--active': aggregationCell && aggregationCell.aggregation }, themeClass]"
-              class="v-btn--has-bg theme--light v-size--default"
-              width="40"
-              height="40"
-            )
-              v-icon mdi-sigma
-      span Агрегация ячейки
+      span {{ t('dcis.grid.sheetToolbar.aggregation') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
