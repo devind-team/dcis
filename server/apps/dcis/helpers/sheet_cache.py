@@ -28,22 +28,19 @@
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import ClassVar, Sequence
 
-from django.core.cache import cache
-from jsonpickle import decode, encode
 from openpyxl.utils.cell import get_column_letter
 from xlsx_evaluate.functions.xl import flatten
 from xlsx_evaluate.parser import FormulaParser
 from xlsx_evaluate.utils import resolve_ranges
 
+from apps.dcis.helpers.cache import Cache
 from apps.dcis.models import Cell, Sheet
-
-KEY_TEMPLATE = 'cache.sheet.%s'
 
 
 @dataclass
-class FormulaDependencyCache:
+class FormulaDependencyCache(Cache):
     """Структура для хранения кеша.
 
         - sheet_name - название листа
@@ -51,6 +48,8 @@ class FormulaDependencyCache:
         - dependency - частотная зависимость. Какие значения нужно получить, чтобы посчитать значение.
         - inversion - инверсивная зависимость. Какие ячейки нужно посчитать, если изменяется выбранная
     """
+    KEY_TEMPLATE: ClassVar[str] = 'cache.sheet.%s'
+
     sheet_name: str
 
     sheet_id: int | None = None
@@ -60,23 +59,7 @@ class FormulaDependencyCache:
 
     @property
     def key(self) -> str:
-        return KEY_TEMPLATE % self.sheet_id
-
-
-def save_to_cache(formula_dependency: FormulaDependencyCache) -> bool:
-    """Сохраняем структуру зависимостей в кеш."""
-    return cache.set(formula_dependency.key, encode(formula_dependency))
-
-
-def get_from_cache(sheet_id: int) -> FormulaDependencyCache | None:
-    """Забираем структуру из кеша."""
-    result = cache.get(KEY_TEMPLATE % sheet_id)
-    return None if result is None else decode(result)
-
-
-def delete_from_cache(sheet_id: int) -> bool:
-    """Удаление структуры из кеша."""
-    return cache.delete(KEY_TEMPLATE % sheet_id)
+        return self.KEY_TEMPLATE % self.sheet_id
 
 
 def dependency_formula(formula: str) -> list[str]:
@@ -116,28 +99,6 @@ class FormulaContainerCache:
     @property
     def inversion(self) -> dict[str, list[str]]:
         return self.sheet_dependency.inversion
-
-    def recalculate_dependency(self, coordinate: str) -> tuple[list[str], list[str]]:
-        """Рассчитываем значения связанных ячеек.
-
-        Нужно вычислить какие ячейки необходимо пересчитать и какие ячейки
-        и какие данные нужны.
-            - relation - выбираемые ячейки
-            - recalculation - пересчитываемые ячейки
-        """
-        relation: list[str] = []
-        recalculation: list[str] = []
-        stack_coordinates: list[str] = [coordinate]
-        while stack_coordinates:
-            next_coord: str = stack_coordinates.pop()
-            recalculation.append(next_coord)
-            # Нужно предусмотреть работу с листами
-            relation_dep: Counter | None = self.sheet_dependency.dependency.get(next_coord)
-            relation_inversion: list[str] | None = self.sheet_dependency.inversion.get(next_coord)
-            relation = [*relation, *(relation_dep.keys() if relation_dep else [])]
-            stack_coordinates = [*stack_coordinates, *(relation_inversion if relation_inversion else [])]
-
-        return relation, recalculation
 
     def add_formula(self, coordinate: str, formula: str):
         """
@@ -211,7 +172,7 @@ class FormulaContainerCache:
     def save(self, sheet_id: int | None = None) -> bool:
         if sheet_id is not None:
             self.sheet_id = sheet_id
-        return save_to_cache(self.sheet_dependency)
+        return self.sheet_dependency.save()
 
     @classmethod
     def get(cls, sheet: Sheet):
@@ -221,11 +182,11 @@ class FormulaContainerCache:
 
     def delete(self) -> bool:
         assert self.sheet_id is not None, 'Невозможно удалить контейнер без идентификатор'
-        return delete_from_cache(self.sheet_id)
+        return FormulaDependencyCache.delete(self.sheet_id)
 
     @classmethod
     def from_cache(cls, sheet_id: int):
-        result = get_from_cache(sheet_id)
+        result = FormulaDependencyCache.get(sheet_id)
         if result is None:
             return None
         container = cls(result.sheet_name)

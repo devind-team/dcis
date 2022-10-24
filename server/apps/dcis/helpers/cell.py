@@ -1,20 +1,20 @@
 """Вспомогательный модуль для расчета формул."""
 from collections import defaultdict
-from typing import Iterable, TypedDict
 from itertools import groupby
+from typing import Iterable, TypedDict
 
-from xlsx_evaluate import ModelCompiler, Model, Evaluator
-from django.db.models import QuerySet, Q
-from openpyxl.utils.cell import get_column_letter, column_index_from_string
-from openpyxl.utils.cell import coordinate_from_string
+from django.db.models import Q, QuerySet
+from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
+from xlsx_evaluate import Evaluator, Model, ModelCompiler
+from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
+
 from apps.dcis.models import Cell, Document, Sheet, Value
 from .sheet_cache import FormulaContainerCache
-from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
 
 
 def get_dependency_cells(
-        sheet_containers: list[FormulaContainerCache],
-        value: Value
+    sheet_containers: list[FormulaContainerCache],
+    value: Value
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
@@ -49,7 +49,11 @@ def get_dependency_cells(
     return dependency_cells, inversion_cells, [el for el, _ in groupby(sequence_evaluate)]
 
 
-def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) -> tuple[QuerySet[Cell], QuerySet[Value]]:
+def resolve_cells(
+    sheets: Iterable[Sheet],
+    document: Document,
+    cells: set[str]
+) -> tuple[QuerySet[Cell], QuerySet[Value]]:
     """Получаем строки в зависимости от координат."""
     sheet_mapping: dict[str, int] = {sheet.name: sheet.pk for sheet in sheets}
     sheet_cells: defaultdict[int, list[tuple[int, int]]] = defaultdict(list)
@@ -90,9 +94,9 @@ class ValueState(TypedDict):
 
 
 def resolve_evaluate_state(
-        cells: Iterable[Cell],
-        values: Iterable[Value],
-        inversion_cells: list[str]
+    cells: Iterable[Cell],
+    values: Iterable[Value],
+    inversion_cells: list[str]
 ) -> dict[str, ValueState]:
     """Строим массив для расчета.
 
