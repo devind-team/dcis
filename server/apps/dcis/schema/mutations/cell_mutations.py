@@ -58,6 +58,7 @@ class ChangeCellsOptionMutation(BaseMutation):
             'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
         ]
         - number_format - форматирование чисел
+        - aggregation - [None, 'sum', 'avg', 'min', 'max']
     """
 
     class Input:

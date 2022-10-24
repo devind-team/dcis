@@ -44,7 +44,7 @@ import valueCellsQuery from '~/gql/dcis/queries/value_cells.graphql'
 import deleteValuesCellMutation from '~/gql/dcis/mutations/cell/delete_values_cell.graphql'
 
 const aggregationKinds = t => ([
-  { text: 'Не задано', value: null },
+  { text: t('dcis.grid.sheetToolbar.aggregationKind.empty'), value: null },
   ...['sum', 'avg', 'max', 'min'].map(value => ({
     text: t(`dcis.grid.sheetToolbar.aggregationKind.${value}`),
     value
@@ -66,7 +66,7 @@ export default defineComponent({
     const aggregationItems = aggregationKinds(t)
     const aggregationKind = computed({
       get: () => (aggregationItems.reduce((a, c) => ({ [c.value]: c, ...a }), {})[props.cell?.aggregation]),
-      set: value => emit('changeKind', value)
+      set: value => emit('changeKind', value.value)
     })
 
     const {
@@ -90,7 +90,17 @@ export default defineComponent({
       active.value = false
     }
 
-    return { active, cancel, fromCells, fromCellsLoading, cellPosition, deleteMutate, aggregationKind, aggregationItems, t }
+    return {
+      active,
+      cancel,
+      fromCells,
+      fromCellsLoading,
+      cellPosition,
+      deleteMutate,
+      aggregationKind,
+      aggregationItems,
+      t
+    }
   }
 })
 </script>

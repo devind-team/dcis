@@ -28,6 +28,7 @@ v-row
       template(#activator="{ on: onTooltip, attrs }")
         div(v-on="onTooltip" v-bind="attrs")
           aggregation-property(
+            @changeKind="aggregationCell ? changeCellsOption([aggregationCell], 'aggregation', $event) : null"
             :cell="aggregationCell"
             :disabled="disabled"
             :themeClass="themeClass"
@@ -310,7 +311,8 @@ export default defineComponent({
       kinds,
       kind,
       commaDecrease,
-      commaIncrease
+      commaIncrease,
+      changeCellsOption
     }
   }
 })
