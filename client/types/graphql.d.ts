@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы изменения связей между записями в базе данных
+ * Типы измнения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -2110,7 +2110,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатает, готовиться отправить сообщение
+ * - TYPING - Печатет, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -2261,10 +2261,10 @@ export type DeleteCuratorGroupMutationInput = {
 export type DeleteCuratorGroupMutationPayload = {
   __typename?: 'DeleteCuratorGroupMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
-  /** Идентификатор удаленной кураторской группы */
-  deleteId: Scalars['ID'];
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленной кураторской группы */
+  id: Scalars['ID'];
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2705,7 +2705,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы. */
+/** Ошибка в поле формы */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -5371,7 +5371,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представляющий собой таблицу. */
+/** Документ, представлющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
@@ -5984,6 +5984,12 @@ export type AddCuratorGroupMutationVariables = Exact<{
 }>;
 
 export type AddCuratorGroupMutation = { __typename?: 'Mutation', addCuratorGroup: { __typename?: 'AddCuratorGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, curatorGroup?: { __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename: 'GroupType', id: string, name: string } | null } | null } };
+
+export type DeleteCuratorGroupMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeleteCuratorGroupMutation = { __typename?: 'Mutation', deleteCuratorGroup: { __typename: 'DeleteCuratorGroupMutationPayload', success: boolean, id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddChildRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];

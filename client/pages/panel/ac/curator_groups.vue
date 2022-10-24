@@ -23,31 +23,48 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
           v-btn.mx-1(v-on="on" v-bind="attrs" icon color="primary")
             v-icon mdi-briefcase-edit-outline
         span {{ $t('curators.tooltips.changeOrganizations') }}
-      v-tooltip(v-if="hasPerm('dcis.delete_curatorgroup')" bottom)
-        template(#activator="{ on, attrs }")
-          v-btn.ml-1(v-on="on" v-bind="attrs" icon color="error")
-            v-icon mdi-delete
-        span {{ $t('curators.tooltips.delete') }}
+      delete-menu(
+        v-if="hasPerm('dcis.delete_curatorgroup')"
+        :item-name="String($t('curators.deleteCuratorGroup.itemName'))"
+        @confirm="deleteCuratorGroup({ id: item.id })"
+        )
+        template(#default="{ on: onMenu }")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs }")
+              v-btn.ml-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" icon color="error")
+                v-icon mdi-delete
+            span {{ $t('curators.tooltips.delete') }}
 </template>
 
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
+import { useMutation } from '@vue/apollo-composable'
 import { computed, defineComponent, PropType } from '#app'
 import { useAuthStore } from '~/stores'
-import { CuratorGroupsQuery, CuratorGroupsQueryVariables } from '~/types/graphql'
+import {
+  CuratorGroupType,
+  CuratorGroupsQuery,
+  CuratorGroupsQueryVariables,
+  DeleteCuratorGroupMutation,
+  DeleteCuratorGroupMutationVariables
+} from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useCommonQuery } from '~/composables'
 import curatorGroupsQuery from '~/gql/dcis/queries/curator_groups.graphql'
+import deleteCuratorGroupMutation from '~/gql/dcis/mutations/curator/delete_curator_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddCuratorGroupMenu from '~/components/dcis/curators/AddCuratorGroupMenu.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({
   components: {
     LeftNavigatorContainer,
-    AddCuratorGroupMenu
+    AddCuratorGroupMenu,
+    DeleteMenu
   },
   props: {
-    breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
+    breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
+    group: { type: Object as PropType<CuratorGroupType>, required: true }
   },
   setup (props) {
     const { t, localePath } = useI18n()
@@ -75,8 +92,18 @@ export default defineComponent({
       return result
     })
 
-    const { data: curatorGroups, addUpdate } = useCommonQuery<CuratorGroupsQuery, CuratorGroupsQueryVariables>({
+    const { data: curatorGroups, addUpdate, deleteUpdate } = useCommonQuery<CuratorGroupsQuery, CuratorGroupsQueryVariables>({
       document: curatorGroupsQuery
+    })
+
+    /**
+     * Удаление группы
+     */
+    const { mutate: deleteCuratorGroup } = useMutation<
+      DeleteCuratorGroupMutation,
+      DeleteCuratorGroupMutationVariables
+    >(deleteCuratorGroupMutation, {
+      update: deleteUpdate
     })
 
     return {
@@ -84,7 +111,8 @@ export default defineComponent({
       bc,
       headers,
       curatorGroups,
-      addUpdate
+      addUpdate,
+      deleteCuratorGroup
     }
   }
 })
