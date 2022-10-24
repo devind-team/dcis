@@ -9,11 +9,11 @@ from xlsx_evaluate import Evaluator, Model, ModelCompiler
 from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
 
 from apps.dcis.models import Cell, Document, Sheet, Value
-from .sheet_cache import FormulaContainerCache
+from .sheet_formula_cache import SheetFormulaContainerCache
 
 
 def get_dependency_cells(
-    sheet_containers: list[FormulaContainerCache],
+    sheet_containers: list[SheetFormulaContainerCache],
     value: Value
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
@@ -32,7 +32,7 @@ def get_dependency_cells(
         cell = cells.pop()
         sheet_name, column_letter, row_index = parse_coordinate(cell)
         sequence_evaluate.append(sheet_name)
-        sheet_container: FormulaContainerCache
+        sheet_container: SheetFormulaContainerCache
         for sheet_container in sheet_containers:
             coordinate: str = f'{column_letter}{row_index}' if sheet_name == sheet_container.sheet_name else cell
             inversions: list[str] = [

@@ -12,9 +12,11 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.timezone import now
 
 from apps.core.models import User
-from apps.dcis.helpers.cell import (ValueState, evaluate_state, get_dependency_cells, resolve_cells,
-                                    resolve_evaluate_state)
-from apps.dcis.helpers.sheet_cache import FormulaContainerCache
+from apps.dcis.helpers.cell import (
+    ValueState, evaluate_state, get_dependency_cells, resolve_cells,
+    resolve_evaluate_state,
+)
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Cell, Document, RowDimension, Sheet, Value
 from apps.dcis.permissions import can_view_document
 
@@ -60,7 +62,7 @@ def update_or_create_value(
 def recalculate_cells(document: Document, value: Value) -> list[Value]:
     """Пересчитываем значения ячеек в зависимости от новых."""
     sheets: list[Sheet] = document.sheets.all()
-    sheet_containers: list[FormulaContainerCache] = [FormulaContainerCache.get(sheet) for sheet in sheets]
+    sheet_containers: list[SheetFormulaContainerCache] = [SheetFormulaContainerCache.get(sheet) for sheet in sheets]
     # 1. Собираем зависимости и последовательность операций
     dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(sheet_containers, value)
     # 1.1 Если у нас нет ячеек необходимых для пересчета, возвращаем только само значение

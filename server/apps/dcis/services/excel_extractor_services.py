@@ -14,7 +14,7 @@ from openpyxl.worksheet.dimensions import (
 from openpyxl.worksheet.merge import MergeCell as OpenpyxlMergedCell
 from xlsx_evaluate import Evaluator, ModelCompiler
 
-from apps.dcis.helpers.sheet_cache import FormulaContainerCache
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 from ..models.sheet import KindCell
@@ -84,10 +84,10 @@ class BuildSheet:
     cells: list[BuildCell]
     merged_cells: list[BuildMergedCell]
 
-    cache_container: FormulaContainerCache = field(init=False)
+    cache_container: SheetFormulaContainerCache = field(init=False)
 
     def __post_init__(self):
-        self.cache_container = FormulaContainerCache(self.name)
+        self.cache_container = SheetFormulaContainerCache(self.name)
 
 
 class ExcelExtractor:
