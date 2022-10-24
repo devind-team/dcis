@@ -29,6 +29,8 @@ v-row
         div(v-on="onTooltip" v-bind="attrs")
           aggregation-property(
             @changeKind="aggregationCell ? changeCellsOption([aggregationCell], 'aggregation', $event) : null"
+            :grid-choice="gridChoice"
+            :active-sheet-index="activeSheetIndex"
             :cell="aggregationCell"
             :disabled="disabled"
             :themeClass="themeClass"
@@ -99,10 +101,13 @@ import {
 import { CellType, DocumentsSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
 import AggregationProperty from '~/components/dcis/grid/properties/AggregationProperty.vue'
+import { GridChoiceType } from '~/composables/grid-choice'
 
 export default defineComponent({
   components: { AggregationProperty },
   props: {
+    gridChoice: { type: Object as PropType<GridChoiceType>, required: true },
+    activeSheetIndex: { type: Number, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateType<DocumentsSheetQuery>>, required: true },
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null },
     selectedColumnDimensionsOptions: { type: Object as PropType<ColumnDimensionsOptionsType>, default: null },

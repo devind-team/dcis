@@ -133,9 +133,9 @@ class AddValuesCellsMutation(BaseMutation):
         root: Any,
         info: ResolveInfo,
         cell_id: str,
-        cells_ids: list[str]
+        cells_id: list[str]
     ) -> 'AddValuesCellsMutation':
-        cells, errors = add_cell_aggregation(info.context.user, cell_id, cells_ids)
+        cells, errors = add_cell_aggregation(info.context.user, cell_id, cells_id)
         return AddValuesCellsMutation(success=not errors, errors=errors, cells=cells)
 
 

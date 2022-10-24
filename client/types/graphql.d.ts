@@ -1241,6 +1241,7 @@ export type ChangeCellsOptionMutationInput = {
  *     'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
  * ]
  * - number_format - форматирование чисел
+ * - aggregation - [None, 'sum', 'avg', 'min', 'max']
  */
 export type ChangeCellsOptionMutationPayload = {
   __typename?: 'ChangeCellsOptionMutationPayload';
@@ -5922,6 +5923,13 @@ export type AddBudgetClassificationMutationVariables = Exact<{
 }>;
 
 export type AddBudgetClassificationMutation = { __typename?: 'Mutation', addBudgetClassification: { __typename?: 'AddBudgetClassificationMutationPayload', budgetClassification?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } };
+
+export type AddValuesCellsMutationVariables = Exact<{
+  cellId: Scalars['ID'];
+  cellsId: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+export type AddValuesCellsMutation = { __typename?: 'Mutation', addValuesCells: { __typename?: 'AddValuesCellsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, cells?: Array<{ __typename: 'ChangeCellType', id: string, kind: CellKind, tooltip?: string | null, comment?: string | null, aggregation?: CellAggregation | null, default?: string | null, column?: { __typename: 'ChangeColumnDimensionType', id: string, index: number } | null, row?: { __typename: 'ChangeRowDimensionType', id: string, index: number } | null, sheet?: { __typename: 'SheetType', id: string, name: string } | null } | null> | null } };
 
 export type ChangeCellDefaultMutationVariables = Exact<{
   cellId: Scalars['ID'];
