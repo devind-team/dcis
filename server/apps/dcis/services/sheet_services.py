@@ -126,6 +126,13 @@ class CheckCellOptions:
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
 
 
+def get_aggregation_cells(user: User, cell: Cell) -> list[Cell]:
+    """Возвращаем ячейки, от которых зависит cell."""
+    can_change_period_sheet(user, cell.row.sheet.period)
+    to_cells = cell.to_cells.select_related('from_cell').all()
+    return [to_cell.from_cell for to_cell in to_cells]
+
+
 def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     """Изменение значения ячейки по умолчанию."""
     can_change_period_sheet(user, cell.row.sheet.period)

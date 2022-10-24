@@ -52,8 +52,7 @@ export default defineComponent({
     value: { type: String, default: null }
   },
   setup (props, { emit }) {
-    const { search, debounceSearch } = useDebounceSearch()
-    search.value = debounceSearch.value = props.value
+    const { search, debounceSearch } = useDebounceSearch({ defaultValue: props.value })
     const active = ref<boolean>(true)
     const name = ref<string>('')
 
