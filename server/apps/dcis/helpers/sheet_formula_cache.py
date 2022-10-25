@@ -26,7 +26,7 @@
 
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import ClassVar, Optional, Sequence
+from typing import ClassVar, Optional
 
 from openpyxl.utils.cell import get_column_letter
 
@@ -118,17 +118,17 @@ class SheetFormulaContainerCache(FormulaContainerCache):
     @classmethod
     def from_cache(cls, sheet_id: int) -> Optional['SheetFormulaContainerCache']:
         """Получение контейнера из кеша."""
-        result = SheetFormulaDependencyCache.get(sheet_id)
-        if result is None:
+        cache = SheetFormulaDependencyCache.get(sheet_id)
+        if cache is None:
             return None
-        container = cls(result.sheet_name)
-        container.sheet_dependency_cache = result
+        container = cls(cache.sheet_name)
+        container.sheet_dependency_cache = cache
         return container
 
     @classmethod
     def build_cache(cls, sheet: Sheet) -> 'SheetFormulaContainerCache':
         """Построение нового контейнера."""
-        cells: Sequence[Cell] = Cell.objects.filter(
+        cells = Cell.objects.filter(
             formula__isnull=False,
             formula__istartswith='=',
             row__parent__isnull=True,

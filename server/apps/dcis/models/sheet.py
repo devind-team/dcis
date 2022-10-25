@@ -263,6 +263,9 @@ class Limitation(models.Model):
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 
+    class Meta:
+        ordering = ('id',)
+
 
 class MergedCell(models.Model):
     """Модель объединенной ячейки."""

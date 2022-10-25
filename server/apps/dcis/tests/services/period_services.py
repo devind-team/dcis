@@ -1,4 +1,5 @@
 """Тесты модуля, отвечающего за работу с периодами."""
+from collections import Counter
 from datetime import date, timedelta
 from os.path import join
 from shutil import rmtree
@@ -8,10 +9,11 @@ from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from six import BytesIO
 
 from apps.core.models import User
+from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaDependencyCache
 from apps.dcis.models import Division, Limitation, Period, PeriodGroup, PeriodPrivilege, Privilege, Project, Sheet
 from apps.dcis.permissions import (
     can_add_period,
@@ -221,6 +223,7 @@ class PeriodTestCase(TestCase):
             'Create period'
         )
 
+    @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}})
     def test_add_limitations_from_file_with_errors(self) -> None:
         """Тестирование функции `add_limitations_from` c ошибками."""
         self._test_add_limitations_from_file_with_error(
@@ -250,6 +253,7 @@ class PeriodTestCase(TestCase):
             ]
         )
 
+    @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
     def test_add_limitations_from_file(self) -> None:
         """Тестирование функции `add_limitations_from` без ошибок."""
         limitations = add_limitations_from_file(
@@ -260,6 +264,23 @@ class PeriodTestCase(TestCase):
             Limitation.objects.get(sheet=self.form1),
             Limitation.objects.get(sheet=self.form2)
         ], limitations)
+        limitation_dependency_cache = LimitationFormulaDependencyCache.get(self.departament_period.id)
+        self.assertEqual(
+            {
+                'A1': Counter(['Форма1!A1', 'Форма2!A1']),
+                'A2': Counter(['Форма1!A2', 'Форма2!A2'])
+            },
+            limitation_dependency_cache.dependency
+        )
+        self.assertEqual(
+            {
+                'Форма1!A1': ['A1'],
+                'Форма2!A1': ['A1'],
+                'Форма1!A2': ['A2'],
+                'Форма2!A2': ['A2'],
+            },
+            limitation_dependency_cache.inversion
+        )
 
     def test_add_divisions_period(self) -> None:
         """Тестирование функции `add_divisions_period`."""

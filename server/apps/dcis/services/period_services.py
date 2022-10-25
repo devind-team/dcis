@@ -16,6 +16,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
+from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
 from apps.dcis.models import Attribute, Division, Limitation, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     can_add_period,
@@ -148,6 +149,7 @@ def add_limitations_from_file(period: Period, limitations_file: File) -> list[Li
         if not isinstance(data, list):
             raise_error(['json файл не содержит массив на верхнем уровне'])
         sheets = list(period.sheet_set.all())
+        container_cache = LimitationFormulaContainerCache()
         for i, limitation in enumerate(data, 1):
             if not isinstance(limitation, dict):
                 raise_error([f'Ограничение по номеру {i} не является объектом'])
@@ -158,11 +160,14 @@ def add_limitations_from_file(period: Period, limitations_file: File) -> list[Li
             sheet = next((sheet for sheet in sheets if sheet.name == limitation['form']), None)
             if sheet is None:
                 raise_error([f'Не найдена форма "{limitation["form"]}" для ограничения по номеру {i}'])
-            limitations.append(Limitation.objects.create(
+            limitation = Limitation.objects.create(
                 formula=limitation['check'],
                 error_message=limitation['message'],
                 sheet=sheet
-            ))
+            )
+            limitations.append(limitation)
+            container_cache.add_formula(f'A{i}', f'{limitation.formula}')
+            container_cache.save(period_id=period.id)
     except json.JSONDecodeError as error:
         raise raise_error(['Не удалось разобрать json файл', error.msg])
     return limitations
