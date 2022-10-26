@@ -1,5 +1,6 @@
 from django.db import models
 from openpyxl.utils.cell import get_column_letter
+from devind_helpers.utils import convert_str_to_bool
 
 from apps.core.models import User
 from .document import Document, Sheet
@@ -282,7 +283,7 @@ class Cell(Style, KindCell, models.Model):
     @property
     def is_aggregation(self) -> bool:
         """Является ли ячейка агрегационной."""
-        return self.aggregation is None
+        return self.aggregation is not None
 
 
 class RelationshipCells(models.Model):

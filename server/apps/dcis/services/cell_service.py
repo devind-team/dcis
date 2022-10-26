@@ -1,4 +1,5 @@
 """Модуль, отвечающий за работу с метаданными ячейки."""
+import contextlib
 
 from django.db.models import QuerySet, Q, ExpressionWrapper
 from devind_helpers.schema.types import ErrorFieldType
@@ -44,3 +45,20 @@ def delete_cell_aggregation(user: User, cell_id: CellIDType, target_cell_id: Cel
     target_cell = check_cell_permission(user, target_cell_id)
     RelationshipCells.objects.filter(to_cell=cell, from_cell=target_cell).delete()
     return target_cell_id
+
+
+def calculate_aggregation_cell(cell: Cell, *raw_values: tuple[str, float, int, bytes, ...]) -> float:
+    values: list[float] = []
+    for raw_value in raw_values:
+        with contextlib.suppress(ValueError):
+            values.append(float(raw_value))
+
+    match cell.aggregation:
+        case Cell.AGGREGATION_AVG:
+            return sum(values) / len(values)
+        case Cell.AGGREGATION_MIN:
+            return min(values)
+        case Cell.AGGREGATION_MAX:
+            return max(values)
+        case _:
+            return sum(values)
