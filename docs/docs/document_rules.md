@@ -60,8 +60,10 @@
 - `Period.project.user.id == info.context.user.id` - пользователь создал проект с периодом;
 - `Period.user.id == info.context.user.id` - пользователь создал период;
 - `info.context.user in Period.groups` - пользователь состоит в группе периода;
-- `Period in get_user_privileges_periods(user)` - пользователь имеет привилегию для периода;
-- `Period in get_user_divisions_periods(user)` - пользователь состоит в дивизионе, который участвует в периоде.
+- `Period in get_user_curator_periods(info.context.user)` - пользователь является куратором для периода;
+- `Period in get_user_privileges_periods(info.context.user)` - пользователь имеет привилегию для периода;
+- `Period in get_user_divisions_periods(info.context.user)` - пользователь состоит в дивизионе,
+  который участвует в периоде.
 
 Добавлять период могут пользователи, способные просматривать проект периода и
 обладающие хотя бы одним из следующих свойств:

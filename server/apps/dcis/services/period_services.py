@@ -27,6 +27,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
+from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 
@@ -35,6 +36,16 @@ def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[
     """Получение периодов, в которых пользователь непосредственно участвует."""
     return Period.objects.filter(
         Q(project__user=user) | Q(user=user) | Q(periodgroup__users=user),
+        project_id=project_id
+    )
+
+
+def get_user_curator_periods(user: User, project_id: int | str) -> QuerySet[Period]:
+    """Получение периодов, для которых пользователь является куратором."""
+    organization_ids = get_curator_organizations(user).values_list('id', flat=True)
+    return Period.objects.filter(
+        division__object_id__in=organization_ids,
+        project__content_type__model='organization',
         project_id=project_id
     )
 
@@ -64,6 +75,7 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
       - пользователь обладает глобальной привилегией dcis.view_period
       - пользователь участвует в периоде
         (создал проект с периодом, или создал период, или состоит в группе периода)
+      - пользователь является куратором для периода
       - пользователь имеет привилегию для периода
       - пользователь состоит в дивизионе, который участвует в периоде
     """
@@ -71,6 +83,7 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
         return Period.objects.filter(project_id=project_id)
     return (
         get_user_participant_periods(user, project_id) |
+        get_user_curator_periods(user, project_id) |
         get_user_divisions_periods(user, project_id) |
         get_user_privileges_periods(user, project_id)
     ).distinct()

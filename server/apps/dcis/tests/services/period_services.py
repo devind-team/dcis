@@ -5,7 +5,7 @@ from os.path import join
 from shutil import rmtree
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -14,7 +14,17 @@ from six import BytesIO
 
 from apps.core.models import User
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaDependencyCache
-from apps.dcis.models import Division, Limitation, Period, PeriodGroup, PeriodPrivilege, Privilege, Project, Sheet
+from apps.dcis.models import (
+    CuratorGroup,
+    Division,
+    Limitation,
+    Period,
+    PeriodGroup,
+    PeriodPrivilege,
+    Privilege,
+    Project,
+    Sheet,
+)
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -36,6 +46,7 @@ from apps.dcis.services.period_services import (
     delete_divisions_period,
     delete_period,
     delete_period_groups,
+    get_user_curator_periods,
     get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
@@ -50,14 +61,18 @@ class GetUserPeriodsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.user = User.objects.create(username='user', email='user@gmain.com')
         self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
 
-        self.user_is_creator_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
+        self.user_is_creator_project = Project.objects.create(
+            user=self.user,
+            content_type=self.organization_content_type
+        )
         self.user_project_periods = [Period.objects.create(project=self.user_is_creator_project) for _ in range(3)]
 
-        self.user_is_not_creator_project = Project.objects.create(content_type=self.department_content_type)
+        self.user_is_not_creator_project = Project.objects.create(content_type=self.organization_content_type)
         self.user_periods = [Period.objects.create(
             user=self.user, project=self.user_is_not_creator_project
         ) for _ in range(3)]
@@ -67,6 +82,10 @@ class GetUserPeriodsTestCase(TestCase):
             self.user_groups.append(PeriodGroup.objects.create(period=period))
             self.user_groups[-1].users.add(self.user)
 
+        self.curator_department_project = Project.objects.create(content_type=self.department_content_type)
+        self.curator_department_periods = self._create_curator_periods(self.curator_department_project)
+        self.curator_organization_periods = self._create_curator_periods(self.user_is_not_creator_project)
+
         self.privilege_period = Period.objects.create(project=self.user_is_not_creator_project)
         self.privilege = Privilege.objects.create()
         self.period_privilege = PeriodPrivilege.objects.create(
@@ -75,9 +94,12 @@ class GetUserPeriodsTestCase(TestCase):
             privilege=self.privilege,
         )
 
-        self.department = Department.objects.create(user=self.user)
-        self.department_period = Period.objects.create(project=self.user_is_not_creator_project)
-        self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
+        self.organization = Organization.objects.create(attributes='', user=self.user)
+        self.organization_period = Period.objects.create(project=self.user_is_not_creator_project)
+        self.organization_division = Division.objects.create(
+            period=self.organization_period,
+            object_id=self.organization.id,
+        )
 
         self.extra_project = Project.objects.create(content_type=self.department_content_type)
         self.extra_period = Period.objects.create(project=self.extra_project)
@@ -94,6 +116,20 @@ class GetUserPeriodsTestCase(TestCase):
         self.assertSetEqual(
             {*self.user_periods, *self.user_group_periods},
             set(get_user_participant_periods(self.user, self.user_is_not_creator_project.id)),
+        )
+
+    def test_get_user_curator_periods_department_project(self) -> None:
+        """Тестирование функции `get_user_curator_periods` для проекта с департаментами в качестве дивизионов."""
+        self.assertQuerysetEqual(
+            Period.objects.none(),
+            get_user_curator_periods(self.user, self.curator_department_project.id),
+        )
+
+    def test_get_user_curator_periods_organization_project(self) -> None:
+        """Тестирование функции `get_user_curator_periods` для проекта с организациями в качестве дивизионов."""
+        self.assertEqual(
+            {*self.curator_organization_periods},
+            set(get_user_curator_periods(self.user, self.user_is_not_creator_project.id)),
         )
 
     def test_user_privileges_periods(self) -> None:
@@ -113,7 +149,7 @@ class GetUserPeriodsTestCase(TestCase):
     def test_get_user_divisions_periods_with_periods(self) -> None:
         """Тестирование функции `get_user_divisions_periods` для пользователя, у которого есть периоды."""
         self.assertSetEqual(
-            {self.department_period},
+            {self.organization_period},
             set(get_user_divisions_periods(self.user, self.user_is_not_creator_project.id))
         )
 
@@ -130,11 +166,25 @@ class GetUserPeriodsTestCase(TestCase):
             {
                 *self.user_periods,
                 *self.user_group_periods,
+                *self.curator_organization_periods,
                 self.privilege_period,
-                self.department_period
+                self.organization_period
             },
             set(get_user_periods(self.user, self.user_is_not_creator_project.id)),
         )
+
+    def _create_curator_periods(self, project: Project) -> list[Period]:
+        """Создание периодов для проекта c кураторской группой."""
+        periods: list[Period] = []
+        for _ in range(3):
+            organization = Organization.objects.create(attributes='')
+            period = Period.objects.create(project=project)
+            period.division_set.create(object_id=organization.id)
+            curator_group = CuratorGroup.objects.create()
+            curator_group.users.add(self.user)
+            curator_group.organization.add(organization)
+            periods.append(period)
+        return periods
 
 
 class PeriodTestCase(TestCase):
