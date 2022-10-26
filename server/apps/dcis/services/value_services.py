@@ -127,12 +127,6 @@ def recalculate_aggregations(document: Document, cell: Cell, sheet_id: int,  val
             column_id=target_cell.column_id,
             row_id=target_cell.row_id
         ).first()
-        print(target_value)
-        print(target_cell)
-        print(target_cell.aggregation)
-        print(target_cell.is_aggregation)
-        print(target_cell.is_aggregation)
-        print((target_value.extra_value if target_cell.is_aggregation else target_value.value) if target_value else '0')
         target_value_recalculate = recalculate_aggregations(
             parent_document,
             target_cell,
