@@ -25,13 +25,15 @@
 Просматривать проект могут пользователи, обладающие хотя бы одним из следующих свойств:
 - `dcis.view_project` - пользователь обладает глобальной привилегией, позволяющей просматривать все проекты;
 - `Project.user_id == info.context.user.id` - пользователь создал проект;
-- `project.visibility && info.context.user in Project.period.user` - проект является видимым и
+- `Project.visibility && info.context.user in Project.period.user` - проект является видимым и
   пользователь создал один из периодов проекта;
-- `project.visibility && info.context.user in Project.period.periodgroup.users` - проект является видимым и
+- `Project.visibility && info.context.user in Project.period.periodgroup.users` - проект является видимым и
   пользователь состоит в группе одного из периодов проекта;
-- `project.visibility && Project in get_user_privilages_projects(user)` - проект является видимым и
+- `Project.visibility && Project in get_user_curator_projects(info.context.user)` - проект является видимым и
+  пользователь является куратором для одного из периодов проекта;
+- `Project.visibility && Project in get_user_privilages_projects(info.context.user)` - проект является видимым и
   пользователь имеет привилегию для одного из периодов проекта;
-- `project.visibility && Project in get_user_divisions_projects(user)` - проект является видимым и
+- `Project.visibility && Project in get_user_divisions_projects(info.context.user)` - проект является видимым и
   пользователь состоит в дивизионе, который участвует в проекте.
 
 Добавлять проект могут пользователи, обладающие хотя бы одним из следующих свойств:
