@@ -6,4 +6,4 @@ from .period_services import GetUserPeriodsTestCase, PeriodTestCase
 from .privilege_services import PrivilegeTestCase
 from .project_services import GetUserProjectsTestCase, ProjectTestCase
 from .row_dimension_services import RowDimensionTestCase
-from .status_services import StatusTestCase
+from .status_services import AddStatusCheckTestCase, StatusTestCase

@@ -87,7 +87,7 @@ class LimitationFormulaContainerCache(FormulaContainerCache):
     @classmethod
     def build_cache(cls, period: Period) -> 'LimitationFormulaContainerCache':
         """Построение нового контейнера."""
-        limitations = Limitation.objects.filter(sheet__in=period.sheet_set)
+        limitations = Limitation.objects.filter(sheet__in=period.sheet_set.all())
         container = cls()
         for i, limitation in enumerate(limitations, 1):
             container.add_formula(f'A{i}', limitation.formula)

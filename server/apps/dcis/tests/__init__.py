@@ -8,6 +8,7 @@ from .permissions import (
     ProjectPermissionsTestCase,
 )
 from .services import (
+    AddStatusCheckTestCase,
     ColumnDimensionTestCase,
     CuratorTestCase,
     DivisionTestCase,
