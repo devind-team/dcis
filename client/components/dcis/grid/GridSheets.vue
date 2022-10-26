@@ -33,7 +33,7 @@ div
 import { VTabs } from 'vuetify/lib/components/VTabs'
 import { computed, defineComponent, onBeforeUnmount, PropType, ref } from '#app'
 import {
-  BaseSheetType, CellType,
+  BaseSheetType,
   DocumentType,
   SheetType
 } from '~/types/graphql'

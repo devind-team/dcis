@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-dialog(v-model="active" width="600")
+  v-dialog(v-model="active" v-show="!gridChoice.active.value" width="600")
     template(#activator="{ on, attrs }")
       div(class="mr-1 v-item-group theme--light v-btn-toggle")
         v-btn(
@@ -39,9 +39,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onDeactivated, PropType, ref } from '#app'
+import { computed, defineComponent, onUnmounted, PropType, ref } from '#app'
 import { useMutation } from '@vue/apollo-composable'
-import { DataProxy } from 'apollo-cache'
 import {
   AddValuesCellsMutation,
   AddValuesCellsMutationVariables,
@@ -92,7 +91,7 @@ export default defineComponent({
     } = useCommonQuery<ValueCellsQuery, ValueCellsQueryVariables, 'valueCells'>({
       document: valueCellsQuery,
       variables: () => ({ cellId: props.cell?.id }),
-      options: () => ({ enabled: Boolean(props.cell) })
+      options: () => ({ enabled: Boolean(props.cell) && active.value })
     })
 
     const cellPosition = (fc: ValueCellsQuery['valueCells'][number]) => (`${fc.sheet.name}!${positionToLetter(fc.column.index)}${fc.row.index}`)
@@ -125,8 +124,7 @@ export default defineComponent({
       }
     }
     props.gridChoice.on(END_CHOICE_EVENT, endChoiceEventHandler)
-    onDeactivated(() => {
-      console.log('Отпсался из компонента')
+    onUnmounted(() => {
       props.gridChoice.removeListener(END_CHOICE_EVENT, endChoiceEventHandler)
     })
 
