@@ -12,7 +12,7 @@ export const cellKinds = {
   f: 'Formula',
   text: 'Text',
   fl: 'Files',
-  money: 'Money',
+  // money: 'Money', // Временно скрыто, так как не правильно обрабатывается
   department: 'Department',
   classification: 'Classification'
 }
