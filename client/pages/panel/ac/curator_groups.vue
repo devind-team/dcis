@@ -13,11 +13,13 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
       template(v-if="item.group") {{ item.group.name }}
       strong(v-else) &ndash;
     template(#item.actions="{ item }")
-      v-tooltip(v-if="hasPerm('dcis.change_curatorgroup')" bottom)
-        template(#activator="{ on, attrs }")
-          v-btn.mr-1(v-on="on" v-bind="attrs" icon color="primary")
-            v-icon mdi-account-edit
-        span {{ $t('curators.tooltips.changeUsers') }}
+      change-curator-group-users(v-if="hasPerm('dcis.change_curatorgroup')" :curator-group="item")
+        template(#activator="{ on: onMenu }")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs }")
+              v-btn.mr-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" color="primary" icon)
+                v-icon mdi-account-edit
+            span {{ $t('curators.tooltips.changeUsers') }}
       v-tooltip(v-if="hasPerm('dcis.change_curatorgroup')" bottom)
         template(#activator="{ on, attrs }")
           v-btn.mx-1(v-on="on" v-bind="attrs" icon color="primary")
@@ -27,7 +29,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
         v-if="hasPerm('dcis.delete_curatorgroup')"
         :item-name="String($t('curators.deleteCuratorGroup.itemName'))"
         @confirm="deleteCuratorGroup({ id: item.id })"
-        )
+      )
         template(#default="{ on: onMenu }")
           v-tooltip(bottom)
             template(#activator="{ on: onTooltip, attrs }")
@@ -42,7 +44,6 @@ import { useMutation } from '@vue/apollo-composable'
 import { computed, defineComponent, PropType } from '#app'
 import { useAuthStore } from '~/stores'
 import {
-  CuratorGroupType,
   CuratorGroupsQuery,
   CuratorGroupsQueryVariables,
   DeleteCuratorGroupMutation,
@@ -54,17 +55,18 @@ import curatorGroupsQuery from '~/gql/dcis/queries/curator_groups.graphql'
 import deleteCuratorGroupMutation from '~/gql/dcis/mutations/curator/delete_curator_group.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddCuratorGroupMenu from '~/components/dcis/curators/AddCuratorGroupMenu.vue'
+import ChangeCuratorGroupUsers from '~/components/dcis/curators/ChangeCuratorGroupUsers.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({
   components: {
     LeftNavigatorContainer,
     AddCuratorGroupMenu,
+    ChangeCuratorGroupUsers,
     DeleteMenu
   },
   props: {
-    breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
-    group: { type: Object as PropType<CuratorGroupType>, required: true }
+    breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
   setup (props) {
     const { t, localePath } = useI18n()

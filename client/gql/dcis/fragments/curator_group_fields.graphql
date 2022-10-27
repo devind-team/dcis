@@ -1,6 +1,0 @@
-fragment CuratorGroupFields on CuratorGroupType {
-  name
-  users {
-    ...UserFields
-  }
-}

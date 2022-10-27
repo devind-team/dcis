@@ -1,0 +1,15 @@
+#import "../../../core/fragments/user_fields.graphql"
+
+mutation AddUsersCuratorGroup($curatorGroupId: ID!, $userIds: [ID!]!) {
+  addUsersCuratorGroup(input: { curatorGroupId: $curatorGroupId, userIds: $userIds }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    users {
+      ...UserFields
+    }
+  }
+}

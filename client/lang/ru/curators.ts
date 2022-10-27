@@ -17,7 +17,22 @@ export default {
     buttonText: 'Добавить кураторскую группу'
   },
   deleteCuratorGroup: {
-    itemName: 'кураторскую',
+    itemName: 'кураторскую группу',
     delete: '@:delete'
+  },
+  changeCuratorGroupUsers: {
+    header: 'Изменение пользователей',
+    successMessage: 'Кураторы добавлены',
+    tableHeaders: {
+      avatar: 'Аватар',
+      name: 'ФИО',
+      username: 'Логин',
+      email: 'Email',
+      actions: '@:actions'
+    },
+    deleteItemName: 'пользователя',
+    deleteTooltip: '@:delete',
+    newUsers: 'Новые пользователи',
+    buttonText: '@:add'
   }
 }
