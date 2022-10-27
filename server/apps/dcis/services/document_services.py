@@ -28,6 +28,7 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
+from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
 
 
 def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Document]:
@@ -121,6 +122,7 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
+    rerender_values(document, create_attribute_context(user, document))
     return document, []
 
 

@@ -548,6 +548,25 @@ type AddTagMutationPayload {
   tag: TagType
 }
 
+input AddValuesCellsMutationInput {
+  """Целевая ячейка"""
+  cellId: ID!
+  """Связываем ячейки"""
+  cellsId: [ID!]!
+  clientMutationId: String
+}
+
+"""Добавление связной ячейки к агрегирующей."""
+type AddValuesCellsMutationPayload {
+  """Добавленные ячейки"""
+  cells: [ChangeCellType]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """An enumeration."""
 enum ApplicationAlgorithm {
   """No OIDC support"""
@@ -828,8 +847,60 @@ type CategoryTypeEdge {
   node: CategoryType
 }
 
+"""An enumeration."""
+enum CellAggregation {
+  """avg"""
+  AVG
+  """max"""
+  MAX
+  """min"""
+  MIN
+  """sum"""
+  SUM
+}
+
+"""An enumeration."""
+enum CellKind {
+  """b"""
+  B
+  """bigMoney"""
+  BIGMONEY
+  """classification"""
+  CLASSIFICATION
+  """d"""
+  D
+  """department"""
+  DEPARTMENT
+  """e"""
+  E
+  """f"""
+  F
+  """fl"""
+  FL
+  """inlineStr"""
+  INLINESTR
+  """money"""
+  MONEY
+  """n"""
+  N
+  """organization"""
+  ORGANIZATION
+  """s"""
+  S
+  """str"""
+  STR
+  """text"""
+  TEXT
+  """time"""
+  TIME
+  """user"""
+  USER
+}
+
 """Тип ячейки."""
 type CellType {
+  """Метод агрегации"""
+  aggregation: String
   """Цвет фона"""
   background: String!
   """Цвет границ"""
@@ -856,6 +927,8 @@ type CellType {
   horizontalAlign: ID
   """Идентификатор"""
   id: ID!
+  """Является ли поле шаблоном"""
+  isTemplate: Boolean
   """Курсив"""
   italic: Boolean!
   """Тип значения"""
@@ -1048,6 +1121,37 @@ type ChangeCellDefaultPayload {
   success: Boolean!
 }
 
+"""Оригинальные тип мета данных ячейки."""
+type ChangeCellType {
+  """Механизм агрегации"""
+  aggregation: CellAggregation
+  """Колонка"""
+  column: ChangeColumnDimensionType
+  """Комментарий"""
+  comment: String
+  """Значение по умолчанию"""
+  default: String
+  """Редактируемая ячейка"""
+  editable: Boolean!
+  """Формула"""
+  formula: String
+  id: ID!
+  """Является ли поле шаблоном"""
+  isTemplate: Boolean!
+  """Тип значения"""
+  kind: CellKind!
+  """Маска для ввода значений"""
+  mask: String
+  """Форматирование чисел"""
+  numberFormat: String
+  """Строка"""
+  row: ChangeRowDimensionType
+  """Лист"""
+  sheet: SheetType
+  """Подсказка"""
+  tooltip: String
+}
+
 input ChangeCellsOptionMutationInput {
   """Идентификаторы ячеек"""
   cellIds: [ID!]!
@@ -1073,6 +1177,7 @@ input ChangeCellsOptionMutationInput {
     'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
 ]
 - number_format - форматирование чисел
+- aggregation - [None, 'sum', 'avg', 'min', 'max']
 """
 type ChangeCellsOptionMutationPayload {
   """Измененные свойства ячеек"""
@@ -1136,6 +1241,8 @@ type ChangeColumnDimensionType {
   """Скрытие колонки"""
   hidden: Boolean!
   id: ID!
+  """Индекс колонки"""
+  index: Int!
   """Тип значений"""
   kind: String!
   """Дата обновления"""
@@ -1596,6 +1703,8 @@ type ChangeRowDimensionType {
   """Скрытие строки"""
   hidden: Boolean!
   id: ID!
+  """Индекс строки"""
+  index: Int!
   """Дата обновления"""
   updatedAt: DateTime!
 }
@@ -2277,6 +2386,25 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
+input DeleteValuesCellMutationInput {
+  """Агрегирующая ячейка"""
+  cellId: ID!
+  clientMutationId: String
+  """Целевая ячейка"""
+  targetCellId: ID!
+}
+
+"""Удаление агрегирующий ячейки."""
+type DeleteValuesCellMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленной ячейки"""
+  id: ID
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Graphene object type for Department."""
 type DepartmentType {
   """Children departments."""
@@ -2711,6 +2839,8 @@ type Mutation {
   addSectionText(input: AddSectionTextMutationInput!): AddSectionTextMutationPayload!
   """Добавление тега"""
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
+  """Добавляем агрегирование ячейки"""
+  addValuesCells(input: AddValuesCellsMutationInput!): AddValuesCellsMutationPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
   """Изменение атрибута"""
@@ -2835,6 +2965,8 @@ type Mutation {
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
   deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
+  """Удаление агрегированной ячейки"""
+  deleteValuesCell(input: DeleteValuesCellMutationInput!): DeleteValuesCellMutationPayload!
   """Мутация для получения токена авторизации."""
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
@@ -3636,7 +3768,7 @@ type Query {
   """Документ"""
   document(
     """Идентификатор документа"""
-    documentId: ID
+    documentId: ID!
   ): DocumentType
   """Выгрузка листа с несколькими документами"""
   documentSheet(
@@ -3803,6 +3935,11 @@ type Query {
   ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+  """Ячейка и ее зависимости"""
+  valueCells(
+    """Идентификатор ячейки"""
+    cellId: ID!
+  ): [ChangeCellType]
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор колонки"""

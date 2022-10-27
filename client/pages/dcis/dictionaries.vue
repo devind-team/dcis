@@ -13,7 +13,7 @@ import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vu
 import UniversalDictionary from '~/components/dcis/dictionaries/UniversalDictionary.vue'
 export default defineComponent({
   components: { LeftNavigatorDriver, UniversalDictionary },
-  middleware: ['auth'],
+  middleware: 'auth',
   setup () {
     const { t, localePath } = useI18n()
     useNuxt2Meta({ title: t('dictionaries.name') as string })

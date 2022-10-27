@@ -127,7 +127,7 @@ class SheetRowsUnloader(DataUnloader):
         'vertical_align', 'size', 'strong',
         'italic', 'strike', 'underline',
         'color', 'background', 'border_style',
-        'border_color',
+        'border_color', 'aggregation',
     )
     _values_fields = (
         'column_id', 'row_id', 'value', 'verified', 'error',

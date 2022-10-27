@@ -4,6 +4,7 @@ import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/ty
 import { useGridResizing } from '~/composables/grid-resizing'
 import { GridMode, ScrollInfoType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
 import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
+import { useGridSelection } from '~/composables/grid-selection'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -11,7 +12,7 @@ export const cellKinds = {
   f: 'Formula',
   text: 'Text',
   fl: 'Files',
-  money: 'Money',
+  // money: 'Money', // Временно скрыто, так как не правильно обрабатывается
   department: 'Department',
   classification: 'Classification'
 }
@@ -219,7 +220,8 @@ export function useGrid (
     mouseenterColumnName,
     mouseDownColumnName: mouseDownColumnNameSelection,
     mouseenterRowName,
-    mousedownRowName: mouseDownRowNameSelection
+    mousedownRowName: mouseDownRowNameSelection,
+    selectSelectionCell
   } = useGridSelection(
     sheet,
     scroll,
@@ -305,6 +307,7 @@ export function useGrid (
     gridWidth,
     activeCell,
     setActiveCell,
+    selectSelectionCell,
     resizingColumn,
     resizingColumnWidth,
     getColumnWidth,
