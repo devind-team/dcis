@@ -2,13 +2,16 @@
 
 from devind_helpers.orm_utils import get_object_or_none
 from devind_helpers.schema.types import ErrorFieldType
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Max, QuerySet
 
 from apps.core.models import User
+from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import Cell, Division, Document, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
+    can_change_document_base,
     can_change_document_comment,
 )
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
@@ -62,6 +65,8 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
 def get_user_roles(user: User, document: Document) -> list[str]:
     """Получение роли пользователя для документа."""
     roles: list[str] = []
+    if not is_raises(PermissionDenied, can_change_document_base, user, document):
+        roles.append('admin')
     if document.user_id == user.id:
         roles.append('creator')
     if is_document_curator(user, document):

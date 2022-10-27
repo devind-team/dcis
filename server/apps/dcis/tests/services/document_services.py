@@ -271,6 +271,7 @@ class DocumentTestCase(TestCase):
 
     def test_get_user_roles(self) -> None:
         """Тестирование функции `get_user_roles`."""
+        self.assertEqual(['admin', 'division_member'], get_user_roles(self.superuser, self.document))
         self.assertEqual([], get_user_roles(self.user, self.document))
         self.assertEqual(['creator'], get_user_roles(self.user, self.user_document))
         self.assertEqual([], get_user_roles(self.user, self.organization_multiple_document))
