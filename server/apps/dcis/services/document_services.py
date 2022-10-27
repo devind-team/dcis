@@ -11,7 +11,7 @@ from apps.dcis.permissions import (
     can_add_document,
     can_change_document_comment,
 )
-from apps.dcis.services.curator_services import is_document_curator
+from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
 from apps.dcis.services.divisions_services import get_user_division_ids, get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 
@@ -24,6 +24,7 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
       - пользователь создал проект документа
       - пользователь создал период документа
       - пользователь создал документ
+      - пользователь является куратором для документа
       - период создан с множественным типом сбора, и
         пользователь добавлен в закрепленный за документом дивизион
       - период создан с единичным типом сбора, и
@@ -41,12 +42,21 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         )
     ):
         return Document.objects.filter(period_id=period.id)
-    division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
+    user_documents = Document.objects.filter(user=user, period=period)
+    user_division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
     if period.multiple:
-        divisions_documents = Document.objects.filter(period=period, object_id__in=division_ids)
+        divisions_documents = Document.objects.filter(object_id__in=user_division_ids, period=period)
     else:
-        divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
-    return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
+        divisions_documents = Document.objects.filter(rowdimension__object_id__in=user_division_ids, period=period)
+    documents = user_documents | divisions_documents
+    if period.project.division_name == 'department':
+        return documents.distinct()
+    curator_organization_ids = get_curator_organizations(user).values_list('id', flat=True)
+    if period.multiple:
+        documents |= Document.objects.filter(object_id__in=curator_organization_ids, period=period)
+    elif period.division_set.filter(object_id__in=curator_organization_ids).count() > 0:
+        return Document.objects.filter(period_id=period.id)
+    return documents.distinct()
 
 
 def get_user_roles(user: User, document: Document) -> list[str]:

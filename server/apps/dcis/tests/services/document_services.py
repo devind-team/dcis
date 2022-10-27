@@ -25,62 +25,67 @@ class GetUserDocumentsTestCase(TestCase):
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
-        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.user = User.objects.create(username='user', email='user@gmail.com')
         self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
 
-        self.departments = [Department.objects.create(user=self.user) for _ in range(3)]
+        self.organizations = [Organization.objects.create(attributes='', user=self.user) for _ in range(3)]
 
-        self.extra_project = Project.objects.create(content_type=self.department_content_type)
+        self.extra_project = Project.objects.create(content_type=self.organization_content_type)
         self.extra_period = Period.objects.create(project=self.extra_project)
         self.extra_row_document = Document.objects.create(period=self.extra_period)
-        self.extra_department_sheet = Sheet.objects.create(period=self.extra_period)
-        self.extra_department_row_dimensions = [RowDimension.objects.create(
+        self.extra_organization_sheet = Sheet.objects.create(period=self.extra_period)
+        self.extra_organization_row_dimensions = [RowDimension.objects.create(
             index=1,
-            sheet=self.extra_department_sheet,
+            sheet=self.extra_organization_sheet,
             document=self.extra_row_document,
-            object_id=department.id
-        ) for department in self.departments]
+            object_id=organization.id
+        ) for organization in self.organizations]
 
         self.user_is_creator_project = Project.objects.create(
             user=self.user,
-            content_type=self.department_content_type
+            content_type=self.organization_content_type
         )
         self.user_is_not_creator_period = Period.objects.create(project=self.user_is_creator_project)
         self.user_is_creator_project_documents = [Document.objects.create(
             period=self.user_is_not_creator_period
         ) for _ in range(3)]
 
-        self.user_is_not_creator_project = Project.objects.create(content_type=self.department_content_type)
+        self.user_is_not_creator_project = Project.objects.create(content_type=self.organization_content_type)
         self.user_is_creator_period = Period.objects.create(user=self.user, project=self.user_is_not_creator_project)
         self.user_is_creator_period_documents = [Document.objects.create(
             period=self.user_is_creator_period
         ) for _ in range(3)]
 
-        self.multiple_single_project = Project.objects.create(content_type=self.department_content_type)
+        self.multiple_single_project = Project.objects.create(content_type=self.organization_content_type)
+
+        self.curator_organization = Organization.objects.create(attributes='')
+        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group.users.add(self.user)
+        self.curator_group.organization.add(self.curator_organization)
 
         self.multiple_period = Period.objects.create(project=self.multiple_single_project, multiple=True)
+        self.multiple_period.division_set.create(object_id=self.curator_organization.id)
         self.multiple_period_user_document = Document.objects.create(period=self.multiple_period, user=self.user)
-        self.department_documents = [Document.objects.create(
-            period=self.multiple_period, object_id=department.id
-        ) for department in self.departments]
-        self.not_period_department_documents = [Document.objects.create(
-            period=self.extra_period, object_id=department.id
-        ) for department in self.departments]
-        self.not_department_document = Document.objects.create(period=self.multiple_period)
+        self.multiple_period_curator_document = Document.objects.create(
+            period=self.multiple_period,
+            object_id=self.curator_organization.id,
+        )
+        self.organization_documents = [Document.objects.create(
+            period=self.multiple_period, object_id=organization.id
+        ) for organization in self.organizations]
+        self.not_period_organization_documents = [Document.objects.create(
+            period=self.extra_period, object_id=organization.id
+        ) for organization in self.organizations]
+        self.not_organization_document = Document.objects.create(period=self.multiple_period)
 
-        self.single_period = Period.objects.create(project=self.multiple_single_project, multiple=False)
-        self.single_period_user_document = Document.objects.create(period=self.single_period, user=self.user)
-        self.department_row_document = Document.objects.create(period=self.single_period)
-        self.department_sheet = Sheet.objects.create(period=self.single_period)
-        self.department_row_dimensions = [RowDimension.objects.create(
-            index=1,
-            sheet=self.department_sheet,
-            document=self.department_row_document,
-            object_id=department.id
-        ) for department in self.departments]
-        self.not_department_row_document = Document.objects.create(period=self.single_period)
+        self.single_not_curator_period, self.single_not_curator_documents = self._create_single_period()
+        self.single_not_curator_extra_document = Document.objects.create(period=self.single_not_curator_period)
+
+        self.single_curator_period, self.single_curator_documents = self._create_single_period()
+        self.single_curator_extra_document = Document.objects.create(period=self.single_curator_period)
+        self.single_curator_period.division_set.create(object_id=self.curator_organization.id)
 
     def test_get_user_documents_with_global_perm(self) -> None:
         """Тестирование функции `get_user_documents`.
@@ -139,20 +144,49 @@ class GetUserDocumentsTestCase(TestCase):
         """
         for period in self._get_period(self.multiple_period):
             self.assertSetEqual(
-                {self.multiple_period_user_document, *self.department_documents},
+                {
+                    self.multiple_period_user_document,
+                    self.multiple_period_curator_document,
+                    *self.organization_documents
+                },
                 set(get_user_documents(self.user, period))
             )
 
-    def test_get_user_documents_single_period(self) -> None:
+    def test_get_user_documents_single_period_not_curator(self) -> None:
         """Тестирование функции `get_user_documents`.
 
-        Для периода выбран единичный тип сбора.
+        Для периода выбран единичный тип сбора, и пользователь не является куратором.
         """
-        for period in self._get_period(self.single_period):
+        for period in self._get_period(self.single_not_curator_period):
             self.assertSetEqual(
-                {self.single_period_user_document, self.department_row_document},
+                {*self.single_not_curator_documents},
                 set(get_user_documents(self.user, period))
             )
+
+    def test_get_user_documents_single_period_curator(self) -> None:
+        """Тестирование функции `get_user_documents`.
+
+        Для периода выбран единичный тип сбора, и пользователь является куратором.
+        """
+        for period in self._get_period(self.single_curator_period):
+            self.assertSetEqual(
+                {*self.single_curator_documents, self.single_curator_extra_document},
+                set(get_user_documents(self.user, period))
+            )
+
+    def _create_single_period(self) -> tuple[Period, list[Document]]:
+        """Создание периода с единичным типом сбора."""
+        single_period = Period.objects.create(project=self.multiple_single_project, multiple=False)
+        single_period_user_document = Document.objects.create(period=single_period, user=self.user)
+        organization_row_document = Document.objects.create(period=single_period)
+        organization_sheet = Sheet.objects.create(period=single_period)
+        [RowDimension.objects.create(
+            index=1,
+            sheet=organization_sheet,
+            document=organization_row_document,
+            object_id=organization.id
+        ) for organization in self.organizations]
+        return single_period, [single_period_user_document, organization_row_document]
 
     @staticmethod
     def _get_period(period: Period):
