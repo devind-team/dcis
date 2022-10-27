@@ -41,7 +41,7 @@ class AddDocumentBase:
         """Идентификаторы дивизионов пользователя."""
         if self._user_division_ids is None:
             self._user_division_ids = [
-                division['id'] for division in get_user_divisions(self._user)
+                division['id'] for division in get_user_divisions(self._user, self._period.project)
             ]
         return self._user_division_ids
 
@@ -57,9 +57,10 @@ class AddDocumentBase:
             )
         return self._can_add_any_document
 
-    def can_add_restricted_document(self, _: Status, division_id: int | str) -> bool:
+    def can_add_restricted_document(self, status: Status, division_id: int | str) -> bool:
         """Может ли пользователь добавлять документ с конкретным дивизионом и статусом."""
-        return int(division_id) in self.user_division_ids
+        add_status = AddStatus.objects.filter(from_status=None, to_status=status).first()
+        return int(division_id) in self.user_division_ids and add_status is not None
 
     def has_object_permission(self, status: Status, division_id: int | str | None) -> bool:
         """Получение разрешения."""

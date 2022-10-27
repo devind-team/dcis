@@ -6,7 +6,9 @@ from unittest.mock import Mock, patch
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
+from django.test import TestCase
 
+from apps.core.models import User
 from apps.dcis.models import AddStatus, Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet, Status
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
@@ -19,22 +21,26 @@ from apps.dcis.permissions.document_permissions import (
     can_delete_document_status,
     can_view_document,
 )
-from .common import PermissionsTestCase
 
 
-class DocumentPermissionsTestCase(PermissionsTestCase):
+class DocumentPermissionsTestCase(TestCase):
     """Тесты разрешений на работу с документами периодов."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
-        super().setUp()
+        self.user = User.objects.create(username='user', email='user@gmail.com')
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
 
         self.status_edit = Status.objects.create(edit=True)
-        self.add_status = AddStatus.objects.create(
-            from_status=self.status_edit,
+        self.status_edit_create_status = AddStatus.objects.create(
+            from_status=None,
             to_status=Status.objects.create(),
+            roles=[]
+        )
+        self.status_edit_add_status = AddStatus.objects.create(
+            from_status=None,
+            to_status=self.status_edit,
             roles=['creator']
         )
 
@@ -163,6 +169,12 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
         ), patch.object(
             self.period, 'multiple', new=True,
         ):
+            with patch(
+                'apps.dcis.permissions.document_permissions.AddDocumentBase.can_add_restricted_document',
+                new=Mock(return_value=False),
+            ) as mock:
+                self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
+                mock.assert_called_once_with(self.status_edit, 1)
             can_add_document(self.user, self.period, self.status_edit, 1)
             self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 2)
         with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
@@ -186,8 +198,8 @@ class DocumentPermissionsTestCase(PermissionsTestCase):
 
     def test_can_add_document_status(self) -> None:
         """Тестирование функции `can_add_document_status`."""
-        self._test_common(can_add_document_status, self.add_status)
-        can_add_document_status(self.user, self.user_document, self.add_status)
+        self._test_common(can_add_document_status, self.status_edit_add_status)
+        can_add_document_status(self.user, self.user_document, self.status_edit_add_status)
 
     def test_can_delete_document_status(self) -> None:
         """Тестирование функции `can_delete_document_status`."""
