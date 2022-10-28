@@ -12,6 +12,7 @@ from graphql import ResolveInfo
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.models import CuratorGroup
+from apps.dcis.permissions.curator_permissions import can_view_curator_group
 from apps.dcis.schema.types import CuratorGroupType
 from apps.dcis.services.curator_services import get_curator_group_new_users
 
@@ -37,8 +38,15 @@ class CuratorGroupQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
+    def resolve_curator_groups(root: Any, info: ResolveInfo) -> QuerySet[CuratorGroup]:
+        can_view_curator_group(info.context.user)
+        return CuratorGroup.objects.all()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_curator_group(root: Any, info: ResolveInfo, curator_group_id: str) -> CuratorGroup:
         curator_group = get_object_or_404(CuratorGroup, pk=curator_group_id)
+        can_view_curator_group(info.context.user)
         return curator_group
 
     @staticmethod
@@ -50,4 +58,5 @@ class CuratorGroupQueries(graphene.ObjectType):
         *args,
         **kwargs,
     ) -> QuerySet[User]:
+        can_view_curator_group(info.context.user)
         return get_curator_group_new_users(curator_group_id)
