@@ -18,7 +18,12 @@ from apps.dcis.models import (
     Sheet,
     Status, Value,
 )
-from apps.dcis.services.status_services import AddStatusCheck, add_document_status, delete_document_status
+from apps.dcis.services.status_services import (
+    AddStatusCheck,
+    add_document_status,
+    delete_document_status,
+    get_initial_statuses, get_new_statuses,
+)
 
 
 class StatusTestCase(TestCase):
@@ -26,25 +31,66 @@ class StatusTestCase(TestCase):
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
+        self.user = User.objects.create(username='user', email='user@gmail.com')
         self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
+        self.document = Document.objects.create(period=self.period)
 
-        self.status_to_add = Status.objects.create(name='add_status')
+        self.initial_status = Status.objects.create(name='initial_status')
+        self.initial_add_status = AddStatus.objects.create(
+            from_status=None,
+            to_status=self.initial_status,
+            roles=[]
+        )
+        self.initial_admin_status = Status.objects.create(name='initial_admit_status')
+        self.initial_admin_add_status = AddStatus.objects.create(
+            from_status=None,
+            to_status=self.initial_admin_status,
+            roles=['admin']
+        )
+        self.initial_division_member_status = Status.objects.create(name='initial_division_member_status')
+        self.initial_division_member_add_status = AddStatus.objects.create(
+            from_status=None,
+            to_status=self.initial_division_member_status,
+            roles=['division_member']
+        )
+        self.initial_admin_division_member_status = Status.objects.create(name='initial_admit_division_member_status')
+        self.initial_admin_division_member_add_status = AddStatus.objects.create(
+            from_status=None,
+            to_status=self.initial_admin_division_member_status,
+            roles=['admin', 'division_member']
+        )
+
+        self.document_current_status = Status.objects.create(name='document_current_status')
+        self.document_status = DocumentStatus.objects.create(
+            document=self.document,
+            status=self.document_current_status,
+            user=self.superuser,
+        )
+        self.new_statuses = [Status.objects.create(name=f'new_status{i}') for i in range(1, 5)]
+        for i, new_status in enumerate(self.new_statuses, 1):
+            AddStatus.objects.create(
+                from_status=self.document_current_status,
+                to_status=new_status,
+                roles=['creator', 'curator', 'division_member', 'admin'][0:i]
+            )
+
+        self.status_to_add = Status.objects.create(name='status_to_add')
         self.exist_status = Status.objects.create(name='exist_status')
         self.add_status = AddStatus.objects.create(
             from_status=self.exist_status,
             to_status=self.status_to_add,
-            roles=[],
+            roles=['admin'],
             check='test_check',
         )
         self.add_document = Document.objects.create(user=self.superuser, period=self.period)
         self.add_document_status = DocumentStatus.objects.create(
-            user=self.superuser,
             document=self.add_document,
             status=self.exist_status,
+            user=self.superuser,
         )
 
         self.status_to_delete = Status.objects.create(name='delete_status')
@@ -53,6 +99,37 @@ class StatusTestCase(TestCase):
             user=self.superuser,
             document=self.delete_document,
             status=self.status_to_delete,
+        )
+
+    def test_get_initial_statuses(self) -> None:
+        """Тестирование функции `get_initial_statuses`."""
+        self.assertQuerysetEqual(
+            Status.objects.none(),
+            get_initial_statuses(self.user, self.period)
+        )
+        self.assertEqual(
+            {self.initial_admin_status, self.initial_admin_division_member_status},
+            set(get_initial_statuses(self.superuser, self.period))
+        )
+        with patch(
+            'apps.dcis.services.status_services.is_period_division_member',
+            new=Mock(return_value=True)
+        ) as mock:
+            self.assertEqual(
+                {
+                    self.initial_admin_status,
+                    self.initial_division_member_status,
+                    self.initial_admin_division_member_status
+                },
+                set(get_initial_statuses(self.superuser, self.period))
+            )
+            mock.assert_called_once_with(self.superuser, self.period)
+
+    def test_get_new_statuses(self) -> None:
+        """Тестирование функции `get_new_statuses`."""
+        self.assertEqual(
+            [self.new_statuses[3]],
+            get_new_statuses(self.superuser, self.document)
         )
 
     def test_add_document_status(self) -> None:

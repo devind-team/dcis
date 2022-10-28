@@ -2,15 +2,37 @@
 from typing import cast
 
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 
 from apps.core.models import User
 from apps.dcis.helpers.cell import ValueState, evaluate_state, parse_coordinate, resolve_cells, resolve_evaluate_state
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
-from apps.dcis.models import Document, DocumentStatus, Limitation, Status
+from apps.dcis.models import Document, DocumentStatus, Limitation, Period, Status
 from apps.dcis.models.document import AddStatus
 from apps.dcis.permissions import (
-    can_add_document_status, can_delete_document_status,
+    AddDocumentBase,
+    can_add_document_status,
+    can_delete_document_status,
 )
+from apps.dcis.services.divisions_services import is_period_division_member
+from apps.dcis.services.document_services import get_user_roles
+
+
+def get_initial_statuses(user: User, period: Period) -> QuerySet[Status]:
+    """Получение возможных начальных статусов для нового документа периода."""
+    add_statuses = AddStatus.objects.none()
+    if AddDocumentBase(user, period).can_add_any_division_document:
+        add_statuses |= AddStatus.objects.filter(from_status=None, roles__contains='admin')
+    if is_period_division_member(user, period):
+        add_statuses |= AddStatus.objects.filter(from_status=None, roles__contains='division_member')
+    return Status.objects.filter(to_add_statuses__in=add_statuses)
+
+
+def get_new_statuses(user: User, document: Document) -> list[Status]:
+    """Получение возможных новых статусов для документа."""
+    user_roles = set(get_user_roles(user, document))
+    add_statuses = AddStatus.objects.filter(from_status=document.last_status.status)
+    return [add_status.to_status for add_status in add_statuses if len(user_roles & set(add_status.roles)) > 0]
 
 
 def add_document_status(user: User, document: Document, status: Status, comment: str) -> DocumentStatus:
