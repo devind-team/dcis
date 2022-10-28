@@ -402,7 +402,7 @@ export type AddPeriodGroupMutationPayload = {
 
 export type AddPeriodMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** json файл c ограничениями, накладываемыми на лист */
+  /** json файл c ограничениями, накладываемыми на листы */
   limitationsFile?: InputMaybe<Scalars['Upload']>;
   /** Множественный тип сбора */
   multiple: Scalars['Boolean'];
@@ -4292,10 +4292,14 @@ export type Query = {
   groups: Array<GroupType>;
   /** Установлены ли настройки приложения */
   hasSettings: Scalars['Boolean'];
+  /** Возможные начальные статусы для нового документа */
+  initialStatuses?: Maybe<Array<StatusType>>;
   logEntry: LogEntryTypeConnection;
   logRequests: LogRequestTypeConnection;
   /** Информация обо мне */
   me?: Maybe<UserType>;
+  /** Возможные новые статусы для документа */
+  newStatuses?: Maybe<Array<StatusType>>;
   /** Источник уведомлений */
   notices: NoticeTypeConnection;
   /** Детализация уведомления */
@@ -4465,6 +4469,11 @@ export type QueryFilesArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryInitialStatusesArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
 export type QueryLogEntryArgs = {
   action_Contains?: InputMaybe<Scalars['String']>;
   after?: InputMaybe<Scalars['String']>;
@@ -4490,6 +4499,11 @@ export type QueryLogRequestsArgs = {
   offset?: InputMaybe<Scalars['Int']>;
   page_Icontains?: InputMaybe<Scalars['String']>;
   userId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Схема запросов данных. */
+export type QueryNewStatusesArgs = {
+  documentId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -6159,6 +6173,18 @@ export type DocumentsSheetQueryVariables = Exact<{
 }>;
 
 export type DocumentsSheetQuery = { __typename?: 'Query', documentsSheet: { __typename: 'SheetType', canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, verified: boolean, error?: string | null }> }> | null } };
+
+export type InitialStatusesQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type InitialStatusesQuery = { __typename?: 'Query', initialStatuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
+
+export type NewStatusesQueryVariables = Exact<{
+  documentId: Scalars['ID'];
+}>;
+
+export type NewStatusesQuery = { __typename?: 'Query', newStatuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
 
 export type OrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 

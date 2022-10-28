@@ -1,0 +1,7 @@
+#import "../fragments/status_fields.graphql"
+
+query NewStatuses($documentId: ID!) {
+  newStatuses(documentId: $documentId) {
+    ...StatusFields
+  }
+}

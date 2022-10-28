@@ -375,7 +375,7 @@ type AddPeriodGroupMutationPayload {
 
 input AddPeriodMutationInput {
   clientMutationId: String
-  """json файл c ограничениями, накладываемыми на лист"""
+  """json файл c ограничениями, накладываемыми на листы"""
   limitationsFile: Upload
   """Множественный тип сбора"""
   multiple: Boolean!
@@ -3677,10 +3677,20 @@ type Query {
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
   hasSettings: Boolean!
+  """Возможные начальные статусы для нового документа"""
+  initialStatuses(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [StatusType!]
   logEntry(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, first: Int, last: Int, objectId_Icontains: Int, offset: Int, userId: ID): LogEntryTypeConnection!
   logRequests(after: String, before: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, offset: Int, page_Icontains: String, userId: ID): LogRequestTypeConnection!
   """Информация обо мне"""
   me: UserType
+  """Возможные новые статусы для документа"""
+  newStatuses(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [StatusType!]
   """Источник уведомлений"""
   notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection!
   """Детализация уведомления"""
