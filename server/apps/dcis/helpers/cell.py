@@ -10,6 +10,7 @@ from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
 
 from apps.dcis.models import Cell, Document, Sheet, Value
 from .sheet_formula_cache import SheetFormulaContainerCache
+from ..models.sheet import KindCell
 
 
 def get_dependency_cells(
@@ -93,7 +94,7 @@ class ValueState(TypedDict):
         - formula - формула;
         - cell - ячейка, для которой ведем расчет.
     """
-    value: str | None
+    value: str | float | None
     error: str | None
     formula: str | None
     cell: Cell
@@ -114,9 +115,17 @@ def resolve_evaluate_state(
     values_state: dict[str, str] = {get_coordinate(v.column.sheet, v): v.value.strip() for v in values}
     cell: Cell
     for cell in cells:
-        coord: str = get_coordinate(cell.column.sheet, cell)
+        coord = get_coordinate(cell.column.sheet, cell)
+        value = values_state.get(coord, cell.default)
+        if cell.kind == KindCell.NUMERIC:
+            value = float(value)
+        if cell.kind == KindCell.FORMULA:
+            try:
+                value = float(value)
+            except ValueError:
+                pass
         state[coord]: ValueState = {
-            'value': values_state.get(coord, cell.default),
+            'value': value,
             'error': None,
             'formula': cell.formula if cell.formula and coord in inversion_cells else None,
             'cell': cell

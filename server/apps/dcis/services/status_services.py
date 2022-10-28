@@ -74,10 +74,11 @@ class AddStatusCheck:
         cells, values = resolve_cells(sheets, document, dependencies)
         state = resolve_evaluate_state(cells, values, [])
         for i, limitation in enumerate(limitations, 1):
+            error_message = limitation.error_message.replace('"', '""')
             state[f'{cls.VIRTUAL_SHEET_NAME}!A{i}'] = cast(ValueState, {
                 'value': None,
                 'error': None,
-                'formula': f'=IF({limitation.formula}, "", "{limitation.error_message}")',
+                'formula': f'=IF({limitation.formula}, "", "{error_message}")',
                 'cell': None
             })
         evaluate_result = evaluate_state(state, [cls.VIRTUAL_SHEET_NAME])
