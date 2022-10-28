@@ -24,13 +24,13 @@ class AddStatus(models.Model):
         Status,
         on_delete=models.CASCADE,
         null=True,
-        related_name='from_change_statuses',
+        related_name='from_add_statuses',
         help_text='Изначальный статус'
     )
     to_status = models.ForeignKey(
         Status,
         on_delete=models.CASCADE,
-        related_name='to_change_statuses',
+        related_name='to_add_statuses',
         help_text='Новый статус'
     )
     roles = models.JSONField(help_text='Роли пользователей, которые могут изменять статус')
