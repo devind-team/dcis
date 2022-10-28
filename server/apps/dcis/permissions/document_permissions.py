@@ -46,8 +46,8 @@ class AddDocumentBase:
         return self._user_division_ids
 
     @property
-    def can_add_any_document(self) -> bool:
-        """Может ли пользователь добавлять любой документ."""
+    def can_add_any_division_document(self) -> bool:
+        """Может ли пользователь добавлять документ с любым дивизионом."""
         if self._can_add_any_document is None:
             self._can_add_any_document = (
                 self._user.has_perm('dcis.add_document') or
@@ -57,21 +57,13 @@ class AddDocumentBase:
             )
         return self._can_add_any_document
 
-    def can_add_restricted_document(self, status: Status, division_id: int | str) -> bool:
-        """Может ли пользователь добавлять документ с конкретным дивизионом и статусом."""
-        add_status = AddStatus.objects.filter(from_status=None, to_status=status).first()
-        return int(division_id) in self.user_division_ids and add_status is not None
-
     def has_object_permission(self, status: Status, division_id: int | str | None) -> bool:
         """Получение разрешения."""
-        return self.can_add_any_document or (division_id and self.can_add_restricted_document(status, division_id))
-
-
-def can_add_any_document(user: User, period: Period):
-    """Пропускает пользователей, которые могут добавлять любой документ."""
-    if AddDocumentBase(user, period).can_add_any_document:
-        return
-    raise PermissionDenied('Недостаточно прав для добавления документа в период.')
+        from apps.dcis.services.status_services import get_initial_statuses
+        return (
+            self.can_add_any_division_document or
+            (division_id and int(division_id) in self.user_division_ids)
+        ) and status in get_initial_statuses(self._user, self._period)
 
 
 def can_add_document(user: User, period: Period, status: Status, division_id: int | str | None):
@@ -111,7 +103,7 @@ def can_add_document_status_base(user: User, document: Document, add_status: Add
     from apps.dcis.services.document_services import get_user_roles
     if add_status is not None and len(set(get_user_roles(user, document)) & set(add_status.roles)) > 0:
         return
-    can_change_document_base(user, document)
+    raise PermissionDenied('Недостаточно прав для добавления статуса к документу.')
 
 
 def can_add_document_status(user: User, document: Document, add_status: AddStatus | None):

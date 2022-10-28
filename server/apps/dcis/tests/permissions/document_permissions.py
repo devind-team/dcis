@@ -35,8 +35,8 @@ class DocumentPermissionsTestCase(TestCase):
         self.status_edit = Status.objects.create(edit=True)
         self.status_edit_create_status = AddStatus.objects.create(
             from_status=None,
-            to_status=Status.objects.create(),
-            roles=[]
+            to_status=self.status_edit,
+            roles=['division_member']
         )
         self.status_edit_add_status = AddStatus.objects.create(
             from_status=None,
@@ -159,37 +159,43 @@ class DocumentPermissionsTestCase(TestCase):
     def test_can_add_document(self) -> None:
         """Тестирование функции `can_add_document`."""
         self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
-        with patch.object(
-            self.user,
-            'has_perm',
-            new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')
-        ), patch(
-            'apps.dcis.permissions.document_permissions.get_user_divisions',
-            new=Mock(return_value=({'id': 1},))
-        ), patch.object(
-            self.period, 'multiple', new=True,
+        with patch(
+            'apps.dcis.services.status_services.is_period_division_member',
+            new=Mock(return_value=True)
         ):
-            with patch(
-                'apps.dcis.permissions.document_permissions.AddDocumentBase.can_add_restricted_document',
-                new=Mock(return_value=False),
-            ) as mock:
+            with patch.object(
+                self.user,
+                'has_perm',
+                new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')
+            ), patch(
+                'apps.dcis.permissions.document_permissions.get_user_divisions',
+                new=Mock(return_value=({'id': 1},))
+            ):
+                with patch(
+                    'apps.dcis.services.status_services.get_initial_statuses',
+                    new=Mock(return_value=[]),
+                ) as mock:
+                    self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
+                    mock.assert_called_once_with(self.user, self.period)
+                can_add_document(self.user, self.period, self.status_edit, 1)
+                self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 2)
+            with patch.object(
+                self.user,
+                'has_perm',
+                new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')
+            ):
                 self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
-                mock.assert_called_once_with(self.status_edit, 1)
-            can_add_document(self.user, self.period, self.status_edit, 1)
-            self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 2)
-        with patch.object(self.user, 'has_perm', new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period')):
-            self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
-        with patch.object(
-            self.user,
-            'has_perm',
-            new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period', 'dcis.add_document')
-        ):
-            can_add_document(self.user, self.period, self.status_edit, 1)
-        self.assertRaises(PermissionDenied, can_add_document, self.user, self.user_period, self.status_edit, 1)
-        for global_perm in ('dcis.add_project', 'dcis.add_period'):
-            with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
-                self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
-                can_add_document(self.user, self.user_period, self.status_edit, 1)
+            with patch.object(
+                self.user,
+                'has_perm',
+                new=lambda perm: perm in ('dcis.view_project', 'dcis.view_period', 'dcis.add_document')
+            ):
+                can_add_document(self.user, self.period, self.status_edit, 1)
+            self.assertRaises(PermissionDenied, can_add_document, self.user, self.user_period, self.status_edit, 1)
+            for global_perm in ('dcis.add_project', 'dcis.add_period'):
+                with patch.object(self.user, 'has_perm', new=lambda perm: perm == global_perm):
+                    self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
+                    can_add_document(self.user, self.user_period, self.status_edit, 1)
 
     def test_can_change_document_comment(self) -> None:
         """Тестирование функции `can_change_document_comment`."""
@@ -198,7 +204,10 @@ class DocumentPermissionsTestCase(TestCase):
 
     def test_can_add_document_status(self) -> None:
         """Тестирование функции `can_add_document_status`."""
-        self._test_common(can_add_document_status, self.status_edit_add_status)
+        with self.assertRaises(PermissionDenied):
+            can_add_document_status(self.user, self.user_document, None)
+        with self.assertRaises(PermissionDenied):
+            can_add_document_status(self.user, self.document, self.status_edit_add_status)
         can_add_document_status(self.user, self.user_document, self.status_edit_add_status)
 
     def test_can_delete_document_status(self) -> None:

@@ -5,7 +5,6 @@ from .document_permissions import (
     ChangeDocumentSheetBase,
     ChangeValueBase,
     DeleteChildRowDimensionBase,
-    can_add_any_document,
     can_add_budget_classification,
     can_add_child_row_dimension,
     can_add_document,

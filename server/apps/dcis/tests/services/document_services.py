@@ -7,7 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import CuratorGroup, Division, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import AddStatus, CuratorGroup, Division, Document, Period, Project, RowDimension, Sheet, Status
 from apps.dcis.permissions import (
     can_add_document,
     can_change_document_comment,
@@ -210,6 +210,11 @@ class DocumentTestCase(TestCase):
         self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
 
         self.status = Status.objects.create(name='Testing status')
+        self.add_status = AddStatus.objects.create(
+            from_status=None,
+            to_status=self.status,
+            roles=['admin'],
+        )
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
         self.department = Department.objects.create(user=self.superuser)
