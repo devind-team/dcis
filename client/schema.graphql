@@ -3386,7 +3386,7 @@ type PeriodGroupType {
 """Тип периода."""
 type PeriodType {
   """Может ли пользователь добавлять документы в период"""
-  canAddDocument: Boolean!
+  canAddAnyDivisionDocument: Boolean!
   """Может ли пользователь изменять дивизионы периода"""
   canChangeDivisions: Boolean!
   """Может ли пользователь изменять группы периода"""

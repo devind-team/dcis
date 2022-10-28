@@ -37,7 +37,7 @@ fragment PeriodFields on PeriodType {
     __typename
     __typename
   }
-  canAddDocument
+  canAddAnyDivisionDocument
   canChangeDivisions
   canChangeGroups
   canChangeUsers

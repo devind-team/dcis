@@ -1,7 +1,7 @@
 <template lang="pug">
   left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
     template(#header) {{ $t('dcis.documents.name') }}
-      template(v-if="period.canAddDocument || userPeriodDivision.length")
+      template(v-if="period.canAddAnyDivisionDocument || userPeriodDivision.length")
         v-spacer
         add-document-menu(
           v-slot="{ on, attrs }"

@@ -10,6 +10,7 @@ mutation-modal-form(
   mutation-name="addDocumentStatus"
   i18n-path="dcis.documents.status"
   @close="close"
+  @done="refetchStatuses"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
@@ -68,12 +69,12 @@ import {
   DocumentStatusesQuery,
   DocumentStatusesQueryVariables,
   DocumentType,
-  StatusesQuery,
-  StatusesQueryVariables,
+  NewStatusesQuery,
+  NewStatusesQueryVariables,
   StatusType
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
-import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
+import newStatusesQuery from '~/gql/dcis/queries/new_statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
@@ -108,20 +109,18 @@ export default defineComponent({
     const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
 
-    const { data: statusesData, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
-      document: statusesQuery
-    })
-    const statuses = computed<StatusType[]>(() => {
-      if (!statusesData.value) {
-        return []
-      }
-      return props.document.canChange
-        ? statusesData.value as StatusType[]
-        : statusesData.value.filter((status: StatusType) => !status.protected)
+    const { data: statuses, onResult, refetch: refetchStatuses } = useCommonQuery<
+      NewStatusesQuery,
+      NewStatusesQueryVariables
+    >({
+      document: newStatusesQuery,
+      variables: () => ({
+        documentId: props.document.id
+      })
     })
 
-    onResult(({ data: { statuses } }) => {
-      nextTick(() => { status.value = statuses[0] || null })
+    onResult(({ data: { newStatuses } }) => {
+      nextTick(() => { status.value = newStatuses[0] || null })
     })
 
     const {
@@ -150,7 +149,7 @@ export default defineComponent({
       }
     }
 
-    const { mutate: deleteDocumentStatus } = useMutation<
+    const { mutate: deleteDocumentStatusMutate } = useMutation<
       DeleteDocumentStatusMutation,
       DeleteDocumentStatusMutationVariables
     >(
@@ -174,6 +173,10 @@ export default defineComponent({
           )
         }
       })
+    const deleteDocumentStatus = async (variables: DeleteDocumentStatusMutationVariables) => {
+      await deleteDocumentStatusMutate(variables)
+      await refetchStatuses()
+    }
 
     const close = () => {
       status.value = statuses.value[0] || null
@@ -185,6 +188,7 @@ export default defineComponent({
       comment,
       status,
       statuses,
+      refetchStatuses,
       documentStatuses,
       dateTimeHM,
       getUserName,

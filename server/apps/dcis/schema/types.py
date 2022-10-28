@@ -99,7 +99,7 @@ class PeriodType(DjangoObjectType):
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
-    can_add_document = graphene.Boolean(
+    can_add_any_division_document = graphene.Boolean(
         required=True,
         description='Может ли пользователь добавлять документы в период'
     )
@@ -163,8 +163,8 @@ class PeriodType(DjangoObjectType):
         return period.sheet_set.all()
 
     @staticmethod
-    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase(info.context.user, period).can_add_any_document
+    def resolve_can_add_any_division_document(period: Period, info: ResolveInfo) -> bool:
+        return AddDocumentBase(info.context.user, period).can_add_any_division_document
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:

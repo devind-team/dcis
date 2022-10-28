@@ -42,7 +42,7 @@ mutation-modal-form(
       )
     v-alert(v-if="status && status.comment" type="warning" dense) {{ status.comment }}
     validation-provider(
-      v-if="period.multiple && (canAddAnyDocument || userDivisions.length > 1)"
+      v-if="period.multiple && (canAddAnyDivisionDocument || userDivisions.length > 1)"
       v-slot="{ errors, valid }"
       :name="divisionLabel"
       rules="required"
@@ -51,7 +51,7 @@ mutation-modal-form(
         v-model="division"
         :error-messages="errors"
         :success="valid"
-        :items="canAddAnyDocument ? period.divisions : userDivisions"
+        :items="canAddAnyDivisionDocument ? period.divisions : userDivisions"
         :label="divisionLabel"
         item-text="name"
         item-value="id"
@@ -85,12 +85,12 @@ import {
   StatusType,
   DivisionModelType,
   DocumentType,
-  StatusesQuery,
-  StatusesQueryVariables,
+  InitialStatusesQuery,
+  InitialStatusesQueryVariables,
   AddDocumentMutationPayload,
   AddDocumentMutationVariables
 } from '~/types/graphql'
-import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
+import initialStatusesQuery from '~/gql/dcis/queries/initial_statuses.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMutationPayload } }
@@ -98,7 +98,7 @@ export type AddDocumentMutationResultType = { data: { addDocument: AddDocumentMu
 export default defineComponent({
   components: { MutationModalForm },
   props: {
-    canAddAnyDocument: { type: Boolean, required: true },
+    canAddAnyDivisionDocument: { type: Boolean, required: true },
     userDivisions: { type: Array as PropType<DivisionModelType[]>, required: true },
     update: {
       type: Function as PropType<(cache: DataProxy, result: AddDocumentMutationResultType) => void>,
@@ -124,26 +124,24 @@ export default defineComponent({
       if (!props.period.multiple) {
         return null
       }
-      if (props.canAddAnyDocument) {
+      if (props.canAddAnyDivisionDocument) {
         return division.value?.id
       }
       return props.userDivisions.length === 1 ? props.userDivisions[0].id : division.value?.id
     })
 
-    const { data: statusesData, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
-      document: statusesQuery
-    })
-    const statuses = computed<StatusType[]>(() => {
-      if (!statusesData.value) {
-        return []
-      }
-      return props.canAddAnyDocument
-        ? statusesData.value as StatusType[]
-        : statusesData.value.filter((status: StatusType) => !status.protected)
+    const { data: statuses, onResult } = useCommonQuery<
+      InitialStatusesQuery,
+      InitialStatusesQueryVariables
+    >({
+      document: initialStatusesQuery,
+      variables: () => ({
+        periodId: props.period.id
+      })
     })
 
-    onResult(({ data: { statuses } }) => {
-      nextTick(() => { status.value = statuses[0] || null })
+    onResult(({ data: { initialStatuses } }) => {
+      nextTick(() => { status.value = initialStatuses[0] || null })
     })
 
     const variables = computed<AddDocumentMutationVariables>(() => ({
