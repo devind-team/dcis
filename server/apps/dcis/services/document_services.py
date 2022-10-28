@@ -8,14 +8,14 @@ from django.db.models import Max, QuerySet
 
 from apps.core.models import User
 from apps.dcis.helpers.exceptions import is_raises
-from apps.dcis.models import Cell, Division, Document, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import Cell, Document, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
     can_change_document_base,
     can_change_document_comment,
 )
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
-from apps.dcis.services.divisions_services import get_user_division_ids, get_user_divisions
+from apps.dcis.services.divisions_services import get_user_divisions, is_document_division_member
 from apps.dcis.services.privilege_services import has_privilege
 
 
@@ -71,15 +71,7 @@ def get_user_roles(user: User, document: Document) -> list[str]:
         roles.append('creator')
     if is_document_curator(user, document):
         roles.append('curator')
-    user_division_ids = get_user_division_ids(user, document.period.project).get(
-        document.period.project.division_name, []
-    )
-    if (
-        (document.period.multiple and document.object_id in user_division_ids) or
-        (not document.period.multiple and Division.objects.filter(
-            period=document.period, object_id__in=user_division_ids
-        ).count() > 0)
-    ):
+    if is_document_division_member(user, document):
         roles.append('division_member')
     return roles
 
