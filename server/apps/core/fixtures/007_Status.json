@@ -11,14 +11,33 @@
     "model": "dcis.Status",
     "pk": 2,
     "fields": {
-      "name": "Согласовано"
+      "name": "Ввод завершен",
+      "edit": false,
+      "comment": "Документ переходит на проверку Куратору"
     }
   },
   {
     "model": "dcis.Status",
     "pk": 3,
     "fields": {
-      "name": "Утверждено"
+      "name": "Принят",
+      "edit": false
+    }
+  },
+  {
+    "model": "dcis.Status",
+    "pk": 4,
+    "fields": {
+      "name": "Требует доработки",
+      "edit": true
+    }
+  },
+  {
+    "model": "dcis.Status",
+    "pk": 5,
+    "fields": {
+      "name": "Отклонен",
+      "edit": false
     }
   }
 ]
