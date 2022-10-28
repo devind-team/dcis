@@ -7,8 +7,9 @@ mutation-modal-form(
   :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
   :variables="{ documentId: document.id, statusId: status && status.id, comment }"
   :update="addDocumentStatusUpdate"
+  :hide-alert-timeout="Infinity"
   mutation-name="addDocumentStatus"
-  i18n-path="dcis.documents.status"
+  errors-in-alert
   @close="close"
   @done="refetchStatuses"
 )
