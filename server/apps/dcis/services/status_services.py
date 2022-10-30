@@ -1,8 +1,10 @@
 """Модуль, отвечающий за работу со статусами."""
+from dataclasses import dataclass
 from typing import cast
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
+from jsonpickle import encode
 
 from apps.core.models import User
 from apps.dcis.helpers.cell import ValueState, evaluate_state, parse_coordinate, resolve_cells, resolve_evaluate_state
@@ -55,6 +57,14 @@ def delete_document_status(user: User, status: DocumentStatus) -> None:
     status.delete()
 
 
+@dataclass
+class LimitationError:
+    form: str
+    formula: str
+    error_message: str
+    dependencies: str
+
+
 class AddStatusCheck:
     """Класс с методами, определяющими, может ли в документ быть добавлен новый статус.
 
@@ -67,9 +77,9 @@ class AddStatusCheck:
         """Проверка ограничений, накладываемых на лист."""
         sheets = document.sheets.all()
         limitations = Limitation.objects.filter(sheet__in=sheets)
-        cache_container = LimitationFormulaContainerCache.get(document.period)
+        dependency = LimitationFormulaContainerCache.get(document.period).dependency_cache.dependency
         dependencies: set[str] = set()
-        for counter in cache_container.dependency_cache.dependency.values():
+        for counter in dependency.values():
             dependencies.update(counter.keys())
         cells, values = resolve_cells(sheets, document, dependencies)
         state = resolve_evaluate_state(cells, values, [])
@@ -79,16 +89,28 @@ class AddStatusCheck:
                 'value': None,
                 'error': None,
                 'formula': f'=IF({limitation.formula}, "", "{error_message}")',
-                'cell': None
+                'limitation': limitation
             })
         evaluate_result = evaluate_state(state, [cls.VIRTUAL_SHEET_NAME])
-        errors: list[str] = []
+        errors: list[LimitationError] = []
         for coordinate, result_value in evaluate_result.items():
             sheet_name = parse_coordinate(coordinate)[0]
             if sheet_name == cls.VIRTUAL_SHEET_NAME:
+                error: str | None = None
                 if result_value['error'] is not None:
-                    errors.append(result_value['error'])
+                    error = result_value['error']
                 elif result_value['value'] != '':
-                    errors.append(result_value['value'])
+                    error = result_value['value']
+                if error is not None:
+                    limitation_dependencies = dependency[coordinate.replace(f'{sheet_name}!', '')]
+                    dependency_values: dict[str, str] = {}
+                    for key in limitation_dependencies.keys():
+                        dependency_values[key] = evaluate_result[key]['value']
+                    errors.append(LimitationError(
+                        form=result_value['limitation'].sheet.name,
+                        formula=result_value['limitation'].formula,
+                        error_message=error,
+                        dependencies=encode(dependency_values).encode().decode('unicode-escape')
+                    ))
         if len(errors):
-            raise ValidationError(message={'limitations': errors})
+            raise ValidationError(message=None, code=None, params=errors)

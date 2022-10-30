@@ -242,6 +242,8 @@ export default {
       header: 'Изменение статусов',
       readonlyHeader: 'Статусы',
       subheader: '@:dcis.documents.version',
+      tableErrorsMessage: 'Возникли ошибки в ограничениях',
+      tableErrorsTitle: 'Ошибки в ограничениях',
       status: 'Статус',
       comment: 'Комментарий',
       buttonText: '@:add',

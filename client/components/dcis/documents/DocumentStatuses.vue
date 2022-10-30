@@ -9,6 +9,10 @@ mutation-modal-form(
   :variables="{ documentId: document.id, statusId: status && status.id, comment }"
   :update="addDocumentStatusUpdate"
   :hide-alert-timeout="Infinity"
+  :table-errors-mode="ErrorValidateDialogMode.TABLE"
+  :table-errors-message="String($t('dcis.documents.status.tableErrorsMessage'))"
+  :table-errors-title="String($t('dcis.documents.status.tableErrorsTitle'))"
+  :show-table-errors-search="false"
   mutation-name="addDocumentStatus"
   errors-in-alert
   @close="close"
@@ -84,6 +88,7 @@ import { useCommonQuery, useFilters } from '~/composables'
 import newStatusesQuery from '~/gql/dcis/queries/new_statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'
+import { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
@@ -216,6 +221,7 @@ export default defineComponent({
     }
 
     return {
+      ErrorValidateDialogMode,
       form,
       canAdd,
       header,

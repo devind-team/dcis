@@ -97,7 +97,6 @@ class ValueState(TypedDict):
     value: str | float | None
     error: str | None
     formula: str | None
-    cell: Cell
 
 
 def resolve_evaluate_state(

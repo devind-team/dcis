@@ -280,6 +280,8 @@ type AddDocumentStatusMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+  """Документ с ошибками"""
+  table: TableType
 }
 
 input AddFileMutationInput {

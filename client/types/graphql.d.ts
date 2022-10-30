@@ -303,6 +303,8 @@ export type AddDocumentStatusMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+  /** Документ с ошибками */
+  table?: Maybe<TableType>;
 };
 
 export type AddFileMutationInput = {
@@ -5864,7 +5866,7 @@ export type AddDocumentStatusMutationVariables = Exact<{
   statusId: Scalars['ID'];
 }>;
 
-export type AddDocumentStatusMutation = { __typename?: 'Mutation', addDocumentStatus: { __typename: 'AddDocumentStatusMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } } | null } };
+export type AddDocumentStatusMutation = { __typename?: 'Mutation', addDocumentStatus: { __typename: 'AddDocumentStatusMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } } | null, table?: { __typename?: 'TableType', headers: Array<string | null>, rows: Array<{ __typename?: 'TableRowType', index: number, cells: Array<{ __typename?: 'TableCellType', header: string, value?: string | null } | null> } | null> } | null } };
 
 export type ChangeChildRowDimensionHeightMutationVariables = Exact<{
   rowDimensionId: Scalars['ID'];
