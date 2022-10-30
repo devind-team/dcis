@@ -117,9 +117,7 @@ def resolve_evaluate_state(
     for cell in cells:
         coord = get_coordinate(cell.column.sheet, cell)
         value = values_state.get(coord, cell.default)
-        if cell.kind == KindCell.NUMERIC:
-            value = float(value)
-        if cell.kind == KindCell.FORMULA:
+        if (cell.kind == KindCell.NUMERIC or cell.kind == KindCell.FORMULA) and value is not None:
             try:
                 value = float(value)
             except ValueError:
