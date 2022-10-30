@@ -18,7 +18,7 @@ from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     Attribute, AttributeValue, ColumnDimension,
-    Document, DocumentStatus, Period,
+    Document, DocumentStatus, Limitation, Period,
     PeriodGroup, PeriodPrivilege, Privilege,
     Project, RowDimension, Sheet,
     Status, Value,
@@ -574,6 +574,21 @@ class SheetType(BaseSheetType):
         required=True,
         description='Может ли пользователь удалять дочернюю строку, не имеющую собственных дочерних строк'
     )
+
+
+class LimitationType(DjangoObjectType):
+    """Тип ограничения, накладываемого на лист."""
+
+    sheet = graphene.Field(BaseSheetType, description='Лист')
+
+    class Meta:
+        model = Limitation
+        fields = (
+            'id',
+            'formula',
+            'error_message',
+            'sheet'
+        )
 
 
 class ChangedCellOption(graphene.ObjectType):

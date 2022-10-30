@@ -1,0 +1,10 @@
+fragment LimitationFields on LimitationType {
+  id
+  formula
+  errorMessage
+  sheet {
+    id
+    name
+    __typename
+  }
+}

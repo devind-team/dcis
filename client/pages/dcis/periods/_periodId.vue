@@ -51,6 +51,11 @@ export default defineComponent({
           icon: 'briefcase-outline'
         })
       }
+      result.push({
+        title: t('dcis.periods.links.limitations') as string,
+        to: 'dcis-periods-periodId-limitations',
+        icon: 'shield-outline'
+      })
       if (!loading.value) {
         if (period.value.canChangeGroups) {
           result.push({

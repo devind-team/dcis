@@ -54,6 +54,7 @@ export default {
       organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
+      limitations: 'Ограничения',
       attributes: 'Атрибуты',
       sheets: 'Таблица',
       settings: '@:settings'
@@ -112,6 +113,14 @@ export default {
         tooltip: '@:delete',
         departmentItemName: 'департамент',
         organizationItemName: 'организацию'
+      }
+    },
+    limitations: {
+      name: '@:dcis.periods.links.limitations',
+      tableHeaders: {
+        sheet: 'Форма',
+        formula: 'Формула',
+        errorMessage: 'Сообщение об ошибке'
       }
     },
     groups: {

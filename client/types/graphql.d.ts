@@ -2702,6 +2702,18 @@ export type GroupTypeUserSetArgs = {
   username_Icontains?: InputMaybe<Scalars['String']>;
 };
 
+/** Тип ограничения, накладываемого на лист. */
+export type LimitationType = {
+  __typename?: 'LimitationType';
+  /** Сообщение ошибки */
+  errorMessage: Scalars['String'];
+  /** Формула */
+  formula: Scalars['String'];
+  id: Scalars['ID'];
+  /** Лист */
+  sheet?: Maybe<BaseSheetType>;
+};
+
 /** An enumeration. */
 export type LogEntryAction =
   /** create */
@@ -4296,6 +4308,8 @@ export type Query = {
   hasSettings: Scalars['Boolean'];
   /** Возможные начальные статусы для нового документа */
   initialStatuses?: Maybe<Array<StatusType>>;
+  /** Ограничения, накладываемые на листы */
+  limitations: Array<Maybe<LimitationType>>;
   logEntry: LogEntryTypeConnection;
   logRequests: LogRequestTypeConnection;
   /** Информация обо мне */
@@ -4472,6 +4486,11 @@ export type QueryFilesArgs = {
 
 /** Схема запросов данных. */
 export type QueryInitialStatusesArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryLimitationsArgs = {
   periodId: Scalars['ID'];
 };
 
@@ -5720,6 +5739,8 @@ export type DivisionModelFieldsFragment = { __typename: 'DivisionModelType', id:
 
 export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null };
 
+export type LimitationFieldsFragment = { __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
+
 export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
 
 export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name: string, status: string, multiple: boolean, privately: boolean, versioning: boolean, start?: any | null, expiration?: any | null, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> };
@@ -6181,6 +6202,12 @@ export type InitialStatusesQueryVariables = Exact<{
 }>;
 
 export type InitialStatusesQuery = { __typename?: 'Query', initialStatuses?: Array<{ __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean }> | null };
+
+export type LimitationsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type LimitationsQuery = { __typename?: 'Query', limitations: Array<{ __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> };
 
 export type NewStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];

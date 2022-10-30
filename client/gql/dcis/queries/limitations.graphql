@@ -1,0 +1,7 @@
+#import "../fragments/limitation_fields.graphql"
+
+query Limitations($periodId: ID!) {
+  limitations(periodId: $periodId) {
+    ...LimitationFields
+  }
+}

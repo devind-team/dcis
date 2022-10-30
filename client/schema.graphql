@@ -2557,6 +2557,17 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
+"""Тип ограничения, накладываемого на лист."""
+type LimitationType {
+  """Сообщение ошибки"""
+  errorMessage: String!
+  """Формула"""
+  formula: String!
+  id: ID!
+  """Лист"""
+  sheet: BaseSheetType
+}
+
 """An enumeration."""
 enum LogEntryAction {
   """create"""
@@ -3684,6 +3695,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): [StatusType!]
+  """Ограничения, накладываемые на листы"""
+  limitations(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [LimitationType]!
   logEntry(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, first: Int, last: Int, objectId_Icontains: Int, offset: Int, userId: ID): LogEntryTypeConnection!
   logRequests(after: String, before: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, offset: Int, page_Icontains: String, userId: ID): LogRequestTypeConnection!
   """Информация обо мне"""

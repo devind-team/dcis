@@ -255,18 +255,6 @@ class Cell(Style, KindCell, models.Model):
         ]
 
 
-class Limitation(models.Model):
-    """Ограничения, накладываемые на лист."""
-
-    formula = models.TextField(help_text='Формула')
-    error_message = models.TextField(help_text='Сообщение ошибки')
-
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
-
-    class Meta:
-        ordering = ('id',)
-
-
 class MergedCell(models.Model):
     """Модель объединенной ячейки."""
 
