@@ -1,5 +1,6 @@
 <template lang="pug">
 mutation-modal-form(
+  ref="form"
   :header="header"
   :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
   :button-text="String($t('dcis.documents.status.buttonText'))"
@@ -11,12 +12,12 @@ mutation-modal-form(
   mutation-name="addDocumentStatus"
   errors-in-alert
   @close="close"
-  @done="refetchStatuses"
+  @done="addDocumentStatusDone"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
   template(#form)
-    v-list(two-line dense)
+    v-list(v-if="documentStatuses" two-line dense)
       v-list-item(v-for="item in documentStatuses" :key="item.id")
         v-list-item-content
           v-list-item-title {{ item.status.name }}
@@ -36,6 +37,7 @@ mutation-modal-form(
                     v-btn(color="error" icon)
                       v-icon mdi-delete
                 span {{ $t('dcis.documents.status.delete.tooltip') }}
+    v-progress-linear(v-else indeterminate)
     template(v-if="canAdd")
       v-divider
       v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
@@ -48,6 +50,7 @@ mutation-modal-form(
           v-model="status"
           :error-messages="errors"
           :success="valid"
+          :loading="statusesLoading"
           :items="statuses"
           :label="$t('dcis.documents.status.status')"
           item-text="name"
@@ -58,10 +61,12 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
+import { WatchQueryFetchPolicy } from '@apollo/client'
 import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
+import { watchOnce } from '@vueuse/core'
 import type { PropType } from '#app'
-import { computed, defineComponent, ref } from '#app'
+import { computed, defineComponent, onMounted, ref, watch } from '#app'
 import {
   AddDocumentStatusMutationPayload,
   DeleteDocumentStatusMutation,
@@ -72,7 +77,8 @@ import {
   DocumentType,
   NewStatusesQuery,
   NewStatusesQueryVariables,
-  StatusType
+  StatusType,
+  StatusFieldsFragment
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
 import newStatusesQuery from '~/gql/dcis/queries/new_statuses.graphql'
@@ -93,16 +99,30 @@ type PeriodUpdateType = (
 export default defineComponent({
   components: { MutationModalForm, DeleteMenu },
   props: {
-    canAdd: { type: Boolean, required: true },
     canDelete: { type: Boolean, required: true },
     document: { type: Object as PropType<DocumentType>, required: true },
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const { t } = useI18n()
     const { dateTimeHM, getUserName } = useFilters()
 
-    const header = computed<string>(() => props.canAdd || props.canDelete
+    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
+    onMounted(() => {
+      watchOnce(() => form.value.active, (value: boolean) => {
+        statusesQueryOptions.value.enabled = value
+        documentStatusesQueryOptions.value.enabled = value
+      })
+      watch(() => statuses.value, (statuses: StatusFieldsFragment[]) => {
+        if (statuses) {
+          status.value = statuses[0] || null
+        }
+      }, { immediate: true })
+    })
+
+    const canAdd = computed<boolean>(() => Boolean(statuses.value && statuses.value.length))
+
+    const header = computed<string>(() => canAdd.value || props.canDelete
       ? t('dcis.documents.status.header') as string
       : t('dcis.documents.status.readonlyHeader') as string
     )
@@ -110,19 +130,29 @@ export default defineComponent({
     const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
 
-    const { data: statuses, onResult, refetch: refetchStatuses } = useCommonQuery<
+    const statusesQueryOptions = ref<{ enabled: boolean, fetchPolicy: WatchQueryFetchPolicy }>({
+      enabled: false,
+      fetchPolicy: 'cache-and-network'
+    })
+    const documentStatusesQueryOptions = ref<{ enabled: boolean }>({ enabled: false })
+    const {
+      data: statuses,
+      loading: statusesLoading,
+      refetch: refetchStatuses
+    } = useCommonQuery<
       NewStatusesQuery,
       NewStatusesQueryVariables
     >({
       document: newStatusesQuery,
       variables: () => ({
         documentId: props.document.id
-      })
+      }),
+      options: statusesQueryOptions
     })
-
-    onResult(({ data: { newStatuses } }) => {
-      nextTick(() => { status.value = newStatuses[0] || null })
-    })
+    const addDocumentStatusDone = () => {
+      emit('add-status')
+      refetchStatuses()
+    }
 
     const {
       data: documentStatuses,
@@ -130,7 +160,8 @@ export default defineComponent({
       deleteUpdate
     } = useCommonQuery<DocumentStatusesQuery, DocumentStatusesQueryVariables>({
       document: documentStatusesQuery,
-      variables: { documentId: props.document.id }
+      variables: { documentId: props.document.id },
+      options: documentStatusesQueryOptions
     })
 
     const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
@@ -185,11 +216,14 @@ export default defineComponent({
     }
 
     return {
+      form,
+      canAdd,
       header,
       comment,
       status,
       statuses,
-      refetchStatuses,
+      statusesLoading,
+      addDocumentStatusDone,
       documentStatuses,
       dateTimeHM,
       getUserName,

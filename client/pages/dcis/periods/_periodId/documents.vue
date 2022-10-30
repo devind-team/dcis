@@ -24,11 +24,11 @@
       multiple
       has-select-all
     )
-    query-data-filter(
+    items-data-filter(
+      ref="statusesFilter"
       v-model="selectedStatuses"
       v-bind="statusFilterMessages"
-      :query="statusesQuery"
-      :update="data => data.statuses"
+      :items="statuses ? statuses : []"
       :get-name="status => status.name"
       message-container-class="mr-1 mb-1"
       multiple
@@ -54,17 +54,17 @@
         ) {{ item.version }}
       template(#item.comment="{ item }")
         template(v-if="item.comment")
-          template(v-if="canChangeDocument(item)")
+          template(v-if="canChangeDocumentComment(item)")
             text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
               a(v-on="on") {{ item.comment }}
           template(v-else) {{ item.comment }}
       template(#item.lastStatus="{ item }")
         template(v-if="item.lastStatus")
           document-statuses(
-            :can-add="canChangeDocument(item)"
             :can-delete="canDeleteDocumentStatus(item)"
             :update="updateDocuments"
             :document="item"
+            @add-status="refetchDocuments"
           )
             template(#activator="{ on }")
               a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
@@ -78,9 +78,9 @@ import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
+import { computed, defineComponent, ref, useNuxt2Meta, useRoute, onMounted, watch, nextTick } from '#app'
 import { useAuthStore } from '~/stores'
-import { useFilters, useI18n, useCursorPagination } from '~/composables'
+import { useFilters, useI18n, useCursorPagination, useCommonQuery } from '~/composables'
 import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -89,7 +89,10 @@ import {
   DivisionModelType,
   DocumentType,
   PeriodType,
-  StatusType
+  StatusType,
+  StatusFieldsFragment,
+  StatusesQuery,
+  StatusesQueryVariables
 } from '~/types/graphql'
 import { FilterMessages } from '~/types/filters'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
@@ -98,7 +101,6 @@ import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDo
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
-import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
@@ -108,7 +110,6 @@ export default defineComponent({
     AddDocumentMenu,
     LeftNavigatorContainer,
     ItemsDataFilter,
-    QueryDataFilter,
     DocumentStatuses,
     TextMenu
   },
@@ -124,32 +125,60 @@ export default defineComponent({
     useNuxt2Meta({ title: props.period.name })
     const userStore = useAuthStore()
 
+    const statusesFilter = ref<InstanceType<typeof ItemsDataFilter> | null>(null)
+
+    onMounted(() => {
+      watch(() => statuses.value, (statuses: StatusFieldsFragment[]) => {
+        if (props.period.isCurator && statuses) {
+          const inputCompleted = statuses.find((status: StatusType) => status.name === 'Ввод завершен')
+          if (inputCompleted) {
+            nextTick(() => {
+              statusesFilter.value.select([inputCompleted])
+            })
+          }
+        }
+        if (!documentsQueryEnabled.value) {
+          documentsQueryEnabled.value = true
+        }
+      }, { immediate: true })
+    })
+
     const userPeriodDivision = computed(() => {
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
       return props.period.divisions.filter((division: DivisionModelType) => userDivisionIds.includes(division.id))
     })
 
-    const canChangeDocument = (document: DocumentType) => {
+    const canChangeDocumentComment = (document: DocumentType) => {
       return document.canChange || document.user?.id === userStore.user.id
     }
     const canDeleteDocumentStatus = (document: DocumentType) => {
       return document.canChange
     }
 
+    const { data: statuses } = useCommonQuery<
+      StatusesQuery,
+      StatusesQueryVariables
+    >({
+      document: statusesQuery
+    })
+
     const selectedDivisions = ref<DivisionModelType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
 
+    const documentsQueryEnabled = ref<boolean>(false)
     const {
       data: documents,
       loading,
       pagination: { count, totalCount },
       update: updateDocuments,
       addUpdate,
-      changeUpdate
+      changeUpdate,
+      refetch: refetchDocuments
     } = useDocumentsQuery(
       route.params.periodId,
       computed(() => selectedDivisions.value.map(division => division.id)),
-      computed(() => selectedStatuses.value.map(status => status.id)), {
+      computed(() => selectedStatuses.value.map(status => status.id)),
+      documentsQueryEnabled, {
         pagination: useCursorPagination(),
         fetchScroll: typeof document === 'undefined' ? null : document
       }
@@ -224,9 +253,11 @@ export default defineComponent({
 
     return {
       statusesQuery,
+      statusesFilter,
       userPeriodDivision,
-      canChangeDocument,
+      canChangeDocumentComment,
       canDeleteDocumentStatus,
+      statuses,
       selectedDivisions,
       selectedStatuses,
       documents,
@@ -234,6 +265,7 @@ export default defineComponent({
       count,
       totalCount,
       updateDocuments,
+      refetchDocuments,
       addDocumentUpdate,
       addDocumentDataUpdate,
       dateTimeHM,

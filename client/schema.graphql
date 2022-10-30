@@ -3406,6 +3406,8 @@ type PeriodType {
   """Дата окончания"""
   expiration: Date
   id: ID!
+  """Является ли пользователь куратором для периода"""
+  isCurator: Boolean!
   """Методическая поддержка"""
   methodicalSupport: [FileType!]
   """Множественное заполнение"""

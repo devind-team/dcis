@@ -36,6 +36,7 @@ from apps.dcis.permissions import (
     can_delete_period_base,
     can_delete_project_base,
 )
+from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 
 
@@ -99,6 +100,10 @@ class PeriodType(DjangoObjectType):
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
+    is_curator = graphene.Boolean(
+        required=True,
+        description='Является ли пользователь куратором для периода'
+    )
     can_add_any_division_document = graphene.Boolean(
         required=True,
         description='Может ли пользователь добавлять документы в период'
@@ -161,6 +166,10 @@ class PeriodType(DjangoObjectType):
     @resolver_hints(model_field='sheet_set')
     def resolve_sheets(period: Period, info: ResolveInfo) -> QuerySet[Sheet]:
         return period.sheet_set.all()
+
+    @staticmethod
+    def resolve_is_curator(period: Period, info: ResolveInfo) -> bool:
+        return is_period_curator(info.context.user, period)
 
     @staticmethod
     def resolve_can_add_any_division_document(period: Period, info: ResolveInfo) -> bool:

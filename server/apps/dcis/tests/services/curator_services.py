@@ -5,7 +5,12 @@ from django.test import TestCase
 
 from apps.core.models import User
 from apps.dcis.models import CuratorGroup, Document, Period, Project
-from apps.dcis.services.curator_services import get_curator_groups, get_curator_organizations, is_document_curator
+from apps.dcis.services.curator_services import (
+    get_curator_groups,
+    get_curator_organizations,
+    is_document_curator,
+    is_period_curator,
+)
 
 
 class CuratorTestCase(TestCase):
@@ -49,6 +54,13 @@ class CuratorTestCase(TestCase):
         """Тестирование функции `get_curator_organizations`."""
         self.assertEqual(self.organizations, list(get_curator_organizations(self.group_user)))
         self.assertEqual([], list(get_curator_organizations(self.user)))
+
+    def test_is_period_curator(self) -> None:
+        """Тестирование функции `is_period_curator`."""
+        self.assertFalse(is_period_curator(self.group_user, self.department_period))
+        self.assertFalse(is_period_curator(self.user, self.department_period))
+        self.assertTrue(is_period_curator(self.group_user, self.organization_period))
+        self.assertFalse(is_period_curator(self.user, self.organization_period))
 
     def test_is_document_curator(self) -> None:
         """Тестирование функции `is_document_curator`."""

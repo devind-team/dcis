@@ -35,14 +35,6 @@ fragment PeriodFields on PeriodType {
     position
     updatedAt
     __typename
-    __typename
   }
-  canAddAnyDivisionDocument
-  canChangeDivisions
-  canChangeGroups
-  canChangeUsers
-  canChangeSettings
-  canChangeSheet
-  canDelete
   __typename
 }
