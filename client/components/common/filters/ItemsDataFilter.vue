@@ -237,6 +237,13 @@ export default defineComponent({
         : tc('common.filters.itemsDataFilter.multipleMessage', restLength, { name, restLength })
     }
 
+    const select = (items: Item[]) => {
+      for (const item of items) {
+        setSelected(item, true)
+      }
+      apply()
+    }
+
     return {
       search,
       tempValue,
@@ -251,7 +258,8 @@ export default defineComponent({
       reset,
       apply,
       getSelected,
-      setSelected
+      setSelected,
+      select
     }
   }
 })
