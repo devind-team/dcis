@@ -6,17 +6,16 @@ from devind_core.schema import FileType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.utils import gid2int
 from graphene_django import DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
-from devind_helpers.utils import gid2int
 from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Document, DocumentStatus, Sheet, Status, Value, Cell
-from apps.dcis.models import Document, DocumentStatus, Period, Sheet, Status, Value
+from apps.dcis.models import Cell, Document, DocumentStatus, Period, Sheet, Status, Value
 from apps.dcis.permissions import can_view_document
-from apps.dcis.schema.types import DocumentStatusType, DocumentType, SheetType, StatusType, ChangeCellType
+from apps.dcis.schema.types import ChangeCellType, DocumentStatusType, DocumentType, SheetType, StatusType
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader

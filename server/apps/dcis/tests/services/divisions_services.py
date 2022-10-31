@@ -41,11 +41,21 @@ class DivisionTestCase(TestCase):
         self.department_division = {'id': self.department.id, 'name': 'Тестовый департамент', 'model': 'department'}
 
         self.organization = Organization.objects.create(name='Тестовая организация', attributes='', user=self.admin)
+        self.organization_child = Organization.objects.create(
+            name='Дочерняя тестовая организация',
+            attributes='',
+            parent=self.organization
+        )
         self.organization.users.add(self.user)
         self.organization_division = {
             'id': self.organization.id,
             'name': 'Тестовая организация',
             'model': 'organization',
+        }
+        self.organization_child_division = {
+            'id': self.organization_child.id,
+            'name': 'Дочерняя тестовая организация',
+            'model': 'organization'
         }
 
         self.department_project = Project.objects.create(content_type=self.department_content_type)
@@ -87,20 +97,20 @@ class DivisionTestCase(TestCase):
         for user in (self.admin, self.user,):
             with self.subTest(user=user):
                 self.assertListEqual(
-                    [self.department_division, self.organization_division],
+                    [self.department_division, self.organization_division, self.organization_child_division],
                     get_user_divisions(user)
                 )
 
     def test_get_user_divisions_with_project(self) -> None:
         """Тестирование функции `get_user_divisions` с проектом."""
         for user in (self.admin, self.user,):
-            for project_obj, division in (
-                (self.department_project, self.department_division),
-                (self.organization_project, self.organization_division),
+            for project_obj, divisions in (
+                (self.department_project, [self.department_division]),
+                (self.organization_project, [self.organization_division, self.organization_child_division]),
             ):
                 for project in (project_obj, project_obj.id, str(project_obj.id)):
                     with self.subTest(user=user, project_name=project_obj.name, project=project):
-                        self.assertListEqual([division], get_user_divisions(user, project))
+                        self.assertListEqual(divisions, get_user_divisions(user, project))
 
     def test_get_user_division_ids(self) -> None:
         """Тестирование функции `get_user_division_ids`."""

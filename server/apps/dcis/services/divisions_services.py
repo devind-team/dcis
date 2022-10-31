@@ -1,10 +1,12 @@
 """Модуль, отвечающий за работу с дивизионами."""
+from typing import Type
 
-from django.db.models import Q
+from devind_dictionaries.models import Department, Organization
+from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Period, Project
-from django.contrib.postgres.search import SearchQuery, SearchVector
+from apps.dcis.models import Division, Document, Period, Project
 
 
 def get_user_divisions(user: User, project: Project | int | str | None = None) -> list[dict[str, int | str]]:
@@ -16,7 +18,10 @@ def get_user_divisions(user: User, project: Project | int | str | None = None) -
     :param project: объект проекта, или идентификатор проекта, или None
     :return [{'id': int, name: string, 'model': 'department' | 'organization'}, ...]
     """
-    def get_slave_divisions(mdl, parent_divisions) -> QuerySet | list:
+    def get_slave_divisions(
+        mdl: Type[Organization | Department],
+        parent_divisions: QuerySet[Organization | Department]
+    ) -> QuerySet | list:
         if hasattr(mdl, 'parent_id'):
             return mdl.objects.filter(parent_id__in=[
                 parent_division.id for parent_division in parent_divisions

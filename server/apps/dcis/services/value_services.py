@@ -1,13 +1,12 @@
 """Файл, содержащий сервисы для изменения значений ячеек."""
-
 from datetime import datetime
 from os import path
 from pathlib import Path
-from typing import Any, NamedTuple, cast, Type
+from typing import Any, NamedTuple, Type, cast
 from zipfile import ZipFile
 
 from devind_core.models import File
-from devind_dictionaries.models import Organization, Department
+from devind_dictionaries.models import Department, Organization
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q

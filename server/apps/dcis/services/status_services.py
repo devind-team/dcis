@@ -9,15 +9,25 @@ from jsonpickle import encode
 from apps.core.models import User
 from apps.dcis.helpers.cell import ValueState, evaluate_state, parse_coordinate, resolve_cells, resolve_evaluate_state
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
-from apps.dcis.models import Document, DocumentStatus, Limitation, Period, Status
-from apps.dcis.models.document import AddStatus
-from apps.dcis.permissions import (
-    AddDocumentBase,
-    can_add_document_status,
-    can_delete_document_status,
-)
+from apps.dcis.models import Document, Limitation, Period, Status
+from apps.dcis.models.document import AddStatus, DocumentStatus
+from apps.dcis.permissions import AddDocumentBase, can_add_document_status, can_delete_document_status
 from apps.dcis.services.divisions_services import is_period_division_member
 from apps.dcis.services.document_services import get_user_roles
+
+
+def add_document_status(user: User, document: Document, status: Status, comment: str) -> DocumentStatus:
+    """Добавление статуса документа."""
+    add_status = AddStatus.objects.filter(from_status=document.last_status.status, to_status=status).first()
+    can_add_document_status(user, document, add_status)
+    if add_status.check:
+        getattr(AddStatusCheck, add_status.check)(document)
+    return DocumentStatus.objects.create(
+        user=user,
+        document=document,
+        status=status,
+        comment=comment,
+    )
 
 
 def get_initial_statuses(user: User, period: Period) -> QuerySet[Status]:
@@ -35,20 +45,6 @@ def get_new_statuses(user: User, document: Document) -> list[Status]:
     user_roles = set(get_user_roles(user, document))
     add_statuses = AddStatus.objects.filter(from_status=document.last_status.status)
     return [add_status.to_status for add_status in add_statuses if len(user_roles & set(add_status.roles)) > 0]
-
-
-def add_document_status(user: User, document: Document, status: Status, comment: str) -> DocumentStatus:
-    """Добавление статуса документа."""
-    add_status = AddStatus.objects.filter(from_status=document.last_status.status, to_status=status).first()
-    can_add_document_status(user, document, add_status)
-    if add_status.check:
-        getattr(AddStatusCheck, add_status.check)(document)
-    return DocumentStatus.objects.create(
-        user=user,
-        document=document,
-        status=status,
-        comment=comment,
-    )
 
 
 def delete_document_status(user: User, status: DocumentStatus) -> None:

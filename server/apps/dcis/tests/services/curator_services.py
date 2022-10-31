@@ -1,13 +1,14 @@
 """Тесты модуля, отвечающего за работу кураторов."""
 from unittest.mock import patch
 
-from devind_dictionaries.models import Organization
+from devind_dictionaries.models import Department, Organization
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import CuratorGroup
+from apps.dcis.models import CuratorGroup, Document, Period, Project
 from apps.dcis.services.curator_services import (
     add_curator_group,
     add_organization_curator_group,
@@ -15,6 +16,10 @@ from apps.dcis.services.curator_services import (
     delete_curator_group,
     delete_organization_curator_group,
     delete_user_curator_group,
+    get_curator_groups,
+    get_curator_organizations,
+    is_document_curator,
+    is_period_curator,
 )
 
 

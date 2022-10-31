@@ -1,3 +1,4 @@
+from .helpers import CellHelpersTestCase
 from .models import (
     DocumentModelTestCase,
     ProjectModelTestCase,
@@ -10,7 +11,7 @@ from .permissions import (
 from .services import (
     AddStatusCheckTestCase,
     ColumnDimensionTestCase,
-    CuratorTestCase,
+    CuratorGroupTestCase,
     DivisionTestCase,
     DocumentTestCase,
     GetUserDocumentsTestCase,
@@ -21,4 +22,5 @@ from .services import (
     ProjectTestCase,
     RowDimensionTestCase,
     StatusTestCase,
+    ValueServicesTestCase
 )

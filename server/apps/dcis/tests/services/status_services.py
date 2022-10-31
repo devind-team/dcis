@@ -5,6 +5,7 @@ from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase, override_settings
+from jsonpickle import encode
 
 from apps.core.models import User
 from apps.dcis.models import (
@@ -20,7 +21,7 @@ from apps.dcis.models import (
 )
 from apps.dcis.services.status_services import (
     AddStatusCheck,
-    add_document_status,
+    LimitationError, add_document_status,
     delete_document_status,
     get_initial_statuses, get_new_statuses,
 )
@@ -184,17 +185,21 @@ class AddStatusCheckTestCase(TestCase):
         self.sheet1_row = RowDimension.objects.create(index=1, sheet=self.sheet1)
         self.sheet1_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet1) for i in range(1, 4)]
         self.sheet1_cells = {
-            'A1': Cell.objects.create(column=self.sheet1_columns[0], row=self.sheet1_row),
-            'B1': Cell.objects.create(column=self.sheet1_columns[1], row=self.sheet1_row),
-            'C1': Cell.objects.create(formula='=A1+B1', column=self.sheet1_columns[2], row=self.sheet1_row),
+            'A1': Cell.objects.create(column=self.sheet1_columns[0], row=self.sheet1_row, kind='n'),
+            'B1': Cell.objects.create(column=self.sheet1_columns[1], row=self.sheet1_row, kind='n'),
+            'C1': Cell.objects.create(formula='=A1+B1', column=self.sheet1_columns[2], row=self.sheet1_row, kind='n'),
         }
 
         self.sheet2 = Sheet.objects.create(period=self.period, name='sheet2')
         self.sheet2_rows = [RowDimension.objects.create(index=i, sheet=self.sheet2) for i in range(1, 3)]
         self.sheet2_column = ColumnDimension.objects.create(index=1, sheet=self.sheet2)
         self.sheet2_cells = {
-            'A1': Cell.objects.create(formula='=sheet1!A1', column=self.sheet2_column, row=self.sheet2_rows[0]),
-            'A2': Cell.objects.create(column=self.sheet2_column, row=self.sheet2_rows[1]),
+            'A1': Cell.objects.create(
+                formula='=sheet1!A1',
+                column=self.sheet2_column,
+                row=self.sheet2_rows[0], kind='n'
+            ),
+            'A2': Cell.objects.create(column=self.sheet2_column, row=self.sheet2_rows[1], kind='n'),
         }
 
         self.limitations = [
@@ -224,7 +229,17 @@ class AddStatusCheckTestCase(TestCase):
         """Тестирование функции `check_limitations` с ошибками вычислений."""
         with self.assertRaises(ValidationError) as error:
             AddStatusCheck.check_limitations(self.document_with_calculation_errors)
-        self.assertEqual({'limitations': list(map(ValidationError, ['Деление на 0']))}, error.exception.error_dict)
+        self.assertEqual(
+            [
+                LimitationError(
+                    form='sheet2',
+                    formula='2 / sheet2!A1 > 0.2',
+                    error_message='Деление на 0',
+                    dependencies=encode({'sheet2!A1': 0.0})
+                )
+            ],
+            error.exception.params,
+        )
 
     @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
     def test_check_limitations_with_limitation_errors(self) -> None:
@@ -232,8 +247,24 @@ class AddStatusCheckTestCase(TestCase):
         with self.assertRaises(ValidationError) as error:
             AddStatusCheck.check_limitations(self.document_with_limitation_errors)
         self.assertEqual(
-            {'limitations': list(map(ValidationError, ['sheet1!C1 больше 5', 'sheet2!A2 меньше sheet1!C1']))},
-            error.exception.error_dict
+            [
+                LimitationError(
+                    form='sheet1',
+                    formula='sheet1!C1 > 5',
+                    error_message='sheet1!C1 больше 5',
+                    dependencies=encode({'sheet1!C1': 3.0})
+                ),
+                LimitationError(
+                    form='sheet2',
+                    formula='sheet2!A2 < sheet1!C1',
+                    error_message='sheet2!A2 меньше sheet1!C1',
+                    dependencies=encode({
+                        'sheet2!A2': 4.0,
+                        'sheet1!C1': 3.0,
+                    })
+                )
+            ],
+            error.exception.params,
         )
 
     @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
