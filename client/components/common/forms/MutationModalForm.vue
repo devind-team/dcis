@@ -8,7 +8,6 @@ v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="p
     :mutation-name="mutationName"
     :errors-in-alert="errorsInAlert"
     :show-success="showSuccess"
-    :success-message="successMessage"
     :header="header"
     :subheader="subheader"
     :button-text="buttonText"
@@ -65,7 +64,6 @@ export default defineComponent({
     successClose: { type: Boolean, default: true },
     errorsInAlert: { type: Boolean, default: false },
     showSuccess: { type: Boolean, default: true },
-    successMessage: { type: String, default: '' },
     fullscreen: { type: Boolean, default: false },
     persistent: { type: Boolean, default: false },
     canMinimize: { type: Boolean, default: false },

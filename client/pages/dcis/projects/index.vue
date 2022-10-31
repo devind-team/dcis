@@ -24,7 +24,7 @@ bread-crumbs(:items="breadCrumbs")
             )
             v-data-table(
               :headers="headers"
-              :items="projects"
+              :items="visibleProjects"
               :loading="loading"
               disable-pagination
               disable-filtering
@@ -109,7 +109,7 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      if (route.query.deleteProjectId) {
+      if (projects.value && projects.value.length && route.query.deleteProjectId) {
         deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.deleteProjectId } } })
         router.push(localePath({ name: 'dcis-projects' }))
       }
