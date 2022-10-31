@@ -100,17 +100,21 @@ class CheckCellOptions:
                 )
         if field == 'number_format':
             return cls.Success(value)
+        if field == 'aggregation':
+            return cls._standard_check(field, value, cls._allow_aggregation)
 
     _allowed_fields = [
         'strong', 'italic', 'strike',
         'underline', 'horizontal_align', 'vertical_align',
         'editable', 'size', 'kind',
-        'number_format'
+        'number_format',
+        'aggregation'
     ]
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']
     _allowed_underline = [None, 'single', 'double', 'single_accounting', 'double_accounting']
     _allowed_kinds = [kind[0] for kind in Cell.KIND_VALUE]
+    _allow_aggregation = [None, *[kind[0] for kind in Cell.KIND_AGGREGATION]]
 
     @staticmethod
     def _get_value_error_message(field: str, value: str, allowed_values: list[str | None]) -> str:
@@ -124,6 +128,13 @@ class CheckCellOptions:
         if value in allowed_values:
             return cls.Success(value)
         return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
+
+
+def get_aggregation_cells(user: User, cell: Cell) -> list[Cell]:
+    """Возвращаем ячейки, от которых зависит cell."""
+    can_change_period_sheet(user, cell.row.sheet.period)
+    to_cells = cell.to_cells.select_related('from_cell').all()
+    return [to_cell.from_cell for to_cell in to_cells]
 
 
 def change_cell_default(user: User, cell: Cell, default: str) -> Cell:

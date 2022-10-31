@@ -4,6 +4,7 @@ from typing import Any
 
 import graphene
 from devind_core.schema import FileType
+from devind_helpers.utils import gid2int
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -48,8 +49,8 @@ class ChangeValueMutation(BaseMutation):
         cell_id: str,
         value: str
     ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        cell: Cell = get_object_or_404(Cell, pk=cell_id)
+        document: Document = get_object_or_404(Document, pk=gid2int(document_id))
+        cell: Cell = get_object_or_404(Cell, pk=gid2int(cell_id))
         try:
             can_change_value(info.context.user, document, cell)
         except PermissionDenied as e:
@@ -91,14 +92,14 @@ class ChangeFileValueMutation(BaseMutation):
         remaining_files: list[str],
         new_files: list[InMemoryUploadedFile]
     ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        cell: Cell = get_object_or_404(Cell, pk=cell_id)
+        document: Document = get_object_or_404(Document, pk=gid2int(document_id))
+        cell: Cell = get_object_or_404(Cell, pk=gid2int(cell_id))
 
         try:
             can_change_value(info.context.user, document, cell)
         except PermissionDenied as e:
             # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
-            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
+            return ChangeFileValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
         result = update_or_create_file_value(
             user=info.context.user,
             document=document,
@@ -138,7 +139,7 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         row_id: str,
         name: str
     ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        document: Document = get_object_or_404(Document, pk=gid2int(document_id))
         return UnloadFileValueArchiveMutation(
             src=create_file_value_archive(
                 user=info.context.user,

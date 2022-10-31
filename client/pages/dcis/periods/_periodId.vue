@@ -51,17 +51,17 @@ export default defineComponent({
           icon: 'briefcase-outline'
         })
       }
-      result.push({
-        title: t('dcis.periods.links.groups') as string,
-        to: 'dcis-periods-periodId-groups',
-        icon: 'account-group'
-      }, {
-        title: t('dcis.periods.links.users') as string,
-        to: 'dcis-periods-periodId-users',
-        icon: 'account-multiple'
-      })
       if (!loading.value) {
         if (period.value.canChangeSheet) {
+          result.push({
+            title: t('dcis.periods.links.groups') as string,
+            to: 'dcis-periods-periodId-groups',
+            icon: 'account-group'
+          }, {
+            title: t('dcis.periods.links.users') as string,
+            to: 'dcis-periods-periodId-users',
+            icon: 'account-multiple'
+          })
           result.push({
             title: t('dcis.periods.links.attributes') as string,
             to: 'dcis-periods-periodId-attributes',

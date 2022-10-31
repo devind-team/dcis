@@ -11,9 +11,7 @@ from .project_permissions import can_view_project
 def can_view_period(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период."""
     from apps.dcis.services.period_services import get_user_periods
-    can_view_project(
-        user, period.project
-    )
+    can_view_project(user, period.project)
     if period in get_user_periods(user, period.project.id):
         return
     raise PermissionDenied('Недостаточно прав для просмотра периода.')

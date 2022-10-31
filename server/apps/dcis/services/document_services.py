@@ -1,18 +1,34 @@
 """Модуль, отвечающий за работу с документами."""
 
+from typing import Type
 from devind_helpers.orm_utils import get_object_or_none
 from django.db import transaction
-from django.db.models import Max, QuerySet
+from django.db.models import Max, QuerySet, Q
 from devind_helpers.schema.types import ErrorFieldType
 
+from devind_dictionaries.models import Organization, Department
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import (
+    Cell,
+    Document,
+    DocumentStatus,
+    Limitation,
+    Period,
+    RowDimension,
+    Sheet,
+    Status,
+    Value,
+    Project
+)
 from apps.dcis.permissions import (
     can_add_document,
-    can_add_document_status, can_change_document, can_change_document_comment,
+    can_add_document_status,
+    can_change_document,
+    can_change_document_comment
 )
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
+from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
 
 
 def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Document]:
@@ -45,7 +61,8 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         divisions_documents = Document.objects.filter(period=period, object_id__in=division_ids)
     else:
         divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
-    return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
+    return divisions_documents.all()
+    # return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
 
 
 @transaction.atomic
@@ -105,6 +122,7 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
+    rerender_values(document, create_attribute_context(user, document))
     return document, []
 
 
@@ -217,3 +235,12 @@ def get_documents_max_version(period_id: int | str, division_id: int | str | Non
         period_id=period_id,
         object_id=division_id
     ).aggregate(version=Max('version'))['version']
+
+
+def get_document_sheets(document: Document) -> QuerySet[Sheet]:
+    project: Project = document.period.project
+    division_model: Type[Organization | Department] = project.division
+    division = division_model.objects.get(pk=document.object_id)
+    is_child: bool = hasattr(division, 'parent_id') and getattr(division, 'parent_id') is not None
+    sheet_filter = Q(show_child=True) if is_child else Q(show_head=True)
+    return document.sheets.filter(sheet_filter).all()

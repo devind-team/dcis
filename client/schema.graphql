@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы изменения связей между записями в базе данных
+Типы измнения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -150,25 +150,6 @@ type AddChildRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Добавленная строка"""
   rowDimension: RowDimensionType!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input AddCuratorGroupMutationInput {
-  clientMutationId: String
-  """Идентификатор группы привилегий"""
-  groupId: ID
-  """Название группы периода"""
-  name: String!
-}
-
-"""Мутация на добавление кураторской группы."""
-type AddCuratorGroupMutationPayload {
-  clientMutationId: String
-  """Добавленная кураторская группа"""
-  curatorGroup: CuratorGroupType
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -334,25 +315,6 @@ type AddGroupMutationPayload {
   errors: [ErrorFieldType!]!
   """Добавленная группа"""
   group: GroupType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input AddOrganizationCuratorGroupInput {
-  clientMutationId: String
-  """Идентификатор кураторской группы"""
-  curatorGroupId: ID!
-  """Идентификатор организации"""
-  organizationId: ID!
-}
-
-"""Мутация на добавление организации в кураторскую группу."""
-type AddOrganizationCuratorGroupPayload {
-  """Идентификатор организации"""
-  addOrganizationId: ID!
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -586,23 +548,23 @@ type AddTagMutationPayload {
   tag: TagType
 }
 
-input AddUsersCuratorGroupInput {
+input AddValuesCellsMutationInput {
+  """Целевая ячейка"""
+  cellId: ID!
+  """Связываем ячейки"""
+  cellsId: [ID!]!
   clientMutationId: String
-  """Идентификатор кураторской группы"""
-  curatorGroupId: ID!
-  """Идентификаторы пользователей"""
-  userIds: [ID!]!
 }
 
-"""Мутация на добавление пользователей в кураторскую группу."""
-type AddUsersCuratorGroupPayload {
+"""Добавление связной ячейки к агрегирующей."""
+type AddValuesCellsMutationPayload {
+  """Добавленные ячейки"""
+  cells: [ChangeCellType]
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
-  """Добавленные пользователи"""
-  users: [UserType]
 }
 
 """An enumeration."""
@@ -885,8 +847,60 @@ type CategoryTypeEdge {
   node: CategoryType
 }
 
+"""An enumeration."""
+enum CellAggregation {
+  """avg"""
+  AVG
+  """max"""
+  MAX
+  """min"""
+  MIN
+  """sum"""
+  SUM
+}
+
+"""An enumeration."""
+enum CellKind {
+  """b"""
+  B
+  """bigMoney"""
+  BIGMONEY
+  """classification"""
+  CLASSIFICATION
+  """d"""
+  D
+  """department"""
+  DEPARTMENT
+  """e"""
+  E
+  """f"""
+  F
+  """fl"""
+  FL
+  """inlineStr"""
+  INLINESTR
+  """money"""
+  MONEY
+  """n"""
+  N
+  """organization"""
+  ORGANIZATION
+  """s"""
+  S
+  """str"""
+  STR
+  """text"""
+  TEXT
+  """time"""
+  TIME
+  """user"""
+  USER
+}
+
 """Тип ячейки."""
 type CellType {
+  """Метод агрегации"""
+  aggregation: String
   """Цвет фона"""
   background: String!
   """Цвет границ"""
@@ -1107,6 +1121,37 @@ type ChangeCellDefaultPayload {
   success: Boolean!
 }
 
+"""Оригинальные тип мета данных ячейки."""
+type ChangeCellType {
+  """Механизм агрегации"""
+  aggregation: CellAggregation
+  """Колонка"""
+  column: ChangeColumnDimensionType
+  """Комментарий"""
+  comment: String
+  """Значение по умолчанию"""
+  default: String
+  """Редактируемая ячейка"""
+  editable: Boolean!
+  """Формула"""
+  formula: String
+  id: ID!
+  """Является ли поле шаблоном"""
+  isTemplate: Boolean!
+  """Тип значения"""
+  kind: CellKind!
+  """Маска для ввода значений"""
+  mask: String
+  """Форматирование чисел"""
+  numberFormat: String
+  """Строка"""
+  row: ChangeRowDimensionType
+  """Лист"""
+  sheet: SheetType
+  """Подсказка"""
+  tooltip: String
+}
+
 input ChangeCellsOptionMutationInput {
   """Идентификаторы ячеек"""
   cellIds: [ID!]!
@@ -1132,6 +1177,7 @@ input ChangeCellsOptionMutationInput {
     'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
 ]
 - number_format - форматирование чисел
+- aggregation - [None, 'sum', 'avg', 'min', 'max']
 """
 type ChangeCellsOptionMutationPayload {
   """Измененные свойства ячеек"""
@@ -1195,6 +1241,8 @@ type ChangeColumnDimensionType {
   """Скрытие колонки"""
   hidden: Boolean!
   id: ID!
+  """Индекс колонки"""
+  index: Int!
   """Тип значений"""
   kind: String!
   """Дата обновления"""
@@ -1655,6 +1703,8 @@ type ChangeRowDimensionType {
   """Скрытие строки"""
   hidden: Boolean!
   id: ID!
+  """Индекс строки"""
+  index: Int!
   """Дата обновления"""
   updatedAt: DateTime!
 }
@@ -2000,7 +2050,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатает, готовиться отправить сообщение
+- TYPING - Печатет, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -2045,19 +2095,6 @@ type CopyPeriodGroupsMutationPayload {
   periodGroups: [PeriodGroupType]!
   """Успех мутации"""
   success: Boolean!
-}
-
-"""Тип групп кураторов."""
-type CuratorGroupType {
-  """Привилегии кураторской группы"""
-  group: GroupType
-  id: ID!
-  """Наименование кураторской группы"""
-  name: String!
-  """Организация группы"""
-  organization: [OrganizationOriginalType!]
-  """Пользователи в кураторской группе"""
-  users: [UserType!]
 }
 
 """
@@ -2135,23 +2172,6 @@ type DeleteChildRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Идентификатор удаленной строки"""
   rowDimensionId: ID!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input DeleteCuratorGroupMutationInput {
-  clientMutationId: String
-  """Идентификатор кураторской группы"""
-  curatorGroupId: ID!
-}
-
-"""Мутация удаления кураторской группы."""
-type DeleteCuratorGroupMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Идентификатор удаленной кураторской группы"""
-  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -2237,25 +2257,6 @@ type DeleteNoticeMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input DeleteOrganizationCuratorGroupInput {
-  clientMutationId: String
-  """Идентификатор кураторской группы"""
-  curatorGroupId: ID!
-  """Идентификатор организации"""
-  organizationId: ID!
-}
-
-"""Мутация на добавление пользователей в кураторскую группу."""
-type DeleteOrganizationCuratorGroupPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Идентификатор организации"""
-  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -2385,20 +2386,20 @@ type DeleteSessionsMutationPayload {
   success: Boolean!
 }
 
-input DeleteUserCuratorGroupInput {
+input DeleteValuesCellMutationInput {
+  """Агрегирующая ячейка"""
+  cellId: ID!
   clientMutationId: String
-  """Идентификатор кураторской группы"""
-  curatorGroupId: ID!
-  """Идентификатор пользователя"""
-  userId: ID!
+  """Целевая ячейка"""
+  targetCellId: ID!
 }
 
-"""Мутация на добавление пользователей в кураторскую группу."""
-type DeleteUserCuratorGroupPayload {
+"""Удаление агрегирующий ячейки."""
+type DeleteValuesCellMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
-  """Идентификатор пользователя"""
+  """Идентификатор удаленной ячейки"""
   id: ID
   """Успех мутации"""
   success: Boolean!
@@ -2566,7 +2567,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы."""
+"""Ошибка в поле формы"""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2665,8 +2666,6 @@ input GlobalIndicesInputType {
 
 """Группа пользователей."""
 type GroupType {
-  """Привилегии группы"""
-  curatorgroupSet: [CuratorGroupType!]!
   id: ID!
   name: String!
   permissions: [PermissionType!]!
@@ -2804,8 +2803,6 @@ type Mutation {
   addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление дочерней строки."""
   addChildRowDimension(input: AddChildRowDimensionMutationInput!): AddChildRowDimensionMutationPayload!
-  """Мутация на добавление кураторской группы."""
-  addCuratorGroup(input: AddCuratorGroupMutationInput!): AddCuratorGroupMutationPayload!
   """Мутация на добавление дивизионов в период."""
   addDivisions(input: AddDivisionsMutationInput!): AddDivisionsMutationPayload!
   """Мутация для добавления дивизионов из файла."""
@@ -2822,8 +2819,6 @@ type Mutation {
   addFile(input: AddFileMutationInput!): AddFileMutationPayload!
   """Мутация для добавления группы."""
   addGroup(input: AddGroupMutationInput!): AddGroupMutationPayload!
-  """Мутация на добавление организации в кураторскую группу."""
-  addOrganizationCuratorGroup(input: AddOrganizationCuratorGroupInput!): AddOrganizationCuratorGroupPayload!
   """Добавление страницы"""
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
@@ -2844,8 +2839,8 @@ type Mutation {
   addSectionText(input: AddSectionTextMutationInput!): AddSectionTextMutationPayload!
   """Добавление тега"""
   addTag(input: AddTagMutationInput!): AddTagMutationPayload!
-  """Мутация на добавление пользователей в кураторскую группу."""
-  addUsersCuratorGroup(input: AddUsersCuratorGroupInput!): AddUsersCuratorGroupPayload!
+  """Добавляем агрегирование ячейки"""
+  addValuesCells(input: AddValuesCellsMutationInput!): AddValuesCellsMutationPayload!
   """Авторизация через портал https://cbias.ru"""
   authCbias(payload: AuthCbiasMutationInput!): AuthCbiasMutationOutput
   """Изменение атрибута"""
@@ -2944,8 +2939,6 @@ type Mutation {
   deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление дочерней строки."""
   deleteChildRowDimension(input: DeleteChildRowDimensionMutationInput!): DeleteChildRowDimensionMutationPayload!
-  """Мутация удаления кураторской группы."""
-  deleteCuratorGroup(input: DeleteCuratorGroupMutationInput!): DeleteCuratorGroupMutationPayload!
   """Мутация на удаление дивизиона из периода."""
   deleteDivision(input: DeleteDivisionMutationInput!): DeleteDivisionMutationPayload!
   """Удаление статуса документа."""
@@ -2956,8 +2949,6 @@ type Mutation {
   deleteGroup(input: DeleteGroupMutationInput!): DeleteGroupMutationPayload!
   """Удаление уведомления"""
   deleteNotice(input: DeleteNoticeMutationInput!): DeleteNoticeMutationPayload!
-  """Мутация на добавление пользователей в кураторскую группу."""
-  deleteOrganizationCuratorGroup(input: DeleteOrganizationCuratorGroupInput!): DeleteOrganizationCuratorGroupPayload!
   """Удаление страницы"""
   deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация на удаление периода."""
@@ -2974,8 +2965,8 @@ type Mutation {
   deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
   deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
-  """Мутация на добавление пользователей в кураторскую группу."""
-  deleteUserCuratorGroup(input: DeleteUserCuratorGroupInput!): DeleteUserCuratorGroupPayload!
+  """Удаление агрегированной ячейки"""
+  deleteValuesCell(input: DeleteValuesCellMutationInput!): DeleteValuesCellMutationPayload!
   """Мутация для получения токена авторизации."""
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
@@ -3764,27 +3755,6 @@ type Query {
   categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
   """Категория"""
   category(categoryId: ID!): CategoryType!
-  """Кураторская группа"""
-  curatorGroup(
-    """Идентификатор кураторской группы"""
-    curatorGroupId: ID!
-  ): CuratorGroupType!
-  curatorGroupNewUsers(
-    after: String
-    before: String
-    """Идентификатор кураторской группы"""
-    curatorGroupId: ID!
-    email_Icontains: String
-    first: Int
-    firstName_Icontains: String
-    last: Int
-    lastName_Icontains: String
-    offset: Int
-    sirName_Icontains: String
-    username_Icontains: String
-  ): UserTypeConnection
-  """Кураторские группы"""
-  curatorGroups: [CuratorGroupType!]!
   department(
     """Department ID"""
     departmentId: Int!
@@ -3798,7 +3768,7 @@ type Query {
   """Документ"""
   document(
     """Идентификатор документа"""
-    documentId: ID
+    documentId: ID!
   ): DocumentType
   """Выгрузка листа с несколькими документами"""
   documentSheet(
@@ -3965,6 +3935,11 @@ type Query {
   ): [PrivilegeType!]!
   """Пользователи приложения"""
   users(after: String, before: String, email_Icontains: String, first: Int, firstName_Icontains: String, last: Int, lastName_Icontains: String, offset: Int, sirName_Icontains: String, username_Icontains: String): UserTypeConnection!
+  """Ячейка и ее зависимости"""
+  valueCells(
+    """Идентификатор ячейки"""
+    cellId: ID!
+  ): [ChangeCellType]
   """Файлы значения ячейки типа `Файл`"""
   valueFiles(
     """Идентификатор колонки"""
@@ -4477,7 +4452,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представляющий собой таблицу."""
+"""Документ, представлющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!

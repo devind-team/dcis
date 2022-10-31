@@ -2,7 +2,7 @@ import json
 
 import graphene
 from devind_core.schema.types import ContentTypeType, FileType, GroupType
-from devind_dictionaries.models import Organization
+from devind_dictionaries.models import Organization, Department
 from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
@@ -20,6 +20,7 @@ from apps.dcis.models import (
     Attribute,
     AttributeValue,
     ColumnDimension,
+    Cell,
     CuratorGroup,
     Document,
     DocumentStatus,
@@ -48,6 +49,7 @@ from apps.dcis.permissions import (
     can_delete_project_base,
 )
 from apps.dcis.services.divisions_services import get_period_divisions
+from apps.dcis.services.document_services import get_document_sheets
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -161,7 +163,7 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     @resolver_hints(model_field='division_set')
     def resolve_divisions(period: Period, info: ResolveInfo) -> list[dict[str, int | str]]:
-        return get_period_divisions(period)
+        return get_period_divisions(info.context.user, period)
 
     @staticmethod
     @resolver_hints(model_field='periodgroup_set')
@@ -311,7 +313,7 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_sheets(document: Document, info: ResolveInfo) -> QuerySet[Sheet]:
-        return document.sheets.all()
+        return get_document_sheets(document)
 
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
@@ -431,6 +433,7 @@ class ChangeColumnDimensionType(DjangoObjectType):
         fields = (
             'id',
             'width',
+            'index',
             'fixed',
             'hidden',
             'kind',
@@ -444,11 +447,44 @@ class ChangeRowDimensionType(DjangoObjectType):
         fields = (
             'id',
             'height',
+            'index',
             'fixed',
             'hidden',
             'dynamic',
             'updated_at',
         )
+
+
+class ChangeCellType(DjangoObjectType):
+    """Оригинальные тип мета данных ячейки."""
+
+    row = graphene.Field(lambda: ChangeRowDimensionType, description='Строка')
+    column = graphene.Field(lambda: ChangeColumnDimensionType, description='Колонка')
+
+    sheet = graphene.Field(lambda: SheetType, description='Лист')
+
+    class Meta:
+        model = Cell
+        fields = (
+            'id',
+            'kind',
+            'editable',
+            'formula',
+            'number_format',
+            'comment',
+            'default',
+            'mask',
+            'tooltip',
+            'is_template',
+            'aggregation',
+            'column',
+            'row',
+        )
+
+    @staticmethod
+    def resolve_sheet(cell: Cell, info: ResolveInfo) -> Sheet:
+        """Возвращаем лист через колонку."""
+        return cell.column.sheet
 
 
 class CellType(graphene.ObjectType):
@@ -468,6 +504,7 @@ class CellType(graphene.ObjectType):
     is_template = graphene.Boolean(description='Является ли поле шаблоном')
     column_id = graphene.ID(description='Идентификатор колонки')
     row_id = graphene.ID(description='Идентификатор строки')
+    aggregation = graphene.String(description='Метод агрегации')
 
     # apps.dcis.models.Style
     horizontal_align = graphene.ID(description='Горизонтальное выравнивание')
