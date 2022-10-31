@@ -21,6 +21,16 @@ mutation AddDocumentStatus($comment: String!, $documentId: ID!, $statusId: ID!) 
       }
       __typename
     }
+    table {
+      headers
+      rows {
+        index
+        cells {
+          header
+          value
+        }
+      }
+    }
     __typename
   }
 }

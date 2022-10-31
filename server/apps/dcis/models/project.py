@@ -42,8 +42,12 @@ class Project(models.Model):
         ordering = ('-created_at',)
 
     @property
+    def division_name(self) -> str:
+        return cast(str, self.content_type.model)
+
+    @property
     def division(self) -> Type[Department | Organization]:
-        return self.DIVISION_KIND.get(cast(str, self.content_type.model), Department)
+        return self.DIVISION_KIND.get(self.division_name, Department)
 
 
 class Period(models.Model):

@@ -299,6 +299,8 @@ type AddDocumentStatusMutationPayload {
   errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
+  """Документ с ошибками"""
+  table: TableType
 }
 
 input AddFileMutationInput {
@@ -413,8 +415,8 @@ type AddPeriodGroupMutationPayload {
 
 input AddPeriodMutationInput {
   clientMutationId: String
-  """xlsx файл с проектом"""
-  file: Upload!
+  """json файл c ограничениями, накладываемыми на листы"""
+  limitationsFile: Upload
   """Множественный тип сбора"""
   multiple: Boolean!
   """Название периода"""
@@ -425,6 +427,8 @@ input AddPeriodMutationInput {
   readonlyFillColor: Boolean!
   """Разрешить множество версий"""
   versioning: Boolean!
+  """xlsx файл с проектом"""
+  xlsxFile: Upload!
 }
 
 """Мутация для создания периода."""
@@ -2808,6 +2812,17 @@ schema (one of the key benefits of GraphQL).
 """
 scalar JSONString
 
+"""Тип ограничения, накладываемого на лист."""
+type LimitationType {
+  """Сообщение ошибки"""
+  errorMessage: String!
+  """Формула"""
+  formula: String!
+  id: ID!
+  """Лист"""
+  sheet: BaseSheetType
+}
+
 """An enumeration."""
 enum LogEntryAction {
   """create"""
@@ -3610,7 +3625,7 @@ type PeriodGroupType {
 """Тип периода."""
 type PeriodType {
   """Может ли пользователь добавлять документы в период"""
-  canAddDocument: Boolean!
+  canAddAnyDivisionDocument: Boolean!
   """Может ли пользователь изменять дивизионы периода"""
   canChangeDivisions: Boolean!
   """Может ли пользователь изменять группы периода"""
@@ -3630,6 +3645,8 @@ type PeriodType {
   """Дата окончания"""
   expiration: Date
   id: ID!
+  """Является ли пользователь куратором для периода"""
+  isCurator: Boolean!
   """Методическая поддержка"""
   methodicalSupport: [FileType!]
   """Множественное заполнение"""
@@ -3922,10 +3939,25 @@ type Query {
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
   hasSettings: Boolean!
+  """Возможные начальные статусы для нового документа"""
+  initialStatuses(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [StatusType!]
+  """Ограничения, накладываемые на листы"""
+  limitations(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [LimitationType]!
   logEntry(action_Contains: String, after: String, before: String, contentType_Model_Icontains: String, first: Int, last: Int, objectId_Icontains: Int, offset: Int, userId: ID): LogEntryTypeConnection!
   logRequests(after: String, before: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, offset: Int, page_Icontains: String, userId: ID): LogRequestTypeConnection!
   """Информация обо мне"""
   me: UserType
+  """Возможные новые статусы для документа"""
+  newStatuses(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [StatusType!]
   """Источник уведомлений"""
   notices(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): NoticeTypeConnection!
   """Детализация уведомления"""
@@ -4520,8 +4552,6 @@ type StatusType {
   id: ID!
   """Название статуса"""
   name: String!
-  """Является ли статус защищенным от изменения"""
-  protected: Boolean!
 }
 
 """Подписки на сокеты."""

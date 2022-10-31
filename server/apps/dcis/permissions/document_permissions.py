@@ -3,7 +3,7 @@
 from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Period, RowDimension, Status
+from apps.dcis.models import AddStatus, Cell, Document, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
@@ -22,7 +22,7 @@ def can_view_document(user: User, document: Document):
     try:
         can_view_period(user, document.period)
         if document not in get_user_documents(user, document.period):
-            raise PermissionDenied()
+            raise PermissionDenied('Недостаточно прав для просмотра документа.')
     except PermissionDenied:
         raise PermissionDenied('Недостаточно прав для просмотра документа.')
 
@@ -41,13 +41,13 @@ class AddDocumentBase:
         """Идентификаторы дивизионов пользователя."""
         if self._user_division_ids is None:
             self._user_division_ids = [
-                division['id'] for division in get_user_divisions(self._user)
+                division['id'] for division in get_user_divisions(self._user, self._period.project)
             ]
         return self._user_division_ids
 
     @property
-    def can_add_any_document(self) -> bool:
-        """Может ли пользователь добавлять любой документ."""
+    def can_add_any_division_document(self) -> bool:
+        """Может ли пользователь добавлять документ с любым дивизионом."""
         if self._can_add_any_document is None:
             self._can_add_any_document = (
                 self._user.has_perm('dcis.add_document') or
@@ -57,20 +57,13 @@ class AddDocumentBase:
             )
         return self._can_add_any_document
 
-    def can_add_restricted_document(self, status: Status, division_id: int | str) -> bool:
-        """Может ли пользователь добавлять документ с конкретным дивизионом и статусом."""
-        return not status.protected and int(division_id) in self.user_division_ids
-
     def has_object_permission(self, status: Status, division_id: int | str | None) -> bool:
         """Получение разрешения."""
-        return self.can_add_any_document or (division_id and self.can_add_restricted_document(status, division_id))
-
-
-def can_add_any_document(user: User, period: Period):
-    """Пропускает пользователей, которые могут добавлять любой документ."""
-    if AddDocumentBase(user, period).can_add_any_document:
-        return
-    raise PermissionDenied('Недостаточно прав для добавления документа в период.')
+        from apps.dcis.services.status_services import get_initial_statuses
+        return (
+            self.can_add_any_division_document or
+            (division_id and int(division_id) in self.user_division_ids)
+        ) and status in get_initial_statuses(self._user, self._period)
 
 
 def can_add_document(user: User, period: Period, status: Status, division_id: int | str | None):
@@ -92,12 +85,6 @@ def can_change_document_base(user: User, document: Document):
     raise PermissionDenied('Недостаточно прав для изменения документа в периоде.')
 
 
-def can_change_document(user: User, obj: Document):
-    """Пропускает пользователей, которые могут просматривать и изменять документ в периоде."""
-    can_view_document(user, obj)
-    can_change_document_base(user, obj)
-
-
 def can_change_document_comment_base(user: User, document: Document):
     """Пропускает пользователей, которые могут изменять комментарий документа, без проверки возможности просмотра."""
     if document.user_id == user.id:
@@ -111,17 +98,29 @@ def can_change_document_comment(user: User, document: Document):
     can_change_document_comment_base(user, document)
 
 
-def can_add_document_status_base(user: User, document: Document, status: Status):
+def can_add_document_status_base(user: User, document: Document, add_status: AddStatus | None):
     """Пропускает пользователей, которые могут добавлять статус документа, без проверки возможности просмотра."""
-    if not status.protected and document.user_id == user.id:
+    from apps.dcis.services.document_services import get_user_roles
+    if add_status is not None and len(set(get_user_roles(user, document)) & set(add_status.roles)) > 0:
         return
+    raise PermissionDenied('Недостаточно прав для добавления статуса к документу.')
+
+
+def can_add_document_status(user: User, document: Document, add_status: AddStatus | None):
+    """Пропускает пользователей, которые могут просматривать документ и добавлять в него статус."""
+    can_view_document(user, document)
+    can_add_document_status_base(user, document, add_status)
+
+
+def can_delete_document_status_base(user: User, document: Document):
+    """Пропускает пользователей, которые могут удалять статус документа, без проверки возможности просмотра."""
     can_change_document_base(user, document)
 
 
-def can_add_document_status(user: User, document: Document, status: Status):
-    """Пропускает пользователей, которые могут просматривать документ и добавлять в него статус."""
+def can_delete_document_status(user: User, document: Document):
+    """Пропускает пользователей, которые могут просматривать документ и удалять из него статус."""
     can_view_document(user, document)
-    can_add_document_status_base(user, document, status)
+    can_delete_document_status_base(user, document)
 
 
 class ChangeDocumentSheetBase:

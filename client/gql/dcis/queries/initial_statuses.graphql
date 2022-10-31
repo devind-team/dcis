@@ -1,0 +1,7 @@
+#import "../fragments/status_fields.graphql"
+
+query InitialStatuses($periodId: ID!) {
+  initialStatuses(periodId: $periodId) {
+    ...StatusFields
+  }
+}

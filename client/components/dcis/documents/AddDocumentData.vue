@@ -60,11 +60,11 @@ import {
   AddDocumentDataMutationInput,
   AddDocumentDataMutationPayload,
   PeriodType,
-  StatusesQuery,
-  StatusesQueryVariables,
+  InitialStatusesQuery,
+  InitialStatusesQueryVariables,
   StatusType
 } from '~/types/graphql'
-import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
+import initialStatusesQuery from '~/gql/dcis/queries/initial_statuses.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
 export type AddDocumentsDataMutationsResultType = { data: { addDocumentData: AddDocumentDataMutationPayload } }
@@ -83,8 +83,11 @@ export default defineComponent({
     const status = ref<StatusType | null>(null)
     const comment = ref<string>('')
 
-    const { data: statuses } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
-      document: statusesQuery
+    const { data: statuses } = useCommonQuery<InitialStatusesQuery, InitialStatusesQueryVariables>({
+      document: initialStatusesQuery,
+      variables: () => ({
+        periodId: props.period.id
+      })
     })
 
     const variables = computed<AddDocumentDataMutationInput>(() => ({

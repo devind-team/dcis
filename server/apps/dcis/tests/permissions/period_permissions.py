@@ -6,7 +6,9 @@ from unittest.mock import Mock, patch
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
+from django.test import TestCase
 
+from apps.core.models import User
 from apps.dcis.models import Document, Period, Project
 from apps.dcis.permissions.period_permissions import (
     can_add_period,
@@ -19,15 +21,14 @@ from apps.dcis.permissions.period_permissions import (
     can_delete_period,
     can_view_period,
 )
-from .common import PermissionsTestCase
 
 
-class PeriodPermissionsTestCase(PermissionsTestCase):
+class PeriodPermissionsTestCase(TestCase):
     """Тесты разрешений на работу с периодами проектов."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
-        super().setUp()
+        self.user = User.objects.create(username='user', email='user@gmail.com')
 
         self.department_content_type = ContentType.objects.get_for_model(Department)
 

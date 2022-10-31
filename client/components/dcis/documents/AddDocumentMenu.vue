@@ -4,7 +4,7 @@ v-menu(v-model="active" transition="slide-y-transition" offset-y left)
     slot(name="default" :on="on" :attrs="attrs")
   v-list(dense)
     add-document(
-      :can-add-any-document="period.canAddDocument"
+      :can-add-any-division-document="period.canAddAnyDivisionDocument"
       :user-divisions="userDivisions"
       :period="period"
       :documents="documents"
@@ -16,7 +16,7 @@ v-menu(v-model="active" transition="slide-y-transition" offset-y left)
             v-icon mdi-form-select
           v-list-item-content {{ $t('dcis.documents.addDocument.formText') }}
     add-document-data(
-      v-if="period.canAddDocument"
+      v-if="period.canAddAnyDivisionDocument"
       :period="period"
       :update="addDocumentDataUpdate"
     )

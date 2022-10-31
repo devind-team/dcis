@@ -11,6 +11,7 @@ from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Period, Sheet, Value
 from apps.dcis.models.sheet import Cell
 from apps.dcis.permissions import (
@@ -53,6 +54,8 @@ def rename_sheet(user: User, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]
             changed_cell.append(cell)
     sheet.name = name
     sheet.save(update_fields=('name',))
+    for s in Sheet.objects.filter(period=sheet.period):
+        SheetFormulaContainerCache.update(s)
     return sheet, changed_cell
 
 
