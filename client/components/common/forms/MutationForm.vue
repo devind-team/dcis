@@ -55,12 +55,12 @@ export default defineComponent({
     mutationName: { type: [String, Array], required: true },
     errorsInAlert: { type: Boolean, default: false },
     showSuccess: { type: Boolean, default: true },
+    successMessage: { type: String, default: '' },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
     buttonText: { type: String, default: '' },
     i18nPath: { type: String, default: '' },
     hideAlertTimeout: { type: Number, default: 20000 },
-    successMessage: { type: String, default: '' },
     flat: { type: Boolean, default: false },
     hideActions: { type: Boolean, default: false }
   },

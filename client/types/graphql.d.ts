@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы измнения связей между записями в базе данных
+ * Типы изменения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -167,6 +167,26 @@ export type AddChildRowDimensionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Добавленная строка */
   rowDimension: RowDimensionType;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type AddCuratorGroupMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор группы привилегий */
+  groupId?: InputMaybe<Scalars['ID']>;
+  /** Название группы периода */
+  name: Scalars['String'];
+};
+
+/** Мутация на добавление кураторской группы. */
+export type AddCuratorGroupMutationPayload = {
+  __typename?: 'AddCuratorGroupMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Добавленная кураторская группа */
+  curatorGroup?: Maybe<CuratorGroupType>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -340,6 +360,26 @@ export type AddGroupMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Добавленная группа */
   group?: Maybe<GroupType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type AddOrganizationCuratorGroupInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор кураторской группы */
+  curatorGroupId: Scalars['ID'];
+  /** Идентификатор организации */
+  organizationId: Scalars['ID'];
+};
+
+/** Мутация на добавление организации в кураторскую группу. */
+export type AddOrganizationCuratorGroupPayload = {
+  __typename?: 'AddOrganizationCuratorGroupPayload';
+  /** Идентификатор организации */
+  addOrganizationId: Scalars['ID'];
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -581,6 +621,26 @@ export type AddTagMutationPayload = {
   success: Scalars['Boolean'];
   /** Добавленный тег */
   tag?: Maybe<TagType>;
+};
+
+export type AddUsersCuratorGroupInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор кураторской группы */
+  curatorGroupId: Scalars['ID'];
+  /** Идентификаторы пользователей */
+  userIds: Array<Scalars['ID']>;
+};
+
+/** Мутация на добавление пользователей в кураторскую группу. */
+export type AddUsersCuratorGroupPayload = {
+  __typename?: 'AddUsersCuratorGroupPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+  /** Добавленные пользователи */
+  users?: Maybe<Array<Maybe<UserType>>>;
 };
 
 export type AddValuesCellsMutationInput = {
@@ -2157,7 +2217,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатет, готовиться отправить сообщение
+ * - TYPING - Печатает, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -2215,6 +2275,20 @@ export type CopyPeriodGroupsMutationPayload = {
   periodGroups: Array<Maybe<PeriodGroupType>>;
   /** Успех мутации */
   success: Scalars['Boolean'];
+};
+
+/** Тип групп кураторов. */
+export type CuratorGroupType = {
+  __typename?: 'CuratorGroupType';
+  /** Привилегии кураторской группы */
+  group?: Maybe<GroupType>;
+  id: Scalars['ID'];
+  /** Наименование кураторской группы */
+  name: Scalars['String'];
+  /** Организация группы */
+  organization?: Maybe<Array<OrganizationType>>;
+  /** Пользователи в кураторской группе */
+  users?: Maybe<Array<UserType>>;
 };
 
 /** Информация по показателям во временной развертке. */
@@ -2280,6 +2354,24 @@ export type DeleteChildRowDimensionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Идентификатор удаленной строки */
   rowDimensionId: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type DeleteCuratorGroupMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор кураторской группы */
+  curatorGroupId: Scalars['ID'];
+};
+
+/** Мутация удаления кураторской группы. */
+export type DeleteCuratorGroupMutationPayload = {
+  __typename?: 'DeleteCuratorGroupMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленной кураторской группы */
+  id: Scalars['ID'];
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2370,6 +2462,26 @@ export type DeleteNoticeMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type DeleteOrganizationCuratorGroupInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор кураторской группы */
+  curatorGroupId: Scalars['ID'];
+  /** Идентификатор организации */
+  organizationId: Scalars['ID'];
+};
+
+/** Мутация на добавление пользователей в кураторскую группу. */
+export type DeleteOrganizationCuratorGroupPayload = {
+  __typename?: 'DeleteOrganizationCuratorGroupPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор организации */
+  id: Scalars['ID'];
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2503,6 +2615,26 @@ export type DeleteSessionsMutationPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type DeleteUserCuratorGroupInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор кураторской группы */
+  curatorGroupId: Scalars['ID'];
+  /** Идентификатор пользователя */
+  userId: Scalars['ID'];
+};
+
+/** Мутация на добавление пользователей в кураторскую группу. */
+export type DeleteUserCuratorGroupPayload = {
+  __typename?: 'DeleteUserCuratorGroupPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор пользователя */
+  id?: Maybe<Scalars['ID']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2700,7 +2832,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы */
+/** Ошибка в поле формы. */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -2806,6 +2938,8 @@ export type GlobalIndicesInputType = {
 /** Группа пользователей. */
 export type GroupType = {
   __typename?: 'GroupType';
+  /** Привилегии группы */
+  curatorgroupSet: Array<CuratorGroupType>;
   id: Scalars['ID'];
   name: Scalars['String'];
   permissions: Array<PermissionType>;
@@ -2957,6 +3091,8 @@ export type Mutation = {
   addCategory: AddCategoryMutationPayload;
   /** Добавление дочерней строки. */
   addChildRowDimension: AddChildRowDimensionMutationPayload;
+  /** Мутация на добавление кураторской группы. */
+  addCuratorGroup: AddCuratorGroupMutationPayload;
   /** Мутация на добавление дивизионов в период. */
   addDivisions: AddDivisionsMutationPayload;
   /** Мутация для добавления дивизионов из файла. */
@@ -2973,6 +3109,8 @@ export type Mutation = {
   addFile: AddFileMutationPayload;
   /** Мутация для добавления группы. */
   addGroup: AddGroupMutationPayload;
+  /** Мутация на добавление организации в кураторскую группу. */
+  addOrganizationCuratorGroup: AddOrganizationCuratorGroupPayload;
   /** Добавление страницы */
   addPage: AddPageMutationPayload;
   /** Мутация для создания периода. */
@@ -2993,6 +3131,8 @@ export type Mutation = {
   addSectionText: AddSectionTextMutationPayload;
   /** Добавление тега */
   addTag: AddTagMutationPayload;
+  /** Мутация на добавление пользователей в кураторскую группу. */
+  addUsersCuratorGroup: AddUsersCuratorGroupPayload;
   /** Добавляем агрегирование ячейки */
   addValuesCells: AddValuesCellsMutationPayload;
   /** Авторизация через портал https://cbias.ru */
@@ -3093,6 +3233,8 @@ export type Mutation = {
   deleteCategory: DeleteCategoryMutationPayload;
   /** Удаление дочерней строки. */
   deleteChildRowDimension: DeleteChildRowDimensionMutationPayload;
+  /** Мутация удаления кураторской группы. */
+  deleteCuratorGroup: DeleteCuratorGroupMutationPayload;
   /** Мутация на удаление дивизиона из периода. */
   deleteDivision: DeleteDivisionMutationPayload;
   /** Удаление статуса документа. */
@@ -3103,6 +3245,8 @@ export type Mutation = {
   deleteGroup: DeleteGroupMutationPayload;
   /** Удаление уведомления */
   deleteNotice: DeleteNoticeMutationPayload;
+  /** Мутация на добавление пользователей в кураторскую группу. */
+  deleteOrganizationCuratorGroup: DeleteOrganizationCuratorGroupPayload;
   /** Удаление страницы */
   deletePage: DeletePageMutationPayload;
   /** Мутация на удаление периода. */
@@ -3119,6 +3263,8 @@ export type Mutation = {
   deleteSection: DeleteSectionMutationPayload;
   /** Мутация для удаления всех сессий кроме текущей. */
   deleteSessions: DeleteSessionsMutationPayload;
+  /** Мутация на добавление пользователей в кураторскую группу. */
+  deleteUserCuratorGroup: DeleteUserCuratorGroupPayload;
   /** Удаление агрегированной ячейки */
   deleteValuesCell: DeleteValuesCellMutationPayload;
   /** Мутация для получения токена авторизации. */
@@ -3168,6 +3314,11 @@ export type MutationAddChildRowDimensionArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationAddCuratorGroupArgs = {
+  input: AddCuratorGroupMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationAddDivisionsArgs = {
   input: AddDivisionsMutationInput;
 };
@@ -3205,6 +3356,11 @@ export type MutationAddFileArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddGroupArgs = {
   input: AddGroupMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddOrganizationCuratorGroupArgs = {
+  input: AddOrganizationCuratorGroupInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3255,6 +3411,11 @@ export type MutationAddSectionTextArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddTagArgs = {
   input: AddTagMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddUsersCuratorGroupArgs = {
+  input: AddUsersCuratorGroupInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3508,6 +3669,11 @@ export type MutationDeleteChildRowDimensionArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationDeleteCuratorGroupArgs = {
+  input: DeleteCuratorGroupMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteDivisionArgs = {
   input: DeleteDivisionMutationInput;
 };
@@ -3530,6 +3696,11 @@ export type MutationDeleteGroupArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteNoticeArgs = {
   input: DeleteNoticeMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteOrganizationCuratorGroupArgs = {
+  input: DeleteOrganizationCuratorGroupInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3570,6 +3741,11 @@ export type MutationDeleteSectionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteSessionsArgs = {
   input: DeleteSessionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteUserCuratorGroupArgs = {
+  input: DeleteUserCuratorGroupInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3930,50 +4106,6 @@ export type OrganizationOkpoFilterInputType = {
   icontains?: InputMaybe<Scalars['String']>;
 };
 
-/** Описание списка организаций. */
-export type OrganizationOriginalType = {
-  __typename?: 'OrganizationOriginalType';
-  /** Address */
-  address?: Maybe<Scalars['String']>;
-  /** Additional fields */
-  attributes: Scalars['JSONString'];
-  /** Created date */
-  createdAt: Scalars['DateTime'];
-  /** Департаменты */
-  departments?: Maybe<Array<Maybe<DepartmentType>>>;
-  id: Scalars['ID'];
-  /** Individual taxpayer number */
-  inn?: Maybe<Scalars['String']>;
-  /** Type */
-  kind?: Maybe<Scalars['String']>;
-  /** Accounting code */
-  kodbuhg?: Maybe<Scalars['String']>;
-  /** Code of reason */
-  kpp?: Maybe<Scalars['String']>;
-  /** Email */
-  mail?: Maybe<Scalars['String']>;
-  /** Name */
-  name: Scalars['String'];
-  /** Russian classifier of enterprises and organizations */
-  okpo?: Maybe<Scalars['String']>;
-  /** Parent */
-  parent?: Maybe<OrganizationOriginalType>;
-  /** Phone number */
-  phone?: Maybe<Scalars['String']>;
-  /** Name for view */
-  presentName: Scalars['String'];
-  /** Region */
-  region?: Maybe<RegionType>;
-  /** Rubpnubp code */
-  rubpnubp?: Maybe<Scalars['String']>;
-  /** Site url */
-  site?: Maybe<Scalars['String']>;
-  /** Updated date */
-  updatedAt: Scalars['DateTime'];
-  /** Пользователи */
-  users?: Maybe<Array<Maybe<UserType>>>;
-};
-
 export type OrganizationParentFilterInputType = {
   /** `Exact` lookup */
   exact?: InputMaybe<Scalars['ID']>;
@@ -4039,7 +4171,7 @@ export type OrganizationType = Node & {
   /** Russian classifier of enterprises and organizations */
   okpo?: Maybe<Scalars['String']>;
   /** Parent */
-  parent?: Maybe<OrganizationOriginalType>;
+  parent?: Maybe<OrganizationType>;
   /** Phone number */
   phone?: Maybe<Scalars['String']>;
   /** Name for view */
@@ -4413,6 +4545,11 @@ export type Query = {
   categories: CategoryTypeConnection;
   /** Категория */
   category: CategoryType;
+  /** Кураторская группа */
+  curatorGroup: CuratorGroupType;
+  curatorGroupNewUsers?: Maybe<UserTypeConnection>;
+  /** Кураторские группы */
+  curatorGroups: Array<CuratorGroupType>;
   department?: Maybe<DepartmentType>;
   departments?: Maybe<Array<DepartmentType>>;
   district?: Maybe<DistrictType>;
@@ -4548,6 +4685,26 @@ export type QueryCategoriesArgs = {
 /** Схема запросов данных. */
 export type QueryCategoryArgs = {
   categoryId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryCuratorGroupArgs = {
+  curatorGroupId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryCuratorGroupNewUsersArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  curatorGroupId: Scalars['ID'];
+  email_Icontains?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  firstName_Icontains?: InputMaybe<Scalars['String']>;
+  last?: InputMaybe<Scalars['Int']>;
+  lastName_Icontains?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  sirName_Icontains?: InputMaybe<Scalars['String']>;
+  username_Icontains?: InputMaybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -5334,7 +5491,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представлющий собой таблицу. */
+/** Документ, представляющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
@@ -5953,6 +6110,33 @@ export type DeleteValueCellMutationVariables = Exact<{
 
 export type DeleteValueCellMutation = { __typename?: 'Mutation', deleteValuesCell: { __typename: 'DeleteValuesCellMutationPayload', success: boolean, id?: string | null } };
 
+export type AddCuratorGroupMutationVariables = Exact<{
+  name: Scalars['String'];
+  groupId?: InputMaybe<Scalars['ID']>;
+}>;
+
+export type AddCuratorGroupMutation = { __typename?: 'Mutation', addCuratorGroup: { __typename?: 'AddCuratorGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, curatorGroup?: { __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename: 'GroupType', id: string, name: string } | null } | null } };
+
+export type AddUsersCuratorGroupMutationVariables = Exact<{
+  curatorGroupId: Scalars['ID'];
+  userIds: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+export type AddUsersCuratorGroupMutation = { __typename?: 'Mutation', addUsersCuratorGroup: { __typename?: 'AddUsersCuratorGroupPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null> | null } };
+
+export type DeleteCuratorGroupMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+export type DeleteCuratorGroupMutation = { __typename?: 'Mutation', deleteCuratorGroup: { __typename: 'DeleteCuratorGroupMutationPayload', success: boolean, id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type DeleteUserCuratorGroupMutationVariables = Exact<{
+  curatorGroupId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+export type DeleteUserCuratorGroupMutation = { __typename?: 'Mutation', deleteUserCuratorGroup: { __typename: 'DeleteUserCuratorGroupPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
 export type AddChildRowDimensionMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['ID'];
@@ -6280,6 +6464,25 @@ export type BudgetClassificationsQueryVariables = Exact<{
 }>;
 
 export type BudgetClassificationsQuery = { __typename?: 'Query', budgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
+
+export type CuratorGroupNewUsersQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
+  curatorGroupId: Scalars['ID'];
+  search?: InputMaybe<Scalars['String']>;
+}>;
+
+export type CuratorGroupNewUsersQuery = { __typename?: 'Query', curatorGroupNewUsers?: { __typename?: 'UserTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'UserTypeEdge', node?: { __typename: 'UserType', id: string, avatar?: string | null, username: string, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any, groups: Array<{ __typename: 'GroupType', id: string, name: string } | null> } | null } | null> } | null };
+
+export type CuratorGroupUsersQueryVariables = Exact<{
+  curatorGroupId: Scalars['ID'];
+}>;
+
+export type CuratorGroupUsersQuery = { __typename?: 'Query', curatorGroup: { __typename: 'CuratorGroupType', id: string, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null } };
+
+export type CuratorGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+export type CuratorGroupsQuery = { __typename?: 'Query', curatorGroups: Array<{ __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename: 'GroupType', id: string, name: string } | null }> };
 
 export type DepartmentsQueryVariables = Exact<{ [key: string]: never; }>;
 

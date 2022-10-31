@@ -1,3 +1,4 @@
+from .curator import CuratorGroup
 from .document import Attribute, AttributeValue, Document, DocumentStatus, Sheet, Status
 from .privilege import PeriodGroup, PeriodPrivilege, Privilege
 from .project import Division, Period, Project

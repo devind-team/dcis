@@ -1,9 +1,9 @@
 import json
 
 import graphene
-from devind_core.schema.types import ContentTypeType, FileType
+from devind_core.schema.types import ContentTypeType, FileType, GroupType
 from devind_dictionaries.models import Organization, Department
-from devind_dictionaries.schema import DepartmentType
+from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.core.exceptions import PermissionDenied
@@ -17,11 +17,23 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
-    Attribute, AttributeValue, ColumnDimension, Document,
-    DocumentStatus, Limitation, Period,
-    PeriodGroup, PeriodPrivilege, Privilege,
-    Project, RowDimension, Sheet,
-    Status, Value, Cell,
+    Attribute,
+    AttributeValue,
+    ColumnDimension,
+    Cell,
+    CuratorGroup,
+    Document,
+    DocumentStatus,
+    Limitation,
+    Period,
+    PeriodGroup,
+    PeriodPrivilege,
+    Privilege,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+    Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
@@ -210,43 +222,24 @@ class DivisionModelTypeConnection(graphene.relay.Connection):
         node = DivisionModelType
 
 
-class OrganizationOriginalType(DjangoObjectType):
-    """Описание списка организаций."""
-
-    departments = graphene.List(DepartmentType, description='Департаменты')
-    users = graphene.List(UserType, description='Пользователи')
-
-    class Meta:
-        model = Organization
-        fields = (
-            'id', 'name', 'present_name',
-            'inn', 'kpp', 'kind',
-            'rubpnubp', 'kodbuhg', 'okpo',
-            'phone', 'site', 'mail', 'address',
-            'attributes',
-            'created_at', 'updated_at',
-            'parent',
-            'region',
-            'departments'
-        )
-
-    @staticmethod
-    @resolver_hints(model_field='department_set')
-    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
-        return organization.department_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='')
-    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
-        return organization.users.all()
-
-
 class PrivilegeType(DjangoObjectType):
     """Описание сквозных привилегий."""
 
     class Meta:
         model = Privilege
         fields = ('id', 'name', 'created_at', 'key',)
+
+
+class CuratorGroupType(DjangoObjectType):
+    """Тип групп кураторов."""
+
+    group = graphene.Field(GroupType, description='Привилегии кураторской группы')
+    organization = DjangoListField(OrganizationType, description='Организация группы')
+    users = DjangoListField(UserType, description='Пользователи в кураторской группе')
+
+    class Meta:
+        model = CuratorGroup
+        fields = ('id', 'name', 'group', 'users', 'organization')
 
 
 class PeriodGroupType(DjangoObjectType):

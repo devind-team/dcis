@@ -5,3 +5,4 @@ from .period_services import GetUserPeriodsTestCase
 from .privilege_services import PrivilegeServicesTestCase
 from .project_services import GetUserProjectsTestCase
 from .row_dimension_services import RowDimensionTestCase
+from .curator_services import CuratorGroupTestCase
