@@ -29,7 +29,7 @@ def delete_curator_group(user: User, curator_group_id: str | int) -> None:
 
 
 def add_users_curator_group(user: User, curator_group_id: str | int, user_ids: list[str]) -> QuerySet[User]:
-    """Добавление пользователя в кураторскую группу."""
+    """Добавление пользователей в кураторскую группу."""
     can_change_curator_group(user)
     curator_group: CuratorGroup = get_object_or_404(CuratorGroup, pk=curator_group_id)
     users = User.objects.filter(id__in=user_ids)
