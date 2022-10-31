@@ -26,7 +26,14 @@ export default defineComponent({
       {
         title: t('panel.ac.name') as string,
         icon: 'mdi-account',
-        permissions: ['core.view_user', 'auth.view_group', 'auth.view_permission'],
+        permissions: [
+          'core.view_user',
+          'auth.view_group',
+          'dcis.view_curatorgroup',
+          'auth.view_permission',
+          'devind_core.view_logentry',
+          'devind_core.view_logrequest'
+        ],
         permOr: true,
         to: localePath({ name: 'panel-ac' }),
         color: 'info'

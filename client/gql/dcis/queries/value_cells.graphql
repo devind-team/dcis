@@ -1,0 +1,26 @@
+query ValueCells($cellId: ID!) {
+  valueCells(cellId: $cellId) {
+    id
+    kind
+    tooltip
+    comment
+    aggregation
+    default
+    column {
+      id
+      index
+      __typename
+    }
+    row {
+      id
+      index
+      __typename
+    }
+    sheet {
+      id
+      name
+      __typename
+    }
+    __typename
+  }
+}

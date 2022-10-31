@@ -1,5 +1,6 @@
 from django.db import models
 from openpyxl.utils.cell import get_column_letter
+from devind_helpers.utils import convert_str_to_bool
 
 from apps.core.models import User
 from .document import Document, Sheet
@@ -128,7 +129,7 @@ class KindCell(models.Model):
         (USER, 'user'),
         (DEPARTMENT, 'department'),
         (ORGANIZATION, 'organization'),
-        (CLASSIFICATION, 'classification')
+        (CLASSIFICATION, 'classification'),
     )
 
     kind = models.CharField(
@@ -233,6 +234,17 @@ class RowDimension(models.Model):
 
 class Cell(Style, KindCell, models.Model):
     """Модель ячейки."""
+    AGGREGATION_SUM = 'sum'
+    AGGREGATION_AVG = 'avg'
+    AGGREGATION_MIN = 'min'
+    AGGREGATION_MAX = 'max'
+
+    KIND_AGGREGATION = (
+        (AGGREGATION_SUM, 'sum'),
+        (AGGREGATION_AVG, 'avg'),
+        (AGGREGATION_MIN, 'min'),
+        (AGGREGATION_MAX, 'max'),
+    )
 
     TEMPLATE_FIELD = [KindCell.STRING, KindCell.TEXT]
 
@@ -244,15 +256,41 @@ class Cell(Style, KindCell, models.Model):
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
     tooltip = models.TextField(null=True, help_text='Подсказка')
     is_template = models.BooleanField(default=False, help_text='Является ли поле шаблоном')
+    aggregation = models.CharField(
+        max_length=5,
+        choices=KIND_AGGREGATION,
+        null=True,
+        default=None,
+        help_text='Механизм агрегации'
+    )
 
     column = models.ForeignKey(ColumnDimension, on_delete=models.CASCADE, help_text='Колонка')
     row = models.ForeignKey(RowDimension, on_delete=models.CASCADE, help_text='Строка')
+
+    cells = models.ManyToManyField(
+        'self',
+        through='RelationshipCells',
+        symmetrical=False,
+        related_name='related_cells'
+    )
 
     class Meta:
         unique_together = (('column', 'row'),)
         indexes = [
             models.Index(fields=['column'])
         ]
+
+    @property
+    def is_aggregation(self) -> bool:
+        """Является ли ячейка агрегационной."""
+        return self.aggregation is not None
+
+
+class RelationshipCells(models.Model):
+    """Модель много ко многим для ячеек."""
+
+    from_cell = models.ForeignKey(Cell, related_name='from_cells', on_delete=models.CASCADE)
+    to_cell = models.ForeignKey(Cell, related_name='to_cells', on_delete=models.CASCADE)
 
 
 class MergedCell(models.Model):
@@ -304,6 +342,7 @@ class Value(models.Model):
     """
 
     value = models.TextField(help_text='Значение')
+    extra_value = models.TextField(null=True, help_text='Дополнительное значение')
     payload = models.JSONField(null=True, help_text='Дополнительные данные')
     verified = models.BooleanField(default=True, help_text='Валидно ли поле')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')

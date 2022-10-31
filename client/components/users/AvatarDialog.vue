@@ -12,7 +12,7 @@ v-avatar(v-bind="$attrs" color="primary" :size="size")
       v-card-text
         v-img(:src="`/${item.avatar}`" width="600")
   v-img(v-else-if="!!item.avatar" :src="`/${item.avatar}`")
-  .headline(v-else) {{ item.lastName[0] }}{{ item.firstName[0] }}
+  .headline(v-else style="color: black") {{ item.lastName[0] }}{{ item.firstName[0] }}
 </template>
 
 <script lang="ts">

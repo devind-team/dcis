@@ -1,0 +1,7 @@
+mutation DeleteValueCell($cellId: ID!, $targetCellId: ID!) {
+  deleteValuesCell(input: {cellId: $cellId, targetCellId: $targetCellId}) {
+    success
+    id
+    __typename
+  }
+}

@@ -1,21 +1,23 @@
 import graphene
 
 from apps.dcis.schema.mutations import (
+    AttributeMutations,
     CellMutations,
+    CuratorMutations,
     DocumentMutations,
-    ProjectMutations,
     PeriodMutations,
+    ProjectMutations,
     SheetMutations,
     ValueMutations,
-    AttributeMutations,
 )
-from apps.dcis.schema.queries import DocumentQueries, PeriodQueries, ProjectQueries
+from apps.dcis.schema.queries import DocumentQueries, PeriodQueries, ProjectQueries, CuratorGroupQueries
 
 
 class Query(
     DocumentQueries,
     PeriodQueries,
     ProjectQueries,
+    CuratorGroupQueries,
     graphene.ObjectType,
 ):
     """Запросы приложения dcis."""
@@ -31,7 +33,8 @@ class Mutation(
     SheetMutations,
     ValueMutations,
     AttributeMutations,
-    graphene.ObjectType,
+    CuratorMutations,
+    graphene.ObjectType
 ):
     """Мутации приложения dcis."""
 

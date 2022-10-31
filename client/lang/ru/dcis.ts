@@ -2,6 +2,7 @@ export default {
   home: 'Проекты сборов',
   projects: {
     name: '@:dcis.home',
+    divisions: 'Мои организации',
     filters: {
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
@@ -289,7 +290,18 @@ export default {
       fontSize: 'Шрифт',
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
-      commaIncrease: 'Увеличить разрядность'
+      commaIncrease: 'Увеличить разрядность',
+      aggregation: 'Агрегация ячеек',
+      aggregationTitle: 'Настройки агрегации',
+      aggregationChoice: 'Метод агрегации',
+      aggregationDefault: 'Значение по умолчанию: {value}',
+      aggregationKind: {
+        empty: 'Не задано',
+        sum: 'Сумма',
+        avg: 'Среднее арифметическое',
+        max: 'Максимальное значение',
+        min: 'Минимальное значение'
+      }
     },
     columnWidth: 'Ширина: ',
     rowHeight: 'Высота: ',
@@ -357,6 +369,7 @@ export default {
       files: 'Файл',
       money: 'Рубли',
       numeric: 'Числовое значение',
+      aggregation: 'Агрегация',
       all: 'Ошибка добавления'
     },
     changeMenu: {
