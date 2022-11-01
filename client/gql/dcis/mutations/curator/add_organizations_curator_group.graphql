@@ -1,0 +1,15 @@
+#import "../../fragments/organization_fields.graphql"
+
+mutation AddOrganizationsCuratorGroup($curatorGroupId: ID!, $organizationIds: [ID!]!) {
+  addOrganizationsCuratorGroup(input: { curatorGroupId: $curatorGroupId, organizationIds: $organizationIds }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    organizations {
+      ...OrganizationField
+    }
+  }
+}

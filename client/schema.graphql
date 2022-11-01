@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы изменения связей между записями в базе данных
+Типы измнения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -338,21 +338,21 @@ type AddGroupMutationPayload {
   success: Boolean!
 }
 
-input AddOrganizationCuratorGroupInput {
+input AddOrganizationsCuratorGroupInput {
   clientMutationId: String
   """Идентификатор кураторской группы"""
   curatorGroupId: ID!
   """Идентификатор организации"""
-  organizationId: ID!
+  organizationIds: [ID!]!
 }
 
 """Мутация на добавление организации в кураторскую группу."""
-type AddOrganizationCuratorGroupPayload {
-  """Идентификатор организации"""
-  addOrganizationId: ID!
+type AddOrganizationsCuratorGroupPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Идентификатор организации"""
+  organizations: [OrganizationType]
   """Успех мутации"""
   success: Boolean!
 }
@@ -2107,7 +2107,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатает, готовиться отправить сообщение
+- TYPING - Печатет, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -2258,7 +2258,7 @@ type DeleteCuratorGroupMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор удаленной кураторской группы"""
-  id: ID!
+  id: ID
   """Успех мутации"""
   success: Boolean!
 }
@@ -2362,7 +2362,7 @@ type DeleteOrganizationCuratorGroupPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор организации"""
-  id: ID!
+  id: ID
   """Успех мутации"""
   success: Boolean!
 }
@@ -2692,7 +2692,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы."""
+"""Ошибка в поле формы"""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2949,7 +2949,7 @@ type Mutation {
   """Мутация для добавления группы."""
   addGroup(input: AddGroupMutationInput!): AddGroupMutationPayload!
   """Мутация на добавление организации в кураторскую группу."""
-  addOrganizationCuratorGroup(input: AddOrganizationCuratorGroupInput!): AddOrganizationCuratorGroupPayload!
+  addOrganizationsCuratorGroup(input: AddOrganizationsCuratorGroupInput!): AddOrganizationsCuratorGroupPayload!
   """Добавление страницы"""
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
@@ -3856,6 +3856,8 @@ type Query {
     """Идентификатор кураторской группы"""
     curatorGroupId: ID!
   ): CuratorGroupType!
+  """Получение организаций не входящих ни в одну кураторскую группу"""
+  curatorGroupNewOrganizations(address: String, address_Icontains: String, after: String, before: String, department: [ID], department_In: [String], first: Int, id: ID, id_In: [String], inn: String, inn_Icontains: String, kind: String, kind_Icontains: String, kodbuhg: String, kodbuhg_Icontains: String, kpp: String, kpp_Icontains: String, last: Int, mail: String, mail_Icontains: String, name: String, name_Icontains: String, offset: Int, okpo: String, okpo_Icontains: String, parent: ID, parent_Isnull: Boolean, phone: String, phone_Icontains: String, region: ID, region_In: [ID], rubpnubp: String, rubpnubp_Icontains: String, site: String, site_Icontains: String): OrganizationTypeConnection!
   curatorGroupNewUsers(
     after: String
     before: String
@@ -4569,7 +4571,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представляющий собой таблицу."""
+"""Документ, представлющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!
