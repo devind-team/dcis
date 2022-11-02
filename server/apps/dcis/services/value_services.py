@@ -1,23 +1,27 @@
 """Файл, содержащий сервисы для изменения значений ячеек."""
-
 from datetime import datetime
 from os import path
 from pathlib import Path
-from typing import Any, NamedTuple, cast, Type
+from typing import Any, NamedTuple, Type, cast
 from zipfile import ZipFile
 
 from devind_core.models import File
-from devind_dictionaries.models import Organization, Department
+from devind_dictionaries.models import Department, Organization
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
 from django.utils.timezone import now
 
 from apps.core.models import User
-from apps.dcis.helpers.cell import (ValueState, evaluate_state, get_dependency_cells, resolve_cells,
-                                    resolve_evaluate_state)
-from apps.dcis.helpers.sheet_cache import FormulaContainerCache
-from apps.dcis.models import Cell, Document, RowDimension, Sheet, Value, RelationshipCells, Period
+from apps.dcis.helpers.cell import (
+    ValueState,
+    evaluate_state,
+    get_dependency_cells,
+    resolve_cells,
+    resolve_evaluate_state,
+)
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
+from apps.dcis.models import Cell, Document, Period, RelationshipCells, RowDimension, Sheet, Value
 from apps.dcis.permissions import can_view_document
 from apps.dcis.services.cell_service import calculate_aggregation_cell
 
@@ -140,7 +144,7 @@ def recalculate_aggregations(document: Document, cell: Cell, sheet_id: int,  val
 def recalculate_cells(document: Document, value: Value) -> list[Value]:
     """Пересчитываем значения ячеек в зависимости от новых."""
     sheets: list[Sheet] = document.sheets.all()
-    sheet_containers: list[FormulaContainerCache] = [FormulaContainerCache.get(sheet) for sheet in sheets]
+    sheet_containers: list[SheetFormulaContainerCache] = [SheetFormulaContainerCache.get(sheet) for sheet in sheets]
     # 1. Собираем зависимости и последовательность операций
     dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(sheet_containers, value)
     # 1.1 Если у нас нет ячеек необходимых для пересчета, возвращаем только само значение

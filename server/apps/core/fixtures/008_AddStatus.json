@@ -1,0 +1,58 @@
+[
+  {
+    "model": "dcis.AddStatus",
+    "pk": 1,
+    "fields": {
+      "from_status": null,
+      "to_status": 1,
+      "roles": ["admin", "division_member"]
+    }
+  },
+  {
+    "model": "dcis.AddStatus",
+    "pk": 2,
+    "fields": {
+      "from_status": 1,
+      "to_status": 2,
+      "roles": ["admin", "division_member"],
+      "check": "check_limitations"
+    }
+  },
+  {
+    "model": "dcis.AddStatus",
+    "pk": 3,
+    "fields": {
+      "from_status": 2,
+      "to_status": 3,
+      "roles": ["admin", "curator"]
+    }
+  },
+  {
+    "model": "dcis.AddStatus",
+    "pk": 4,
+    "fields": {
+      "from_status": 2,
+      "to_status": 4,
+      "roles": ["admin", "curator"]
+    }
+  },
+  {
+    "model": "dcis.AddStatus",
+    "pk": 5,
+    "fields": {
+      "from_status": 2,
+      "to_status": 5,
+      "roles": ["admin", "curator"]
+    }
+  },
+  {
+    "model": "dcis.AddStatus",
+    "pk": 6,
+    "fields": {
+      "from_status": 4,
+      "to_status": 2,
+      "roles": ["admin", "division_member"],
+      "check": "check_limitations"
+    }
+  }
+]

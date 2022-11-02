@@ -11,11 +11,30 @@ class Status(models.Model):
 
     name = models.CharField(max_length=250, help_text='Название статуса')
     edit = models.BooleanField(default=False, help_text='Можно ли редактировать документ со статусом')
-    protected = models.BooleanField(default=True, help_text='Является ли статус защищенным от изменения')
     comment = models.TextField(null=True, help_text='Комментарий')
 
     class Meta:
         ordering = ('id',)
+
+
+class AddStatus(models.Model):
+    """Модель, определяющая сценарии добавления статусов."""
+
+    from_status = models.ForeignKey(
+        Status,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='from_add_statuses',
+        help_text='Изначальный статус'
+    )
+    to_status = models.ForeignKey(
+        Status,
+        on_delete=models.CASCADE,
+        related_name='to_add_statuses',
+        help_text='Новый статус'
+    )
+    roles = models.JSONField(help_text='Роли пользователей, которые могут изменять статус')
+    check = models.CharField(max_length=250, help_text='Функция, проверяющая может ли статус быть изменен')
 
 
 class Sheet(models.Model):
@@ -161,3 +180,15 @@ class AttributeValue(models.Model):
         indexes = [
             models.Index(fields=['document', 'attribute'])
         ]
+
+
+class Limitation(models.Model):
+    """Ограничения, накладываемые на лист."""
+
+    formula = models.TextField(help_text='Формула')
+    error_message = models.TextField(help_text='Сообщение ошибки')
+
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
+
+    class Meta:
+        ordering = ('id',)

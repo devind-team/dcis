@@ -293,38 +293,6 @@ class RelationshipCells(models.Model):
     to_cell = models.ForeignKey(Cell, related_name='to_cells', on_delete=models.CASCADE)
 
 
-class Limitation(models.Model):
-    """Накладываемые на ячейку ограничения."""
-
-    AND = 'and'
-    OR = 'or'
-
-    KIND_OPERATOR = (
-        (AND, 'and'),
-        (OR, 'or')
-    )
-
-    LT = 'lt'
-    GT = 'gt'
-    EQUAL = 'equal'
-    LTE = 'lte'
-    GTE = 'gte'
-
-    KIND_CONDITION = (
-        (LT, '<'),
-        (GT, '>'),
-        (EQUAL, '='),
-        (LTE, '<='),
-        (GTE, '>=')
-    )
-    operator = models.CharField(max_length=3, default=AND, choices=KIND_OPERATOR, help_text='Оператор')
-    condition = models.CharField(max_length=8, default=EQUAL, choices=KIND_CONDITION, help_text='Состояние')
-    value = models.TextField(help_text='Значение')
-
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
-    cell = models.ForeignKey(Cell, on_delete=models.CASCADE, help_text='Ячейка')
-
-
 class MergedCell(models.Model):
     """Модель объединенной ячейки."""
 

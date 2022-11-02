@@ -55,6 +55,7 @@ export default {
       organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
+      limitations: 'Ограничения',
       attributes: 'Атрибуты',
       sheets: 'Таблица',
       settings: '@:settings'
@@ -71,7 +72,9 @@ export default {
       buttonText: 'Добавить период',
       header: 'Добавление периода',
       name: 'Название периода',
-      file: 'Файл с формой сбора',
+      xlsxFile: 'Файл с формами сбора',
+      limitationsFile: 'Ограничения, накладываемые на формы',
+      downloadTemplate: 'Скачать шаблон файла',
       readonlyFillColor: 'Запретить редактирование ячеек с заливкой',
       multiple: 'Множественное заполнение',
       versioning: 'Разрешить множество версий'
@@ -111,6 +114,14 @@ export default {
         tooltip: '@:delete',
         departmentItemName: 'департамент',
         organizationItemName: 'организацию'
+      }
+    },
+    limitations: {
+      name: '@:dcis.periods.links.limitations',
+      tableHeaders: {
+        sheet: 'Форма',
+        formula: 'Формула',
+        errorMessage: 'Сообщение об ошибке'
       }
     },
     groups: {
@@ -232,6 +243,8 @@ export default {
       header: 'Изменение статусов',
       readonlyHeader: 'Статусы',
       subheader: '@:dcis.documents.version',
+      tableErrorsMessage: 'Возникли ошибки в ограничениях',
+      tableErrorsTitle: 'Ошибки в ограничениях',
       status: 'Статус',
       comment: 'Комментарий',
       buttonText: '@:add',

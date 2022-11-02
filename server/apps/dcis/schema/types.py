@@ -48,6 +48,7 @@ from apps.dcis.permissions import (
     can_delete_period_base,
     can_delete_project_base,
 )
+from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.services.document_services import get_document_sheets
 
@@ -112,7 +113,11 @@ class PeriodType(DjangoObjectType):
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
-    can_add_document = graphene.Boolean(
+    is_curator = graphene.Boolean(
+        required=True,
+        description='Является ли пользователь куратором для периода'
+    )
+    can_add_any_division_document = graphene.Boolean(
         required=True,
         description='Может ли пользователь добавлять документы в период'
     )
@@ -176,8 +181,12 @@ class PeriodType(DjangoObjectType):
         return period.sheet_set.all()
 
     @staticmethod
-    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase(info.context.user, period).can_add_any_document
+    def resolve_is_curator(period: Period, info: ResolveInfo) -> bool:
+        return is_period_curator(info.context.user, period)
+
+    @staticmethod
+    def resolve_can_add_any_division_document(period: Period, info: ResolveInfo) -> bool:
+        return AddDocumentBase(info.context.user, period).can_add_any_division_document
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
@@ -276,7 +285,7 @@ class StatusType(DjangoObjectType):
 
     class Meta:
         model = Status
-        fields = ('id', 'name', 'edit', 'protected', 'comment',)
+        fields = ('id', 'name', 'edit', 'comment',)
 
 
 class DocumentType(DjangoObjectType):
@@ -597,20 +606,18 @@ class SheetType(BaseSheetType):
 
 
 class LimitationType(DjangoObjectType):
-    """Ограничения на ячейку."""
+    """Тип ограничения, накладываемого на лист."""
 
-    cell = graphene.Field(CellType, description='Ячейка')
+    sheet = graphene.Field(BaseSheetType, description='Лист')
 
     class Meta:
         model = Limitation
         fields = (
             'id',
-            'operator',
-            'condition',
-            'value',
-            'cell',
+            'formula',
+            'error_message',
+            'sheet'
         )
-        convert_choices_to_enum = False
 
 
 class ChangedCellOption(graphene.ObjectType):

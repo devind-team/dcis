@@ -6,21 +6,31 @@ div
     v-alert(v-else-if="error.value.type === 'GraphQLError'" type="error")
       | {{ $t('common.mutationResultAlert.mutationGraphQLError', { error: error.value.message }) }}
     v-alert(v-else type="error") {{ $t('common.mutationResultAlert.mutationNetworkError', { error: error.value.message }) }}
-  error-validate-dialog(v-else-if="tableErrors" v-slot="{ on: onDialog }" v-bind="tableErrors")
+  error-validate-dialog(
+    v-else-if="tableErrors"
+    v-slot="{ on: onDialog }"
+    v-bind="tableErrors"
+    :mode="tableErrorsMode"
+    :title="tableErrorsTitle"
+    :show-search="showTableErrorsSearch"
+  )
     v-tooltip(bottom)
       template(#activator="{ on: onTooltip }")
         v-alert(v-on="{ ...onDialog, ...onTooltip }" type="error" style="cursor: pointer")
-          | {{ $t('common.mutationResultAlert.tableMutationErrors') }}
+          | {{ tableErrorsMessage ? tableErrorsMessage : $t('common.mutationResultAlert.tableMutationErrors') }}
       span {{ $t('common.mutationResultAlert.showDetails') }}
-  v-alert(v-else-if="success" type="success") {{ successMessage }}
+  v-alert(
+    v-else-if="success"
+    type="success"
+  ) {{ successMessage ? successMessage : $t('common.mutationResultAlert.mutationSuccess') }}
 </template>
 
 <script lang="ts">
 import { ApolloError } from 'apollo-client'
-import { defineComponent, ref } from '#app'
+import { defineComponent, PropType, ref } from '#app'
 import { ErrorType, WithTimer } from '~/types/devind'
 import { ErrorFieldType, TableType } from '~/types/graphql'
-import ErrorValidateDialog from '~/components/common/dialogs/ErrorValidateDialog.vue'
+import ErrorValidateDialog, { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 
 export type TableErrors = {
   table: TableType,
@@ -31,12 +41,11 @@ export default defineComponent({
   components: { ErrorValidateDialog },
   props: {
     hideTimeout: { type: Number, default: 20000 },
-    successMessage: {
-      type: String,
-      default (): string {
-        return this.$t('common.mutationResultAlert.mutationSuccess') as string
-      }
-    }
+    successMessage: { type: String, default: null },
+    tableErrorsMode: { type: Number as PropType<ErrorValidateDialogMode>, default: ErrorValidateDialogMode.TOOLTIP },
+    tableErrorsMessage: { type: String, default: null },
+    tableErrorsTitle: { type: String, default: null },
+    showTableErrorsSearch: { type: Boolean, default: true }
   },
   setup (props) {
     const success = ref<WithTimer<boolean> | null>(null)
