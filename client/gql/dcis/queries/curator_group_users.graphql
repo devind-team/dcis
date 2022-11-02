@@ -1,0 +1,11 @@
+#import "../../core/fragments/user_fields.graphql"
+
+query CuratorGroupUsers($curatorGroupId: ID!) {
+  curatorGroup(curatorGroupId: $curatorGroupId) {
+    id
+    users {
+      ...UserFields
+    }
+    __typename
+  }
+}

@@ -1,26 +1,41 @@
 """Тесты модуля, отвечающего за работу с периодами."""
+from collections import Counter
 from datetime import date, timedelta
 from os.path import join
 from shutil import rmtree
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from six import BytesIO
 
 from apps.core.models import User
-from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaDependencyCache
+from apps.dcis.models import (
+    CuratorGroup,
+    Division,
+    Limitation,
+    Period,
+    PeriodGroup,
+    PeriodPrivilege,
+    Privilege,
+    Project,
+    Sheet,
+)
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
     can_change_period_groups,
-    can_change_period_settings, can_change_period_users, can_delete_period,
+    can_change_period_settings,
+    can_change_period_users,
+    can_delete_period,
 )
 from apps.dcis.services.period_services import (
     add_divisions_period,
+    add_limitations_from_file,
     add_period_group,
     change_period_group_privileges,
     change_settings_period,
@@ -29,7 +44,10 @@ from apps.dcis.services.period_services import (
     copy_period_groups,
     create_period,
     delete_divisions_period,
-    delete_period, delete_period_groups, get_user_divisions_periods,
+    delete_period,
+    delete_period_groups,
+    get_user_curator_periods,
+    get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
     get_user_privileges_periods,
@@ -43,14 +61,18 @@ class GetUserPeriodsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.user = User.objects.create(username='user', email='user@gmain.com')
         self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
 
-        self.user_is_creator_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
+        self.user_is_creator_project = Project.objects.create(
+            user=self.user,
+            content_type=self.organization_content_type
+        )
         self.user_project_periods = [Period.objects.create(project=self.user_is_creator_project) for _ in range(3)]
 
-        self.user_is_not_creator_project = Project.objects.create(content_type=self.department_content_type)
+        self.user_is_not_creator_project = Project.objects.create(content_type=self.organization_content_type)
         self.user_periods = [Period.objects.create(
             user=self.user, project=self.user_is_not_creator_project
         ) for _ in range(3)]
@@ -60,6 +82,10 @@ class GetUserPeriodsTestCase(TestCase):
             self.user_groups.append(PeriodGroup.objects.create(period=period))
             self.user_groups[-1].users.add(self.user)
 
+        self.curator_department_project = Project.objects.create(content_type=self.department_content_type)
+        self.curator_department_periods = self._create_curator_periods(self.curator_department_project)
+        self.curator_organization_periods = self._create_curator_periods(self.user_is_not_creator_project)
+
         self.privilege_period = Period.objects.create(project=self.user_is_not_creator_project)
         self.privilege = Privilege.objects.create()
         self.period_privilege = PeriodPrivilege.objects.create(
@@ -68,9 +94,12 @@ class GetUserPeriodsTestCase(TestCase):
             privilege=self.privilege,
         )
 
-        self.department = Department.objects.create(user=self.user)
-        self.department_period = Period.objects.create(project=self.user_is_not_creator_project)
-        self.department_division = Division.objects.create(period=self.department_period, object_id=self.department.id)
+        self.organization = Organization.objects.create(attributes='', user=self.user)
+        self.organization_period = Period.objects.create(project=self.user_is_not_creator_project)
+        self.organization_division = Division.objects.create(
+            period=self.organization_period,
+            object_id=self.organization.id,
+        )
 
         self.extra_project = Project.objects.create(content_type=self.department_content_type)
         self.extra_period = Period.objects.create(project=self.extra_project)
@@ -87,6 +116,20 @@ class GetUserPeriodsTestCase(TestCase):
         self.assertSetEqual(
             {*self.user_periods, *self.user_group_periods},
             set(get_user_participant_periods(self.user, self.user_is_not_creator_project.id)),
+        )
+
+    def test_get_user_curator_periods_department_project(self) -> None:
+        """Тестирование функции `get_user_curator_periods` для проекта с департаментами в качестве дивизионов."""
+        self.assertQuerysetEqual(
+            Period.objects.none(),
+            get_user_curator_periods(self.user, self.curator_department_project.id),
+        )
+
+    def test_get_user_curator_periods_organization_project(self) -> None:
+        """Тестирование функции `get_user_curator_periods` для проекта с организациями в качестве дивизионов."""
+        self.assertEqual(
+            {*self.curator_organization_periods},
+            set(get_user_curator_periods(self.user, self.user_is_not_creator_project.id)),
         )
 
     def test_user_privileges_periods(self) -> None:
@@ -106,7 +149,7 @@ class GetUserPeriodsTestCase(TestCase):
     def test_get_user_divisions_periods_with_periods(self) -> None:
         """Тестирование функции `get_user_divisions_periods` для пользователя, у которого есть периоды."""
         self.assertSetEqual(
-            {self.department_period},
+            {self.organization_period},
             set(get_user_divisions_periods(self.user, self.user_is_not_creator_project.id))
         )
 
@@ -123,11 +166,25 @@ class GetUserPeriodsTestCase(TestCase):
             {
                 *self.user_periods,
                 *self.user_group_periods,
+                *self.curator_organization_periods,
                 self.privilege_period,
-                self.department_period
+                self.organization_period
             },
             set(get_user_periods(self.user, self.user_is_not_creator_project.id)),
         )
+
+    def _create_curator_periods(self, project: Project) -> list[Period]:
+        """Создание периодов для проекта c кураторской группой."""
+        periods: list[Period] = []
+        for _ in range(3):
+            organization = Organization.objects.create(attributes='')
+            period = Period.objects.create(project=project)
+            period.division_set.create(object_id=organization.id)
+            curator_group = CuratorGroup.objects.create()
+            curator_group.users.add(self.user)
+            curator_group.organization.add(organization)
+            periods.append(period)
+        return periods
 
 
 class PeriodTestCase(TestCase):
@@ -160,14 +217,16 @@ class PeriodTestCase(TestCase):
         for period_group_privilege_id in self.period_group_privileges:
             self.period_group_privileges_ids.append(period_group_privilege_id.id)
 
-        self.departaments = [
+        self.departments = [
             Department.objects.create(user=self.super_user, name=f'Departament {number}') for number in range(3)
         ]
         self.departament_period = Period.objects.create(
+            name='Departament period',
             user=self.super_user,
             project=self.user_project,
-            name='Departament period'
         )
+        self.form1 = Sheet.objects.create(name='Форма1', period=self.departament_period)
+        self.form2 = Sheet.objects.create(name='Форма2', period=self.departament_period)
         self.departament_period_groups = [PeriodGroup.objects.create(
             period=self.departament_period,
             name=f'Group departament {number + 1}'
@@ -185,7 +244,7 @@ class PeriodTestCase(TestCase):
             self.departament_period_users_privileges_ids.append(departament_period_users_privilege_id.id)
         self.department_divisions = [
             Division.objects.create(period=self.departament_period, object_id=departament.id)
-            for departament in self.departaments
+            for departament in self.departments
         ]
         self.divisions_ids: list[str | int] = []
         for division_id in self.department_divisions:
@@ -199,45 +258,79 @@ class PeriodTestCase(TestCase):
             new=lambda perm: perm not in ('dcis.add_period', 'dcis.add_project')
         ):
             self.assertRaises(PermissionDenied, can_add_period, self.super_user, self.user_project)
-        with open(
-            file=join(BASE_DIR, 'apps', 'dcis', 'tests', 'resources', 'test_create_period.xlsx'),
-            mode='rb'
-        ) as file:
-            self.assertEqual(
-                create_period(
-                    user=self.super_user,
-                    name='Test period',
-                    project=self.user_project,
-                    multiple=True,
-                    file=self._create_inmemory_file(
-                        file_name=file.name,
-                        content=file.read(),
-                        content_type=None
-                    ),
-                    readonly_fill_color=False
-                ),
-                Period.objects.get(name='Test period'),
-                'Create period'
-            )
-
-    def _create_inmemory_file(
-        self,
-        file_name: str,
-        content: bytes,
-        content_type: None
-    ) -> InMemoryUploadedFile:
-        self.stream = BytesIO()
-        self.stream.write(content)
-        self.file = InMemoryUploadedFile(
-            file=self.stream,
-            field_name=None,
-            name=file_name,
-            content_type=content_type,
-            size=self.stream.tell(),
-            charset=None
+        self.assertEqual(
+            create_period(
+                user=self.super_user,
+                name='Test period',
+                project=self.user_project,
+                multiple=True,
+                versioning=True,
+                readonly_fill_color=False,
+                xlsx_file=self._create_in_memory_file('test_create_period.xlsx'),
+                limitations_file=None,
+            ),
+            Period.objects.get(name='Test period'),
+            'Create period'
         )
-        self.file.seek(0)
-        return self.file
+
+    @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}})
+    def test_add_limitations_from_file_with_errors(self) -> None:
+        """Тестирование функции `add_limitations_from` c ошибками."""
+        self._test_add_limitations_from_file_with_error(
+            'test_add_limitations_from_file_wrong_json.json', [
+                'Не удалось разобрать json файл',
+                'Expecting property name enclosed in double quotes',
+            ]
+        )
+        self._test_add_limitations_from_file_with_error(
+            'test_add_limitations_from_file_not_list.json', [
+                'json файл не содержит массив на верхнем уровне'
+            ]
+        )
+        self._test_add_limitations_from_file_with_error(
+            'test_add_limitations_from_file_not_dict.json', [
+                'Ограничение по номеру 2 не является объектом'
+            ]
+        )
+        self._test_add_limitations_from_file_with_error(
+            'test_add_limitations_from_file_wrong_keys.json', [
+                'Ключи ограничения по номеру 2 должны совпадать со списком ["form", "check", "message"]'
+            ]
+        )
+        self._test_add_limitations_from_file_with_error(
+            'test_add_limitations_from_file_wrong_sheet.json', [
+                'Не найдена форма "Форма3" для ограничения по номеру 2'
+            ]
+        )
+
+    @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
+    def test_add_limitations_from_file(self) -> None:
+        """Тестирование функции `add_limitations_from` без ошибок."""
+        limitations = add_limitations_from_file(
+            self.departament_period,
+            self._create_in_memory_file('test_add_limitations_from_file.json')
+        )
+        self.assertEqual([
+            Limitation.objects.get(sheet=self.form1),
+            Limitation.objects.get(sheet=self.form2)
+        ], limitations)
+        limitation_dependency_cache = LimitationFormulaDependencyCache.get(self.departament_period.id)
+        self.assertEqual(
+            {
+                'A1': Counter(['Форма1!A1', 'Форма2!A1']),
+                'A2': Counter(['Форма1!A2', 'Форма2!A2'])
+            },
+            limitation_dependency_cache.dependency
+        )
+        self.assertEqual(
+            {
+                'Форма1!A1': ['A1'],
+                'Форма2!A1': ['A1'],
+                'Форма1!A2': ['A2'],
+                'Форма2!A2': ['A2'],
+            },
+            limitation_dependency_cache.inversion
+        )
 
     def test_add_divisions_period(self) -> None:
         """Тестирование функции `add_divisions_period`."""
@@ -294,9 +387,8 @@ class PeriodTestCase(TestCase):
             period_group_ids=self.user_period_group_id,
             selected_period_id=self.user_periods[0].id
         )
-        self.verify_group: list[PeriodGroup] = []
-        self.verify_group.append((PeriodGroup.objects.get(period_id=self.departament_period.id)))
-        for (copy, verify) in zip(self.copy_group, self.verify_group):
+        verify_groups = PeriodGroup.objects.filter(period_id=self.departament_period.id)
+        for (copy, verify) in zip(self.copy_group, verify_groups):
             self.assertEqual(first=copy.name, second=verify.name, msg='Copy group')
 
     def test_change_period_group_privileges(self) -> None:
@@ -339,6 +431,7 @@ class PeriodTestCase(TestCase):
                 name='Departament',
                 status='В планах',
                 multiple=True,
+                versioning=True,
                 privately=False,
                 start=date.today(),
                 expiration=date.today() + timedelta(days=7)
@@ -377,3 +470,28 @@ class PeriodTestCase(TestCase):
     def tearDown(self) -> None:
         """Очистка данных тестирования."""
         rmtree(join(BASE_DIR.parent, 'storage'), ignore_errors=True)
+
+    def _test_add_limitations_from_file_with_error(self, file_path: str, messages: list[str]) -> None:
+        """Тестирование функции `add_limitations_from` c ошибкой."""
+        with self.assertRaises(ValidationError) as error:
+            add_limitations_from_file(
+                self.departament_period,
+                self._create_in_memory_file(file_path)
+            )
+        self.assertEqual({'limitations_file': list(map(ValidationError, messages))}, error.exception.error_dict)
+
+    @staticmethod
+    def _create_in_memory_file(file_name: str) -> InMemoryUploadedFile:
+        with open(file=join(BASE_DIR, 'apps', 'dcis', 'tests', 'resources', file_name), mode='rb') as file:
+            stream = BytesIO()
+            stream.write(file.read())
+            in_memory_file = InMemoryUploadedFile(
+                file=stream,
+                field_name=None,
+                name=file.name,
+                content_type=None,
+                size=stream.tell(),
+                charset=None
+            )
+            in_memory_file.seek(0)
+            return in_memory_file

@@ -7,11 +7,14 @@ div
       v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(
     v-if="mode === GridMode.CHANGE"
+    :grid-choice="gridChoice"
+    :active-sheet-index="activeSheetIndex"
     :update-active-sheet="updateActiveSheet"
     :selected-cells-options="selectedCellsOptions"
     :selected-column-dimensions-options="selectedColumnDimensionsOptions"
     :selected-row-dimensions-options="selectedRowDimensionsOptions"
   )
+  grid-choice-cells(:grid-choice="gridChoice")
   v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
     slot(v-if="showAttributes" name="attributes")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
@@ -28,7 +31,7 @@ div
 
 <script lang="ts">
 import { VTabs } from 'vuetify/lib/components/VTabs'
-import { computed, defineComponent, PropType, ref } from '#app'
+import { computed, defineComponent, onBeforeUnmount, PropType, ref } from '#app'
 import {
   BaseSheetType,
   DocumentType,
@@ -43,9 +46,11 @@ import {
 } from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
+import GridChoiceCells from '~/components/dcis/grid/GridChoiceCells.vue'
+import { CANCEL_EVENT, CancelEventType, END_CHOICE_EVENT, useGridChoice } from '~/composables/grid-choice'
 
 export default defineComponent({
-  components: { GridSheetToolbar, Grid },
+  components: { GridChoiceCells, GridSheetToolbar, Grid },
   props: {
     value: { type: Number, required: true },
     mode: { type: Number, required: true },
@@ -82,6 +87,22 @@ export default defineComponent({
       tabs.value.onResize()
     }
 
+    const gridChoice = useGridChoice(props.mode, computed(() => props.activeSheet), selectedCellsOptions)
+    if (props.mode === GridMode.CHANGE) {
+      const cancelEventHandler = ({ targetCell, sheetIndex }: CancelEventType) => {
+        activeSheetIndex.value = sheetIndex
+        setTimeout(() => {
+          grid.value && grid.value.length && grid.value[0].selectSelectionCell(targetCell)
+        }, 0)
+      }
+      gridChoice.on(END_CHOICE_EVENT, cancelEventHandler)
+      gridChoice.on(CANCEL_EVENT, cancelEventHandler)
+      onBeforeUnmount(() => {
+        gridChoice.removeListener(END_CHOICE_EVENT, cancelEventHandler)
+        gridChoice.removeListener(CANCEL_EVENT, cancelEventHandler)
+      })
+    }
+
     return {
       GridMode,
       tabs,
@@ -90,7 +111,8 @@ export default defineComponent({
       selectedCellsOptions,
       selectedColumnDimensionsOptions,
       selectedRowDimensionsOptions,
-      updateSize
+      updateSize,
+      gridChoice
     }
   }
 })

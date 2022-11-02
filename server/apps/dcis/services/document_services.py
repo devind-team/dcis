@@ -1,17 +1,32 @@
 """Модуль, отвечающий за работу с документами."""
+from typing import Type
 
+from devind_dictionaries.models import Department, Organization
 from devind_helpers.orm_utils import get_object_or_none
-from django.db import transaction
-from django.db.models import Max, QuerySet
 from devind_helpers.schema.types import ErrorFieldType
+from django.core.exceptions import PermissionDenied
+from django.db import transaction
+from django.db.models import Max, Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, DocumentStatus, Limitation, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.helpers.exceptions import is_raises
+from apps.dcis.models import (
+    Cell,
+    Document,
+    Period,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+    Value,
+)
 from apps.dcis.permissions import (
     can_add_document,
-    can_add_document_status, can_change_document, can_change_document_comment,
+    can_change_document_base, can_change_document_comment,
 )
-from apps.dcis.services.divisions_services import get_user_divisions
+from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
+from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
+from apps.dcis.services.divisions_services import get_user_divisions, is_document_division_member
 from apps.dcis.services.privilege_services import has_privilege
 
 
@@ -23,6 +38,7 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
       - пользователь создал проект документа
       - пользователь создал период документа
       - пользователь создал документ
+      - пользователь является куратором для документа
       - период создан с множественным типом сбора, и
         пользователь добавлен в закрепленный за документом дивизион
       - период создан с единичным типом сбора, и
@@ -40,12 +56,35 @@ def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Docum
         )
     ):
         return Document.objects.filter(period_id=period.id)
-    division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
+    user_documents = Document.objects.filter(user=user, period=period)
+    user_division_ids = [division['id'] for division in get_user_divisions(user, period.project)]
     if period.multiple:
-        divisions_documents = Document.objects.filter(period=period, object_id__in=division_ids)
+        divisions_documents = Document.objects.filter(object_id__in=user_division_ids, period=period)
     else:
-        divisions_documents = Document.objects.filter(period=period, rowdimension__object_id__in=division_ids)
-    return (Document.objects.filter(period=period, user=user) | divisions_documents).distinct()
+        divisions_documents = Document.objects.filter(rowdimension__object_id__in=user_division_ids, period=period)
+    documents = user_documents | divisions_documents
+    if period.project.division_name == 'department':
+        return documents.distinct()
+    curator_organization_ids = get_curator_organizations(user).values_list('id', flat=True)
+    if period.multiple:
+        documents |= Document.objects.filter(object_id__in=curator_organization_ids, period=period)
+    elif period.division_set.filter(object_id__in=curator_organization_ids).count() > 0:
+        return Document.objects.filter(period_id=period.id)
+    return documents.distinct()
+
+
+def get_user_roles(user: User, document: Document) -> list[str]:
+    """Получение роли пользователя для документа."""
+    roles: list[str] = []
+    if not is_raises(PermissionDenied, can_change_document_base, user, document):
+        roles.append('admin')
+    if document.user_id == user.id:
+        roles.append('creator')
+    if is_document_curator(user, document):
+        roles.append('curator')
+    if is_document_division_member(user, document):
+        roles.append('division_member')
+    return roles
 
 
 @transaction.atomic
@@ -105,16 +144,48 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
+    rerender_values(document, create_attribute_context(user, document))
     return document, []
+
+
+def change_document_comment(user: User, document: Document, comment: str) -> Document:
+    """Изменение комментария версии документа."""
+    can_change_document_comment(user, document)
+    document.comment = comment
+    document.save(update_fields=('comment', 'updated_at'))
+    return document
+
+
+def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+    """Получение максимальной версии документа для периода."""
+    return Document.objects.filter(
+        period_id=period_id,
+        object_id=division_id
+    ).aggregate(version=Max('version'))['version']
+
+
+def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
+    """Получение максимальной версии документа для периода."""
+    return Document.objects.filter(
+        period_id=period_id,
+        object_id=division_id
+    ).aggregate(version=Max('version'))['version']
+
+
+def get_document_sheets(document: Document) -> QuerySet[Sheet]:
+    project: Project = document.period.project
+    division_model: Type[Organization | Department] = project.division
+    division = division_model.objects.get(pk=document.object_id)
+    is_child: bool = hasattr(division, 'parent_id') and getattr(division, 'parent_id') is not None
+    sheet_filter = Q(show_child=True) if is_child else Q(show_head=True)
+    return document.sheets.filter(sheet_filter).all()
 
 
 def _transfer_cells(rows_transform: dict[int, int]) -> None:
     """Перенос ячеек дочерних строк."""
     for cell in Cell.objects.filter(row_id__in=rows_transform.keys()):
-        cell_id = cell.id
         cell.pk, cell.row_id = None, rows_transform[cell.row_id]
         cell.save()
-        _transfer_limitations(cell_id, cell.id)
 
 
 def _transfer_values(
@@ -164,56 +235,3 @@ def _transfer_rows(
         rows_transform[row.id] = document_row.id
         rows_transform.update(_transfer_rows(user, sheet, source_document, document, row.id, rows_transform))
     return rows_transform
-
-
-def _transfer_limitations(
-    cell_original: int,
-    cell: int,
-    parent_id_original: int | None = None,
-    parent_id: int | None = None
-) -> None:
-    """Рекурсивно переносим ограничения ячеек.
-
-    :param cell_original: оригинальная ячейка
-    :param cell: ячейка в которую переносим ограничения
-    :param parent_id_original: идентификатор оригинального переносимого ограничения
-    :param parent_id: идентификатор переносимого ограничения
-    """
-    for limitation in Limitation.objects.filter(cell_id=cell_original, parent_id=parent_id_original):
-        limitation_parent = limitation.pk
-        limitation.pk, limitation.cell_id, limitation.parent_id = None, cell, parent_id
-        limitation.save()
-        _transfer_limitations(cell_original, cell, limitation_parent, limitation.id)
-
-
-def add_document_status(user: User, document: Document, status: Status, comment: str, ) -> DocumentStatus:
-    """Добавление статуса документа."""
-    can_add_document_status(user, document, status)
-    return DocumentStatus.objects.create(
-        user=user,
-        document=document,
-        status=status,
-        comment=comment,
-    )
-
-
-def change_document_comment(user: User, document: Document, comment: str) -> Document:
-    """Изменение комментария версии документа."""
-    can_change_document_comment(user, document)
-    document.comment = comment
-    document.save(update_fields=('comment', 'updated_at'))
-    return document
-
-
-def delete_document_status(user: User, status: DocumentStatus) -> None:
-    """Удаление статуса документа."""
-    can_change_document(user, status.document)
-    status.delete()
-
-
-def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
-    """Получение максимальной версии документа для периода."""
-    return Document.objects.filter(
-        period_id=period_id,
-        object_id=division_id
-    ).aggregate(version=Max('version'))['version']

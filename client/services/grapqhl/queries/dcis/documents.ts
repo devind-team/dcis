@@ -7,6 +7,7 @@ export const useDocumentsQuery = (
   periodId: Ref<string> | string,
   divisionIds: Ref<string[]>,
   lastStatusIds: Ref<string[]>,
+  enabled: Ref<boolean>,
   queryOptions: QueryRelayOptions
 ) => {
   return useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
@@ -15,6 +16,9 @@ export const useDocumentsQuery = (
       periodId: unref(periodId),
       divisionIds: unref(divisionIds),
       lastStatusIds: unref(lastStatusIds)
-    })
+    }),
+    options: computed(() => ({
+      enabled: enabled.value
+    }))
   }, queryOptions)
 }

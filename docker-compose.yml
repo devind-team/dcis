@@ -2,11 +2,7 @@ version: '3.2'
 
 services:
   redis:
-    container_name: redis
+    container_name: redis-dcis
     image: redis:latest
-    network_mode: host
-
-  rabbit:
-    container_name: rabbit
-    image: rabbitmq:latest
-    network_mode: host
+    ports:
+      - '6379:6379'

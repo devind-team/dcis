@@ -4,6 +4,7 @@ from typing import Any
 
 import graphene
 from devind_dictionaries.schema.types import BudgetClassificationType
+from devind_helpers.utils import gid2int
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -13,7 +14,7 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
-from apps.dcis.schema.types import ChangedCellOption
+from apps.dcis.schema.types import ChangedCellOption, ChangeCellType
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
     change_cell_default,
@@ -21,6 +22,7 @@ from apps.dcis.services.sheet_services import (
     change_cells_option,
     add_budget_classification
 )
+from apps.dcis.services.cell_service import add_cell_aggregation, delete_cell_aggregation
 
 
 class ChangeCellDefault(BaseMutation):
@@ -36,7 +38,7 @@ class ChangeCellDefault(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, default: str):
-        cell: Cell = get_object_or_404(Cell, pk=cell_id)
+        cell: Cell = get_object_or_404(Cell, pk=gid2int(cell_id))
         change_cell_default(user=info.context.user, cell=cell, default=default)
         return ChangeCellDefault(cell_id=cell.id, default=cell.default)
 
@@ -56,6 +58,7 @@ class ChangeCellsOptionMutation(BaseMutation):
             'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
         ]
         - number_format - форматирование чисел
+        - aggregation - [None, 'sum', 'avg', 'min', 'max']
     """
 
     class Input:
@@ -111,6 +114,51 @@ class AddBudgetClassificationMutation(BaseMutation):
         )
 
 
+class AddValuesCellsMutation(BaseMutation):
+    """Добавление связной ячейки к агрегирующей."""
+
+    class Input:
+        cell_id = graphene.ID(required=True, description='Целевая ячейка')
+        cells_id = graphene.List(
+            graphene.NonNull(graphene.ID, required=True, description='Идентификаторы ячеек'),
+            required=True,
+            description='Связываем ячейки'
+        )
+
+    cells = graphene.List(ChangeCellType, description='Добавленные ячейки')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        cell_id: str,
+        cells_id: list[str]
+    ) -> 'AddValuesCellsMutation':
+        cells, errors = add_cell_aggregation(info.context.user, cell_id, cells_id)
+        return AddValuesCellsMutation(success=not errors, errors=errors, cells=cells)
+
+
+class DeleteValuesCellMutation(BaseMutation):
+    """Удаление агрегирующий ячейки."""
+
+    class Input:
+        cell_id = graphene.ID(required=True, description='Агрегирующая ячейка')
+        target_cell_id = graphene.ID(required=True, description='Целевая ячейка')
+
+    id = graphene.ID(description='Идентификатор удаленной ячейки')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        cell_id: str,
+        target_cell_id: str
+    ) -> 'DeleteValuesCellMutation':
+        return DeleteValuesCellMutation(id=delete_cell_aggregation(info.context.user, cell_id, target_cell_id))
+
+
 class CellMutations(graphene.ObjectType):
     """Мутации, связанные с ячейками."""
 
@@ -120,3 +168,6 @@ class CellMutations(graphene.ObjectType):
         required=True,
         description='Добавление нового КБК'
     )
+
+    add_values_cells = AddValuesCellsMutation.Field(required=True, description='Добавляем агрегирование ячейки')
+    delete_values_cell = DeleteValuesCellMutation.Field(required=True, description='Удаление агрегированной ячейки')

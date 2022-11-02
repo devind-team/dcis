@@ -4,10 +4,10 @@ mutation-modal-form(
   :subheader="project.name"
   :button-text="String($t('dcis.periods.addPeriod.buttonText'))"
   :mutation="addPeriod"
-  :variables="{ name, file, projectId: project.id, multiple, readonlyFillColor, versioning }"
+  :variables="variables"
   :update="addPeriodUpdate"
   mutation-name="addPeriod"
-  i18n-path="dcis.projects.addPeriod"
+  i18n-path="dcis.periods.addPeriod"
   @close="close"
 )
   template(#activator="{ on }")
@@ -27,15 +27,32 @@ mutation-modal-form(
       )
     validation-provider(
       v-slot="{ errors, valid }"
-      :name="String($t('dcis.periods.addPeriod.file'))"
+      :name="String($t('dcis.periods.addPeriod.xlsxFile'))"
       rules="required"
     )
       v-file-input(
-        v-model="file"
-        :label="$t('dcis.periods.addPeriod.file')"
+        v-model="xlsxFile"
+        :label="$t('dcis.periods.addPeriod.xlsxFile')"
         :error-messages="errors"
         :success="valid"
+        accept=".xlsx"
       )
+    validation-provider(
+      v-slot="{ errors }"
+      :name="String($t('dcis.periods.addPeriod.limitationsFile'))"
+    )
+      v-file-input(
+        v-model="limitationsFile"
+        :label="$t('dcis.periods.addPeriod.limitationsFile')"
+        :error-messages="errors"
+        accept=".json"
+      )
+        template(#append-outer)
+          v-tooltip(bottom)
+            template(#activator="{ on, attrs }")
+              v-btn(v-bind="attrs" v-on="on" href="/templates/Ограничения.json" small icon download)
+                v-icon mdi-file-download
+            span {{ $t('dcis.periods.addPeriod.downloadTemplate') }}
     v-checkbox(v-model="readonlyFillColor" :label="$t('dcis.periods.addPeriod.readonlyFillColor')")
     v-checkbox(
       v-if="project.contentType.model === 'department'"
@@ -49,7 +66,7 @@ mutation-modal-form(
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref } from '#app'
-import { AddPeriodMutationPayload, ProjectType } from '~/types/graphql'
+import { AddPeriodMutationVariables, AddPeriodMutationPayload, ProjectType } from '~/types/graphql'
 import addPeriod from '~/gql/dcis/mutations/period/add_period.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 
@@ -64,10 +81,21 @@ export default defineComponent({
   },
   setup (props) {
     const name = ref<string>('')
-    const file = ref<File | null>(null)
+    const xlsxFile = ref<File | null>(null)
+    const limitationsFile = ref<File | null>(null)
     const readonlyFillColor = ref<boolean>(false)
     const multiple = ref<boolean>(true)
     const versioning = ref<boolean>(false)
+
+    const variables = computed<AddPeriodMutationVariables>(() => ({
+      name: name.value,
+      projectId: props.project.id,
+      multiple: multiple.value,
+      versioning: versioning.value,
+      readonlyFillColor: readonlyFillColor.value,
+      xlsxFile: xlsxFile.value,
+      limitationsFile: limitationsFile.value
+    }))
 
     const addPeriodUpdate = (cache: DataProxy, result: AddPeriodMutationResult) => {
       const { success } = result.data.addPeriod
@@ -78,9 +106,22 @@ export default defineComponent({
 
     const close = () => {
       name.value = ''
-      file.value = null
+      xlsxFile.value = null
+      limitationsFile.value = null
     }
-    return { name, file, readonlyFillColor, multiple, versioning, addPeriod, addPeriodUpdate, close }
+
+    return {
+      name,
+      xlsxFile,
+      limitationsFile,
+      readonlyFillColor,
+      multiple,
+      versioning,
+      variables,
+      addPeriod,
+      addPeriodUpdate,
+      close
+    }
   }
 })
 </script>

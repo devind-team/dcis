@@ -315,6 +315,13 @@ export function useGridSelection (
     updateSelectionViews()
   }
 
+  const selectSelectionCell = (cell: CellType) => {
+    cellsSelection.value = {
+      first: cell,
+      last: cell
+    }
+  }
+
   const selectAllCells = () => {
     cellsSelection.value = {
       first: sheet.value.rows[0].cells[0],
@@ -433,6 +440,7 @@ export function useGridSelection (
     mouseenterColumnName,
     mouseDownColumnName,
     mouseenterRowName,
-    mousedownRowName
+    mousedownRowName,
+    selectSelectionCell
   }
 }

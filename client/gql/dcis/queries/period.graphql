@@ -6,5 +6,13 @@
 query Period($periodId: ID!) {
   period(periodId: $periodId) {
     ...PeriodFields
+    isCurator
+    canAddAnyDivisionDocument
+    canChangeDivisions
+    canChangeGroups
+    canChangeUsers
+    canChangeSettings
+    canChangeSheet
+    canDelete
   }
 }

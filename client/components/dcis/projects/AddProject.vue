@@ -62,7 +62,7 @@ import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { defineComponent, ref, toRef } from '#app'
 import { useAuthStore } from '~/stores'
-import { AddProjectMutationPayload, UserType } from '~/types/graphql'
+import { AddProjectMutationPayload } from '~/types/graphql'
 import addProjectMutation from '~/gql/dcis/mutations/project/add_project.graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 

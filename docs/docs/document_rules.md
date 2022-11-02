@@ -25,13 +25,15 @@
 Просматривать проект могут пользователи, обладающие хотя бы одним из следующих свойств:
 - `dcis.view_project` - пользователь обладает глобальной привилегией, позволяющей просматривать все проекты;
 - `Project.user_id == info.context.user.id` - пользователь создал проект;
-- `project.visibility && info.context.user in Project.period.user` - проект является видимым и
+- `Project.visibility && info.context.user in Project.period.user` - проект является видимым и
   пользователь создал один из периодов проекта;
-- `project.visibility && info.context.user in Project.period.periodgroup.users` - проект является видимым и
+- `Project.visibility && info.context.user in Project.period.periodgroup.users` - проект является видимым и
   пользователь состоит в группе одного из периодов проекта;
-- `project.visibility && Project in get_user_privilages_projects(user)` - проект является видимым и
+- `Project.visibility && Project in get_user_curator_projects(info.context.user)` - проект является видимым и
+  пользователь является куратором для одного из периодов проекта;
+- `Project.visibility && Project in get_user_privilages_projects(info.context.user)` - проект является видимым и
   пользователь имеет привилегию для одного из периодов проекта;
-- `project.visibility && Project in get_user_divisions_projects(user)` - проект является видимым и
+- `Project.visibility && Project in get_user_divisions_projects(info.context.user)` - проект является видимым и
   пользователь состоит в дивизионе, который участвует в проекте.
 
 Добавлять проект могут пользователи, обладающие хотя бы одним из следующих свойств:
@@ -58,8 +60,10 @@
 - `Period.project.user.id == info.context.user.id` - пользователь создал проект с периодом;
 - `Period.user.id == info.context.user.id` - пользователь создал период;
 - `info.context.user in Period.groups` - пользователь состоит в группе периода;
-- `Period in get_user_privileges_periods(user)` - пользователь имеет привилегию для периода;
-- `Period in get_user_divisions_periods(user)` - пользователь состоит в дивизионе, который участвует в периоде.
+- `Period in get_user_curator_periods(info.context.user)` - пользователь является куратором для периода;
+- `Period in get_user_privileges_periods(info.context.user)` - пользователь имеет привилегию для периода;
+- `Period in get_user_divisions_periods(info.context.user)` - пользователь состоит в дивизионе,
+  который участвует в периоде.
 
 Добавлять период могут пользователи, способные просматривать проект периода и
 обладающие хотя бы одним из следующих свойств:
@@ -115,6 +119,7 @@
 - `Document.period.project.user_id == info.context.user.id` - пользователь создал проект документа;
 - `Document.period.user_id == info.context.user.id` - пользователь создал период документа;
 - `Document.user_id == info.context.user.id` - пользователь создал документ;
+- `is_document_curator(info.context.user, Document)` - пользователь является куратором для документа;
 - `Document.object_id in get_user_divisions(info.context.user, Document.period.project)` - период создан с
   множественным типом сбора, и пользователь добавлен в закрепленный за документом дивизион;
 - `Document.rowdimension__object_id in get_user_divisions(info.context.user, Document.period.project)` - период создан с
@@ -132,9 +137,9 @@
   создал период, в котором пытается добавить документ, и обладает возможностью создания периодов;
 - `add_document` - пользователь обладает локальной привилегией, позволяющей добавлять документы в конкретный период;
 - в множественном типе сбора:
-  - дивизион пользователя добавлен в период и документ добавляется для этого дивизиона с незащищенным статусом.
+  - дивизион пользователя добавлен в период.
 
-Изменять документ могут пользователи, способные просматривать этот документ и
+Изменять комментарий документа могут пользователи, способные просматривать этот документ и
 обладающие хотя бы одним из следующих свойств:
 - `dcis.change_document` - пользователь обладает глобальной привилегией, позволяющей изменять любой видимый документ;
 - `Document.period.project.user_id == info.context.user_id && dcis.add_project` - пользователь
@@ -144,7 +149,19 @@
 - `Document.user_id == info.context.user_id` - пользователь создал документ;
 - `change_document` - пользователь обладает локальной привилегией, позволяющей изменять документы в конкретном периоде.
 
-**Право изменять документ позволяет изменять его комментарий и статус и не распространяется на таблицу документа.**
+Добавлять статус документа могут пользователи, способные просматривать этот документ и
+обладающие хотя бы одним из следующих свойств:
+- `len(set(get_user_roles(user, document)) & set(add_status.roles)) > 0` - пользователь обладает ролью,
+позволяющей добавлять статус.
+
+Удалять статус документа могут пользователи, способные просматривать этот документ и
+обладающие хотя бы одним из следующих свойств:
+- `dcis.change_document` - пользователь обладает глобальной привилегией, позволяющей изменять любой видимый документ;
+- `Document.period.project.user_id == info.context.user_id && dcis.add_project` - пользователь
+  создал проект, в периоде которого пытается изменить документ, и обладает возможностью создания проектов;
+- `Document.period.user_id == info.context.user_id && dcis.add_period` - пользователь
+  создал период, в котором пытается изменить документ, и обладает возможностью создания периодов;
+- `change_document` - пользователь обладает локальной привилегией, позволяющей изменять документы в конкретном периоде.
 
 ## Привилегии и права для работы с таблицей периода и документа
 

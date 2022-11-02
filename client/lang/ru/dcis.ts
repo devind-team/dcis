@@ -2,6 +2,7 @@ export default {
   home: 'Проекты сборов',
   projects: {
     name: '@:dcis.home',
+    divisions: 'Мои организации',
     filters: {
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
@@ -54,6 +55,7 @@ export default {
       organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
+      limitations: 'Ограничения',
       attributes: 'Атрибуты',
       sheets: 'Таблица',
       settings: '@:settings'
@@ -70,7 +72,9 @@ export default {
       buttonText: 'Добавить период',
       header: 'Добавление периода',
       name: 'Название периода',
-      file: 'Файл с формой сбора',
+      xlsxFile: 'Файл с формами сбора',
+      limitationsFile: 'Ограничения, накладываемые на формы',
+      downloadTemplate: 'Скачать шаблон файла',
       readonlyFillColor: 'Запретить редактирование ячеек с заливкой',
       multiple: 'Множественное заполнение',
       versioning: 'Разрешить множество версий'
@@ -110,6 +114,14 @@ export default {
         tooltip: '@:delete',
         departmentItemName: 'департамент',
         organizationItemName: 'организацию'
+      }
+    },
+    limitations: {
+      name: '@:dcis.periods.links.limitations',
+      tableHeaders: {
+        sheet: 'Форма',
+        formula: 'Формула',
+        errorMessage: 'Сообщение об ошибке'
       }
     },
     groups: {
@@ -231,6 +243,8 @@ export default {
       header: 'Изменение статусов',
       readonlyHeader: 'Статусы',
       subheader: '@:dcis.documents.version',
+      tableErrorsMessage: 'Возникли ошибки в ограничениях',
+      tableErrorsTitle: 'Ошибки в ограничениях',
       status: 'Статус',
       comment: 'Комментарий',
       buttonText: '@:add',
@@ -276,7 +290,18 @@ export default {
       fontSize: 'Шрифт',
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
-      commaIncrease: 'Увеличить разрядность'
+      commaIncrease: 'Увеличить разрядность',
+      aggregation: 'Агрегация ячеек',
+      aggregationTitle: 'Настройки агрегации',
+      aggregationChoice: 'Метод агрегации',
+      aggregationDefault: 'Значение по умолчанию: {value}',
+      aggregationKind: {
+        empty: 'Не задано',
+        sum: 'Сумма',
+        avg: 'Среднее арифметическое',
+        max: 'Максимальное значение',
+        min: 'Минимальное значение'
+      }
     },
     columnWidth: 'Ширина: ',
     rowHeight: 'Высота: ',
@@ -344,6 +369,7 @@ export default {
       files: 'Файл',
       money: 'Рубли',
       numeric: 'Числовое значение',
+      aggregation: 'Агрегация',
       all: 'Ошибка добавления'
     },
     changeMenu: {

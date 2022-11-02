@@ -1,10 +1,10 @@
 from typing import Any
 
 import graphene
-from django.db.models import Prefetch
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
+from devind_helpers.utils import gid2int
 from django.db.models import QuerySet
 from graphene import ConnectionField
 from graphene_django import DjangoListField
@@ -12,21 +12,27 @@ from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
 
-from devind_helpers.utils import gid2int
-
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import AttributeValue, Period, Privilege, Sheet, Attribute, Document
+from apps.dcis.models import Attribute, AttributeValue, Document, Limitation, Period, Privilege, Sheet
 from apps.dcis.permissions import can_change_period_sheet, can_view_period
-from apps.dcis.schema.types import DivisionModelTypeConnection, PeriodType, PrivilegeType, SheetType, AttributeType, AttributeValueType
+from apps.dcis.schema.types import (
+    AttributeType,
+    AttributeValueType,
+    DivisionModelTypeConnection,
+    LimitationType,
+    PeriodType,
+    PrivilegeType,
+    SheetType,
+)
 from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
+    get_period_attributes,
     get_period_users,
     get_user_period_privileges,
     get_user_periods,
-    get_period_attributes,
 )
 from apps.dcis.services.sheet_unload_services import DocumentsSheetUnloader
 
@@ -89,6 +95,13 @@ class PeriodQueries(graphene.ObjectType):
         description='Выгрузка листа с несколькими документами'
     )
 
+    limitations = graphene.List(
+        LimitationType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Ограничения, накладываемые на листы'
+    )
+
     attributes = graphene.List(
         AttributeType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
@@ -96,7 +109,6 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Получение атрибутов, привязанных к периоду'
     )
-
     attributes_values = graphene.List(
         AttributeValueType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
@@ -170,6 +182,13 @@ class PeriodQueries(graphene.ObjectType):
             document_ids=[gid2int(document_id) for document_id in document_ids],
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_limitations(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Limitation]:
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        can_view_period(info.context.user, period)
+        return Limitation.objects.filter(sheet__in=period.sheet_set.all())
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

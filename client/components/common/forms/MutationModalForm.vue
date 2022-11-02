@@ -14,6 +14,11 @@ v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="p
     :i18n-path="i18nPath"
     :hide-alert-timeout="hideAlertTimeout"
     :hide-actions="hideActions"
+    :success-message="successMessage"
+    :table-errors-mode="tableErrorsMode"
+    :table-errors-message="tableErrorsMessage"
+    :table-errors-title="tableErrorsTitle"
+    :show-table-errors-search="showTableErrorsSearch"
     v-on="mutationListeners"
   )
     template(#header)
@@ -45,7 +50,8 @@ v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="p
 <script lang="ts">
 import { VueConstructor } from 'vue'
 import type { Ref, ComputedRef } from '#app'
-import { computed, defineComponent, getCurrentInstance, ref } from '#app'
+import { computed, defineComponent, getCurrentInstance, PropType, ref } from '#app'
+import { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
 
 type MutateFormType = InstanceType<typeof MutationForm> | null
@@ -67,7 +73,12 @@ export default defineComponent({
     i18nPath: { type: String, default: '' },
     width: { type: [String, Number], default: 600 },
     hideAlertTimeout: { type: Number, default: 5000 },
-    hideActions: { type: Boolean, default: false }
+    hideActions: { type: Boolean, default: false },
+    successMessage: { type: String, default: '' },
+    tableErrorsMode: { type: Number as PropType<ErrorValidateDialogMode>, default: ErrorValidateDialogMode.TOOLTIP },
+    tableErrorsMessage: { type: String, default: null },
+    tableErrorsTitle: { type: String, default: null },
+    showTableErrorsSearch: { type: Boolean, default: true }
   },
   setup (props, { emit }) {
     const instance = getCurrentInstance()
@@ -84,7 +95,7 @@ export default defineComponent({
               ? props.mutationName
               : [props.mutationName]
           ) as string[]
-          const success = mutationNames.every((mutationName: string) => result.data[mutationName].success || !result.data[mutationName].errors.length)
+          const success = mutationNames.every((mutationName: string) => result.data[mutationName].success && !result.data[mutationName].errors.length)
           if (success && props.successClose) {
             close()
           }
