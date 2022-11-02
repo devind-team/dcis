@@ -127,8 +127,8 @@ class CuratorGroupTestCase(TestCase):
             delete_curator_group(user=self.superuser, curator_group_id=self.curator_group.id)
         )
 
-    def test_add_user_curator_group(self) -> None:
-        """Тестирование функции `add_user_curator_group`."""
+    def test_add_users_curator_group(self) -> None:
+        """Тестирование функции `add_users_curator_group`."""
         with patch.object(
             self.superuser,
             'has_perm',
@@ -170,8 +170,8 @@ class CuratorGroupTestCase(TestCase):
             )
         )
 
-    def test_add_organization_curator_group(self) -> None:
-        """Тестирование функции `add_organization_curator_group`."""
+    def test_add_organizations_curator_group(self) -> None:
+        """Тестирование функции `add_organizations_curator_group`."""
         with patch.object(
             self.superuser,
             'has_perm',
@@ -180,16 +180,16 @@ class CuratorGroupTestCase(TestCase):
             add_organization_curator_group(
                 user=self.superuser,
                 curator_group_id=self.curator_group.id,
-                organization_id=self.organization.id
+                organization_ids=[self.organization.id, self.organization_2.id]
             )
         organization_curator_group = add_organization_curator_group(
             user=self.superuser,
             curator_group_id=self.curator_group.id,
-            organization_id=self.organization.id
+            organization_ids=[self.organization.id, self.organization_2.id]
         )
         self.assertEqual(
-            self.organization.id,
-            organization_curator_group,
+            {self.organization, self.organization_2},
+            set(organization_curator_group),
         )
 
     def test_delete_organization_curator_group(self) -> None:
