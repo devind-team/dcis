@@ -1,0 +1,12 @@
+mutation DeleteOrganizationCuratorGroup($curatorGroupId: ID!, $organizationId: ID!) {
+  deleteOrganizationCuratorGroup(input: { curatorGroupId: $curatorGroupId, organizationId: $organizationId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    id
+    __typename
+  }
+}

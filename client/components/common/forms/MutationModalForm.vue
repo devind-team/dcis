@@ -49,8 +49,9 @@ v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="p
 
 <script lang="ts">
 import { VueConstructor } from 'vue'
+import { watchOnce } from '@vueuse/core'
 import type { Ref, ComputedRef } from '#app'
-import { computed, defineComponent, getCurrentInstance, PropType, ref } from '#app'
+import { computed, defineComponent, getCurrentInstance, PropType, ref, watch } from '#app'
 import { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
 
@@ -103,6 +104,15 @@ export default defineComponent({
         }
       })
     ))
+
+    watch(() => active.value, (newValue) => {
+      emit('active-changed', newValue)
+    })
+    watchOnce(() => active.value, (newValue) => {
+      if (newValue) {
+        emit('first-activated')
+      }
+    })
 
     const close = () => {
       active.value = false
