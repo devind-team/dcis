@@ -9,6 +9,7 @@ mutation-modal-form(
   :update="update"
   mutation-name="changeUserPeriodPrivileges"
   errors-in-alert
+  @first-activated="firstActivated"
   @close="close"
 )
   template(#activator="{ on }")
@@ -39,7 +40,7 @@ import {
   UserPeriodPrivilegesQuery,
   UserPeriodPrivilegesQueryVariables,
   ChangeUserPeriodPrivilegesMutationVariables,
-  ChangeUserPeriodPrivilegesPayload
+  ChangeUserPeriodPrivilegesMutationPayload
 } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
@@ -47,7 +48,7 @@ import userPeriodPrivilegesQuery from '~/gql/dcis/queries/user_period_privileges
 import changeUserPeriodPrivilegesMutation from '~/gql/dcis/mutations/period/change_user_period_privilges.graphql'
 
 type ChangeUserPeriodPrivilegesMutationResult = {
-  data: { changeUserPeriodPrivileges: ChangeUserPeriodPrivilegesPayload }
+  data: { changeUserPeriodPrivileges: ChangeUserPeriodPrivilegesMutationPayload }
 }
 
 export default defineComponent({
@@ -57,14 +58,9 @@ export default defineComponent({
     user: { type: Object as PropType<UserFieldsFragment>, required: true }
   },
   setup (props) {
-    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
-    onMounted(() => {
-      watch(() => form.value.active, (value: boolean) => {
-        if (value) {
-          options.value.enabled = true
-        }
-      })
-    })
+    const firstActivated = () => {
+      options.value.enabled = true
+    }
 
     const { t } = useI18n()
 
@@ -135,7 +131,7 @@ export default defineComponent({
     }
 
     return {
-      form,
+      firstActivated,
       changeUserPeriodPrivilegesMutation,
       headers,
       allPrivileges,

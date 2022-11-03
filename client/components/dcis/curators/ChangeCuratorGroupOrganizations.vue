@@ -1,6 +1,5 @@
 <template lang="pug">
 mutation-modal-form(
-  ref="form"
   :header="String($t('curators.changeCuratorGroupOrganizations.header'))"
   :subheader="curatorGroup.name"
   :button-text="String($t('curators.changeCuratorGroupOrganizations.buttonText'))"
@@ -12,9 +11,10 @@ mutation-modal-form(
   mutation-name="addOrganizationsCuratorGroup"
   i18n-path="curators.changeCuratorGroupOrganizations"
   width="1500"
+  @first-activated="firstActivated"
   @close="close"
   @done="addOrganizationsDone"
-  )
+)
   template(#activator="{ on }")
     slot(name="activator" :on="on")
   template(#form)
@@ -57,7 +57,7 @@ mutation-modal-form(
         deletable-chips
         return-object
         no-filter
-        )
+      )
           template(#selection="{ item }")
             v-chip(close @click:close="userChipClose(item)") {{ item.name }}
           template(#item="{ item }")
@@ -66,11 +66,10 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from '#app'
+import { computed, defineComponent, PropType, ref } from '#app'
 import { DataProxy } from '@apollo/client'
 import { VariablesParameter } from '@vue/apollo-composable/dist/useQuery'
 import { useMutation } from '@vue/apollo-composable'
-import { watchOnce } from '@vueuse/core'
 import { DataTableHeader } from 'vuetify'
 import { ValidationProvider } from 'vee-validate'
 import {
@@ -104,13 +103,11 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
 
-    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
     const newOrganizationsValidationProvider = ref<InstanceType<typeof ValidationProvider | null>>(null)
-    onMounted(() => {
-      watchOnce(() => form.value.active, (value: boolean) => {
-        options.value.enabled = value
-      })
-    })
+
+    const firstActivated = () => {
+      options.value.enabled = true
+    }
 
     const headers = computed<DataTableHeader[]>(() => [
       { text: t('curators.changeCuratorGroupOrganizations.tableHeaders.name') as string, value: 'name' },
@@ -218,8 +215,8 @@ export default defineComponent({
     }
 
     return {
+      firstActivated,
       addOrganizationsCuratorGroupMutation,
-      form,
       newOrganizationsValidationProvider,
       headers,
       groupOrganizations,

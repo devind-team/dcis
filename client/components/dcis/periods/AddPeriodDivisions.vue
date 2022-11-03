@@ -10,6 +10,7 @@ mutation-modal-form(
   width="50vw"
   mutation-name="addDivisions"
   errors-in-alert
+  @active-changed="activeChanged"
   @close="close"
 )
   template(#activator="{ on }")
@@ -32,7 +33,7 @@ mutation-modal-form(
 import { DataTableHeader } from 'vuetify'
 import { UseQueryOptions, VariablesParameter } from '@vue/apollo-composable/dist/useQuery'
 import { DataProxy } from 'apollo-cache'
-import { defineComponent, onMounted, PropType, ref, watch } from '#app'
+import { defineComponent, PropType, ref } from '#app'
 import {
   DivisionModelType,
   PeriodType,
@@ -59,17 +60,14 @@ export default defineComponent({
   setup (props, { emit }) {
     const { t } = useI18n()
 
-    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
-    onMounted(() => {
-      watch(() => form.value.active, (value: boolean) => {
-        if (value) {
-          queryOptions.value.enabled = true
-          refetchDivisions()
-        } else {
-          queryOptions.value.enabled = false
-        }
-      })
-    })
+    const activeChanged = (active: boolean) => {
+      if (active) {
+        queryOptions.value.enabled = true
+        refetchDivisions()
+      } else {
+        queryOptions.value.enabled = false
+      }
+    }
 
     const queryOptions = ref<UseQueryOptions<
       PeriodPossibleDivisionsQuery,
@@ -114,7 +112,7 @@ export default defineComponent({
     }
 
     return {
-      form,
+      activeChanged,
       addDivisionsMutation,
       search,
       divisions,
