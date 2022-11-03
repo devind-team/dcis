@@ -1,32 +1,34 @@
 <template lang="pug">
-bread-crumbs(:items="bc" fluid)
-  v-card(v-if="!activeDocumentLoading")
-    v-card-subtitle {{ activeDocument.objectName }}
-    v-card-text
-      grid-sheets(
-        v-model="activeSheetIndex"
-        :mode="GridMode.WRITE"
-        :sheets="activeDocument.sheets"
-        :active-sheet="activeSheet"
-        :update-active-sheet="updateActiveSheet"
-        :active-document="activeDocument"
-        show-attributes
-      )
-        template(#settings)
-          settings-document(:document="activeDocument")
-            template(#activator="{ on, attrs }")
-              v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
-                v-icon mdi-cog
-        template(#attributes)
-          attributes-values-tab-item(
-            :document-id="activeDocument.id"
-            :loading="attributesLoading || attributesValuesLoading"
-            :attributes="attributes"
-            :attributes-values="attributesValues"
-            :change-update-attributes-values="changeUpdateAttributesValues"
-            :update-active-sheet="updateActiveSheet"
-          )
-  v-progress-circular(v-else color="primary" indeterminate)
+div
+  left-navigator-driver(v-model="drawer" :items="links")
+  bread-crumbs(:items="bc" fluid)
+    v-card(v-if="!activeDocumentLoading")
+      v-card-subtitle {{ activeDocument.objectName }}
+      v-card-text
+        grid-sheets(
+          v-model="activeSheetIndex"
+          :mode="GridMode.WRITE"
+          :sheets="activeDocument.sheets"
+          :active-sheet="activeSheet"
+          :update-active-sheet="updateActiveSheet"
+          :active-document="activeDocument"
+          show-attributes
+        )
+          template(#settings)
+            settings-document(:document="activeDocument")
+              template(#activator="{ on, attrs }")
+                v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
+                  v-icon mdi-cog
+          template(#attributes)
+            attributes-values-tab-item(
+              :document-id="activeDocument.id"
+              :loading="attributesLoading || attributesValuesLoading"
+              :attributes="attributes"
+              :attributes-values="attributesValues"
+              :change-update-attributes-values="changeUpdateAttributesValues"
+              :update-active-sheet="updateActiveSheet"
+            )
+  v-progress-circular(color="primary" indeterminate)
 </template>
 
 <script lang="ts">
@@ -34,7 +36,7 @@ import { computed, defineComponent, inject, onUnmounted, PropType, ref, useRoute
 import { toGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
-import { BreadCrumbsItem } from '~/types/devind'
+import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import type {
   AttributesQuery,
   AttributesQueryVariables,
@@ -49,6 +51,7 @@ import documentQuery from '~/gql/dcis/queries/document.graphql'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
 import attributesValuesQuery from '~/gql/dcis/queries/attributes_values.graphql'
+import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
@@ -56,7 +59,7 @@ import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import AttributesValuesTabItem from '~/components/dcis/attributes/AttributesValuesTabItem.vue'
 
 export default defineComponent({
-  components: { AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
+  components: { LeftNavigatorDriver, AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
@@ -66,6 +69,30 @@ export default defineComponent({
 
     const documentVersion = computed<string>(() =>
       t('dcis.grid.version', { version: activeDocument.value.version }) as string)
+
+    const loading = ref<boolean>(true)
+
+    const drawer = ref<boolean>(false)
+    const links = computed<LinksType[]>(() => {
+      const result: LinksType[] = [
+        {
+          title: t('dcis.documents.links.sheets') as string,
+          to: 'dcis-documents-documentId-sheets',
+          icon: 'file-table-box-multiple-outline'
+        },
+        {
+          title: t('dcis.documents.links.attributes') as string,
+          to: 'dcis-documents-documentId-attributes',
+          icon: 'page-next'
+        },
+        {
+          title: t('dcis.documents.links.comments') as string,
+          to: 'dcis-documents-documentId-comments',
+          icon: 'comment-multiple'
+        }
+      ]
+      return result
+    })
 
     const bc = computed<BreadCrumbsItem[]>(() => {
       const result: BreadCrumbsItem[] = [...props.breadCrumbs]
@@ -146,6 +173,9 @@ export default defineComponent({
 
     return {
       GridMode,
+      loading,
+      drawer,
+      links,
       bc,
       activeSheetIndex,
       activeDocument,
