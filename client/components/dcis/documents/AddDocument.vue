@@ -57,6 +57,8 @@ mutation-modal-form(
         item-value="id"
         return-object
       )
+        template(#item="{ item }")
+          v-list-item-content {{ item.name }}
     v-autocomplete(
       v-if="documents.length"
       v-model="document"
