@@ -14,8 +14,16 @@ import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import { useCommonQuery, useI18n } from '~/composables'
-import { DocumentQuery, DocumentQueryVariables } from '~/types/graphql'
+import {
+  AttributesQuery,
+  AttributesQueryVariables,
+  AttributesValuesQuery, AttributesValuesQueryVariables,
+  DocumentQuery,
+  DocumentQueryVariables
+} from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
+import attributesQuery from "~/gql/dcis/queries/attributes.graphql";
+import attributesValuesQuery from "~/gql/dcis/queries/attributes_values.graphql";
 
 export default defineComponent({
   components: { LeftNavigatorContainer, AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
@@ -35,36 +43,22 @@ export default defineComponent({
         documentId: route.params.documentId
       })
     })
-    const documentVersion = computed<string>(() =>
-      t('dcis.grid.version', { version: activeDocument.value.version }) as string)
-    const bc = computed<BreadCrumbsItem[]>(() => {
-      const result: BreadCrumbsItem[] = [...props.breadCrumbs]
-      if (activeDocument.value) {
-        result.push({
-          text: activeDocument.value.period.project.name,
-          to: localePath({
-            name: 'dcis-projects-projectId-periods',
-            params: { projectId: activeDocument.value.period.project.id }
-          }),
-          exact: true
-        }, {
-          text: activeDocument.value.period.name,
-          to: localePath({
-            name: 'dcis-periods-periodId-documents',
-            params: { periodId: toGlobalId('PeriodType', Number(activeDocument.value.period.id)) }
-          }),
-          exact: true
-        }, {
-          text: documentVersion.value,
-          to: localePath({
-            name: 'dcis-documents-documentId',
-            params: { documentId: activeDocument.value.id }
-          }),
-          exact: true
-        })
-      }
-      return result
+
+    const { data: attributes, loading: attributesLoading } = useCommonQuery<AttributesQuery, AttributesQueryVariables>({
+      document: attributesQuery,
+      variables: () => ({ periodId: activeDocument.value?.period.id }),
+      options: () => ({ enabled: !activeDocumentLoading.value })
     })
+
+    const { data: attributesValues, loading: attributesValuesLoading, changeUpdate: changeUpdateAttributesValues } = useCommonQuery<
+      AttributesValuesQuery,
+      AttributesValuesQueryVariables
+    >({
+      document: attributesValuesQuery,
+      variables: () => ({ documentId: route.params.documentId }),
+      options: () => ({ enabled: !activeDocumentLoading.value })
+    })
+
     return { bc }
   }
 })

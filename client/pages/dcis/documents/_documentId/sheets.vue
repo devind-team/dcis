@@ -1,31 +1,50 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+div
+  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+    v-card(v-if="!activeDocumentLoading")
+      v-card-subtitle {{ activeDocument.objectName }}
+      v-card-text
+        grid-sheets(
+          v-model="activeSheetIndex"
+          :mode="GridMode.WRITE"
+          :sheets="activeDocument.sheets"
+          :active-sheet="activeSheet"
+          :update-active-sheet="updateActiveSheet"
+          :active-document="activeDocument"
+        )
+          template(#settings)
+            settings-document(:document="activeDocument")
+              template(#activator="{ on, attrs }")
+                v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
+                  v-icon mdi-cog
+  v-progress-circular(color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, useRoute } from '#app'
+import { defineComponent, PropType, ref, useRoute } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { toGlobalId } from '~/services/graphql-relay'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AttributesValuesTabItem from '~/components/dcis/attributes/AttributesValuesTabItem.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import { useCommonQuery, useI18n } from '~/composables'
-import { DocumentQuery, DocumentQueryVariables } from '~/types/graphql'
+import { useCommonQuery } from '~/composables'
+import { DocumentQuery, DocumentQueryVariables, DocumentSheetQuery, DocumentSheetQueryVariables } from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
+import { GridMode } from '~/types/grid'
+import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
-  setup (props) {
-    const { t, localePath } = useI18n()
+  setup () {
     const route = useRoute()
 
-    const { data: activeDocument } = useCommonQuery<
+    const activeSheetIndex = ref<number>(0)
+    const { data: activeDocument, loading: activeDocumentLoading } = useCommonQuery<
       DocumentQuery,
       DocumentQueryVariables
     >({
@@ -34,37 +53,31 @@ export default defineComponent({
         documentId: route.params.documentId
       })
     })
-    const documentVersion = computed<string>(() =>
-      t('dcis.grid.version', { version: activeDocument.value.version }) as string)
-    const bc = computed<BreadCrumbsItem[]>(() => {
-      const result: BreadCrumbsItem[] = [...props.breadCrumbs]
-      if (activeDocument.value) {
-        result.push({
-          text: activeDocument.value.period.project.name,
-          to: localePath({
-            name: 'dcis-projects-projectId-periods',
-            params: { projectId: activeDocument.value.period.project.id }
-          }),
-          exact: true
-        }, {
-          text: activeDocument.value.period.name,
-          to: localePath({
-            name: 'dcis-periods-periodId-documents',
-            params: { periodId: toGlobalId('PeriodType', Number(activeDocument.value.period.id)) }
-          }),
-          exact: true
-        }, {
-          text: documentVersion.value,
-          to: localePath({
-            name: 'dcis-documents-documentId',
-            params: { documentId: activeDocument.value.id }
-          }),
-          exact: true
-        })
-      }
-      return result
+
+    const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet } = useCommonQuery<
+      DocumentSheetQuery,
+      DocumentSheetQueryVariables
+    >({
+      document: documentSheetQuery,
+      variables: () => ({
+        documentId: route.params.documentId,
+        sheetId: activeDocument.value?.sheets[activeSheetIndex.value]?.id
+      }),
+      options: () => ({
+        enabled: !activeDocumentLoading.value && !!activeDocument.value?.sheets[activeSheetIndex.value]?.id,
+        fetchPolicy: 'cache-and-network'
+      })
     })
-    return { bc }
+
+    return {
+      GridMode,
+      activeSheetIndex,
+      activeDocument,
+      activeDocumentLoading,
+      activeSheet,
+      activeSheetLoading,
+      updateActiveSheet
+    }
   }
 })
 </script>
