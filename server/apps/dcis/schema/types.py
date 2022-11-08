@@ -2,8 +2,7 @@ import json
 
 import graphene
 from devind_core.schema.types import ContentTypeType, FileType, GroupType
-from devind_dictionaries.models import Organization, Department
-from devind_dictionaries.schema import DepartmentType, OrganizationType
+from devind_dictionaries.schema import OrganizationType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.core.exceptions import PermissionDenied
@@ -19,8 +18,8 @@ from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     Attribute,
     AttributeValue,
-    ColumnDimension,
     Cell,
+    ColumnDimension,
     CuratorGroup,
     Document,
     DocumentStatus,
@@ -37,8 +36,10 @@ from apps.dcis.models import (
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
+    ChangeAttributeValueBase,
     can_add_period_base,
     can_change_document_base,
+    can_change_period_attributes,
     can_change_period_divisions_base,
     can_change_period_groups_base,
     can_change_period_settings_base,
@@ -115,35 +116,39 @@ class PeriodType(DjangoObjectType):
 
     is_curator = graphene.Boolean(
         required=True,
-        description='Является ли пользователь куратором для периода'
+        description='Является ли пользователь куратором для периода',
     )
     can_add_any_division_document = graphene.Boolean(
         required=True,
-        description='Может ли пользователь добавлять документы в период'
+        description='Может ли пользователь добавлять документы в период',
     )
     can_change_divisions = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять дивизионы периода'
+        description='Может ли пользователь изменять дивизионы периода',
     )
     can_change_groups = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять группы периода'
+        description='Может ли пользователь изменять группы периода',
     )
     can_change_users = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять пользователей периода'
+        description='Может ли пользователь изменять пользователей периода',
+    )
+    can_change_attributes = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять атрибуты периода',
     )
     can_change_settings = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять настройки периода'
+        description='Может ли пользователь изменять настройки периода',
     )
     can_change_sheet = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять структуру листа периода'
+        description='Может ли пользователь изменять структуру листа периода',
     )
     can_delete = graphene.Boolean(
         required=True,
-        description='Может ли пользователь удалять период'
+        description='Может ли пользователь удалять период',
     )
 
     class Meta:
@@ -199,6 +204,10 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_period_users_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_change_attributes(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_attributes, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
@@ -297,7 +306,10 @@ class DocumentType(DjangoObjectType):
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
-    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять документ')
+    can_change_attribute_value = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять значение атрибута в документе',
+    )
 
     object_id = graphene.ID(description='Идентификатор дивизиона')
 
@@ -327,6 +339,10 @@ class DocumentType(DjangoObjectType):
     @staticmethod
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_document_base, info.context.user, document)
+
+    @staticmethod
+    def resolve_can_change_attribute_value(document: Document, info: ResolveInfo) -> bool:
+        return ChangeAttributeValueBase(info.context.user, document).can_change_some_attribute
 
 
 class DocumentStatusType(DjangoObjectType):

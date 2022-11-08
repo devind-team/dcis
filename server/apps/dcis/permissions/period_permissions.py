@@ -102,6 +102,23 @@ def can_change_period_users(user: User, period: Period):
     can_change_period_users_base(user, period)
 
 
+def can_change_period_attributes_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут изменять атрибуты периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, period)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, period.id, 'change_period_attributes'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения атрибутов периода.')
+
+
+def can_change_period_attributes(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать период и изменять в нем атрибуты."""
+    can_view_period(user, period)
+    can_change_period_attributes_base(user, period)
+
+
 def can_change_period_settings_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять настройки периода, без проверки возможности просмотра."""
     try:
@@ -133,12 +150,6 @@ def can_change_period_sheet_base(user: User, period: Period):
 
 def can_change_period_sheet(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру листа."""
-    can_view_period(user, period)
-    can_change_period_sheet_base(user, period)
-
-
-def can_change_period_attributes(user: User, period: Period):
-    """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру атрибутов."""
     can_view_period(user, period)
     can_change_period_sheet_base(user, period)
 

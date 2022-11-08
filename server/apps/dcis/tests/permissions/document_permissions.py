@@ -9,11 +9,23 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import AddStatus, Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import (
+    AddStatus,
+    Attribute,
+    Cell,
+    ColumnDimension,
+    Document,
+    Period,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+)
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
     can_add_document,
     can_add_document_status,
+    can_change_attribute_value,
     can_change_child_row_dimension_height,
     can_change_document_comment,
     can_change_value,
@@ -21,6 +33,7 @@ from apps.dcis.permissions.document_permissions import (
     can_delete_document_status,
     can_view_document,
 )
+from apps.dcis.tests.helpers.mock import patch_db_object
 
 
 class DocumentPermissionsTestCase(TestCase):
@@ -46,6 +59,8 @@ class DocumentPermissionsTestCase(TestCase):
 
         self.project = Project.objects.create(content_type=self.department_content_type)
         self.period = Period.objects.create(project=self.project)
+        self.period_attribute = Attribute.objects.create(key='a', mutable=False, period=self.period)
+        self.period_attribute_mutable = Attribute.objects.create(key='am', mutable=True, period=self.period)
         self.document = Document.objects.create(period=self.period)
         self.document.documentstatus_set.create(
             document=self.document,
@@ -55,6 +70,8 @@ class DocumentPermissionsTestCase(TestCase):
 
         self.user_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
         self.user_period = Period.objects.create(user=self.user, project=self.user_project)
+        self.user_period_attribute = Attribute.objects.create(key='a', mutable=False, period=self.user_period)
+        self.user_period_attribute_mutable = Attribute.objects.create(kind='am', mutable=True, period=self.user_period)
         self.sheet = Sheet.objects.create(period=self.user_period)
         self.row_dimension = RowDimension.objects.create(index=1, sheet=self.sheet)
         self.column_dimensions = [
@@ -214,6 +231,41 @@ class DocumentPermissionsTestCase(TestCase):
         """Тестирование функции `can_delete_document_status`."""
         self._test_common(can_delete_document_status)
 
+    def test_can_change_attribute_value(self) -> None:
+        """Тестирование функции `can_change_attribute_value`."""
+        self._test_can_change_attribute_value((False, False, False), False)
+        self._test_can_change_attribute_value((False, True, False), True)
+        with patch(
+            'apps.dcis.permissions.document_permissions.can_view_document',
+            new=Mock(return_value=True)
+        ):
+            self._test_can_change_attribute_value((False, True, False), True)
+            with patch(
+                'apps.dcis.permissions.document_permissions.can_change_period_sheet_base',
+                new=lambda _user, _period: True
+            ):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_attributevalue'):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_value'):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch(
+                'apps.dcis.permissions.document_permissions.get_user_divisions',
+                new=Mock(return_value=({'id': 1},))
+            ) as mock:
+                self._test_can_change_attribute_value((False, True, False), True)
+                with patch.object(self.user_document, 'object_id', new=1), patch.object(
+                    self.user_period_document, 'object_id', new=1
+                ), patch.object(
+                    self.user_period, 'multiple', new=True,
+                ):
+                    self._test_can_change_attribute_value((False, True, True), True)
+                    mock.assert_called_with(self.user, self.user_project)
+                with patch_db_object(self.document_row_dimension_child, 'object_id', new=1):
+                    self._test_can_change_attribute_value((False, True, True), True)
+
     def test_can_change_value(self) -> None:
         """Тестирование функции `can_change_value`."""
         with patch(
@@ -337,6 +389,28 @@ class DocumentPermissionsTestCase(TestCase):
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
                 f(self.user, self.user_period_document, *args)
                 mock.assert_called_once_with(self.user.id, self.user_period.id, 'change_document')
+
+    def _test_can_change_attribute_value(self, values: tuple[bool, bool, bool], attribute_mutable: bool) -> None:
+        """Тестирование функции `can_change_attribute_value`."""
+        for document, attribute, value in zip((
+            self.document,
+            self.user_document,
+            self.user_period_document
+        ), (
+            self.period_attribute_mutable if attribute_mutable else self.period_attribute,
+            self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
+            self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
+        ), values):
+            if value:
+                can_change_attribute_value(self.user, document, attribute)
+            else:
+                self.assertRaises(
+                    PermissionDenied,
+                    can_change_attribute_value,
+                    self.user,
+                    document,
+                    attribute,
+                )
 
     def _test_can_change_value(self, values: tuple[bool, bool, bool, bool, bool, bool]) -> None:
         """Тестирование функции `can_change_value` для 6 типов ячеек."""

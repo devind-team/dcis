@@ -2653,8 +2653,8 @@ type DocumentStatusType {
 type DocumentType implements Node {
   """Может ли пользователь изменять документ"""
   canChange: Boolean!
-  """Может ли пользователь удалять документ"""
-  canDelete: Boolean!
+  """Может ли пользователь изменять значение атрибута в документе"""
+  canChangeAttributeValue: Boolean!
   """Комментарий"""
   comment: String!
   """Дата создания"""
@@ -3626,6 +3626,8 @@ type PeriodGroupType {
 type PeriodType {
   """Может ли пользователь добавлять документы в период"""
   canAddAnyDivisionDocument: Boolean!
+  """Может ли пользователь изменять атрибуты периода"""
+  canChangeAttributes: Boolean!
   """Может ли пользователь изменять дивизионы периода"""
   canChangeDivisions: Boolean!
   """Может ли пользователь изменять группы периода"""
