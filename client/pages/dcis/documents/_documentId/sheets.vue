@@ -1,22 +1,21 @@
 <template lang="pug">
 div
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    v-card(v-if="!activeDocumentLoading")
-      v-card-subtitle {{ activeDocument.objectName }}
-      v-card-text
-        grid-sheets(
-          v-model="activeSheetIndex"
-          :mode="GridMode.WRITE"
-          :sheets="activeDocument.sheets"
-          :active-sheet="activeSheet"
-          :update-active-sheet="updateActiveSheet"
-          :active-document="activeDocument"
-        )
-          template(#settings)
-            settings-document(:document="activeDocument")
-              template(#activator="{ on, attrs }")
-                v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
-                  v-icon mdi-cog
+  left-navigator-container(v-if="!activeDocumentLoading" :bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+    v-card-subtitle {{ activeDocument.objectName }}
+    v-card-text
+      grid-sheets(
+        v-model="activeSheetIndex"
+        :mode="GridMode.WRITE"
+        :sheets="activeDocument.sheets"
+        :active-sheet="activeSheet"
+        :update-active-sheet="updateActiveSheet"
+        :active-document="activeDocument"
+      )
+        template(#settings)
+          settings-document(:document="activeDocument")
+            template(#activator="{ on, attrs }")
+              v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
+                v-icon mdi-cog
   v-progress-circular(color="primary" indeterminate)
 </template>
 
