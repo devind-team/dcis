@@ -12,7 +12,7 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.mutation_factories import DeleteMutation
 
 from apps.dcis.services.attribute_service import change_attribute_value
-from apps.dcis.permissions import can_change_period_sheet
+from apps.dcis.permissions import can_change_period_attributes
 from apps.dcis.models import Attribute, Period, Document
 from apps.dcis.forms import AddAttributeForm, ChangeAttributeForm
 from apps.dcis.schema.types import AttributeValueType, ValueType
@@ -27,7 +27,7 @@ class AddAttributeMutation(DjangoModelFormMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(cls, root, info, **data):
         period = get_object_or_404(Period, pk=data.get('period'))
-        can_change_period_sheet(info.context.user, period)
+        can_change_period_attributes(info.context.user, period)
         return super().mutate_and_get_payload(root, info, **data)
 
 
@@ -42,7 +42,7 @@ class ChangeAttributeMutation(DjangoModelFormMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(cls, root, info, **data):
         attribute: Attribute = get_object_or_404(Attribute, pk=data.get('id'))
-        can_change_period_sheet(info.context.user, attribute.period)
+        can_change_period_attributes(info.context.user, attribute.period)
         return super().mutate_and_get_payload(root, info, **data)
 
 
@@ -78,6 +78,9 @@ class AttributeMutations(graphene.ObjectType):
 
     add_attribute = AddAttributeMutation.Field(required=True, description='Добавление атрибута')
     change_attribute = ChangeAttributeMutation.Field(required=True, description='Изменение атрибута')
-    delete_attribute = DeleteMutation(Attribute).Field(required=True, description='Удаление атрибута')
+    delete_attribute = DeleteMutation(
+        model=Attribute,
+        check_permissions=lambda context, attribute: can_change_period_attributes(context.user, attribute.period)
+    ).Field(required=True, description='Удаление атрибута')
 
     change_attribute_value = ChangeAttributeValueMutation.Field(required=True, description='Изменение значения')

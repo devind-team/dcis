@@ -18,7 +18,6 @@ v-tab-item
 <script lang="ts">
 import { computed, defineComponent, PropType } from '#app'
 import { useApolloClient, useMutation } from '@vue/apollo-composable'
-import { client } from 'websocket'
 import {
   AttributeKind,
   AttributeType,
@@ -79,7 +78,6 @@ export default defineComponent({
           if (!result.data.changeAttributeValue.errors.length) {
             props.changeUpdateAttributesValues(cache, result, 'attributeValue')
             const { values } = result.data.changeAttributeValue
-            console.log(values)
             changeSheetValues(values, client, props.documentId)
           }
         }

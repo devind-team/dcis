@@ -1,76 +1,76 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.documents.name') }}
-      template(v-if="period.canAddAnyDivisionDocument || userPeriodDivision.length")
-        v-spacer
-        add-document-menu(
-          v-slot="{ on, attrs }"
-          :period="period"
-          :documents="documents"
-          :add-document-update="addDocumentUpdate"
-          :add-document-data-update="addDocumentDataUpdate"
-          :user-divisions="userPeriodDivision"
+left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.documents.name') }}
+    template(v-if="period.canAddAnyDivisionDocument || userPeriodDivision.length")
+      v-spacer
+      add-document-menu(
+        v-slot="{ on, attrs }"
+        :period="period"
+        :documents="documents"
+        :add-document-update="addDocumentUpdate"
+        :add-document-data-update="addDocumentDataUpdate"
+        :user-divisions="userPeriodDivision"
+      )
+        v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
+  template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
+  items-data-filter(
+    v-if="showDivisionFilter"
+    v-model="selectedDivisions"
+    v-bind="divisionFilterMessages"
+    :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
+    :get-name="d => d.name"
+    :search-function="(d, s) => d.name.toLocaleLowerCase().includes(s.toLocaleLowerCase())"
+    message-container-class="mr-1 mb-1"
+    multiple
+    has-select-all
+  )
+  items-data-filter(
+    ref="statusesFilter"
+    v-model="selectedStatuses"
+    v-bind="statusFilterMessages"
+    :items="statuses ? statuses : []"
+    :get-name="status => status.name"
+    message-container-class="mr-1 mb-1"
+    multiple
+    has-select-all
+  )
+  v-data-table(
+    :headers="headers"
+    :items="documents"
+    :loading="loading"
+    disable-sort
+    disable-pagination
+    hide-default-footer
+  )
+    template(#item.division="{ item }")
+      nuxt-link(
+        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+      ) {{ item.objectName }} ({{ item.objectId }})
+    template(#item.version="{ item }")
+      template(v-if="period.multiple") {{ item.version }}
+      nuxt-link(
+        v-else
+        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+      ) {{ item.version }}
+    template(#item.comment="{ item }")
+      template(v-if="item.comment")
+        template(v-if="canChangeDocumentComment(item)")
+          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+            a(v-on="on") {{ item.comment }}
+        template(v-else) {{ item.comment }}
+    template(#item.lastStatus="{ item }")
+      template(v-if="item.lastStatus")
+        document-statuses(
+          :can-delete="canDeleteDocumentStatus(item)"
+          :update="updateDocuments"
+          :document="item"
+          @add-status="refetchDocuments"
         )
-          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-    template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-    items-data-filter(
-      v-if="showDivisionFilter"
-      v-model="selectedDivisions"
-      v-bind="divisionFilterMessages"
-      :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
-      :get-name="d => d.name"
-      :search-function="(d, s) => d.name.toLocaleLowerCase().includes(s.toLocaleLowerCase())"
-      message-container-class="mr-1 mb-1"
-      multiple
-      has-select-all
-    )
-    items-data-filter(
-      ref="statusesFilter"
-      v-model="selectedStatuses"
-      v-bind="statusFilterMessages"
-      :items="statuses ? statuses : []"
-      :get-name="status => status.name"
-      message-container-class="mr-1 mb-1"
-      multiple
-      has-select-all
-    )
-    v-data-table(
-      :headers="headers"
-      :items="documents"
-      :loading="loading"
-      disable-sort
-      disable-pagination
-      hide-default-footer
-    )
-      template(#item.division="{ item }")
-        nuxt-link(
-          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) {{ item.objectName }} ({{ item.objectId }})
-      template(#item.version="{ item }")
-        template(v-if="period.multiple") {{ item.version }}
-        nuxt-link(
-          v-else
-          :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-        ) {{ item.version }}
-      template(#item.comment="{ item }")
-        template(v-if="item.comment")
-          template(v-if="canChangeDocumentComment(item)")
-            text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
-              a(v-on="on") {{ item.comment }}
-          template(v-else) {{ item.comment }}
-      template(#item.lastStatus="{ item }")
-        template(v-if="item.lastStatus")
-          document-statuses(
-            :can-delete="canDeleteDocumentStatus(item)"
-            :update="updateDocuments"
-            :document="item"
-            @add-status="refetchDocuments"
-          )
-            template(#activator="{ on }")
-              a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-          div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
-          .font-italic {{ item.lastStatus.comment }}
-      template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
+          template(#activator="{ on }")
+            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+        div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
+        .font-italic {{ item.lastStatus.comment }}
+    template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
 <script lang="ts">

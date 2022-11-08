@@ -1,6 +1,7 @@
 from .document_permissions import (
     AddChildRowDimensionBase,
     AddDocumentBase,
+    ChangeAttributeValueBase,
     ChangeChildRowDimensionHeightBase,
     ChangeDocumentSheetBase,
     ChangeValueBase,
@@ -10,6 +11,7 @@ from .document_permissions import (
     can_add_document,
     can_add_document_status,
     can_add_document_status_base,
+    can_change_attribute_value,
     can_change_child_row_dimension_height,
     can_change_document_base,
     can_change_document_comment,
