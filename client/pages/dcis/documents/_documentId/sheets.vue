@@ -24,7 +24,6 @@ div
 import { defineComponent, PropType, ref, useRoute } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import AttributesValuesTabItem from '~/components/dcis/attributes/AttributesValuesTabItem.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
@@ -36,7 +35,7 @@ import { GridMode } from '~/types/grid'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
+  components: { LeftNavigatorContainer, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },

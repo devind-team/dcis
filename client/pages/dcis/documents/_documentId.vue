@@ -9,26 +9,17 @@ div
 import { computed, defineComponent, inject, onUnmounted, PropType, provide, ref, useRoute } from '#app'
 import { toGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
-import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import type {
   DocumentQuery,
-  DocumentQueryVariables,
-  DocumentSheetQuery,
-  DocumentSheetQueryVariables
+  DocumentQueryVariables
 } from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
-import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
-import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
-import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import AttributesValuesTabItem from '~/components/dcis/attributes/AttributesValuesTabItem.vue'
-import projectQuery from '~/gql/dcis/queries/project.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorDriver, AttributesValuesTabItem, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
+  components: { LeftNavigatorDriver, BreadCrumbs },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
@@ -104,7 +95,7 @@ export default defineComponent({
       return result
     })
 
-    const { data: activeDocument, loading: activeDocumentLoading } = useCommonQuery<
+    const { data: activeDocument } = useCommonQuery<
       DocumentQuery,
       DocumentQueryVariables
     >({
@@ -122,13 +113,10 @@ export default defineComponent({
 
     return {
       document,
-      GridMode,
       loading,
       drawer,
       links,
-      bc,
-      activeDocument,
-      activeDocumentLoading
+      bc
     }
   }
 })
