@@ -366,22 +366,22 @@ export type AddGroupMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-export type AddOrganizationCuratorGroupInput = {
+export type AddOrganizationsCuratorGroupInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор кураторской группы */
   curatorGroupId: Scalars['ID'];
   /** Идентификатор организации */
-  organizationId: Scalars['ID'];
+  organizationIds: Array<Scalars['ID']>;
 };
 
 /** Мутация на добавление организации в кураторскую группу. */
-export type AddOrganizationCuratorGroupPayload = {
-  __typename?: 'AddOrganizationCuratorGroupPayload';
-  /** Идентификатор организации */
-  addOrganizationId: Scalars['ID'];
+export type AddOrganizationsCuratorGroupPayload = {
+  __typename?: 'AddOrganizationsCuratorGroupPayload';
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Идентификатор организации */
+  organizations?: Maybe<Array<Maybe<OrganizationType>>>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2375,7 +2375,7 @@ export type DeleteCuratorGroupMutationPayload = {
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Идентификатор удаленной кураторской группы */
-  id: Scalars['ID'];
+  id?: Maybe<Scalars['ID']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2485,7 +2485,7 @@ export type DeleteOrganizationCuratorGroupPayload = {
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Идентификатор организации */
-  id: Scalars['ID'];
+  id?: Maybe<Scalars['ID']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -3126,7 +3126,7 @@ export type Mutation = {
   /** Мутация для добавления группы. */
   addGroup: AddGroupMutationPayload;
   /** Мутация на добавление организации в кураторскую группу. */
-  addOrganizationCuratorGroup: AddOrganizationCuratorGroupPayload;
+  addOrganizationsCuratorGroup: AddOrganizationsCuratorGroupPayload;
   /** Добавление страницы */
   addPage: AddPageMutationPayload;
   /** Мутация для создания периода. */
@@ -3375,8 +3375,8 @@ export type MutationAddGroupArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationAddOrganizationCuratorGroupArgs = {
-  input: AddOrganizationCuratorGroupInput;
+export type MutationAddOrganizationsCuratorGroupArgs = {
+  input: AddOrganizationsCuratorGroupInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4567,6 +4567,8 @@ export type Query = {
   category: CategoryType;
   /** Кураторская группа */
   curatorGroup: CuratorGroupType;
+  /** Получение организаций не входящих ни в одну кураторскую группу */
+  curatorGroupNewOrganizations: OrganizationTypeConnection;
   curatorGroupNewUsers?: Maybe<UserTypeConnection>;
   /** Кураторские группы */
   curatorGroups: Array<CuratorGroupType>;
@@ -4716,6 +4718,45 @@ export type QueryCategoryArgs = {
 /** Схема запросов данных. */
 export type QueryCuratorGroupArgs = {
   curatorGroupId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryCuratorGroupNewOrganizationsArgs = {
+  address?: InputMaybe<Scalars['String']>;
+  address_Icontains?: InputMaybe<Scalars['String']>;
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  department?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  department_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  first?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['ID']>;
+  id_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  inn?: InputMaybe<Scalars['String']>;
+  inn_Icontains?: InputMaybe<Scalars['String']>;
+  kind?: InputMaybe<Scalars['String']>;
+  kind_Icontains?: InputMaybe<Scalars['String']>;
+  kodbuhg?: InputMaybe<Scalars['String']>;
+  kodbuhg_Icontains?: InputMaybe<Scalars['String']>;
+  kpp?: InputMaybe<Scalars['String']>;
+  kpp_Icontains?: InputMaybe<Scalars['String']>;
+  last?: InputMaybe<Scalars['Int']>;
+  mail?: InputMaybe<Scalars['String']>;
+  mail_Icontains?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  okpo?: InputMaybe<Scalars['String']>;
+  okpo_Icontains?: InputMaybe<Scalars['String']>;
+  parent?: InputMaybe<Scalars['ID']>;
+  parent_Isnull?: InputMaybe<Scalars['Boolean']>;
+  phone?: InputMaybe<Scalars['String']>;
+  phone_Icontains?: InputMaybe<Scalars['String']>;
+  region?: InputMaybe<Scalars['ID']>;
+  region_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  rubpnubp?: InputMaybe<Scalars['String']>;
+  rubpnubp_Icontains?: InputMaybe<Scalars['String']>;
+  site?: InputMaybe<Scalars['String']>;
+  site_Icontains?: InputMaybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -6158,6 +6199,13 @@ export type AddCuratorGroupMutationVariables = Exact<{
 
 export type AddCuratorGroupMutation = { __typename?: 'Mutation', addCuratorGroup: { __typename?: 'AddCuratorGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, curatorGroup?: { __typename: 'CuratorGroupType', id: string, name: string, group?: { __typename: 'GroupType', id: string, name: string } | null } | null } };
 
+export type AddOrganizationsCuratorGroupMutationVariables = Exact<{
+  curatorGroupId: Scalars['ID'];
+  organizationIds: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+export type AddOrganizationsCuratorGroupMutation = { __typename?: 'Mutation', addOrganizationsCuratorGroup: { __typename?: 'AddOrganizationsCuratorGroupPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, organizations?: Array<{ __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null> | null } };
+
 export type AddUsersCuratorGroupMutationVariables = Exact<{
   curatorGroupId: Scalars['ID'];
   userIds: Array<Scalars['ID']> | Scalars['ID'];
@@ -6169,7 +6217,14 @@ export type DeleteCuratorGroupMutationVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
-export type DeleteCuratorGroupMutation = { __typename?: 'Mutation', deleteCuratorGroup: { __typename: 'DeleteCuratorGroupMutationPayload', success: boolean, id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type DeleteCuratorGroupMutation = { __typename?: 'Mutation', deleteCuratorGroup: { __typename: 'DeleteCuratorGroupMutationPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type DeleteOrganizationCuratorGroupMutationVariables = Exact<{
+  curatorGroupId: Scalars['ID'];
+  organizationId: Scalars['ID'];
+}>;
+
+export type DeleteOrganizationCuratorGroupMutation = { __typename?: 'Mutation', deleteOrganizationCuratorGroup: { __typename: 'DeleteOrganizationCuratorGroupPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type DeleteUserCuratorGroupMutationVariables = Exact<{
   curatorGroupId: Scalars['ID'];
@@ -6507,6 +6562,14 @@ export type BudgetClassificationsQueryVariables = Exact<{
 
 export type BudgetClassificationsQuery = { __typename?: 'Query', budgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
 
+export type CuratorGroupNewOrganizationsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
+  search?: InputMaybe<Scalars['String']>;
+}>;
+
+export type CuratorGroupNewOrganizationsQuery = { __typename?: 'Query', curatorGroupNewOrganizations: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } };
+
 export type CuratorGroupNewUsersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
@@ -6515,6 +6578,12 @@ export type CuratorGroupNewUsersQueryVariables = Exact<{
 }>;
 
 export type CuratorGroupNewUsersQuery = { __typename?: 'Query', curatorGroupNewUsers?: { __typename?: 'UserTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'UserTypeEdge', node?: { __typename: 'UserType', id: string, avatar?: string | null, username: string, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any, groups: Array<{ __typename: 'GroupType', id: string, name: string } | null> } | null } | null> } | null };
+
+export type CuratorGroupOrganizationsQueryVariables = Exact<{
+  curatorGroupId: Scalars['ID'];
+}>;
+
+export type CuratorGroupOrganizationsQuery = { __typename?: 'Query', curatorGroup: { __typename: 'CuratorGroupType', id: string, organization?: Array<{ __typename: 'OrganizationType', id: string, name: string, createdAt: any }> | null } };
 
 export type CuratorGroupUsersQueryVariables = Exact<{
   curatorGroupId: Scalars['ID'];
