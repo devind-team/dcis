@@ -21,7 +21,7 @@ from apps.dcis.models import (
     AttributeValue,
     ColumnDimension,
     Cell,
-    CuratorGroup,
+    Comments, CuratorGroup,
     Document,
     DocumentStatus,
     Limitation,
@@ -346,6 +346,14 @@ class DocumentStatusType(DjangoObjectType):
             'status',
             'user',
         )
+
+
+class DocumentCommentsType(DjangoObjectType):
+    """Тип комментариев для документа"""
+
+    class Meta:
+        model = Comments
+        fields = ('id', 'comment', 'created_at', 'document_id', 'user_id',)
 
 
 class AttributeType(DjangoObjectType):

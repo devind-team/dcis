@@ -1,0 +1,10 @@
+query DocumentComments($documentId: ID!) {
+  documentComments(documentId: $documentId) {
+    id
+    comment
+    createdAt
+    document_id
+    user_id
+    __typename
+  }
+}
