@@ -2634,6 +2634,19 @@ type DjangoDebugSQL {
   vendor: String!
 }
 
+"""Тип комментариев для документа"""
+type DocumentCommentsType {
+  """Комментарий"""
+  comment: String!
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  id: ID!
+  """Пользователь"""
+  user: UserType!
+}
+
 """Тип статусов для документов."""
 type DocumentStatusType {
   """Комментарий"""
@@ -3904,6 +3917,11 @@ type Query {
     """Идентификатор документа"""
     documentId: ID!
   ): DocumentType
+  """Комментарии документов"""
+  documentComments(
+    """Идентификатор документа"""
+    documentId: ID!
+  ): [DocumentCommentsType!]
   """Выгрузка листа с несколькими документами"""
   documentSheet(
     """Идентификатор документа"""

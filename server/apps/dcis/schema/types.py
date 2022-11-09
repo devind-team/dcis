@@ -351,9 +351,12 @@ class DocumentStatusType(DjangoObjectType):
 class DocumentCommentsType(DjangoObjectType):
     """Тип комментариев для документа"""
 
+    document = graphene.Field(DocumentType, description='Документ')
+    user = graphene.Field(UserType, required=True, description='Пользователь')
+
     class Meta:
         model = Comments
-        fields = ('id', 'comment', 'created_at', 'document_id', 'user_id',)
+        fields = ('id', 'comment', 'created_at', 'document', 'user',)
 
 
 class AttributeType(DjangoObjectType):
