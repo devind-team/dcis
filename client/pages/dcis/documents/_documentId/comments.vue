@@ -1,25 +1,27 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-  v-row(justify="center")
+  v-row(justify="center" )
     div(class="view messages")
       section(class="chat-box")
+        v-divider
         div(v-for="message in state.messages"
           :key="message.key"
           :class="(message.username === state.username ? 'message current-user' : 'message')")
           div(class="message-inner")
             div(class="username") {{ message.username }}
             div(class="content") {{ message.content }}
-        footer
-          form(@submit.prevent="SendMessage")
-            v-textarea(label="Введите комментарий" v-model="inputMessage" auto-grow rows="1")
-            v-col(cols="3")
-              v-btn(color="primary" absolute right bottom) {{ 'Отправить' }}
+            div(class="time" align="right") {{ message.time }}
+    footer
+      form(@submit.prevent="SendMessage")
+        v-textarea(label="Введите комментарий" v-model="inputMessage" auto-grow rows="1")
+        v-col(cols="3")
+          v-btn(color="primary" absolute right bottom) {{ 'Отправить' }}
 </template>
 
 <script lang="ts">
 import { computed, ComputedRef, defineComponent, PropType, reactive, onMounted, ref } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useI18n } from '~/composables'
+import { useI18n, useFilters } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 
@@ -30,7 +32,7 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
-
+    const { timeHM } = useFilters()
     const inputMessage = ref('')
     const state = reactive({
       username: '',
@@ -43,7 +45,8 @@ export default defineComponent({
       }
       const message = {
         username: state.username,
-        content: inputMessage.value
+        content: inputMessage.value,
+        time: timeHM(Date())
       }
       inputMessage.value = ''
     }
@@ -51,13 +54,15 @@ export default defineComponent({
       const data = {
         0: {
           username: 'Куратор',
-          content: 'Какой-то комментарий'
+          content: 'Какой-то комментарий',
+          time: timeHM(Date())
         },
         1: {
           username: 'Куратор',
           content: 'Да, хорошо, вычитывайте. В названиях разделов не должно быть только английских слов. Например, ' +
             'к "3.1.5 Sentry" надо добавить русских слов, чтобы человеку не очень знакомому с программированием, ' +
-            'было понятно что это.'
+            'было понятно что это.',
+          time: timeHM(Date())
         }
       }
       const messages = []
@@ -65,7 +70,8 @@ export default defineComponent({
         messages.push({
           id: key,
           username: data[key].username,
-          content: data[key].content
+          content: data[key].content,
+          time: data[key].time
         })
       })
       state.messages = messages
@@ -110,7 +116,7 @@ export default defineComponent({
     .message-inner {
       .username {
         color: #888;
-        font-size: 16px;
+        font-size: 14px;
         margin-bottom: 5px;
         padding-left: 15px;
         padding-right: 15px;
@@ -119,11 +125,18 @@ export default defineComponent({
         display: inline-block;
         padding: 10px 20px;
         background-color: #F3F3F3;
-        border-radius: 999px;
+        border-radius: 10px;
         color: #333;
-        font-size: 18px;
+        font-size: 16px;
         line-height: 1.2em;
         text-align: left;
+      }
+      .time {
+        color: #888;
+        font-size: 12px;
+        margin-bottom: 5px;
+        padding-left: 15px;
+        padding-right: 15px;
       }
     }
     &.current-user {
@@ -141,6 +154,7 @@ export default defineComponent({
   }
 }
 footer {
+  width: 70%;
   position: sticky;
   bottom: 0px;
   background-color: #FFF;
