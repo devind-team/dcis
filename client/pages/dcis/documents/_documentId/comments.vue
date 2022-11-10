@@ -1,5 +1,6 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  pre {{ comments }}
   v-row(justify="center" )
     div(class="view messages")
       section(class="chat-box")
@@ -11,7 +12,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
             div(class="username") {{ message.username }}
             div(class="content") {{ message.content }}
             div(class="time" align="right") {{ message.time }}
-    footer
+    footer(class="textarea")
       form(@submit.prevent="SendMessage")
         v-textarea(label="Введите комментарий" v-model="inputMessage" auto-grow rows="1")
         v-col(cols="3")
@@ -21,9 +22,14 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 <script lang="ts">
 import { computed, ComputedRef, defineComponent, PropType, reactive, onMounted, ref } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useI18n, useFilters } from '~/composables'
+import { useI18n, useFilters, useCommonQuery } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import {
+  DocumentCommentsQuery,
+  DocumentCommentsQueryVariables
+} from '~/types/graphql'
+import documentCommentsQuery from '~/gql/dcis/queries/document_comments.graphql'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs },
@@ -37,6 +43,13 @@ export default defineComponent({
     const state = reactive({
       username: '',
       messages: []
+    })
+
+    const { data: comments } = useCommonQuery<
+      DocumentCommentsQuery,
+      DocumentCommentsQueryVariables
+    >({
+      document: documentCommentsQuery
     })
 
     const SendMessage = () => {
@@ -89,7 +102,8 @@ export default defineComponent({
       bc,
       state,
       inputMessage,
-      SendMessage
+      SendMessage,
+      comments
     }
   }
 })
@@ -153,7 +167,7 @@ export default defineComponent({
     }
   }
 }
-footer {
+.textarea {
   width: 70%;
   position: sticky;
   bottom: 0px;
