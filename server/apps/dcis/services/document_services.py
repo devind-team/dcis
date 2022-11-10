@@ -12,7 +12,7 @@ from apps.core.models import User
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     Cell,
-    Document,
+    Comments, Document,
     Period,
     Project,
     RowDimension,
@@ -28,6 +28,7 @@ from apps.dcis.services.attribute_service import create_attribute_context, reren
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
 from apps.dcis.services.divisions_services import get_user_divisions, is_document_division_member
 from apps.dcis.services.privilege_services import has_privilege
+from apps.pages.models import Comment
 
 
 def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Document]:
@@ -154,6 +155,11 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
     document.comment = comment
     document.save(update_fields=('comment', 'updated_at'))
     return document
+
+
+def create_document_comment(user: User, document: Document, message: str) -> Comment:
+    """Добавление комментария к документу."""
+    return Comments.objects.create(comment=message, user_id=user, document_id=document)
 
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:

@@ -232,6 +232,27 @@ type AddDivisionsMutationPayload {
   success: Boolean!
 }
 
+input AddDocumentCommentMutationInput {
+  clientMutationId: String
+  """Документ"""
+  documentId: ID!
+  """Текст комментария"""
+  message: String
+  """Пользователь"""
+  userId: ID!
+}
+
+"""Добавление комментария к документу"""
+type AddDocumentCommentMutationPayload {
+  clientMutationId: String
+  """Созданный комментарий"""
+  comment: DocumentCommentsType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDocumentDataMutationInput {
   clientMutationId: String
   """Комментарий"""
@@ -2968,6 +2989,8 @@ type Mutation {
   addDivisionsFromPeriod(input: AddDivisionsFromPeriodMutationInput!): AddDivisionsFromPeriodMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
+  """Добавление комментария к документу"""
+  addDocumentComment(input: AddDocumentCommentMutationInput!): AddDocumentCommentMutationPayload!
   """Загрузка данных из файла."""
   addDocumentData(input: AddDocumentDataMutationInput!): AddDocumentDataMutationPayload!
   """Добавление статуса документа."""

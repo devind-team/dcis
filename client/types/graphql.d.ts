@@ -253,6 +253,28 @@ export type AddDivisionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddDocumentCommentMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Документ */
+  documentId: Scalars['ID'];
+  /** Текст комментария */
+  message?: InputMaybe<Scalars['String']>;
+  /** Пользователь */
+  userId: Scalars['ID'];
+};
+
+/** Добавление комментария к документу */
+export type AddDocumentCommentMutationPayload = {
+  __typename?: 'AddDocumentCommentMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Созданный комментарий */
+  comment?: Maybe<DocumentCommentsType>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddDocumentDataMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Комментарий */
@@ -3131,6 +3153,8 @@ export type Mutation = {
   addDivisionsFromPeriod: AddDivisionsFromPeriodMutationPayload;
   /** Добавление документа. */
   addDocument: AddDocumentMutationPayload;
+  /** Добавление комментария к документу */
+  addDocumentComment: AddDocumentCommentMutationPayload;
   /** Загрузка данных из файла. */
   addDocumentData: AddDocumentDataMutationPayload;
   /** Добавление статуса документа. */
@@ -3366,6 +3390,11 @@ export type MutationAddDivisionsFromPeriodArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddDocumentArgs = {
   input: AddDocumentMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddDocumentCommentArgs = {
+  input: AddDocumentCommentMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */

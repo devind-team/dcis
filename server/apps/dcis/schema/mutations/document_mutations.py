@@ -16,9 +16,15 @@ from graphql_relay import from_global_id
 
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
-from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
+from apps.dcis.schema.types import (
+    DocumentStatusType,
+    DocumentType,
+    DocumentCommentsType,
+    GlobalIndicesInputType,
+    RowDimensionType
+)
 from apps.dcis.services.add_document_data_services import add_document_data
-from apps.dcis.services.document_services import change_document_comment, create_document
+from apps.dcis.services.document_services import create_document_comment, change_document_comment, create_document
 from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
@@ -93,6 +99,23 @@ class ChangeDocumentCommentMutation(BaseMutation):
     ):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         return ChangeDocumentCommentMutation(document=change_document_comment(info.context.user, document, comment))
+
+
+class AddDocumentCommentMutation(BaseMutation):
+    """Добавление комментария к документу"""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Документ')
+        user_id = graphene.ID(required=True, description='Пользователь')
+        message = graphene.String(description='Текст комментария')
+
+    comment = graphene.Field(DocumentCommentsType, description='Созданный комментарий')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, user_id: str, comment: str):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        return AddDocumentCommentMutation(document=create_document_comment(info.context.user, document, comment))
 
 
 class AddDocumentStatusMutation(BaseMutation):
@@ -302,6 +325,7 @@ class DocumentMutations(graphene.ObjectType):
 
     add_document = AddDocumentMutation.Field(required=True)
     change_document_comment = ChangeDocumentCommentMutation.Field(required=True)
+    add_document_comment = AddDocumentCommentMutation.Field(required=True)
     add_document_status = AddDocumentStatusMutation.Field(required=True)
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
