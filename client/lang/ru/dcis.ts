@@ -137,8 +137,13 @@ export default {
       tableHeaders: {
         sheet: 'Форма',
         formula: 'Формула',
-        errorMessage: 'Сообщение об ошибке'
-      }
+        errorMessage: 'Сообщение об ошибке',
+        actions: '@:actions'
+      },
+      tooltips: {
+        delete: '@:delete'
+      },
+      deleteItemName: 'ограничение'
     },
     groups: {
       name: '@:dcis.periods.links.groups',

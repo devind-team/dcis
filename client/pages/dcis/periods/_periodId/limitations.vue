@@ -18,21 +18,41 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     disable-pagination
     hide-default-footer
   )
+    template(#item.actions="{ item }")
+      delete-menu(
+        :item-name="String($t('dcis.periods.limitations.deleteItemName'))"
+        @confirm="deleteLimitation({ limitationId: item.id })"
+      )
+        template(#default="{ on: onMenu }")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs }")
+              v-btn(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" icon, color="error")
+                v-icon mdi-delete
+            span {{ String($t('dcis.periods.limitations.tooltips.delete')) }}
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import type { PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
+import { useMutation } from '@vue/apollo-composable'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType, LimitationsQuery, LimitationsQueryVariables } from '~/types/graphql'
+import {
+  PeriodType,
+  LimitationsQuery,
+  LimitationsQueryVariables,
+  DeleteLimitationMutation,
+  DeleteLimitationMutationVariables
+} from '~/types/graphql'
 import { useI18n, useCommonQuery } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ChangePeriodLimitationsMenu from '~/components/dcis/periods/ChangePeriodLimitationsMenu.vue'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import limitationsQuery from '~/gql/dcis/queries/limitations.graphql'
+import deleteLimitationMutation from '~/gql/dcis/mutations/limitation/delete_limitation.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, ChangePeriodLimitationsMenu },
+  components: { LeftNavigatorContainer, ChangePeriodLimitationsMenu, DeleteMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -51,17 +71,29 @@ export default defineComponent({
       }
     ]))
 
-    const tableHeaders = computed<DataTableHeader[]>(() => [
-      { text: t('dcis.periods.limitations.tableHeaders.sheet') as string, value: 'sheet.name' },
-      { text: t('dcis.periods.limitations.tableHeaders.formula') as string, value: 'formula' },
-      { text: t('dcis.periods.limitations.tableHeaders.errorMessage') as string, value: 'errorMessage' }
-    ])
+    const tableHeaders = computed<DataTableHeader[]>(() => {
+      const result: DataTableHeader[] = [
+        { text: t('dcis.periods.limitations.tableHeaders.sheet') as string, value: 'sheet.name' },
+        { text: t('dcis.periods.limitations.tableHeaders.formula') as string, value: 'formula' },
+        { text: t('dcis.periods.limitations.tableHeaders.errorMessage') as string, value: 'errorMessage' }
+      ]
+      if (props.period.canChangeLimitations) {
+        result.push({
+          text: t('dcis.periods.limitations.tableHeaders.actions') as string,
+          value: 'actions',
+          align: 'center',
+          sortable: false
+        })
+      }
+      return result
+    })
 
     const {
       data: limitations,
       loading: limitationsLoading,
       resetUpdate: limitationsResetUpdate,
-      addUpdate: limitationsAddUpdate
+      addUpdate: limitationsAddUpdate,
+      deleteUpdate: limitationDeleteUpdate
     } = useCommonQuery<
       LimitationsQuery,
       LimitationsQueryVariables
@@ -73,6 +105,13 @@ export default defineComponent({
     })
     const count = computed<number>(() => limitations.value ? limitations.value.length : 0)
 
+    const { mutate: deleteLimitation } = useMutation<
+      DeleteLimitationMutation,
+      DeleteLimitationMutationVariables
+    >(deleteLimitationMutation, {
+      update: limitationDeleteUpdate
+    })
+
     return {
       bc,
       tableHeaders,
@@ -80,7 +119,8 @@ export default defineComponent({
       limitationsLoading,
       limitationsResetUpdate,
       limitationsAddUpdate,
-      count
+      count,
+      deleteLimitation
     }
   }
 })
