@@ -30,6 +30,8 @@ from .period_permissions import (
     can_change_period_divisions_base,
     can_change_period_groups,
     can_change_period_groups_base,
+    can_change_period_limitations,
+    can_change_period_limitations_base,
     can_change_period_settings,
     can_change_period_settings_base,
     can_change_period_sheet,

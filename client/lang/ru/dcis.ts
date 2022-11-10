@@ -118,11 +118,40 @@ export default {
     },
     limitations: {
       name: '@:dcis.periods.links.limitations',
+      changeMenu: {
+        buttonText: 'Изменить ограничения',
+        updateLimitationFromFile: {
+          buttonText: 'Обновить ограничения из файла',
+          header: 'Обновление ограничения из файла',
+          limitationsFile: 'Файл с новыми ограничениями',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        addLimitation: {
+          buttonText: 'Добавить ограничение',
+          header: 'Добавление ограничения',
+          formula: 'Формула ограничения',
+          errorMessage: 'Сообщение об ошибке',
+          sheet: 'Форма'
+        }
+      },
       tableHeaders: {
         sheet: 'Форма',
         formula: 'Формула',
-        errorMessage: 'Сообщение об ошибке'
-      }
+        errorMessage: 'Сообщение об ошибке',
+        actions: '@:actions'
+      },
+      tooltips: {
+        delete: '@:delete',
+        change: '@:change'
+      },
+      changeLimitation: {
+        header: 'Изменение ограничения',
+        buttonText: 'Изменить ограничение',
+        formula: 'Формула ограничения',
+        errorMessage: 'Сообщение об ошибке',
+        sheet: 'Форма'
+      },
+      deleteItemName: 'ограничение'
     },
     groups: {
       name: '@:dcis.periods.links.groups',

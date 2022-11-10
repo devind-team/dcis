@@ -1,6 +1,5 @@
 """Модуль, отвечающий за работу с периодами."""
 
-import json
 from datetime import date
 from io import BytesIO
 from typing import Type
@@ -9,15 +8,13 @@ from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import convert_str_to_int
-from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
-from apps.dcis.models import Attribute, Division, Limitation, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.models import Attribute, Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -30,6 +27,7 @@ from apps.dcis.permissions import (
 from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
+from apps.dcis.services.limitation_services import add_limitations_from_file
 
 
 def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[Period]:
@@ -148,42 +146,6 @@ def create_period(
         add_limitations_from_file(period, limitations_file)
     return period
 
-
-def add_limitations_from_file(period: Period, limitations_file: File) -> list[Limitation]:
-    """Добавление ограничений, накладываемых на лист, из json файла."""
-    possible_keys = ['form', 'check', 'message']
-    limitations: list[Limitation] = []
-
-    def raise_error(messages: list[str]):
-        raise ValidationError(message={'limitations_file': messages})
-
-    try:
-        data = json.load(limitations_file)
-        if not isinstance(data, list):
-            raise_error(['json файл не содержит массив на верхнем уровне'])
-        sheets = list(period.sheet_set.all())
-        container_cache = LimitationFormulaContainerCache()
-        for i, limitation in enumerate(data, 1):
-            if not isinstance(limitation, dict):
-                raise_error([f'Ограничение по номеру {i} не является объектом'])
-            if list(limitation.keys()) != possible_keys:
-                raise_error([
-                    f'Ключи ограничения по номеру {i} должны совпадать со списком {possible_keys}'.replace("'", '"')
-                ])
-            sheet = next((sheet for sheet in sheets if sheet.name == limitation['form']), None)
-            if sheet is None:
-                raise_error([f'Не найдена форма "{limitation["form"]}" для ограничения по номеру {i}'])
-            limitation = Limitation.objects.create(
-                formula=limitation['check'],
-                error_message=limitation['message'],
-                sheet=sheet
-            )
-            limitations.append(limitation)
-            container_cache.add_formula(f'A{i}', f'{limitation.formula}')
-            container_cache.save(period_id=period.id)
-    except json.JSONDecodeError as error:
-        raise raise_error(['Не удалось разобрать json файл', error.msg])
-    return limitations
 
 def add_divisions_period(user: User, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
     """Добавление дивизионов в период."""

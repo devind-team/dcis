@@ -1,0 +1,15 @@
+#import "../../fragments/limitation_fields.graphql"
+
+mutation UpdateLimitationsFromFile($periodId: ID!, $limitationsFile: Upload!) {
+  updateLimitationsFromFile(input: { periodId: $periodId, limitationsFile: $limitationsFile }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    limitations {
+      ...LimitationFields
+    }
+  }
+}

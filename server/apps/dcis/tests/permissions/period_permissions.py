@@ -16,6 +16,7 @@ from apps.dcis.permissions.period_permissions import (
     can_change_period_attributes,
     can_change_period_divisions,
     can_change_period_groups,
+    can_change_period_limitations,
     can_change_period_settings,
     can_change_period_sheet,
     can_change_period_users,
@@ -71,6 +72,15 @@ class PeriodPermissionsTestCase(TestCase):
             'dcis.change_period',
             'change_period',
             'change_period_divisions',
+        )
+
+    def test_can_change_period_limitations(self) -> None:
+        """Тестирование функции `can_change_period_limitations`."""
+        self._test_change_period_element(
+            can_change_period_limitations,
+            'dcis.change_period',
+            'change_period',
+            'change_period_limitations',
         )
 
     def test_can_change_period_groups(self) -> None:

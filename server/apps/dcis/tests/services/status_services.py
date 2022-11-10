@@ -204,16 +204,19 @@ class AddStatusCheckTestCase(TestCase):
 
         self.limitations = [
             Limitation.objects.create(
+                index=1,
                 formula='sheet1!C1 > 5',
                 error_message='sheet1!C1 больше 5',
                 sheet=self.sheet1
             ),
             Limitation.objects.create(
+                index=2,
                 formula='2 / sheet2!A1 > 0.2',
                 error_message='sheet2!A1 больше 0.2',
                 sheet=self.sheet2
             ),
             Limitation.objects.create(
+                index=3,
                 formula='sheet2!A2 < sheet1!C1',
                 error_message='sheet2!A2 меньше sheet1!C1',
                 sheet=self.sheet2

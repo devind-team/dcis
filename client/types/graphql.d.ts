@@ -366,6 +366,28 @@ export type AddGroupMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type AddLimitationMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Сообщение ошибки */
+  errorMessage: Scalars['String'];
+  /** Формула */
+  formula: Scalars['String'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
+};
+
+/** Добавление ограничения, накладываемого на лист. */
+export type AddLimitationMutationPayload = {
+  __typename?: 'AddLimitationMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Добавленное ограничение */
+  limitation?: Maybe<LimitationType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddOrganizationsCuratorGroupInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор кураторской группы */
@@ -1521,6 +1543,30 @@ export type ChangeGroupPermissionsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type ChangeLimitationMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Сообщение ошибки */
+  errorMessage: Scalars['String'];
+  /** Формула */
+  formula: Scalars['String'];
+  /** Идентификатор ограничения */
+  limitationId: Scalars['ID'];
+  /** Идентификатор листа */
+  sheetId: Scalars['ID'];
+};
+
+/** Изменение ограничения, накладываемого на лист. */
+export type ChangeLimitationMutationPayload = {
+  __typename?: 'ChangeLimitationMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Измененное ограничение */
+  limitation?: Maybe<LimitationType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type ChangeNotificationMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Название поля */
@@ -2454,6 +2500,24 @@ export type DeleteGroupMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteLimitationMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор ограничения */
+  limitationId: Scalars['ID'];
+};
+
+/** Удаления ограничения, накладываемого на лист. */
+export type DeleteLimitationMutationPayload = {
+  __typename?: 'DeleteLimitationMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленного ограничения */
+  id?: Maybe<Scalars['ID']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteNoticeMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор уведомления */
@@ -2968,7 +3032,7 @@ export type GroupTypeUserSetArgs = {
 /** Тип ограничения, накладываемого на лист. */
 export type LimitationType = {
   __typename?: 'LimitationType';
-  /** Сообщение ошибки */
+  /** Сообщение об ошибке */
   errorMessage: Scalars['String'];
   /** Формула */
   formula: Scalars['String'];
@@ -3125,6 +3189,8 @@ export type Mutation = {
   addFile: AddFileMutationPayload;
   /** Мутация для добавления группы. */
   addGroup: AddGroupMutationPayload;
+  /** Добавление ограничения, накладываемого на лист. */
+  addLimitation: AddLimitationMutationPayload;
   /** Мутация на добавление организации в кураторскую группу. */
   addOrganizationsCuratorGroup: AddOrganizationsCuratorGroupPayload;
   /** Добавление страницы */
@@ -3187,6 +3253,8 @@ export type Mutation = {
   changeGroupName: ChangeGroupNameMutationPayload;
   /** Мутация для изменения привилегий группы. */
   changeGroupPermissions: ChangeGroupPermissionsMutationPayload;
+  /** Изменение ограничения, накладываемого на лист. */
+  changeLimitation: ChangeLimitationMutationPayload;
   /** Изменение свойств уведомления */
   changeNotification: ChangeNotificationMutationPayload;
   /** Изменение свойств уведомлений */
@@ -3259,6 +3327,8 @@ export type Mutation = {
   deleteFile: DeleteFileMutationPayload;
   /** Мутация для удаления группы. */
   deleteGroup: DeleteGroupMutationPayload;
+  /** Удаления ограничения, накладываемого на лист. */
+  deleteLimitation: DeleteLimitationMutationPayload;
   /** Удаление уведомления */
   deleteNotice: DeleteNoticeMutationPayload;
   /** Мутация на добавление пользователей в кураторскую группу. */
@@ -3305,6 +3375,8 @@ export type Mutation = {
   unloadDocument: UnloadDocumentMutationPayload;
   /** Выгрузка архива значения ячейки типа `Файл` */
   unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
+  /** Обновление ограничений, накладываемых на лист, из json файла. */
+  updateLimitationsFromFile: UpdateLimitationsFromFileMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -3372,6 +3444,11 @@ export type MutationAddFileArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddGroupArgs = {
   input: AddGroupMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddLimitationArgs = {
+  input: AddLimitationMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3527,6 +3604,11 @@ export type MutationChangeGroupNameArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeGroupPermissionsArgs = {
   input: ChangeGroupPermissionsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeLimitationArgs = {
+  input: ChangeLimitationMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3710,6 +3792,11 @@ export type MutationDeleteGroupArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationDeleteLimitationArgs = {
+  input: DeleteLimitationMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteNoticeArgs = {
   input: DeleteNoticeMutationInput;
 };
@@ -3822,6 +3909,11 @@ export type MutationUnloadDocumentArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUnloadFileValueArchiveArgs = {
   input: UnloadFileValueArchiveMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUpdateLimitationsFromFileArgs = {
+  input: UpdateLimitationsFromFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4343,6 +4435,8 @@ export type PeriodType = {
   canChangeDivisions: Scalars['Boolean'];
   /** Может ли пользователь изменять группы периода */
   canChangeGroups: Scalars['Boolean'];
+  /** Может ли пользователь изменять ограничения периода */
+  canChangeLimitations: Scalars['Boolean'];
   /** Может ли пользователь изменять настройки периода */
   canChangeSettings: Scalars['Boolean'];
   /** Может ли пользователь изменять структуру листа периода */
@@ -5660,6 +5754,26 @@ export type UnloadFileValueArchiveMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UpdateLimitationsFromFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** json файл c ограничениями, накладываемыми на листы */
+  limitationsFile: Scalars['Upload'];
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Обновление ограничений, накладываемых на лист, из json файла. */
+export type UpdateLimitationsFromFileMutationPayload = {
+  __typename?: 'UpdateLimitationsFromFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Новые ограничения */
+  limitations?: Maybe<Array<Maybe<LimitationType>>>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UploadUsersMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Источник данных, файл xlsx или csv */
@@ -6089,7 +6203,7 @@ export type DivisionModelFieldsFragment = { __typename: 'DivisionModelType', id:
 
 export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null };
 
-export type LimitationFieldsFragment = { __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
+export type LimitationFieldsFragment = { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
 
 export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
 
@@ -6303,6 +6417,36 @@ export type UnloadDocumentMutationVariables = Exact<{
 }>;
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type AddLimitationMutationVariables = Exact<{
+  formula: Scalars['String'];
+  errorMessage: Scalars['String'];
+  sheetId: Scalars['ID'];
+}>;
+
+export type AddLimitationMutation = { __typename?: 'Mutation', addLimitation: { __typename?: 'AddLimitationMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitation?: { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null } };
+
+export type ChangeLimitationMutationVariables = Exact<{
+  limitationId: Scalars['ID'];
+  formula: Scalars['String'];
+  errorMessage: Scalars['String'];
+  sheetId: Scalars['ID'];
+}>;
+
+export type ChangeLimitationMutation = { __typename?: 'Mutation', changeLimitation: { __typename?: 'ChangeLimitationMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitation?: { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null } };
+
+export type DeleteLimitationMutationVariables = Exact<{
+  limitationId: Scalars['ID'];
+}>;
+
+export type DeleteLimitationMutation = { __typename?: 'Mutation', deleteLimitation: { __typename?: 'DeleteLimitationMutationPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UpdateLimitationsFromFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  limitationsFile: Scalars['Upload'];
+}>;
+
+export type UpdateLimitationsFromFileMutation = { __typename?: 'Mutation', updateLimitationsFromFile: { __typename?: 'UpdateLimitationsFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitations?: Array<{ __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> | null } };
 
 export type AddDivisionsMutationVariables = Exact<{
   periodId: Scalars['ID'];
@@ -6645,7 +6789,7 @@ export type LimitationsQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type LimitationsQuery = { __typename?: 'Query', limitations: Array<{ __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> };
+export type LimitationsQuery = { __typename?: 'Query', limitations: Array<{ __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> };
 
 export type NewStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
@@ -6664,7 +6808,7 @@ export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', isCurator: boolean, canAddAnyDivisionDocument: boolean, canChangeDivisions: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeAttributes: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, id: string, name: string, status: string, multiple: boolean, privately: boolean, versioning: boolean, start?: any | null, expiration?: any | null, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> } };
+export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', isCurator: boolean, canAddAnyDivisionDocument: boolean, canChangeDivisions: boolean, canChangeLimitations: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeAttributes: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, id: string, name: string, status: string, multiple: boolean, privately: boolean, versioning: boolean, start?: any | null, expiration?: any | null, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, showHead: boolean, showChild: boolean, comment: string, createdAt: any, position: number, updatedAt: any } | null> } };
 
 export type PeriodPossibleDivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];

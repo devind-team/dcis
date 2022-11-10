@@ -1,0 +1,11 @@
+mutation DeleteLimitation($limitationId: ID!) {
+  deleteLimitation(input: { limitationId: $limitationId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    id
+  }
+}

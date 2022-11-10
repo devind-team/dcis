@@ -2,6 +2,7 @@ from .column_dimension_services import ColumnDimensionTestCase
 from .curator_services import CuratorGroupTestCase
 from .divisions_services import DivisionTestCase
 from .document_services import DocumentTestCase, GetUserDocumentsTestCase
+from .limitation_services import LimitationTestCase
 from .period_services import GetUserPeriodsTestCase, PeriodTestCase
 from .privilege_services import PrivilegeTestCase
 from .project_services import GetUserProjectsTestCase, ProjectTestCase
