@@ -3701,6 +3701,8 @@ type PeriodType {
   canChangeDivisions: Boolean!
   """Может ли пользователь изменять группы периода"""
   canChangeGroups: Boolean!
+  """Может ли пользователь изменять ограничения периода"""
+  canChangeLimitations: Boolean!
   """Может ли пользователь изменять настройки периода"""
   canChangeSettings: Boolean!
   """Может ли пользователь изменять структуру листа периода"""

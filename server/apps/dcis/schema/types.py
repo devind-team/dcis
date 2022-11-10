@@ -42,6 +42,7 @@ from apps.dcis.permissions import (
     can_change_period_attributes,
     can_change_period_divisions_base,
     can_change_period_groups_base,
+    can_change_period_limitations_base,
     can_change_period_settings_base,
     can_change_period_sheet_base,
     can_change_period_users_base,
@@ -126,6 +127,10 @@ class PeriodType(DjangoObjectType):
         required=True,
         description='Может ли пользователь изменять дивизионы периода',
     )
+    can_change_limitations = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять ограничения периода',
+    )
     can_change_groups = graphene.Boolean(
         required=True,
         description='Может ли пользователь изменять группы периода',
@@ -196,6 +201,10 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_period_divisions_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_change_limitations(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_limitations_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_groups(period: Period, info: ResolveInfo) -> bool:

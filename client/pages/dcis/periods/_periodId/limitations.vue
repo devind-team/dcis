@@ -1,6 +1,11 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.limitations.name') }}
+    template(v-if="period.canChangeLimitations")
+      v-spacer
+      change-period-limitations-menu(:period="period" :from-file-update="limitationsResetUpdate")
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.periods.limitations.changeMenu.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount: count }) }}
   v-data-table(
     :headers="tableHeaders"
@@ -19,10 +24,11 @@ import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodType, LimitationsQuery, LimitationsQueryVariables } from '~/types/graphql'
 import { useI18n, useCommonQuery } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
+import ChangePeriodLimitationsMenu from '~/components/dcis/periods/ChangePeriodLimitationsMenu.vue'
 import limitationsQuery from '~/gql/dcis/queries/limitations.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer },
+  components: { LeftNavigatorContainer, ChangePeriodLimitationsMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -47,7 +53,7 @@ export default defineComponent({
       { text: t('dcis.periods.limitations.tableHeaders.errorMessage') as string, value: 'errorMessage' }
     ])
 
-    const { data: limitations, loading: limitationsLoading } = useCommonQuery<
+    const { data: limitations, loading: limitationsLoading, resetUpdate: limitationsResetUpdate } = useCommonQuery<
       LimitationsQuery,
       LimitationsQueryVariables
     >({
@@ -58,7 +64,7 @@ export default defineComponent({
     })
     const count = computed<number>(() => limitations.value ? limitations.value.length : 0)
 
-    return { bc, tableHeaders, limitations, limitationsLoading, count }
+    return { bc, tableHeaders, limitations, limitationsLoading, limitationsResetUpdate, count }
   }
 })
 </script>

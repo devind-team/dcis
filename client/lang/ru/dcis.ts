@@ -118,6 +118,18 @@ export default {
     },
     limitations: {
       name: '@:dcis.periods.links.limitations',
+      changeMenu: {
+        buttonText: 'Изменить ограничения',
+        updateLimitationFromFile: {
+          buttonText: 'Обновить ограничения из файла',
+          header: 'Обновление ограничения из файла',
+          limitationsFile: 'Файл с новыми ограничениями',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        addLimitation: {
+          buttonText: 'Добавить ограничение'
+        }
+      },
       tableHeaders: {
         sheet: 'Форма',
         formula: 'Формула',
