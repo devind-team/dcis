@@ -1,0 +1,15 @@
+#import "../../fragments/limitation_fields.graphql"
+
+mutation AddLimitation($formula: String!, $errorMessage: String!, $sheetId: ID!) {
+  addLimitation(input: { formula: $formula, errorMessage: $errorMessage, sheetId: $sheetId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    limitation {
+      ...LimitationFields
+    }
+  }
+}

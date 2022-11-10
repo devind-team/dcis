@@ -57,7 +57,7 @@ def update_limitations_from_file(period: Period, limitations_file: File) -> list
     return add_limitations_from_file(period, limitations_file)
 
 
-def add_limitation(formula: str, error_message: str, sheet_id: str) -> Limitation:
+def add_limitation(formula: str, error_message: str, sheet_id: int | str) -> Limitation:
     """Добавление ограничения, накладываемого на лист."""
     period = Period.objects.get(sheet__id=sheet_id)
     max_index = Limitation.objects.filter(sheet__period=period).aggregate(Max('index'))['index__max'] or 1
@@ -72,7 +72,7 @@ def add_limitation(formula: str, error_message: str, sheet_id: str) -> Limitatio
     return limitation
 
 
-def change_limitation(limitation: Limitation, formula: str, error_message: str, sheet_id: str) -> Limitation:
+def change_limitation(limitation: Limitation, formula: str, error_message: str, sheet_id: int | str) -> Limitation:
     """Изменение ограничения, накладываемого на лист."""
     limitation.formula = formula
     limitation.error_message = error_message
@@ -85,7 +85,7 @@ def change_limitation(limitation: Limitation, formula: str, error_message: str, 
 
 @transaction.atomic
 def delete_limitation(limitation: Limitation) -> int:
-    """Удаления ограничения, накладываемого на лист"""
+    """Удаления ограничения, накладываемого на лист."""
     container_cache = LimitationFormulaContainerCache.get(limitation.sheet.period)
     Limitation.objects.filter(
         sheet__period=limitation.sheet.period,
