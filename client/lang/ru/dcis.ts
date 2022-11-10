@@ -141,7 +141,15 @@ export default {
         actions: '@:actions'
       },
       tooltips: {
-        delete: '@:delete'
+        delete: '@:delete',
+        change: '@:change'
+      },
+      changeLimitation: {
+        header: 'Изменение ограничения',
+        buttonText: 'Изменить ограничение',
+        formula: 'Формула ограничения',
+        errorMessage: 'Сообщение об ошибке',
+        sheet: 'Форма'
       },
       deleteItemName: 'ограничение'
     },

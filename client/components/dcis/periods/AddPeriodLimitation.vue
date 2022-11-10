@@ -55,7 +55,7 @@ mutation-modal-form(
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from '#app'
 import { AddUpdateType } from '~/composables'
-import { PeriodType, SheetType, AddLimitationMutationVariables } from '~/types/graphql'
+import { PeriodType, BaseSheetType, AddLimitationMutationVariables } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import addLimitationMutation from '~/gql/dcis/mutations/limitation/add_limitation.graphql'
 
@@ -68,7 +68,7 @@ export default defineComponent({
   setup () {
     const formula = ref<string>('')
     const errorMessage = ref<string>('')
-    const sheet = ref<SheetType | null>(null)
+    const sheet = ref<BaseSheetType | null>(null)
 
     const variables = computed<AddLimitationMutationVariables>(() => ({
       formula: formula.value,

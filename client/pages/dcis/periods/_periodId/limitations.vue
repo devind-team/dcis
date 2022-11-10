@@ -19,6 +19,18 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     hide-default-footer
   )
     template(#item.actions="{ item }")
+      change-period-limitation(:period="period" :limitation="item")
+        template(#activator="{ on: onMenu, attrs: attrsMenu }")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs: attrsTooltip }")
+              v-btn.mr-1(
+                v-on="{ ...onMenu, ...onTooltip }"
+                v-bind="{ ...attrsMenu, ...attrsTooltip}"
+                color="primary"
+                icon
+              )
+                v-icon mdi-pencil
+            span {{ String($t('dcis.periods.limitations.tooltips.change')) }}
       delete-menu(
         :item-name="String($t('dcis.periods.limitations.deleteItemName'))"
         @confirm="deleteLimitation({ limitationId: item.id })"
@@ -26,7 +38,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         template(#default="{ on: onMenu }")
           v-tooltip(bottom)
             template(#activator="{ on: onTooltip, attrs }")
-              v-btn(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" icon, color="error")
+              v-btn.ml-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" icon, color="error")
                 v-icon mdi-delete
             span {{ String($t('dcis.periods.limitations.tooltips.delete')) }}
 </template>
@@ -47,12 +59,13 @@ import {
 import { useI18n, useCommonQuery } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ChangePeriodLimitationsMenu from '~/components/dcis/periods/ChangePeriodLimitationsMenu.vue'
+import ChangePeriodLimitation from '~/components/dcis/periods/ChangePeriodLimitation.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import limitationsQuery from '~/gql/dcis/queries/limitations.graphql'
 import deleteLimitationMutation from '~/gql/dcis/mutations/limitation/delete_limitation.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, ChangePeriodLimitationsMenu, DeleteMenu },
+  components: { LeftNavigatorContainer, ChangePeriodLimitationsMenu, ChangePeriodLimitation, DeleteMenu },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
