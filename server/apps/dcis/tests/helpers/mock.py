@@ -1,4 +1,5 @@
 """Вспомогательный функции для подмены."""
+
 from contextlib import contextmanager
 from typing import Any, Generator
 from unittest.mock import patch
