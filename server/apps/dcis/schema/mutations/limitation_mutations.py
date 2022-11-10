@@ -35,7 +35,9 @@ class UpdateLimitationsFromFileMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, limitations_file: InMemoryUploadedFile):
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return UpdateLimitationsFromFileMutation(limitations=update_limitations_from_file(period, limitations_file))
+        return UpdateLimitationsFromFileMutation(
+            limitations=update_limitations_from_file(info.context.user, period, limitations_file)
+        )
 
 
 class AddLimitationMutation(BaseMutation):
@@ -51,7 +53,9 @@ class AddLimitationMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, formula: str, error_message: str, sheet_id: str):
-        return AddLimitationMutation(limitation=add_limitation(formula, error_message, gid2int(sheet_id)))
+        return AddLimitationMutation(
+            limitation=add_limitation(info.context.user, formula, error_message, gid2int(sheet_id))
+        )
 
 
 class ChangeLimitationMutation(BaseMutation):
@@ -77,7 +81,7 @@ class ChangeLimitationMutation(BaseMutation):
     ):
         limitation = get_object_or_404(Limitation, pk=gid2int(limitation_id))
         return ChangeLimitationMutation(
-            limitation=change_limitation(limitation, formula, error_message, gid2int(sheet_id))
+            limitation=change_limitation(info.context.user, limitation, formula, error_message, gid2int(sheet_id))
         )
 
 
@@ -93,7 +97,7 @@ class DeleteLimitationMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, limitation_id: str):
         limitation = get_object_or_404(Limitation, pk=gid2int(limitation_id))
-        return DeleteLimitationMutation(id=delete_limitation(limitation))
+        return DeleteLimitationMutation(id=delete_limitation(info.context.user, limitation))
 
 
 class LimitationMutations(graphene.ObjectType):

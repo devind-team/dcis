@@ -68,6 +68,23 @@ def can_change_period_divisions(user: User, period: Period):
     can_change_period_divisions_base(user, period)
 
 
+def can_change_period_limitations_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут изменять ограничения периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, period)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, period.id, 'change_period_limitations'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения ограничений периода.')
+
+
+def can_change_period_limitations(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать период и изменять в нем ограничения."""
+    can_view_period(user, period)
+    can_change_period_limitations_base(user, period)
+
+
 def can_change_period_groups_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять группы периода, без проверки возможности просмотра."""
     try:

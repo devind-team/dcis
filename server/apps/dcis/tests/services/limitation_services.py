@@ -1,10 +1,11 @@
 """Тесты модуля, отвечающего за работу с ограничениями."""
 
 from collections import Counter
+from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase, override_settings
 
 from apps.core.models import User
@@ -29,13 +30,13 @@ class LimitationTestCase(TestCase):
         self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
 
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
-        self.project = Project.objects.create(user=self.superuser, content_type=self.organization_content_type)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
 
-        self.add_file_period = Period.objects.create(user=self.superuser, project=self.project)
+        self.add_file_period = Period.objects.create(project=self.project)
         self.add_file_period_form1 = Sheet.objects.create(name='Форма1', period=self.add_file_period)
         self.add_file_period_form2 = Sheet.objects.create(name='Форма2', period=self.add_file_period)
 
-        self.update_file_period = Period.objects.create(user=self.superuser, project=self.project)
+        self.update_file_period = Period.objects.create(project=self.project)
         self.update_file_period_form1 = Sheet.objects.create(name='Форма1', period=self.update_file_period)
         self.update_file_period_form2 = Sheet.objects.create(name='Форма2', period=self.update_file_period)
         self.update_file_period_container_cache = LimitationFormulaContainerCache.get(self.update_file_period)
@@ -46,7 +47,7 @@ class LimitationTestCase(TestCase):
             sheet=self.update_file_period_form1,
         )
 
-        self.add_period = Period.objects.create(user=self.superuser, project=self.project)
+        self.add_period = Period.objects.create(project=self.project)
         self.add_period_form1 = Sheet.objects.create(name='Форма1', period=self.add_period)
         self.add_period_form2 = Sheet.objects.create(name='Форма2', period=self.add_period)
         self.add_period_container_cache = LimitationFormulaContainerCache.get(self.add_period)
@@ -58,7 +59,7 @@ class LimitationTestCase(TestCase):
         )
         self.add_period_container_cache.add_limitation_formula(self.add_period_limitation).save()
 
-        self.change_period = Period.objects.create(user=self.superuser, project=self.project)
+        self.change_period = Period.objects.create(project=self.project)
         self.change_period_form1 = Sheet.objects.create(name='Форма1', period=self.change_period)
         self.change_period_form2 = Sheet.objects.create(name='Форма2', period=self.change_period)
         self.change_period_container_cache = LimitationFormulaContainerCache.get(self.change_period)
@@ -78,7 +79,7 @@ class LimitationTestCase(TestCase):
         self.change_period_container_cache.add_limitation_formula(self.change_period_limitation2)
         self.change_period_container_cache.save()
 
-        self.delete_period = Period.objects.create(user=self.superuser, project=self.project)
+        self.delete_period = Period.objects.create(project=self.project)
         self.delete_period_form1 = Sheet.objects.create(name='Форма1', period=self.delete_period)
         self.delete_period_form2 = Sheet.objects.create(name='Форма2', period=self.delete_period)
         self.delete_period_container_cache = LimitationFormulaContainerCache.get(self.delete_period)
@@ -144,7 +145,17 @@ class LimitationTestCase(TestCase):
 
     def test_update_limitations_from_file(self) -> None:
         """Тестирование функции `update_limitations_from_file`."""
+        with patch.object(
+            self.superuser, 'has_perm', lambda perm: perm != 'dcis.change_period'
+        ), self.assertRaises(PermissionDenied) as error:
+            update_limitations_from_file(
+                self.superuser,
+                self.update_file_period,
+                create_in_memory_file('test_add_update_limitations_from_file.json')
+            )
+        self.assertEqual('Недостаточно прав для изменения ограничений периода.', str(error.exception))
         limitations = update_limitations_from_file(
+            self.superuser,
             self.update_file_period,
             create_in_memory_file('test_add_update_limitations_from_file.json')
         )
@@ -158,7 +169,12 @@ class LimitationTestCase(TestCase):
             'error_message': 'add_limitation',
             'sheet_id': self.add_period_form2.id,
         }
-        limitation = add_limitation(**add_data)
+        with patch.object(
+            self.superuser, 'has_perm', lambda perm: perm != 'dcis.change_period'
+        ), self.assertRaises(PermissionDenied) as error:
+            add_limitation(self.superuser, **add_data)
+        self.assertEqual('Недостаточно прав для изменения ограничений периода.', str(error.exception))
+        limitation = add_limitation(self.superuser, **add_data)
         self.assertEqual(limitation.index, 2)
         for k, v in add_data.items():
             self.assertEqual(v, getattr(limitation, k))
@@ -182,7 +198,12 @@ class LimitationTestCase(TestCase):
             'error_message': 'change_period_limitation2_changed',
             'sheet_id': self.change_period_form1.id,
         }
-        limitation = change_limitation(self.change_period_limitation2, **change_data)
+        with patch.object(
+            self.superuser, 'has_perm', lambda perm: perm != 'dcis.change_period'
+        ), self.assertRaises(PermissionDenied) as error:
+            change_limitation(self.superuser, self.change_period_limitation2, **change_data)
+        self.assertEqual('Недостаточно прав для изменения ограничений периода.', str(error.exception))
+        limitation = change_limitation(self.superuser, self.change_period_limitation2, **change_data)
         self.assertEqual(self.change_period_limitation2, limitation)
         self.change_period_limitation2.refresh_from_db()
         for k, v in change_data.items():
@@ -203,7 +224,12 @@ class LimitationTestCase(TestCase):
     def test_delete_limitation(self) -> None:
         """Тестирование функции `delete_limitation`."""
         expected_delete_id = self.delete_period_limitation2.id
-        actual_delete_id = delete_limitation(self.delete_period_limitation2)
+        with patch.object(
+            self.superuser, 'has_perm', lambda perm: perm != 'dcis.change_period'
+        ), self.assertRaises(PermissionDenied) as error:
+            delete_limitation(self.superuser, self.delete_period_limitation2)
+        self.assertEqual('Недостаточно прав для изменения ограничений периода.', str(error.exception))
+        actual_delete_id = delete_limitation(self.superuser, self.delete_period_limitation2)
         self.assertEqual(expected_delete_id, actual_delete_id)
         limitations = Limitation.objects.filter(sheet__period=self.delete_period)
         self.assertEqual(

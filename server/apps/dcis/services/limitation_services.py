@@ -7,8 +7,10 @@ from django.core.files.base import File
 from django.db import transaction
 from django.db.models import F, Max
 
+from apps.core.models import User
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
 from apps.dcis.models import Limitation, Period
+from apps.dcis.permissions import can_change_period_limitations
 
 
 @transaction.atomic
@@ -51,15 +53,17 @@ def add_limitations_from_file(period: Period, limitations_file: File) -> list[Li
 
 
 @transaction.atomic
-def update_limitations_from_file(period: Period, limitations_file: File) -> list[Limitation]:
+def update_limitations_from_file(user: User, period: Period, limitations_file: File) -> list[Limitation]:
     """Обновление ограничений, накладываемых на лист, из json файла."""
+    can_change_period_limitations(user, period)
     Limitation.objects.filter(sheet__period=period).delete()
     return add_limitations_from_file(period, limitations_file)
 
 
-def add_limitation(formula: str, error_message: str, sheet_id: int | str) -> Limitation:
+def add_limitation(user: User, formula: str, error_message: str, sheet_id: int | str) -> Limitation:
     """Добавление ограничения, накладываемого на лист."""
     period = Period.objects.get(sheet__id=sheet_id)
+    can_change_period_limitations(user, period)
     max_index = Limitation.objects.filter(sheet__period=period).aggregate(Max('index'))['index__max'] or 1
     limitation = Limitation.objects.create(
         index=max_index + 1,
@@ -72,8 +76,15 @@ def add_limitation(formula: str, error_message: str, sheet_id: int | str) -> Lim
     return limitation
 
 
-def change_limitation(limitation: Limitation, formula: str, error_message: str, sheet_id: int | str) -> Limitation:
+def change_limitation(
+    user: User,
+    limitation: Limitation,
+    formula: str,
+    error_message: str,
+    sheet_id: int | str
+) -> Limitation:
     """Изменение ограничения, накладываемого на лист."""
+    can_change_period_limitations(user, limitation.sheet.period)
     limitation.formula = formula
     limitation.error_message = error_message
     limitation.sheet_id = sheet_id
@@ -84,8 +95,9 @@ def change_limitation(limitation: Limitation, formula: str, error_message: str, 
 
 
 @transaction.atomic
-def delete_limitation(limitation: Limitation) -> int:
+def delete_limitation(user: User, limitation: Limitation) -> int:
     """Удаления ограничения, накладываемого на лист."""
+    can_change_period_limitations(user, limitation.sheet.period)
     container_cache = LimitationFormulaContainerCache.get(limitation.sheet.period)
     Limitation.objects.filter(
         sheet__period=limitation.sheet.period,
