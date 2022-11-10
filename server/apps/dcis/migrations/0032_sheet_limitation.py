@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('formula', models.TextField(help_text='Формула')),
-                ('error_message', models.TextField(help_text='Сообщение ошибки')),
+                ('error_message', models.TextField(help_text='Сообщение об ошибке')),
                 ('sheet',
                  models.ForeignKey(help_text='Лист', on_delete=django.db.models.deletion.CASCADE, to='dcis.sheet')),
             ],

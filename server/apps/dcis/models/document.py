@@ -187,7 +187,7 @@ class Limitation(models.Model):
 
     index = models.PositiveSmallIntegerField(help_text='Индекс, начиная с 1, для вывода и расчета')
     formula = models.TextField(help_text='Формула')
-    error_message = models.TextField(help_text='Сообщение ошибки')
+    error_message = models.TextField(help_text='Сообщение об ошибке')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 

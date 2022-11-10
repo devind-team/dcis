@@ -127,7 +127,11 @@ export default {
           downloadTemplate: 'Скачать шаблон файла'
         },
         addLimitation: {
-          buttonText: 'Добавить ограничение'
+          buttonText: 'Добавить ограничение',
+          header: 'Добавление ограничения',
+          formula: 'Формула ограничения',
+          errorMessage: 'Сообщение об ошибке',
+          sheet: 'Форма'
         }
       },
       tableHeaders: {

@@ -14,13 +14,15 @@ mutation-modal-form(
     slot(name="activator" :on="on" :attrs="attrs")
   template(#form)
     validation-provider(
-      v-slot="{ errors }"
+      v-slot="{ errors, valid }"
       :name="String($t('dcis.periods.limitations.changeMenu.updateLimitationFromFile.limitationsFile'))"
+      rules="required"
     )
       v-file-input(
         v-model="limitationsFile"
         :label="$t('dcis.periods.limitations.changeMenu.updateLimitationFromFile.limitationsFile')"
         :error-messages="errors"
+        :success="valid"
         accept=".json"
       )
         template(#append-outer)

@@ -3,7 +3,11 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   template(#header) {{ $t('dcis.periods.limitations.name') }}
     template(v-if="period.canChangeLimitations")
       v-spacer
-      change-period-limitations-menu(:period="period" :from-file-update="limitationsResetUpdate")
+      change-period-limitations-menu(
+        :period="period"
+        :from-file-update="limitationsResetUpdate"
+        :add-update="limitationsAddUpdate"
+      )
         template(#activator="{ on, attrs }")
           v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.periods.limitations.changeMenu.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount: count }) }}
@@ -53,7 +57,12 @@ export default defineComponent({
       { text: t('dcis.periods.limitations.tableHeaders.errorMessage') as string, value: 'errorMessage' }
     ])
 
-    const { data: limitations, loading: limitationsLoading, resetUpdate: limitationsResetUpdate } = useCommonQuery<
+    const {
+      data: limitations,
+      loading: limitationsLoading,
+      resetUpdate: limitationsResetUpdate,
+      addUpdate: limitationsAddUpdate
+    } = useCommonQuery<
       LimitationsQuery,
       LimitationsQueryVariables
     >({
@@ -64,7 +73,15 @@ export default defineComponent({
     })
     const count = computed<number>(() => limitations.value ? limitations.value.length : 0)
 
-    return { bc, tableHeaders, limitations, limitationsLoading, limitationsResetUpdate, count }
+    return {
+      bc,
+      tableHeaders,
+      limitations,
+      limitationsLoading,
+      limitationsResetUpdate,
+      limitationsAddUpdate,
+      count
+    }
   }
 })
 </script>

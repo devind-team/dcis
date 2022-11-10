@@ -2875,7 +2875,7 @@ scalar JSONString
 
 """Тип ограничения, накладываемого на лист."""
 type LimitationType {
-  """Сообщение ошибки"""
+  """Сообщение об ошибке"""
   errorMessage: String!
   """Формула"""
   formula: String!

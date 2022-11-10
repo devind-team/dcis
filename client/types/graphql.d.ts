@@ -3032,7 +3032,7 @@ export type GroupTypeUserSetArgs = {
 /** Тип ограничения, накладываемого на лист. */
 export type LimitationType = {
   __typename?: 'LimitationType';
-  /** Сообщение ошибки */
+  /** Сообщение об ошибке */
   errorMessage: Scalars['String'];
   /** Формула */
   formula: Scalars['String'];
@@ -6203,7 +6203,7 @@ export type DivisionModelFieldsFragment = { __typename: 'DivisionModelType', id:
 
 export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null };
 
-export type LimitationFieldsFragment = { __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
+export type LimitationFieldsFragment = { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
 
 export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
 
@@ -6424,7 +6424,7 @@ export type AddLimitationMutationVariables = Exact<{
   sheetId: Scalars['ID'];
 }>;
 
-export type AddLimitationMutation = { __typename?: 'Mutation', addLimitation: { __typename?: 'AddLimitationMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitation?: { __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null } };
+export type AddLimitationMutation = { __typename?: 'Mutation', addLimitation: { __typename?: 'AddLimitationMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitation?: { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null } };
 
 export type ChangeLimitationMutationVariables = Exact<{
   limitationId: Scalars['ID'];
@@ -6433,7 +6433,7 @@ export type ChangeLimitationMutationVariables = Exact<{
   sheetId: Scalars['ID'];
 }>;
 
-export type ChangeLimitationMutation = { __typename?: 'Mutation', changeLimitation: { __typename?: 'ChangeLimitationMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitation?: { __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null } };
+export type ChangeLimitationMutation = { __typename?: 'Mutation', changeLimitation: { __typename?: 'ChangeLimitationMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitation?: { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null } };
 
 export type DeleteLimitationMutationVariables = Exact<{
   limitationId: Scalars['ID'];
@@ -6446,7 +6446,7 @@ export type UpdateLimitationsFromFileMutationVariables = Exact<{
   limitationsFile: Scalars['Upload'];
 }>;
 
-export type UpdateLimitationsFromFileMutation = { __typename?: 'Mutation', updateLimitationsFromFile: { __typename?: 'UpdateLimitationsFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitations?: Array<{ __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> | null } };
+export type UpdateLimitationsFromFileMutation = { __typename?: 'Mutation', updateLimitationsFromFile: { __typename?: 'UpdateLimitationsFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, limitations?: Array<{ __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> | null } };
 
 export type AddDivisionsMutationVariables = Exact<{
   periodId: Scalars['ID'];
@@ -6789,7 +6789,7 @@ export type LimitationsQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type LimitationsQuery = { __typename?: 'Query', limitations: Array<{ __typename?: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> };
+export type LimitationsQuery = { __typename?: 'Query', limitations: Array<{ __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null } | null> };
 
 export type NewStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
