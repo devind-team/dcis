@@ -235,7 +235,7 @@ class AddStatusCheckTestCase(TestCase):
             Limitation.objects.create(
                 index=4,
                 formula='SUM(sheet3!A1:B2) > 10',
-                error_message='SUM(sheet3!A1:sheet3!B2) меньше или равно 10',
+                error_message='SUM(sheet3!A1:B2) меньше или равно 10',
                 sheet=self.sheet3,
             )
         ]
@@ -286,7 +286,7 @@ class AddStatusCheckTestCase(TestCase):
                 LimitationError(
                     form='sheet3',
                     formula='SUM(sheet3!A1:B2) > 10',
-                    error_message='SUM(sheet3!A1:sheet3!B2) меньше или равно 10',
+                    error_message='SUM(sheet3!A1:B2) меньше или равно 10',
                     dependencies=encode({
                         'sheet3!A1': 2.0,
                         'sheet3!B1': 3.0,
