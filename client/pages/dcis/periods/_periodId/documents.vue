@@ -19,7 +19,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
     v-bind="divisionFilterMessages"
     :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
     :get-name="d => d.name"
-    :search-function="(d, s) => d.name.toLocaleLowerCase().includes(s.toLocaleLowerCase())"
+    :search-function="searchDivision"
     message-container-class="mr-1 mb-1"
     multiple
     has-select-all
@@ -251,6 +251,11 @@ export default defineComponent({
       return result
     })
 
+    const searchDivision = (division: DivisionModelType, search: string): boolean => {
+      return division.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
+        division.id.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+    }
+
     return {
       statusesQuery,
       statusesFilter,
@@ -274,7 +279,8 @@ export default defineComponent({
       statusFilterMessages,
       getFilterMessages,
       showDivisionFilter,
-      headers
+      headers,
+      searchDivision
     }
   }
 })
