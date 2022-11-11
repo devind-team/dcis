@@ -61,10 +61,13 @@ def get_period_divisions(user: User, period: Period, search: str = '') -> list[d
     """Получение списка обобщенных дивизионов периода."""
     from apps.dcis.helpers.exceptions import check_permission_wrapper
     from apps.dcis.permissions import can_change_period_divisions
+    from apps.dcis.services.curator_services import get_curator_organizations
 
     limitations = Q()
     if not check_permission_wrapper(can_change_period_divisions, user=user, period=period):
         limitations = Q(object_id__in=[division['id'] for division in get_user_divisions(user, period.project)])
+        if period.project.division_name == 'organization':
+            limitations |= Q(object_id__in=get_curator_organizations(user))
 
     return get_divisions(period.project.division.objects.filter(
         name__contains=search,
