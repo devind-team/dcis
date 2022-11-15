@@ -104,7 +104,7 @@ class DocumentQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_document_comments(root: Any, info: ResolveInfo, document_id: str) -> Iterable[Comments]:
         document = get_object_or_404(Document, pk=gid2int(document_id))
-        return Comments.objects.all()
+        return Comments.objects.filter(document=document)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

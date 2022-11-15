@@ -159,7 +159,7 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
 
 def create_document_comment(user: User, document: Document, message: str) -> Comment:
     """Добавление комментария к документу."""
-    return Comments.objects.create(comment=message, user_id=user, document_id=document)
+    return Comments.objects.create(comment=message, user=user, document=document)
 
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:

@@ -1,39 +1,49 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-  pre {{ comments }}
   v-row(justify="center" )
     div(class="view messages")
       section(class="chat-box")
         v-divider
-        div(v-for="message in state.messages"
-          :key="message.key"
-          :class="(message.username === state.username ? 'message current-user' : 'message')")
+        div(v-for="comment in comments"
+          :class="(comment.user.username === state.username ? 'message current-user' : 'message')")
           div(class="message-inner")
-            div(class="username") {{ message.username }}
-            div(class="content") {{ message.content }}
-            div(class="time" align="right") {{ message.time }}
+            div(class="username") {{ comment.user.username }}
+            div(class="content") {{ comment.comment }}
+            div(class="time" align="right") {{ timeHM(comment.createdAt) }}
     footer(class="textarea")
-      form(@submit.prevent="SendMessage")
+      form
         v-textarea(label="Введите комментарий" v-model="inputMessage" auto-grow rows="1")
         v-col(cols="3")
-          v-btn(color="primary" absolute right bottom) {{ 'Отправить' }}
+          v-btn(
+            v-if="inputMessage"
+            @click="addDocumentCommentMutate(addDocumentCommentVariables)"
+            color="primary"
+            absolute
+            right
+            bottom
+          ) {{ 'Отправить' }}
+          v-btn(v-else color="primary" absolute right bottom disabled) {{ 'Отправить' }}
 </template>
 
 <script lang="ts">
 import { computed, ComputedRef, defineComponent, PropType, reactive, onMounted, ref } from '#app'
+import { useMutation } from '@vue/apollo-composable'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useFilters, useCommonQuery } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import {
+  AddDocumentCommentMutation, AddDocumentCommentMutationVariables,
   DocumentCommentsQuery,
-  DocumentCommentsQueryVariables
+  DocumentCommentsQueryVariables, DocumentType
 } from '~/types/graphql'
 import documentCommentsQuery from '~/gql/dcis/queries/document_comments.graphql'
+import addDocumentCommentMutation from '~/gql/dcis/mutations/document/add_document_comment.graphql'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs },
   props: {
+    document: { type: Object as PropType<DocumentType>, required: true },
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
   setup (props) {
@@ -45,24 +55,32 @@ export default defineComponent({
       messages: []
     })
 
-    const { data: comments } = useCommonQuery<
-      DocumentCommentsQuery,
-      DocumentCommentsQueryVariables
-    >({
-      document: documentCommentsQuery
-    })
+    const {
+      data: comments,
+      addUpdate
+    } = useCommonQuery<DocumentCommentsQuery,
+      DocumentCommentsQueryVariables>({
+        document: documentCommentsQuery,
+        variables: { documentId: props.document.id }
+      })
 
-    const SendMessage = () => {
-      if (inputMessage.value === '' || inputMessage.value === null) {
-        return
-      }
-      const message = {
-        username: state.username,
-        content: inputMessage.value,
-        time: timeHM(Date())
-      }
-      inputMessage.value = ''
-    }
+    const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentCommentMutation,
+      AddDocumentCommentMutationVariables>(
+        addDocumentCommentMutation,
+        {
+          update: (cache, result) => {
+            if (result.data.addDocumentComment.success) {
+              addUpdate(cache, result, 'comment')
+            }
+          }
+        }
+      )
+
+    const addDocumentCommentVariables = computed<AddDocumentCommentMutationVariables>(() => ({
+      documentId: props.document.id,
+      message: inputMessage.value
+    }))
+
     onMounted(() => {
       const data = {
         0: {
@@ -90,7 +108,7 @@ export default defineComponent({
       state.messages = messages
     })
 
-    const bc: ComputedRef < BreadCrumbsItem[] > = computed<BreadCrumbsItem[]>(() => ([
+    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
         text: t('dcis.documents.links.comments') as string,
@@ -102,8 +120,10 @@ export default defineComponent({
       bc,
       state,
       inputMessage,
-      SendMessage,
-      comments
+      timeHM,
+      comments,
+      addDocumentCommentMutate,
+      addDocumentCommentVariables
     }
   }
 })

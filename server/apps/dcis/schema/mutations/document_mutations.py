@@ -106,16 +106,15 @@ class AddDocumentCommentMutation(BaseMutation):
 
     class Input:
         document_id = graphene.ID(required=True, description='Документ')
-        user_id = graphene.ID(required=True, description='Пользователь')
         message = graphene.String(description='Текст комментария')
 
     comment = graphene.Field(DocumentCommentsType, description='Созданный комментарий')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, user_id: str, comment: str):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, message: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        return AddDocumentCommentMutation(document=create_document_comment(info.context.user, document, comment))
+        return AddDocumentCommentMutation(comment=create_document_comment(info.context.user, document, message))
 
 
 class AddDocumentStatusMutation(BaseMutation):

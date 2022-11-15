@@ -238,8 +238,6 @@ input AddDocumentCommentMutationInput {
   documentId: ID!
   """Текст комментария"""
   message: String
-  """Пользователь"""
-  userId: ID!
 }
 
 """Добавление комментария к документу"""

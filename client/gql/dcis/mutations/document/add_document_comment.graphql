@@ -1,11 +1,21 @@
-mutation AddDocumentComment($documentId: ID!, $userId: ID!, $message: String!) {
-  addDocumentComment(input: {documentId: $documentId, userId: $userId, message: $message}){
+mutation AddDocumentComment($documentId: ID!, $message: String!) {
+  addDocumentComment(input: {documentId: $documentId, message: $message}){
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
     comment {
+      document {
+        id
+        __typename
+      }
       user {
+        id
         username
         __typename
       }
-      comment
       createdAt
       __typename
     }

@@ -3,7 +3,13 @@ query DocumentComments($documentId: ID!) {
     comment
     createdAt
     user {
+      id
       username
+      __typename
+    }
+    document {
+      id
+      __typename
     }
     __typename
   }

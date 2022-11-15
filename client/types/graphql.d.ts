@@ -259,8 +259,6 @@ export type AddDocumentCommentMutationInput = {
   documentId: Scalars['ID'];
   /** Текст комментария */
   message?: InputMaybe<Scalars['String']>;
-  /** Пользователь */
-  userId: Scalars['ID'];
 };
 
 /** Добавление комментария к документу */
@@ -6247,6 +6245,13 @@ export type AddDocumentMutationVariables = Exact<{
 
 export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
 
+export type AddDocumentCommentMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  message: Scalars['String'];
+}>;
+
+export type AddDocumentCommentMutation = { __typename?: 'Mutation', addDocumentComment: { __typename?: 'AddDocumentCommentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, comment?: { __typename: 'DocumentCommentsType', createdAt: any, document?: { __typename: 'DocumentType', id: string } | null, user: { __typename: 'UserType', id: string, username: string } } | null } };
+
 export type AddDocumentDataMutationVariables = Exact<{
   periodId: Scalars['ID'];
   file: Scalars['Upload'];
@@ -6588,7 +6593,7 @@ export type DocumentCommentsQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentCommentsQuery = { __typename?: 'Query', documentComments?: Array<{ __typename: 'DocumentCommentsType', comment: string, createdAt: any, user: { __typename?: 'UserType', username: string } }> | null };
+export type DocumentCommentsQuery = { __typename?: 'Query', documentComments?: Array<{ __typename: 'DocumentCommentsType', comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string }, document?: { __typename: 'DocumentType', id: string } | null }> | null };
 
 export type DocumentSheetQueryVariables = Exact<{
   documentId: Scalars['ID'];
