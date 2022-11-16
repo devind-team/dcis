@@ -162,10 +162,10 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
         compiler: ModelCompiler = ModelCompiler()
         model: Model = compiler.read_and_parse_dict(input_dict=input_state, default_sheet=sheet_name)
         evaluator = Evaluator(model)
-        for formula in model.formulae:
-            success, value = evaluate_formula(evaluator, formula)
-            state[formula]['value'] = value if success else ''
-            state[formula]['error'] = value if not success else None
+        for coordinate in model.formulae:
+            success, value = evaluate_formula(evaluator, coordinate)
+            state[coordinate]['value'] = value if success else ''
+            state[coordinate]['error'] = value if not success else None
     return state
 
 
@@ -192,13 +192,13 @@ def normalize_coordinate(coord: str, sheet_name: str | None = None) -> str:
     return f'{sheet_name}!{column}{row}'
 
 
-def evaluate_formula(evaluator: Evaluator, formula: str) -> tuple[bool, str]:
+def evaluate_formula(evaluator: Evaluator, coordinate: str) -> tuple[bool, str]:
     """Вычисление формулы с возвратом возможной ошибки.
 
     Возвращает (успех, рассчитанное значение или сообщение ошибки).
     """
     try:
-        value = evaluator.evaluate(formula)
+        value = evaluator.evaluate(coordinate)
         value_type = type(value)
         if value_type in EXCEL_ERRORS_MAP:
             return False, EXCEL_ERRORS_MAP[value_type]
