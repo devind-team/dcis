@@ -1,6 +1,5 @@
 from django.db import models
 from openpyxl.utils.cell import get_column_letter
-from devind_helpers.utils import convert_str_to_bool
 
 from apps.core.models import User
 from .document import Document, Sheet
@@ -253,6 +252,7 @@ class Cell(Style, KindCell, models.Model):
     number_format = models.TextField(null=True, help_text='Форматирование чисел')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
+    default_error = models.TextField(null=True, help_text='Значение ошибки по умолчанию')
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
     tooltip = models.TextField(null=True, help_text='Подсказка')
     is_template = models.BooleanField(default=False, help_text='Является ли поле шаблоном')
