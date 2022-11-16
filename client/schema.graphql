@@ -1039,8 +1039,6 @@ type CellType {
   underline: String
   """Значение"""
   value: String
-  """Валидно ли поле"""
-  verified: Boolean!
   """Вертикальное выравнивание"""
   verticalAlign: ID
 }
@@ -4875,6 +4873,4 @@ type ValueType {
   sheetId: ID!
   """Значение"""
   value: String!
-  """Валидно ли поле"""
-  verified: Boolean!
 }

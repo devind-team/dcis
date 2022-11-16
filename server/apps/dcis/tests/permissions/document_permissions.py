@@ -33,7 +33,7 @@ from apps.dcis.permissions.document_permissions import (
     can_delete_document_status,
     can_view_document,
 )
-from apps.dcis.tests.helpers.mock import patch_db_object
+from apps.dcis.tests.tests_helpers.mock import patch_db_object
 
 
 class DocumentPermissionsTestCase(TestCase):

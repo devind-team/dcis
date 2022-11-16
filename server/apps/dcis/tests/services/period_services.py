@@ -46,7 +46,7 @@ from apps.dcis.services.period_services import (
     get_user_periods,
     get_user_privileges_periods,
 )
-from apps.dcis.tests.helpers import create_in_memory_file
+from apps.dcis.tests.tests_helpers import create_in_memory_file
 from devind.settings import BASE_DIR
 
 
