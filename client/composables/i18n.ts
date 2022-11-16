@@ -17,7 +17,7 @@ export interface Composer {
 export function useI18n (): Composer {
   const { $i18n } = useNuxtApp()
   const instance = getCurrentInstance()
-  const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
+  const vm = (instance?.proxy || instance as unknown as InstanceType<VueConstructor>).$root
   const locale: WritableComputedRef<string> = computed({
     get () {
       return $i18n.locale
