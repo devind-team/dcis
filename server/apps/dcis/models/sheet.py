@@ -344,7 +344,6 @@ class Value(models.Model):
     value = models.TextField(help_text='Значение')
     extra_value = models.TextField(null=True, help_text='Дополнительное значение')
     payload = models.JSONField(null=True, help_text='Дополнительные данные')
-    verified = models.BooleanField(default=True, help_text='Валидно ли поле')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')

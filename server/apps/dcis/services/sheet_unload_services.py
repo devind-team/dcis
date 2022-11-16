@@ -130,7 +130,7 @@ class SheetRowsUnloader(DataUnloader):
         'border_style', 'border_color', 'aggregation',
     )
     _values_fields = (
-        'column_id', 'row_id', 'value', 'verified', 'error',
+        'column_id', 'row_id', 'value', 'error',
     )
     _merged_cells_fields = (
         'min_col', 'max_col',
@@ -255,7 +255,7 @@ class SheetRowsUnloader(DataUnloader):
             if value is not None:
                 cell.update(value)
             else:
-                cell.update({'value': default, 'error': default_error, 'verified': True})
+                cell.update({'value': default, 'error': default_error})
 
     @staticmethod
     def _add_cells(rows: list[dict], columns_map: dict[dict], cells: list[dict]) -> None:

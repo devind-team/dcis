@@ -564,9 +564,8 @@ class CellType(graphene.ObjectType):
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
 
-    # От Value
+    # От Value или Cell
     value = graphene.String(description='Значение')
-    verified = graphene.Boolean(required=True, description='Валидно ли поле')
     error = graphene.String(description='Текст ошибки')
 
 
@@ -585,7 +584,6 @@ class ValueType(DjangoObjectType):
             'id',
             'value',
             'payload',
-            'verified',
             'error',
             'document',
         )
