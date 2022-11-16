@@ -18,7 +18,7 @@ from apps.dcis.services.limitation_services import (
     delete_limitation,
     update_limitations_from_file,
 )
-from apps.dcis.tests.helpers import create_in_memory_file
+from apps.dcis.tests.tests_helpers import create_in_memory_file
 
 
 @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})

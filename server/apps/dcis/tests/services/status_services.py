@@ -22,9 +22,11 @@ from apps.dcis.models import (
 )
 from apps.dcis.services.status_services import (
     AddStatusCheck,
-    LimitationError, add_document_status,
+    LimitationError,
+    add_document_status,
     delete_document_status,
-    get_initial_statuses, get_new_statuses,
+    get_initial_statuses,
+    get_new_statuses,
 )
 
 

@@ -1,3 +1,4 @@
+from .helpers import CellHelpersTestCase
 from .models import (
     DocumentModelTestCase,
     ProjectModelTestCase,

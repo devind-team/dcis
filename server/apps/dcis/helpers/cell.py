@@ -6,7 +6,13 @@ from typing import Iterable, TypedDict
 from django.db.models import Q, QuerySet
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
 from xlsx_evaluate import Evaluator, Model, ModelCompiler
-from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
+from xlsx_evaluate.functions.xlerrors import (
+    DivZeroExcelError,
+    NaExcelError, NameExcelError,
+    NullExcelError,
+    NumExcelError, RefExcelError,
+    ValueExcelError,
+)
 
 from apps.dcis.models import Cell, Document, Sheet, Value
 from .sheet_formula_cache import SheetFormulaContainerCache
@@ -157,19 +163,9 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
         model: Model = compiler.read_and_parse_dict(input_dict=input_state, default_sheet=sheet_name)
         evaluator = Evaluator(model)
         for formula in model.formulae:
-            try:
-                value = evaluator.evaluate(formula)
-                if isinstance(value, DivZeroExcelError):
-                    state[formula]['value'] = ''
-                    state[formula]['error'] = 'Деление на 0'
-                else:
-                    state[formula]['value'] = str(value)
-            except RuntimeError as e:
-                if 'Cycle detected' in str(e):
-                    state[formula]['value'] = ''
-                    state[formula]['error'] = 'Циклическая ссылка'
-                else:
-                    raise e
+            success, value = evaluate_formula(evaluator, formula)
+            state[formula]['value'] = value if success else ''
+            state[formula]['error'] = value if not success else None
     return state
 
 
@@ -194,3 +190,31 @@ def normalize_coordinate(coord: str, sheet_name: str | None = None) -> str:
     """
     sheet_name, column, row = parse_coordinate(coord, sheet_name)
     return f'{sheet_name}!{column}{row}'
+
+
+def evaluate_formula(evaluator: Evaluator, formula: str) -> tuple[bool, str]:
+    """Вычисление формулы с возвратом возможной ошибки.
+
+    Возвращает (успех, рассчитанное значение или сообщение ошибки).
+    """
+    try:
+        value = evaluator.evaluate(formula)
+        value_type = type(value)
+        if value_type in EXCEL_ERRORS_MAP:
+            return False, EXCEL_ERRORS_MAP[value_type]
+        return True, str(value)
+    except RuntimeError as e:
+        if 'Cycle detected' in str(e):
+            return False, 'Циклическая ссылка'
+        raise e
+
+
+EXCEL_ERRORS_MAP = {
+    NullExcelError: 'Неверный диапазон или диапазоны',
+    DivZeroExcelError: 'Деление на 0',
+    ValueExcelError: 'Неверный тип операнда или аргумента функции',
+    RefExcelError: 'Недействительная ссылка',
+    NameExcelError: 'Неверное имя',
+    NumExcelError: 'Недопустимые числовые значения',
+    NaExcelError: 'Не удалось найти данные',
+}
