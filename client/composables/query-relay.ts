@@ -1,5 +1,5 @@
 import { DocumentNode } from 'graphql'
-import { ApolloQueryResult, DataProxy } from '@apollo/client'
+import { DataProxy } from '@apollo/client'
 import { useQuery } from '@vue/apollo-composable'
 import { useScroll } from '@vueuse/core'
 import { FetchResult } from '@apollo/client/link/core'
@@ -13,6 +13,7 @@ import type { ComputedRef } from '#app'
 import { computed } from '#app'
 import { UseResultReturn } from '@vue/apollo-composable/dist/useResult'
 import { ExtractSingleKey } from '@vue/apollo-composable/dist/util/ExtractSingleKey'
+import { InvariantError } from 'ts-invariant'
 import { PageInfo } from '~/types/graphql'
 import { getValue } from '~/services/graphql-relay'
 import { PaginationInterface, useOffsetPagination } from '~/composables/pagination'
@@ -24,8 +25,10 @@ export type ResultDefaultValueType<TNode> = {
   pageInfo?: PageInfo
 }
 
-export type ApolloQueryResultFn<T> = (result: ApolloQueryResult<T>) => void
-export type TransformUpdate<TResultQuery, TResultMutation> = (data: TResultQuery, result?: Omit<FetchResult<TResultMutation>, 'context'>) => TResultQuery
+export type TransformUpdate<TResultQuery, TResultMutation> = (
+  data: TResultQuery,
+  result?: Omit<FetchResult<TResultMutation>, 'context'>
+) => TResultQuery
 
 export type QueryRelayParams<TResult = any, TVariables = any> = {
   document: DocumentParameter<TResult, TVariables>,
@@ -41,16 +44,35 @@ export type QueryRelayOptions = {
 
 export type UseResultDefaultValueType<TNode> = { totalCount: number, edges: { node: TNode }[] }
 
-export type QueryRelayResult<TResult = any, TVariables = any, TNode extends { id: string | number } = any> = UseQueryReturn<TResult, TVariables> & {
+export type QueryRelayResult<
+  TResult = any,
+  TVariables = any,
+  TNode extends { id: string | number } = any
+> = UseQueryReturn<TResult, TVariables> & {
   dataQuery: UseResultReturn<UseResultDefaultValueType<TNode> | ExtractSingleKey<NonNullable<TResult>>>
   data: ComputedRef<TNode[]>
   pagination: PaginationInterface
   fetchMoreAvailable: ComputedRef<boolean>
   fetchMoreData: () => void
-  update: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, transform: TransformUpdate<TResult, TResultMutation>) => void
-  addUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key?: string | null) => void
-  changeUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key?: string | null) => void
-  deleteUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>) => void
+  update: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    transform: TransformUpdate<TResult, TResultMutation>
+  ) => void
+  addUpdate: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    key?: string | null
+  ) => void
+  changeUpdate: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    key?: string | null
+  ) => void
+  deleteUpdate: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>
+  ) => void
 }
 export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number} = any> (
   queryParams: QueryRelayParams<TResult, TVariables>,
@@ -135,23 +157,32 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
    * @param cache - хранилище
    * @param result - результат выполнения мутации
    * @param transform - функция преобразования
+   * @param isStrict - происходит ли исключение, если запись отсутствует в кеше
    */
   const update = <TResultMutation>(
     cache: DataProxy,
     result: Omit<FetchResult<TResultMutation>, 'context'>,
-    transform: TransformUpdate<TResult, TResultMutation>
+    transform: TransformUpdate<TResult, TResultMutation>,
+    isStrict: boolean = true
   ): void => {
-    const cacheData: TResult = cache.readQuery<TResult, TVariables>({
-      query: document as DocumentNode,
-      variables: queryVariables.value
-    })
-    const data: TResult = transform(cacheData, result)
-    cache.writeQuery({ query: document as DocumentNode, variables: queryVariables.value, data })
+    try {
+      const cacheData: TResult = cache.readQuery<TResult, TVariables>({
+        query: document as DocumentNode,
+        variables: queryVariables.value
+      })
+      const data: TResult = transform(cacheData, result)
+      cache.writeQuery({ query: document as DocumentNode, variables: queryVariables.value, data })
+    } catch (e) {
+      if (e instanceof InvariantError && !isStrict) {
+        return
+      }
+      throw e
+    }
   }
   /**
    * Получение __typename элементов
    * @param edges - список объектов из списка
-   * @param el - манипулируемый объек
+   * @param el - манипулируемый объект
    */
   const getEdgeTypename = (edges: { __typename: string }[], el: TNode & { __typename?: string }): string =>
     edges.length === 0 ? `${el.__typename}Edge` : edges[0].__typename
@@ -199,9 +230,9 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
 
   /**
    * Изменение при редактировании записи
-   * @param cache
-   * @param result
-   * @param key
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
+   * @param key - элемент в мутации
    */
   const changeUpdate = <TResultMutation>(
     cache: DataProxy,
@@ -224,12 +255,14 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
 
   /**
    * Удаление записи
-   * @param cache
-   * @param result
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
+   * @param isStrict - происходит ли исключение, если запись отсутствует в кеше
    */
   const deleteUpdate = <TResultMutation>(
     cache: DataProxy,
-    result: Omit<FetchResult<TResultMutation>, 'context'>
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    isStrict: boolean = true
   ): void => {
     update(cache, result, (dataCache) => {
       const { id } = getMutationResult(result)
@@ -239,7 +272,7 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
         --dataCache[k].totalCount
       }
       return dataCache
-    })
+    }, isStrict)
   }
 
   return {
