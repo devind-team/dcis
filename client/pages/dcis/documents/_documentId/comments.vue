@@ -29,7 +29,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 import { computed, ComputedRef, defineComponent, PropType, reactive, onMounted, ref } from '#app'
 import { useMutation } from '@vue/apollo-composable'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useI18n, useFilters, useCommonQuery } from '~/composables'
+import { useI18n, useFilters, useQueryRelay, useCursorPagination } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import {
@@ -44,12 +44,14 @@ export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs },
   props: {
     document: { type: Object as PropType<DocumentType>, required: true },
-    breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
+    breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> },
+    pageSize: { type: Number, default: 0 }
   },
   setup (props) {
     const { t, localePath } = useI18n()
     const { timeHM } = useFilters()
     const inputMessage = ref('')
+    const pageSize = ref(5)
     const state = reactive({
       username: '',
       messages: []
@@ -58,10 +60,14 @@ export default defineComponent({
     const {
       data: comments,
       addUpdate
-    } = useCommonQuery<DocumentCommentsQuery,
+    } = useQueryRelay<DocumentCommentsQuery,
       DocumentCommentsQueryVariables>({
         document: documentCommentsQuery,
         variables: { documentId: props.document.id }
+      },
+      {
+        pagination: useCursorPagination({ pageSize: pageSize.value }),
+        fetchScroll: typeof document === 'undefined' ? null : document
       })
 
     const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentCommentMutation,

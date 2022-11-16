@@ -2654,16 +2654,34 @@ type DjangoDebugSQL {
 }
 
 """Тип комментариев для документа"""
-type DocumentCommentsType {
+type DocumentCommentsType implements Node {
   """Комментарий"""
   comment: String!
   """Дата создания"""
   createdAt: DateTime!
   """Документ"""
   document: DocumentType
+  """The ID of the object."""
   id: ID!
   """Пользователь"""
   user: UserType!
+}
+
+type DocumentCommentsTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DocumentCommentsTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DocumentCommentsType` and its cursor."""
+type DocumentCommentsTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DocumentCommentsType
 }
 
 """Тип статусов для документов."""
@@ -3940,9 +3958,14 @@ type Query {
   ): DocumentType
   """Комментарии документов"""
   documentComments(
+    after: String
+    before: String
     """Идентификатор документа"""
     documentId: ID!
-  ): [DocumentCommentsType!]
+    first: Int
+    last: Int
+    offset: Int
+  ): DocumentCommentsTypeConnection
   """Выгрузка листа с несколькими документами"""
   documentSheet(
     """Идентификатор документа"""

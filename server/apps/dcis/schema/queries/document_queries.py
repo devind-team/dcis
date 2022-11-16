@@ -37,7 +37,7 @@ class DocumentQueries(graphene.ObjectType):
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
     )
 
-    document_comments = DjangoListField(
+    document_comments = DjangoFilterConnectionField(
         DocumentCommentsType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
         description='Комментарии документов'
@@ -102,7 +102,13 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_document_comments(root: Any, info: ResolveInfo, document_id: str) -> Iterable[Comments]:
+    def resolve_document_comments(
+        root: Any,
+        info: ResolveInfo,
+        document_id: str,
+        *args,
+        **kwarg
+    ) -> Iterable[Comments]:
         document = get_object_or_404(Document, pk=gid2int(document_id))
         return Comments.objects.filter(document=document)
 

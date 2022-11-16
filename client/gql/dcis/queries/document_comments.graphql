@@ -1,16 +1,28 @@
-query DocumentComments($documentId: ID!) {
-  documentComments(documentId: $documentId) {
-    comment
-    createdAt
-    user {
-      id
-      username
+query DocumentComments($documentId: ID!, $first: Int, $after: String) {
+  documentComments(documentId: $documentId, first: $first, after: $after) {
+    edges {
+      node {
+        comment
+        createdAt
+        user {
+          id
+          username
+          __typename
+        }
+        document {
+          id
+          __typename
+        }
+        __typename
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
       __typename
     }
-    document {
-      id
-      __typename
-    }
-    __typename
+    totalCount
   }
 }

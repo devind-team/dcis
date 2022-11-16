@@ -2791,7 +2791,7 @@ export type DjangoDebugSql = {
 };
 
 /** Тип комментариев для документа */
-export type DocumentCommentsType = {
+export type DocumentCommentsType = Node & {
   __typename?: 'DocumentCommentsType';
   /** Комментарий */
   comment: Scalars['String'];
@@ -2799,9 +2799,29 @@ export type DocumentCommentsType = {
   createdAt: Scalars['DateTime'];
   /** Документ */
   document?: Maybe<DocumentType>;
+  /** The ID of the object. */
   id: Scalars['ID'];
   /** Пользователь */
   user: UserType;
+};
+
+export type DocumentCommentsTypeConnection = {
+  __typename?: 'DocumentCommentsTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<DocumentCommentsTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `DocumentCommentsType` and its cursor. */
+export type DocumentCommentsTypeEdge = {
+  __typename?: 'DocumentCommentsTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<DocumentCommentsType>;
 };
 
 /** Тип статусов для документов. */
@@ -4616,7 +4636,7 @@ export type Query = {
   /** Документ */
   document?: Maybe<DocumentType>;
   /** Комментарии документов */
-  documentComments?: Maybe<Array<DocumentCommentsType>>;
+  documentComments?: Maybe<DocumentCommentsTypeConnection>;
   /** Выгрузка листа с несколькими документами */
   documentSheet: SheetType;
   /** Статусы документов */
@@ -4791,7 +4811,12 @@ export type QueryDocumentArgs = {
 
 /** Схема запросов данных. */
 export type QueryDocumentCommentsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
   documentId: Scalars['ID'];
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Схема запросов данных. */
@@ -6591,9 +6616,11 @@ export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'Do
 
 export type DocumentCommentsQueryVariables = Exact<{
   documentId: Scalars['ID'];
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
 }>;
 
-export type DocumentCommentsQuery = { __typename?: 'Query', documentComments?: Array<{ __typename: 'DocumentCommentsType', comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string }, document?: { __typename: 'DocumentType', id: string } | null }> | null };
+export type DocumentCommentsQuery = { __typename?: 'Query', documentComments?: { __typename?: 'DocumentCommentsTypeConnection', totalCount: number, edges: Array<{ __typename?: 'DocumentCommentsTypeEdge', node?: { __typename: 'DocumentCommentsType', comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string }, document?: { __typename: 'DocumentType', id: string } | null } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
 
 export type DocumentSheetQueryVariables = Exact<{
   documentId: Scalars['ID'];

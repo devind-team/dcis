@@ -356,7 +356,10 @@ class DocumentCommentsType(DjangoObjectType):
 
     class Meta:
         model = Comments
+        interfaces = (graphene.relay.Node,)
         fields = ('id', 'comment', 'created_at', 'document', 'user',)
+        filter_fields = {}
+        connection_class = CountableConnection
 
 
 class AttributeType(DjangoObjectType):
