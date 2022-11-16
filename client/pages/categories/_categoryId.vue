@@ -7,7 +7,8 @@ v-row(v-else)
 <script lang="ts">
 import { ApolloQueryResult } from '@apollo/client'
 import type { ComputedRef } from '#app'
-import { computed, defineComponent, onUnmounted, useRoute } from '#app'
+import { computed, defineComponent, onUnmounted } from '#app'
+import { useRoute } from '#imports'
 import { useCommonQuery, useI18n, usePage } from '~/composables'
 import { CategoryQuery, CategoryQueryVariables } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'

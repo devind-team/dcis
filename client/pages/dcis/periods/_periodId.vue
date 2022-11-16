@@ -7,7 +7,8 @@ div
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, useRoute, provide } from '#app'
+import { computed, defineComponent, ref, provide } from '#app'
+import { useRoute } from '#imports'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
 import { usePeriodQuery } from '~/services/grapqhl/queries/dcis/periods'

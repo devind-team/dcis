@@ -6,7 +6,8 @@ v-container
 </template>
 
 <script lang="ts">
-import { useNuxt2Meta, defineComponent, onMounted, useRouter, toRefs } from '#app'
+import { useNuxt2Meta, defineComponent, onMounted, toRefs } from '#app'
+import { useRouter } from '#imports'
 import { useAuthStore } from '~/stores'
 import { useCommonQuery, useI18n } from '~/composables'
 import segmentsQuery from '~/gql/pages/queries/segments.graphql'

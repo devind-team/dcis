@@ -112,7 +112,8 @@ bread-crumbs(:items="bc")
 import { promiseTimeout } from '@vueuse/core'
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, useNuxt2Meta, useRouter, inject } from '#app'
+import { computed, defineComponent, ref, useNuxt2Meta, inject } from '#app'
+import { useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   PeriodType,

@@ -42,7 +42,7 @@ mutation-form(
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType, useRouter } from '#app'
+import { defineComponent, ref, PropType } from '#app'
 import { DataProxy } from 'apollo-cache'
 import {
   ChangeSectionGalleryMutationPayload,
