@@ -123,7 +123,8 @@ v-menu(v-model="active" :close-on-content-click="false" left bottom)
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType, useRouter, toRefs, computed } from '#app'
+import { defineComponent, ref, PropType, toRefs, computed } from '#app'
+import { useRouter } from '#imports'
 import { useI18n } from '~/composables'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
 import { PageType, UserType, DeletePageMutation } from '~/types/graphql'

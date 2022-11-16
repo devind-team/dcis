@@ -94,7 +94,8 @@ bread-crumbs(:items="bc")
 import { DataProxy } from 'apollo-cache'
 import { promiseTimeout } from '@vueuse/core'
 import type { PropType } from '#app'
-import { computed, defineComponent, useRoute, useRouter, ref, inject, useNuxt2Meta } from '#app'
+import { computed, defineComponent, ref, inject, useNuxt2Meta } from '#app'
+import { useRoute, useRouter } from '#imports'
 import {
   ProjectType,
   ChangeProjectMutationPayload,

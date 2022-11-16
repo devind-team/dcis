@@ -47,7 +47,8 @@ bread-crumbs(:items="breadCrumbs")
 </template>
 
 <script lang="ts">
-import { useNuxt2Meta } from '#app'
+import { defineComponent, useNuxt2Meta } from '#app'
+import { useI18n, useRouter } from '#imports'
 import { useAuthStore } from '~/stores'
 import { ConfirmEmailMutation, RequestCodeMutation } from '~/types/graphql'
 import { BreadCrumbsItem } from '~/types/devind'

@@ -15,7 +15,7 @@ export interface Composer {
 }
 
 export function useI18n (): Composer {
-  const { $i18n } = useNuxtApp()
+  const { $i18n, vue2App } = useNuxtApp()
   const instance = getCurrentInstance()
   const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
   const locale: WritableComputedRef<string> = computed({
@@ -34,6 +34,6 @@ export function useI18n (): Composer {
     te: vm.$te.bind(vm),
     d: vm.$d.bind(vm),
     n: vm.$n.bind(vm),
-    localePath: vm.localePath.bind(vm)
+    localePath: vue2App.localePath.bind(vm)
   }
 }

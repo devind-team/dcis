@@ -6,7 +6,8 @@ div
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, ref, useRoute } from '#app'
+import { computed, defineComponent, PropType, provide, ref } from '#app'
+import { useRoute } from '#imports'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useCommonQuery, useI18n } from '~/composables'
 import { ProjectQuery, ProjectQueryVariables } from '~/types/graphql'
