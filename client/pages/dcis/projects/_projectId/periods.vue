@@ -59,7 +59,7 @@ export default defineComponent({
       data: periods,
       loading,
       addUpdate,
-      update
+      deleteUpdate
     } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
       document: periodsQuery,
       variables: { projectId: route.params.projectId }
@@ -71,15 +71,12 @@ export default defineComponent({
     ) => addUpdate(cache, result, 'period')
 
     onMounted(() => {
-      if (periods.value && route.query.deletePeriodId) {
-        update(
+      if (route.query.deletePeriodId) {
+        deleteUpdate(
           defaultClient.cache,
           { data: { deletePeriod: { id: route.query.deletePeriodId } } },
-          (cacheData, { data: { deletePeriod: { id: periodId } } }
-          ) => {
-            cacheData.periods = cacheData.periods.filter(period => period.id !== periodId)
-            return cacheData
-          })
+          false
+        )
         router.push(localePath({ name: 'dcis-projects-projectId-periods', params: route.params }))
       }
     })
