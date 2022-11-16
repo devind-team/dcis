@@ -6,7 +6,7 @@
     v-on="componentListeners"
     :is="componentName"
   )
-  div(v-else style="white-space: pre") {{ formattedCellValue }}
+  div(v-else :style="stylesRawValues") {{ formattedCellValue }}
 </template>
 
 <script lang="ts">
@@ -222,7 +222,19 @@ export default defineComponent({
       'grid__cell-content_active': props.active && ['Numeric', 'String', 'Money'].includes(cellKind.value)
     }))
 
-    return { formattedCellValue, componentName, renderComponent, componentProps, componentListeners, contentClasses }
+    const stylesRawValues = computed<Record<string, string>>(() => ({
+      'white-space': props.cell.kind === 'text' ? 'pre' : undefined
+    }))
+
+    return {
+      formattedCellValue,
+      componentName,
+      renderComponent,
+      componentProps,
+      componentListeners,
+      contentClasses,
+      stylesRawValues
+    }
   }
 })
 </script>
