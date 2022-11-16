@@ -13,8 +13,10 @@ from apps.dcis.models import Document, Period, Project
 from apps.dcis.permissions.period_permissions import (
     can_add_period,
     can_change_period,
+    can_change_period_attributes,
     can_change_period_divisions,
     can_change_period_groups,
+    can_change_period_limitations,
     can_change_period_settings,
     can_change_period_sheet,
     can_change_period_users,
@@ -72,6 +74,15 @@ class PeriodPermissionsTestCase(TestCase):
             'change_period_divisions',
         )
 
+    def test_can_change_period_limitations(self) -> None:
+        """Тестирование функции `can_change_period_limitations`."""
+        self._test_change_period_element(
+            can_change_period_limitations,
+            'dcis.change_period',
+            'change_period',
+            'change_period_limitations',
+        )
+
     def test_can_change_period_groups(self) -> None:
         """Тестирование функции `can_change_period_groups`."""
         self._test_change_period_element(
@@ -88,6 +99,15 @@ class PeriodPermissionsTestCase(TestCase):
             'dcis.change_period',
             'change_period',
             'change_period_users',
+        )
+
+    def test_can_change_period_attributes(self) -> None:
+        """Тестирование функции `can_change_period_attributes`."""
+        self._test_change_period_element(
+            can_change_period_attributes,
+            'dcis.change_period',
+            'change_period',
+            'change_period_attributes'
         )
 
     def test_can_change_period_settings(self) -> None:
@@ -128,7 +148,7 @@ class PeriodPermissionsTestCase(TestCase):
         with patch.object(self.user, 'has_perm', new=lambda perm: perm == permission):
             f(self.user, self.user_period_without_documents)
         with patch.object(
-                self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'
+            self.user, 'has_perm', new=lambda perm: perm == 'dcis.add_project'
         ), patch(
             'apps.dcis.permissions.period_permissions.can_view_period',
             new=Mock(),
@@ -151,8 +171,8 @@ class PeriodPermissionsTestCase(TestCase):
         """Тестирование разрешений на изменение элемента периода."""
         self._test_change_period(f, permission, change_period_privilege)
         with patch(
-                'apps.dcis.permissions.period_permissions.can_change_period_base',
-                new=Mock(side_effect=PermissionDenied()),
+            'apps.dcis.permissions.period_permissions.can_change_period_base',
+            new=Mock(side_effect=PermissionDenied()),
         ), patch(
             'apps.dcis.permissions.period_permissions.has_privilege',
             new=Mock(return_value=True),

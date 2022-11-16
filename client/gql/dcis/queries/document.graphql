@@ -47,6 +47,7 @@ query Document($documentId: ID!) {
     }
     objectId
     objectName
+    canChangeAttributeValue
     __typename
   }
 }

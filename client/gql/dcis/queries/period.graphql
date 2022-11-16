@@ -9,8 +9,10 @@ query Period($periodId: ID!) {
     isCurator
     canAddAnyDivisionDocument
     canChangeDivisions
+    canChangeLimitations
     canChangeGroups
     canChangeUsers
+    canChangeAttributes
     canChangeSettings
     canChangeSheet
     canDelete

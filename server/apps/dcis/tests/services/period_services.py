@@ -1,5 +1,5 @@
 """Тесты модуля, отвечающего за работу с периодами."""
-from collections import Counter
+
 from datetime import date, timedelta
 from os.path import join
 from shutil import rmtree
@@ -7,23 +7,18 @@ from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase, override_settings
-from six import BytesIO
+from django.core.exceptions import PermissionDenied
+from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaDependencyCache
 from apps.dcis.models import (
     CuratorGroup,
     Division,
-    Limitation,
     Period,
     PeriodGroup,
     PeriodPrivilege,
     Privilege,
     Project,
-    Sheet,
 )
 from apps.dcis.permissions import (
     can_add_period,
@@ -35,7 +30,6 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.services.period_services import (
     add_divisions_period,
-    add_limitations_from_file,
     add_period_group,
     change_period_group_privileges,
     change_settings_period,
@@ -52,6 +46,7 @@ from apps.dcis.services.period_services import (
     get_user_periods,
     get_user_privileges_periods,
 )
+from apps.dcis.tests.helpers import create_in_memory_file
 from devind.settings import BASE_DIR
 
 
@@ -225,8 +220,6 @@ class PeriodTestCase(TestCase):
             user=self.super_user,
             project=self.user_project,
         )
-        self.form1 = Sheet.objects.create(name='Форма1', period=self.departament_period)
-        self.form2 = Sheet.objects.create(name='Форма2', period=self.departament_period)
         self.departament_period_groups = [PeriodGroup.objects.create(
             period=self.departament_period,
             name=f'Group departament {number + 1}'
@@ -266,70 +259,11 @@ class PeriodTestCase(TestCase):
                 multiple=True,
                 versioning=True,
                 readonly_fill_color=False,
-                xlsx_file=self._create_in_memory_file('test_create_period.xlsx'),
+                xlsx_file=create_in_memory_file('test_create_period.xlsx'),
                 limitations_file=None,
             ),
             Period.objects.get(name='Test period'),
             'Create period'
-        )
-
-    @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}})
-    def test_add_limitations_from_file_with_errors(self) -> None:
-        """Тестирование функции `add_limitations_from` c ошибками."""
-        self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_wrong_json.json', [
-                'Не удалось разобрать json файл',
-                'Expecting property name enclosed in double quotes',
-            ]
-        )
-        self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_not_list.json', [
-                'json файл не содержит массив на верхнем уровне'
-            ]
-        )
-        self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_not_dict.json', [
-                'Ограничение по номеру 2 не является объектом'
-            ]
-        )
-        self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_wrong_keys.json', [
-                'Ключи ограничения по номеру 2 должны совпадать со списком ["form", "check", "message"]'
-            ]
-        )
-        self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_wrong_sheet.json', [
-                'Не найдена форма "Форма3" для ограничения по номеру 2'
-            ]
-        )
-
-    @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
-    def test_add_limitations_from_file(self) -> None:
-        """Тестирование функции `add_limitations_from` без ошибок."""
-        limitations = add_limitations_from_file(
-            self.departament_period,
-            self._create_in_memory_file('test_add_limitations_from_file.json')
-        )
-        self.assertEqual([
-            Limitation.objects.get(sheet=self.form1),
-            Limitation.objects.get(sheet=self.form2)
-        ], limitations)
-        limitation_dependency_cache = LimitationFormulaDependencyCache.get(self.departament_period.id)
-        self.assertEqual(
-            {
-                'A1': Counter(['Форма1!A1', 'Форма2!A1']),
-                'A2': Counter(['Форма1!A2', 'Форма2!A2'])
-            },
-            limitation_dependency_cache.dependency
-        )
-        self.assertEqual(
-            {
-                'Форма1!A1': ['A1'],
-                'Форма2!A1': ['A1'],
-                'Форма1!A2': ['A2'],
-                'Форма2!A2': ['A2'],
-            },
-            limitation_dependency_cache.inversion
         )
 
     def test_add_divisions_period(self) -> None:
@@ -470,28 +404,3 @@ class PeriodTestCase(TestCase):
     def tearDown(self) -> None:
         """Очистка данных тестирования."""
         rmtree(join(BASE_DIR.parent, 'storage'), ignore_errors=True)
-
-    def _test_add_limitations_from_file_with_error(self, file_path: str, messages: list[str]) -> None:
-        """Тестирование функции `add_limitations_from` c ошибкой."""
-        with self.assertRaises(ValidationError) as error:
-            add_limitations_from_file(
-                self.departament_period,
-                self._create_in_memory_file(file_path)
-            )
-        self.assertEqual({'limitations_file': list(map(ValidationError, messages))}, error.exception.error_dict)
-
-    @staticmethod
-    def _create_in_memory_file(file_name: str) -> InMemoryUploadedFile:
-        with open(file=join(BASE_DIR, 'apps', 'dcis', 'tests', 'resources', file_name), mode='rb') as file:
-            stream = BytesIO()
-            stream.write(file.read())
-            in_memory_file = InMemoryUploadedFile(
-                file=stream,
-                field_name=None,
-                name=file.name,
-                content_type=None,
-                size=stream.tell(),
-                charset=None
-            )
-            in_memory_file.seek(0)
-            return in_memory_file

@@ -40,6 +40,21 @@ class LimitationFormulaContainerCache(FormulaContainerCache):
     def transform_dependency(self, dependency: str) -> str:
         return dependency
 
+    def add_limitation_formula(self, limitation: Limitation) -> 'LimitationFormulaContainerCache':
+        """Добавление формулы для ограничения."""
+        self.add_formula(f'A{limitation.index}', limitation.formula)
+        return self
+
+    def delete_limitation_formula(self, limitation: Limitation) -> 'LimitationFormulaContainerCache':
+        """Удаление формулы для ограничения."""
+        self.delete_formula(f'{limitation.index}')
+        return self.update(limitation.sheet.period)
+
+    def change_limitation_formula(self, limitation: Limitation) -> 'LimitationFormulaContainerCache':
+        """Изменение формулы для ограничения."""
+        self.change_formula(f'A{limitation.index}', limitation.formula)
+        return self
+
     @property
     def period_id(self) -> int | None:
         return self.limitation_dependency_cache.period_id

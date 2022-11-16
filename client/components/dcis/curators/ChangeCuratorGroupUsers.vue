@@ -1,6 +1,5 @@
 <template lang="pug">
 mutation-modal-form(
-  ref="form"
   :header="String($t('curators.changeCuratorGroupUsers.header'))"
   :subheader="curatorGroup.name"
   :button-text="String($t('curators.changeCuratorGroupUsers.buttonText'))"
@@ -12,6 +11,7 @@ mutation-modal-form(
   mutation-name="addUsersCuratorGroup"
   i18n-path="curators.changeCuratorGroupUsers"
   width="1000"
+  @first-activated="firstActivated"
   @close="close"
   @done="addUsersDone"
 )
@@ -70,11 +70,10 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from '#app'
+import { computed, defineComponent, PropType, ref } from '#app'
 import { DataProxy } from '@apollo/client'
 import { VariablesParameter } from '@vue/apollo-composable/dist/useQuery'
 import { useMutation } from '@vue/apollo-composable'
-import { watchOnce } from '@vueuse/core'
 import { DataTableHeader } from 'vuetify'
 import { ValidationProvider } from 'vee-validate'
 import {
@@ -110,13 +109,11 @@ export default defineComponent({
     const { t } = useI18n()
     const { getUserFullName } = useFilters()
 
-    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
     const newUsersValidationProvider = ref<InstanceType<typeof ValidationProvider | null>>(null)
-    onMounted(() => {
-      watchOnce(() => form.value.active, (value: boolean) => {
-        options.value.enabled = value
-      })
-    })
+
+    const firstActivated = () => {
+      options.value.enabled = true
+    }
 
     const headers = computed<DataTableHeader[]>(() => [
       {
@@ -228,8 +225,8 @@ export default defineComponent({
     return {
       addUsersCuratorGroupMutation,
       getUserFullName,
-      form,
       newUsersValidationProvider,
+      firstActivated,
       headers,
       groupUsers,
       deleteUser,

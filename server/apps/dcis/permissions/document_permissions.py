@@ -3,7 +3,7 @@
 from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
-from apps.dcis.models import AddStatus, Cell, Document, Period, RowDimension, Status
+from apps.dcis.models import AddStatus, Attribute, Cell, Document, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
@@ -126,7 +126,7 @@ def can_delete_document_status(user: User, document: Document):
 class ChangeDocumentSheetBase:
     """Пропускает пользователей, которые могут изменять лист документа."""
 
-    global_permission: str = ''
+    global_permissions: list[str] = []
     local_permission: str = ''
 
     def __init__(self, user: User, document: Document):
@@ -164,7 +164,7 @@ class ChangeDocumentSheetBase:
     def has_privilege(self) -> bool:
         """Обладает ли пользователь привилегией, позволяющей выполнять действие."""
         if self._has_privilege is None:
-            self._has_privilege = self._user.has_perm(self.global_permission) or has_privilege(
+            self._has_privilege = any(self._user.has_perm(perm) for perm in self.global_permissions) or has_privilege(
                 self._user.id,
                 self._document.period.id,
                 self.local_permission
@@ -195,6 +195,61 @@ class ChangeDocumentSheetBase:
         return self._can_change_in_multiple_mode
 
 
+class ChangeAttributeValueBase(ChangeDocumentSheetBase):
+    """Пропускает пользователей, которые могут изменять значение атрибута документа, без проверки возможности просмотра."""
+
+    global_permissions = ['dcis.change_attributevalue', 'dcis.change_value']
+    local_permission = 'change_value'
+
+    def __init__(self, user: User, document: Document):
+        super().__init__(user, document)
+        self._can_change_in_single_mode: bool | None = None
+        self._can_change_some_attribute: bool | None = None
+
+    @property
+    def can_change_in_single_mode(self) -> bool:
+        """Может ли пользователь изменять значение атрибута, если тип сбора является единичным."""
+        if self._can_change_in_single_mode is None:
+            if self._document.period.multiple:
+                self._can_change_in_single_mode = False
+            else:
+                self._can_change_in_single_mode = RowDimension.objects.filter(
+                    sheet__period__id=self._document.period.id,
+                    object_id__in=self.user_division_ids
+                ).count() > 0
+        return self._can_change_in_single_mode
+
+    @property
+    def can_change_some_attribute(self):
+        """Может ли пользователь изменять значение какого-либо атрибута в документе."""
+        if self._can_change_some_attribute is None:
+            if not self.is_document_editable:
+                self._can_change_some_attribute = False
+            elif self.can_change_period_sheet:
+                self._can_change_some_attribute = True
+            else:
+                self._can_change_some_attribute = (
+                    self.has_permission or
+                    self.can_change_in_multiple_mode or
+                    self.can_change_in_single_mode
+                )
+        return self._can_change_some_attribute
+
+    def has_object_permission(self, attribute: Attribute) -> bool:
+        """Получение разрешения."""
+        if not attribute.mutable:
+            return False
+        return self.can_change_some_attribute
+
+
+def can_change_attribute_value(user: User, document: Document, attribute: Attribute):
+    """Пропускает пользователей, которые могут просматривать документ и изменять в нем значение атрибута."""
+    can_view_document(user, document)
+    if ChangeAttributeValueBase(user, document).has_object_permission(attribute):
+        return
+    raise PermissionDenied('Недостаточно прав для изменения значения атрибута.')
+
+
 class ChangeValueBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут изменять значение ячейки, без проверки возможности просмотра.
 
@@ -202,7 +257,7 @@ class ChangeValueBase(ChangeDocumentSheetBase):
     и нескольких ячеек одного документа, не делая дополнительных запросов.
     """
 
-    global_permission = 'dcis.change_value'
+    global_permissions = ['dcis.change_value']
     local_permission = 'change_value'
 
     def can_change_in_single_mode(self, cell: Cell) -> bool:
@@ -237,7 +292,7 @@ def can_change_value(user: User, document: Document, cell: Cell):
 class AddChildRowDimensionBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут добавлять дочерние строки, без проверки возможности просмотра."""
 
-    global_permission = 'dcis.add_rowdimension'
+    global_permissions = ['dcis.add_rowdimension']
     local_permission = 'add_rowdimension'
 
     def can_change_in_single_mode(self, row: RowDimension) -> bool:
@@ -265,7 +320,7 @@ def can_add_child_row_dimension(user: User, document: Document, row_dimension: R
 class ChangeChildRowDimensionHeightBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут изменять высоту дочерней строки, без проверки возможности просмотра."""
 
-    global_permission = 'dcis.change_rowdimension'
+    global_permissions = ['dcis.change_rowdimension']
     local_permission = 'change_rowdimension'
 
     def has_object_permission(self, row: RowDimension) -> bool:
@@ -295,7 +350,7 @@ def can_change_child_row_dimension_height(user: User, row: RowDimension):
 class DeleteChildRowDimensionBase(ChangeDocumentSheetBase):
     """Пропускает пользователей, которые могут удалять дочерние строки, без проверки возможности просмотра."""
 
-    global_permission = 'dcis.delete_rowdimension'
+    global_permissions = ['dcis.delete_rowdimension']
     local_permission = 'delete_rowdimension'
 
     def has_object_permission(self, row: RowDimension) -> bool:

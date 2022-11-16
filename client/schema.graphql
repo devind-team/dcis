@@ -340,21 +340,42 @@ type AddGroupMutationPayload {
   success: Boolean!
 }
 
-input AddOrganizationCuratorGroupInput {
+input AddLimitationMutationInput {
+  clientMutationId: String
+  """Сообщение ошибки"""
+  errorMessage: String!
+  """Формула"""
+  formula: String!
+  """Идентификатор листа"""
+  sheetId: ID!
+}
+
+"""Добавление ограничения, накладываемого на лист."""
+type AddLimitationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Добавленное ограничение"""
+  limitation: LimitationType
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddOrganizationsCuratorGroupInput {
   clientMutationId: String
   """Идентификатор кураторской группы"""
   curatorGroupId: ID!
   """Идентификатор организации"""
-  organizationId: ID!
+  organizationIds: [ID!]!
 }
 
 """Мутация на добавление организации в кураторскую группу."""
-type AddOrganizationCuratorGroupPayload {
-  """Идентификатор организации"""
-  addOrganizationId: ID!
+type AddOrganizationsCuratorGroupPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Идентификатор организации"""
+  organizations: [OrganizationType]
   """Успех мутации"""
   success: Boolean!
 }
@@ -1444,6 +1465,29 @@ type ChangeGroupPermissionsMutationPayload {
   success: Boolean!
 }
 
+input ChangeLimitationMutationInput {
+  clientMutationId: String
+  """Сообщение ошибки"""
+  errorMessage: String!
+  """Формула"""
+  formula: String!
+  """Идентификатор ограничения"""
+  limitationId: ID!
+  """Идентификатор листа"""
+  sheetId: ID!
+}
+
+"""Изменение ограничения, накладываемого на лист."""
+type ChangeLimitationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененное ограничение"""
+  limitation: LimitationType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangeNotificationMutationInput {
   clientMutationId: String
   """Название поля"""
@@ -2262,7 +2306,7 @@ type DeleteCuratorGroupMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор удаленной кураторской группы"""
-  id: ID!
+  id: ID
   """Успех мутации"""
   success: Boolean!
 }
@@ -2337,6 +2381,23 @@ type DeleteGroupMutationPayload {
   success: Boolean!
 }
 
+input DeleteLimitationMutationInput {
+  clientMutationId: String
+  """Идентификатор ограничения"""
+  limitationId: ID!
+}
+
+"""Удаления ограничения, накладываемого на лист."""
+type DeleteLimitationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленного ограничения"""
+  id: ID
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteNoticeMutationInput {
   clientMutationId: String
   """Идентификатор уведомления"""
@@ -2366,7 +2427,7 @@ type DeleteOrganizationCuratorGroupPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор организации"""
-  id: ID!
+  id: ID
   """Успех мутации"""
   success: Boolean!
 }
@@ -2653,8 +2714,8 @@ type DocumentStatusType {
 type DocumentType implements Node {
   """Может ли пользователь изменять документ"""
   canChange: Boolean!
-  """Может ли пользователь удалять документ"""
-  canDelete: Boolean!
+  """Может ли пользователь изменять значение атрибута в документе"""
+  canChangeAttributeValue: Boolean!
   """Комментарий"""
   comment: String!
   """Дата создания"""
@@ -2814,7 +2875,7 @@ scalar JSONString
 
 """Тип ограничения, накладываемого на лист."""
 type LimitationType {
-  """Сообщение ошибки"""
+  """Сообщение об ошибке"""
   errorMessage: String!
   """Формула"""
   formula: String!
@@ -2963,8 +3024,10 @@ type Mutation {
   addFile(input: AddFileMutationInput!): AddFileMutationPayload!
   """Мутация для добавления группы."""
   addGroup(input: AddGroupMutationInput!): AddGroupMutationPayload!
+  """Добавление ограничения, накладываемого на лист."""
+  addLimitation(input: AddLimitationMutationInput!): AddLimitationMutationPayload!
   """Мутация на добавление организации в кураторскую группу."""
-  addOrganizationCuratorGroup(input: AddOrganizationCuratorGroupInput!): AddOrganizationCuratorGroupPayload!
+  addOrganizationsCuratorGroup(input: AddOrganizationsCuratorGroupInput!): AddOrganizationsCuratorGroupPayload!
   """Добавление страницы"""
   addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
@@ -3025,6 +3088,8 @@ type Mutation {
   changeGroupName(input: ChangeGroupNameMutationInput!): ChangeGroupNameMutationPayload!
   """Мутация для изменения привилегий группы."""
   changeGroupPermissions(input: ChangeGroupPermissionsMutationInput!): ChangeGroupPermissionsMutationPayload!
+  """Изменение ограничения, накладываемого на лист."""
+  changeLimitation(input: ChangeLimitationMutationInput!): ChangeLimitationMutationPayload!
   """Изменение свойств уведомления"""
   changeNotification(input: ChangeNotificationMutationInput!): ChangeNotificationMutationPayload!
   """Изменение свойств уведомлений"""
@@ -3097,6 +3162,8 @@ type Mutation {
   deleteFile(input: DeleteFileMutationInput!): DeleteFileMutationPayload!
   """Мутация для удаления группы."""
   deleteGroup(input: DeleteGroupMutationInput!): DeleteGroupMutationPayload!
+  """Удаления ограничения, накладываемого на лист."""
+  deleteLimitation(input: DeleteLimitationMutationInput!): DeleteLimitationMutationPayload!
   """Удаление уведомления"""
   deleteNotice(input: DeleteNoticeMutationInput!): DeleteNoticeMutationPayload!
   """Мутация на добавление пользователей в кураторскую группу."""
@@ -3143,6 +3210,8 @@ type Mutation {
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
   """Выгрузка архива значения ячейки типа `Файл`"""
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
+  """Обновление ограничений, накладываемых на лист, из json файла."""
+  updateLimitationsFromFile(input: UpdateLimitationsFromFileMutationInput!): UpdateLimitationsFromFileMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
 }
@@ -3626,10 +3695,14 @@ type PeriodGroupType {
 type PeriodType {
   """Может ли пользователь добавлять документы в период"""
   canAddAnyDivisionDocument: Boolean!
+  """Может ли пользователь изменять атрибуты периода"""
+  canChangeAttributes: Boolean!
   """Может ли пользователь изменять дивизионы периода"""
   canChangeDivisions: Boolean!
   """Может ли пользователь изменять группы периода"""
   canChangeGroups: Boolean!
+  """Может ли пользователь изменять ограничения периода"""
+  canChangeLimitations: Boolean!
   """Может ли пользователь изменять настройки периода"""
   canChangeSettings: Boolean!
   """Может ли пользователь изменять структуру листа периода"""
@@ -3873,6 +3946,8 @@ type Query {
     """Идентификатор кураторской группы"""
     curatorGroupId: ID!
   ): CuratorGroupType!
+  """Получение организаций не входящих ни в одну кураторскую группу"""
+  curatorGroupNewOrganizations(address: String, address_Icontains: String, after: String, before: String, department: [ID], department_In: [String], first: Int, id: ID, id_In: [String], inn: String, inn_Icontains: String, kind: String, kind_Icontains: String, kodbuhg: String, kodbuhg_Icontains: String, kpp: String, kpp_Icontains: String, last: Int, mail: String, mail_Icontains: String, name: String, name_Icontains: String, offset: Int, okpo: String, okpo_Icontains: String, parent: ID, parent_Isnull: Boolean, phone: String, phone_Icontains: String, region: ID, region_In: [ID], rubpnubp: String, rubpnubp_Icontains: String, site: String, site_Icontains: String): OrganizationTypeConnection!
   curatorGroupNewUsers(
     after: String
     before: String
@@ -4678,6 +4753,25 @@ type UnloadFileValueArchiveMutationPayload {
   errors: [ErrorFieldType!]!
   """Ссылка на сгенерированный архив"""
   src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UpdateLimitationsFromFileMutationInput {
+  clientMutationId: String
+  """json файл c ограничениями, накладываемыми на листы"""
+  limitationsFile: Upload!
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Обновление ограничений, накладываемых на лист, из json файла."""
+type UpdateLimitationsFromFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Новые ограничения"""
+  limitations: [LimitationType]
   """Успех мутации"""
   success: Boolean!
 }

@@ -1,26 +1,15 @@
 """Модуль для сервисов атрибутов."""
 
 from typing import Sequence, cast
-from django.db.models import QuerySet
-
-from django.template import Context, Template
 
 from django.core.exceptions import PermissionDenied
+from django.db.models import QuerySet
+from django.template import Context, Template
+
 from apps.core.models import User
-from apps.dcis.models import Period, Attribute, Document, AttributeValue, Value, Cell, Sheet
-from apps.dcis.permissions import can_change_period_attributes
-
-from .value_services import update_or_create_value, UpdateOrCrateValuesResult
-
-
-def add_attribute(period: Period):
-    pass
-
-
-def delete_attribute(user: User, attribute: Attribute):
-    """Удаление атрибута."""
-    can_change_period_attributes(user, attribute.period)
-    attribute.delete()
+from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Value
+from apps.dcis.permissions import can_change_attribute_value
+from .value_services import UpdateOrCrateValuesResult, update_or_create_value
 
 
 def change_attribute_value(
@@ -34,11 +23,11 @@ def change_attribute_value(
     Кроме этого, необходимо собрать контекст из существующих атрибутов и перерендерить.
     """
     try:
-        can_change_period_attributes(user, document.period)
+        can_change_attribute_value(user, document, attribute)
     except PermissionDenied as error:
         raise PermissionDenied({'value': str(error)})
 
-    attribute_value, created = AttributeValue.objects.update_or_create(
+    attribute_value, _ = AttributeValue.objects.update_or_create(
         document=document,
         attribute=attribute, defaults={
             'value': value
@@ -88,4 +77,3 @@ def create_attribute_context(user: User, document: Document) -> Context:
         'org_name': document.object_name
     })
     return Context(context)
-

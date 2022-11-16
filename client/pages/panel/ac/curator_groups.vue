@@ -20,11 +20,13 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
               v-btn.mr-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" color="primary" icon)
                 v-icon mdi-account-edit
             span {{ $t('curators.tooltips.changeUsers') }}
-      v-tooltip(v-if="hasPerm('dcis.change_curatorgroup')" bottom)
-        template(#activator="{ on, attrs }")
-          v-btn.mx-1(v-on="on" v-bind="attrs" icon color="primary")
-            v-icon mdi-briefcase-edit-outline
-        span {{ $t('curators.tooltips.changeOrganizations') }}
+      change-curator-group-organizations(v-if="hasPerm('dcis.change_curatorgroup')" :curator-group="item")
+        template(#activator="{ on: onMenu }")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs }")
+              v-btn.mx-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" color="primary" icon)
+                v-icon mdi-briefcase-edit-outline
+            span {{ $t('curators.tooltips.changeOrganizations') }}
       delete-menu(
         v-if="hasPerm('dcis.delete_curatorgroup')"
         :item-name="String($t('curators.deleteCuratorGroup.itemName'))"
@@ -56,6 +58,7 @@ import deleteCuratorGroupMutation from '~/gql/dcis/mutations/curator/delete_cura
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import AddCuratorGroupMenu from '~/components/dcis/curators/AddCuratorGroupMenu.vue'
 import ChangeCuratorGroupUsers from '~/components/dcis/curators/ChangeCuratorGroupUsers.vue'
+import ChangeCuratorGroupOrganizations from '~/components/dcis/curators/ChangeCuratorGroupOrganizations.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({
@@ -63,6 +66,7 @@ export default defineComponent({
     LeftNavigatorContainer,
     AddCuratorGroupMenu,
     ChangeCuratorGroupUsers,
+    ChangeCuratorGroupOrganizations,
     DeleteMenu
   },
   props: {

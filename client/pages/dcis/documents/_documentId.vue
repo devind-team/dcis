@@ -23,6 +23,7 @@ bread-crumbs(:items="bc" fluid)
             :loading="attributesLoading || attributesValuesLoading"
             :attributes="attributes"
             :attributes-values="attributesValues"
+            :readonly="!activeDocument.canChangeAttributeValue"
             :change-update-attributes-values="changeUpdateAttributesValues"
             :update-active-sheet="updateActiveSheet"
           )

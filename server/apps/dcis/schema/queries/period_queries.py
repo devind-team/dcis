@@ -16,11 +16,10 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Attribute, AttributeValue, Document, Limitation, Period, Privilege, Sheet
+from apps.dcis.models import Attribute, Limitation, Period, Privilege, Sheet
 from apps.dcis.permissions import can_change_period_sheet, can_view_period
 from apps.dcis.schema.types import (
     AttributeType,
-    AttributeValueType,
     DivisionModelTypeConnection,
     LimitationType,
     PeriodType,
@@ -109,12 +108,6 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Получение атрибутов, привязанных к периоду'
     )
-    attributes_values = graphene.List(
-        AttributeValueType,
-        document_id=graphene.ID(required=True, description='Идентификатор документа'),
-        required=True,
-        description='Атрибуты со значениями документа'
-    )
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -201,14 +194,3 @@ class PeriodQueries(graphene.ObjectType):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         return get_period_attributes(period, parent=parent)
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def resolve_attributes_values(
-        root: Any,
-        info: ResolveInfo,
-        document_id: str
-    ) -> QuerySet[Attribute]:
-        document: Document = Document.objects.select_related('period').get(pk=gid2int(document_id))
-        can_view_period(info.context.user, document.period)
-        return AttributeValue.objects.filter(document=document).all()
