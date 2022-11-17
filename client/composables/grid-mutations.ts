@@ -855,7 +855,6 @@ export const useChangeValueMutation = (
               sheetId: sheetId.value,
               value,
               error: null,
-              verified: true,
               columnId: cell.value.columnId,
               rowId: cell.value.rowId,
               payload: null,
@@ -939,7 +938,6 @@ const updateValues = (data: DocumentSheetQuery, values: ValueType[], updatedAt: 
       if (c.columnId in value) {
         c.value = value[c.columnId].value
         c.error = value[c.columnId].error
-        c.verified = value[c.columnId].verified
       }
       return c
     })

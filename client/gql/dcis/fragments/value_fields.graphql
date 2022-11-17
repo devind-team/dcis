@@ -2,7 +2,6 @@ fragment ValueFields on ValueType {
   id
   value
   payload
-  verified
   error
   columnId
   rowId

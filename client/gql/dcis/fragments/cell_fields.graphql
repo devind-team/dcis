@@ -26,7 +26,6 @@ fragment CellFields on CellType {
   colspan
   rowspan
   value
-  verified
   error
   aggregation
   __typename

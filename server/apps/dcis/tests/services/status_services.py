@@ -1,4 +1,5 @@
 """Тесты модуля, отвечающего за работу со статусами."""
+from itertools import product
 from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department
@@ -21,9 +22,11 @@ from apps.dcis.models import (
 )
 from apps.dcis.services.status_services import (
     AddStatusCheck,
-    LimitationError, add_document_status,
+    LimitationError,
+    add_document_status,
     delete_document_status,
-    get_initial_statuses, get_new_statuses,
+    get_initial_statuses,
+    get_new_statuses,
 )
 
 
@@ -182,8 +185,8 @@ class AddStatusCheckTestCase(TestCase):
         self.period = Period.objects.create(project=self.project)
 
         self.sheet1 = Sheet.objects.create(period=self.period, name='sheet1')
-        self.sheet1_row = RowDimension.objects.create(index=1, sheet=self.sheet1)
         self.sheet1_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet1) for i in range(1, 4)]
+        self.sheet1_row = RowDimension.objects.create(index=1, sheet=self.sheet1)
         self.sheet1_cells = {
             'A1': Cell.objects.create(column=self.sheet1_columns[0], row=self.sheet1_row, kind='n'),
             'B1': Cell.objects.create(column=self.sheet1_columns[1], row=self.sheet1_row, kind='n'),
@@ -191,8 +194,8 @@ class AddStatusCheckTestCase(TestCase):
         }
 
         self.sheet2 = Sheet.objects.create(period=self.period, name='sheet2')
-        self.sheet2_rows = [RowDimension.objects.create(index=i, sheet=self.sheet2) for i in range(1, 3)]
         self.sheet2_column = ColumnDimension.objects.create(index=1, sheet=self.sheet2)
+        self.sheet2_rows = [RowDimension.objects.create(index=i, sheet=self.sheet2) for i in range(1, 3)]
         self.sheet2_cells = {
             'A1': Cell.objects.create(
                 formula='=sheet1!A1',
@@ -202,30 +205,46 @@ class AddStatusCheckTestCase(TestCase):
             'A2': Cell.objects.create(column=self.sheet2_column, row=self.sheet2_rows[1], kind='n'),
         }
 
+        self.sheet3 = Sheet.objects.create(period=self.period, name='sheet3')
+        self.sheet3_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet3) for i in range(1, 3)]
+        self.sheet3_rows = [RowDimension.objects.create(index=i, sheet=self.sheet3) for i in range(1, 3)]
+        self.sheet3_cells = {
+            'A1': Cell.objects.create(column=self.sheet3_columns[0], row=self.sheet3_rows[0], kind='n'),
+            'B1': Cell.objects.create(column=self.sheet3_columns[1], row=self.sheet3_rows[0], kind='n'),
+            'A2': Cell.objects.create(column=self.sheet3_columns[0], row=self.sheet3_rows[1], kind='n'),
+            'B2': Cell.objects.create(column=self.sheet3_columns[1], row=self.sheet3_rows[1], kind='n'),
+        }
+
         self.limitations = [
             Limitation.objects.create(
                 index=1,
                 formula='sheet1!C1 > 5',
                 error_message='sheet1!C1 больше 5',
-                sheet=self.sheet1
+                sheet=self.sheet1,
             ),
             Limitation.objects.create(
                 index=2,
                 formula='2 / sheet2!A1 > 0.2',
                 error_message='sheet2!A1 больше 0.2',
-                sheet=self.sheet2
+                sheet=self.sheet2,
             ),
             Limitation.objects.create(
                 index=3,
                 formula='sheet2!A2 < sheet1!C1',
                 error_message='sheet2!A2 меньше sheet1!C1',
-                sheet=self.sheet2
+                sheet=self.sheet2,
             ),
+            Limitation.objects.create(
+                index=4,
+                formula='SUM(sheet3!A1:B2) > 10',
+                error_message='SUM(sheet3!A1:B2) меньше или равно 10',
+                sheet=self.sheet3,
+            )
         ]
 
-        self.document_with_calculation_errors = self._create_document(['0', '6', '6', '0', '3'])
-        self.document_with_limitation_errors = self._create_document(['1', '2', '3', '1', '4'])
-        self.document_without_errors = self._create_document(['3', '4', '7', '3', '5'])
+        self.document_with_calculation_errors = self._create_document(['0', '6', '6'], ['0', '3'], ['2', '4', '2', '4'])
+        self.document_with_limitation_errors = self._create_document(['1', '2', '3'], ['1', '4'], ['2', '3', '2', '3'])
+        self.document_without_errors = self._create_document(['3', '4', '7'], ['3', '5'], ['2', '4', '2', '4'])
 
     @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
     def test_check_limitations_with_calculation_errors(self) -> None:
@@ -255,7 +274,7 @@ class AddStatusCheckTestCase(TestCase):
                     form='sheet1',
                     formula='sheet1!C1 > 5',
                     error_message='sheet1!C1 больше 5',
-                    dependencies=encode({'sheet1!C1': 3.0})
+                    dependencies=encode({'sheet1!C1': 3.0}),
                 ),
                 LimitationError(
                     form='sheet2',
@@ -264,8 +283,19 @@ class AddStatusCheckTestCase(TestCase):
                     dependencies=encode({
                         'sheet2!A2': 4.0,
                         'sheet1!C1': 3.0,
-                    })
-                )
+                    }),
+                ),
+                LimitationError(
+                    form='sheet3',
+                    formula='SUM(sheet3!A1:B2) > 10',
+                    error_message='SUM(sheet3!A1:B2) меньше или равно 10',
+                    dependencies=encode({
+                        'sheet3!A1': 2.0,
+                        'sheet3!B1': 3.0,
+                        'sheet3!A2': 2.0,
+                        'sheet3!B2': 3.0,
+                    }),
+                ),
             ],
             error.exception.params,
         )
@@ -275,24 +305,37 @@ class AddStatusCheckTestCase(TestCase):
         """Тестирование функции `check_limitations` без ошибок."""
         AddStatusCheck.check_limitations(self.document_without_errors)
 
-    def _create_document(self, values: list[str]) -> Document:
+    def _create_document(
+        self,
+        sheet1_values: list[str],
+        sheet2_values: list[str],
+        sheet3_values: list[str],
+    ) -> Document:
         """Создание документа со значениями."""
         document = Document.objects.create(period=self.period)
-        document.sheets.set([self.sheet1, self.sheet2])
-        for i in range(3):
+        document.sheets.set([self.sheet1, self.sheet2, self.sheet3])
+        for value, column in zip(sheet1_values, self.sheet1_columns):
             Value.objects.create(
-                value=values[i],
+                value=value,
                 document=document,
                 sheet=self.sheet1,
-                column=self.sheet1_columns[i],
-                row=self.sheet1_row
+                column=column,
+                row=self.sheet1_row,
             )
-        for i in range(2):
+        for value, row in zip(sheet2_values, self.sheet2_rows):
             Value.objects.create(
-                value=values[3 + i],
+                value=value,
                 document=document,
                 sheet=self.sheet2,
                 column=self.sheet2_column,
-                row=self.sheet2_rows[i]
+                row=row,
+            )
+        for value, dimensions in zip(sheet3_values, product(self.sheet3_rows, self.sheet3_columns)):
+            Value.objects.create(
+                value=value,
+                document=document,
+                sheet=self.sheet3,
+                column=dimensions[1],
+                row=dimensions[0],
             )
         return document

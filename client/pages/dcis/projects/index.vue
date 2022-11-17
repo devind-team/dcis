@@ -44,7 +44,8 @@ bread-crumbs(:items="breadCrumbs")
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
+import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta } from '#app'
+import { useRoute, useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useApolloHelpers, useFilters, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'
@@ -109,8 +110,12 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      if (projects.value && projects.value.length && route.query.deleteProjectId) {
-        deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.deleteProjectId } } })
+      if (route.query.deleteProjectId) {
+        deleteUpdate(
+          defaultClient.cache,
+          { data: { deleteProject: { id: route.query.deleteProjectId } } },
+          false
+        )
         router.push(localePath({ name: 'dcis-projects' }))
       }
     })

@@ -16,12 +16,10 @@ import {
   computed,
   defineComponent,
   useNuxt2Meta,
-  useNuxtApp,
-  useRoute,
-  useRouter,
   useRuntimeConfig,
   onMounted
 } from '#app'
+import { useRoute, useRouter } from '#imports'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'
 import { AuthCbiasMutation, AuthCbiasMutationVariables, UserType } from '~/types/graphql'

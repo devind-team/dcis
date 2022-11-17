@@ -21,7 +21,8 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, onMounted, useRoute, useRouter } from '#app'
+import { defineComponent, onMounted } from '#app'
+import { useRoute, useRouter } from '#imports'
 import { useApolloHelpers, useCommonQuery, useFilters, useI18n } from '~/composables'
 import { PeriodsQuery, PeriodsQueryVariables, ProjectType } from '~/types/graphql'
 import { toGlobalId } from '~/services/graphql-relay'
@@ -58,7 +59,7 @@ export default defineComponent({
       data: periods,
       loading,
       addUpdate,
-      update
+      deleteUpdate
     } = useCommonQuery<PeriodsQuery, PeriodsQueryVariables>({
       document: periodsQuery,
       variables: { projectId: route.params.projectId }
@@ -70,15 +71,12 @@ export default defineComponent({
     ) => addUpdate(cache, result, 'period')
 
     onMounted(() => {
-      if (periods.value && route.query.deletePeriodId) {
-        update(
+      if (route.query.deletePeriodId) {
+        deleteUpdate(
           defaultClient.cache,
           { data: { deletePeriod: { id: route.query.deletePeriodId } } },
-          (cacheData, { data: { deletePeriod: { id: periodId } } }
-          ) => {
-            cacheData.periods = cacheData.periods.filter(period => period.id !== periodId)
-            return cacheData
-          })
+          false
+        )
         router.push(localePath({ name: 'dcis-projects-projectId-periods', params: route.params }))
       }
     })

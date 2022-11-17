@@ -23,7 +23,7 @@ mutation-form(
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, useRouter } from '#app'
+import { defineComponent, PropType, ref } from '#app'
 import { DataProxy } from 'apollo-cache'
 import { useI18n } from '~/composables'
 import { AddSectionTextMutationPayload, PageType } from '~/types/graphql'
