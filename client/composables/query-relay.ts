@@ -34,6 +34,7 @@ export type QueryRelayParams<TResult = any, TVariables = any> = {
 }
 
 export type QueryRelayOptions = {
+  isScrollDown: boolean,
   pagination: PaginationInterface,
   fetchScroll?: Document | HTMLElement | undefined
   fetchThrottle?: number
@@ -55,7 +56,8 @@ export type QueryRelayResult<TResult = any, TVariables = any, TNode extends { id
 export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number} = any> (
   queryParams: QueryRelayParams<TResult, TVariables>,
   queryOptions: QueryRelayOptions = {
-    pagination: useOffsetPagination()
+    pagination: useOffsetPagination(),
+    isScrollDown: true
   }
 ): QueryRelayResult<TResult, TVariables, TNode> {
   const { document, variables, options } = queryParams

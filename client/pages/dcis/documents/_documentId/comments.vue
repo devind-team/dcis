@@ -2,14 +2,18 @@
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   v-row(justify="center" )
     div(class="view messages")
-      section(class="chat-box")
-        v-divider
-        div(v-for="comment in comments"
-          :class="(comment.user.username === state.username ? 'message current-user' : 'message')")
-          div(class="message-inner")
-            div(class="username") {{ comment.user.username }}
-            div(class="content") {{ comment.comment }}
-            div(class="time" align="right") {{ timeHM(comment.createdAt) }}
+      section(v-if="!commentsLoading" class="chat-box")
+        div(
+          v-for="comment in comments"
+        )
+          div(class="container")
+            div(v-if="comment.isNewDate" align="center")
+              v-chip(small) {{ date(comment.createdAt) }}
+              v-divider
+            div(class="message-inner")
+              div(class="username") {{ comment.user.username }}
+              div(class="content") {{ comment.comment }}
+              div(class="time" align="right") {{ timeHM(comment.createdAt) }}
     footer(class="textarea")
       form
         v-textarea(label="Введите комментарий" v-model="inputMessage" auto-grow rows="1")
@@ -26,7 +30,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, PropType, reactive, onMounted, ref } from '#app'
+import { computed, ComputedRef, defineComponent, PropType, ref } from '#app'
 import { useMutation } from '@vue/apollo-composable'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useFilters, useQueryRelay, useCursorPagination } from '~/composables'
@@ -49,16 +53,13 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
-    const { timeHM } = useFilters()
+    const { timeHM, date } = useFilters()
     const inputMessage = ref('')
     const pageSize = ref(5)
-    const state = reactive({
-      username: '',
-      messages: []
-    })
 
     const {
-      data: comments,
+      data: result,
+      loading: commentsLoading,
       addUpdate
     } = useQueryRelay<DocumentCommentsQuery,
       DocumentCommentsQueryVariables>({
@@ -69,6 +70,13 @@ export default defineComponent({
         pagination: useCursorPagination({ pageSize: pageSize.value }),
         fetchScroll: typeof document === 'undefined' ? null : document
       })
+
+    const comments = computed(() =>
+      result.value.reduce((newArr, currentItem, index) => {
+        newArr.push({ ...currentItem, isNewDate: date(currentItem.createdAt) !== date(result.value[index - 1]?.createdAt) })
+        return newArr
+      }, []).reverse()
+    )
 
     const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentCommentMutation,
       AddDocumentCommentMutationVariables>(
@@ -87,33 +95,6 @@ export default defineComponent({
       message: inputMessage.value
     }))
 
-    onMounted(() => {
-      const data = {
-        0: {
-          username: 'Куратор',
-          content: 'Какой-то комментарий',
-          time: timeHM(Date())
-        },
-        1: {
-          username: 'Куратор',
-          content: 'Да, хорошо, вычитывайте. В названиях разделов не должно быть только английских слов. Например, ' +
-            'к "3.1.5 Sentry" надо добавить русских слов, чтобы человеку не очень знакомому с программированием, ' +
-            'было понятно что это.',
-          time: timeHM(Date())
-        }
-      }
-      const messages = []
-      Object.keys(data).forEach((key) => {
-        messages.push({
-          id: key,
-          username: data[key].username,
-          content: data[key].content,
-          time: data[key].time
-        })
-      })
-      state.messages = messages
-    })
-
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
@@ -124,12 +105,13 @@ export default defineComponent({
     ]))
     return {
       bc,
-      state,
       inputMessage,
       timeHM,
+      date,
       comments,
       addDocumentCommentMutate,
-      addDocumentCommentVariables
+      addDocumentCommentVariables,
+      commentsLoading
     }
   }
 })
@@ -149,18 +131,21 @@ export default defineComponent({
   box-shadow: 0px 0px 12px rgba(100, 100, 100, 0.2);
   flex: 1 1 100%;
   padding: 30px;
-  .message {
-    display: flex;
-    margin-bottom: 15px;
+
+  .container {
+    flex-direction: row;
 
     .message-inner {
       .username {
-        color: #888;
+        color: #333;
         font-size: 14px;
+        margin-top: 10px;
         margin-bottom: 5px;
+        font-weight: 700;
         padding-left: 15px;
         padding-right: 15px;
       }
+
       .content {
         display: inline-block;
         padding: 10px 20px;
@@ -171,24 +156,12 @@ export default defineComponent({
         line-height: 1.2em;
         text-align: left;
       }
+
       .time {
         color: #888;
         font-size: 12px;
-        margin-bottom: 5px;
         padding-left: 15px;
         padding-right: 15px;
-      }
-    }
-    &.current-user {
-      margin-top: 30px;
-      justify-content: flex-end;
-      text-align: right;
-      .message-inner {
-        max-width: 75%;
-        .content {
-          color: #FFF;
-          font-weight: 600;
-        }
       }
     }
   }

@@ -2,6 +2,7 @@ query DocumentComments($documentId: ID!, $first: Int, $after: String) {
   documentComments(documentId: $documentId, first: $first, after: $after) {
     edges {
       node {
+        id
         comment
         createdAt
         user {
@@ -15,6 +16,7 @@ query DocumentComments($documentId: ID!, $first: Int, $after: String) {
         }
         __typename
       }
+      __typename
     }
     pageInfo {
       startCursor
