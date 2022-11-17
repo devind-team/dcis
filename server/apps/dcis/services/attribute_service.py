@@ -5,6 +5,7 @@ from typing import Sequence, cast
 from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 from django.template import Context, Template
+from django.utils.safestring import mark_safe
 
 from apps.core.models import User
 from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Value
@@ -67,13 +68,13 @@ def create_attribute_context(user: User, document: Document) -> Context:
         for attribute_value in AttributeValue.objects.filter(document=document).values('attribute_id', 'value')
     }
     context: dict[str, str] = {
-        attribute.key: attribute_values.get(attribute.id, attribute.default)
+        attribute.key: mark_safe(attribute_values.get(attribute.id, attribute.default))
         for attribute in attributes
     }
     # Расширяем контекст с помощью встроенных переменных
     context.update({
-        'user': user.get_full_name,
-        'org_id': document.object_id,
-        'org_name': document.object_name
+        'user': mark_safe(user.get_full_name),
+        'org_id': mark_safe(document.object_id),
+        'org_name': mark_safe(document.object_name)
     })
     return Context(context)
