@@ -51,6 +51,7 @@ export default {
     },
     links: {
       documents: 'Документы',
+      monitoring: 'Мониторинг',
       departments: 'Департаменты',
       organizations: 'Организации',
       groups: 'Группы',
@@ -293,6 +294,14 @@ export default {
       organizationHead: 'Начальник организации',
       user: 'Пользователь, добавивший строку',
       unload: 'Выгрузить'
+    },
+    tabs: {
+      tabNameDocuments: {
+        name: 'Документы'
+      },
+      tabNameNotSupplied: {
+        name: 'Не подавшие'
+      }
     }
   },
   grid: {

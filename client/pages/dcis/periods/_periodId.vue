@@ -37,7 +37,9 @@ export default defineComponent({
     const links = computed<LinksType[]>(() => {
       const result: LinksType[] = [
         {
-          title: t('dcis.periods.links.documents') as string,
+          title: period.value && period.value.isCurator
+            ? t('dcis.periods.links.monitoring') as string
+            : t('dcis.periods.links.documents') as string,
           to: 'dcis-periods-periodId-documents',
           icon: 'file-table-box-multiple-outline'
         }
