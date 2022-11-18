@@ -301,7 +301,9 @@ class ExcelExtractor:
                     success, value = evaluate_formula(evaluator, coordinate)
                     cell.default = value if success else None
                     cell.default_error = value if not success else None
-                    cells_values[coordinate] = cell.default
+                    # cells_values - для локального пересчета, если все ок - изменяем, если нет, ничего не делаем
+                    if success:
+                        cells_values[coordinate] = cell.default
                     sheet.cache_container.add_formula(cell.coordinate, cell.formula)
         return sheets
 
