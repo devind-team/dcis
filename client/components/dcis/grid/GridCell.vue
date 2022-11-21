@@ -27,7 +27,7 @@ import {
   CellType,
   DivisionModelType,
   DocumentSheetQuery,
-  DocumentsSheetQuery,
+  PeriodSheetQuery,
   DocumentType,
   SheetType,
   ValueFilesQuery,
@@ -85,7 +85,7 @@ export default defineComponent({
     })
 
     const changeDefault = mode === GridMode.CHANGE
-      ? useChangeCellDefaultMutation(updateSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      ? useChangeCellDefaultMutation(updateSheet as Ref<UpdateType<PeriodSheetQuery>>)
       : null
     const changeValue = mode === GridMode.WRITE
       ? useChangeValueMutation(

@@ -4712,6 +4712,8 @@ export type Query = {
   period: PeriodType;
   /** Возможные дивизионы периода */
   periodPossibleDivisions?: Maybe<DivisionModelTypeConnection>;
+  /** Выгрузка листа для периода */
+  periodSheet: SheetType;
   /** Пользователи, связанные периодом */
   periodUsers: Array<UserType>;
   /** Периоды */
@@ -5041,6 +5043,11 @@ export type QueryPeriodPossibleDivisionsArgs = {
   last?: InputMaybe<Scalars['Int']>;
   periodId: Scalars['ID'];
   search?: InputMaybe<Scalars['String']>;
+};
+
+/** Схема запросов данных. */
+export type QueryPeriodSheetArgs = {
+  sheetId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -6813,6 +6820,12 @@ export type PeriodPossibleDivisionsQueryVariables = Exact<{
 }>;
 
 export type PeriodPossibleDivisionsQuery = { __typename?: 'Query', periodPossibleDivisions?: { __typename?: 'DivisionModelTypeConnection', edges: Array<{ __typename?: 'DivisionModelTypeEdge', node?: { __typename: 'DivisionModelType', id: string, model: string, name: string } | null } | null> } | null };
+
+export type PeriodSheetQueryVariables = Exact<{
+  sheetId: Scalars['ID'];
+}>;
+
+export type PeriodSheetQuery = { __typename?: 'Query', periodSheet: { __typename: 'SheetType', canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, error?: string | null, aggregation?: string | null }> }> | null } };
 
 export type PeriodUsersQueryVariables = Exact<{
   periodId: Scalars['ID'];

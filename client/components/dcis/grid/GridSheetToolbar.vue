@@ -98,7 +98,7 @@ import {
   useI18n,
   UpdateType
 } from '~/composables'
-import { CellType, DocumentsSheetQuery } from '~/types/graphql'
+import { CellType, PeriodSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
 import AggregationProperty from '~/components/dcis/grid/properties/AggregationProperty.vue'
 import { GridChoiceType } from '~/composables/grid-choice'
@@ -108,7 +108,7 @@ export default defineComponent({
   props: {
     gridChoice: { type: Object as PropType<GridChoiceType>, required: true },
     activeSheetIndex: { type: Number, default: null },
-    updateActiveSheet: { type: Function as PropType<UpdateType<DocumentsSheetQuery>>, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateType<PeriodSheetQuery>>, required: true },
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null },
     selectedColumnDimensionsOptions: { type: Object as PropType<ColumnDimensionsOptionsType>, default: null },
     selectedRowDimensionsOptions: { type: Object as PropType<RowDimensionsOptionsType>, default: null }

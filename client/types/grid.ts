@@ -3,7 +3,7 @@ import {
   ColumnDimensionType,
   RowDimensionType,
   DocumentSheetQuery,
-  DocumentsSheetQuery
+  PeriodSheetQuery
 } from '~/types/graphql'
 import { UpdateType } from '~/composables'
 
@@ -19,7 +19,7 @@ export enum GridMode {
   WRITE
 }
 
-export type UpdateSheetType = UpdateType<DocumentsSheetQuery | DocumentSheetQuery>
+export type UpdateSheetType = UpdateType<PeriodSheetQuery | DocumentSheetQuery>
 
 /*
  * Кодовые ошибки

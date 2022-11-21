@@ -38,9 +38,9 @@ mutation-modal-form(
 import { DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { PropType, Ref } from '#app'
-import { UpdateType } from '~/composables'
+import { updateRowDimension, UpdateType } from '~/composables'
 import {
-  DocumentsSheetQuery,
+  PeriodSheetQuery,
   RowDimensionType,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables
@@ -87,7 +87,7 @@ export default defineComponent({
       }
     }))
 
-    const updateSheet = inject<Ref<UpdateType<DocumentsSheetQuery>>>('updateActiveSheet')
+    const updateSheet = inject<Ref<UpdateType<PeriodSheetQuery>>>('updateActiveSheet')
     const update = (dataProxy: DataProxy, result: Omit<FetchResult<ChangeRowDimensionMutation>, 'context'>) => {
       updateRowDimension(updateSheet.value, dataProxy, result)
     }

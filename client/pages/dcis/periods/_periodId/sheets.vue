@@ -32,11 +32,11 @@ import { BreadCrumbsItem } from '~/types/devind'
 import {
   PeriodType,
   PeriodQuery,
-  DocumentsSheetQuery,
-  DocumentsSheetQueryVariables,
+  PeriodSheetQuery,
+  PeriodSheetQueryVariables,
   RenameSheetMutation
 } from '~/types/graphql'
-import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
+import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
@@ -68,13 +68,12 @@ export default defineComponent({
       data: activeSheet,
       update: updateActiveSheet
     } = useCommonQuery<
-      DocumentsSheetQuery,
-      DocumentsSheetQueryVariables
+      PeriodSheetQuery,
+      PeriodSheetQueryVariables
     >({
-      document: documentsSheetQuery,
+      document: periodSheetQuery,
       variables: () => ({
-        sheetId: props.period.sheets[activeSheetIndex.value].id,
-        documentIds: []
+        sheetId: props.period.sheets[activeSheetIndex.value].id
       })
     })
 

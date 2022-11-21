@@ -434,12 +434,8 @@ class SheetUnloader(DataUnloader):
         return sheet
 
 
-class DocumentsSheetUnloader(SheetUnloader):
-    """Выгрузчик листа с несколькими документами."""
-
-    def __init__(self, sheet: Sheet, document_ids: list[int | str], fields: Sequence[str]) -> None:
-        super().__init__(sheet, fields)
-        self.document_ids = document_ids
+class PeriodSheetUnloader(SheetUnloader):
+    """Выгрузчик листа для периода."""
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""
@@ -494,4 +490,32 @@ class DocumentSheetUnloader(SheetUnloader):
             'can_add_child_row_dimension': self.add_child_row_dimension.has_privilege,
             'can_change_child_row_dimension_height': self.change_child_row_dimension_height.has_privilege,
             'can_delete_child_row_dimension': self.delete_child_row_dimension.has_privilege,
+        }
+
+
+class DocumentsSheetUnloader(SheetUnloader):
+    """Выгрузчик листа с несколькими документами."""
+
+    def __init__(self, sheet: Sheet, document_ids: list[int | str], fields: Sequence[str]) -> None:
+        super().__init__(sheet, fields)
+        self.document_ids = document_ids
+
+    def unload_rows(self) -> list[dict] | dict:
+        """Выгрузка строк."""
+        rows = self.sheet.rowdimension_set.filter(parent__isnull=True)
+        return SheetRowsUnloader(
+            columns_unloader=self.columns_unloader,
+            rows=rows,
+            cells=Cell.objects.filter(row__in=[row.id for row in rows]),
+            merged_cells=self.sheet.mergedcell_set.all(),
+            values=Value.objects.none(),
+        ).unload()
+
+    def get_permissions(self) -> dict[str, bool]:
+        return {
+            'can_change': False,
+            'can_change_value': False,
+            'can_add_child_row_dimension': False,
+            'can_change_child_row_dimension_height': False,
+            'can_delete_child_row_dimension': False,
         }

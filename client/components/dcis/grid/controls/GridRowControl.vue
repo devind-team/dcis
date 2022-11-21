@@ -37,7 +37,7 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
 import { PropType, Ref } from '#app'
 import { AddRowDimensionPosition, UpdateType } from '~/composables'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentSheetQuery, DocumentsSheetQuery, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
+import { DocumentSheetQuery, PeriodSheetQuery, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
 
 export default defineComponent({
@@ -65,7 +65,7 @@ export default defineComponent({
     const addRowDimensionMutate = mode === GridMode.CHANGE
       ? useAddRowDimensionMutation(
         activeSheet,
-        updateSheet as Ref<UpdateType<DocumentsSheetQuery>>
+        updateSheet as Ref<UpdateType<PeriodSheetQuery>>
       )
       : useAddChildRowDimensionMutation(
         computed(() => activeDocument.value ? activeDocument.value.id : null),
@@ -74,7 +74,7 @@ export default defineComponent({
       )
 
     const deleteRowDimensionMutate = mode === GridMode.CHANGE
-      ? useDeleteRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      ? useDeleteRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<PeriodSheetQuery>>)
       : useDeleteChildRowDimensionMutation(activeSheet, updateSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const deleteRowDimension = async (row: RowDimensionType) => {

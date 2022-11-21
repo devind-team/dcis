@@ -33,7 +33,7 @@ from apps.dcis.services.period_services import (
     get_user_period_privileges,
     get_user_periods,
 )
-from apps.dcis.services.sheet_unload_services import DocumentsSheetUnloader
+from apps.dcis.services.sheet_unload_services import DocumentsSheetUnloader, PeriodSheetUnloader
 
 
 class PeriodQueries(graphene.ObjectType):
@@ -86,6 +86,12 @@ class PeriodQueries(graphene.ObjectType):
         description='Отдельные привилегии пользователя для периода'
     )
 
+    period_sheet = graphene.Field(
+        SheetType,
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        required=True,
+        description='Выгрузка листа для периода'
+    )
     documents_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
@@ -162,6 +168,16 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
+    def resolve_period_sheet(root: Any, info: ResolveInfo, sheet_id: str) -> list[dict] | dict:
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        can_change_period_sheet(info.context.user, sheet.period)
+        return PeriodSheetUnloader(
+            sheet=sheet,
+            fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
+        ).unload()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_documents_sheet(
         root: Any,
         info: ResolveInfo,
@@ -169,7 +185,6 @@ class PeriodQueries(graphene.ObjectType):
         document_ids: list[str]
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        can_change_period_sheet(info.context.user, sheet.period)
         return DocumentsSheetUnloader(
             sheet=sheet,
             document_ids=[gid2int(document_id) for document_id in document_ids],

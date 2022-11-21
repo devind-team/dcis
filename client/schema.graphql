@@ -4077,6 +4077,11 @@ type Query {
     """Запрос поиска"""
     search: String
   ): DivisionModelTypeConnection
+  """Выгрузка листа для периода"""
+  periodSheet(
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Пользователи, связанные периодом"""
   periodUsers(
     """Идентификатор периода"""

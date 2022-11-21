@@ -77,7 +77,7 @@
 import { defineComponent, Ref, PropType, toRef, provide, ref } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
+import { DocumentType, SheetType, RowDimensionType, PeriodSheetQuery, DocumentSheetQuery } from '~/types/graphql'
 import {
   UpdateType,
   useChangeColumnDimensionWidthMutation,
@@ -138,10 +138,10 @@ export default defineComponent({
     }
 
     const changeColumnWidth = props.mode === GridMode.CHANGE
-      ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
       : null
     const changeRowHeight = props.mode === GridMode.CHANGE
-      ? useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
+      ? useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
       : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
 
     const {

@@ -1,0 +1,20 @@
+#import "../fragments/sheet_fields.graphql"
+#import "../fragments/column_dimension_fields.graphql"
+#import "../fragments/row_dimension_fields.graphql"
+
+query PeriodSheet($sheetId: ID!) {
+  periodSheet(sheetId: $sheetId) {
+    ...SheetFields
+    columns {
+      ...ColumnDimensionFields
+    }
+    rows {
+      ...RowDimensionFields
+    }
+    canChange
+    canChangeValue
+    canAddChildRowDimension
+    canChangeChildRowDimensionHeight
+    canDeleteChildRowDimension
+  }
+}

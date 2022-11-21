@@ -21,12 +21,12 @@ class Cache(ABC):
         return cache.set(self.key, encode(self))
 
     @classmethod
-    def get(cls, object_id: str | int) -> Union['Cache', None]:
+    def get(cls, object_id: int | str) -> Union['Cache', None]:
         """Забираем структуру из кеша."""
         result = cache.get(cls.KEY_TEMPLATE % object_id)
         return None if result is None else decode(result)
 
     @classmethod
-    def delete(cls, object_id: str | int) -> bool:
+    def delete(cls, object_id: int | str) -> bool:
         """Удаление структуры из кеша."""
         return cache.delete(cls.KEY_TEMPLATE % object_id)
