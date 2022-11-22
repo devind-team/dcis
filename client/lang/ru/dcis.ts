@@ -58,6 +58,7 @@ export default {
       limitations: 'Ограничения',
       attributes: 'Атрибуты',
       sheets: 'Таблица',
+      report: 'Сводный отчет',
       settings: '@:settings'
     },
     statuses: {
@@ -214,6 +215,19 @@ export default {
     },
     sheets: {
       name: '@:dcis.periods.links.sheets'
+    },
+    report: {
+      name: '@:dcis.periods.links.report',
+      settings: {
+        unload: 'Выгрузить сводный отчет'
+      },
+      filters: {
+        documentsFilter: {
+          title: 'Фильтр документов',
+          noFiltrationMessage: 'Документы не выбраны',
+          multipleMessage: 'Выбрано документов: {count}'
+        }
+      }
     }
   },
   documents: {

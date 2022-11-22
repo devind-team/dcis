@@ -2,7 +2,7 @@
 left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.sheets.name') }}
     v-spacer
-    settings-period-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
+    sheets-settings-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
       v-btn(v-on="on" v-bind="attrs" icon)
         v-icon mdi-cog
   grid-sheets(
@@ -40,10 +40,10 @@ import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import SettingsPeriodMenu from '~/components/dcis/periods/SettingsPeriodMenu.vue'
+import SheetsSettingsMenu from '~/components/dcis/periods/SheetsSettingsMenu.vue'
 
 export default defineComponent({
-  components: { SettingsPeriodMenu, LeftNavigatorContainer, SheetControl, GridSheets },
+  components: { SheetsSettingsMenu, LeftNavigatorContainer, SheetControl, GridSheets },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
