@@ -1,13 +1,15 @@
 """Модуль, отвечающий за работу с метаданными ячейки."""
 import contextlib
 
-from django.db.models import QuerySet, Q, ExpressionWrapper
+from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import gid2int
-from devind_helpers.orm_utils import get_object_or_404
+from django.db.models import QuerySet
+
 from apps.core.models import User
-from apps.dcis.permissions import can_change_period_sheet
 from apps.dcis.models import Cell, Period, RelationshipCells
+from apps.dcis.permissions import can_change_period_sheet
+
 
 CellIDType = int | str
 
@@ -21,9 +23,9 @@ def check_cell_permission(user: User, cell_id: CellIDType) -> Cell:
 
 
 def add_cell_aggregation(
-        user: User,
-        cell_id: CellIDType,
-        cells_id: list[CellIDType]
+    user: User,
+    cell_id: CellIDType,
+    cells_id: list[CellIDType]
 ) -> tuple[list[Cell] | QuerySet[Cell], list[ErrorFieldType]]:
     """Добавляем ячейки к агрегирующей ячейке."""
     cell: Cell = check_cell_permission(user, cell_id)
