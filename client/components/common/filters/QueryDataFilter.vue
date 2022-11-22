@@ -12,6 +12,7 @@ apollo-query(
     :items="data || []"
     :item-key="itemKey"
     :modal="modal"
+    :fullscreen="fullscreen"
     :multiple="multiple"
     :has-select-all="hasSelectAll"
     :message-container-class="messageContainerClass"
@@ -82,7 +83,8 @@ export default defineComponent({
     searchKey: { type: [String, Array] as PropType<string | string[]>, default: 'search' },
 
     itemKey: { type: String, default: undefined },
-    modal: { type: Boolean, default: undefined },
+    modal: { type: Boolean, default: false },
+    fullscreen: { type: Boolean, default: undefined },
     multiple: { type: Boolean, default: undefined },
     hasSelectAll: { type: Boolean, default: undefined },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },

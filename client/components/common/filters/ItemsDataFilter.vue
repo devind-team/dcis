@@ -5,6 +5,7 @@ base-data-filter(
   :message-container-close="!!selectedItems.length"
   :title="title"
   :modal="modal"
+  :fullscreen="fullscreen"
   :max-width="maxWidth"
   :max-height="maxHeight"
   @clear="clear"
@@ -90,6 +91,7 @@ export default defineComponent({
     items: { type: Array as PropType<Item[]>, required: true },
     itemKey: { type: String, default: 'id' },
     modal: { type: Boolean, default: false },
+    fullscreen: { type: Boolean, default: undefined },
     multiple: { type: Boolean, default: false },
     hasSelectAll: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null },

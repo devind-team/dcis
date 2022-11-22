@@ -4,6 +4,7 @@ component(
   :is="modal ? 'v-dialog' : 'v-menu'"
   :max-width="maxWidth"
   :close-on-content-click="false"
+  :fullscreen="fullscreen"
   bottom
   scrollable
 )
@@ -53,6 +54,7 @@ export default defineComponent({
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
     messageContainerClose: { type: Boolean, default: false },
     modal: { type: Boolean, default: false },
+    fullscreen: { type: Boolean, default: undefined },
     title: {
       type: String,
       default () {
