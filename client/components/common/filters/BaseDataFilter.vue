@@ -8,15 +8,17 @@ component(
   bottom
   scrollable
 )
-  template(#activator="{ on }")
+  template(#activator="{ on, attrs }")
     slot(
       name="message"
       :on="on"
+      :attrs="attrs"
       :message="message"
       :container-class="messageContainerClass"
     )
       v-chip(
         v-on="on"
+        v-bind="attrs"
         :class="messageContainerClass"
         :close="messageContainerClose"
         @click:close="$emit('clear')"
@@ -43,28 +45,23 @@ component(
 
 <script lang="ts">
 import { VMenu, VDialog } from 'vuetify/lib'
-import type { PropType, Ref, SetupContext } from '#app'
+import type { PropType, Ref } from '#app'
 import { defineComponent, ref } from '#app'
 import { Class } from '~/types/filters'
 
 export default defineComponent({
   components: { VMenu, VDialog },
   props: {
+    title: { type: String, default: null },
     message: { type: String, required: true },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
     messageContainerClose: { type: Boolean, default: false },
     modal: { type: Boolean, default: false },
     fullscreen: { type: Boolean, default: undefined },
-    title: {
-      type: String,
-      default () {
-        return (this as any).$options.methods.t.call(this, 'title')
-      }
-    },
     maxWidth: { type: [String, Number], default: '400px' },
     maxHeight: { type: [String, Number], default: '400px' }
   },
-  setup (_, { emit }: SetupContext) {
+  setup (_, { emit }) {
     const active: Ref<boolean> = ref<boolean>(false)
 
     const close = () => {

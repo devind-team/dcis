@@ -20,11 +20,11 @@ base-data-filter(
   template(#subtitle)
     slot(name="subtitle")
   template(#fixed-content)
-    slot(name="search" :search-label="searchLabel" :search-function="searchFunction" :on="searchOn")
+    slot(name="search" :search-label="searchLabelComputed" :search-function="searchFunction" :on="searchOn")
       v-card-text.flex-shrink-0(v-if="searchFunction")
         v-text-field(
           v-model="search"
-          :label="searchLabel"
+          :label="searchLabelComputed"
           prepend-icon="mdi-magnify"
           hide-details
           clearable
@@ -34,6 +34,7 @@ base-data-filter(
       name="items"
       :items="items"
       :searchItems="searchItems"
+      :temp-items="tempItems"
       :item-key="itemKey"
       :multiple="multiple"
       :has-select-all="hasSelectAll"
@@ -81,7 +82,15 @@ base-data-filter(
 import type { PropType } from '#app'
 import { computed, defineComponent, ref } from '#app'
 import { useI18n } from '~/composables'
-import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, SearchOn } from '~/types/filters'
+import {
+  Class,
+  GetName,
+  Item,
+  MessageFunction,
+  MultipleMessageFunction,
+  SearchFunction,
+  SearchOn
+} from '~/types/filters'
 import BaseDataFilter from '~/components/common/filters/BaseDataFilter.vue'
 
 export default defineComponent({
@@ -98,22 +107,13 @@ export default defineComponent({
     title: { type: String, default: null },
     maxWidth: { type: [String, Number], default: undefined },
     maxHeight: { type: [String, Number], default: undefined },
-    noFiltrationMessage: {
-      type: String,
-      default () {
-        return (this as any).$t('common.filters.itemsDataFilter.noFiltrationMessage')
-      }
-    },
+    messageFunction: { type: Function as PropType<MessageFunction>, default: null },
+    noFiltrationMessage: { type: String, default: null },
     multipleMessageFunction: {
       type: Function as PropType<MultipleMessageFunction | null>,
       default: null
     },
-    searchLabel: {
-      type: String,
-      default () {
-        return (this as any).$t('common.filters.itemsDataFilter.search')
-      }
-    },
+    searchLabel: { type: String, default: null },
     searchFunction: { type: Function as PropType<SearchFunction>, default: null },
     getName: {
       type: Function as PropType<GetName>,
@@ -124,8 +124,11 @@ export default defineComponent({
     defaultValue: { type: [Object, Array], default: () => ([]) }
   },
   setup (props, { emit }) {
-    const { tc } = useI18n()
+    const { t, tc } = useI18n()
 
+    const searchLabelComputed = computed<string>(() =>
+      props.searchLabel || t('common.filters.itemsDataFilter.search')
+    )
     const search = ref<string>('')
     const tempValue = ref<Item[] | Item>(props.value)
 
@@ -173,8 +176,11 @@ export default defineComponent({
       ]
     })
     const message = computed<string>(() => {
+      if (props.messageFunction) {
+        return props.messageFunction(selectedItems.value)
+      }
       if (selectedItems.value.length === 0) {
-        return props.noFiltrationMessage
+        return props.noFiltrationMessage || t('common.filters.itemsDataFilter.noFiltrationMessage')
       }
       if (selectedItems.value.length === 1) {
         return props.getName(selectedItems.value[0])
@@ -188,19 +194,19 @@ export default defineComponent({
         tempItems.value = selected ? [...searchItems.value] : []
       }
     })
-    /** Очистка фильтра */
+
     const clear = () => {
       tempItems.value = props.defaultValue
       emit('clear')
       apply()
     }
-    /** Закрытие модального окна */
+
     const close = () => {
-      tempItems.value = []
+      tempItems.value = selectedItems.value
       search.value = ''
       emit('close')
     }
-    /** Сброс фильтра */
+
     const reset = () => {
       clear()
       tempItems.value = props.defaultValue
@@ -208,25 +214,17 @@ export default defineComponent({
       emit('reset')
       apply()
     }
-    /** Применение фильтра */
+
     const apply = () => {
       selectedItems.value = tempItems.value
       search.value = ''
       emit('apply')
     }
-    /**
-     * Получение состояния элемента (выбран или не выбран)
-     * @param item
-     * @return
-     */
+
     const getSelected = (item: Item): boolean => {
       return !!tempItems.value.find(selectedItem => selectedItem[props.itemKey] === item[props.itemKey])
     }
-    /**
-     * Установка состояния элемента (выбран или не выбран)
-     * @param item
-     * @param selected
-     */
+
     const setSelected = (item: Item, selected: boolean) => {
       tempItems.value = selected
         ? [...tempItems.value, item]
@@ -248,6 +246,7 @@ export default defineComponent({
 
     return {
       search,
+      searchLabelComputed,
       tempValue,
       selectedItems,
       tempItems,

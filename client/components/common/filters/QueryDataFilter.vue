@@ -19,6 +19,7 @@ apollo-query(
     :title="title"
     :max-width="maxWidth"
     :max-height="maxHeight"
+    :message-function="messageFunction"
     :no-filtration-message="noFiltrationMessage"
     :multiple-message-function="multipleMessageFunction"
     :search-label="searchLabel"
@@ -67,7 +68,15 @@ apollo-query(
 import { useVModel } from '@vueuse/core'
 import type { PropType } from '#app'
 import { computed, defineComponent } from '#app'
-import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, Variables } from '~/types/filters'
+import {
+  Class,
+  GetName,
+  Item,
+  MessageFunction,
+  MultipleMessageFunction,
+  SearchFunction,
+  Variables
+} from '~/types/filters'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import { useDebounceSearch } from '~/composables'
 
@@ -91,6 +100,7 @@ export default defineComponent({
     title: { type: String, default: undefined },
     maxWidth: { type: [String, Number], default: undefined },
     maxHeight: { type: [String, Number], default: undefined },
+    messageFunction: { type: Function as PropType<MessageFunction>, default: undefined },
     noFiltrationMessage: { type: String, default: undefined },
     multipleMessageFunction: { type: Function as PropType<MultipleMessageFunction>, default: undefined },
     getName: { type: Function as PropType<GetName>, default: undefined },
