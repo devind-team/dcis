@@ -1,76 +1,87 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ $t('dcis.documents.name') }}
-    template(v-if="period.canAddAnyDivisionDocument || userPeriodDivision.length")
-      v-spacer
-      add-document-menu(
-        v-slot="{ on, attrs }"
-        :period="period"
-        :documents="documents"
-        :add-document-update="addDocumentUpdate"
-        :add-document-data-update="addDocumentDataUpdate"
-        :user-divisions="userPeriodDivision"
-      )
-        v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-  template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-  items-data-filter(
-    v-if="showDivisionFilter"
-    v-model="selectedDivisions"
-    v-bind="divisionFilterMessages"
-    :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
-    :get-name="d => d.name"
-    :search-function="(d, s) => d.name.toLocaleLowerCase().includes(s.toLocaleLowerCase())"
-    message-container-class="mr-1 mb-1"
-    multiple
-    has-select-all
-  )
-  items-data-filter(
-    ref="statusesFilter"
-    v-model="selectedStatuses"
-    v-bind="statusFilterMessages"
-    :items="statuses ? statuses : []"
-    :get-name="status => status.name"
-    message-container-class="mr-1 mb-1"
-    multiple
-    has-select-all
-  )
-  v-data-table(
-    :headers="headers"
-    :items="documents"
-    :loading="loading"
-    disable-sort
-    disable-pagination
-    hide-default-footer
-  )
-    template(#item.division="{ item }")
-      nuxt-link(
-        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-      ) {{ item.objectName }} ({{ item.objectId }})
-    template(#item.version="{ item }")
-      template(v-if="period.multiple") {{ item.version }}
-      nuxt-link(
-        v-else
-        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-      ) {{ item.version }}
-    template(#item.comment="{ item }")
-      template(v-if="item.comment")
-        template(v-if="canChangeDocumentComment(item)")
-          text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
-            a(v-on="on") {{ item.comment }}
-        template(v-else) {{ item.comment }}
-    template(#item.lastStatus="{ item }")
-      template(v-if="item.lastStatus")
-        document-statuses(
-          :can-delete="canDeleteDocumentStatus(item)"
-          :update="updateDocuments"
-          :document="item"
-          @add-status="refetchDocuments"
-        )
-          template(#activator="{ on }")
-            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-        div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
-        .font-italic {{ item.lastStatus.comment }}
-    template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
+bread-crumbs(:items="breadCrumbs")
+  v-card
+    v-tabs(grow)
+      v-tab {{ $t('dcis.documents.tabs.tabNameDocuments.name') }}
+      v-tab(v-if="period.isCurator" ) {{ $t('dcis.documents.tabs.tabNameNotSupplied.name') }}
+      v-tab-item
+        v-card(flat)
+          v-card-title(v-if="period.canAddAnyDivisionDocument || userPeriodDivision.length")
+            v-spacer
+            add-document-menu(
+              v-slot="{ on, attrs }"
+              :period="period"
+              :documents="documents"
+              :add-document-update="addDocumentUpdate"
+              :add-document-data-update="addDocumentDataUpdate"
+              :user-divisions="userPeriodDivision"
+            )
+              v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
+          v-card-subtitle {{ $t('shownOf', { count, totalCount }) }}
+          v-card-text
+            items-data-filter(
+              v-if="showDivisionFilter"
+              v-model="selectedDivisions"
+              v-bind="divisionFilterMessages"
+              :items="period.divisions.map(d => ({ id: d.id, name: d.name }))"
+              :get-name="d => d.name"
+              :search-function="(d, s) => d.name.toLocaleLowerCase().includes(s.toLocaleLowerCase())"
+              message-container-class="mr-1 mb-1"
+              multiple
+              has-select-all
+            )
+            items-data-filter(
+              ref="statusesFilter"
+              v-model="selectedStatuses"
+              v-bind="statusFilterMessages"
+              :items="statuses ? statuses : []"
+              :get-name="status => status.name"
+              message-container-class="mr-1 mb-1"
+              multiple
+              has-select-all
+            )
+            v-data-table(
+              :headers="headers"
+              :items="documents"
+              :loading="loading"
+              disable-sort
+              disable-pagination
+              hide-default-footer
+            )
+              template(#item.division="{ item }")
+                nuxt-link(
+                  :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+                ) {{ item.objectName }} ({{ item.objectId }})
+              template(#item.version="{ item }")
+                template(v-if="period.multiple") {{ item.version }}
+                nuxt-link(
+                  v-else
+                  :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+                ) {{ item.version }}
+              template(#item.comment="{ item }")
+                template(v-if="item.comment")
+                  template(v-if="canChangeDocumentComment(item)")
+                    text-menu(v-slot="{ on }" @update="changeDocumentComment(item, $event)" :value="item.comment")
+                      a(v-on="on") {{ item.comment }}
+                  template(v-else) {{ item.comment }}
+              template(#item.lastStatus="{ item }")
+                template(v-if="item.lastStatus")
+                  document-statuses(
+                    :can-delete="canDeleteDocumentStatus(item)"
+                    :update="updateDocuments"
+                    :document="item"
+                    @add-status="refetchDocuments"
+                  )
+                    template(#activator="{ on }")
+                      a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+                  div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
+                  .font-italic {{ item.lastStatus.comment }}
+              template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
+      v-tab-item(v-if="period.isCurator")
+        v-list
+          v-list-item(v-for="division in period.divisions" :key="division.id")
+            v-list-item-content {{ division.name }} ({{ division.id }})
+        pre {{ period }}
 </template>
 
 <script lang="ts">
@@ -98,6 +109,7 @@ import { FilterMessages } from '~/types/filters'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
@@ -107,6 +119,7 @@ import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 
 export default defineComponent({
   components: {
+    BreadCrumbs,
     AddDocumentMenu,
     LeftNavigatorContainer,
     ItemsDataFilter,
@@ -244,7 +257,7 @@ export default defineComponent({
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
         { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
+        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus'},
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
       )
