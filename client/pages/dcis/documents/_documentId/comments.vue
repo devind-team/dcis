@@ -3,9 +3,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   v-row(justify="center" )
     div(class="view messages")
       section(v-if="!commentsLoading" class="chat-box")
-        div(
-          v-for="comment in comments"
-        )
+        div(v-for="comment in comments" key="comment.user.id")
           div(class="container")
             div(v-if="comment.isNewDate" align="center")
               v-chip(small) {{ date(comment.createdAt) }}
@@ -30,7 +28,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, PropType, ref } from '#app'
+import { computed, ComputedRef, defineComponent, PropType, onMounted, ref } from '#app'
 import { useMutation } from '@vue/apollo-composable'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useFilters, useQueryRelay, useCursorPagination } from '~/composables'
@@ -58,7 +56,7 @@ export default defineComponent({
     const pageSize = ref(5)
 
     const {
-      data: result,
+      data: commentsData,
       loading: commentsLoading,
       addUpdate
     } = useQueryRelay<DocumentCommentsQuery,
@@ -67,15 +65,16 @@ export default defineComponent({
         variables: { documentId: props.document.id }
       },
       {
+        isScrollDown: true,
         pagination: useCursorPagination({ pageSize: pageSize.value }),
         fetchScroll: typeof document === 'undefined' ? null : document
       })
 
     const comments = computed(() =>
-      result.value.reduce((newArr, currentItem, index) => {
-        newArr.push({ ...currentItem, isNewDate: date(currentItem.createdAt) !== date(result.value[index - 1]?.createdAt) })
+      commentsData.value.reduce((newArr, currentItem, index) => {
+        newArr.push({ ...currentItem, isNewDate: date(currentItem.createdAt) !== date(commentsData.value[index - 1]?.createdAt) })
         return newArr
-      }, []).reverse()
+      }, [])
     )
 
     const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentCommentMutation,
@@ -83,8 +82,9 @@ export default defineComponent({
         addDocumentCommentMutation,
         {
           update: (cache, result) => {
-            if (result.data.addDocumentComment.success) {
+            if (!result.data.addDocumentComment.errors.length) {
               addUpdate(cache, result, 'comment')
+              inputMessage.value = ''
             }
           }
         }
@@ -94,6 +94,11 @@ export default defineComponent({
       documentId: props.document.id,
       message: inputMessage.value
     }))
+
+    onMounted(() => {
+      const html = document.body.parentNode as HTMLHtmlElement
+      html.scrollTop = html.scrollHeight
+    })
 
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,

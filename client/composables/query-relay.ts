@@ -127,7 +127,11 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
   const { y } = useScroll(fetchScroll, {
     throttle: fetchThrottle ?? 300,
     onScroll (event: Event | any) {
-      if (fetchMoreAvailable.value && y.value + window.innerHeight + 200 > event.target.documentElement.offsetHeight) {
+      if (queryOptions.isScrollDown &&
+        (fetchMoreAvailable.value && y.value + window.innerHeight + 200 > event.target.documentElement.offsetHeight)) {
+        fetchMoreData()
+      } else if (!queryOptions.isScrollDown &&
+        (fetchMoreAvailable.value && y.value + window.innerHeight + 200 < event.target.documentElement.offsetHeight)) {
         fetchMoreData()
       }
     }

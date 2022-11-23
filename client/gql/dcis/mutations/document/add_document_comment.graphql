@@ -7,17 +7,20 @@ mutation AddDocumentComment($documentId: ID!, $message: String!) {
       __typename
     }
     comment {
-      document {
-        id
-        __typename
-      }
+      id
+      comment
+      createdAt
       user {
         id
         username
         __typename
       }
-      createdAt
+      document {
+        id
+        __typename
+      }
       __typename
     }
+    __typename
   }
 }

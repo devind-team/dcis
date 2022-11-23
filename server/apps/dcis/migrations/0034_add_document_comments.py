@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(help_text='Пользователь, добавивший комментарий', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'ordering': ('created_at',),
+                'ordering': ('-created_at',),
             },
         ),
     ]

@@ -6275,7 +6275,7 @@ export type AddDocumentCommentMutationVariables = Exact<{
   message: Scalars['String'];
 }>;
 
-export type AddDocumentCommentMutation = { __typename?: 'Mutation', addDocumentComment: { __typename?: 'AddDocumentCommentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, comment?: { __typename: 'DocumentCommentsType', createdAt: any, document?: { __typename: 'DocumentType', id: string } | null, user: { __typename: 'UserType', id: string, username: string } } | null } };
+export type AddDocumentCommentMutation = { __typename?: 'Mutation', addDocumentComment: { __typename: 'AddDocumentCommentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, comment?: { __typename: 'DocumentCommentsType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string }, document?: { __typename: 'DocumentType', id: string } | null } | null } };
 
 export type AddDocumentDataMutationVariables = Exact<{
   periodId: Scalars['ID'];
