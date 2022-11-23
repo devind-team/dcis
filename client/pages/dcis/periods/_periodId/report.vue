@@ -38,21 +38,35 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
           v-for="dti in ['createdAt', 'updatedAt']"
           v-slot:[`item.${dti}`]="{ item }"
         ) {{ dateTimeHM(item[dti]) }}
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="GridMode.READ"
+    :sheets="period.sheets"
+    :active-sheet="activeSheet"
+  )
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, PropType } from '#app'
+import { computed, defineComponent, ref, PropType, inject } from '#app'
 import { DataTableHeader } from 'vuetify'
-import { useFilters, useI18n } from '~/composables'
+import { useCommonQuery, useFilters, useI18n } from '~/composables'
+import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType } from '~/types/graphql'
+import { PeriodType, DocumentType, DocumentsSheetQuery, DocumentsSheetQueryVariables } from '~/types/graphql'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
+import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ReportSettingsMenu from '~/components/dcis/periods/ReportSettingsMenu.vue'
 import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
+import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, ReportSettingsMenu, QueryDataFilter },
+  components: {
+    LeftNavigatorContainer,
+    ReportSettingsMenu,
+    QueryDataFilter,
+    GridSheets
+  },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -90,13 +104,34 @@ export default defineComponent({
       { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
     ])
 
+    const activeSheetIndex = ref<number>(0)
+    const { data: activeSheet } = useCommonQuery<
+      DocumentsSheetQuery,
+      DocumentsSheetQueryVariables
+    >({
+      document: documentsSheetQuery,
+      variables: () => ({
+        sheetId: props.period.sheets[activeSheetIndex.value].id,
+        documentIds: selectedDocuments.value.map((document: DocumentType) => document.id)
+      })
+    })
+
+    const setFooter = inject<(state: boolean) => void>('setFooter')
+    setFooter(false)
+    onUnmounted(() => {
+      setFooter(true)
+    })
+
     return {
+      GridMode,
       documentsQuery,
       dateTimeHM,
       bc,
       selectedDocuments,
       documentFilterMessageFunction,
-      documentsFilterTableHeaders
+      documentsFilterTableHeaders,
+      activeSheetIndex,
+      activeSheet
     }
   }
 })
