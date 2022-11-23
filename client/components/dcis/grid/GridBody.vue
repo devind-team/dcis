@@ -49,19 +49,16 @@ tbody
 </template>
 
 <script lang="ts">
-import { PropType, Ref, nextTick, inject } from '#app'
-import { fromGlobalId } from '~/services/graphql-relay'
-import {
-  CellType,
-  ColumnDimensionType,
-  DivisionModelType,
-  DocumentType,
-  RowDimensionType,
-  SheetType
-} from '~/types/graphql'
-import { GridMode, ResizingType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
+import { computed, defineComponent, ref, inject, nextTick, PropType, Ref } from '#app'
+import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
+import { FixedInfoType, GridMode, ResizingType, RowFixedInfoType } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
-import { useAuthStore } from '~/stores'
+import {
+  useCanAddRowBeforeOrAfter,
+  useCanAddRowInside,
+  useCanChangeRowSettings,
+  useCanDeleteRow
+} from '~/composables/grid-permissions'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -102,22 +99,20 @@ export default defineComponent({
     mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
-    const userStore = useAuthStore()
-
-    const mode = inject<GridMode>('mode')
-    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+    const mode = inject<Ref<GridMode>>('mode')
     const activeSheet = inject<Ref<SheetType>>('activeSheet')
 
-    const rootCount = computed<number>(() => activeSheet.value.rows
-      .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
+    const isReadOrWriteMode = computed<boolean>(() =>
+      mode.value === GridMode.READ || mode.value === GridMode.WRITE
+    )
 
     const getRowClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
-        grid__row_fixed: mode === GridMode.WRITE && props.getRowFixedInfo(row).fixed
+        grid__row_fixed: isReadOrWriteMode.value && props.getRowFixedInfo(row).fixed
       }
     }
     const getRowStyle = (row: RowDimensionType): Record<string, string> => {
-      if (mode === GridMode.CHANGE) {
+      if (mode.value === GridMode.CHANGE) {
         return {}
       }
       const fixedInfo = props.getRowFixedInfo(row)
@@ -133,70 +128,20 @@ export default defineComponent({
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-boundary-selected': mode === GridMode.CHANGE &&
+        'grid__cell_row-name-boundary-selected': mode.value === GridMode.CHANGE &&
           props.boundarySelectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-hover': mode === GridMode.CHANGE && !props.resizingRow,
-        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
-        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)
+        'grid__cell_row-name-hover': mode.value === GridMode.CHANGE && !props.resizingRow,
+        'grid__cell_fixed-border-right': isReadOrWriteMode.value && props.borderFixedColumn === null,
+        'grid__cell_fixed-border-bottom': isReadOrWriteMode.value && props.isRowFixedBorder(row)
       }
     }
 
-    const canChangeRowSettings = mode === GridMode.CHANGE
-    const canAddRowRegardingDivisions = (rowDimension: RowDimensionType): boolean => {
-      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
-      if (activeDocument.value.period.multiple) {
-        return userDivisionIds.includes(activeDocument.value.objectId)
-      }
-      return userDivisionIds.includes(rowDimension.id)
-    }
-    const canAddRowBeforeOrAfter = (rowDimension: RowDimensionType): boolean => {
-      if (mode === GridMode.CHANGE) {
-        return true
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      if (rowDimension.parent) {
-        const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
-        return parent.dynamic && (
-          activeSheet.value.canChange ||
-          activeSheet.value.canAddChildRowDimension ||
-          activeDocument.value.user?.id === userStore.user.id ||
-          canAddRowRegardingDivisions(rowDimension)
-        )
-      }
-      return false
-    }
-    const canAddRowInside = (rowDimension: RowDimensionType): boolean => {
-      if (mode === GridMode.CHANGE) {
-        return false
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      return rowDimension.dynamic && (
-        activeSheet.value.canChange ||
-        activeSheet.value.canAddChildRowDimension ||
-        activeDocument.value.user?.id === userStore.user.id ||
-        canAddRowRegardingDivisions(rowDimension)
-      )
-    }
-    const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
-      if (mode === GridMode.CHANGE) {
-        return rootCount.value !== 1 || Boolean(rowDimension.parent)
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      return rowDimension.parent !== null && rowDimension.children.length === 0 && (
-        activeSheet.value.canChange ||
-        activeSheet.value.canDeleteChildRowDimension ||
-        activeDocument.value.user?.id === userStore.user.id ||
-        rowDimension.userId === String(fromGlobalId(userStore.user.id).id)
-      )
-    }
+    const canChangeRowSettings = useCanChangeRowSettings()
+    const canAddRowBeforeOrAfter = useCanAddRowBeforeOrAfter()
+    const canAddRowInside = useCanAddRowInside()
+    const canDeleteRow = useCanDeleteRow()
     const viewControl = (rowDimension: RowDimensionType): boolean => {
-      return canChangeRowSettings ||
+      return canChangeRowSettings.value ||
         canAddRowBeforeOrAfter(rowDimension) ||
         canAddRowInside(rowDimension) ||
         canDeleteRow(rowDimension)
@@ -204,19 +149,19 @@ export default defineComponent({
 
     const getCellClass = (cell: CellType): Record<string, boolean> => {
       return {
-        grid__cell_selected: mode === GridMode.WRITE && Boolean(
+        grid__cell_selected: isReadOrWriteMode.value && Boolean(
           props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
         ),
-        grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
+        grid__cell_fixed: isReadOrWriteMode.value && props.getCellFixedInfo(cell).fixed,
         grid__cell_readonly: !cell.editable,
-        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
-        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
+        'grid__cell_fixed-border-right': isReadOrWriteMode.value && props.isCellFixedBorderRight(cell),
+        'grid__cell_fixed-border-bottom': isReadOrWriteMode.value && props.isCellFixedBorderBottom(cell)
       }
     }
     const getCellStyle = (cell: CellType): Record<string, string> => {
       const textDecoration: string[] = []
       const style: Record<string, string> = {}
-      if (mode === GridMode.WRITE) {
+      if (isReadOrWriteMode.value) {
         const fixedInfo = props.getCellFixedInfo(cell)
         if (fixedInfo.fixed) {
           style.left = `${fixedInfo.position}px`
@@ -275,9 +220,9 @@ export default defineComponent({
       return height
     }
 
-    const currentRow = ref<RowDimensionType>(null)
-    const posX = ref(0)
-    const posY = ref(0)
+    const currentRow = ref<RowDimensionType | null>(null)
+    const posX = ref<number>(0)
+    const posY = ref<number>(0)
     const showMenu = (e: MouseEvent, row: RowDimensionType) => {
       e.preventDefault()
       currentRow.value = null

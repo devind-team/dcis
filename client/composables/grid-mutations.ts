@@ -1,4 +1,4 @@
-import { useMutation } from '@vue/apollo-composable'
+import { useApolloClient, useMutation } from '@vue/apollo-composable'
 import { ApolloClient, DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { Ref, unref } from '#app'
@@ -16,16 +16,16 @@ import {
   ChangeCellsOptionMutationVariables,
   ChangeChildRowDimensionHeightMutation,
   ChangeChildRowDimensionHeightMutationVariables,
-  ChangeColumnDimensionsFixedMutation,
-  ChangeColumnDimensionsFixedMutationVariables,
   ChangeColumnDimensionMutation,
   ChangeColumnDimensionMutationVariables,
+  ChangeColumnDimensionsFixedMutation,
+  ChangeColumnDimensionsFixedMutationVariables,
   ChangeFileValueMutation,
   ChangeFileValueMutationVariables,
-  ChangeRowDimensionsFixedMutation,
-  ChangeRowDimensionsFixedMutationVariables,
   ChangeRowDimensionMutation,
   ChangeRowDimensionMutationVariables,
+  ChangeRowDimensionsFixedMutation,
+  ChangeRowDimensionsFixedMutationVariables,
   ChangeValueMutation,
   ChangeValueMutationVariables,
   ColumnDimensionFieldsFragment,
@@ -36,8 +36,8 @@ import {
   DeleteRowDimensionMutationVariables,
   DocumentSheetQuery,
   DocumentSheetQueryVariables,
-  PeriodSheetQuery,
   GlobalIndicesInputType,
+  PeriodSheetQuery,
   RowDimensionFieldsFragment,
   RowDimensionType,
   SheetType,
@@ -487,7 +487,7 @@ export function useChangeColumnDimensionWidthMutation (updateSheet: Ref<UpdateTy
   }
 }
 
-export function useChangeColumnDimensionsFixed (updateSheet: Ref<UpdateType<PeriodSheetQuery>>) {
+export function useChangeColumnDimensionsFixedMutation (updateSheet: Ref<UpdateType<PeriodSheetQuery>>) {
   const { mutate } = useMutation<
     ChangeColumnDimensionsFixedMutation,
     ChangeColumnDimensionsFixedMutationVariables
@@ -639,7 +639,7 @@ export function useChangeChildRowDimensionHeightMutation (updateSheet: Ref<Updat
   }
 }
 
-export function useChangeRowDimensionsFixed (updateSheet: Ref<UpdateType<PeriodSheetQuery>>) {
+export function useChangeRowDimensionsFixedMutation (updateSheet: Ref<UpdateType<PeriodSheetQuery>>) {
   const { mutate } = useMutation<
     ChangeRowDimensionsFixedMutation,
     ChangeRowDimensionsFixedMutationVariables
@@ -792,7 +792,11 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<Period
   }
 }
 
-export const changeSheetValues = (values: ValueType[], client: ApolloClient<DocumentSheetQuery>, documentId: Ref<string | null> | string, updatedAt: string | null = null) => {
+export const changeSheetValues = (
+  values: ValueType[],
+  client: ApolloClient<DocumentSheetQuery>,
+  documentId: Ref<string | null> | string, updatedAt: string | null = null
+) => {
   const sheetValue = values.reduce<Record<number, ValueType[]>>((a, v) => {
     if (!(v.sheetId in a)) { a[v.sheetId] = [] }
     a[v.sheetId].push(v)
@@ -822,19 +826,18 @@ export const changeSheetValues = (values: ValueType[], client: ApolloClient<Docu
 
 export const useChangeValueMutation = (
   documentId: Ref<string | null>,
-  sheetId: Ref<string>,
-  cell: Ref<CellType>,
-  client: ApolloClient<DocumentSheetQuery>
+  sheetId: Ref<string>
 ) => {
+  const { client } = useApolloClient()
   const { mutate } = useMutation<
     ChangeValueMutation,
     ChangeValueMutationVariables
   >(changeValueMutation)
-  return async (value: string) => {
+  return async (cell: CellType, value: string) => {
     await mutate({
       documentId: unref(documentId),
       sheetId: unref(sheetId),
-      cellId: unref(cell.value).id,
+      cellId: cell.id,
       value
     }, {
       update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
@@ -855,8 +858,8 @@ export const useChangeValueMutation = (
               sheetId: sheetId.value,
               value,
               error: null,
-              columnId: cell.value.columnId,
-              rowId: cell.value.rowId,
+              columnId: cell.columnId,
+              rowId: cell.rowId,
               payload: null,
               __typename: 'ValueType'
             }

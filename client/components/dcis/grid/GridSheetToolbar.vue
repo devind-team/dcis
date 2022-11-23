@@ -35,24 +35,24 @@ v-row
             :disabled="disabled"
             :themeClass="themeClass"
           )
-      span {{ t('dcis.grid.sheetToolbar.aggregation') }}
+      span {{ $t('dcis.grid.sheetToolbar.aggregation') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
           v-btn-toggle.mx-1(v-model="properties" multiple)
             v-btn(:disabled="disabled" value="readonly" height="40")
               v-icon mdi-pencil-off
-      span {{ t('dcis.grid.sheetToolbar.readonly') }}
+      span {{ $t('dcis.grid.sheetToolbar.readonly') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
           v-btn-toggle.mx-1(v-model="dimensionsProperties" multiple)
             v-btn(:disabled="fixedDisabled" value="fixed" height="40")
               v-icon mdi-table-lock
-      span {{ t('dcis.grid.sheetToolbar.fix') }}
+      span {{ $t('dcis.grid.sheetToolbar.fix') }}
     v-combobox.mx-1.shrink(
       v-model="size"
-      :label="t('dcis.grid.sheetToolbar.fontSize')"
+      :label="$t('dcis.grid.sheetToolbar.fontSize')"
       :items="sizes"
       :disabled="disabled"
       style="width: 170px"
@@ -63,7 +63,7 @@ v-row
     )
     v-combobox.mx-1.shrink(
       v-model="kind"
-      :label="t('dcis.grid.sheetToolbar.kind')"
+      :label="$t('dcis.grid.sheetToolbar.kind')"
       :items="kinds"
       :disabled="disabled"
       style="width: 170px"
@@ -78,37 +78,34 @@ v-row
           .v-btn-toggle.ml-1(:class="themeClass" style="border-radius: 4px 0 0 4px")
             v-btn(:disabled="commaDecreaseDisabled" height="40" @click="commaDecrease")
               v-icon mdi-decimal-comma-decrease
-      span {{ t('dcis.grid.sheetToolbar.commaDecrease') }}
+      span {{ $t('dcis.grid.sheetToolbar.commaDecrease') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
           .v-btn-toggle.mr-1(:class="themeClass" style="border-radius: 0 4px 4px 0")
             v-btn(:disabled="commaDisabled" height="40" style="border-left-width: 0" @click="commaIncrease")
               v-icon mdi-decimal-comma-increase
-      span {{ t('dcis.grid.sheetToolbar.commaIncrease') }}
+      span {{ $t('dcis.grid.sheetToolbar.commaIncrease') }}
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRef } from '#app'
-import {
-  useChangeCellsOptionMutation,
-  useChangeColumnDimensionsFixed,
-  useChangeRowDimensionsFixed,
-  useVuetify,
-  useI18n,
-  UpdateType
-} from '~/composables'
+import { computed, defineComponent, inject, PropType, Ref } from '#app'
 import { CellType, PeriodSheetQuery } from '~/types/graphql'
 import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
-import AggregationProperty from '~/components/dcis/grid/properties/AggregationProperty.vue'
+import { useVuetify, useI18n, UpdateType } from '~/composables'
+import {
+  useChangeCellsOptionMutation,
+  useChangeColumnDimensionsFixedMutation,
+  useChangeRowDimensionsFixedMutation
+} from '~/composables/grid-mutations'
 import { GridChoiceType } from '~/composables/grid-choice'
+import AggregationProperty from '~/components/dcis/grid/properties/AggregationProperty.vue'
 
 export default defineComponent({
   components: { AggregationProperty },
   props: {
     gridChoice: { type: Object as PropType<GridChoiceType>, required: true },
     activeSheetIndex: { type: Number, default: null },
-    updateActiveSheet: { type: Function as PropType<UpdateType<PeriodSheetQuery>>, required: true },
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null },
     selectedColumnDimensionsOptions: { type: Object as PropType<ColumnDimensionsOptionsType>, default: null },
     selectedRowDimensionsOptions: { type: Object as PropType<RowDimensionsOptionsType>, default: null }
@@ -119,10 +116,10 @@ export default defineComponent({
 
     const themeClass = computed<string>(() => isDark ? 'theme--light' : 'theme--dark')
 
-    const updateActiveSheet = toRef(props, 'updateActiveSheet')
+    const updateActiveSheet = inject<Ref<UpdateType<PeriodSheetQuery>>>('updateActiveSheet')
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
-    const changeColumnDimensionsFixed = useChangeColumnDimensionsFixed(updateActiveSheet)
-    const changeRowDimensionsFixed = useChangeRowDimensionsFixed(updateActiveSheet)
+    const changeColumnDimensionsFixed = useChangeColumnDimensionsFixedMutation(updateActiveSheet)
+    const changeRowDimensionsFixed = useChangeRowDimensionsFixedMutation(updateActiveSheet)
 
     const selectedDimensionsOptions = computed<ColumnDimensionsOptionsType | RowDimensionsOptionsType | null>(
       () => props.selectedColumnDimensionsOptions || props.selectedRowDimensionsOptions || null
@@ -299,7 +296,6 @@ export default defineComponent({
     }
 
     return {
-      t,
       themeClass,
       disabled,
       fixedDisabled,

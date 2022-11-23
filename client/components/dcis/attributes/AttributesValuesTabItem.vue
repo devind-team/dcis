@@ -71,7 +71,10 @@ export default defineComponent({
     const values = computed<Record<number, AttributeValueType>>(() => (
       props.attributesValues.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {}))
     )
-    const { mutate: changeAttributeValue } = useMutation<ChangeAttributeValueMutation, ChangeAttributeValueMutationVariables>(
+    const { mutate: changeAttributeValue } = useMutation<
+      ChangeAttributeValueMutation,
+      ChangeAttributeValueMutationVariables
+    >(
       changeAttributeValueMutation,
       {
         update: (cache, result: ChangeAttributeValueMutationResult) => {

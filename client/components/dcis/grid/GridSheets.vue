@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  v-tabs(ref="tabs" :class="{ 'mb-2': mode === GridMode.WRITE }" v-model="activeSheetIndex")
+  v-tabs(ref="tabs" :class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.WRITE }" v-model="activeSheetIndex")
     slot(name="settings")
     slot(name="tabs" :sheets="sheets" :update-size="updateSize")
       v-tab(v-if="showAttributes" key="attributes") Атрибуты
@@ -9,29 +9,26 @@ div
     v-if="mode === GridMode.CHANGE"
     :grid-choice="gridChoice"
     :active-sheet-index="activeSheetIndex"
-    :update-active-sheet="updateActiveSheet"
     :selected-cells-options="selectedCellsOptions"
     :selected-column-dimensions-options="selectedColumnDimensionsOptions"
     :selected-row-dimensions-options="selectedRowDimensionsOptions"
   )
   grid-choice-cells(:grid-choice="gridChoice")
-  v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex")
+  v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex" ref="tabItems" :style="{ height: gridHeight }")
     slot(v-if="showAttributes" name="attributes")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
         v-if="activeSheet && activeSheet.id === sheet.id"
         ref="grid"
-        :mode="mode"
-        :active-sheet="activeSheet"
-        :update-active-sheet="updateActiveSheet"
-        :active-document="activeDocument"
+        :height="gridHeight"
       )
       v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { VTabs } from 'vuetify/lib/components/VTabs'
-import { computed, defineComponent, onBeforeUnmount, PropType, ref } from '#app'
+import { VTabs, VTabsItems } from 'vuetify/src/components/VTabs'
+import { useElementBounding } from '@vueuse/core'
+import { computed, defineComponent, onBeforeUnmount, PropType, provide, ref, toRefs } from '#app'
 import {
   BaseSheetType,
   DocumentType,
@@ -56,13 +53,26 @@ export default defineComponent({
     mode: { type: Number, required: true },
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true },
     activeSheet: { type: Object as PropType<SheetType>, default: null },
-    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
+    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, default: null },
     activeDocument: { type: Object as PropType<DocumentType>, default: null },
     showAttributes: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
     const tabs = ref<InstanceType<typeof VTabs> | null>(null)
+    const tabItems = ref<InstanceType<typeof VTabsItems> | null>(null)
     const grid = ref<InstanceType<typeof Grid>[] | null>(null)
+
+    const { mode, activeSheet, updateActiveSheet, activeDocument } = toRefs(props)
+
+    provide('mode', mode)
+    provide('activeSheet', activeSheet)
+    provide('updateActiveSheet', updateActiveSheet)
+    provide('activeDocument', activeDocument)
+
+    const { top: tabItemsTop } = useElementBounding(
+      () => tabItems.value ? tabItems.value.$el as HTMLDivElement : null
+    )
+    const gridHeight = computed<string>(() => `calc(100vh - ${tabItemsTop.value + 30}px)`)
 
     const activeSheetIndex = computed<number>({
       get () {
@@ -106,7 +116,9 @@ export default defineComponent({
     return {
       GridMode,
       tabs,
+      tabItems,
       grid,
+      gridHeight,
       activeSheetIndex,
       selectedCellsOptions,
       selectedColumnDimensionsOptions,
@@ -120,6 +132,5 @@ export default defineComponent({
 
 <style lang="sass">
 .grid-sheet__tabs-items
-  height: calc(100vh - 285px)
   overflow: visible !important
 </style>

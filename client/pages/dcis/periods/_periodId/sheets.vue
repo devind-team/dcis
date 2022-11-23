@@ -63,7 +63,6 @@ export default defineComponent({
     const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
     const activeSheetIndex = ref<number>(0)
-
     const {
       data: activeSheet,
       update: updateActiveSheet

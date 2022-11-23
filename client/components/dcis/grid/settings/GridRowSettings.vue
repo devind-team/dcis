@@ -1,12 +1,12 @@
 <template lang="pug">
 mutation-modal-form(
-  :header="String(t('dcis.grid.rowSettings.header'))"
-  :subheader="String(t('dcis.grid.rowSettings.subheader', { updatedAt: dateTimeHM(row.updatedAt) }))"
+  :header="String($t('dcis.grid.rowSettings.header'))"
+  :subheader="String($t('dcis.grid.rowSettings.subheader', { updatedAt: dateTimeHM(row.updatedAt) }))"
   :mutation="changeRowDimensionMutation"
   :variables="variables"
   :optimistic-response="optimisticResponse"
   :update="update"
-  :button-text="String(t('dcis.grid.rowSettings.buttonText'))"
+  :button-text="String($t('dcis.grid.rowSettings.buttonText'))"
   i18n-path="dcis.grid.rowSettings"
   mutation-name="changeRowDimension"
   @close="$emit('close')"
@@ -16,19 +16,19 @@ mutation-modal-form(
   template(#form)
     validation-provider(
       v-slot="{ errors, valid }"
-      :name="String(t('dcis.grid.rowSettings.height'))"
+      :name="String($t('dcis.grid.rowSettings.height'))"
       rules="required|integer|min_value:0"
     )
       v-text-field(
         v-model="height"
         :error-messages="errors"
         :success="valid"
-        :label="t('dcis.grid.rowSettings.height')"
+        :label="$t('dcis.grid.rowSettings.height')"
       )
-    v-checkbox(v-model="hidden" :label="t('dcis.grid.rowSettings.hide')" color="primary")
+    v-checkbox(v-model="hidden" :label="$t('dcis.grid.rowSettings.hide')" color="primary")
     v-checkbox(
       v-model="dynamic"
-      :label="t('dcis.grid.rowSettings.makeDynamic')"
+      :label="$t('dcis.grid.rowSettings.makeDynamic')"
       :disabled="!!row.children.length || row.cells.some(cell => cell.rowspan !== 1)"
       color="primary"
     )
@@ -37,8 +37,9 @@ mutation-modal-form(
 <script lang="ts">
 import { DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
-import { PropType, Ref } from '#app'
-import { updateRowDimension, UpdateType } from '~/composables'
+import { ref, inject, PropType, Ref } from '#app'
+import { useFilters, UpdateType } from '~/composables'
+import { updateRowDimension } from '~/composables/grid-mutations'
 import {
   PeriodSheetQuery,
   RowDimensionType,
@@ -55,8 +56,6 @@ export default defineComponent({
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true }
   },
   setup (props) {
-    const { t } = useI18n()
-
     const { dateTimeHM } = useFilters()
 
     const height = ref<string>(String(props.getRowHeight(props.row)))
@@ -93,7 +92,6 @@ export default defineComponent({
     }
 
     return {
-      t,
       dateTimeHM,
       height,
       hidden,

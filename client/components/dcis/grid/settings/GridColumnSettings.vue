@@ -1,12 +1,12 @@
 <template lang="pug">
 mutation-modal-form(
-  :header="String(t('dcis.grid.columnSettings.header'))"
-  :subheader="String(t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
+  :header="String($t('dcis.grid.columnSettings.header'))"
+  :subheader="String($t('dcis.grid.columnSettings.subheader', { updatedAt: dateTimeHM(column.updatedAt) }))"
   :mutation="changeColumnDimensionMutation"
   :variables="variables"
   :optimistic-response="optimisticResponse"
   :update="update"
-  :button-text="String(t('dcis.grid.columnSettings.buttonText'))"
+  :button-text="String($t('dcis.grid.columnSettings.buttonText'))"
   i18n-path="dcis.grid.columnSettings"
   mutation-name="changeColumnDimension"
   @close="$emit('close')"
@@ -16,25 +16,26 @@ mutation-modal-form(
   template(#form)
     validation-provider(
       v-slot="{ errors, valid }"
-      :name="String(t('dcis.grid.columnSettings.width'))"
+      :name="String($t('dcis.grid.columnSettings.width'))"
       rules="required|integer|min_value:0"
     )
       v-text-field(
         v-model="width"
         :error-messages="errors"
         :success="valid"
-        :label="t('dcis.grid.columnSettings.width')"
+        :label="$t('dcis.grid.columnSettings.width')"
       )
-    v-combobox.mx-1(v-model="kind" :items="kinds" :label="t('dcis.grid.columnSettings.kind')" color="primary")
-    v-checkbox(v-model="hidden" :label="t('dcis.grid.columnSettings.hide')" color="primary")
+    v-combobox.mx-1(v-model="kind" :items="kinds" :label="$t('dcis.grid.columnSettings.kind')" color="primary")
+    v-checkbox(v-model="hidden" :label="$t('dcis.grid.columnSettings.hide')" color="primary")
 </template>
 
 <script lang="ts">
 import { DataProxy } from '@apollo/client'
 import { FetchResult } from '@apollo/client/link/core'
 import { PropType, Ref } from '#app'
-import { updateColumnDimension, UpdateType } from '~/composables'
+import { useFilters, UpdateType } from '~/composables'
 import { cellKinds } from '~/composables/grid'
+import { updateColumnDimension } from '~/composables/grid-mutations'
 import {
   PeriodSheetQuery,
   ColumnDimensionType,
@@ -96,7 +97,6 @@ export default defineComponent({
     }
 
     return {
-      t,
       dateTimeHM,
       width,
       hidden,
