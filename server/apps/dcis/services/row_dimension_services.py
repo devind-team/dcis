@@ -133,14 +133,24 @@ def change_row_dimension_height(user: User, row_dimension: RowDimension, height:
     return row_dimension
 
 
-@transaction.atomic
 def delete_row_dimension(user: User, row_dimension: RowDimension) -> int:
+    """Удаление строки."""
+    can_change_period_sheet(user, row_dimension.sheet.period)
+    return delete_row_dimension_base(row_dimension)
+
+
+def delete_child_row_dimension(user: User, row_dimension: RowDimension) -> int:
+    """Удаление дочерней строки."""
+    can_delete_child_row_dimension(user, row_dimension)
+    return delete_row_dimension_base(row_dimension)
+
+
+@transaction.atomic
+def delete_row_dimension_base(row_dimension: RowDimension) -> int:
     """Удаление строки.
 
     После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
     """
-    can_change_period_sheet(user, row_dimension.sheet.period)
-    can_delete_child_row_dimension(user, row_dimension)
     row_dimension_id = row_dimension.id
     row_dimension.delete()
     row_dimension.sheet.rowdimension_set.filter(

@@ -23,7 +23,7 @@ from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
     change_row_dimension_height,
-    delete_row_dimension,
+    delete_child_row_dimension,
 )
 from apps.dcis.services.status_services import add_document_status, delete_document_status
 
@@ -294,7 +294,7 @@ class DeleteChildRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(info.context.user, row_dimension))
+        return DeleteRowDimensionMutation(row_dimension_id=delete_child_row_dimension(info.context.user, row_dimension))
 
 
 class DocumentMutations(graphene.ObjectType):
