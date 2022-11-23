@@ -17,7 +17,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     modal
     fullscreen
   )
-    template(#items="{ searchItems, tempItems, setSelected }")
+    template(#items="{ searchItems, tempItems, setSelected, setAllSelected }")
       v-data-table(
         :value="tempItems"
         :headers="documentsFilterTableHeaders"
@@ -27,6 +27,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
         disable-pagination
         hide-default-footer
         @item-selected="setSelected($event.item, $event.value)"
+        @toggle-select-all="setAllSelected($event.value)"
       )
         template(#item.division="{ item }") {{ item.objectName }} ({{ item.objectId }})
         template(#item.lastStatus="{ item }")

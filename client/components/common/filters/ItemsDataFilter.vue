@@ -41,6 +41,8 @@ base-data-filter(
       :get-name="getName"
       :get-selected="getSelected"
       :set-selected="setSelected"
+      :all-selected="allSelected"
+      :set-all-selected="setAllSelected"
     )
       template(v-if="multiple")
         v-checkbox.my-2(
@@ -224,11 +226,14 @@ export default defineComponent({
     const getSelected = (item: Item): boolean => {
       return !!tempItems.value.find(selectedItem => selectedItem[props.itemKey] === item[props.itemKey])
     }
-
     const setSelected = (item: Item, selected: boolean) => {
       tempItems.value = selected
         ? [...tempItems.value, item]
         : tempItems.value.filter(selectedItem => selectedItem[props.itemKey] !== item[props.itemKey])
+    }
+
+    const setAllSelected = (selected: boolean) => {
+      allSelected.value = selected
     }
 
     const defaultMultipleMessageFunction = (name: string, restLength: number): string => {
@@ -260,6 +265,7 @@ export default defineComponent({
       apply,
       getSelected,
       setSelected,
+      setAllSelected,
       select
     }
   }
