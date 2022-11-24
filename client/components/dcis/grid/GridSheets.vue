@@ -35,11 +35,15 @@ import {
   SheetType
 } from '~/types/graphql'
 import {
+  GridModeInject,
+  ActiveSheetInject,
+  UpdateActiveSheetInject,
+  ActiveDocumentInject,
   CellsOptionsType,
   ColumnDimensionsOptionsType,
   GridMode,
   RowDimensionsOptionsType,
-  UpdateSheetType
+  UpdateActiveSheetType
 } from '~/types/grid'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
@@ -53,7 +57,7 @@ export default defineComponent({
     mode: { type: Number, required: true },
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true },
     activeSheet: { type: Object as PropType<SheetType>, default: null },
-    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, default: null },
+    updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
     activeDocument: { type: Object as PropType<DocumentType>, default: null },
     showAttributes: { type: Boolean, default: false }
   },
@@ -64,10 +68,10 @@ export default defineComponent({
 
     const { mode, activeSheet, updateActiveSheet, activeDocument } = toRefs(props)
 
-    provide('mode', mode)
-    provide('activeSheet', activeSheet)
-    provide('updateActiveSheet', updateActiveSheet)
-    provide('activeDocument', activeDocument)
+    provide(GridModeInject, mode)
+    provide(ActiveSheetInject, activeSheet)
+    provide(UpdateActiveSheetInject, updateActiveSheet)
+    provide(ActiveDocumentInject, activeDocument)
 
     const { top: tabItemsTop } = useElementBounding(
       () => tabItems.value ? tabItems.value.$el as HTMLDivElement : null

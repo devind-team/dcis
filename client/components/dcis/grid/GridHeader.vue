@@ -30,9 +30,9 @@ thead
 </template>
 
 <script lang="ts">
-import { ref, nextTick, PropType, Ref, computed } from '#app'
-import { FixedInfoType, GridMode, ResizingType } from '~/types/grid'
-import { ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
+import { ref, nextTick, PropType, computed } from '#app'
+import { GridModeInject, ActiveSheetInject, GridMode, FixedInfoType, ResizingType } from '~/types/grid'
+import { ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -66,8 +66,8 @@ export default defineComponent({
     selectAllCells: { type: Function as PropType<() => void>, required: true }
   },
   setup (props) {
-    const mode = inject<Ref<GridMode>>('mode')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const mode = inject(GridModeInject)
+    const activeSheet = inject(ActiveSheetInject)
 
     const isReadOrWriteMode = computed<boolean>(() =>
       mode.value === GridMode.READ || mode.value === GridMode.WRITE

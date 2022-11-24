@@ -1,14 +1,14 @@
 import { computed, inject, Ref } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { useAuthStore } from '~/stores'
-import { GridMode } from '~/types/grid'
-import { CellType, DivisionModelType, DocumentType, RowDimensionType, SheetType } from '~/types/graphql'
+import { GridModeInject, ActiveSheetInject, ActiveDocumentInject, GridMode } from '~/types/grid'
+import { CellType, DivisionModelType, DocumentType, RowDimensionType } from '~/types/graphql'
 
 export function useCanChangeRowHeight () {
   const userStore = useAuthStore()
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   return function (rowDimension: RowDimensionType) {
     if (mode.value === GridMode.CHANGE) {
       return true
@@ -26,15 +26,15 @@ export function useCanChangeRowHeight () {
 }
 
 export function useCanChangeRowSettings () {
-  const mode = inject<Ref<GridMode>>('mode')
+  const mode = inject(GridModeInject)
   return computed<boolean>(() => mode.value === GridMode.CHANGE)
 }
 
 export function useCanAddRowBeforeOrAfter () {
   const userStore = useAuthStore()
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   return function (rowDimension: RowDimensionType) {
     if (mode.value === GridMode.CHANGE) {
       return true
@@ -57,9 +57,9 @@ export function useCanAddRowBeforeOrAfter () {
 
 export function useCanAddRowInside () {
   const userStore = useAuthStore()
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   return function (rowDimension: RowDimensionType) {
     if (mode.value === GridMode.READ || mode.value === GridMode.CHANGE) {
       return false
@@ -75,9 +75,9 @@ export function useCanAddRowInside () {
 
 export function useCanDeleteRow () {
   const userStore = useAuthStore()
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   const rootCount = computed<number>(() => activeSheet.value.rows
     .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
   return function (rowDimension: RowDimensionType) {
@@ -98,9 +98,9 @@ export function useCanDeleteRow () {
 
 export function useCanChangeValue (cell: Ref<CellType>) {
   const userStore = useAuthStore()
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   return computed<boolean>(() => {
     if (mode.value === GridMode.CHANGE) {
       return true

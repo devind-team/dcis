@@ -1,7 +1,10 @@
+import { Ref, InjectionKey } from '#app'
 import {
   CellType,
   ColumnDimensionType,
   RowDimensionType,
+  SheetType,
+  DocumentType,
   DocumentSheetQuery,
   PeriodSheetQuery
 } from '~/types/graphql'
@@ -21,7 +24,14 @@ export enum GridMode {
   WRITE
 }
 
-export type UpdateSheetType = UpdateType<PeriodSheetQuery | DocumentSheetQuery>
+export type UpdateActiveSheetType = UpdateType<PeriodSheetQuery | DocumentSheetQuery>
+
+export const GridModeInject: InjectionKey<Ref<GridMode>> = Symbol('Mode')
+export const ActiveSheetInject: InjectionKey<Ref<SheetType>> = Symbol('ActiveSheet')
+export const UpdateActiveSheetInject: InjectionKey<
+  Ref<UpdateActiveSheetType | null>
+> = Symbol('UpdateActiveSheet')
+export const ActiveDocumentInject: InjectionKey<Ref<DocumentType | null>> = Symbol('ActiveDocument')
 
 /*
  * Кодовые ошибки

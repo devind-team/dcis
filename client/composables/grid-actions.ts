@@ -13,21 +13,25 @@ import {
   useChangeValueMutation,
   useUnloadFileValueArchiveMutation
 } from '~/composables/grid-mutations'
-import { GridMode, UpdateSheetType } from '~/types/grid'
+import {
+  GridModeInject,
+  ActiveSheetInject,
+  UpdateActiveSheetInject,
+  ActiveDocumentInject,
+  GridMode
+} from '~/types/grid'
 import {
   CellType,
   DocumentSheetQuery,
-  DocumentType,
   PeriodSheetQuery,
-  SheetType,
   ValueFilesQuery
 } from '~/types/graphql'
 
 export function useAddRowDimension () {
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const updateActiveSheet = inject<Ref<UpdateSheetType | null>>('updateActiveSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.CHANGE) {
     return useAddRowDimensionMutation(
       activeSheet,
@@ -45,9 +49,9 @@ export function useAddRowDimension () {
 }
 
 export function useDeleteRowDimension () {
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const updateActiveSheet = inject<Ref<UpdateSheetType | null>>('updateActiveSheet')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
   if (mode.value === GridMode.CHANGE) {
     return useDeleteRowDimensionMutation(activeSheet, updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
@@ -58,8 +62,8 @@ export function useDeleteRowDimension () {
 }
 
 export function useChangeColumnDimensionWidth () {
-  const mode = inject<Ref<GridMode>>('mode')
-  const updateActiveSheet = inject<Ref<UpdateSheetType | null>>('updateActiveSheet')
+  const mode = inject(GridModeInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
   if (mode.value === GridMode.CHANGE) {
     return useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
@@ -67,8 +71,8 @@ export function useChangeColumnDimensionWidth () {
 }
 
 export function useChangeRowDimensionHeight () {
-  const mode = inject<Ref<GridMode>>('mode')
-  const updateActiveSheet = inject<Ref<UpdateSheetType | null>>('updateActiveSheet')
+  const mode = inject(GridModeInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
   if (mode.value === GridMode.CHANGE) {
     return useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
@@ -79,10 +83,10 @@ export function useChangeRowDimensionHeight () {
 }
 
 export function useChangeValue () {
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const updateActiveSheet = inject<Ref<UpdateSheetType | null>>('updateActiveSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.CHANGE) {
     return useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
@@ -96,10 +100,10 @@ export function useChangeValue () {
 }
 
 export function useChangeFileValue (cell: Ref<CellType>, updateFiles: UpdateType<ValueFilesQuery>) {
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const updateActiveSheet = inject<Ref<UpdateSheetType | null>>('updateActiveSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.WRITE) {
     return useChangeFileValueMutation(
       computed(() => activeDocument.value.id),
@@ -113,9 +117,9 @@ export function useChangeFileValue (cell: Ref<CellType>, updateFiles: UpdateType
 }
 
 export function useUnloadFileValueArchive (cell: Ref<CellType>) {
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
-  const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.WRITE) {
     return useUnloadFileValueArchiveMutation(
       computed(() => activeDocument.value ? activeDocument.value.id : ''),

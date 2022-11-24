@@ -1,8 +1,8 @@
 import { useEventListener } from '@vueuse/core'
-import { computed, inject, ref, Ref } from '#app'
-import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
+import { computed, inject, ref } from '#app'
+import { CellType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
-import { GridMode, ScrollInfoType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
+import { GridModeInject, ActiveSheetInject, GridMode, ScrollInfoType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
 import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
 import { useGridSelection } from '~/composables/grid-selection'
 import { useCanChangeRowHeight } from '~/composables/grid-permissions'
@@ -20,8 +20,8 @@ export const cellKinds = {
 }
 
 export function useGrid () {
-  const mode = inject<Ref<GridMode>>('mode')
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
   const canChangeRowHeight = useCanChangeRowHeight()
   const changeColumnWidth = useChangeColumnDimensionWidth()
   const changeRowHeight = useChangeRowDimensionHeight()

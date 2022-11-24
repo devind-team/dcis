@@ -49,9 +49,16 @@ tbody
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, inject, nextTick, PropType, Ref } from '#app'
-import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
-import { FixedInfoType, GridMode, ResizingType, RowFixedInfoType } from '~/types/grid'
+import { computed, defineComponent, ref, inject, nextTick, PropType } from '#app'
+import { CellType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
+import {
+  GridModeInject,
+  ActiveSheetInject,
+  GridMode,
+  FixedInfoType,
+  ResizingType,
+  RowFixedInfoType
+} from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
 import {
   useCanAddRowBeforeOrAfter,
@@ -99,8 +106,8 @@ export default defineComponent({
     mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
-    const mode = inject<Ref<GridMode>>('mode')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const mode = inject(GridModeInject)
+    const activeSheet = inject(ActiveSheetInject)
 
     const isReadOrWriteMode = computed<boolean>(() =>
       mode.value === GridMode.READ || mode.value === GridMode.WRITE

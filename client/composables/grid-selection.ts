@@ -1,7 +1,8 @@
 import { useEventListener } from '@vueuse/core'
 import { computed, ref, inject, Ref } from '#app'
-import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 import {
+  ActiveSheetInject,
   RangeIndicesType,
   SelectionType,
   SelectionViewType,
@@ -27,7 +28,7 @@ export function useGridSelection (
   grid: Ref<HTMLTableElement | null>,
   setActiveCell: (cell: CellType | null) => void
 ) {
-  const activeSheet = inject<Ref<SheetType>>('activeSheet')
+  const activeSheet = inject(ActiveSheetInject)
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
   const cellsSelection = ref<SelectionType<CellType> | null>(null)

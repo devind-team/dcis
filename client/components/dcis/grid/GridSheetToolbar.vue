@@ -91,7 +91,12 @@ v-row
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, Ref } from '#app'
 import { CellType, PeriodSheetQuery } from '~/types/graphql'
-import { CellsOptionsType, ColumnDimensionsOptionsType, RowDimensionsOptionsType } from '~/types/grid'
+import {
+  UpdateActiveSheetInject,
+  CellsOptionsType,
+  ColumnDimensionsOptionsType,
+  RowDimensionsOptionsType
+} from '~/types/grid'
 import { useVuetify, useI18n, UpdateType } from '~/composables'
 import {
   useChangeCellsOptionMutation,
@@ -116,7 +121,7 @@ export default defineComponent({
 
     const themeClass = computed<string>(() => isDark ? 'theme--light' : 'theme--dark')
 
-    const updateActiveSheet = inject<Ref<UpdateType<PeriodSheetQuery>>>('updateActiveSheet')
+    const updateActiveSheet = inject(UpdateActiveSheetInject) as Ref<UpdateType<PeriodSheetQuery>>
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)
     const changeColumnDimensionsFixed = useChangeColumnDimensionsFixedMutation(updateActiveSheet)
     const changeRowDimensionsFixed = useChangeRowDimensionsFixedMutation(updateActiveSheet)

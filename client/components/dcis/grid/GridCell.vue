@@ -10,16 +10,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, Ref } from '#app'
+import { computed, defineComponent, inject, PropType } from '#app'
 import numfmt from 'numfmt'
 import { useCommonQuery } from '~/composables'
 import { useCanChangeValue } from '~/composables/grid-permissions'
 import { useChangeValue, useChangeFileValue, useUnloadFileValueArchive } from '~/composables/grid-actions'
-import { GridMode } from '~/types/grid'
+import { GridModeInject, ActiveSheetInject, ActiveDocumentInject, GridMode } from '~/types/grid'
 import {
   CellType,
-  DocumentType,
-  SheetType,
   ValueFilesQuery,
   ValueFilesQueryVariables
 } from '~/types/graphql'
@@ -48,9 +46,9 @@ export default defineComponent({
     active: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
-    const mode = inject<Ref<GridMode>>('mode')
-    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const mode = inject(GridModeInject)
+    const activeSheet = inject(ActiveSheetInject)
+    const activeDocument = inject(ActiveDocumentInject)
 
     const cell = computed(() => props.cell)
 

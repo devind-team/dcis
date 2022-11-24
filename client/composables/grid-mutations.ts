@@ -920,12 +920,6 @@ export function useChangeFileValueMutation (
   }
 }
 
-/**
- *
- * @param data
- * @param values
- * @param updatedAt
- */
 const updateValues = (data: DocumentSheetQuery, values: ValueType[], updatedAt: string | null = null): void => {
   const rowValues = values.reduce<Record<number, Record<number, ValueType>>>((a, v) => {
     if (!(v.rowId in a)) { a[v.rowId] = {} }

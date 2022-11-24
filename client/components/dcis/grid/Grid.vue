@@ -74,8 +74,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, Ref } from '#app'
-import { GridMode } from '~/types/grid'
+import { defineComponent, inject } from '#app'
+import { GridModeInject, GridMode } from '~/types/grid'
 import { useGrid } from '~/composables/grid'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
@@ -93,7 +93,7 @@ export default defineComponent({
     height: { type: String, required: true }
   },
   setup () {
-    const mode = inject<Ref<GridMode>>('mode')
+    const mode = inject(GridModeInject)
 
     const {
       gridContainer,
