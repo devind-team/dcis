@@ -13,6 +13,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :variables="{ periodId: period.id, divisionIds: [], lastStatusIds: [] }"
     :update="data => data.documents.edges.map(e => e.node)"
     :get-name="document => document.objectName"
+    message-container-class="mb-2"
     multiple
     modal
     fullscreen
