@@ -493,8 +493,8 @@ class DocumentSheetUnloader(SheetUnloader):
         }
 
 
-class DocumentsSheetUnloader(SheetUnloader):
-    """Выгрузчик листа с несколькими документами."""
+class ReportSheetUnloader(SheetUnloader):
+    """Выгрузчик листа для сводного отчета."""
 
     def __init__(self, sheet: Sheet, document_ids: list[int | str], fields: Sequence[str]) -> None:
         super().__init__(sheet, fields)

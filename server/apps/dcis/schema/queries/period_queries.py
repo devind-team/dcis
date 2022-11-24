@@ -33,7 +33,7 @@ from apps.dcis.services.period_services import (
     get_user_period_privileges,
     get_user_periods,
 )
-from apps.dcis.services.sheet_unload_services import DocumentsSheetUnloader, PeriodSheetUnloader
+from apps.dcis.services.sheet_unload_services import PeriodSheetUnloader, ReportSheetUnloader
 
 
 class PeriodQueries(graphene.ObjectType):
@@ -92,12 +92,12 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Выгрузка листа для периода'
     )
-    documents_sheet = graphene.Field(
+    report_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
         document_ids=graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы документов'),
         required=True,
-        description='Выгрузка листа с несколькими документами'
+        description='Выгрузка листа для сводного отчета'
     )
 
     limitations = graphene.List(
@@ -178,14 +178,14 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_documents_sheet(
+    def resolve_report_sheet(
         root: Any,
         info: ResolveInfo,
         sheet_id: str,
         document_ids: list[str]
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-        return DocumentsSheetUnloader(
+        return ReportSheetUnloader(
             sheet=sheet,
             document_ids=[gid2int(document_id) for document_id in document_ids],
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],

@@ -52,9 +52,9 @@ import { DataTableHeader } from 'vuetify'
 import { useCommonQuery, useFilters, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType, DocumentType, DocumentsSheetQuery, DocumentsSheetQueryVariables } from '~/types/graphql'
+import { PeriodType, DocumentType, ReportSheetQuery, ReportSheetQueryVariables } from '~/types/graphql'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
-import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
+import reportSheetQuery from '~/gql/dcis/queries/report_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ReportSettingsMenu from '~/components/dcis/periods/ReportSettingsMenu.vue'
 import QueryDataFilter from '~/components/common/filters/QueryDataFilter.vue'
@@ -106,10 +106,10 @@ export default defineComponent({
 
     const activeSheetIndex = ref<number>(0)
     const { data: activeSheet } = useCommonQuery<
-      DocumentsSheetQuery,
-      DocumentsSheetQueryVariables
+      ReportSheetQuery,
+      ReportSheetQueryVariables
     >({
-      document: documentsSheetQuery,
+      document: reportSheetQuery,
       variables: () => ({
         sheetId: props.period.sheets[activeSheetIndex.value].id,
         documentIds: selectedDocuments.value.map((document: DocumentType) => document.id)

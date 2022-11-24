@@ -4001,13 +4001,6 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): DocumentTypeConnection!
-  """Выгрузка листа с несколькими документами"""
-  documentsSheet(
-    """Идентификаторы документов"""
-    documentIds: [ID!]
-    """Идентификатор листа"""
-    sheetId: ID!
-  ): SheetType!
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
@@ -4127,6 +4120,13 @@ type Query {
     regionId: Int!
   ): RegionType
   regions: [RegionType!]
+  """Выгрузка листа для сводного отчета"""
+  reportSheet(
+    """Идентификаторы документов"""
+    documentIds: [ID!]
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
   """Сегменты страницы"""
