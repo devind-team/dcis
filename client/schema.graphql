@@ -4122,8 +4122,10 @@ type Query {
   regions: [RegionType!]
   """Выгрузка листа для сводного отчета"""
   reportSheet(
+    """Основной документ"""
+    mainDocumentId: ID
     """Идентификаторы документов"""
-    documentIds: [ID!]
+    reportDocuments: [ReportDocumentInputType!]!
     """Идентификатор листа"""
     sheetId: ID!
   ): SheetType!
@@ -4261,6 +4263,16 @@ type RenameSheetMutationPayload {
   sheet: SheetType
   """Успех мутации"""
   success: Boolean!
+}
+
+"""Документ для выгрузки сводного отчета."""
+input ReportDocumentInputType {
+  """Цвет выделения дочерних строк"""
+  color: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Показывать ли дочерние строки"""
+  isVisible: Boolean!
 }
 
 input RequestCodeMutationInput {

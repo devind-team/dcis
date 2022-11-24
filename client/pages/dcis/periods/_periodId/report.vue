@@ -113,7 +113,12 @@ export default defineComponent({
       document: reportSheetQuery,
       variables: () => ({
         sheetId: props.period.sheets[activeSheetIndex.value].id,
-        documentIds: selectedDocuments.value.map((document: DocumentType) => document.id)
+        reportDocuments: selectedDocuments.value.map((document: DocumentType) => ({
+          documentId: document.id,
+          isVisible: false,
+          color: null
+        })),
+        mainDocumentId: null
       })
     })
 

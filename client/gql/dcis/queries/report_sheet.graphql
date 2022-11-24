@@ -1,7 +1,7 @@
 #import "../fragments/sheet_fields.graphql"
 
-query ReportSheet($sheetId: ID!, $documentIds: [ID!]!) {
-  reportSheet(sheetId: $sheetId, documentIds: $documentIds) {
+query ReportSheet($sheetId: ID!, $reportDocuments: [ReportDocumentInputType!]!, $mainDocumentId: ID) {
+  reportSheet(sheetId: $sheetId, reportDocuments: $reportDocuments, mainDocumentId: $mainDocumentId) {
     ...SheetFields
   }
 }

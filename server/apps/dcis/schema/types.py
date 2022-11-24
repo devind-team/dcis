@@ -656,3 +656,11 @@ class GlobalIndicesInputType(graphene.InputObjectType):
 
     row_id = graphene.ID(required=True, description='Идентификатор строки')
     global_index = graphene.Int(required=True, description='Индекс в плоской структуре')
+
+
+class ReportDocumentInputType(graphene.InputObjectType):
+    """Документ для выгрузки сводного отчета."""
+
+    document_id = graphene.ID(required=True, description='Идентификатор документа')
+    is_visible = graphene.Boolean(required=True, description='Показывать ли дочерние строки')
+    color = graphene.String(description='Цвет выделения дочерних строк')

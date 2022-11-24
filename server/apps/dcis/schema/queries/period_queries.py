@@ -16,7 +16,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Attribute, Limitation, Period, Privilege, Sheet
+from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
 from apps.dcis.permissions import can_change_period_sheet, can_view_period
 from apps.dcis.schema.types import (
     AttributeType,
@@ -24,6 +24,7 @@ from apps.dcis.schema.types import (
     LimitationType,
     PeriodType,
     PrivilegeType,
+    ReportDocumentInputType,
     SheetType,
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
@@ -33,7 +34,7 @@ from apps.dcis.services.period_services import (
     get_user_period_privileges,
     get_user_periods,
 )
-from apps.dcis.services.sheet_unload_services import PeriodSheetUnloader, ReportSheetUnloader
+from apps.dcis.services.sheet_unload_services import PeriodSheetUnloader, ReportDocument, ReportSheetUnloader
 
 
 class PeriodQueries(graphene.ObjectType):
@@ -95,9 +96,14 @@ class PeriodQueries(graphene.ObjectType):
     report_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
-        document_ids=graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы документов'),
+        report_documents=graphene.List(
+            graphene.NonNull(ReportDocumentInputType),
+            required=True,
+            description='Идентификаторы документов'
+        ),
+        main_document_id=graphene.ID(description='Основной документ'),
         required=True,
-        description='Выгрузка листа для сводного отчета'
+        description='Выгрузка листа для сводного отчета',
     )
 
     limitations = graphene.List(
@@ -182,12 +188,23 @@ class PeriodQueries(graphene.ObjectType):
         root: Any,
         info: ResolveInfo,
         sheet_id: str,
-        document_ids: list[str]
+        report_documents: list[ReportDocumentInputType],
+        **kwargs
     ) -> list[dict] | dict:
-        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
+        if 'main_document_id' in kwargs:
+            main_document = get_object_or_404(Document, pk=gid2int(kwargs['main_document_id']))
+        else:
+            main_document = None
+        document_ids = [gid2int(report_document.document_id) for report_document in report_documents]
+        documents = Document.objects.filter(id__in=document_ids)
         return ReportSheetUnloader(
             sheet=sheet,
-            document_ids=[gid2int(document_id) for document_id in document_ids],
+            report_documents=[next(
+                ReportDocument(d, r.is_visible, r.color)
+                for r in report_documents if r.document_id == d.id
+            ) for d in documents],
+            main_document=main_document,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
 

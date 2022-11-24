@@ -1,6 +1,7 @@
 """Модуль для выгрузки листов."""
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Sequence
 
@@ -83,8 +84,8 @@ class SheetColumnsUnloader(DataUnloader):
     )
 
 
-class SheetRowsUnloader(DataUnloader):
-    """Выгрузчик строк листа."""
+class SheetRowsUnloaderBase(DataUnloader, ABC):
+    """Базовый выгрузчик строк листа."""
 
     def __init__(
         self,
@@ -93,24 +94,13 @@ class SheetRowsUnloader(DataUnloader):
         cells: QuerySet[Cell] | Sequence[Cell],
         merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
         values: QuerySet[Value] | Sequence[Value]
-    ) -> None:
+    ):
         super().__init__()
         self.columns_unloader = columns_unloader
         self.rows = rows
         self.cells = cells
         self.merged_cells = merged_cells
         self.values = values
-
-    def unload_data(self) -> list[dict] | dict:
-        """Выгрузка строк листа."""
-        rows = self._unload_raw_rows()
-        cells = self._unload_raw_cells()
-        row_trees = self._connect_rows(rows)
-        self._add_row_names(row_trees)
-        rows = self._flatten_rows(row_trees)
-        self._add_global_indices(rows)
-        self._prepare_data(rows, cells)
-        return rows
 
     _rows_fields = (
         'id', 'index', 'height',
@@ -138,20 +128,6 @@ class SheetRowsUnloader(DataUnloader):
     _merged_cells_properties = (
         'colspan', 'rowspan', 'target', 'cells',
     )
-
-    def _prepare_data(self, rows: list[dict], cells: list[dict]) -> None:
-        """Подготовка строк и ячеек к выгрузке после сортировки строк."""
-        columns = self.columns_unloader.unload()
-        merged_cells = self._unload_raw_merged_cells()
-        values = self._unload_raw_values()
-        columns_map = self._create_columns_map(columns)
-        merged_cells_map = self._create_merged_cells_map(merged_cells)
-        merged_cell_positions = self._create_merged_cell_positions(merged_cells)
-        merged_cell_row_positions = self._create_merged_cell_row_positions(merged_cells)
-        self._add_cell_values(cells, values)
-        self._add_cells(rows, columns_map, cells)
-        self._add_cell_properties(rows, columns_map, merged_cells_map)
-        self._filter_rows_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
 
     def _unload_raw_rows(self) -> list[dict]:
         """Выгрузка необработанных строк листа."""
@@ -201,20 +177,71 @@ class SheetRowsUnloader(DataUnloader):
         return trees
 
     @classmethod
-    def _add_children(cls, rows: list[dict], row: dict) -> None:
-        """Добавление дочерних строк к строке."""
-        row['children'] = [r for r in rows if r['parent_id'] == row['id']]
-        for child in row['children']:
-            child['parent'] = row
-            cls._add_children(rows, child)
-
-    @classmethod
     def _add_row_names(cls, rows_tree: list[dict]) -> None:
         """Добавление имен к строкам."""
         for row in rows_tree:
             row['name'] = cls._get_row_name(row)
             if len(row['children']):
                 cls._add_row_names(row['children'])
+
+    @classmethod
+    @abstractmethod
+    def _add_children(cls, rows: list[dict], row: dict) -> None:
+        """Добавление дочерних строк к строке."""
+        ...
+
+    @classmethod
+    @abstractmethod
+    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
+        """Получение имени строки."""
+        ...
+
+
+class SheetRowsUnloader(SheetRowsUnloaderBase):
+    """Выгрузчик строк листа."""
+
+    def __init__(
+        self,
+        columns_unloader: SheetColumnsUnloader,
+        rows: QuerySet[RowDimension] | Sequence[RowDimension],
+        cells: QuerySet[Cell] | Sequence[Cell],
+        merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
+        values: QuerySet[Value] | Sequence[Value]
+    ) -> None:
+        super().__init__(columns_unloader, rows, cells, merged_cells, values)
+
+    def unload_data(self) -> list[dict] | dict:
+        """Выгрузка строк листа."""
+        rows = self._unload_raw_rows()
+        cells = self._unload_raw_cells()
+        row_trees = self._connect_rows(rows)
+        self._add_row_names(row_trees)
+        rows = self._flatten_rows(row_trees)
+        self._add_global_indices(rows)
+        self._prepare_data(rows, cells)
+        return rows
+
+    def _prepare_data(self, rows: list[dict], cells: list[dict]) -> None:
+        """Подготовка строк и ячеек к выгрузке после сортировки строк."""
+        columns = self.columns_unloader.unload()
+        merged_cells = self._unload_raw_merged_cells()
+        values = self._unload_raw_values()
+        columns_map = self._create_columns_map(columns)
+        merged_cells_map = self._create_merged_cells_map(merged_cells)
+        merged_cell_positions = self._create_merged_cell_positions(merged_cells)
+        merged_cell_row_positions = self._create_merged_cell_row_positions(merged_cells)
+        self._add_cell_values(cells, values)
+        self._add_cells(rows, columns_map, cells)
+        self._add_cell_properties(rows, columns_map, merged_cells_map)
+        self._filter_rows_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
+
+    @classmethod
+    def _add_children(cls, rows: list[dict], row: dict) -> None:
+        """Добавление дочерних строк к строке."""
+        row['children'] = [r for r in rows if r['parent_id'] == row['id']]
+        for child in row['children']:
+            child['parent'] = row
+            cls._add_children(rows, child)
 
     @classmethod
     def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
@@ -399,6 +426,45 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
         return sorted(rows, key=lambda row: row['global_index'])
 
 
+@dataclass
+class ReportDocument:
+    document: Document
+    is_visible: bool
+    color: str
+
+
+class SheetReportRowsUnloader(SheetRowsUnloaderBase):
+    """Выгрузчик строк листа для сводного отчета."""
+
+    def __init__(
+        self,
+        columns_unloader: SheetColumnsUnloader,
+        rows: QuerySet[RowDimension] | Sequence[RowDimension],
+        cells: QuerySet[Cell] | Sequence[Cell],
+        merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
+        values: QuerySet[Value] | Sequence[Value],
+        report_documents: list[ReportDocument],
+        main_document: Document,
+    ) -> None:
+        super().__init__(columns_unloader, rows, cells, merged_cells, values)
+        self.report_documents = report_documents
+        self.main_document = main_document
+
+    def unload_data(self) -> list[dict] | dict:
+        """Выгрузка строк листа для сводного отчета."""
+        return SheetRowsUnloader(self.columns_unloader, self.rows, self.cells, self.merged_cells, self.values).unload()
+
+    @classmethod
+    def _add_children(cls, rows: list[dict], row: dict) -> None:
+        """Добавление дочерних строк к строке."""
+        pass
+
+    @classmethod
+    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
+        """Получение имени строки."""
+        pass
+
+
 class SheetUnloader(DataUnloader):
     """Выгрузчик листа."""
 
@@ -496,19 +562,32 @@ class DocumentSheetUnloader(SheetUnloader):
 class ReportSheetUnloader(SheetUnloader):
     """Выгрузчик листа для сводного отчета."""
 
-    def __init__(self, sheet: Sheet, document_ids: list[int | str], fields: Sequence[str]) -> None:
+    def __init__(
+        self,
+        sheet: Sheet,
+        report_documents: list[ReportDocument],
+        main_document: Document | None,
+        fields: Sequence[str]
+    ) -> None:
         super().__init__(sheet, fields)
-        self.document_ids = document_ids
+        self.report_documents = report_documents
+        self.main_document = main_document
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""
-        rows = self.sheet.rowdimension_set.filter(parent__isnull=True)
-        return SheetRowsUnloader(
+        all_documents = [dr.document for dr in self.report_documents]
+        visible_documents = [dr.document for dr in self.report_documents if dr.is_visible]
+        rows = self.sheet.rowdimension_set.filter(
+            Q(parent__isnull=True) | Q(parent__isnull=False, document__in=visible_documents)
+        )
+        return SheetReportRowsUnloader(
             columns_unloader=self.columns_unloader,
             rows=rows,
             cells=Cell.objects.filter(row__in=[row.id for row in rows]),
             merged_cells=self.sheet.mergedcell_set.all(),
-            values=Value.objects.none(),
+            values=Value.objects.filter(row__in=rows, document__in=all_documents),
+            report_documents=self.report_documents,
+            main_document=self.main_document,
         ).unload()
 
     def get_permissions(self) -> dict[str, bool]:
