@@ -225,7 +225,11 @@ export default {
         documentsFilter: {
           title: 'Фильтр документов',
           noFiltrationMessage: 'Документы не выбраны',
-          multipleMessage: 'Выбрано документов: {count}'
+          multipleMessage: 'Выбрано документов: {count}',
+          selectMainDocument: 'Выбрать основной документ',
+          mainDocumentSelection: 'Выбор основного документа',
+          mainDocument: 'Выбран основной документ: {divisionId}',
+          changeProperties: 'Изменить свойства'
         }
       }
     }
