@@ -38,6 +38,7 @@ base-data-filter(
       :item-key="itemKey"
       :multiple="multiple"
       :has-select-all="hasSelectAll"
+      :get-key="getKey"
       :get-name="getName"
       :get-selected="getSelected"
       :set-selected="setSelected"
@@ -55,6 +56,7 @@ base-data-filter(
           slot(
             name="item"
             :item="item"
+            :get-key="getKey"
             :get-name="getName"
             :is-selected="getSelected(item)"
             :change="setSelected.bind(this, item)"
@@ -71,22 +73,24 @@ base-data-filter(
           slot(
             name="item"
             :item="item"
+            :get-key="getKey"
             :get-name="getName"
             :is-selected="getSelected(item)"
             :change="setSelected.bind(this, item)"
           )
-            v-radio(:key="item[itemKey]" :value="item" :label="getName(item)")
+            v-radio(:key="getKey(item)" :value="item" :label="getName(item)")
   template(#actions="actions")
     slot(name="actions" v-bind="actions")
 </template>
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { computed, defineComponent, ref } from '#app'
+import { computed, defineComponent, ref, watch } from '#app'
 import { useI18n } from '~/composables'
 import {
   Class,
   GetName,
+  GetKey,
   Item,
   MessageFunction,
   MultipleMessageFunction,
@@ -117,10 +121,16 @@ export default defineComponent({
     },
     searchLabel: { type: String, default: null },
     searchFunction: { type: Function as PropType<SearchFunction>, default: null },
+    getKey: {
+      type: Function as PropType<GetKey>,
+      default (item: Item) {
+        return item[(this as any).itemKey]
+      }
+    },
     getName: {
       type: Function as PropType<GetName>,
       default (item: Item) {
-        return String(item[(this as any).itemKey])
+        return (this as any).getKey(item)
       }
     },
     defaultValue: { type: [Object, Array], default: () => ([]) }
@@ -174,7 +184,7 @@ export default defineComponent({
         : props.items
       return [
         ...items,
-        ...tempItems.value.filter(tempItem => !items.find(item => item[props.itemKey] === tempItem[props.itemKey]))
+        ...tempItems.value.filter(tempItem => !items.find(item => props.getKey(item) === props.getKey(tempItem)))
       ]
     })
     const message = computed<string>(() => {
@@ -197,6 +207,10 @@ export default defineComponent({
       }
     })
 
+    watch(() => tempItems.value, (newValue) => {
+      emit('select', newValue)
+    })
+
     const clear = () => {
       tempItems.value = props.defaultValue
       emit('clear')
@@ -210,7 +224,6 @@ export default defineComponent({
     }
 
     const reset = () => {
-      clear()
       tempItems.value = props.defaultValue
       search.value = ''
       emit('reset')
@@ -224,12 +237,12 @@ export default defineComponent({
     }
 
     const getSelected = (item: Item): boolean => {
-      return !!tempItems.value.find(selectedItem => selectedItem[props.itemKey] === item[props.itemKey])
+      return !!tempItems.value.find(selectedItem => props.getKey(selectedItem) === props.getKey(item))
     }
     const setSelected = (item: Item, selected: boolean) => {
       tempItems.value = selected
         ? [...tempItems.value, item]
-        : tempItems.value.filter(selectedItem => selectedItem[props.itemKey] !== item[props.itemKey])
+        : tempItems.value.filter(selectedItem => props.getKey(selectedItem) !== props.getKey(item))
     }
 
     const setAllSelected = (selected: boolean) => {
