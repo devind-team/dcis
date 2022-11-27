@@ -26,7 +26,7 @@ import ReportSettingsMenu from '~/components/dcis/periods/ReportSettingsMenu.vue
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import ReportDocumentFilter, {
   ReportDocumentType,
-  ReportDocumentFilterData
+  ReportDocumentFilterInputType
 } from '~/components/dcis/periods/ReportDocumentFilter.vue'
 
 export default defineComponent({
@@ -53,7 +53,7 @@ export default defineComponent({
       }
     ]))
 
-    const reportDocumentFilterData = ref<ReportDocumentFilterData>({
+    const reportDocumentFilterData = ref<ReportDocumentFilterInputType>({
       reportDocuments: [],
       mainDocument: null
     })

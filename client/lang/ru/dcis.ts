@@ -221,15 +221,19 @@ export default {
       settings: {
         unload: 'Выгрузить сводный отчет'
       },
-      filters: {
-        documentsFilter: {
-          title: 'Фильтр документов',
-          noFiltrationMessage: 'Документы не выбраны',
-          multipleMessage: 'Выбрано документов: {count}',
-          selectMainDocument: 'Выбрать основной документ',
-          mainDocumentSelection: 'Выбор основного документа',
-          mainDocument: 'Выбран основной документ: {divisionId}',
-          changeProperties: 'Изменить свойства'
+      documentsFilter: {
+        title: 'Фильтр документов',
+        noFiltrationMessage: 'Документы не выбраны',
+        multipleMessage: 'Выбрано документов: {count}',
+        selectMainDocument: 'Выбрать основной документ',
+        mainDocumentSelection: 'Выбор основного документа',
+        mainDocument: 'Выбран основной документ: {divisionId}',
+        propertiesForm: {
+          header: 'Изменение свойств отображения документа',
+          subheader: 'Документ: {divisionId}',
+          isVisible: 'Отображать дочерние строки',
+          color: 'Выделять цветом',
+          buttonText: 'Изменить свойства'
         }
       }
     }

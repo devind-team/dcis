@@ -2,7 +2,7 @@
 items-data-filter(
   v-model="reportDocuments"
   :items="reportDocumentItems"
-  :title="String($t(`dcis.periods.report.filters.documentsFilter.title`))"
+  :title="String($t(`dcis.periods.report.documentsFilter.title`))"
   :message-function="documentFilterMessageFunction"
   :get-key="reportDocument => reportDocument.document.id"
   :get-name="reportDocument => reportDocument.document.objectName"
@@ -46,7 +46,7 @@ items-data-filter(
               template(#activator="{ on, attrs }")
                 v-btn(v-on="on" v-bind="attrs" color="success" icon @click="selectMainDocument(item.document)")
                   v-icon mdi-check-circle
-              span {{ $t('dcis.periods.report.filters.documentsFilter.selectMainDocument') }}
+              span {{ $t('dcis.periods.report.documentsFilter.selectMainDocument') }}
           td.text-center(v-else)
             v-simple-checkbox(v-ripple :value="isSelected" @input="select($event)")
           td {{ item.document.objectName }} ({{ item.document.objectId }})
@@ -59,11 +59,23 @@ items-data-filter(
           td {{ dateTimeHM(item.document.createdAt) }}
           td {{ dateTimeHM(item.document.updatedAt) }}
           td.text-center(v-if="!mainDocumentSelection")
-            v-tooltip(bottom v-if="!!tempItems.find(i => i.document.id === item.document.id)")
-              template(#activator="{ on, attrs }")
-                v-btn(v-on="on" v-bind="attrs" color="primary" icon)
-                  v-icon mdi-pencil
-              span {{ $t('dcis.periods.report.filters.documentsFilter.changeProperties') }}
+            report-document-properties-form(
+              v-if="!!tempItems.find(i => i.document.id === item.document.id)"
+              :document="item.document"
+              :is-visible.sync="item.isVisible"
+              :color.sync="item.color"
+            )
+              template(#activator="{ on: onDialog, attrs: attrsDialog }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip, attrs: attrsTooltip }")
+                    v-btn(
+                      v-on="{ ...onDialog, ...onTooltip }"
+                      v-bind="{ ...attrsDialog, ...attrsTooltip }"
+                      color="primary"
+                      icon
+                    )
+                      v-icon mdi-pencil
+                  span {{ $t('dcis.periods.report.documentsFilter.propertiesForm.buttonText') }}
 </template>
 
 <script lang="ts">
@@ -73,21 +85,22 @@ import { PeriodType, DocumentType, DocumentsQuery, DocumentsQueryVariables } fro
 import { useFilters, useI18n, useQueryRelay } from '~/composables'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+import ReportDocumentPropertiesForm from '~/components/dcis/periods/ReportDocumentPropertiesForm.vue'
 
 export type ReportDocumentType = {
   document: DocumentType,
   isVisible: boolean,
   color: string | null
 }
-export type ReportDocumentFilterData = {
+export type ReportDocumentFilterInputType = {
   reportDocuments: ReportDocumentType[],
   mainDocument: DocumentType | null
 }
 
 export default defineComponent({
-  components: { ItemsDataFilter },
+  components: { ItemsDataFilter, ReportDocumentPropertiesForm },
   props: {
-    value: { type: Object as PropType<ReportDocumentFilterData>, required: true },
+    value: { type: Object as PropType<ReportDocumentFilterInputType>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props, { emit }) {
@@ -100,15 +113,15 @@ export default defineComponent({
     const mainDocumentSelection = ref<boolean>(false)
     const mainDocumentMessage = computed<string>(() => {
       if (mainDocumentSelection.value) {
-        return t('dcis.periods.report.filters.documentsFilter.mainDocumentSelection') as string
+        return t('dcis.periods.report.documentsFilter.mainDocumentSelection') as string
       }
       if (mainDocument.value) {
         return t(
-          'dcis.periods.report.filters.documentsFilter.mainDocument',
+          'dcis.periods.report.documentsFilter.mainDocument',
           { divisionId: mainDocument.value.objectId }
         ) as string
       }
-      return t('dcis.periods.report.filters.documentsFilter.selectMainDocument') as string
+      return t('dcis.periods.report.documentsFilter.selectMainDocument') as string
     })
     const startMainDocumentSelection = () => {
       mainDocumentSelection.value = true
@@ -167,9 +180,9 @@ export default defineComponent({
 
     const documentFilterMessageFunction = (selectedItems: DocumentType[]): string => {
       if (selectedItems.length === 0) {
-        return t('dcis.periods.report.filters.documentsFilter.noFiltrationMessage') as string
+        return t('dcis.periods.report.documentsFilter.noFiltrationMessage') as string
       }
-      return t('dcis.periods.report.filters.documentsFilter.multipleMessage', { count: selectedItems.length }) as string
+      return t('dcis.periods.report.documentsFilter.multipleMessage', { count: selectedItems.length }) as string
     }
     const documentsFilterTableHeaders = computed<DataTableHeader[]>(() => {
       const result: DataTableHeader[] = []
@@ -208,18 +221,43 @@ export default defineComponent({
       }
     }
 
+    const clearReportDocumentItems = () => {
+      for (const reportDocument of reportDocumentItems.value) {
+        reportDocument.isVisible = true
+        reportDocument.color = null
+      }
+    }
+
+    const closeReportDocumentItems = () => {
+      for (const reportDocument of reportDocumentItems.value) {
+        const valueReportDocument = props.value.reportDocuments.find(
+          (valueReportDocument: ReportDocumentType) => valueReportDocument.document.id === reportDocument.document.id
+        )
+        if (valueReportDocument) {
+          reportDocument.isVisible = valueReportDocument.isVisible
+          reportDocument.color = valueReportDocument.color
+        } else {
+          reportDocument.isVisible = true
+          reportDocument.color = null
+        }
+      }
+    }
+
     const clear = () => {
       mainDocument.value = null
+      clearReportDocumentItems()
     }
 
     const close = () => {
       mainDocument.value = props.value.mainDocument
       mainDocumentSelection.value = false
+      closeReportDocumentItems()
     }
 
     const reset = () => {
       mainDocument.value = null
       mainDocumentSelection.value = false
+      clearReportDocumentItems()
     }
 
     const apply = () => {
