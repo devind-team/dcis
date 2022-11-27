@@ -8,6 +8,7 @@ base-data-filter(
   :fullscreen="fullscreen"
   :max-width="maxWidth"
   :max-height="maxHeight"
+  @active-changed="$emit('active-changed', $event)"
   @clear="clear"
   @close="close"
   @reset="reset"
@@ -29,6 +30,7 @@ base-data-filter(
           hide-details
           clearable
         )
+    slot(name="fixed-content" :items="items" :searchItems="searchItems" :temp-items="tempItems")
   template(#item-content)
     slot(
       name="items"
@@ -189,7 +191,7 @@ export default defineComponent({
     })
     const message = computed<string>(() => {
       if (props.messageFunction) {
-        return props.messageFunction(selectedItems.value)
+        return props.messageFunction(selectedItems.value, props.getName)
       }
       if (selectedItems.value.length === 0) {
         return props.noFiltrationMessage || t('common.filters.itemsDataFilter.noFiltrationMessage')
@@ -208,7 +210,7 @@ export default defineComponent({
     })
 
     watch(() => tempItems.value, (newValue) => {
-      emit('select', newValue)
+      emit('temp-items-changed', newValue)
     })
 
     const clear = () => {

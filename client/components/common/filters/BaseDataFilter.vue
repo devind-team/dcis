@@ -45,8 +45,8 @@ component(
 
 <script lang="ts">
 import { VMenu, VDialog } from 'vuetify/lib'
-import type { PropType, Ref } from '#app'
-import { defineComponent, ref } from '#app'
+import type { PropType } from '#app'
+import { defineComponent, ref, watch } from '#app'
 import { Class } from '~/types/filters'
 
 export default defineComponent({
@@ -62,7 +62,11 @@ export default defineComponent({
     maxHeight: { type: [String, Number], default: '400px' }
   },
   setup (_, { emit }) {
-    const active: Ref<boolean> = ref<boolean>(false)
+    const active = ref<boolean>(false)
+
+    watch(() => active.value, (newValue) => {
+      emit('active-changed', newValue)
+    })
 
     const close = () => {
       active.value = false

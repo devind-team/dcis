@@ -25,6 +25,7 @@ apollo-query(
     :search-label="searchLabel"
     :search-function="searchType === 'client' ? searchFunction : undefined"
     :get-name="getName"
+    @active-changed="$emit('active-changed', $event)"
     @clear="$emit('clear')"
     @close="$emit('close')"
     @reset="$emit('reset')"
