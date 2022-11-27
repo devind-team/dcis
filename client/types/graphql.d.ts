@@ -5086,6 +5086,7 @@ export type QueryRegionArgs = {
 
 /** Схема запросов данных. */
 export type QueryReportSheetArgs = {
+  aggregation?: InputMaybe<ReportAggregation>;
   mainDocumentId?: InputMaybe<Scalars['ID']>;
   reportDocuments: Array<ReportDocumentInputType>;
   sheetId: Scalars['ID'];
@@ -5241,6 +5242,14 @@ export type RenameSheetMutationPayload = {
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
+
+/** Тип агрегации для сводного отчета. */
+export type ReportAggregation =
+  | 'AVG'
+  | 'CONCAT'
+  | 'MAX'
+  | 'MIN'
+  | 'SUM';
 
 /** Документ для выгрузки сводного отчета. */
 export type ReportDocumentInputType = {
@@ -6864,6 +6873,7 @@ export type ReportSheetQueryVariables = Exact<{
   sheetId: Scalars['ID'];
   reportDocuments: Array<ReportDocumentInputType> | ReportDocumentInputType;
   mainDocumentId?: InputMaybe<Scalars['ID']>;
+  aggregation?: InputMaybe<ReportAggregation>;
 }>;
 
 export type ReportSheetQuery = { __typename?: 'Query', reportSheet: { __typename: 'SheetType', id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any, canChange: boolean, canChangeValue: boolean, canAddChildRowDimension: boolean, canChangeChildRowDimensionHeight: boolean, canDeleteChildRowDimension: boolean, columns?: Array<{ __typename: 'ColumnDimensionType', id: string, index: number, name: string, width?: number | null, fixed: boolean, hidden: boolean, kind: string, createdAt: any, updatedAt: any }> | null, rows?: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, error?: string | null, aggregation?: string | null }> }> | null } };

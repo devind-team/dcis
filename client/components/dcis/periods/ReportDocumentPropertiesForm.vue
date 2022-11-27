@@ -14,8 +14,12 @@ v-dialog(v-model="active" width="578")
           v-model="isVisibleLocal"
           :label="$t('dcis.periods.report.documentsFilter.propertiesForm.isVisible')"
         )
-        v-label {{ $t('dcis.periods.report.documentsFilter.propertiesForm.color') }}
-        v-color-picker.mt-1(
+        v-switch(
+          v-model="isColored"
+          :label="$t('dcis.periods.report.documentsFilter.propertiesForm.color')"
+        )
+        v-color-picker(
+          v-if="isColored"
           v-model="colorLocal"
           :swatches="swatches"
           width="546"
@@ -32,7 +36,7 @@ v-dialog(v-model="active" width="578")
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, nextTick, PropType } from '#app'
+import { defineComponent, ref, PropType } from '#app'
 import { DocumentType } from '~/types/graphql'
 
 export default defineComponent({
@@ -43,14 +47,9 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const active = ref<boolean>(false)
-    watch(() => active.value, async (value) => {
-      if (!value) {
-        await nextTick()
-        document.documentElement.classList.add('overflow-y-hidden')
-      }
-    })
 
     const isVisibleLocal = ref<boolean>(props.isVisible)
+    const isColored = ref<boolean>(!!props.color)
     const colorLocal = ref<string>(props.color || '#5A83C3')
 
     const swatches = [
@@ -69,16 +68,22 @@ export default defineComponent({
     const save = () => {
       active.value = false
       emit('update:isVisible', isVisibleLocal.value)
-      emit('update:color', colorLocal.value)
+      if (isColored.value) {
+        emit('update:color', colorLocal.value)
+      } else {
+        emit('update:color', null)
+        colorLocal.value = '#5A83C3'
+      }
     }
 
     const close = () => {
       active.value = false
       isVisibleLocal.value = props.isVisible
+      isColored.value = Boolean(props.color)
       colorLocal.value = props.color || '#5A83C3'
     }
 
-    return { active, isVisibleLocal, colorLocal, swatches, save, close }
+    return { active, isVisibleLocal, isColored, colorLocal, swatches, save, close }
   }
 })
 </script>

@@ -10,20 +10,31 @@ items-data-filter(
   multiple
   modal
   fullscreen
-  @select="select"
+  @active-changed="activeChanged"
+  @temp-items-changed="tempItemsChanged"
   @clear="clear"
   @close="close"
   @reset="reset"
   @apply="apply"
 )
+  template(#fixed-content="{ tempItems }")
+    v-card-text(style="flex: none")
+      v-chip.mr-1(
+        :class="{'font-weight-bold': !!mainDocument}"
+        :close="!!mainDocument || mainDocumentSelection"
+        :disabled="!tempItems.length"
+        @click="startMainDocumentSelection"
+        @click:close="closeMainDocument"
+      ) {{ mainDocumentMessage }}
+      items-data-filter(
+        v-model="aggregation"
+        :items="aggregationItems"
+        :title="String($t('dcis.periods.report.documentsFilter.aggregationFilter.title'))"
+        :message-function="aggregationMessageFunction"
+        :get-name="item => String($t(`dcis.periods.report.documentsFilter.aggregationFilter.${item.id.toLowerCase()}`))"
+        message-container-class="ml-1"
+      )
   template(#items="{ searchItems, tempItems, setSelected, setAllSelected }")
-    v-chip.mb-1(
-      :class="{'font-weight-bold': !!mainDocument}"
-      :close="!!mainDocument || mainDocumentSelection"
-      :disabled="!tempItems.length"
-      @click="startMainDocumentSelection"
-      @click:close="closeMainDocument"
-    ) {{ mainDocumentMessage }}
     v-data-table(
       :value="tempItems"
       :headers="documentsFilterTableHeaders"
@@ -79,9 +90,11 @@ items-data-filter(
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch, PropType } from '#app'
+import { computed, defineComponent, ref, watch, onMounted, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
-import { PeriodType, DocumentType, DocumentsQuery, DocumentsQueryVariables } from '~/types/graphql'
+import { useMutationObserver } from '@vueuse/core'
+import { GetName } from '~/types/filters'
+import { PeriodType, DocumentType, DocumentsQuery, DocumentsQueryVariables, ReportAggregation } from '~/types/graphql'
 import { useFilters, useI18n, useQueryRelay } from '~/composables'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
@@ -94,8 +107,10 @@ export type ReportDocumentType = {
 }
 export type ReportDocumentFilterInputType = {
   reportDocuments: ReportDocumentType[],
-  mainDocument: DocumentType | null
+  mainDocument: DocumentType | null,
+  aggregation: ReportAggregation | null
 }
+type AggregationItemType = { id: ReportAggregation }
 
 export default defineComponent({
   components: { ItemsDataFilter, ReportDocumentPropertiesForm },
@@ -108,8 +123,8 @@ export default defineComponent({
     const { dateTimeHM } = useFilters()
 
     const reportDocuments = ref<ReportDocumentType[]>([])
-    const mainDocument = ref<DocumentType | null>(null)
 
+    const mainDocument = ref<DocumentType | null>(null)
     const mainDocumentSelection = ref<boolean>(false)
     const mainDocumentMessage = computed<string>(() => {
       if (mainDocumentSelection.value) {
@@ -136,6 +151,24 @@ export default defineComponent({
       } else if (mainDocument.value) {
         mainDocument.value = null
       }
+    }
+
+    const aggregation = ref<AggregationItemType | null>(null)
+    const aggregationItems: AggregationItemType[] = [
+      { id: 'CONCAT' },
+      { id: 'SUM' },
+      { id: 'AVG' },
+      { id: 'MIN' },
+      { id: 'MAX' }
+    ]
+    const aggregationMessageFunction = (selectedItems: AggregationItemType[], getName: GetName): string => {
+      if (selectedItems.length) {
+        return t(
+          'dcis.periods.report.documentsFilter.aggregationFilter.aggregation',
+          { method: getName(selectedItems[0]) }
+        ) as string
+      }
+      return t('dcis.periods.report.documentsFilter.aggregationFilter.selectAggregation') as string
     }
 
     const { data: documents } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
@@ -212,7 +245,21 @@ export default defineComponent({
       return result
     })
 
-    const select = (reportDocuments: ReportDocumentType[]) => {
+    const active = ref<boolean>(false)
+    const activeChanged = (value: boolean) => {
+      active.value = value
+    }
+    onMounted(() => {
+      useMutationObserver(document.documentElement, (mutations) => {
+        if (mutations[0] && active.value && !document.documentElement.classList.contains('overflow-y-hidden')) {
+          document.documentElement.classList.add('overflow-y-hidden')
+        }
+      }, {
+        attributeFilter: ['class']
+      })
+    })
+
+    const tempItemsChanged = (reportDocuments: ReportDocumentType[]) => {
       if (!mainDocument.value) {
         return
       }
@@ -245,25 +292,29 @@ export default defineComponent({
 
     const clear = () => {
       mainDocument.value = null
+      aggregation.value = null
       clearReportDocumentItems()
     }
 
     const close = () => {
       mainDocument.value = props.value.mainDocument
       mainDocumentSelection.value = false
+      aggregation.value = props.value.aggregation ? { id: props.value.aggregation } : null
       closeReportDocumentItems()
     }
 
     const reset = () => {
       mainDocument.value = null
       mainDocumentSelection.value = false
+      aggregation.value = null
       clearReportDocumentItems()
     }
 
     const apply = () => {
       emit('input', {
         reportDocuments: reportDocuments.value.map((rd: ReportDocumentType) => ({ ...rd })),
-        mainDocument: mainDocument.value
+        mainDocument: mainDocument.value,
+        aggregation: aggregation.value ? aggregation.value.id : null
       })
     }
 
@@ -276,11 +327,15 @@ export default defineComponent({
       startMainDocumentSelection,
       selectMainDocument,
       closeMainDocument,
+      aggregation,
+      aggregationItems,
+      aggregationMessageFunction,
       reportDocumentItems,
       getItems,
       documentFilterMessageFunction,
       documentsFilterTableHeaders,
-      select,
+      activeChanged,
+      tempItemsChanged,
       clear,
       close,
       reset,

@@ -4122,6 +4122,8 @@ type Query {
   regions: [RegionType!]
   """Выгрузка листа для сводного отчета"""
   reportSheet(
+    """Тип агрегации для сводного отчета"""
+    aggregation: ReportAggregation
     """Основной документ"""
     mainDocumentId: ID
     """Идентификаторы документов"""
@@ -4263,6 +4265,15 @@ type RenameSheetMutationPayload {
   sheet: SheetType
   """Успех мутации"""
   success: Boolean!
+}
+
+"""Тип агрегации для сводного отчета."""
+enum ReportAggregation {
+  AVG
+  CONCAT
+  MAX
+  MIN
+  SUM
 }
 
 """Документ для выгрузки сводного отчета."""

@@ -34,7 +34,12 @@ from apps.dcis.services.period_services import (
     get_user_period_privileges,
     get_user_periods,
 )
-from apps.dcis.services.sheet_unload_services import PeriodSheetUnloader, ReportDocument, ReportSheetUnloader
+from apps.dcis.services.sheet_unload_services import (
+    PeriodSheetUnloader,
+    ReportAggregation,
+    ReportDocument,
+    ReportSheetUnloader,
+)
 
 
 class PeriodQueries(graphene.ObjectType):
@@ -43,20 +48,20 @@ class PeriodQueries(graphene.ObjectType):
     privileges = DjangoListField(
         PrivilegeType,
         required=True,
-        description='Привилегии'
+        description='Привилегии',
     )
 
     period = graphene.Field(
         PeriodType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Период'
+        description='Период',
     )
     periods = DjangoListField(
         PeriodType,
         project_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Периоды'
+        description='Периоды',
     )
 
     period_possible_divisions = ConnectionField(
@@ -70,28 +75,28 @@ class PeriodQueries(graphene.ObjectType):
         UserType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Пользователи, связанные периодом'
+        description='Пользователи, связанные периодом',
     )
     user_group_privileges = DjangoListField(
         PrivilegeType,
         user_id=graphene.ID(default_value=None, description='Идентификатор пользователя'),
         period_group_id=graphene.ID(required=True, description='Идентификатор группы периода'),
         required=True,
-        description='Привилегии пользователя в группе периода'
+        description='Привилегии пользователя в группе периода',
     )
     user_period_privileges = DjangoListField(
         PrivilegeType,
         user_id=graphene.ID(default_value=None, description='Идентификатор пользователя'),
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Отдельные привилегии пользователя для периода'
+        description='Отдельные привилегии пользователя для периода',
     )
 
     period_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
         required=True,
-        description='Выгрузка листа для периода'
+        description='Выгрузка листа для периода',
     )
     report_sheet = graphene.Field(
         SheetType,
@@ -99,9 +104,13 @@ class PeriodQueries(graphene.ObjectType):
         report_documents=graphene.List(
             graphene.NonNull(ReportDocumentInputType),
             required=True,
-            description='Идентификаторы документов'
+            description='Идентификаторы документов',
         ),
         main_document_id=graphene.ID(description='Основной документ'),
+        aggregation=graphene.Argument(
+            graphene.Enum.from_enum(ReportAggregation),
+            description='Тип агрегации для сводного отчета',
+        ),
         required=True,
         description='Выгрузка листа для сводного отчета',
     )
@@ -110,7 +119,7 @@ class PeriodQueries(graphene.ObjectType):
         LimitationType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Ограничения, накладываемые на листы'
+        description='Ограничения, накладываемые на листы',
     )
 
     attributes = graphene.List(
@@ -118,7 +127,7 @@ class PeriodQueries(graphene.ObjectType):
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         parent=graphene.Boolean(default_value=True, description='Вытягивать только родителей'),
         required=True,
-        description='Получение атрибутов, привязанных к периоду'
+        description='Получение атрибутов, привязанных к периоду',
     )
 
     @staticmethod
@@ -196,15 +205,17 @@ class PeriodQueries(graphene.ObjectType):
             main_document = get_object_or_404(Document, pk=gid2int(kwargs['main_document_id']))
         else:
             main_document = None
+        aggregation = ReportAggregation(kwargs['aggregation']) if 'aggregation' in kwargs else None
         document_ids = [gid2int(report_document.document_id) for report_document in report_documents]
         documents = Document.objects.filter(id__in=document_ids)
         return ReportSheetUnloader(
             sheet=sheet,
             report_documents=[next(
                 ReportDocument(d, r.is_visible, r.color)
-                for r in report_documents if r.document_id == d.id
+                for r in report_documents if gid2int(r.document_id) == d.id
             ) for d in documents],
             main_document=main_document,
+            aggregation=aggregation,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
 

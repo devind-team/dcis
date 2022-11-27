@@ -55,7 +55,8 @@ export default defineComponent({
 
     const reportDocumentFilterData = ref<ReportDocumentFilterInputType>({
       reportDocuments: [],
-      mainDocument: null
+      mainDocument: null,
+      aggregation: null
     })
 
     const activeSheetIndex = ref<number>(0)
@@ -67,10 +68,12 @@ export default defineComponent({
       variables: () => ({
         sheetId: props.period.sheets[activeSheetIndex.value].id,
         reportDocuments: reportDocumentFilterData.value.reportDocuments.map((rd: ReportDocumentType) => ({
-          ...rd,
-          documentId: rd.document.id
+          documentId: rd.document.id,
+          isVisible: rd.isVisible,
+          color: rd.color
         })),
-        mainDocumentId: reportDocumentFilterData.value.mainDocument?.id
+        mainDocumentId: reportDocumentFilterData.value.mainDocument?.id,
+        aggregation: reportDocumentFilterData.value.aggregation ?? null
       })
     })
 

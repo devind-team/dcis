@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum, auto
 from functools import reduce
 from typing import Any, Sequence
 
@@ -428,9 +429,19 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
 
 @dataclass
 class ReportDocument:
+    """Документ для сводного отчета."""
     document: Document
     is_visible: bool
     color: str
+
+
+class ReportAggregation(Enum):
+    """Тип агрегации для сводного отчета."""
+    CONCAT = auto()
+    SUM = auto()
+    AVG = auto()
+    MIN = auto()
+    MAX = auto()
 
 
 class SheetReportRowsUnloader(SheetRowsUnloaderBase):
@@ -445,10 +456,12 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
         values: QuerySet[Value] | Sequence[Value],
         report_documents: list[ReportDocument],
         main_document: Document,
+        aggregation: ReportAggregation | None
     ) -> None:
         super().__init__(columns_unloader, rows, cells, merged_cells, values)
         self.report_documents = report_documents
         self.main_document = main_document
+        self.aggregation = aggregation
 
     def unload_data(self) -> list[dict] | dict:
         """Выгрузка строк листа для сводного отчета."""
@@ -567,11 +580,13 @@ class ReportSheetUnloader(SheetUnloader):
         sheet: Sheet,
         report_documents: list[ReportDocument],
         main_document: Document | None,
+        aggregation: ReportAggregation | None,
         fields: Sequence[str]
     ) -> None:
         super().__init__(sheet, fields)
         self.report_documents = report_documents
         self.main_document = main_document
+        self.aggregation = aggregation
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""
@@ -588,6 +603,7 @@ class ReportSheetUnloader(SheetUnloader):
             values=Value.objects.filter(row__in=rows, document__in=all_documents),
             report_documents=self.report_documents,
             main_document=self.main_document,
+            aggregation=self.aggregation,
         ).unload()
 
     def get_permissions(self) -> dict[str, bool]:
