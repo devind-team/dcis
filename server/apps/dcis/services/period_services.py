@@ -4,10 +4,11 @@ from datetime import date
 from io import BytesIO
 from typing import Type
 
+from devind_dictionaries.models import Organization
 from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
-from devind_helpers.utils import convert_str_to_int
+from devind_helpers.utils import convert_str_to_int, gid2int
 from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
@@ -112,6 +113,15 @@ def get_period_attributes(period: Period | int | str, parent: bool = True) -> Qu
 def get_user_period_privileges(user_id: int | str, period_id: int | str) -> QuerySet[Privilege]:
     """Получение отдельных привилегий пользователя в периоде."""
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
+
+
+def get_organizations_is_document(user: User, period_id: int | str) -> QuerySet[Organization]:
+    """Получение организаций, у которых не поданы документы в периоде."""
+    period = get_object_or_404(Period, pk=gid2int(period_id))
+    return Organization.objects.filter(
+        id__in=period.division_set.exclude(
+            object_id__in=period.document_set.values_list('object_id', flat=True)).values_list('object_id', flat=True)
+    )
 
 
 @transaction.atomic

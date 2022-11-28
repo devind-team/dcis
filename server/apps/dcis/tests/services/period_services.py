@@ -6,14 +6,18 @@ from shutil import rmtree
 from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department, Organization
+from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.utils import gid2int
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
+from django.db.models import QuerySet
 from django.test import TestCase
 
 from apps.core.models import User
 from apps.dcis.models import (
     CuratorGroup,
     Division,
+    Document,
     Period,
     PeriodGroup,
     PeriodPrivilege,
@@ -40,7 +44,7 @@ from apps.dcis.services.period_services import (
     delete_divisions_period,
     delete_period,
     delete_period_groups,
-    get_user_curator_periods,
+    get_organizations_is_document, get_user_curator_periods,
     get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
@@ -243,6 +247,15 @@ class PeriodTestCase(TestCase):
         for division_id in self.department_divisions:
             self.divisions_ids.append(division_id.object_id)
 
+        self.organization = Organization.objects.create(attributes='', user=self.super_user)
+        self.organization_period = Period.objects.create(project=self.user_project)
+        self.organization_division = Division.objects.create(
+            period=self.organization_period,
+            object_id=self.organization.id,
+        )
+
+        self.document = Document.objects.create(period=self.organization_period, object_id=self.organization_division.id)
+
     def test_create_period(self) -> None:
         """Тестирование функции `get_create_period`."""
         with patch.object(self.user_project, 'user_id', new=None), patch.object(
@@ -399,6 +412,18 @@ class PeriodTestCase(TestCase):
             delete_period(user=self.super_user, period=self.departament_period),
             None,
             'Delete period'
+        )
+
+    def test_get_organizations_is_document(self) -> None:
+        """Тестирование функции `get_organizations_is_document`."""
+        list_organizations = list(Organization.objects.filter(
+            id__in=self.organization_period.division_set.exclude(
+                object_id__in=self.organization_period.document_set.values_list('object_id', flat=True)
+            ).values_list('object_id', flat=True)
+        )),
+        self.assertEqual(
+            list_organizations[0],
+            list(get_organizations_is_document(user=self.super_user, period_id=self.organization_period.id))
         )
 
     def tearDown(self) -> None:

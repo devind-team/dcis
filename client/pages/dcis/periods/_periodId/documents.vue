@@ -44,7 +44,6 @@ bread-crumbs(:items="breadCrumbs")
               :headers="headers"
               :items="documents"
               :loading="loading"
-              disable-sort
               disable-pagination
               hide-default-footer
             )
@@ -79,9 +78,8 @@ bread-crumbs(:items="breadCrumbs")
               template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
       v-tab-item(v-if="period.isCurator")
         v-list
-          v-list-item(v-for="division in period.divisions" :key="division.id")
-            v-list-item-content {{ division.name }} ({{ division.id }})
-        pre {{ period }}
+          v-list-item(v-for="organization in organizationsIsDocument" :key="organization.id")
+            v-list-item-content {{ organization.name }}
 </template>
 
 <script lang="ts">
@@ -103,19 +101,22 @@ import {
   StatusType,
   StatusFieldsFragment,
   StatusesQuery,
-  StatusesQueryVariables
+  StatusesQueryVariables,
+  OrganizationsIsDocumentQuery,
+  OrganizationsIsDocumentQueryVariables
 } from '~/types/graphql'
 import { FilterMessages } from '~/types/filters'
-import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
+import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
+import organizationsIsDocumentQuery from '~/gql/dcis/queries/organizations_is_document.graphql'
+import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import DocumentStatuses from '~/components/dcis/documents/DocumentStatuses.vue'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
-import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 
 export default defineComponent({
   components: {
@@ -264,6 +265,16 @@ export default defineComponent({
       return result
     })
 
+    const { data: organizationsIsDocument } = useCommonQuery<
+      OrganizationsIsDocumentQuery,
+      OrganizationsIsDocumentQueryVariables
+    >({
+      document: organizationsIsDocumentQuery,
+      variables: () => ({
+        periodId: props.period.id
+      })
+    })
+
     return {
       statusesQuery,
       statusesFilter,
@@ -287,7 +298,8 @@ export default defineComponent({
       statusFilterMessages,
       getFilterMessages,
       showDivisionFilter,
-      headers
+      headers,
+      organizationsIsDocument
     }
   }
 })

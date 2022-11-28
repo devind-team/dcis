@@ -4700,6 +4700,8 @@ export type Query = {
   notifications: NotificationTypeConnection;
   organization?: Maybe<OrganizationType>;
   organizations?: Maybe<OrganizationTypeConnection>;
+  /** Получение организаций, у которых не поданы документы в периоде */
+  organizationsIsDocument: Array<Maybe<OrganizationType>>;
   /** Страница */
   page: PageType;
   /** Получение типа страницы */
@@ -5004,6 +5006,11 @@ export type QueryOrganizationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryOrganizationsIsDocumentArgs = {
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -6799,6 +6806,12 @@ export type OrganizationsQueryVariables = Exact<{
 }>;
 
 export type OrganizationsQuery = { __typename?: 'Query', organizations?: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+
+export type OrganizationsIsDocumentQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type OrganizationsIsDocumentQuery = { __typename?: 'Query', organizationsIsDocument: Array<{ __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null> };
 
 export type PeriodQueryVariables = Exact<{
   periodId: Scalars['ID'];

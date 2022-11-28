@@ -4053,6 +4053,11 @@ type Query {
     last: Int
     offset: Int
   ): OrganizationTypeConnection
+  """Получение организаций, у которых не поданы документы в периоде"""
+  organizationsIsDocument(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [OrganizationType]!
   """Страница"""
   page(pageId: ID!): PageType!
   """Получение типа страницы"""
