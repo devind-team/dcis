@@ -3,12 +3,14 @@
 query ReportSheet(
   $sheetId: ID!,
   $reportDocuments: [ReportDocumentInputType!]!,
+  $reportRows: [ReportRowInputType!]!,
   $mainDocumentId: ID,
   $aggregation: ReportAggregation
 ) {
   reportSheet(
     sheetId: $sheetId,
     reportDocuments: $reportDocuments,
+    reportRows: $reportRows,
     mainDocumentId: $mainDocumentId,
     aggregation: $aggregation
   ) {

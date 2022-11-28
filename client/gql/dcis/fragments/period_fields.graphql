@@ -28,12 +28,13 @@ fragment PeriodFields on PeriodType {
   sheets {
     id
     name
+    position
+    comment
     showHead
     showChild
-    comment
     createdAt
-    position
     updatedAt
+    rowsCount
     __typename
   }
   __typename

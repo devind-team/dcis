@@ -429,7 +429,7 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
 
 @dataclass
 class ReportDocument:
-    """Документ для сводного отчета."""
+    """Документ для выгрузки сводного отчета."""
     document: Document
     is_visible: bool
     color: str
@@ -456,12 +456,14 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
         values: QuerySet[Value] | Sequence[Value],
         report_documents: list[ReportDocument],
         main_document: Document,
-        aggregation: ReportAggregation | None
+        aggregation: ReportAggregation | None,
+        expanded_rows: dict[int, bool],
     ) -> None:
         super().__init__(columns_unloader, rows, cells, merged_cells, values)
         self.report_documents = report_documents
         self.main_document = main_document
         self.aggregation = aggregation
+        self.expanded_rows = expanded_rows
 
     def unload_data(self) -> list[dict] | dict:
         """Выгрузка строк листа для сводного отчета."""
@@ -581,12 +583,14 @@ class ReportSheetUnloader(SheetUnloader):
         report_documents: list[ReportDocument],
         main_document: Document | None,
         aggregation: ReportAggregation | None,
+        expanded_rows: dict[int, bool],
         fields: Sequence[str]
     ) -> None:
         super().__init__(sheet, fields)
         self.report_documents = report_documents
         self.main_document = main_document
         self.aggregation = aggregation
+        self.expanded_rows = expanded_rows
 
     def unload_rows(self) -> list[dict] | dict:
         """Выгрузка строк."""
@@ -604,6 +608,7 @@ class ReportSheetUnloader(SheetUnloader):
             report_documents=self.report_documents,
             main_document=self.main_document,
             aggregation=self.aggregation,
+            expanded_rows=self.expanded_rows
         ).unload()
 
     def get_permissions(self) -> dict[str, bool]:

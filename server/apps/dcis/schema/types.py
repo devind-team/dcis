@@ -600,11 +600,17 @@ class BaseSheetType(graphene.ObjectType):
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
-    show_head = graphene.Boolean(required=True, description='Показвать ли головам')
-    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным')
+    show_head = graphene.Boolean(required=True, description='Показывать ли головным организациям')
+    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным организациям')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
+    rows_count = graphene.Int(required=True, description='Число строк')
+
     period = graphene.Field(PeriodType, description='Период')
+
+    @staticmethod
+    def resolve_rows_count(sheet: Sheet, info: ResolveInfo) -> int:
+        return sheet.rowdimension_set.count()
 
 
 class SheetType(BaseSheetType):
@@ -664,3 +670,10 @@ class ReportDocumentInputType(graphene.InputObjectType):
     document_id = graphene.ID(required=True, description='Идентификатор документа')
     is_visible = graphene.Boolean(required=True, description='Показывать ли дочерние строки')
     color = graphene.String(description='Цвет выделения дочерних строк')
+
+
+class ReportRowInputType(graphene.InputObjectType):
+    """Строка для выгрузки сводного отчета."""
+
+    row_index = graphene.Int(required=True, description='Индекс строки')
+    is_expanded = graphene.Boolean(required=True, description='Является ли строка расширенной')

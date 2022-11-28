@@ -812,9 +812,11 @@ type BaseSheetType {
   period: PeriodType
   """Позиция"""
   position: Int!
-  """Показывать ли подведомственным"""
+  """Число строк"""
+  rowsCount: Int!
+  """Показывать ли подведомственным организациям"""
   showChild: Boolean!
-  """Показвать ли головам"""
+  """Показывать ли головным организациям"""
   showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
@@ -4126,8 +4128,10 @@ type Query {
     aggregation: ReportAggregation
     """Основной документ"""
     mainDocumentId: ID
-    """Идентификаторы документов"""
+    """Документы для выгрузки сводного отчета"""
     reportDocuments: [ReportDocumentInputType!]!
+    """Строки для выгрузки сводного отчета"""
+    reportRows: [ReportRowInputType!]!
     """Идентификатор листа"""
     sheetId: ID!
   ): SheetType!
@@ -4284,6 +4288,14 @@ input ReportDocumentInputType {
   documentId: ID!
   """Показывать ли дочерние строки"""
   isVisible: Boolean!
+}
+
+"""Строка для выгрузки сводного отчета."""
+input ReportRowInputType {
+  """Является ли строка расширенной"""
+  isExpanded: Boolean!
+  """Индекс строки"""
+  rowIndex: Int!
 }
 
 input RequestCodeMutationInput {
@@ -4636,9 +4648,11 @@ type SheetType {
   position: Int!
   """Строки"""
   rows: [RowDimensionType!]
-  """Показывать ли подведомственным"""
+  """Число строк"""
+  rowsCount: Int!
+  """Показывать ли подведомственным организациям"""
   showChild: Boolean!
-  """Показвать ли головам"""
+  """Показывать ли головным организациям"""
   showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!

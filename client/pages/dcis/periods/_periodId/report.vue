@@ -5,7 +5,23 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     report-settings-menu(v-slot="{ on, attrs }")
       v-btn(v-on="on" v-bind="attrs" icon)
         v-icon mdi-cog
-  report-document-filter(v-model="reportDocumentFilterData" :period="period")
+  report-document-filter(
+    v-model="reportDocumentFilterData"
+    :period="period"
+    message-container-class="mb-2 mr-1"
+  )
+  items-data-filter(
+    v-model="reportRows"
+    ref="reportRowsFilter"
+    :items="reportRowsItems"
+    :title="String($t('dcis.periods.report.rowsFilter.title'))"
+    :message-function="reportRowsMessageFunction"
+    :search-function="reportRowsSearchFunction"
+    :get-name="item => String(item.index)"
+    item-key="index"
+    message-container-class="mb-2"
+    multiple
+  )
   grid-sheets(
     v-model="activeSheetIndex"
     :mode="GridMode.READ"
@@ -15,11 +31,11 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, PropType, inject } from '#app'
+import { computed, defineComponent, ref, PropType, inject, watch } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType, ReportSheetQuery, ReportSheetQueryVariables } from '~/types/graphql'
+import { PeriodType, BaseSheetType, ReportSheetQuery, ReportSheetQueryVariables } from '~/types/graphql'
 import reportSheetQuery from '~/gql/dcis/queries/report_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ReportSettingsMenu from '~/components/dcis/periods/ReportSettingsMenu.vue'
@@ -28,13 +44,17 @@ import ReportDocumentFilter, {
   ReportDocumentType,
   ReportDocumentFilterInputType
 } from '~/components/dcis/periods/ReportDocumentFilter.vue'
+import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+
+type ReportRow = { index: number }
 
 export default defineComponent({
   components: {
     LeftNavigatorContainer,
     ReportSettingsMenu,
     GridSheets,
-    ReportDocumentFilter
+    ReportDocumentFilter,
+    ItemsDataFilter
   },
   middleware: 'auth',
   props: {
@@ -53,24 +73,48 @@ export default defineComponent({
       }
     ]))
 
+    const activeSheetIndex = ref<number>(0)
+    const activeBaseSheet = computed<BaseSheetType>(() => props.period.sheets[activeSheetIndex.value])
+
     const reportDocumentFilterData = ref<ReportDocumentFilterInputType>({
       reportDocuments: [],
       mainDocument: null,
       aggregation: null
     })
 
-    const activeSheetIndex = ref<number>(0)
+    const reportRowsFilter = ref<InstanceType<typeof ItemsDataFilter>>(null)
+    const reportRows = ref<ReportRow[]>([])
+    const reportRowsItems = computed<ReportRow[]>(() =>
+      Array.from({ length: activeBaseSheet.value.rowsCount }).map((_, i) => ({ index: i + 1 }))
+    )
+    const reportRowsMessageFunction = (selectedItems: ReportRow[]): string => {
+      if (selectedItems.length) {
+        return t('dcis.periods.report.rowsFilter.multipleMessage', { count: selectedItems.length }) as string
+      }
+      return t('dcis.periods.report.rowsFilter.noFiltrationMessage') as string
+    }
+    const reportRowsSearchFunction = (item: ReportRow, search: string): boolean => {
+      return String(item.index).includes(search.toLocaleLowerCase())
+    }
+    watch(() => activeSheetIndex.value, () => {
+      reportRowsFilter.value.reset()
+    })
+
     const { data: activeSheet } = useCommonQuery<
       ReportSheetQuery,
       ReportSheetQueryVariables
     >({
       document: reportSheetQuery,
       variables: () => ({
-        sheetId: props.period.sheets[activeSheetIndex.value].id,
+        sheetId: activeBaseSheet.value.id,
         reportDocuments: reportDocumentFilterData.value.reportDocuments.map((rd: ReportDocumentType) => ({
           documentId: rd.document.id,
           isVisible: rd.isVisible,
           color: rd.color
+        })),
+        reportRows: Array.from({ length: activeBaseSheet.value.rowsCount }).map((_, i) => ({
+          rowIndex: i + 1,
+          isExpanded: !!reportRows.value.find((r: ReportRow) => r.index === i + 1)
         })),
         mainDocumentId: reportDocumentFilterData.value.mainDocument?.id,
         aggregation: reportDocumentFilterData.value.aggregation ?? null
@@ -87,6 +131,11 @@ export default defineComponent({
       GridMode,
       bc,
       reportDocumentFilterData,
+      reportRowsFilter,
+      reportRows,
+      reportRowsItems,
+      reportRowsMessageFunction,
+      reportRowsSearchFunction,
       activeSheetIndex,
       activeSheet
     }

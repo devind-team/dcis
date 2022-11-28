@@ -6,7 +6,7 @@ items-data-filter(
   :message-function="documentFilterMessageFunction"
   :get-key="reportDocument => reportDocument.document.id"
   :get-name="reportDocument => reportDocument.document.objectName"
-  message-container-class="mb-2"
+  :message-container-class="messageContainerClass"
   multiple
   modal
   fullscreen
@@ -32,7 +32,6 @@ items-data-filter(
         :title="String($t('dcis.periods.report.documentsFilter.aggregationFilter.title'))"
         :message-function="aggregationMessageFunction"
         :get-name="item => String($t(`dcis.periods.report.documentsFilter.aggregationFilter.${item.id.toLowerCase()}`))"
-        message-container-class="ml-1"
       )
   template(#items="{ searchItems, tempItems, setSelected, setAllSelected }")
     v-data-table(
@@ -93,7 +92,7 @@ items-data-filter(
 import { computed, defineComponent, ref, watch, onMounted, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { useMutationObserver } from '@vueuse/core'
-import { GetName } from '~/types/filters'
+import { Class, GetName } from '~/types/filters'
 import { PeriodType, DocumentType, DocumentsQuery, DocumentsQueryVariables, ReportAggregation } from '~/types/graphql'
 import { useFilters, useI18n, useQueryRelay } from '~/composables'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
@@ -116,7 +115,8 @@ export default defineComponent({
   components: { ItemsDataFilter, ReportDocumentPropertiesForm },
   props: {
     value: { type: Object as PropType<ReportDocumentFilterInputType>, required: true },
-    period: { type: Object as PropType<PeriodType>, required: true }
+    period: { type: Object as PropType<PeriodType>, required: true },
+    messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null }
   },
   setup (props, { emit }) {
     const { t } = useI18n()

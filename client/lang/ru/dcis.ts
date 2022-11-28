@@ -222,8 +222,8 @@ export default {
         unload: 'Выгрузить сводный отчет'
       },
       documentsFilter: {
-        title: 'Фильтр документов',
-        noFiltrationMessage: 'Документы не выбраны',
+        title: 'Выбор документов',
+        noFiltrationMessage: 'Выбрать документы',
         multipleMessage: 'Выбрано документов: {count}',
         selectMainDocument: 'Выбрать основной документ',
         mainDocumentSelection: 'Выбор основного документа',
@@ -245,6 +245,11 @@ export default {
           max: 'Максимальное значение',
           min: 'Минимальное значение'
         }
+      },
+      rowsFilter: {
+        title: 'Выбор расширенных строки',
+        noFiltrationMessage: 'Выбрать расширенные строки',
+        multipleMessage: 'Выбрано расширенных строк: {count}'
       }
     }
   },

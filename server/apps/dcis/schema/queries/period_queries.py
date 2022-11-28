@@ -25,6 +25,7 @@ from apps.dcis.schema.types import (
     PeriodType,
     PrivilegeType,
     ReportDocumentInputType,
+    ReportRowInputType,
     SheetType,
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
@@ -104,7 +105,12 @@ class PeriodQueries(graphene.ObjectType):
         report_documents=graphene.List(
             graphene.NonNull(ReportDocumentInputType),
             required=True,
-            description='Идентификаторы документов',
+            description='Документы для выгрузки сводного отчета',
+        ),
+        report_rows=graphene.List(
+            graphene.NonNull(ReportRowInputType),
+            required=True,
+            description='Строки для выгрузки сводного отчета',
         ),
         main_document_id=graphene.ID(description='Основной документ'),
         aggregation=graphene.Argument(
@@ -198,6 +204,7 @@ class PeriodQueries(graphene.ObjectType):
         info: ResolveInfo,
         sheet_id: str,
         report_documents: list[ReportDocumentInputType],
+        report_rows: list[ReportRowInputType],
         **kwargs
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
@@ -208,14 +215,18 @@ class PeriodQueries(graphene.ObjectType):
         aggregation = ReportAggregation(kwargs['aggregation']) if 'aggregation' in kwargs else None
         document_ids = [gid2int(report_document.document_id) for report_document in report_documents]
         documents = Document.objects.filter(id__in=document_ids)
+        expanded_rows = {}
+        for row in report_rows:
+            expanded_rows[row.row_index] = row.is_expanded
         return ReportSheetUnloader(
             sheet=sheet,
             report_documents=[next(
-                ReportDocument(d, r.is_visible, r.color)
+                ReportDocument(document=d, is_visible=r.is_visible, color=r.color)
                 for r in report_documents if gid2int(r.document_id) == d.id
             ) for d in documents],
             main_document=main_document,
             aggregation=aggregation,
+            expanded_rows=expanded_rows,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
 
