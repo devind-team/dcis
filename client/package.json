@@ -29,7 +29,7 @@
     "moment": "^2.29.4",
     "numfmt": "^2.4.2",
     "nuxt-edge": "latest",
-    "pinia": "^2.0.23",
+    "pinia": "^2.0.27",
     "scule": "^0.3.2",
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
