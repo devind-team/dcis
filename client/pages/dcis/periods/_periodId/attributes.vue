@@ -114,7 +114,7 @@ export default defineComponent({
 
     const addAttributeUpdate = (cache, result: AddAttributeMutationResult) => {
       if (!result.data.addAttribute.errors.length) {
-        addUpdate(cache, result, 'attribute')
+        addUpdate(cache, result, 'attribute', false)
       }
     }
 
