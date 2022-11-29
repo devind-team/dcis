@@ -14,7 +14,12 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
               div(class="time" align="right") {{ timeHM(comment.createdAt) }}
     footer(class="textarea")
       form
-        v-textarea(label="Введите комментарий" v-model="inputMessage" auto-grow rows="1")
+        v-textarea(
+          label="Введите комментарий"
+          v-model="inputMessage"
+          @keyup.enter="addDocumentCommentMutate(addDocumentCommentVariables)"
+          auto-grow rows="1"
+          )
         v-col(cols="3")
           v-btn(
             v-if="inputMessage"
@@ -52,8 +57,8 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     const { timeHM, date } = useFilters()
-    const inputMessage = ref('')
-    const pageSize = ref(5)
+    const inputMessage = ref<string>('')
+    const pageSize = ref<number>(5)
 
     const {
       data: commentsData,
@@ -62,20 +67,26 @@ export default defineComponent({
     } = useQueryRelay<DocumentCommentsQuery,
       DocumentCommentsQueryVariables>({
         document: documentCommentsQuery,
-        variables: { documentId: props.document.id }
+        variables: {
+          documentId: props.document.id
+        }
       },
       {
-        isScrollDown: true,
+        isScrollDown: false,
         pagination: useCursorPagination({ pageSize: pageSize.value }),
         fetchScroll: typeof document === 'undefined' ? null : document
       })
 
-    const comments = computed(() =>
-      commentsData.value.reduce((newArr, currentItem, index) => {
-        newArr.push({ ...currentItem, isNewDate: date(currentItem.createdAt) !== date(commentsData.value[index - 1]?.createdAt) })
+    const comments = computed(() => {
+      const reversedDate = [...commentsData.value].reverse()
+      return reversedDate.reduce((newArr, currentItem, index) => {
+        newArr.push({
+          ...currentItem,
+          isNewDate: date(currentItem.createdAt) !== date(reversedDate[index - 1]?.createdAt)
+        })
         return newArr
       }, [])
-    )
+    })
 
     const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentCommentMutation,
       AddDocumentCommentMutationVariables>(
@@ -127,7 +138,7 @@ export default defineComponent({
   width: 70%;
   display: flex;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 80vh;
 }
 .chat-box {
   width: 70%;

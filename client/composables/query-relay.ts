@@ -131,7 +131,7 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
         (fetchMoreAvailable.value && y.value + window.innerHeight + 200 > event.target.documentElement.offsetHeight)) {
         fetchMoreData()
       } else if (!queryOptions.isScrollDown &&
-        (fetchMoreAvailable.value && y.value + window.innerHeight + 200 < event.target.documentElement.offsetHeight)) {
+        (fetchMoreAvailable.value && y.value < 200)) {
         fetchMoreData()
       }
     }

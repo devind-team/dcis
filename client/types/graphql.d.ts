@@ -6617,7 +6617,7 @@ export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'Do
 export type DocumentCommentsQueryVariables = Exact<{
   documentId: Scalars['ID'];
   first?: InputMaybe<Scalars['Int']>;
-  after?: InputMaybe<Scalars['String']>;
+  cursor?: InputMaybe<Scalars['String']>;
 }>;
 
 export type DocumentCommentsQuery = { __typename?: 'Query', documentComments?: { __typename?: 'DocumentCommentsTypeConnection', totalCount: number, edges: Array<{ __typename: 'DocumentCommentsTypeEdge', node?: { __typename: 'DocumentCommentsType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string }, document?: { __typename: 'DocumentType', id: string } | null } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
