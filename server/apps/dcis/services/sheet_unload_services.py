@@ -121,7 +121,7 @@ class SheetRowsUnloaderBase(DataUnloader, ABC):
         'border_style', 'border_color', 'aggregation',
     )
     _values_fields = (
-        'column_id', 'row_id', 'value', 'error',
+        'document_id', 'column_id', 'row_id', 'value', 'error',
     )
     _merged_cells_fields = (
         'min_col', 'max_col',
@@ -166,6 +166,20 @@ class SheetRowsUnloaderBase(DataUnloader, ABC):
         """Создание списка позиций объединенных ячеек для первой строки."""
         return reduce(lambda a, c: [*a, *c['cells'][:c['max_col'] - c['min_col'] + 1]], merged_cells, [])
 
+    def _prepare_data(self, rows: list[dict], cells: list[dict]) -> None:
+        """Подготовка строк и ячеек к выгрузке после сортировки строк."""
+        columns = self.columns_unloader.unload()
+        merged_cells = self._unload_raw_merged_cells()
+        values = self._unload_raw_values()
+        columns_map = self._create_columns_map(columns)
+        merged_cells_map = self._create_merged_cells_map(merged_cells)
+        merged_cell_positions = self._create_merged_cell_positions(merged_cells)
+        merged_cell_row_positions = self._create_merged_cell_row_positions(merged_cells)
+        self._add_cells(rows, columns_map, cells)
+        self._add_cell_values(rows, values)
+        self._add_cell_properties(rows, columns_map, merged_cells_map)
+        self._filter_rows_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
+
     @classmethod
     def _connect_rows(cls, rows: list[dict]) -> list[dict]:
         """Создание деревьев строк."""
@@ -178,65 +192,6 @@ class SheetRowsUnloaderBase(DataUnloader, ABC):
         return trees
 
     @classmethod
-    def _add_row_names(cls, rows_tree: list[dict]) -> None:
-        """Добавление имен к строкам."""
-        for row in rows_tree:
-            row['name'] = cls._get_row_name(row)
-            if len(row['children']):
-                cls._add_row_names(row['children'])
-
-    @classmethod
-    @abstractmethod
-    def _add_children(cls, rows: list[dict], row: dict) -> None:
-        """Добавление дочерних строк к строке."""
-        ...
-
-    @classmethod
-    @abstractmethod
-    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
-        """Получение имени строки."""
-        ...
-
-
-class SheetRowsUnloader(SheetRowsUnloaderBase):
-    """Выгрузчик строк листа."""
-
-    def __init__(
-        self,
-        columns_unloader: SheetColumnsUnloader,
-        rows: QuerySet[RowDimension] | Sequence[RowDimension],
-        cells: QuerySet[Cell] | Sequence[Cell],
-        merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
-        values: QuerySet[Value] | Sequence[Value]
-    ) -> None:
-        super().__init__(columns_unloader, rows, cells, merged_cells, values)
-
-    def unload_data(self) -> list[dict] | dict:
-        """Выгрузка строк листа."""
-        rows = self._unload_raw_rows()
-        cells = self._unload_raw_cells()
-        row_trees = self._connect_rows(rows)
-        self._add_row_names(row_trees)
-        rows = self._flatten_rows(row_trees)
-        self._add_global_indices(rows)
-        self._prepare_data(rows, cells)
-        return rows
-
-    def _prepare_data(self, rows: list[dict], cells: list[dict]) -> None:
-        """Подготовка строк и ячеек к выгрузке после сортировки строк."""
-        columns = self.columns_unloader.unload()
-        merged_cells = self._unload_raw_merged_cells()
-        values = self._unload_raw_values()
-        columns_map = self._create_columns_map(columns)
-        merged_cells_map = self._create_merged_cells_map(merged_cells)
-        merged_cell_positions = self._create_merged_cell_positions(merged_cells)
-        merged_cell_row_positions = self._create_merged_cell_row_positions(merged_cells)
-        self._add_cell_values(cells, values)
-        self._add_cells(rows, columns_map, cells)
-        self._add_cell_properties(rows, columns_map, merged_cells_map)
-        self._filter_rows_cells(rows, merged_cells_map, merged_cell_positions, merged_cell_row_positions)
-
-    @classmethod
     def _add_children(cls, rows: list[dict], row: dict) -> None:
         """Добавление дочерних строк к строке."""
         row['children'] = [r for r in rows if r['parent_id'] == row['id']]
@@ -244,46 +199,18 @@ class SheetRowsUnloader(SheetRowsUnloaderBase):
             child['parent'] = row
             cls._add_children(rows, child)
 
-    @classmethod
-    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
-        """Получение имени строки."""
-        indices = indices or []
-        if row['parent'] is not None:
-            return cls._get_row_name(row['parent'], [str(row['index']), *indices])
-        return '.'.join([str(row['index']), *indices])
-
-    @classmethod
-    def _flatten_rows(cls, rows_tree: list[dict]) -> list[dict]:
+    def _flatten_rows(self, rows_tree: list[dict]) -> list[dict]:
         """Превращение строк в плоскую структуру."""
         result: list[dict] = []
-        for row in sorted(rows_tree, key=lambda r: r['index']):
+        for row in self._sort_rows(rows_tree):
             result.append(row)
-            result.extend(cls._flatten_rows(row['children']))
+            result.extend(self._flatten_rows(row['children']))
         return result
 
-    @classmethod
-    def _add_global_indices(cls, rows: list[dict]) -> None:
-        """Добавление индексов в плоской структуре для строк."""
-        for i, row in enumerate(rows, 1):
-            row['global_index'] = i
-
-    @staticmethod
-    def _add_cell_values(cells: list[dict], values: list[dict]) -> None:
-        """Добавление значений к ячейкам."""
-        for cell in cells:
-            default = cell['default']
-            del cell['default']
-            default_error = cell['default_error']
-            del cell['default_error']
-            value = next(
-                (value for value in values
-                 if value['row_id'] == cell['row_id'] and value['column_id'] == cell['column_id']),
-                None
-            )
-            if value is not None:
-                cell.update(value)
-            else:
-                cell.update({'value': default, 'error': default_error})
+    @abstractmethod
+    def _sort_rows(self, rows: list[dict]) -> list[dict]:
+        """Сортировка строк."""
+        ...
 
     @staticmethod
     def _add_cells(rows: list[dict], columns_map: dict[dict], cells: list[dict]) -> None:
@@ -291,6 +218,12 @@ class SheetRowsUnloader(SheetRowsUnloaderBase):
         for row in rows:
             row['cells'] = [cell for cell in cells if cell['row_id'] == row['id']]
             row['cells'].sort(key=lambda cell: columns_map[cell['column_id']]['index'])
+
+    @staticmethod
+    @abstractmethod
+    def _add_cell_values(rows: list[dict], values: list[dict]) -> None:
+        """Добавление значений к ячейкам."""
+        ...
 
     @classmethod
     def _add_cell_properties(cls, rows: list[dict], columns_map: dict[dict], merged_cells_map: dict[dict]) -> None:
@@ -327,6 +260,21 @@ class SheetRowsUnloader(SheetRowsUnloaderBase):
                 cell['related_global_positions'].append(f'{column_name}{row_index}')
 
     @classmethod
+    def _find_root_cell(cls, row: dict, cell: dict) -> dict:
+        """Нахождение корневой ячейки для ячейки дочерней строки.
+        Корневой считается ячейка лежащая в той же колонке в строке верхнего уровня.
+        """
+        if row['parent'] is None:
+            return cell
+        return cls._find_root_cell(
+            row['parent'],
+            next(
+                parent_cell for parent_cell in row['parent']['cells']
+                if parent_cell['column_id'] == cell['column_id']
+            )
+        )
+
+    @classmethod
     def _filter_rows_cells(
         cls,
         rows: list[dict],
@@ -345,21 +293,74 @@ class SheetRowsUnloader(SheetRowsUnloaderBase):
         for row in rows:
             row['cells'] = row['output_cells']
 
-    @classmethod
-    def _find_root_cell(cls, row: dict, cell: dict) -> dict:
-        """Нахождение корневой ячейки для ячейки дочерней строки.
 
-        Корневой считается ячейка лежащая в той же колонке в строке верхнего уровня.
-        """
-        if row['parent'] is None:
-            return cell
-        return cls._find_root_cell(
-            row['parent'],
-            next(
-                parent_cell for parent_cell in row['parent']['cells']
-                if parent_cell['column_id'] == cell['column_id']
-            )
-        )
+class SheetRowsUnloader(SheetRowsUnloaderBase):
+    """Выгрузчик строк листа."""
+
+    def __init__(
+        self,
+        columns_unloader: SheetColumnsUnloader,
+        rows: QuerySet[RowDimension] | Sequence[RowDimension],
+        cells: QuerySet[Cell] | Sequence[Cell],
+        merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
+        values: QuerySet[Value] | Sequence[Value]
+    ) -> None:
+        super().__init__(columns_unloader, rows, cells, merged_cells, values)
+
+    def unload_data(self) -> list[dict] | dict:
+        """Выгрузка строк листа."""
+        rows = self._unload_raw_rows()
+        cells = self._unload_raw_cells()
+        row_trees = self._connect_rows(rows)
+        self._add_row_names(row_trees)
+        rows = self._flatten_rows(row_trees)
+        self._add_global_indices(rows)
+        self._prepare_data(rows, cells)
+        return rows
+
+    def _sort_rows(self, rows: list[dict]) -> list[dict]:
+        """Сортировка строк."""
+        return sorted(rows, key=lambda r: r['index'])
+
+    @staticmethod
+    def _add_cell_values(rows: list[dict], values: list[dict]) -> None:
+        """Добавление значений к ячейкам."""
+        for row in rows:
+            for cell in row['cells']:
+                val = cell['default']
+                del cell['default']
+                err = cell['default_error']
+                del cell['default_error']
+                value = next(
+                    (v for v in values if v['row_id'] == cell['row_id'] and v['column_id'] == cell['column_id']),
+                    None
+                )
+                if value is not None:
+                    val = value['value']
+                    err = value['error']
+                cell.update({'value': val, 'error': err})
+
+    @classmethod
+    def _add_row_names(cls, rows_tree: list[dict]) -> None:
+        """Добавление имен к строкам."""
+        for row in rows_tree:
+            row['name'] = cls._get_row_name(row)
+            if len(row['children']):
+                cls._add_row_names(row['children'])
+
+    @classmethod
+    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
+        """Получение имени строки."""
+        indices = indices or []
+        if row['parent'] is not None:
+            return cls._get_row_name(row['parent'], [str(row['index']), *indices])
+        return '.'.join([str(row['index']), *indices])
+
+    @staticmethod
+    def _add_global_indices(rows: list[dict]) -> None:
+        """Добавление индексов в плоской структуре для строк."""
+        for i, row in enumerate(rows, 1):
+            row['global_index'] = i
 
 
 class SheetPartialRowsUploader(SheetRowsUnloader):
@@ -394,7 +395,7 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
         all_cells = [*cells, *self._find_rows_cells(parent_rows)]
         self._add_global_indices(all_rows)
         self._prepare_data(all_rows, all_cells)
-        return self._sort_rows(rows)
+        return self._sort_rows_finally(rows)
 
     @classmethod
     def _find_row_parents(cls, rows: list[dict]) -> list[dict]:
@@ -422,7 +423,7 @@ class SheetPartialRowsUploader(SheetRowsUnloader):
             row['global_index'] = self.rows_global_indices_map[row['id']]
 
     @staticmethod
-    def _sort_rows(rows: list[dict]) -> list[dict]:
+    def _sort_rows_finally(rows: list[dict]) -> list[dict]:
         """Сортировка строк."""
         return sorted(rows, key=lambda row: row['global_index'])
 
@@ -455,7 +456,7 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
         merged_cells: QuerySet[MergedCell] | Sequence[MergedCell],
         values: QuerySet[Value] | Sequence[Value],
         report_documents: list[ReportDocument],
-        main_document: Document,
+        main_document: Document | None,
         aggregation: ReportAggregation | None,
         expanded_rows: dict[int, bool],
     ) -> None:
@@ -467,17 +468,54 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
 
     def unload_data(self) -> list[dict] | dict:
         """Выгрузка строк листа для сводного отчета."""
-        return SheetRowsUnloader(self.columns_unloader, self.rows, self.cells, self.merged_cells, self.values).unload()
+        rows = self._unload_raw_rows()
+        cells = self._unload_raw_cells()
+        row_trees = self._connect_rows(rows)
+        rows = self._flatten_rows(row_trees)
+        self._add_rows_additional_data(rows)
+        self._prepare_data(rows, cells)
+        return rows
 
-    @classmethod
-    def _add_children(cls, rows: list[dict], row: dict) -> None:
-        """Добавление дочерних строк к строке."""
-        pass
+    def _sort_rows(self, rows: list[dict]) -> list[dict]:
+        """Сортировка строк по документу, а затем по индексу."""
+        return sorted(
+            rows,
+            key=lambda r: (
+                next(
+                    (rd[0] for rd in enumerate(self.report_documents, 1) if r['document_id'] == rd[1].document.id), 0
+                ),
+                r['index']
+            )
+        )
 
-    @classmethod
-    def _get_row_name(cls, row: dict, indices: list[int] | None = None) -> str:
-        """Получение имени строки."""
-        pass
+    def _add_cell_values(self, rows: list[dict], values: list[dict]) -> None:
+        """Добавление значений к ячейкам."""
+        for row in rows:
+            for cell in row['cells']:
+                val = cell['default']
+                del cell['default']
+                err = cell['default_error']
+                del cell['default_error']
+                cell_values = [
+                    v for v in values if
+                    v['row_id'] == cell['row_id'] and v['column_id'] == cell['column_id']
+                ]
+                if self.main_document is not None and row['parent_id'] is None:
+                    value = next((v for v in cell_values if v['document_id'] == self.main_document.id), None)
+                    if value is not None:
+                        val = value['value']
+                        err = value['error']
+                elif row['parent'] is not None:
+                    val = cell_values[0]['value']
+                    err = cell_values[0]['error']
+                cell.update({'value': val, 'error': err})
+
+    @staticmethod
+    def _add_rows_additional_data(rows: list[dict]) -> None:
+        """Добавление дополнительных данных для строк."""
+        for i, row in enumerate(rows, 1):
+            row['global_index'] = i
+            row['name'] = str(i)
 
 
 class SheetUnloader(DataUnloader):
