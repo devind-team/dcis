@@ -824,10 +824,7 @@ export const changeSheetValues = (
   }
 }
 
-export const useChangeValueMutation = (
-  documentId: Ref<string | null>,
-  sheetId: Ref<string>
-) => {
+export const useChangeValueMutation = (documentId: Ref<string | null>, sheetId: Ref<string>) => {
   const { client } = useApolloClient()
   const { mutate } = useMutation<
     ChangeValueMutation,

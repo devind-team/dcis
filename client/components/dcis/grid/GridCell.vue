@@ -117,6 +117,9 @@ export default defineComponent({
 
     const setValue = async (value: string) => {
       emit('clear-active')
+      if (props.cell.value === value || (props.cell.value === null && value === '')) {
+        return
+      }
       await changeValue(props.cell, value)
     }
 
