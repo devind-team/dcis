@@ -18,7 +18,7 @@ div
     slot(v-if="showAttributes" name="attributes")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
-        v-if="activeSheet && activeSheet.id === sheet.id"
+        v-if="activeSheet && activeSheet.id === sheet.id && !loading"
         ref="grid"
         :height="gridHeight"
       )
@@ -59,6 +59,7 @@ export default defineComponent({
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
     activeDocument: { type: Object as PropType<DocumentType>, default: null },
+    loading: { type: Boolean, required: true },
     showAttributes: { type: Boolean, default: false }
   },
   setup (props, { emit }) {

@@ -10,6 +10,7 @@ bread-crumbs(:items="bc" fluid)
         :active-sheet="activeSheet"
         :update-active-sheet="updateActiveSheet"
         :active-document="activeDocument"
+        :loading="activeDocumentLoading"
         show-attributes
       )
         template(#settings)

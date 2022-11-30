@@ -11,6 +11,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :sheets="period.sheets"
     :active-sheet="activeSheet"
     :update-active-sheet="updateActiveSheet"
+    :loading="activeSheetLoading"
   )
     template(#tabs="{ sheets, updateSize }")
       template(v-for="sheet in sheets")
@@ -65,7 +66,8 @@ export default defineComponent({
     const activeSheetIndex = ref<number>(0)
     const {
       data: activeSheet,
-      update: updateActiveSheet
+      update: updateActiveSheet,
+      loading: activeSheetLoading
     } = useCommonQuery<
       PeriodSheetQuery,
       PeriodSheetQueryVariables
@@ -106,6 +108,7 @@ export default defineComponent({
       activeSheetIndex,
       activeSheet,
       updateActiveSheet,
+      activeSheetLoading,
       renameSheetUpdate
     }
   }

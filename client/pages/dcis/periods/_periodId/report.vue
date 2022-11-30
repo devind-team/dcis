@@ -27,6 +27,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :mode="GridMode.READ"
     :sheets="period.sheets"
     :active-sheet="activeSheet"
+    :loading="activeSheetLoading"
   )
 </template>
 
@@ -100,7 +101,7 @@ export default defineComponent({
       reportRowsFilter.value.reset()
     })
 
-    const { data: activeSheet } = useCommonQuery<
+    const { data: activeSheet, loading: activeSheetLoading } = useCommonQuery<
       ReportSheetQuery,
       ReportSheetQueryVariables
     >({
@@ -137,7 +138,8 @@ export default defineComponent({
       reportRowsMessageFunction,
       reportRowsSearchFunction,
       activeSheetIndex,
-      activeSheet
+      activeSheet,
+      activeSheetLoading
     }
   }
 })
