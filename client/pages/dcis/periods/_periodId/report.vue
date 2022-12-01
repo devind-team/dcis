@@ -17,8 +17,8 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :title="String($t('dcis.periods.report.rowsFilter.title'))"
     :message-function="reportRowsMessageFunction"
     :search-function="reportRowsSearchFunction"
-    :get-name="item => String(item.index)"
-    item-key="index"
+    :get-name="item => item.name"
+    item-key="name"
     message-container-class="mb-2"
     multiple
   )
@@ -34,6 +34,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
 <script lang="ts">
 import { computed, defineComponent, ref, PropType, inject, watch } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
+import { positionsToRangeIndices } from '~/services/grid'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
 import { PeriodType, BaseSheetType, ReportSheetQuery, ReportSheetQueryVariables } from '~/types/graphql'
@@ -47,7 +48,7 @@ import ReportDocumentFilter, {
 } from '~/components/dcis/periods/ReportDocumentFilter.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 
-type ReportRow = { index: number }
+type ReportRow = { indices: number[], name: string }
 
 export default defineComponent({
   components: {
@@ -85,9 +86,27 @@ export default defineComponent({
 
     const reportRowsFilter = ref<InstanceType<typeof ItemsDataFilter>>(null)
     const reportRows = ref<ReportRow[]>([])
-    const reportRowsItems = computed<ReportRow[]>(() =>
-      Array.from({ length: activeBaseSheet.value.rowsCount }).map((_, i) => ({ index: i + 1 }))
-    )
+    const reportRowsItems = computed<ReportRow[]>(() => {
+      if (!activeSheet.value) {
+        return []
+      }
+      const result: ReportRow[] = []
+      let i = 0
+      while (i < activeSheet.value.rows.length) {
+        let max = 1
+        for (const cell of activeSheet.value.rows[i].cells) {
+          const { minRow, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
+          const rowsCount = maxRow - minRow + 1
+          if (rowsCount > max) {
+            max = rowsCount
+          }
+        }
+        const indices = Array.from({ length: max }).map((_, index) => i + index + 1)
+        result.push({ indices, name: indices.join(', ') })
+        i += max
+      }
+      return result
+    })
     const reportRowsMessageFunction = (selectedItems: ReportRow[]): string => {
       if (selectedItems.length) {
         return t('dcis.periods.report.rowsFilter.multipleMessage', { count: selectedItems.length }) as string
@@ -95,7 +114,7 @@ export default defineComponent({
       return t('dcis.periods.report.rowsFilter.noFiltrationMessage') as string
     }
     const reportRowsSearchFunction = (item: ReportRow, search: string): boolean => {
-      return String(item.index).includes(search.toLocaleLowerCase())
+      return item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
     }
     watch(() => activeSheetIndex.value, () => {
       reportRowsFilter.value.reset()
@@ -115,7 +134,7 @@ export default defineComponent({
         })),
         reportRows: Array.from({ length: activeBaseSheet.value.rowsCount }).map((_, i) => ({
           rowIndex: i + 1,
-          isExpanded: !!reportRows.value.find((r: ReportRow) => r.index === i + 1)
+          isExpanded: !!reportRows.value.find((r: ReportRow) => r.indices.includes(i + 1))
         })),
         mainDocumentId: reportDocumentFilterData.value.mainDocument?.id,
         aggregation: reportDocumentFilterData.value.aggregation ?? null
