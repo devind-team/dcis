@@ -14,7 +14,7 @@ tbody
       @mousedown="mousedownRowName(row, $event)"
       @mouseup="mouseupRowName"
     )
-      div(:style="{ height: `${getRowHeight(row)}px` }" @contextmenu="(e) => showMenu(e, row)") {{ row.name }}
+      div(:style="getRowNameCellContentStyle(row)" @contextmenu="(e) => showMenu(e, row)") {{ row.name }}
     td(
       v-for="cell in row.cells"
       :key="cell.id"
@@ -132,6 +132,17 @@ export default defineComponent({
       return {}
     }
 
+    const canChangeRowSettings = useCanChangeRowSettings()
+    const canAddRowBeforeOrAfter = useCanAddRowBeforeOrAfter()
+    const canAddRowInside = useCanAddRowInside()
+    const canDeleteRow = useCanDeleteRow()
+    const viewControl = (rowDimension: RowDimensionType): boolean => {
+      return canChangeRowSettings.value ||
+        canAddRowBeforeOrAfter(rowDimension) ||
+        canAddRowInside(rowDimension) ||
+        canDeleteRow(rowDimension)
+    }
+
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
         'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
@@ -142,16 +153,12 @@ export default defineComponent({
         'grid__cell_fixed-border-bottom': isReadOrWriteMode.value && props.isRowFixedBorder(row)
       }
     }
-
-    const canChangeRowSettings = useCanChangeRowSettings()
-    const canAddRowBeforeOrAfter = useCanAddRowBeforeOrAfter()
-    const canAddRowInside = useCanAddRowInside()
-    const canDeleteRow = useCanDeleteRow()
-    const viewControl = (rowDimension: RowDimensionType): boolean => {
-      return canChangeRowSettings.value ||
-        canAddRowBeforeOrAfter(rowDimension) ||
-        canAddRowInside(rowDimension) ||
-        canDeleteRow(rowDimension)
+    const getRowNameCellContentStyle = (row: RowDimensionType): Record<string, string> => {
+      const style: Record<string, string> = { height: `${props.getRowHeight(row)}px` }
+      if (row.background) {
+        style.background = row.background
+      }
+      return style
     }
 
     const getCellClass = (cell: CellType): Record<string, boolean> => {
@@ -182,7 +189,6 @@ export default defineComponent({
       if (cell.error) {
         style.color = 'red'
       } else if (cell.color) { style.color = cell.color }
-      if (cell.background) { style['background-color'] = cell.background }
       if (textDecoration.length) {
         style['text-decoration'] = textDecoration.join(' ')
       }
@@ -199,6 +205,7 @@ export default defineComponent({
     }
 
     const getCellContentStyle = (cell: CellType): Record<string, string> => {
+      const row = activeSheet.value.rows.find((row: RowDimensionType) => row.id === cell.rowId)
       const valuesMap = {
         left: 'flex-start',
         top: 'flex-start',
@@ -215,6 +222,11 @@ export default defineComponent({
         style['text-align'] = cell.horizontalAlign
       }
       if (cell.verticalAlign) { style['align-items'] = valuesMap[cell.verticalAlign] }
+      if (cell.background && cell.background !== '#FFFFFF') {
+        style.background = cell.background
+      } else if (row.background) {
+        style.background = row.background
+      }
       return style
     }
 
@@ -248,12 +260,13 @@ export default defineComponent({
       activeSheet,
       getRowClass,
       getRowStyle,
-      getRowNameCellClass,
       canChangeRowSettings,
       canAddRowBeforeOrAfter,
       canDeleteRow,
       canAddRowInside,
       viewControl,
+      getRowNameCellClass,
+      getRowNameCellContentStyle,
       getCellClass,
       getCellStyle,
       getCellContentStyle

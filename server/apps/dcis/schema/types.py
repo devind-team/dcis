@@ -457,6 +457,7 @@ class RowDimensionType(graphene.ObjectType):
     object_id = graphene.ID(description='Идентификатор дивизиона')
     user_id = graphene.ID(description='Идентификатор пользователя')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
+    background = graphene.String(description='Цвет фона')
 
 
 class ChangeColumnDimensionType(DjangoObjectType):

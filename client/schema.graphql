@@ -4361,6 +4361,8 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
+  """Цвет фона"""
+  background: String
   """Ячейки"""
   cells: [CellType!]!
   """Дочерние строки"""

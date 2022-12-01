@@ -510,12 +510,16 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
                     err = cell_values[0]['error']
                 cell.update({'value': val, 'error': err})
 
-    @staticmethod
-    def _add_rows_additional_data(rows: list[dict]) -> None:
+    def _add_rows_additional_data(self, rows: list[dict]) -> None:
         """Добавление дополнительных данных для строк."""
+        colors: dict[int, str] = {}
+        for rd in self.report_documents:
+            colors[rd.document.id] = rd.color
         for i, row in enumerate(rows, 1):
             row['global_index'] = i
             row['name'] = str(i)
+            if row['document_id'] is not None:
+                row['background'] = colors[row['document_id']]
 
 
 class SheetUnloader(DataUnloader):
