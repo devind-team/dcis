@@ -40,12 +40,12 @@ import { useI18n, useFilters, useQueryRelay, useCursorPagination } from '~/compo
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import {
-  AddDocumentCommentMutation, AddDocumentCommentMutationVariables,
-  DocumentCommentsQuery,
-  DocumentCommentsQueryVariables, DocumentType
+  AddDocumentMessageMutation, AddDocumentMessageMutationVariables,
+  DocumentMessageQuery,
+  DocumentMessageQueryVariables, DocumentType
 } from '~/types/graphql'
-import documentCommentsQuery from '~/gql/dcis/queries/document_comments.graphql'
-import addDocumentCommentMutation from '~/gql/dcis/mutations/document/add_document_comment.graphql'
+import documentCommentsQuery from '~/gql/dcis/queries/document_message.graphql'
+import addDocumentCommentMutation from '~/gql/dcis/mutations/document/add_document_message.graphql'
 
 export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs },
@@ -64,8 +64,8 @@ export default defineComponent({
       data: commentsData,
       loading: commentsLoading,
       addUpdate
-    } = useQueryRelay<DocumentCommentsQuery,
-      DocumentCommentsQueryVariables>({
+    } = useQueryRelay<DocumentMessageQuery,
+      DocumentMessageQueryVariables>({
         document: documentCommentsQuery,
         variables: {
           documentId: props.document.id
@@ -88,12 +88,12 @@ export default defineComponent({
       }, [])
     })
 
-    const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentCommentMutation,
-      AddDocumentCommentMutationVariables>(
+    const { mutate: addDocumentCommentMutate } = useMutation<AddDocumentMessageMutation,
+      AddDocumentMessageMutationVariables>(
         addDocumentCommentMutation,
         {
           update: (cache, result) => {
-            if (!result.data.addDocumentComment.errors.length) {
+            if (!result.data.addDocumentMessage.errors.length) {
               addUpdate(cache, result, 'comment')
               inputMessage.value = ''
             }
@@ -101,7 +101,7 @@ export default defineComponent({
         }
       )
 
-    const addDocumentCommentVariables = computed<AddDocumentCommentMutationVariables>(() => ({
+    const addDocumentCommentVariables = computed<AddDocumentMessageMutationVariables>(() => ({
       documentId: props.document.id,
       message: inputMessage.value
     }))

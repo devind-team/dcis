@@ -232,25 +232,6 @@ type AddDivisionsMutationPayload {
   success: Boolean!
 }
 
-input AddDocumentCommentMutationInput {
-  clientMutationId: String
-  """Документ"""
-  documentId: ID!
-  """Текст комментария"""
-  message: String
-}
-
-"""Добавление комментария к документу"""
-type AddDocumentCommentMutationPayload {
-  clientMutationId: String
-  """Созданный комментарий"""
-  comment: DocumentCommentsType
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
 input AddDocumentDataMutationInput {
   clientMutationId: String
   """Комментарий"""
@@ -268,6 +249,25 @@ type AddDocumentDataMutationPayload {
   clientMutationId: String
   """Список созданных документов"""
   documents: [DocumentType]
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input AddDocumentMessageMutationInput {
+  clientMutationId: String
+  """Документ"""
+  documentId: ID!
+  """Текст комментария"""
+  message: String
+}
+
+"""Добавление комментария к документу"""
+type AddDocumentMessageMutationPayload {
+  clientMutationId: String
+  """Созданный комментарий"""
+  comment: DocumentMessageType
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
@@ -2654,7 +2654,7 @@ type DjangoDebugSQL {
 }
 
 """Тип комментариев для документа"""
-type DocumentCommentsType implements Node {
+type DocumentMessageType implements Node {
   """Комментарий"""
   comment: String!
   """Дата создания"""
@@ -2667,21 +2667,21 @@ type DocumentCommentsType implements Node {
   user: UserType!
 }
 
-type DocumentCommentsTypeConnection {
+type DocumentMessageTypeConnection {
   """Contains the nodes in this connection."""
-  edges: [DocumentCommentsTypeEdge]!
+  edges: [DocumentMessageTypeEdge]!
   """Pagination data for this connection."""
   pageInfo: PageInfo!
   """Number of items in the queryset."""
   totalCount: Int!
 }
 
-"""A Relay edge containing a `DocumentCommentsType` and its cursor."""
-type DocumentCommentsTypeEdge {
+"""A Relay edge containing a `DocumentMessageType` and its cursor."""
+type DocumentMessageTypeEdge {
   """A cursor for use in pagination"""
   cursor: String!
   """The item at the end of the edge"""
-  node: DocumentCommentsType
+  node: DocumentMessageType
 }
 
 """Тип статусов для документов."""
@@ -3005,10 +3005,10 @@ type Mutation {
   addDivisionsFromPeriod(input: AddDivisionsFromPeriodMutationInput!): AddDivisionsFromPeriodMutationPayload!
   """Добавление документа."""
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
-  """Добавление комментария к документу"""
-  addDocumentComment(input: AddDocumentCommentMutationInput!): AddDocumentCommentMutationPayload!
   """Загрузка данных из файла."""
   addDocumentData(input: AddDocumentDataMutationInput!): AddDocumentDataMutationPayload!
+  """Добавление комментария к документу"""
+  addDocumentMessage(input: AddDocumentMessageMutationInput!): AddDocumentMessageMutationPayload!
   """Добавление статуса документа."""
   addDocumentStatus(input: AddDocumentStatusMutationInput!): AddDocumentStatusMutationPayload!
   """Мутация для загрузки файлов"""
@@ -3957,7 +3957,7 @@ type Query {
     documentId: ID!
   ): DocumentType
   """Комментарии документов"""
-  documentComments(
+  documentMessage(
     after: String
     before: String
     """Идентификатор документа"""
@@ -3965,7 +3965,7 @@ type Query {
     first: Int
     last: Int
     offset: Int
-  ): DocumentCommentsTypeConnection
+  ): DocumentMessageTypeConnection
   """Выгрузка листа с несколькими документами"""
   documentSheet(
     """Идентификатор документа"""

@@ -1,5 +1,5 @@
-mutation AddDocumentComment($documentId: ID!, $message: String!) {
-  addDocumentComment(input: {documentId: $documentId, message: $message}){
+mutation AddDocumentMessage($documentId: ID!, $message: String!) {
+  addDocumentMessage(input: {documentId: $documentId, message: $message}){
     success
     errors {
       field

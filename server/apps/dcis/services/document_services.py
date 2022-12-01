@@ -12,7 +12,7 @@ from apps.core.models import User
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     Cell,
-    Comments, Document,
+    Message, Document,
     Period,
     Project,
     RowDimension,
@@ -157,9 +157,10 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
     return document
 
 
-def create_document_comment(user: User, document: Document, message: str) -> Comment:
+def create_document_message(user: User, document: Document, message: str) -> Message:
     """Добавление комментария к документу."""
-    return Comments.objects.create(comment=message, user=user, document=document)
+    can_change_document_comment(user, document)
+    return Message.objects.create(comment=message, user=user, document=document)
 
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:

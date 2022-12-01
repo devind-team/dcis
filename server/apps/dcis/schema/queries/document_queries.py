@@ -13,9 +13,9 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Cell, Comments, Document, DocumentStatus, Period, Sheet, Status, Value
+from apps.dcis.models import Cell, Message, Document, DocumentStatus, Period, Sheet, Status, Value
 from apps.dcis.permissions import can_view_document
-from apps.dcis.schema.types import ChangeCellType, DocumentCommentsType, DocumentStatusType, DocumentType, SheetType, StatusType
+from apps.dcis.schema.types import ChangeCellType, DocumentMessageType, DocumentStatusType, DocumentType, SheetType, StatusType
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
@@ -37,8 +37,8 @@ class DocumentQueries(graphene.ObjectType):
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
     )
 
-    document_comments = DjangoFilterConnectionField(
-        DocumentCommentsType,
+    document_message = DjangoFilterConnectionField(
+        DocumentMessageType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
         description='Комментарии документов'
     )
@@ -102,15 +102,15 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_document_comments(
+    def resolve_document_message(
         root: Any,
         info: ResolveInfo,
         document_id: str,
         *args,
         **kwarg
-    ) -> Iterable[Comments]:
+    ) -> Iterable[Message]:
         document = get_object_or_404(Document, pk=gid2int(document_id))
-        return Comments.objects.filter(document=document)
+        return Message.objects.filter(document=document)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

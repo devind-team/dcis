@@ -4,7 +4,7 @@ from apps.core.models import User
 from .document import Document
 
 
-class Comments(models.Model):
+class Message(models.Model):
     """Модель комментариев к документу"""
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')
