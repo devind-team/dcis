@@ -1,16 +1,18 @@
 """Модуль для выгрузки листов."""
 
+import operator
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
 from functools import reduce
-from typing import Any, Sequence
+from statistics import mean
+from typing import Any, Iterable, Sequence
 
 from django.db.models import Model, Q, QuerySet
 from openpyxl.utils import column_index_from_string, get_column_letter
 
 from apps.dcis.models import Document
-from apps.dcis.models.sheet import Cell, ColumnDimension, MergedCell, RowDimension, Sheet, Value
+from apps.dcis.models.sheet import Cell, ColumnDimension, KindCell, MergedCell, RowDimension, Sheet, Value
 from apps.dcis.permissions import (
     AddChildRowDimensionBase,
     ChangeChildRowDimensionHeightBase,
@@ -444,6 +446,48 @@ class ReportAggregation(Enum):
     MIN = auto()
     MAX = auto()
 
+    def is_applicable(self, kind: str) -> bool:
+        """Применима ли агрегация к типу."""
+        return kind in _AGGREGATION_TYPE_MAP[self]
+
+    def apply(self, values: Iterable[str]) -> str:
+        """Применение агрегации."""
+        return getattr(self, self.name.lower())(values)
+
+    @staticmethod
+    def concat(values: Iterable[str]) -> str:
+        """Применение функции CONCAT."""
+        return reduce(operator.add, values, '')
+
+    @staticmethod
+    def sum(values: Iterable[str]) -> str:
+        """Применение функции SUM."""
+        return str(sum(float(v) for v in values))
+
+    @staticmethod
+    def avg(values: Iterable[str]) -> str:
+        """Применение функции AVG."""
+        return str(mean(float(v) for v in values))
+
+    @staticmethod
+    def min(values: Iterable[str]) -> str:
+        """Применение функции MIN."""
+        return str(min(float(v) for v in values))
+
+    @staticmethod
+    def max(values: Iterable[str]) -> str:
+        """Применение функции MAX."""
+        return str(max(float(v) for v in values))
+
+
+_AGGREGATION_TYPE_MAP = {
+    ReportAggregation.CONCAT: [KindCell.STRING, KindCell.TEXT],
+    ReportAggregation.SUM: [KindCell.NUMERIC, KindCell.FORMULA],
+    ReportAggregation.AVG: [KindCell.NUMERIC, KindCell.FORMULA],
+    ReportAggregation.MIN: [KindCell.NUMERIC, KindCell.FORMULA],
+    ReportAggregation.MAX: [KindCell.NUMERIC, KindCell.FORMULA],
+}
+
 
 class SheetReportRowsUnloader(SheetRowsUnloaderBase):
     """Выгрузчик строк листа для сводного отчета."""
@@ -500,12 +544,16 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
                     v for v in values if
                     v['row_id'] == cell['row_id'] and v['column_id'] == cell['column_id']
                 ]
-                if self.main_document is not None and row['parent_id'] is None:
-                    value = next((v for v in cell_values if v['document_id'] == self.main_document.id), None)
-                    if value is not None:
-                        val = value['value']
-                        err = value['error']
-                elif row['parent'] is not None:
+                if row['parent_id'] is None:
+                    if self._is_aggregation_applicable(cell, cell_values):
+                        val = self.aggregation.apply(v['value'] for v in cell_values)
+                        err = None
+                    elif self.main_document is not None:
+                        value = next((v for v in cell_values if v['document_id'] == self.main_document.id), None)
+                        if value is not None:
+                            val = value['value']
+                            err = value['error']
+                else:
                     val = cell_values[0]['value']
                     err = cell_values[0]['error']
                 cell.update({'value': val, 'error': err})
@@ -520,6 +568,15 @@ class SheetReportRowsUnloader(SheetRowsUnloaderBase):
             row['name'] = str(i)
             if row['document_id'] is not None:
                 row['background'] = colors[row['document_id']]
+
+    def _is_aggregation_applicable(self, cell: dict, values: list[dict]) -> bool:
+        """Применима ли агрегация к ячейке и значениям."""
+        return (
+            self.aggregation is not None and
+            self.aggregation.is_applicable(cell['kind']) and
+            len(values) > 1 and
+            all(v['error'] is None for v in values)
+        )
 
 
 class SheetUnloader(DataUnloader):
