@@ -34,7 +34,6 @@ fragment PeriodFields on PeriodType {
     showChild
     createdAt
     updatedAt
-    rowsCount
     __typename
   }
   __typename

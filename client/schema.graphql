@@ -812,8 +812,6 @@ type BaseSheetType {
   period: PeriodType
   """Позиция"""
   position: Int!
-  """Число строк"""
-  rowsCount: Int!
   """Показывать ли подведомственным организациям"""
   showChild: Boolean!
   """Показывать ли головным организациям"""
@@ -4007,6 +4005,11 @@ type Query {
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
   hasSettings: Boolean!
+  """Группы индексов строк, которые можно расширить"""
+  indicesGroupsToExpand(
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): [[Int!]!]
   """Возможные начальные статусы для нового документа"""
   initialStatuses(
     """Идентификатор периода"""
@@ -4130,8 +4133,8 @@ type Query {
     mainDocumentId: ID
     """Документы для выгрузки сводного отчета"""
     reportDocuments: [ReportDocumentInputType!]!
-    """Строки для выгрузки сводного отчета"""
-    reportRows: [ReportRowInputType!]!
+    """Группы строк для выгрузки сводного отчета"""
+    reportRowGroups: [ReportRowGroupInputType!]!
     """Идентификатор листа"""
     sheetId: ID!
   ): SheetType!
@@ -4290,12 +4293,12 @@ input ReportDocumentInputType {
   isVisible: Boolean!
 }
 
-"""Строка для выгрузки сводного отчета."""
-input ReportRowInputType {
+"""Группа строк для выгрузки сводного отчета."""
+input ReportRowGroupInputType {
+  """Индекс группы строк"""
+  groupIndex: Int!
   """Является ли строка расширенной"""
   isExpanded: Boolean!
-  """Индекс строки"""
-  rowIndex: Int!
 }
 
 input RequestCodeMutationInput {
@@ -4650,8 +4653,6 @@ type SheetType {
   position: Int!
   """Строки"""
   rows: [RowDimensionType!]
-  """Число строк"""
-  rowsCount: Int!
   """Показывать ли подведомственным организациям"""
   showChild: Boolean!
   """Показывать ли головным организациям"""

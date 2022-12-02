@@ -25,7 +25,7 @@ from apps.dcis.schema.types import (
     PeriodType,
     PrivilegeType,
     ReportDocumentInputType,
-    ReportRowInputType,
+    ReportRowGroupInputType,
     SheetType,
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
@@ -35,6 +35,7 @@ from apps.dcis.services.period_services import (
     get_user_period_privileges,
     get_user_periods,
 )
+from apps.dcis.services.row_dimension_services import get_indices_groups_to_expand
 from apps.dcis.services.sheet_unload_services import (
     PeriodSheetUnloader,
     ReportAggregation,
@@ -99,6 +100,11 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Выгрузка листа для периода',
     )
+    indices_groups_to_expand = graphene.List(
+        graphene.NonNull(graphene.List(graphene.NonNull(graphene.Int))),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        description='Группы индексов строк, которые можно расширить'
+    )
     report_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
@@ -107,10 +113,10 @@ class PeriodQueries(graphene.ObjectType):
             required=True,
             description='Документы для выгрузки сводного отчета',
         ),
-        report_rows=graphene.List(
-            graphene.NonNull(ReportRowInputType),
+        report_row_groups=graphene.List(
+            graphene.NonNull(ReportRowGroupInputType),
             required=True,
-            description='Строки для выгрузки сводного отчета',
+            description='Группы строк для выгрузки сводного отчета',
         ),
         main_document_id=graphene.ID(description='Основной документ'),
         aggregation=graphene.Argument(
@@ -199,12 +205,18 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
+    def resolve_indices_groups_to_expand(root: Any, info: ResolveInfo, sheet_id: str) -> list[list[int]]:
+        sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
+        return get_indices_groups_to_expand(sheet)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_report_sheet(
         root: Any,
         info: ResolveInfo,
         sheet_id: str,
         report_documents: list[ReportDocumentInputType],
-        report_rows: list[ReportRowInputType],
+        report_row_groups: list[ReportRowGroupInputType],
         **kwargs
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
@@ -215,9 +227,9 @@ class PeriodQueries(graphene.ObjectType):
         aggregation = ReportAggregation(kwargs['aggregation']) if 'aggregation' in kwargs else None
         document_ids = [gid2int(report_document.document_id) for report_document in report_documents]
         documents = Document.objects.filter(id__in=document_ids)
-        expanded_rows = {}
-        for row in report_rows:
-            expanded_rows[row.row_index] = row.is_expanded
+        expanded_row_groups = {}
+        for group in report_row_groups:
+            expanded_row_groups[group.group_index] = group.is_expanded
         return ReportSheetUnloader(
             sheet=sheet,
             report_documents=[next(
@@ -226,7 +238,7 @@ class PeriodQueries(graphene.ObjectType):
             ) for d in documents],
             main_document=main_document,
             aggregation=aggregation,
-            expanded_rows=expanded_rows,
+            expanded_row_groups=expanded_row_groups,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
 

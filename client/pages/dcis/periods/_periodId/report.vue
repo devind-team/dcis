@@ -11,12 +11,12 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     message-container-class="mb-2 mr-1"
   )
   items-data-filter(
-    v-model="reportRows"
-    ref="reportRowsFilter"
-    :items="reportRowsItems"
+    v-model="reportRowGroups"
+    ref="reportRowGroupsFilter"
+    :items="reportRowGroupsItems"
     :title="String($t('dcis.periods.report.rowsFilter.title'))"
-    :message-function="reportRowsMessageFunction"
-    :search-function="reportRowsSearchFunction"
+    :message-function="reportRowGroupsMessageFunction"
+    :search-function="reportRowGroupsSearchFunction"
     :get-name="item => item.name"
     item-key="name"
     message-container-class="mb-2"
@@ -27,17 +27,24 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :mode="GridMode.READ"
     :sheets="period.sheets"
     :active-sheet="activeSheet"
-    :loading="activeSheetLoading"
+    :loading="loading"
   )
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, ref, PropType, inject, watch } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
-import { positionsToRangeIndices } from '~/services/grid'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType, BaseSheetType, ReportSheetQuery, ReportSheetQueryVariables } from '~/types/graphql'
+import {
+  PeriodType,
+  BaseSheetType,
+  IndicesGroupsToExpandQuery,
+  IndicesGroupsToExpandQueryVariables,
+  ReportSheetQuery,
+  ReportSheetQueryVariables
+} from '~/types/graphql'
+import indicesToExpandQuery from '~/gql/dcis/queries/indices_to_expand.graphql'
 import reportSheetQuery from '~/gql/dcis/queries/report_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import ReportSettingsMenu from '~/components/dcis/periods/ReportSettingsMenu.vue'
@@ -48,7 +55,7 @@ import ReportDocumentFilter, {
 } from '~/components/dcis/periods/ReportDocumentFilter.vue'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 
-type ReportRow = { indices: number[], name: string }
+type ReportRowGroup = { index: number, indices: number[], name: string }
 
 export default defineComponent({
   components: {
@@ -84,40 +91,38 @@ export default defineComponent({
       aggregation: null
     })
 
-    const reportRowsFilter = ref<InstanceType<typeof ItemsDataFilter>>(null)
-    const reportRows = ref<ReportRow[]>([])
-    const reportRowsItems = computed<ReportRow[]>(() => {
-      if (!activeSheet.value) {
+    const { data: indicesGroupsToExpand, loading: indicesGroupsToExpandLoading } = useCommonQuery<
+      IndicesGroupsToExpandQuery,
+      IndicesGroupsToExpandQueryVariables
+    >({
+      document: indicesToExpandQuery,
+      variables: () => ({
+        sheetId: activeBaseSheet.value.id
+      })
+    })
+    const reportRowGroupsFilter = ref<InstanceType<typeof ItemsDataFilter>>(null)
+    const reportRowGroups = ref<ReportRowGroup[]>([])
+    const reportRowGroupsItems = computed<ReportRowGroup[]>(() => {
+      if (!indicesGroupsToExpand.value) {
         return []
       }
-      const result: ReportRow[] = []
-      let i = 0
-      while (i < activeSheet.value.rows.length) {
-        let max = 1
-        for (const cell of activeSheet.value.rows[i].cells) {
-          const { minRow, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
-          const rowsCount = maxRow - minRow + 1
-          if (rowsCount > max) {
-            max = rowsCount
-          }
-        }
-        const indices = Array.from({ length: max }).map((_, index) => i + index + 1)
-        result.push({ indices, name: indices.join(', ') })
-        i += max
-      }
-      return result
+      return indicesGroupsToExpand.value.map((indices: number[], index: number) => ({
+        index,
+        indices,
+        name: indices.join(', ')
+      }))
     })
-    const reportRowsMessageFunction = (selectedItems: ReportRow[]): string => {
+    const reportRowGroupsMessageFunction = (selectedItems: ReportRowGroup[]): string => {
       if (selectedItems.length) {
         return t('dcis.periods.report.rowsFilter.multipleMessage', { count: selectedItems.length }) as string
       }
       return t('dcis.periods.report.rowsFilter.noFiltrationMessage') as string
     }
-    const reportRowsSearchFunction = (item: ReportRow, search: string): boolean => {
+    const reportRowGroupsSearchFunction = (item: ReportRowGroup, search: string): boolean => {
       return item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
     }
     watch(() => activeSheetIndex.value, () => {
-      reportRowsFilter.value.reset()
+      reportRowGroupsFilter.value.reset()
     })
 
     const { data: activeSheet, loading: activeSheetLoading } = useCommonQuery<
@@ -132,14 +137,21 @@ export default defineComponent({
           isVisible: rd.isVisible,
           color: rd.color
         })),
-        reportRows: Array.from({ length: activeBaseSheet.value.rowsCount }).map((_, i) => ({
-          rowIndex: i + 1,
-          isExpanded: !!reportRows.value.find((r: ReportRow) => r.indices.includes(i + 1))
-        })),
+        reportRowGroups: indicesGroupsToExpand.value
+          ? Array.from({ length: indicesGroupsToExpand.value.length }).map((_, i) => ({
+            groupIndex: i,
+            isExpanded: !!reportRowGroups.value.find((r: ReportRowGroup) => r.index === i)
+          }))
+          : [],
         mainDocumentId: reportDocumentFilterData.value.mainDocument?.id,
         aggregation: reportDocumentFilterData.value.aggregation ?? null
-      })
+      }),
+      options: computed(() => ({
+        enabled: !!indicesGroupsToExpand.value
+      }))
     })
+
+    const loading = computed<boolean>(() => indicesGroupsToExpandLoading.value || activeSheetLoading.value)
 
     const setFooter = inject<(state: boolean) => void>('setFooter')
     setFooter(false)
@@ -151,14 +163,14 @@ export default defineComponent({
       GridMode,
       bc,
       reportDocumentFilterData,
-      reportRowsFilter,
-      reportRows,
-      reportRowsItems,
-      reportRowsMessageFunction,
-      reportRowsSearchFunction,
+      reportRowGroupsFilter,
+      reportRowGroups,
+      reportRowGroupsItems,
+      reportRowGroupsMessageFunction,
+      reportRowGroupsSearchFunction,
       activeSheetIndex,
       activeSheet,
-      activeSheetLoading
+      loading
     }
   }
 })

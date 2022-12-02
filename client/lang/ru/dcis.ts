@@ -232,7 +232,7 @@ export default {
           header: 'Изменение свойств отображения документа',
           subheader: 'Документ: {divisionId}',
           isVisible: 'Отображать дочерние строки',
-          color: 'Выделять подстроки цветом',
+          color: 'Выделять цветом',
           buttonText: 'Изменить свойства'
         },
         aggregationFilter: {

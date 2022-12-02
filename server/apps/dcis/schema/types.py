@@ -605,13 +605,8 @@ class BaseSheetType(graphene.ObjectType):
     show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным организациям')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
-    rows_count = graphene.Int(required=True, description='Число строк')
 
     period = graphene.Field(PeriodType, description='Период')
-
-    @staticmethod
-    def resolve_rows_count(sheet: Sheet, info: ResolveInfo) -> int:
-        return sheet.rowdimension_set.count()
 
 
 class SheetType(BaseSheetType):
@@ -673,8 +668,8 @@ class ReportDocumentInputType(graphene.InputObjectType):
     color = graphene.String(description='Цвет выделения дочерних строк')
 
 
-class ReportRowInputType(graphene.InputObjectType):
-    """Строка для выгрузки сводного отчета."""
+class ReportRowGroupInputType(graphene.InputObjectType):
+    """Группа строк для выгрузки сводного отчета."""
 
-    row_index = graphene.Int(required=True, description='Индекс строки')
+    group_index = graphene.Int(required=True, description='Индекс группы строк')
     is_expanded = graphene.Boolean(required=True, description='Является ли строка расширенной')
