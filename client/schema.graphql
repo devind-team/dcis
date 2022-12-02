@@ -3709,6 +3709,8 @@ type PeriodType {
   canChangeUsers: Boolean!
   """Может ли пользователь удалять период"""
   canDelete: Boolean!
+  """Может ли пользователь просматривать сводный отчет периода"""
+  canViewReport: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""

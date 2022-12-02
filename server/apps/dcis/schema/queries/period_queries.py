@@ -17,7 +17,7 @@ from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
-from apps.dcis.permissions import can_change_period_sheet, can_view_period
+from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_report
 from apps.dcis.schema.types import (
     AttributeType,
     DivisionModelTypeConnection,
@@ -207,6 +207,7 @@ class PeriodQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_indices_groups_to_expand(root: Any, info: ResolveInfo, sheet_id: str) -> list[list[int]]:
         sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
+        can_view_period_report(info.context.user, sheet.period)
         return get_indices_groups_to_expand(sheet)
 
     @staticmethod
@@ -220,6 +221,7 @@ class PeriodQueries(graphene.ObjectType):
         **kwargs
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
+        can_view_period_report(info.context.user, sheet.period)
         if 'main_document_id' in kwargs:
             main_document = get_object_or_404(Document, pk=gid2int(kwargs['main_document_id']))
         else:

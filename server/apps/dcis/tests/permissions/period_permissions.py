@@ -3,13 +3,13 @@
 from typing import Any, Callable
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import Document, Period, Project
+from apps.dcis.models import CuratorGroup, Document, Period, Project
 from apps.dcis.permissions.period_permissions import (
     can_add_period,
     can_change_period,
@@ -21,7 +21,7 @@ from apps.dcis.permissions.period_permissions import (
     can_change_period_sheet,
     can_change_period_users,
     can_delete_period,
-    can_view_period,
+    can_view_period, can_view_period_report,
 )
 
 
@@ -31,13 +31,20 @@ class PeriodPermissionsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
 
-        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.organization = Organization.objects.create(name='Тестовая организация', attributes='')
 
-        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group.users.add(self.curator)
+        self.curator_group.organization.add(self.organization)
+
+        self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
+        self.period.division_set.create(object_id=self.organization.id)
 
-        self.user_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
+        self.user_project = Project.objects.create(user=self.user, content_type=self.organization_content_type)
         self.user_period_without_documents = Period.objects.create(user=self.user, project=self.user_project)
         self.user_period_with_documents = Period.objects.create(user=self.user, project=self.user_project)
         self.document = Document.objects.create(period=self.user_period_with_documents)
@@ -108,6 +115,16 @@ class PeriodPermissionsTestCase(TestCase):
             'dcis.change_period',
             'change_period',
             'change_period_attributes'
+        )
+
+    def test_can_view_period_report(self) -> None:
+        """Тестирование функции `can_view_period_report`."""
+        can_view_period_report(self.curator, self.period)
+        self._test_change_period_element(
+            can_view_period_report,
+            'dcis.change_period',
+            'change_period',
+            'view_period_report'
         )
 
     def test_can_change_period_settings(self) -> None:
