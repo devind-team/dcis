@@ -48,10 +48,6 @@ export default defineComponent({
   setup (props, { emit }) {
     const active = ref<boolean>(false)
 
-    const isVisibleLocal = ref<boolean>(props.isVisible)
-    const isColored = ref<boolean>(!!props.color)
-    const colorLocal = ref<string>(props.color || '#5A83C3')
-
     const swatches = [
       ['#821506', '#DAB9B0', '#C8816D', '#B2492B', '#8F2709', '#732611', '#4E1403'],
       ['#DC2B11', '#E9CDCC', '#D79C9A', '#C76B67', '#AF200B', '#831506', '#570B02'],
@@ -64,6 +60,11 @@ export default defineComponent({
       ['#8506F8', '#D7D2E8', '#B1A7D4', '#8A7CC0', '#614EA3', '#301B72', '#1D124B'],
       ['#DD25F9', '#E3D2DB', '#C9A7BC', '#B27D9E', '#945077', '#642046', '#41142F']
     ]
+    const defaultColor = '#FBF3CF'
+
+    const isVisibleLocal = ref<boolean>(props.isVisible)
+    const isColored = ref<boolean>(!!props.color)
+    const colorLocal = ref<string>(props.color || defaultColor)
 
     const save = () => {
       active.value = false
@@ -72,7 +73,7 @@ export default defineComponent({
         emit('update:color', colorLocal.value)
       } else {
         emit('update:color', null)
-        colorLocal.value = '#5A83C3'
+        colorLocal.value = defaultColor
       }
     }
 
@@ -80,10 +81,10 @@ export default defineComponent({
       active.value = false
       isVisibleLocal.value = props.isVisible
       isColored.value = Boolean(props.color)
-      colorLocal.value = props.color || '#5A83C3'
+      colorLocal.value = props.color || defaultColor
     }
 
-    return { active, isVisibleLocal, isColored, colorLocal, swatches, save, close }
+    return { active, swatches, isVisibleLocal, isColored, colorLocal, save, close }
   }
 })
 </script>

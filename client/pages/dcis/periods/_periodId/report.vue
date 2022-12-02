@@ -20,6 +20,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :get-name="item => item.name"
     item-key="name"
     message-container-class="mb-2"
+    has-select-all
     multiple
   )
   grid-sheets(
