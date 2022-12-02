@@ -78,7 +78,7 @@ bread-crumbs(:items="breadCrumbs")
               template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
       v-tab-item(v-if="period.isCurator")
         v-list
-          v-list-item(v-for="organization in organizationsIsDocument" :key="organization.id")
+          v-list-item(v-for="organization in organizationsHasNotDocument" :key="organization.id")
             v-list-item-content {{ organization.name }}
 </template>
 
@@ -102,14 +102,14 @@ import {
   StatusFieldsFragment,
   StatusesQuery,
   StatusesQueryVariables,
-  OrganizationsIsDocumentQuery,
-  OrganizationsIsDocumentQueryVariables
+  OrganizationsHasNotDocumentQuery,
+  OrganizationsHasNotDocumentQueryVariables
 } from '~/types/graphql'
 import { FilterMessages } from '~/types/filters'
 import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
-import organizationsIsDocumentQuery from '~/gql/dcis/queries/organizations_is_document.graphql'
+import organizationsHasNotDocumentQuery from '~/gql/dcis/queries/organizations_has_not_document.graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
@@ -258,18 +258,18 @@ export default defineComponent({
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
         { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
-        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus'},
+        { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
       )
       return result
     })
 
-    const { data: organizationsIsDocument } = useCommonQuery<
-      OrganizationsIsDocumentQuery,
-      OrganizationsIsDocumentQueryVariables
+    const { data: organizationsHasNotDocument } = useCommonQuery<
+      OrganizationsHasNotDocumentQuery,
+      OrganizationsHasNotDocumentQueryVariables
     >({
-      document: organizationsIsDocumentQuery,
+      document: organizationsHasNotDocumentQuery,
       variables: () => ({
         periodId: props.period.id
       })
@@ -299,7 +299,7 @@ export default defineComponent({
       getFilterMessages,
       showDivisionFilter,
       headers,
-      organizationsIsDocument
+      organizationsHasNotDocument
     }
   }
 })

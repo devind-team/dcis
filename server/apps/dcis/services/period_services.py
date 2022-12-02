@@ -115,7 +115,7 @@ def get_user_period_privileges(user_id: int | str, period_id: int | str) -> Quer
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
 
 
-def get_organizations_is_document(user: User, period_id: int | str) -> QuerySet[Organization]:
+def get_organizations_has_not_document(user: User, period_id: int | str) -> QuerySet[Organization]:
     """Получение организаций, у которых не поданы документы в периоде."""
     period = get_object_or_404(Period, pk=gid2int(period_id))
     return Organization.objects.filter(

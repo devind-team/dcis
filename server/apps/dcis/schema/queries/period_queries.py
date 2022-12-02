@@ -30,7 +30,7 @@ from apps.dcis.schema.types import (
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
-    get_organizations_is_document, get_period_attributes,
+    get_organizations_has_not_document, get_period_attributes,
     get_period_users,
     get_user_period_privileges,
     get_user_periods,
@@ -111,7 +111,7 @@ class PeriodQueries(graphene.ObjectType):
         description='Получение атрибутов, привязанных к периоду'
     )
 
-    organizations_is_document = graphene.List(
+    organizations_has_not_document = graphene.List(
         OrganizationType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
@@ -206,5 +206,5 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_organizations_is_document(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
-        return get_organizations_is_document(user=info.context.user, period_id=period_id)
+    def resolve_organizations_has_not_document(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
+        return get_organizations_has_not_document(user=info.context.user, period_id=period_id)
