@@ -1,5 +1,5 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+left-navigator-container.report__container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.report.name') }}
     v-spacer
     report-settings-menu(v-slot="{ on, attrs }")
@@ -176,3 +176,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="sass">
+.report__container
+  position: relative
+  z-index: 0
+</style>
