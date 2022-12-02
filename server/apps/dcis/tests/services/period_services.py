@@ -44,7 +44,7 @@ from apps.dcis.services.period_services import (
     delete_divisions_period,
     delete_period,
     delete_period_groups,
-    get_organizations_is_document, get_user_curator_periods,
+    get_organizations_has_not_document, get_user_curator_periods,
     get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
@@ -423,7 +423,7 @@ class PeriodTestCase(TestCase):
         )),
         self.assertEqual(
             list_organizations[0],
-            list(get_organizations_is_document(user=self.super_user, period_id=self.organization_period.id))
+            list(get_organizations_has_not_document(user=self.super_user, period_id=self.organization_period.id))
         )
 
     def tearDown(self) -> None:
