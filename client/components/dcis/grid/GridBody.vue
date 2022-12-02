@@ -49,13 +49,13 @@ tbody
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, inject, nextTick, PropType } from '#app'
+import { computed, defineComponent, inject, nextTick, PropType, ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import {
-  GridModeInject,
   ActiveSheetInject,
-  GridMode,
   FixedInfoType,
+  GridMode,
+  GridModeInject,
   ResizingType,
   RowFixedInfoType
 } from '~/types/grid'
@@ -109,13 +109,13 @@ export default defineComponent({
     const mode = inject(GridModeInject)
     const activeSheet = inject(ActiveSheetInject)
 
-    const isReadOrWriteMode = computed<boolean>(() =>
-      mode.value === GridMode.READ || mode.value === GridMode.WRITE
+    const isFixedSelection = computed<boolean>(() =>
+      mode.value === GridMode.READ || mode.value === GridMode.REPORT || mode.value === GridMode.WRITE
     )
 
     const getRowClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
-        grid__row_fixed: isReadOrWriteMode.value && props.getRowFixedInfo(row).fixed
+        grid__row_fixed: isFixedSelection.value && props.getRowFixedInfo(row).fixed
       }
     }
     const getRowStyle = (row: RowDimensionType): Record<string, string> => {
@@ -149,8 +149,8 @@ export default defineComponent({
         'grid__cell_row-name-boundary-selected': mode.value === GridMode.CHANGE &&
           props.boundarySelectedRowsPositions.includes(row.globalIndex),
         'grid__cell_row-name-hover': mode.value === GridMode.CHANGE && !props.resizingRow,
-        'grid__cell_fixed-border-right': isReadOrWriteMode.value && props.borderFixedColumn === null,
-        'grid__cell_fixed-border-bottom': isReadOrWriteMode.value && props.isRowFixedBorder(row)
+        'grid__cell_fixed-border-right': isFixedSelection.value && props.borderFixedColumn === null,
+        'grid__cell_fixed-border-bottom': isFixedSelection.value && props.isRowFixedBorder(row)
       }
     }
     const getRowNameCellContentStyle = (row: RowDimensionType): Record<string, string> => {
@@ -163,19 +163,19 @@ export default defineComponent({
 
     const getCellClass = (cell: CellType): Record<string, boolean> => {
       return {
-        grid__cell_selected: isReadOrWriteMode.value && Boolean(
+        grid__cell_selected: isFixedSelection.value && Boolean(
           props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
         ),
-        grid__cell_fixed: isReadOrWriteMode.value && props.getCellFixedInfo(cell).fixed,
-        grid__cell_readonly: !cell.editable,
-        'grid__cell_fixed-border-right': isReadOrWriteMode.value && props.isCellFixedBorderRight(cell),
-        'grid__cell_fixed-border-bottom': isReadOrWriteMode.value && props.isCellFixedBorderBottom(cell)
+        grid__cell_fixed: isFixedSelection.value && props.getCellFixedInfo(cell).fixed,
+        grid__cell_readonly: mode.value !== GridMode.REPORT && !cell.editable,
+        'grid__cell_fixed-border-right': isFixedSelection.value && props.isCellFixedBorderRight(cell),
+        'grid__cell_fixed-border-bottom': isFixedSelection.value && props.isCellFixedBorderBottom(cell)
       }
     }
     const getCellStyle = (cell: CellType): Record<string, string> => {
       const textDecoration: string[] = []
       const style: Record<string, string> = {}
-      if (isReadOrWriteMode.value) {
+      if (isFixedSelection.value) {
         const fixedInfo = props.getCellFixedInfo(cell)
         if (fixedInfo.fixed) {
           style.left = `${fixedInfo.position}px`

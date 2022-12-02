@@ -69,14 +69,14 @@ export default defineComponent({
     const mode = inject(GridModeInject)
     const activeSheet = inject(ActiveSheetInject)
 
-    const isReadOrWriteMode = computed<boolean>(() =>
-      mode.value === GridMode.READ || mode.value === GridMode.WRITE
+    const isFixedSelection = computed<boolean>(() =>
+      mode.value === GridMode.READ || mode.value === GridMode.REPORT || mode.value === GridMode.WRITE
     )
 
     const firstHeaderClass = computed<Record<string, boolean>>(() => ({
       grid__header_all_selected: props.allCellsSelected,
-      'grid__header_fixed-border-right': isReadOrWriteMode.value && props.borderFixedColumn === null,
-      'grid__header_fixed-border-bottom': isReadOrWriteMode.value && props.borderFixedRow === null
+      'grid__header_fixed-border-right': isFixedSelection.value && props.borderFixedColumn === null,
+      'grid__header_fixed-border-bottom': isFixedSelection.value && props.borderFixedRow === null
     }))
 
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
@@ -85,9 +85,9 @@ export default defineComponent({
         'grid__header_boundary-selected': mode.value === GridMode.CHANGE &&
           props.boundarySelectedColumnsPositions.includes(column.index),
         grid__header_hover: mode.value === GridMode.CHANGE && !props.resizingColumn,
-        grid__header_fixed: isReadOrWriteMode.value && props.getColumnFixedInfo(column).fixed,
-        'grid__header_fixed-border-right': isReadOrWriteMode.value && props.isColumnFixedBorder(column),
-        'grid__header_fixed-border-bottom': isReadOrWriteMode.value && props.borderFixedRow === null
+        grid__header_fixed: isFixedSelection.value && props.getColumnFixedInfo(column).fixed,
+        'grid__header_fixed-border-right': isFixedSelection.value && props.isColumnFixedBorder(column),
+        'grid__header_fixed-border-bottom': isFixedSelection.value && props.borderFixedRow === null
       }
     }
     const getHeaderStyle = (column: ColumnDimensionType): Record<string, string> => {

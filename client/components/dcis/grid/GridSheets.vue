@@ -1,6 +1,10 @@
 <template lang="pug">
 div
-  v-tabs(ref="tabs" :class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.WRITE }" v-model="activeSheetIndex")
+  v-tabs(
+    ref="tabs"
+    :class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.REPORT || mode === GridMode.WRITE }"
+    v-model="activeSheetIndex"
+  )
     slot(name="settings")
     slot(name="tabs" :sheets="sheets" :update-size="updateSize")
       v-tab(v-if="showAttributes" key="attributes") Атрибуты

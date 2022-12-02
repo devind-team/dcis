@@ -25,7 +25,7 @@ left-navigator-container.report__container(:bread-crumbs="bc" fluid @update-draw
   )
   grid-sheets(
     v-model="activeSheetIndex"
-    :mode="GridMode.READ"
+    :mode="GridMode.REPORT"
     :sheets="period.sheets"
     :active-sheet="activeSheet"
     :loading="loading"

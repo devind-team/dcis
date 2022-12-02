@@ -20,8 +20,9 @@ export type RangeType = string
  */
 export enum GridMode {
   READ,
+  REPORT,
+  WRITE,
   CHANGE,
-  WRITE
 }
 
 export type UpdateActiveSheetType = UpdateType<PeriodSheetQuery | DocumentSheetQuery>

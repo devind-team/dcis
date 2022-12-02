@@ -1,7 +1,7 @@
 import { computed, inject, Ref } from '#app'
 import { fromGlobalId } from '~/services/graphql-relay'
 import { useAuthStore } from '~/stores'
-import { GridModeInject, ActiveSheetInject, ActiveDocumentInject, GridMode } from '~/types/grid'
+import { ActiveDocumentInject, ActiveSheetInject, GridMode, GridModeInject } from '~/types/grid'
 import { CellType, DivisionModelType, DocumentType, RowDimensionType } from '~/types/graphql'
 
 export function useCanChangeRowHeight () {
@@ -13,7 +13,7 @@ export function useCanChangeRowHeight () {
     if (mode.value === GridMode.CHANGE) {
       return true
     }
-    if (mode.value === GridMode.READ) {
+    if (mode.value === GridMode.READ || mode.value === GridMode.REPORT) {
       return false
     }
     return rowDimension.parent !== null && (
@@ -39,7 +39,7 @@ export function useCanAddRowBeforeOrAfter () {
     if (mode.value === GridMode.CHANGE) {
       return true
     }
-    if (mode.value === GridMode.READ) {
+    if (mode.value === GridMode.READ || mode.value === GridMode.REPORT) {
       return false
     }
     if (rowDimension.parent) {
@@ -61,7 +61,7 @@ export function useCanAddRowInside () {
   const activeSheet = inject(ActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
   return function (rowDimension: RowDimensionType) {
-    if (mode.value === GridMode.READ || mode.value === GridMode.CHANGE) {
+    if (mode.value === GridMode.READ || mode.value === GridMode.REPORT || mode.value === GridMode.CHANGE) {
       return false
     }
     return rowDimension.dynamic && (
@@ -84,7 +84,7 @@ export function useCanDeleteRow () {
     if (mode.value === GridMode.CHANGE) {
       return rootCount.value !== 1 || Boolean(rowDimension.parent)
     }
-    if (mode.value === GridMode.READ) {
+    if (mode.value === GridMode.READ || mode.value === GridMode.REPORT) {
       return false
     }
     return rowDimension.parent !== null && rowDimension.children.length === 0 && (
@@ -105,7 +105,12 @@ export function useCanChangeValue (cell: Ref<CellType>) {
     if (mode.value === GridMode.CHANGE) {
       return true
     }
-    if (mode.value === GridMode.READ || !cell.value.editable || cell.value.kind === 'f') {
+    if (
+      mode.value === GridMode.READ ||
+      mode.value === GridMode.REPORT ||
+      !cell.value.editable ||
+      cell.value.kind === 'f'
+    ) {
       return false
     }
     if (
