@@ -24,6 +24,7 @@ from apps.dcis.permissions import (
     can_add_document,
     can_change_document_base, can_change_document_comment,
 )
+from apps.dcis.permissions.document_permissions import can_add_document_message
 from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
 from apps.dcis.services.divisions_services import get_user_divisions, is_document_division_member
@@ -159,7 +160,7 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
 
 def create_document_message(user: User, document: Document, message: str) -> Message:
     """Добавление комментария к документу."""
-    can_change_document_comment(user, document)
+    can_add_document_message(user, document)
     return Message.objects.create(comment=message, user=user, document=document)
 
 

@@ -17,13 +17,13 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         v-textarea(
           label="Введите комментарий"
           v-model="inputMessage"
-          @keyup.enter="addDocumentCommentMutate(addDocumentCommentVariables)"
+          @keyup.enter.prevent="addDocumentCommentMutate(addDocumentCommentVariables).then()"
           auto-grow rows="1"
           )
         v-col(cols="3")
           v-btn(
             v-if="inputMessage"
-            @click="addDocumentCommentMutate(addDocumentCommentVariables)"
+            @click="addDocumentCommentMutate(addDocumentCommentVariables).then()"
             color="primary"
             absolute
             right

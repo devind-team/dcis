@@ -1,12 +1,14 @@
 """Разрешения на работу с документами периодов."""
-
+from devind_dictionaries.models import Organization
 from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
 from apps.dcis.models import AddStatus, Cell, Document, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
+from .curator_permissions import can_view_curator_group
 from .period_permissions import can_change_period_sheet_base, can_view_period
+from ..services.curator_services import is_document_curator
 
 
 def can_add_budget_classification(user: User):
@@ -83,6 +85,13 @@ def can_change_document_base(user: User, document: Document):
     ) or has_privilege(user.id, document.period.id, 'change_document'):
         return
     raise PermissionDenied('Недостаточно прав для изменения документа в периоде.')
+
+
+def can_add_document_message(user: User, document: Document):
+    """Пропускает пользователей, которые могут добавлять сообщение к документу."""
+    if is_document_curator(user, document):
+        return
+    can_change_document_comment_base(user, document)
 
 
 def can_change_document_comment_base(user: User, document: Document):
