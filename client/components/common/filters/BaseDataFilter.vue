@@ -19,6 +19,7 @@ component(
       v-chip(
         v-on="on"
         v-bind="attrs"
+        :disabled="disabled"
         :class="messageContainerClass"
         :close="messageContainerClose"
         @click:close="$emit('clear')"
@@ -54,6 +55,7 @@ export default defineComponent({
   props: {
     title: { type: String, default: null },
     message: { type: String, required: true },
+    disabled: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
     messageContainerClose: { type: Boolean, default: false },
     modal: { type: Boolean, default: false },

@@ -1,6 +1,7 @@
 <template lang="pug">
 base-data-filter(
   :message="message"
+  :disabled="disabled"
   :message-container-class="messageContainerClass"
   :message-container-close="!!selectedItems.length"
   :title="title"
@@ -111,6 +112,7 @@ export default defineComponent({
     fullscreen: { type: Boolean, default: undefined },
     multiple: { type: Boolean, default: false },
     hasSelectAll: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null },
     title: { type: String, default: null },
     maxWidth: { type: [String, Number], default: undefined },

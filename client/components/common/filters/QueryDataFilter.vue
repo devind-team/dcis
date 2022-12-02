@@ -15,6 +15,7 @@ apollo-query(
     :fullscreen="fullscreen"
     :multiple="multiple"
     :has-select-all="hasSelectAll"
+    :disabled="disabled"
     :message-container-class="messageContainerClass"
     :title="title"
     :max-width="maxWidth"
@@ -97,6 +98,7 @@ export default defineComponent({
     fullscreen: { type: Boolean, default: undefined },
     multiple: { type: Boolean, default: undefined },
     hasSelectAll: { type: Boolean, default: undefined },
+    disabled: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
     title: { type: String, default: undefined },
     maxWidth: { type: [String, Number], default: undefined },
