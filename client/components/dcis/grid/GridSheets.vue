@@ -28,7 +28,7 @@ div
 <script lang="ts">
 import { VTabs, VTabsItems } from 'vuetify/src/components/VTabs'
 import { useElementBounding } from '@vueuse/core'
-import { computed, defineComponent, onBeforeUnmount, PropType, provide, ref, toRefs } from '#app'
+import { computed, defineComponent, onBeforeUnmount, PropType, provide, ref, toRefs, onMounted } from '#app'
 import {
   BaseSheetType,
   DocumentType,
@@ -78,6 +78,9 @@ export default defineComponent({
       () => tabItems.value ? tabItems.value.$el as HTMLDivElement : null
     )
     const gridHeight = computed<string>(() => `calc(100vh - ${tabItemsTop.value + 30}px)`)
+    onMounted(() => {
+      document.documentElement.scrollTop = 0
+    })
 
     const activeSheetIndex = computed<number>({
       get () {
