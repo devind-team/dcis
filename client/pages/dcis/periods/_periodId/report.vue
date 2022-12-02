@@ -15,6 +15,7 @@ left-navigator-container.report__container(:bread-crumbs="bc" fluid @update-draw
     ref="reportRowGroupsFilter"
     :items="reportRowGroupsItems"
     :title="String($t('dcis.periods.report.rowsFilter.title'))"
+    :disabled="!reportDocumentFilterData.reportDocuments.length"
     :message-function="reportRowGroupsMessageFunction"
     :search-function="reportRowGroupsSearchFunction"
     :get-name="item => item.name"
@@ -90,6 +91,11 @@ export default defineComponent({
       reportDocuments: [],
       mainDocument: null,
       aggregation: null
+    })
+    watch(() => reportDocumentFilterData.value, (newValue) => {
+      if (!newValue.reportDocuments.length) {
+        reportRowGroups.value = []
+      }
     })
 
     const { data: indicesGroupsToExpand, loading: indicesGroupsToExpandLoading } = useCommonQuery<

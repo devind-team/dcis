@@ -30,6 +30,7 @@ items-data-filter(
         v-model="aggregation"
         :items="aggregationItems"
         :title="String($t('dcis.periods.report.documentsFilter.aggregationFilter.title'))"
+        :disabled="!tempItems.length"
         :message-function="aggregationMessageFunction"
         :get-name="item => String($t(`dcis.periods.report.documentsFilter.aggregationFilter.${item.id.toLowerCase()}`))"
       )
@@ -260,6 +261,9 @@ export default defineComponent({
     })
 
     const tempItemsChanged = (reportDocuments: ReportDocumentType[]) => {
+      if (!reportDocuments.length) {
+        aggregation.value = null
+      }
       if (!mainDocument.value) {
         return
       }
