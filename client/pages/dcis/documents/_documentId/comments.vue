@@ -17,7 +17,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
         v-textarea(
           label="Введите комментарий"
           v-model="inputMessage"
-          @keyup.enter.prevent="addDocumentCommentMutate(addDocumentCommentVariables).then()"
+          @keyup.enter="addDocumentCommentMutate(addDocumentCommentVariables).then()"
           auto-grow rows="1"
           )
         v-col(cols="3")

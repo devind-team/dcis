@@ -129,6 +129,7 @@ export default defineComponent({
         search: debounceSearch.value
       })
     }, {
+      isScrollDown: true,
       pagination: useCursorPagination(),
       fetchScroll: typeof document === 'undefined' ? null : document
     })
