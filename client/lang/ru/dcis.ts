@@ -3,7 +3,8 @@ export default {
   projects: {
     name: '@:dcis.home',
     divisions: 'Мои организации',
-    filters: {
+    filter: {
+      title: 'Фильтр проектов',
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
       hidden: 'Скрытые проекты',
