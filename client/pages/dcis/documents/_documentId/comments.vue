@@ -133,90 +133,80 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
-.view {
-  width: 70%;
-  display: flex;
-  justify-content: center;
-  min-height: 80vh;
-}
-.chat-box {
-  width: 70%;
-  border-radius: 24px 24px 0px 0px;
-  background-color: #FFF;
-  box-shadow: 0px 0px 12px rgba(100, 100, 100, 0.2);
-  flex: 1 1 100%;
-  padding: 30px;
+<style lang="sass">
+.view
+  width: 70%
+  display: flex
+  justify-content: center
+  min-height: 80vh
 
-  .container {
-    flex-direction: row;
+.chat-box
+  width: 70%
+  border-radius: 24px 24px 0px 0px
+  background-color: #FFF
+  box-shadow: 0px 0px 12px rgba(100, 100, 100, 0.2)
+  flex: 1 1 100%
+  padding: 30px
 
-    .message-inner {
-      .username {
-        color: #333;
-        font-size: 14px;
-        margin-top: 10px;
-        margin-bottom: 5px;
-        font-weight: 700;
-        padding-left: 15px;
-        padding-right: 15px;
-      }
+  .container
+    flex-direction: row
 
-      .content {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #F3F3F3;
-        border-radius: 10px;
-        color: #333;
-        font-size: 16px;
-        line-height: 1.2em;
-        text-align: left;
-      }
+    .message-inner
+      .username
+        color: #333
+        font-size: 14px
+        margin-top: 10px
+        margin-bottom: 5px
+        font-weight: 700
+        padding-left: 15px
+        padding-right: 15px
 
-      .time {
-        color: #888;
-        font-size: 12px;
-        padding-left: 15px;
-        padding-right: 15px;
-      }
-    }
-  }
-}
-.textarea {
-  width: 70%;
-  position: sticky;
-  bottom: 0px;
-  background-color: #FFF;
-  padding: 30px;
-  box-shadow: 0px 0px 12px rgba(100, 100, 100, 0.2);
-  form {
-    display: flex;
-    input[type="text"] {
-      flex: 1 1 100%;
-      display: block;
-      width: 100%;
-      padding: 10px 15px;
-      border-radius: 8px 0px 0px 8px;
+      .content
+        display: inline-block
+        padding: 10px 20px
+        background-color: #F3F3F3
+        border-radius: 10px
+        color: #333
+        font-size: 16px
+        line-height: 1.2em
+        text-align: left
 
-      color: #333;
-      font-size: 18px;
-      box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
-      background-color: #F3F3F3;
-      transition: 0.4s;
-      &::placeholder {
-        color: #888;
-        transition: 0.4s;
-      }
-    }
+      .time
+        color: #888
+        font-size: 12px
+        padding-left: 15px
+        padding-right: 15px
 
-    input[type="submit"] {
-      display: block;
-      padding: 10px 15px;
-      border-radius: 0px 8px 8px 0px;
-      color: #FFF;
-      font-size: 18px;
-      font-weight: 700;
-    }
-  }
-}
+.textarea
+  width: 70%
+  position: sticky
+  bottom: 0px
+  background-color: #FFF
+  padding: 30px
+  box-shadow: 0px 0px 12px rgba(100, 100, 100, 0.2)
+  form
+    display: flex
+    input[type="text"]
+      flex: 1 1 100%
+      display: block
+      width: 100%
+      padding: 10px 15px
+      border-radius: 8px 0px 0px 8px
+
+      color: #333
+      font-size: 18px
+      box-shadow: 0px 0px 0px rgba(0, 0, 0, 0)
+      background-color: #F3F3F3
+      transition: 0.4s
+      &::placeholder
+        color: #888
+        transition: 0.4s
+
+    input[type="submit"]
+      display: block
+      padding: 10px 15px
+      border-radius: 0px 8px 8px 0px
+      color: #FFF
+      font-size: 18px
+      font-weight: 700
 </style>
