@@ -57,7 +57,8 @@ export type QueryRelayResult<
   update: <TResultMutation>(
     cache: DataProxy,
     result: Omit<FetchResult<TResultMutation>, 'context'>,
-    transform: TransformUpdate<TResult, TResultMutation>
+    transform: TransformUpdate<TResult, TResultMutation>,
+    isStrict: boolean
   ) => void
   addUpdate: <TResultMutation>(
     cache: DataProxy,
@@ -71,7 +72,8 @@ export type QueryRelayResult<
   ) => void
   deleteUpdate: <TResultMutation>(
     cache: DataProxy,
-    result: Omit<FetchResult<TResultMutation>, 'context'>
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    isStrict: boolean
   ) => void
 }
 export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number} = any> (
