@@ -110,6 +110,7 @@ class DocumentQueries(graphene.ObjectType):
         **kwarg
     ) -> Iterable[Message]:
         document = get_object_or_404(Document, pk=gid2int(document_id))
+        can_view_document(info.context.user, document)
         return Message.objects.filter(document=document)
 
     @staticmethod
