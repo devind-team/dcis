@@ -50,9 +50,6 @@ import { ErrorType } from '~/types/devind'
 import { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 import MutationResultAlert, { TableErrors } from '~/components/common/MutationResultAlert.vue'
 
-type MutationResultAlertType = InstanceType<typeof MutationResultAlert> | null
-type ValidationObserverType = InstanceType<typeof ValidationObserver> | null
-
 export default defineComponent({
   components: { MutationResultAlert },
   inheritAttrs: false,
@@ -78,9 +75,8 @@ export default defineComponent({
 
     const instance = getCurrentInstance()
     const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
-    const validationObserver = ref<ValidationObserverType>(null)
-    // @ts-ignore: TS2322
-    const mutationResultAlert = ref<MutationResultAlertType>(null)
+    const validationObserver = ref<InstanceType<typeof ValidationObserver>>(null)
+    const mutationResultAlert = ref<InstanceType<typeof ValidationObserver>>(null)
 
     const setApolloError = (error: ApolloError): void => {
       mutationResultAlert.value.setApolloError(error)

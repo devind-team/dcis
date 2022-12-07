@@ -30,9 +30,9 @@ thead
 </template>
 
 <script lang="ts">
-import { nextTick, PropType, Ref } from '#app'
-import { FixedInfoType, GridMode, ResizingType } from '~/types/grid'
-import { ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
+import { ref, nextTick, PropType, computed } from '#app'
+import { GridModeInject, ActiveSheetInject, GridMode, FixedInfoType, ResizingType } from '~/types/grid'
+import { ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import GridColumnControl from '~/components/dcis/grid/controls/GridColumnControl.vue'
 
 export default defineComponent({
@@ -66,24 +66,28 @@ export default defineComponent({
     selectAllCells: { type: Function as PropType<() => void>, required: true }
   },
   setup (props) {
-    const mode = inject<GridMode>('mode')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
+    const mode = inject(GridModeInject)
+    const activeSheet = inject(ActiveSheetInject)
+
+    const isFixedSelection = computed<boolean>(() =>
+      mode.value === GridMode.READ || mode.value === GridMode.REPORT || mode.value === GridMode.WRITE
+    )
 
     const firstHeaderClass = computed<Record<string, boolean>>(() => ({
       grid__header_all_selected: props.allCellsSelected,
-      'grid__header_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
-      'grid__header_fixed-border-bottom': mode === GridMode.WRITE && props.borderFixedRow === null
+      'grid__header_fixed-border-right': isFixedSelection.value && props.borderFixedColumn === null,
+      'grid__header_fixed-border-bottom': isFixedSelection.value && props.borderFixedRow === null
     }))
 
     const getHeaderClass = (column: ColumnDimensionType): Record<string, boolean> => {
       return {
         grid__header_selected: props.selectedColumnPositions.includes(column.index),
-        'grid__header_boundary-selected': mode === GridMode.CHANGE &&
+        'grid__header_boundary-selected': mode.value === GridMode.CHANGE &&
           props.boundarySelectedColumnsPositions.includes(column.index),
-        grid__header_hover: mode === GridMode.CHANGE && !props.resizingColumn,
-        grid__header_fixed: mode === GridMode.WRITE && props.getColumnFixedInfo(column).fixed,
-        'grid__header_fixed-border-right': mode === GridMode.WRITE && props.isColumnFixedBorder(column),
-        'grid__header_fixed-border-bottom': mode === GridMode.WRITE && props.borderFixedRow === null
+        grid__header_hover: mode.value === GridMode.CHANGE && !props.resizingColumn,
+        grid__header_fixed: isFixedSelection.value && props.getColumnFixedInfo(column).fixed,
+        'grid__header_fixed-border-right': isFixedSelection.value && props.isColumnFixedBorder(column),
+        'grid__header_fixed-border-bottom': isFixedSelection.value && props.borderFixedRow === null
       }
     }
     const getHeaderStyle = (column: ColumnDimensionType): Record<string, string> => {
@@ -97,9 +101,9 @@ export default defineComponent({
       return style
     }
 
-    const currentCol = ref<ColumnDimensionType>(null)
-    const posX = ref(0)
-    const posY = ref(0)
+    const currentCol = ref<ColumnDimensionType | null>(null)
+    const posX = ref<number>(0)
+    const posY = ref<number>(0)
     const showMenu = (e: MouseEvent, col: ColumnDimensionType) => {
       e.preventDefault()
       currentCol.value = null
@@ -117,9 +121,9 @@ export default defineComponent({
       firstHeaderClass,
       getHeaderClass,
       getHeaderStyle,
+      currentCol,
       posX,
       posY,
-      currentCol,
       showMenu
     }
   }

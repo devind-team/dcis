@@ -133,14 +133,24 @@ def change_row_dimension_height(user: User, row_dimension: RowDimension, height:
     return row_dimension
 
 
-@transaction.atomic
 def delete_row_dimension(user: User, row_dimension: RowDimension) -> int:
+    """Удаление строки."""
+    can_change_period_sheet(user, row_dimension.sheet.period)
+    return delete_row_dimension_base(row_dimension)
+
+
+def delete_child_row_dimension(user: User, row_dimension: RowDimension) -> int:
+    """Удаление дочерней строки."""
+    can_delete_child_row_dimension(user, row_dimension)
+    return delete_row_dimension_base(row_dimension)
+
+
+@transaction.atomic
+def delete_row_dimension_base(row_dimension: RowDimension) -> int:
     """Удаление строки.
 
     После удаления строки, все строки после удаленной строки должны уменьшить свой индекс на единицу.
     """
-    can_change_period_sheet(user, row_dimension.sheet.period)
-    can_delete_child_row_dimension(user, row_dimension)
     row_dimension_id = row_dimension.id
     row_dimension.delete()
     row_dimension.sheet.rowdimension_set.filter(
@@ -186,3 +196,16 @@ def move_merged_cells(sheet: Sheet, idx: int, offset: int, delete: bool = False)
             merge_cells.delete()
         else:
             merge_cells.save(update_fields=('min_row', 'max_row',))
+
+
+def get_indices_groups_to_expand(sheet: Sheet) -> list[list[int]]:
+    """Получение групп индексов строк, которые можно расширить."""
+    result: list[list[int]] = []
+    min_row = 1
+    merged_cells = MergedCell.objects.filter(sheet=sheet)
+    while min_row <= sheet.rowdimension_set.filter(parent__isnull=True).count():
+        min_row_merged_cells = [mc for mc in merged_cells if mc.min_row == min_row]
+        max_row = max(mc.max_row for mc in min_row_merged_cells) if len(min_row_merged_cells) else min_row
+        result.append(list(range(min_row, max_row + 1)))
+        min_row += max_row - min_row + 1
+    return result

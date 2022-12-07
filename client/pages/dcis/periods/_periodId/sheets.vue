@@ -2,7 +2,7 @@
 left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.sheets.name') }}
     v-spacer
-    settings-period-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
+    sheets-settings-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
       v-btn(v-on="on" v-bind="attrs" icon)
         v-icon mdi-cog
   grid-sheets(
@@ -11,6 +11,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :sheets="period.sheets"
     :active-sheet="activeSheet"
     :update-active-sheet="updateActiveSheet"
+    :loading="activeSheetLoading"
   )
     template(#tabs="{ sheets, updateSize }")
       template(v-for="sheet in sheets")
@@ -32,18 +33,18 @@ import { BreadCrumbsItem } from '~/types/devind'
 import {
   PeriodType,
   PeriodQuery,
-  DocumentsSheetQuery,
-  DocumentsSheetQueryVariables,
+  PeriodSheetQuery,
+  PeriodSheetQueryVariables,
   RenameSheetMutation
 } from '~/types/graphql'
-import documentsSheetQuery from '~/gql/dcis/queries/documents_sheet.graphql'
+import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import SettingsPeriodMenu from '~/components/dcis/periods/SettingsPeriodMenu.vue'
+import SheetsSettingsMenu from '~/components/dcis/periods/SheetsSettingsMenu.vue'
 
 export default defineComponent({
-  components: { SettingsPeriodMenu, LeftNavigatorContainer, SheetControl, GridSheets },
+  components: { SheetsSettingsMenu, LeftNavigatorContainer, SheetControl, GridSheets },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -63,18 +64,17 @@ export default defineComponent({
     const periodUpdate = inject<UpdateType<PeriodQuery>>('periodUpdate')
 
     const activeSheetIndex = ref<number>(0)
-
     const {
       data: activeSheet,
-      update: updateActiveSheet
+      update: updateActiveSheet,
+      loading: activeSheetLoading
     } = useCommonQuery<
-      DocumentsSheetQuery,
-      DocumentsSheetQueryVariables
+      PeriodSheetQuery,
+      PeriodSheetQueryVariables
     >({
-      document: documentsSheetQuery,
+      document: periodSheetQuery,
       variables: () => ({
-        sheetId: props.period.sheets[activeSheetIndex.value].id,
-        documentIds: []
+        sheetId: props.period.sheets[activeSheetIndex.value].id
       })
     })
 
@@ -108,6 +108,7 @@ export default defineComponent({
       activeSheetIndex,
       activeSheet,
       updateActiveSheet,
+      activeSheetLoading,
       renameSheetUpdate
     }
   }

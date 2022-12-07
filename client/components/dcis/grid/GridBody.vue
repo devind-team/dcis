@@ -14,7 +14,7 @@ tbody
       @mousedown="mousedownRowName(row, $event)"
       @mouseup="mouseupRowName"
     )
-      div(:style="{ height: `${getRowHeight(row)}px` }" @contextmenu="(e) => showMenu(e, row)") {{ row.name }}
+      div(:style="getRowNameCellContentStyle(row)" @contextmenu="(e) => showMenu(e, row)") {{ row.name }}
     td(
       v-for="cell in row.cells"
       :key="cell.id"
@@ -49,19 +49,23 @@ tbody
 </template>
 
 <script lang="ts">
-import { PropType, Ref, nextTick, inject } from '#app'
-import { fromGlobalId } from '~/services/graphql-relay'
+import { computed, defineComponent, inject, nextTick, PropType, ref } from '#app'
+import { CellType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import {
-  CellType,
-  ColumnDimensionType,
-  DivisionModelType,
-  DocumentType,
-  RowDimensionType,
-  SheetType
-} from '~/types/graphql'
-import { GridMode, ResizingType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
+  ActiveSheetInject,
+  FixedInfoType,
+  GridMode,
+  GridModeInject,
+  ResizingType,
+  RowFixedInfoType
+} from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
-import { useAuthStore } from '~/stores'
+import {
+  useCanAddRowBeforeOrAfter,
+  useCanAddRowInside,
+  useCanChangeRowSettings,
+  useCanDeleteRow
+} from '~/composables/grid-permissions'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -102,22 +106,20 @@ export default defineComponent({
     mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
-    const userStore = useAuthStore()
+    const mode = inject(GridModeInject)
+    const activeSheet = inject(ActiveSheetInject)
 
-    const mode = inject<GridMode>('mode')
-    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
-
-    const rootCount = computed<number>(() => activeSheet.value.rows
-      .reduce((a: number, c: RowDimensionType) => c.parent ? a : a + 1, 0))
+    const isFixedSelection = computed<boolean>(() =>
+      mode.value === GridMode.READ || mode.value === GridMode.REPORT || mode.value === GridMode.WRITE
+    )
 
     const getRowClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
-        grid__row_fixed: mode === GridMode.WRITE && props.getRowFixedInfo(row).fixed
+        grid__row_fixed: isFixedSelection.value && props.getRowFixedInfo(row).fixed
       }
     }
     const getRowStyle = (row: RowDimensionType): Record<string, string> => {
-      if (mode === GridMode.CHANGE) {
+      if (mode.value === GridMode.CHANGE) {
         return {}
       }
       const fixedInfo = props.getRowFixedInfo(row)
@@ -130,93 +132,50 @@ export default defineComponent({
       return {}
     }
 
-    const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
-      return {
-        'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-boundary-selected': mode === GridMode.CHANGE &&
-          props.boundarySelectedRowsPositions.includes(row.globalIndex),
-        'grid__cell_row-name-hover': mode === GridMode.CHANGE && !props.resizingRow,
-        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.borderFixedColumn === null,
-        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isRowFixedBorder(row)
-      }
-    }
-
-    const canChangeRowSettings = mode === GridMode.CHANGE
-    const canAddRowRegardingDivisions = (rowDimension: RowDimensionType): boolean => {
-      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
-      if (activeDocument.value.period.multiple) {
-        return userDivisionIds.includes(activeDocument.value.objectId)
-      }
-      return userDivisionIds.includes(rowDimension.id)
-    }
-    const canAddRowBeforeOrAfter = (rowDimension: RowDimensionType): boolean => {
-      if (mode === GridMode.CHANGE) {
-        return true
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      if (rowDimension.parent) {
-        const parent = activeSheet.value.rows.find((row: RowDimensionType) => rowDimension.parent.id === row.id)
-        return parent.dynamic && (
-          activeSheet.value.canChange ||
-          activeSheet.value.canAddChildRowDimension ||
-          activeDocument.value.user?.id === userStore.user.id ||
-          canAddRowRegardingDivisions(rowDimension)
-        )
-      }
-      return false
-    }
-    const canAddRowInside = (rowDimension: RowDimensionType): boolean => {
-      if (mode === GridMode.CHANGE) {
-        return false
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      return rowDimension.dynamic && (
-        activeSheet.value.canChange ||
-        activeSheet.value.canAddChildRowDimension ||
-        activeDocument.value.user?.id === userStore.user.id ||
-        canAddRowRegardingDivisions(rowDimension)
-      )
-    }
-    const canDeleteRow = (rowDimension: RowDimensionType): boolean => {
-      if (mode === GridMode.CHANGE) {
-        return rootCount.value !== 1 || Boolean(rowDimension.parent)
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      return rowDimension.parent !== null && rowDimension.children.length === 0 && (
-        activeSheet.value.canChange ||
-        activeSheet.value.canDeleteChildRowDimension ||
-        activeDocument.value.user?.id === userStore.user.id ||
-        rowDimension.userId === String(fromGlobalId(userStore.user.id).id)
-      )
-    }
+    const canChangeRowSettings = useCanChangeRowSettings()
+    const canAddRowBeforeOrAfter = useCanAddRowBeforeOrAfter()
+    const canAddRowInside = useCanAddRowInside()
+    const canDeleteRow = useCanDeleteRow()
     const viewControl = (rowDimension: RowDimensionType): boolean => {
-      return canChangeRowSettings ||
+      return canChangeRowSettings.value ||
         canAddRowBeforeOrAfter(rowDimension) ||
         canAddRowInside(rowDimension) ||
         canDeleteRow(rowDimension)
     }
 
+    const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
+      return {
+        'grid__cell_row-name-selected': props.selectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-boundary-selected': mode.value === GridMode.CHANGE &&
+          props.boundarySelectedRowsPositions.includes(row.globalIndex),
+        'grid__cell_row-name-hover': mode.value === GridMode.CHANGE && !props.resizingRow,
+        'grid__cell_fixed-border-right': isFixedSelection.value && props.borderFixedColumn === null,
+        'grid__cell_fixed-border-bottom': isFixedSelection.value && props.isRowFixedBorder(row)
+      }
+    }
+    const getRowNameCellContentStyle = (row: RowDimensionType): Record<string, string> => {
+      const style: Record<string, string> = { height: `${props.getRowHeight(row)}px` }
+      if (row.background) {
+        style.background = row.background
+      }
+      return style
+    }
+
     const getCellClass = (cell: CellType): Record<string, boolean> => {
       return {
-        grid__cell_selected: mode === GridMode.WRITE && Boolean(
+        grid__cell_selected: isFixedSelection.value && Boolean(
           props.selectedCells.find((selectedCell: CellType) => selectedCell.id === cell.id)
         ),
-        grid__cell_fixed: mode === GridMode.WRITE && props.getCellFixedInfo(cell).fixed,
-        grid__cell_readonly: !cell.editable,
-        'grid__cell_fixed-border-right': mode === GridMode.WRITE && props.isCellFixedBorderRight(cell),
-        'grid__cell_fixed-border-bottom': mode === GridMode.WRITE && props.isCellFixedBorderBottom(cell)
+        grid__cell_fixed: isFixedSelection.value && props.getCellFixedInfo(cell).fixed,
+        grid__cell_readonly: mode.value !== GridMode.REPORT && !cell.editable,
+        'grid__cell_fixed-border-right': isFixedSelection.value && props.isCellFixedBorderRight(cell),
+        'grid__cell_fixed-border-bottom': isFixedSelection.value && props.isCellFixedBorderBottom(cell)
       }
     }
     const getCellStyle = (cell: CellType): Record<string, string> => {
       const textDecoration: string[] = []
       const style: Record<string, string> = {}
-      if (mode === GridMode.WRITE) {
+      if (isFixedSelection.value) {
         const fixedInfo = props.getCellFixedInfo(cell)
         if (fixedInfo.fixed) {
           style.left = `${fixedInfo.position}px`
@@ -230,7 +189,6 @@ export default defineComponent({
       if (cell.error) {
         style.color = 'red'
       } else if (cell.color) { style.color = cell.color }
-      if (cell.background) { style['background-color'] = cell.background }
       if (textDecoration.length) {
         style['text-decoration'] = textDecoration.join(' ')
       }
@@ -247,6 +205,7 @@ export default defineComponent({
     }
 
     const getCellContentStyle = (cell: CellType): Record<string, string> => {
+      const row = activeSheet.value.rows.find((row: RowDimensionType) => row.id === cell.rowId)
       const valuesMap = {
         left: 'flex-start',
         top: 'flex-start',
@@ -263,6 +222,11 @@ export default defineComponent({
         style['text-align'] = cell.horizontalAlign
       }
       if (cell.verticalAlign) { style['align-items'] = valuesMap[cell.verticalAlign] }
+      if (cell.background && cell.background !== '#FFFFFF') {
+        style.background = cell.background
+      } else if (row.background) {
+        style.background = row.background
+      }
       return style
     }
 
@@ -275,9 +239,9 @@ export default defineComponent({
       return height
     }
 
-    const currentRow = ref<RowDimensionType>(null)
-    const posX = ref(0)
-    const posY = ref(0)
+    const currentRow = ref<RowDimensionType | null>(null)
+    const posX = ref<number>(0)
+    const posY = ref<number>(0)
     const showMenu = (e: MouseEvent, row: RowDimensionType) => {
       e.preventDefault()
       currentRow.value = null
@@ -296,12 +260,13 @@ export default defineComponent({
       activeSheet,
       getRowClass,
       getRowStyle,
-      getRowNameCellClass,
       canChangeRowSettings,
       canAddRowBeforeOrAfter,
       canDeleteRow,
       canAddRowInside,
       viewControl,
+      getRowNameCellClass,
+      getRowNameCellContentStyle,
       getCellClass,
       getCellStyle,
       getCellContentStyle

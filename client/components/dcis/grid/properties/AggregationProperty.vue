@@ -13,7 +13,7 @@
         )
           v-icon mdi-sigma
     v-card
-      v-card-title {{ t('dcis.grid.sheetToolbar.aggregationTitle') }}
+      v-card-title {{ $t('dcis.grid.sheetToolbar.aggregationTitle') }}
         v-spacer
         v-btn(@click="cancel" icon)
           v-icon mdi-close
@@ -23,7 +23,7 @@
             v-combobox(
               v-model="aggregationKind"
               :items="aggregationItems"
-              :label="t('dcis.grid.sheetToolbar.aggregationChoice')"
+              :label="$t('dcis.grid.sheetToolbar.aggregationChoice')"
             )
           v-col.text-right(v-if="aggregationKind && aggregationKind.value")
             v-btn(@click="startChoice" color="primary") Добавить ячейки
@@ -31,7 +31,7 @@
           v-list-item(v-for="fromCell in fromCells" :key="fromCell.id")
             v-list-item-content
               v-list-item-title {{ cellPosition(fromCell) }}
-              v-list-item-subtitle {{ t('dcis.grid.sheetToolbar.aggregationDefault', { value: fromCell.default }) }}
+              v-list-item-subtitle {{ $t('dcis.grid.sheetToolbar.aggregationDefault', { value: fromCell.default }) }}
             v-list-item-action
               v-btn(@click="deleteMutate({ cellId: cell.id, targetCellId: fromCell.id })" icon)
                 v-icon(color="error") mdi-close
@@ -94,16 +94,24 @@ export default defineComponent({
       options: () => ({ enabled: Boolean(props.cell) && active.value })
     })
 
-    const cellPosition = (fc: ValueCellsQuery['valueCells'][number]) => (`${fc.sheet.name}!${positionToLetter(fc.column.index)}${fc.row.index}`)
+    const cellPosition = (fc: ValueCellsQuery['valueCells'][number]) => (
+      `${fc.sheet.name}!${positionToLetter(fc.column.index)}${fc.row.index}`
+    )
 
-    const { mutate: addMutate } = useMutation<AddValuesCellsMutation, AddValuesCellsMutationVariables>(addValuesCellsMutation, {
+    const { mutate: addMutate } = useMutation<
+      AddValuesCellsMutation,
+      AddValuesCellsMutationVariables
+    >(addValuesCellsMutation, {
       update: (cache, result) => {
         if (!result.data.addValuesCells.errors.length) {
           addUpdate(cache, result, 'cells')
         }
       }
     })
-    const { mutate: deleteMutate } = useMutation<DeleteValueCellMutation, DeleteValueCellMutationVariables>(deleteValuesCellMutation, {
+    const { mutate: deleteMutate } = useMutation<
+      DeleteValueCellMutation,
+      DeleteValueCellMutationVariables
+    >(deleteValuesCellMutation, {
       update: deleteUpdate
     })
 
@@ -137,8 +145,7 @@ export default defineComponent({
       cellPosition,
       deleteMutate,
       aggregationKind,
-      aggregationItems,
-      t
+      aggregationItems
     }
   }
 })

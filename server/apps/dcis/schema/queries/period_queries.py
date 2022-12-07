@@ -18,14 +18,16 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Attribute, Limitation, Period, Privilege, Sheet
-from apps.dcis.permissions import can_change_period_sheet, can_view_period
+from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
+from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_report
 from apps.dcis.schema.types import (
     AttributeType,
     DivisionModelTypeConnection,
     LimitationType,
     PeriodType,
     PrivilegeType,
+    ReportDocumentInputType,
+    ReportRowGroupInputType,
     SheetType,
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
@@ -35,7 +37,13 @@ from apps.dcis.services.period_services import (
     get_user_period_privileges,
     get_user_periods,
 )
-from apps.dcis.services.sheet_unload_services import DocumentsSheetUnloader
+from apps.dcis.services.row_dimension_services import get_indices_groups_to_expand
+from apps.dcis.services.sheet_unload_services import (
+    PeriodSheetUnloader,
+    ReportAggregation,
+    ReportDocument,
+    ReportSheetUnloader,
+)
 
 
 class PeriodQueries(graphene.ObjectType):
@@ -44,20 +52,20 @@ class PeriodQueries(graphene.ObjectType):
     privileges = DjangoListField(
         PrivilegeType,
         required=True,
-        description='Привилегии'
+        description='Привилегии',
     )
 
     period = graphene.Field(
         PeriodType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Период'
+        description='Период',
     )
     periods = DjangoListField(
         PeriodType,
         project_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Периоды'
+        description='Периоды',
     )
 
     period_possible_divisions = ConnectionField(
@@ -71,36 +79,61 @@ class PeriodQueries(graphene.ObjectType):
         UserType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Пользователи, связанные периодом'
+        description='Пользователи, связанные периодом',
     )
     user_group_privileges = DjangoListField(
         PrivilegeType,
         user_id=graphene.ID(default_value=None, description='Идентификатор пользователя'),
         period_group_id=graphene.ID(required=True, description='Идентификатор группы периода'),
         required=True,
-        description='Привилегии пользователя в группе периода'
+        description='Привилегии пользователя в группе периода',
     )
     user_period_privileges = DjangoListField(
         PrivilegeType,
         user_id=graphene.ID(default_value=None, description='Идентификатор пользователя'),
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Отдельные привилегии пользователя для периода'
+        description='Отдельные привилегии пользователя для периода',
     )
 
-    documents_sheet = graphene.Field(
+    period_sheet = graphene.Field(
         SheetType,
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
-        document_ids=graphene.List(graphene.NonNull(graphene.ID), description='Идентификаторы документов'),
         required=True,
-        description='Выгрузка листа с несколькими документами'
+        description='Выгрузка листа для периода',
+    )
+    indices_groups_to_expand = graphene.List(
+        graphene.NonNull(graphene.List(graphene.NonNull(graphene.Int))),
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        description='Группы индексов строк, которые можно расширить'
+    )
+    report_sheet = graphene.Field(
+        SheetType,
+        sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
+        report_documents=graphene.List(
+            graphene.NonNull(ReportDocumentInputType),
+            required=True,
+            description='Документы для выгрузки сводного отчета',
+        ),
+        report_row_groups=graphene.List(
+            graphene.NonNull(ReportRowGroupInputType),
+            required=True,
+            description='Группы строк для выгрузки сводного отчета',
+        ),
+        main_document_id=graphene.ID(description='Основной документ'),
+        aggregation=graphene.Argument(
+            graphene.Enum.from_enum(ReportAggregation),
+            description='Тип агрегации для сводного отчета',
+        ),
+        required=True,
+        description='Выгрузка листа для сводного отчета',
     )
 
     limitations = graphene.List(
         LimitationType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
-        description='Ограничения, накладываемые на листы'
+        description='Ограничения, накладываемые на листы',
     )
 
     attributes = graphene.List(
@@ -108,7 +141,7 @@ class PeriodQueries(graphene.ObjectType):
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         parent=graphene.Boolean(default_value=True, description='Вытягивать только родителей'),
         required=True,
-        description='Получение атрибутов, привязанных к периоду'
+        description='Получение атрибутов, привязанных к периоду',
     )
 
     organizations_has_not_document = graphene.List(
@@ -171,17 +204,52 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_documents_sheet(
+    def resolve_period_sheet(root: Any, info: ResolveInfo, sheet_id: str) -> list[dict] | dict:
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+        can_change_period_sheet(info.context.user, sheet.period)
+        return PeriodSheetUnloader(
+            sheet=sheet,
+            fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
+        ).unload()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_indices_groups_to_expand(root: Any, info: ResolveInfo, sheet_id: str) -> list[list[int]]:
+        sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
+        can_view_period_report(info.context.user, sheet.period)
+        return get_indices_groups_to_expand(sheet)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_report_sheet(
         root: Any,
         info: ResolveInfo,
         sheet_id: str,
-        document_ids: list[str]
+        report_documents: list[ReportDocumentInputType],
+        report_row_groups: list[ReportRowGroupInputType],
+        **kwargs
     ) -> list[dict] | dict:
-        sheet = get_object_or_404(Sheet, pk=sheet_id)
-        can_change_period_sheet(info.context.user, sheet.period)
-        return DocumentsSheetUnloader(
+        sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
+        can_view_period_report(info.context.user, sheet.period)
+        if 'main_document_id' in kwargs:
+            main_document = get_object_or_404(Document, pk=gid2int(kwargs['main_document_id']))
+        else:
+            main_document = None
+        aggregation = ReportAggregation(kwargs['aggregation']) if 'aggregation' in kwargs else None
+        document_ids = [gid2int(report_document.document_id) for report_document in report_documents]
+        documents = Document.objects.filter(id__in=document_ids)
+        expanded_row_groups = {}
+        for group in report_row_groups:
+            expanded_row_groups[group.group_index] = group.is_expanded
+        return ReportSheetUnloader(
             sheet=sheet,
-            document_ids=[gid2int(document_id) for document_id in document_ids],
+            report_documents=[next(
+                ReportDocument(document=d, is_visible=r.is_visible, color=r.color)
+                for r in report_documents if gid2int(r.document_id) == d.id
+            ) for d in documents],
+            main_document=main_document,
+            aggregation=aggregation,
+            expanded_row_groups=expanded_row_groups,
             fields=[snakecase(k) for k in get_fields(info).keys() if k != '__typename'],
         ).unload()
 

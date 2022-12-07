@@ -88,6 +88,13 @@ export default defineComponent({
             icon: 'table'
           })
         }
+        if (period.value.canViewReport) {
+          result.push({
+            title: t('dcis.periods.links.report') as string,
+            to: 'dcis-periods-periodId-report',
+            icon: 'table-multiple'
+          })
+        }
         if (period.value.canChangeSettings || period.value.canDelete) {
           result.push({
             title: t('dcis.periods.links.settings') as string,

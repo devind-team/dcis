@@ -5,11 +5,12 @@ bread-crumbs(:items="bc" fluid)
     v-card-text
       grid-sheets(
         v-model="activeSheetIndex"
-        :mode="GridMode.WRITE"
+        :mode="mode"
         :sheets="activeDocument.sheets"
         :active-sheet="activeSheet"
         :update-active-sheet="updateActiveSheet"
         :active-document="activeDocument"
+        :loading="activeDocumentLoading"
         show-attributes
       )
         template(#settings)
@@ -65,6 +66,10 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     const route = useRoute()
+
+    const mode = computed<GridMode>(
+      () => activeDocument.value.lastStatus.status.edit ? GridMode.WRITE : GridMode.READ
+    )
 
     const documentVersion = computed<string>(() =>
       t('dcis.grid.version', { version: activeDocument.value.version }) as string)
@@ -125,13 +130,20 @@ export default defineComponent({
       })
     })
 
-    const { data: attributes, loading: attributesLoading } = useCommonQuery<AttributesQuery, AttributesQueryVariables>({
+    const { data: attributes, loading: attributesLoading } = useCommonQuery<
+      AttributesQuery,
+      AttributesQueryVariables
+    >({
       document: attributesQuery,
       variables: () => ({ periodId: activeDocument.value?.period.id }),
       options: () => ({ enabled: !activeDocumentLoading.value })
     })
 
-    const { data: attributesValues, loading: attributesValuesLoading, changeUpdate: changeUpdateAttributesValues } = useCommonQuery<
+    const {
+      data: attributesValues,
+      loading: attributesValuesLoading,
+      changeUpdate: changeUpdateAttributesValues
+    } = useCommonQuery<
       AttributesValuesQuery,
       AttributesValuesQueryVariables
     >({
@@ -148,6 +160,7 @@ export default defineComponent({
 
     return {
       GridMode,
+      mode,
       bc,
       activeSheetIndex,
       activeDocument,

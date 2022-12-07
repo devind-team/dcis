@@ -6,6 +6,7 @@ from apps.core.models import User
 from apps.dcis.models import Period, Project
 from apps.dcis.services.privilege_services import has_privilege
 from .project_permissions import can_view_project
+from ..services.curator_services import is_period_curator
 
 
 def can_view_period(user: User, period: Period):
@@ -134,6 +135,28 @@ def can_change_period_attributes(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем атрибуты."""
     can_view_period(user, period)
     can_change_period_attributes_base(user, period)
+
+
+def can_view_period_report_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать сводный отчет периода.
+
+    Функция не проверяет, может ли пользователь просматривать период.
+    """
+    try:
+        can_change_period_base(user, period)
+        return
+    except PermissionDenied:
+        if is_period_curator(user, period):
+            return
+        if has_privilege(user.id, period.id, 'view_period_report'):
+            return
+    raise PermissionDenied('Недостаточно прав для просмотра сводного отчета периода.')
+
+
+def can_view_period_report(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать сводный отчет периода."""
+    can_view_period(user, period)
+    can_view_period_report_base(user, period)
 
 
 def can_change_period_settings_base(user: User, period: Period):

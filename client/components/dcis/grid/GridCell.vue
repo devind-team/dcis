@@ -10,26 +10,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, Ref } from '#app'
-import { useApolloClient } from '@vue/apollo-composable'
+import { computed, defineComponent, inject, PropType } from '#app'
 import numfmt from 'numfmt'
-import {
-  UpdateType,
-  useChangeCellDefaultMutation,
-  useChangeFileValueMutation,
-  useChangeValueMutation,
-  useCommonQuery,
-  useUnloadFileValueArchiveMutation
-} from '~/composables'
-import { useAuthStore } from '~/stores'
-import { GridMode, UpdateSheetType } from '~/types/grid'
+import { useCommonQuery } from '~/composables'
+import { useCanChangeValue } from '~/composables/grid-permissions'
+import { useChangeValue, useChangeFileValue, useUnloadFileValueArchive } from '~/composables/grid-actions'
+import { GridModeInject, ActiveSheetInject, ActiveDocumentInject, GridMode } from '~/types/grid'
 import {
   CellType,
-  DivisionModelType,
-  DocumentSheetQuery,
-  DocumentsSheetQuery,
-  DocumentType,
-  SheetType,
   ValueFilesQuery,
   ValueFilesQueryVariables
 } from '~/types/graphql'
@@ -58,14 +46,11 @@ export default defineComponent({
     active: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
-    const { client } = useApolloClient()
+    const mode = inject(GridModeInject)
+    const activeSheet = inject(ActiveSheetInject)
+    const activeDocument = inject(ActiveDocumentInject)
 
-    const userStore = useAuthStore()
-
-    const mode = inject<GridMode>('mode')
-    const activeDocument = inject<Ref<DocumentType | null>>('activeDocument')
-    const activeSheet = inject<Ref<SheetType>>('activeSheet')
-    const updateSheet = inject<Ref<UpdateSheetType>>('updateActiveSheet')
+    const cell = computed(() => props.cell)
 
     const { data: files, update: updateFiles } = useCommonQuery<
       ValueFilesQuery,
@@ -80,43 +65,19 @@ export default defineComponent({
         rowId: props.cell.rowId
       },
       options: computed(() => ({
-        enabled: props.active && props.cell.editable && props.cell.kind === 'fl' && mode === GridMode.WRITE
+        enabled: props.active && props.cell.editable && props.cell.kind === 'fl' && mode.value === GridMode.WRITE
       }))
     })
 
-    const changeDefault = mode === GridMode.CHANGE
-      ? useChangeCellDefaultMutation(updateSheet as Ref<UpdateType<DocumentsSheetQuery>>)
-      : null
-    const changeValue = mode === GridMode.WRITE
-      ? useChangeValueMutation(
-        computed(() => activeDocument.value.id),
-        computed(() => activeSheet.value.id),
-        computed(() => props.cell),
-        client
-      )
-      : null
+    const canChangeValue = useCanChangeValue(cell)
 
-    const changeFileValue = mode === GridMode.WRITE
-      ? useChangeFileValueMutation(
-        computed(() => activeDocument.value.id),
-        computed(() => activeSheet.value.id),
-        computed(() => props.cell),
-        updateSheet as Ref<UpdateType<DocumentSheetQuery>>,
-        updateFiles
-      )
-      : null
-
-    const unloadFileValueArchive = mode === GridMode.WRITE
-      ? useUnloadFileValueArchiveMutation(
-        computed(() => activeDocument.value ? activeDocument.value.id : ''),
-        computed(() => activeSheet.value.id),
-        computed(() => props.cell)
-      )
-      : null
+    const changeValue = useChangeValue()
+    const changeFileValue = useChangeFileValue(cell, updateFiles)
+    const unloadFileValueArchive = useUnloadFileValueArchive(cell)
 
     const cellKind = computed<string>(() => {
       if (props.cell.kind in cellKinds) {
-        if (props.cell.kind === 'fl' && mode === GridMode.CHANGE) {
+        if (props.cell.kind === 'fl' && mode.value === GridMode.CHANGE) {
           return 'String'
         }
         return cellKinds[props.cell.kind]
@@ -159,7 +120,7 @@ export default defineComponent({
       if (props.cell.value === value || (props.cell.value === null && value === '')) {
         return
       }
-      mode === GridMode.CHANGE ? await changeDefault(props.cell, value) : await changeValue(value)
+      await changeValue(props.cell, value)
     }
 
     const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {
@@ -175,27 +136,6 @@ export default defineComponent({
     const cancel = () => {
       emit('clear-active')
     }
-
-    const canChangeValue = computed<boolean>(() => {
-      if (mode === GridMode.CHANGE) {
-        return true
-      }
-      if (!activeDocument.value.lastStatus.status.edit || !props.cell.editable || props.cell.kind === 'f') {
-        return false
-      }
-      if (
-        activeSheet.value.canChange ||
-        activeSheet.value.canChangeValue ||
-        activeDocument.value.user?.id === userStore.user.id
-      ) {
-        return true
-      }
-      const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
-      if (activeDocument.value.period.multiple) {
-        return userDivisionIds.includes(activeDocument.value.objectId)
-      }
-      return userDivisionIds.includes(props.cell.rowId)
-    })
 
     const componentName = computed<string>(() => `GridCell${cellKind.value}`)
     const hasFiles = computed<boolean>(() =>

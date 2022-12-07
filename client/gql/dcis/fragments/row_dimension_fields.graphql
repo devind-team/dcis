@@ -30,5 +30,6 @@ fragment RowDimensionFields on RowDimensionType {
   cells {
     ...CellFields
   }
+  background
   __typename
 }

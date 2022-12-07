@@ -812,9 +812,9 @@ type BaseSheetType {
   period: PeriodType
   """Позиция"""
   position: Int!
-  """Показывать ли подведомственным"""
+  """Показывать ли подведомственным организациям"""
   showChild: Boolean!
-  """Показвать ли головам"""
+  """Показывать ли головным организациям"""
   showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
@@ -3709,6 +3709,8 @@ type PeriodType {
   canChangeUsers: Boolean!
   """Может ли пользователь удалять период"""
   canDelete: Boolean!
+  """Может ли пользователь просматривать сводный отчет периода"""
+  canViewReport: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
@@ -4003,17 +4005,15 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): DocumentTypeConnection!
-  """Выгрузка листа с несколькими документами"""
-  documentsSheet(
-    """Идентификаторы документов"""
-    documentIds: [ID!]
-    """Идентификатор листа"""
-    sheetId: ID!
-  ): SheetType!
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
   hasSettings: Boolean!
+  """Группы индексов строк, которые можно расширить"""
+  indicesGroupsToExpand(
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): [[Int!]!]
   """Возможные начальные статусы для нового документа"""
   initialStatuses(
     """Идентификатор периода"""
@@ -4084,6 +4084,11 @@ type Query {
     """Запрос поиска"""
     search: String
   ): DivisionModelTypeConnection
+  """Выгрузка листа для периода"""
+  periodSheet(
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Пользователи, связанные периодом"""
   periodUsers(
     """Идентификатор периода"""
@@ -4129,6 +4134,19 @@ type Query {
     regionId: Int!
   ): RegionType
   regions: [RegionType!]
+  """Выгрузка листа для сводного отчета"""
+  reportSheet(
+    """Тип агрегации для сводного отчета"""
+    aggregation: ReportAggregation
+    """Основной документ"""
+    mainDocumentId: ID
+    """Документы для выгрузки сводного отчета"""
+    reportDocuments: [ReportDocumentInputType!]!
+    """Группы строк для выгрузки сводного отчета"""
+    reportRowGroups: [ReportRowGroupInputType!]!
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
   """Сегменты страницы"""
@@ -4265,6 +4283,33 @@ type RenameSheetMutationPayload {
   success: Boolean!
 }
 
+"""Тип агрегации для сводного отчета."""
+enum ReportAggregation {
+  AVG
+  CONCAT
+  MAX
+  MIN
+  SUM
+}
+
+"""Документ для выгрузки сводного отчета."""
+input ReportDocumentInputType {
+  """Цвет выделения дочерних строк"""
+  color: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Показывать ли дочерние строки"""
+  isVisible: Boolean!
+}
+
+"""Группа строк для выгрузки сводного отчета."""
+input ReportRowGroupInputType {
+  """Индекс группы строк"""
+  groupIndex: Int!
+  """Является ли строка расширенной"""
+  isExpanded: Boolean!
+}
+
 input RequestCodeMutationInput {
   clientMutationId: String
   """Email адрес"""
@@ -4328,6 +4373,8 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
+  """Цвет фона"""
+  background: String
   """Ячейки"""
   cells: [CellType!]!
   """Дочерние строки"""
@@ -4615,9 +4662,9 @@ type SheetType {
   position: Int!
   """Строки"""
   rows: [RowDimensionType!]
-  """Показывать ли подведомственным"""
+  """Показывать ли подведомственным организациям"""
   showChild: Boolean!
-  """Показвать ли головам"""
+  """Показывать ли головным организациям"""
   showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
