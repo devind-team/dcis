@@ -1,9 +1,9 @@
 <template lang="pug">
-bread-crumbs(v-if="period.isCurator" :items="breadCrumbs")
+bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
   v-card
     v-tabs(grow)
       v-tab {{ $t('dcis.documents.tabs.tabNameDocuments.name') }}
-      v-tab(v-if="period.isCurator" ) {{ $t('dcis.documents.tabs.tabNameNotSupplied.name') }}
+      v-tab {{ $t('dcis.documents.tabs.tabNameNotSupplied.name') }}
       v-tab-item
         v-card(flat)
           v-card-text
