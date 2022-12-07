@@ -207,4 +207,5 @@ class PeriodQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_organizations_has_not_document(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
-        return get_organizations_has_not_document(user=info.context.user, period_id=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_organizations_has_not_document(info.context.user, period)
