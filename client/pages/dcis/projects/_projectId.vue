@@ -2,7 +2,7 @@
 div
   left-navigator-driver(v-model="drawer" :items="links")
   v-progress-circular(v-if="loading" color="primary" indeterminate)
-  nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :project="project")
+  nuxt-child(v-else :breadCrumbs="bc" :project="project" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">

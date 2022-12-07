@@ -3716,6 +3716,8 @@ type PeriodType {
   """Дата окончания"""
   expiration: Date
   id: ID!
+  """Является ли пользователь администратором для периода"""
+  isAdmin: Boolean!
   """Является ли пользователь куратором для периода"""
   isCurator: Boolean!
   """Методическая поддержка"""
@@ -4053,6 +4055,11 @@ type Query {
     last: Int
     offset: Int
   ): OrganizationTypeConnection
+  """Получение организаций, у которых не поданы документы в периоде"""
+  organizationsHasNotDocument(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [OrganizationType]!
   """Страница"""
   page(pageId: ID!): PageType!
   """Получение типа страницы"""

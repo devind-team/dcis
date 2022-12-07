@@ -3,7 +3,8 @@ export default {
   projects: {
     name: '@:dcis.home',
     divisions: 'Мои организации',
-    filters: {
+    filter: {
+      title: 'Фильтр проектов',
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
       hidden: 'Скрытые проекты',
@@ -51,6 +52,7 @@ export default {
     },
     links: {
       documents: 'Документы',
+      monitoring: 'Мониторинг',
       departments: 'Департаменты',
       organizations: 'Организации',
       groups: 'Группы',
@@ -293,6 +295,14 @@ export default {
       organizationHead: 'Начальник организации',
       user: 'Пользователь, добавивший строку',
       unload: 'Выгрузить'
+    },
+    tabs: {
+      tabNameDocuments: {
+        name: 'Документы'
+      },
+      tabNameNotSupplied: {
+        name: 'Не подавшие'
+      }
     }
   },
   grid: {
