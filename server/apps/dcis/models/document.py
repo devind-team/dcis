@@ -157,11 +157,14 @@ class Attribute(models.Model):
     mutable = models.BooleanField(default=True, help_text='Можно ли изменять')
     position = models.PositiveIntegerField(default=0, help_text='Позиция в выводе')
 
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительские данные для сбора')
 
     class Meta:
-        ordering = ('position',)
+        ordering = ('created_at',)
         unique_together = (('key', 'period',),)
 
 

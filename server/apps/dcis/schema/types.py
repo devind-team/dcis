@@ -51,6 +51,7 @@ from apps.dcis.permissions import (
     can_delete_project_base,
     can_view_period_report_base,
 )
+from apps.dcis.permissions.period_permissions import can_change_period_base
 from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.services.document_services import get_document_sheets
@@ -116,6 +117,10 @@ class PeriodType(DjangoObjectType):
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
+    is_admin = graphene.Boolean(
+        required=True,
+        description='Является ли пользователь администратором для периода',
+    )
     is_curator = graphene.Boolean(
         required=True,
         description='Является ли пользователь куратором для периода',
@@ -194,6 +199,10 @@ class PeriodType(DjangoObjectType):
     @resolver_hints(model_field='sheet_set')
     def resolve_sheets(period: Period, info: ResolveInfo) -> QuerySet[Sheet]:
         return period.sheet_set.all()
+
+    @staticmethod
+    def resolve_is_admin(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_base, info.context.user, period)
 
     @staticmethod
     def resolve_is_curator(period: Period, info: ResolveInfo) -> bool:

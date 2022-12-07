@@ -1,6 +1,8 @@
 from typing import Any
 
 import graphene
+from devind_dictionaries.models import Organization
+from devind_dictionaries.schema import OrganizationType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -30,7 +32,7 @@ from apps.dcis.schema.types import (
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
-    get_period_attributes,
+    get_organizations_has_not_document, get_period_attributes,
     get_period_users,
     get_user_period_privileges,
     get_user_periods,
@@ -140,6 +142,13 @@ class PeriodQueries(graphene.ObjectType):
         parent=graphene.Boolean(default_value=True, description='Вытягивать только родителей'),
         required=True,
         description='Получение атрибутов, привязанных к периоду',
+    )
+
+    organizations_has_not_document = graphene.List(
+        OrganizationType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Получение организаций, у которых не поданы документы в периоде'
     )
 
     @staticmethod
@@ -262,3 +271,9 @@ class PeriodQueries(graphene.ObjectType):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         return get_period_attributes(period, parent=parent)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_organizations_has_not_document(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_organizations_has_not_document(info.context.user, period)

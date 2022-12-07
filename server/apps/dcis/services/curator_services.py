@@ -12,6 +12,7 @@ from apps.dcis.permissions.curator_permissions import (
     can_delete_curator_group,
 )
 
+
 def get_curator_groups(user: User) -> QuerySet[CuratorGroup]:
     """Возвращает кураторские группы, в который состоит пользователь `user`."""
     return CuratorGroup.objects.filter(users=user)
@@ -45,10 +46,10 @@ def get_curator_group_new_users(curator_group_id: str | int) -> QuerySet[User]:
     """Получение новых пользователей для кураторской группы."""
     return User.objects.exclude(curatorgroup__id=curator_group_id)
 
+
 def get_curator_group_new_organizations() -> QuerySet[Organization]:
     """Получение новых организаций для кураторской группы."""
     return Organization.objects.exclude(curatorgroup__in=CuratorGroup.objects.all().values_list('id', flat=True))
-
 
 
 def add_curator_group(user: User, name: str, group_id: str | int) -> CuratorGroup:

@@ -20,14 +20,13 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     v-col.caption.text-right(cols="12" md="6") {{ $t('shownOf', { count, totalCount }) }}
   v-data-table(
     :headers="headers"
-    :items="users"
+    :items="extendedUsers"
     :loading="loading"
     hide-default-footer
     disable-pagination
   )
     template(#item.avatar="{ item }")
       avatar-dialog(:item="item")
-    template(#item.name="{ item }") {{ getUserFullName(item) }}
     template(#item.groups="{ item }")
       change-group-dialog(
         :user="item"
@@ -104,9 +103,9 @@ export default defineComponent({
       { text: t('panel.ac.users.name') as string, to: localePath({ name: 'panel-ac-users' }), exact: true }
     ]))
 
-    const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
+    const headers = computed<DataTableHeader[]>(() => ([
       { text: t('panel.ac.users.tableHeaders.avatar') as string, value: 'avatar', align: 'center', sortable: false },
-      { text: t('panel.ac.users.tableHeaders.name') as string, value: 'name' },
+      { text: t('panel.ac.users.tableHeaders.name') as string, value: 'fullName' },
       { text: t('panel.ac.users.tableHeaders.username') as string, value: 'username' },
       { text: t('panel.ac.users.tableHeaders.email') as string, value: 'email' },
       { text: t('panel.ac.users.tableHeaders.groups') as string, value: 'groups' },
@@ -131,6 +130,17 @@ export default defineComponent({
     }, {
       pagination: useCursorPagination(),
       fetchScroll: typeof document === 'undefined' ? null : document
+    })
+
+    const extendedUsers = computed(() => {
+      if (!users.value) {
+        return []
+      }
+      return users.value.map((user: UserType) => ({
+        ...user,
+        fullName: getUserFullName(user)
+      })
+      )
     })
 
     /**
@@ -185,9 +195,9 @@ export default defineComponent({
       loading,
       count,
       totalCount,
-      users,
       updateGroups,
-      updateUsers
+      updateUsers,
+      extendedUsers
     }
   }
 })
