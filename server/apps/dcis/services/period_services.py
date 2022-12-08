@@ -128,7 +128,7 @@ def get_organizations_has_not_document(user: User, period: Period) -> QuerySet[O
         return organizations
     if is_period_curator(user, period):
         return organizations.filter(curatorgroup__id__in=user.curatorgroup_set.values_list('id', flat=True))
-    raise PermissionDenied('Недостаточно прав для просмотра периода.')
+    raise PermissionDenied('Недостаточно прав для просмотра организаций, не подавших документ.')
 
 
 @transaction.atomic
