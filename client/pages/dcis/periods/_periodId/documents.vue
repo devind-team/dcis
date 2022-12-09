@@ -181,7 +181,10 @@ export default defineComponent({
       document: organizationsHasNotDocumentQuery,
       variables: () => ({
         periodId: props.period.id
-      })
+      }),
+      options: computed(() => ({
+        enabled: props.period.isAdmin || props.period.isCurator
+      }))
     })
 
     return {
