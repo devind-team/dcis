@@ -7,4 +7,5 @@ fragment LimitationFields on LimitationType {
     name
     __typename
   }
+  __typename
 }

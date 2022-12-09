@@ -13,9 +13,27 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Cell, Message, Document, DocumentStatus, Period, Sheet, Status, Value
+from apps.dcis.models import (
+    AttributeValue,
+    Cell,
+    Document,
+    DocumentMessage,
+    DocumentStatus,
+    Period,
+    Sheet,
+    Status,
+    Value,
+)
 from apps.dcis.permissions import can_view_document
-from apps.dcis.schema.types import ChangeCellType, DocumentMessageType, DocumentStatusType, DocumentType, SheetType, StatusType
+from apps.dcis.schema.types import (
+    AttributeValueType,
+    ChangeCellType,
+    DocumentMessageType,
+    DocumentStatusType,
+    DocumentType,
+    SheetType,
+    StatusType,
+)
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
@@ -37,7 +55,7 @@ class DocumentQueries(graphene.ObjectType):
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
     )
 
-    document_message = DjangoFilterConnectionField(
+    document_messages = DjangoFilterConnectionField(
         DocumentMessageType,
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
         description='Комментарии документов'
@@ -58,6 +76,13 @@ class DocumentQueries(graphene.ObjectType):
         DocumentStatusType,
         document_id=graphene.ID(description='Идентификатор документа'),
         description='Статусы документов',
+    )
+
+    attributes_values = graphene.List(
+        AttributeValueType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        required=True,
+        description='Атрибуты со значениями документа'
     )
 
     document_sheet = graphene.Field(
@@ -97,21 +122,21 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_statuses(root: Any, info: ResolveInfo) -> Iterable[Status]:
-        return Status.objects.all()
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def resolve_document_message(
+    def resolve_document_messages(
         root: Any,
         info: ResolveInfo,
         document_id: str,
         *args,
         **kwarg
-    ) -> Iterable[Message]:
+    ) -> Iterable[DocumentMessage]:
         document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
-        return Message.objects.filter(document=document)
+        return DocumentMessage.objects.filter(document=document)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_statuses(root: Any, info: ResolveInfo) -> Iterable[Status]:
+        return Status.objects.all()
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
@@ -131,6 +156,17 @@ class DocumentQueries(graphene.ObjectType):
         document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         return document.documentstatus_set.all()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_attributes_values(
+        root: Any,
+        info: ResolveInfo,
+        document_id: str
+    ) -> Iterable[AttributeValue]:
+        document: Document = Document.objects.get(pk=gid2int(document_id))
+        can_view_document(info.context.user, document)
+        return AttributeValue.objects.filter(document=document).all()
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

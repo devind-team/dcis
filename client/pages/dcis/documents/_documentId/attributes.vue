@@ -1,27 +1,26 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-  template(v-if="!(attributesLoading || attributesValuesLoading)")
+left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+  template(v-if="!loading")
     template(v-if="attributes.length")
       component(
         v-for="attribute in attributes"
         :key="attribute.id"
         :is="AttributeValueComponents[attribute.kind]"
         :attribute="attribute"
-        :attribute-value="attribute.id in values ? values[attribute.id] : null"
-        :readonly="readonly"
-        :change-update-attributes-values="changeUpdateAttributesValues"
-        @change="changeValue(attribute, $event)"
+        :attribute-value="attribute.id in attributesValues ? attributesValues[attribute.id] : null"
+        :readonly="!document.canChangeAttributeValue"
+        @change="changeAttributeValue(attribute, $event)"
       )
-    v-alert(v-else type="info") Атрибутов нет
+    v-alert(v-else type="info") {{ $t('dcis.documents.attributes.noAttributes') }}
   v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, PropType } from '#app'
+import { computed, defineComponent, PropType } from '#app'
 import { useApolloClient, useMutation } from '@vue/apollo-composable'
+import { changeSheetValues } from '~/composables/grid-mutations'
 import {
-  DocumentQuery,
-  DocumentQueryVariables,
+  DocumentType,
   AttributesQuery,
   AttributesQueryVariables,
   AttributesValuesQuery,
@@ -32,11 +31,7 @@ import {
   ChangeAttributeValueMutation,
   ChangeAttributeValueMutationVariables
 } from '~/types/graphql'
-import documentQuery from '~/gql/dcis/queries/document.graphql'
-import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
-import attributesValuesQuery from '~/gql/dcis/queries/attributes_values.graphql'
 import { BreadCrumbsItem } from '~/types/devind'
-import changeAttributeValueMutation from '~/gql/dcis/mutations/attributes/change_attribute_value.graphql'
 import AttributeValueMoney from '~/components/dcis/attributes/fields/AttributeValueMoney.vue'
 import AttributeValueNumeric from '~/components/dcis/attributes/fields/AttributeValueNumeric.vue'
 import AttributeValueText from '~/components/dcis/attributes/fields/AttributeValueText.vue'
@@ -44,9 +39,11 @@ import AttributeValueBigmoney from '~/components/dcis/attributes/fields/Attribut
 import AttributeValueBool from '~/components/dcis/attributes/fields/AttributeValueBool.vue'
 import AttributeValueFiles from '~/components/dcis/attributes/fields/AttributeValueFiles.vue'
 import AttributeValueDate from '~/components/dcis/attributes/fields/AttributeValueDate.vue'
-import { changeSheetValues } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
+import attributesValuesQuery from '~/gql/dcis/queries/attributes_values.graphql'
+import changeAttributeValueMutation from '~/gql/dcis/mutations/attributes/change_attribute_value.graphql'
 
 type AttributeComponentsType = typeof AttributeValueNumeric | typeof AttributeValueMoney | typeof AttributeValueText
 
@@ -68,64 +65,14 @@ export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> },
-    documentId: { type: String, required: true },
-    attributes: { type: Array as PropType<AttributeType[]>, default: () => ([]) },
-    readonly: { type: Boolean, default: false },
-    attributesValues: { type: Array as PropType<AttributeValueType[]>, default: () => ([]) },
-    changeUpdateAttributesValues: {
-      type: Function as PropType<(cache, result: ChangeAttributeValueMutationResult, key: string) => void>,
-      required: true
-    }
+    document: { required: true, type: Object as PropType<DocumentType> }
   },
   setup (props) {
     const { t, localePath } = useI18n()
     const route = useRoute()
     const { client } = useApolloClient()
-    const values = computed<Record<number, AttributeValueType>>(() => (
-      props.attributesValues.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {}))
-    )
-    const { mutate: changeAttributeValue } = useMutation<ChangeAttributeValueMutation, ChangeAttributeValueMutationVariables>(
-      changeAttributeValueMutation,
-      {
-        update: (cache, result: ChangeAttributeValueMutationResult) => {
-          if (!result.data.changeAttributeValue.errors.length) {
-            props.changeUpdateAttributesValues(cache, result, 'attributeValue')
-            const { values } = result.data.changeAttributeValue
-            console.log(values)
-            changeSheetValues(values, client, props.documentId)
-          }
-        }
-      }
-    )
-    const changeValue = (attribute: AttributeType, value: string) => {
-      changeAttributeValue({ attributeId: attribute.id, documentId: props.documentId, value: value ?? '' })
-    }
-    const { data: activeDocument, loading: activeDocumentLoading } = useCommonQuery<
-      DocumentQuery,
-      DocumentQueryVariables
-    >({
-      document: documentQuery,
-      variables: () => ({
-        documentId: route.params.documentId
-      })
-    })
 
-    const { loading: attributesLoading } = useCommonQuery<AttributesQuery, AttributesQueryVariables>({
-      document: attributesQuery,
-      variables: () => ({ periodId: activeDocument.value?.period.id }),
-      options: () => ({ enabled: !activeDocumentLoading.value })
-    })
-
-    const { loading: attributesValuesLoading } = useCommonQuery<
-      AttributesValuesQuery,
-      AttributesValuesQueryVariables
-    >({
-      document: attributesValuesQuery,
-      variables: () => ({ documentId: route.params.documentId }),
-      options: () => ({ enabled: !activeDocumentLoading.value })
-    })
-
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
         text: t('dcis.documents.links.attributes') as string,
@@ -134,14 +81,65 @@ export default defineComponent({
       }
     ]))
 
+    const {
+      data: attributes,
+      loading: attributesLoading
+    } = useCommonQuery<
+      AttributesQuery,
+      AttributesQueryVariables
+    >({
+      document: attributesQuery,
+      variables: () => ({ periodId: props.document.period.id })
+    })
+
+    const {
+      data: attributesValuesData,
+      loading: attributesValuesLoading,
+      changeUpdate: changeAttributesValuesUpdate
+    } = useCommonQuery<
+      AttributesValuesQuery,
+      AttributesValuesQueryVariables
+    >({
+      document: attributesValuesQuery,
+      variables: () => ({ documentId: route.params.documentId })
+    })
+
+    const loading = computed(() => attributesLoading.value || attributesValuesLoading.value)
+
+    const attributesValues = computed<Record<number, AttributeValueType>>(() => (
+      attributesValuesData.value.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {}))
+    )
+
+    const { mutate: changeAttributeValueMutate } = useMutation<
+      ChangeAttributeValueMutation,
+      ChangeAttributeValueMutationVariables
+    >(
+      changeAttributeValueMutation,
+      {
+        update: (cache, result: ChangeAttributeValueMutationResult) => {
+          if (!result.data.changeAttributeValue.errors.length) {
+            changeAttributesValuesUpdate(cache, result, 'attributeValue')
+            const { values } = result.data.changeAttributeValue
+            changeSheetValues(values, client, props.document.id)
+          }
+        }
+      }
+    )
+    const changeAttributeValue = (attribute: AttributeType, value: string) => {
+      changeAttributeValueMutate({
+        attributeId: attribute.id,
+        documentId: props.document.id,
+        value: value ?? ''
+      })
+    }
+
     return {
-      bc,
-      values,
-      activeDocument,
-      attributesLoading,
       AttributeValueComponents,
-      attributesValuesLoading,
-      changeValue
+      bc,
+      attributes,
+      attributesValues,
+      loading,
+      changeAttributeValue
     }
   }
 })

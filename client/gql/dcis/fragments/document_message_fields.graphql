@@ -1,0 +1,15 @@
+#import "../../core/fragments/user_fields.graphql"
+
+fragment DocumentMessageFields on DocumentMessageType {
+  id
+  comment
+  createdAt
+  user {
+    ...UserFields
+  }
+  document {
+    id
+    __typename
+  }
+  __typename
+}

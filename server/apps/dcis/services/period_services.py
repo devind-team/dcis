@@ -1,23 +1,23 @@
 """Модуль, отвечающий за работу с периодами."""
 
-import json
 from datetime import date
 from io import BytesIO
 from typing import Type
 
+from devind_dictionaries.models import Organization
 from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import convert_str_to_int
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied
 from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
-from apps.dcis.models import Attribute, Division, Limitation, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.helpers.exceptions import is_raises
+from apps.dcis.models import Attribute, Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -27,9 +27,11 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
-from apps.dcis.services.curator_services import get_curator_organizations
+from apps.dcis.permissions.period_permissions import can_change_period_base
+from apps.dcis.services.curator_services import get_curator_organizations, is_period_curator
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
+from apps.dcis.services.limitation_services import add_limitations_from_file
 
 
 def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[Period]:
@@ -116,6 +118,19 @@ def get_user_period_privileges(user_id: int | str, period_id: int | str) -> Quer
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
 
 
+def get_organizations_has_not_document(user: User, period: Period) -> QuerySet[Organization]:
+    """Получение организаций, у которых не поданы документы в периоде."""
+    organizations = Organization.objects.filter(
+        id__in=period.division_set.exclude(
+            object_id__in=period.document_set.values_list('object_id', flat=True)).values_list('object_id', flat=True)
+    )
+    if not is_raises(PermissionDenied, can_change_period_base, user, period):
+        return organizations
+    if is_period_curator(user, period):
+        return organizations.filter(curatorgroup__id__in=user.curatorgroup_set.values_list('id', flat=True))
+    raise PermissionDenied('Недостаточно прав для просмотра периода.')
+
+
 @transaction.atomic
 def create_period(
     user: User,
@@ -148,42 +163,6 @@ def create_period(
         add_limitations_from_file(period, limitations_file)
     return period
 
-
-def add_limitations_from_file(period: Period, limitations_file: File) -> list[Limitation]:
-    """Добавление ограничений, накладываемых на лист, из json файла."""
-    possible_keys = ['form', 'check', 'message']
-    limitations: list[Limitation] = []
-
-    def raise_error(messages: list[str]):
-        raise ValidationError(message={'limitations_file': messages})
-
-    try:
-        data = json.load(limitations_file)
-        if not isinstance(data, list):
-            raise_error(['json файл не содержит массив на верхнем уровне'])
-        sheets = list(period.sheet_set.all())
-        container_cache = LimitationFormulaContainerCache()
-        for i, limitation in enumerate(data, 1):
-            if not isinstance(limitation, dict):
-                raise_error([f'Ограничение по номеру {i} не является объектом'])
-            if list(limitation.keys()) != possible_keys:
-                raise_error([
-                    f'Ключи ограничения по номеру {i} должны совпадать со списком {possible_keys}'.replace("'", '"')
-                ])
-            sheet = next((sheet for sheet in sheets if sheet.name == limitation['form']), None)
-            if sheet is None:
-                raise_error([f'Не найдена форма "{limitation["form"]}" для ограничения по номеру {i}'])
-            limitation = Limitation.objects.create(
-                formula=limitation['check'],
-                error_message=limitation['message'],
-                sheet=sheet
-            )
-            limitations.append(limitation)
-            container_cache.add_formula(f'A{i}', f'{limitation.formula}')
-            container_cache.save(period_id=period.id)
-    except json.JSONDecodeError as error:
-        raise raise_error(['Не удалось разобрать json файл', error.msg])
-    return limitations
 
 def add_divisions_period(user: User, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
     """Добавление дивизионов в период."""
@@ -330,13 +309,14 @@ def change_period_group_privileges(
     return privileges
 
 
-def change_user_period_groups(user: User, period_group_ids: list[str | int]) -> list[PeriodGroup]:
+def change_user_period_groups(permission_user: User, user: User, period_group_ids: list[str | int]) -> list[PeriodGroup]:
     """Изменение групп пользователя в периоде."""
     period_groups: list[PeriodGroup] = []
     for period_group_id in period_group_ids:
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        can_change_period_users(user, period_group.period)
+        can_change_period_users(permission_user, period_group.period)
         period_groups.append(period_group)
+    user.periodgroup_set.set(period_groups)
     return period_groups
 
 

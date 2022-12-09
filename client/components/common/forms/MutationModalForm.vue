@@ -1,7 +1,7 @@
 <template lang="pug">
 v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="persistent" scrollable)
-  template(#activator="{ on }")
-    slot(name="activator" :on="on" :close="close")
+  template(#activator="{ on, attrs }")
+    slot(name="activator" :on="on" :attrs="attrs" :close="close")
   mutation-form(
     ref="mutationForm"
     v-bind="$attrs"
@@ -49,12 +49,10 @@ v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="p
 
 <script lang="ts">
 import { VueConstructor } from 'vue'
-import type { Ref, ComputedRef } from '#app'
-import { computed, defineComponent, getCurrentInstance, PropType, ref } from '#app'
+import { watchOnce } from '@vueuse/core'
+import { computed, defineComponent, getCurrentInstance, PropType, ref, watch } from '#app'
 import { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
-
-type MutateFormType = InstanceType<typeof MutationForm> | null
 
 export default defineComponent({
   components: { MutationForm },
@@ -83,11 +81,11 @@ export default defineComponent({
   setup (props, { emit }) {
     const instance = getCurrentInstance()
     const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
-    // @ts-ignore: TS2322
-    const mutationForm: Ref<MutateFormType> = ref<MutateFormType>(null)
-    const active: Ref<boolean> = ref<boolean>(false)
 
-    const mutationListeners: ComputedRef = computed(() => (
+    const mutationForm = ref<InstanceType<typeof MutationForm>>(null)
+    const active = ref<boolean>(false)
+
+    const mutationListeners = computed(() => (
       Object.assign({}, vm.$listeners, {
         done (result: any) {
           const mutationNames = (
@@ -103,6 +101,15 @@ export default defineComponent({
         }
       })
     ))
+
+    watch(() => active.value, (newValue) => {
+      emit('active-changed', newValue)
+    })
+    watchOnce(() => active.value, (newValue) => {
+      if (newValue) {
+        emit('first-activated')
+      }
+    })
 
     const close = () => {
       active.value = false

@@ -1,26 +1,30 @@
 <template lang="pug">
-div
-  left-navigator-container(v-if="!activeDocumentLoading" :bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-    v-card-subtitle {{ activeDocument.objectName }}
-    v-card-text
-      grid-sheets(
-        v-model="activeSheetIndex"
-        :mode="GridMode.WRITE"
-        :sheets="activeDocument.sheets"
-        :active-sheet="activeSheet"
-        :update-active-sheet="updateActiveSheet"
-        :active-document="activeDocument"
-      )
-        template(#settings)
-          settings-document(:document="activeDocument")
-            template(#activator="{ on, attrs }")
-              v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
-                v-icon mdi-cog
-  v-progress-circular(color="primary" indeterminate)
+left-navigator-container(
+  v-if="!activeDocumentLoading"
+  :bread-crumbs="breadCrumbs"
+  fluid
+  @update-drawer="$emit('update-drawer')"
+)
+  template(#subheader) {{ activeDocument.objectName }}
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="mode"
+    :sheets="activeDocument.sheets"
+    :active-sheet="activeSheet"
+    :update-active-sheet="updateActiveSheet"
+    :active-document="activeDocument"
+    :loading="activeDocumentLoading"
+  )
+    template(#settings)
+      settings-document(:document="activeDocument")
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
+            v-icon mdi-cog
+v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, useRoute } from '#app'
+import { computed, defineComponent, PropType, ref, useRoute } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -52,6 +56,10 @@ export default defineComponent({
       })
     })
 
+    const mode = computed<GridMode>(
+      () => activeDocument.value.lastStatus.status.edit ? GridMode.WRITE : GridMode.READ
+    )
+
     const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet } = useCommonQuery<
       DocumentSheetQuery,
       DocumentSheetQueryVariables
@@ -68,10 +76,10 @@ export default defineComponent({
     })
 
     return {
-      GridMode,
       activeSheetIndex,
       activeDocument,
       activeDocumentLoading,
+      mode,
       activeSheet,
       activeSheetLoading,
       updateActiveSheet

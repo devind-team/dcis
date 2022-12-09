@@ -34,5 +34,17 @@ export default {
     deleteTooltip: '@:delete',
     newUsers: 'Новые пользователи',
     buttonText: '@:add'
+  },
+  changeCuratorGroupOrganizations: {
+    header: 'Изменение организаций',
+    successMessage: 'Организация добавлена',
+    tableHeaders: {
+      name: 'Название',
+      actions: '@:actions'
+    },
+    deleteItemName: 'организацию',
+    deleteTooltip: '@:delete',
+    newOrganizations: 'Новые организации',
+    buttonText: '@:add'
   }
 }

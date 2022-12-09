@@ -1,20 +1,7 @@
 #import "../fragments/sheet_fields.graphql"
-#import "../fragments/column_dimension_fields.graphql"
-#import "../fragments/row_dimension_fields.graphql"
 
 query DocumentSheet($documentId: ID!, $sheetId: ID!) {
   documentSheet(documentId: $documentId, sheetId: $sheetId) {
     ...SheetFields
-    columns {
-      ...ColumnDimensionFields
-    }
-    rows {
-      ...RowDimensionFields
-    }
-    canChange
-    canChangeValue
-    canAddChildRowDimension
-    canChangeChildRowDimensionHeight
-    canDeleteChildRowDimension
   }
 }

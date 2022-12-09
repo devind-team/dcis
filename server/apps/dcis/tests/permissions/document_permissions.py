@@ -3,17 +3,30 @@
 from typing import Callable
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import AddStatus, Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import (
+    AddStatus,
+    Attribute,
+    Cell,
+    ColumnDimension,
+    CuratorGroup, Document,
+    Period,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+)
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
     can_add_document,
+    can_add_document_message,
     can_add_document_status,
+    can_change_attribute_value,
     can_change_child_row_dimension_height,
     can_change_document_comment,
     can_change_value,
@@ -21,6 +34,7 @@ from apps.dcis.permissions.document_permissions import (
     can_delete_document_status,
     can_view_document,
 )
+from apps.dcis.tests.tests_helpers.mock import patch_db_object
 
 
 class DocumentPermissionsTestCase(TestCase):
@@ -29,8 +43,9 @@ class DocumentPermissionsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
 
-        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.status_edit = Status.objects.create(edit=True)
         self.status_edit_create_status = AddStatus.objects.create(
@@ -44,8 +59,10 @@ class DocumentPermissionsTestCase(TestCase):
             roles=['creator']
         )
 
-        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
+        self.period_attribute = Attribute.objects.create(key='a', mutable=False, period=self.period)
+        self.period_attribute_mutable = Attribute.objects.create(key='am', mutable=True, period=self.period)
         self.document = Document.objects.create(period=self.period)
         self.document.documentstatus_set.create(
             document=self.document,
@@ -53,8 +70,17 @@ class DocumentPermissionsTestCase(TestCase):
             user=self.user
         )
 
-        self.user_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
+        self.organization = Organization.objects.create(attributes='')
+        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group.users.add(self.curator)
+        self.curator_group.organization.add(self.organization)
+        self.period.division_set.create(object_id=self.organization.id)
+        self.organization_document = Document.objects.create(period=self.period, object_id=self.organization.id)
+
+        self.user_project = Project.objects.create(user=self.user, content_type=self.organization_content_type)
         self.user_period = Period.objects.create(user=self.user, project=self.user_project)
+        self.user_period_attribute = Attribute.objects.create(key='a', mutable=False, period=self.user_period)
+        self.user_period_attribute_mutable = Attribute.objects.create(kind='am', mutable=True, period=self.user_period)
         self.sheet = Sheet.objects.create(period=self.user_period)
         self.row_dimension = RowDimension.objects.create(index=1, sheet=self.sheet)
         self.column_dimensions = [
@@ -214,6 +240,46 @@ class DocumentPermissionsTestCase(TestCase):
         """Тестирование функции `can_delete_document_status`."""
         self._test_common(can_delete_document_status)
 
+    def test_can_add_document_message(self) -> None:
+        """Тестирование функции `can_add_document_message`."""
+        self._test_common(can_add_document_message)
+        can_add_document_message(self.curator, self.organization_document)
+
+    def test_can_change_attribute_value(self) -> None:
+        """Тестирование функции `can_change_attribute_value`."""
+        self._test_can_change_attribute_value((False, False, False), False)
+        self._test_can_change_attribute_value((False, True, False), True)
+        with patch(
+            'apps.dcis.permissions.document_permissions.can_view_document',
+            new=Mock(return_value=True)
+        ):
+            self._test_can_change_attribute_value((False, True, False), True)
+            with patch(
+                'apps.dcis.permissions.document_permissions.can_change_period_sheet_base',
+                new=lambda _user, _period: True
+            ):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_attributevalue'):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch.object(self.user, 'has_perm', lambda perm: perm == 'dcis.change_value'):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)):
+                self._test_can_change_attribute_value((True, True, True), True)
+            with patch(
+                'apps.dcis.permissions.document_permissions.get_user_divisions',
+                new=Mock(return_value=({'id': 1},))
+            ) as mock:
+                self._test_can_change_attribute_value((False, True, False), True)
+                with patch.object(self.user_document, 'object_id', new=1), patch.object(
+                    self.user_period_document, 'object_id', new=1
+                ), patch.object(
+                    self.user_period, 'multiple', new=True,
+                ):
+                    self._test_can_change_attribute_value((False, True, True), True)
+                    mock.assert_called_with(self.user, self.user_project)
+                with patch_db_object(self.document_row_dimension_child, 'object_id', new=1):
+                    self._test_can_change_attribute_value((False, True, True), True)
+
     def test_can_change_value(self) -> None:
         """Тестирование функции `can_change_value`."""
         with patch(
@@ -337,6 +403,28 @@ class DocumentPermissionsTestCase(TestCase):
             with patch('apps.dcis.permissions.document_permissions.has_privilege', new=Mock(return_value=True)) as mock:
                 f(self.user, self.user_period_document, *args)
                 mock.assert_called_once_with(self.user.id, self.user_period.id, 'change_document')
+
+    def _test_can_change_attribute_value(self, values: tuple[bool, bool, bool], attribute_mutable: bool) -> None:
+        """Тестирование функции `can_change_attribute_value`."""
+        for document, attribute, value in zip((
+            self.document,
+            self.user_document,
+            self.user_period_document
+        ), (
+            self.period_attribute_mutable if attribute_mutable else self.period_attribute,
+            self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
+            self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
+        ), values):
+            if value:
+                can_change_attribute_value(self.user, document, attribute)
+            else:
+                self.assertRaises(
+                    PermissionDenied,
+                    can_change_attribute_value,
+                    self.user,
+                    document,
+                    attribute,
+                )
 
     def _test_can_change_value(self, values: tuple[bool, bool, bool, bool, bool, bool]) -> None:
         """Тестирование функции `can_change_value` для 6 типов ячеек."""

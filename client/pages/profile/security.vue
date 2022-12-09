@@ -63,12 +63,13 @@ v-card
 <script lang="ts">
 import { DataTableHeader } from 'vuetify'
 import { useMutation } from '@vue/apollo-composable'
-import { useNuxt2Meta } from '#app'
+import { computed, defineComponent, toRef, useNuxt2Meta } from '#app'
 import { useAuthStore } from '~/stores'
 import { ChangePasswordMutationPayload, SessionsQuery, SessionsQueryVariables, SessionType } from '~/types/graphql'
 import sessionQuery from '~/gql/core/queries/sessions.graphql'
 import deleteSessions from '~/gql/core/mutations/user/delete_sessions.graphql'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
+import { useI18n } from '~/composables'
 
 export default defineComponent({
   components: { MutationForm },

@@ -1,5 +1,5 @@
 import { Ref, unref } from '#app'
-import { QueryRelayOptions } from '~/composables'
+import { useQueryRelay, QueryRelayOptions } from '~/composables'
 import { DocumentsQuery, DocumentsQueryVariables, DocumentType } from '~/types/graphql'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 

@@ -1,7 +1,7 @@
 import { DocumentNode } from 'graphql'
 import { ApolloQueryResult, DataProxy } from '@apollo/client'
 import { useQuery } from '@vue/apollo-composable'
-import { useScroll } from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { FetchResult } from '@apollo/client/link/core'
 import type {
   DocumentParameter,
@@ -10,9 +10,10 @@ import type {
   UseQueryReturn
 } from '@vue/apollo-composable/dist/useQuery'
 import type { ComputedRef } from '#app'
-import { computed } from '#app'
+import { computed, onMounted, watch } from '#app'
 import { UseResultReturn } from '@vue/apollo-composable/dist/useResult'
 import { ExtractSingleKey } from '@vue/apollo-composable/dist/util/ExtractSingleKey'
+import { InvariantError } from 'ts-invariant'
 import { PageInfo } from '~/types/graphql'
 import { getValue } from '~/services/graphql-relay'
 import { PaginationInterface, useOffsetPagination } from '~/composables/pagination'
@@ -24,8 +25,10 @@ export type ResultDefaultValueType<TNode> = {
   pageInfo?: PageInfo
 }
 
-export type ApolloQueryResultFn<T> = (result: ApolloQueryResult<T>) => void
-export type TransformUpdate<TResultQuery, TResultMutation> = (data: TResultQuery, result?: Omit<FetchResult<TResultMutation>, 'context'>) => TResultQuery
+export type TransformUpdate<TResultQuery, TResultMutation> = (
+  data: TResultQuery,
+  result?: Omit<FetchResult<TResultMutation>, 'context'>
+) => TResultQuery
 
 export type QueryRelayParams<TResult = any, TVariables = any> = {
   document: DocumentParameter<TResult, TVariables>,
@@ -34,51 +37,74 @@ export type QueryRelayParams<TResult = any, TVariables = any> = {
 }
 
 export type QueryRelayOptions = {
-  isScrollDown: boolean,
   pagination: PaginationInterface,
+  isScrollDown?: boolean,
+  fetchScrollTrigger?: number
   fetchScroll?: Document | HTMLElement | undefined
-  fetchThrottle?: number
 }
 
 export type UseResultDefaultValueType<TNode> = { totalCount: number, edges: { node: TNode }[] }
 
-export type QueryRelayResult<TResult = any, TVariables = any, TNode extends { id: string | number } = any> = UseQueryReturn<TResult, TVariables> & {
+export type QueryRelayResult<
+  TResult = any,
+  TVariables = any,
+  TNode extends { id: string | number } = any
+> = UseQueryReturn<TResult, TVariables> & {
   dataQuery: UseResultReturn<UseResultDefaultValueType<TNode> | ExtractSingleKey<NonNullable<TResult>>>
   data: ComputedRef<TNode[]>
   pagination: PaginationInterface
   fetchMoreAvailable: ComputedRef<boolean>
   fetchMoreData: () => void
-  update: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, transform: TransformUpdate<TResult, TResultMutation>) => void
-  addUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key?: string | null) => void
-  changeUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>, key?: string | null) => void
-  deleteUpdate: <TResultMutation>(cache: DataProxy, result: Omit<FetchResult<TResultMutation>, 'context'>) => void
+  update: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    transform: TransformUpdate<TResult, TResultMutation>,
+    isStrict: boolean
+  ) => void
+  addUpdate: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    key?: string | null
+  ) => void
+  changeUpdate: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    key?: string | null
+  ) => void
+  deleteUpdate: <TResultMutation>(
+    cache: DataProxy,
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    isStrict: boolean
+  ) => void
 }
 export function useQueryRelay<TResult = any, TVariables = any, TNode extends { id: string | number} = any> (
   queryParams: QueryRelayParams<TResult, TVariables>,
   queryOptions: QueryRelayOptions = {
-    pagination: useOffsetPagination(),
-    isScrollDown: true
+    pagination: useOffsetPagination()
   }
 ): QueryRelayResult<TResult, TVariables, TNode> {
-  const { document, variables, options } = queryParams
-  const { pagination, fetchScroll, fetchThrottle } = queryOptions
+  const { document: documentNode, variables, options } = queryParams
+  const { pagination, fetchScroll } = queryOptions
+  const isScrollDown = queryOptions.isScrollDown ?? true
+  const fetchScrollTrigger = queryOptions.fetchScrollTrigger ?? 200
+
   /**
    * Переменные запроса
    */
-  const queryVariables: ComputedRef<TVariables> = computed<TVariables>(() => {
+  const queryVariables = computed<TVariables>(() => {
     return { ...pagination.variables.value, ...getValue<TVariables>(variables) }
   })
 
   /**
    * Запросы
    */
-  const q: UseQueryReturn<TResult, TVariables> = useQuery<TResult, TVariables>(document, queryVariables, options)
+  const q = useQuery<TResult, TVariables>(documentNode, queryVariables, options)
   const dataQuery = useResult<TResult, ResultDefaultValueType<any>>(q.result, { totalCount: 0, edges: [] })
 
   /**
    * Чистые данные
    */
-  const data: ComputedRef<TNode[]> = computed<TNode[]>(() => {
+  const data = computed<TNode[]>(() => {
     const { totalCount, pageInfo, edges } = (dataQuery.value as unknown as {
       totalCount: number,
       edges: { node: TNode }[],
@@ -94,18 +120,18 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
   /**
    * Могу ли я подгружать еще записи
    */
-  const fetchMoreAvailable: ComputedRef<boolean> = computed<boolean>(() => {
+  const fetchMoreAvailable = computed<boolean>(() => {
     return pagination.mode === 'fetch' && !q.loading.value && pagination.fetchMore.value
   })
   /**
    * Подгрузка записей
    */
-  const fetchMoreData = (): void => {
+  const fetchMoreData = (): Promise<ApolloQueryResult<TResult>> | undefined => {
     if (!fetchMoreAvailable.value) {
       return
     }
     pagination.setPage(++pagination.page.value)
-    q.fetchMore({
+    return q.fetchMore({
       variables: { ...getValue(variables), ...pagination.extendVariables.value },
       updateQuery: (previousResult: TResult, { fetchMoreResult }): TResult => {
         return Object.keys(previousResult).reduce((a, key) => ({
@@ -118,46 +144,70 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
           }
         }), {}) as TResult
       }
-    }).then()
+    })
   }
 
   /**
    * Событие на подгрузку по прокрутке
    */
-  const { y } = useScroll(fetchScroll, {
-    throttle: fetchThrottle ?? 300,
-    onScroll (event: Event | any) {
-      if (queryOptions.isScrollDown &&
-        (fetchMoreAvailable.value && y.value + window.innerHeight + 200 > event.target.documentElement.offsetHeight)) {
-        fetchMoreData()
-      } else if (!queryOptions.isScrollDown &&
-        (fetchMoreAvailable.value && y.value < 200)) {
-        fetchMoreData()
+  onMounted(() => {
+    watch(() => data.value, () => {
+      if (data.value.length === pagination.pageSize.value) {
+        if (!isScrollDown) {
+          document.documentElement.scrollTop = document.documentElement.scrollHeight
+        }
+        useEventListener(fetchScroll, 'scroll', async (e: Event) => {
+          const eventTarget = (
+            e.target === document ? (e.target as Document).documentElement : e.target
+          ) as HTMLElement
+          if (
+            isScrollDown &&
+            fetchMoreAvailable.value &&
+            eventTarget.scrollTop + window.innerHeight + fetchScrollTrigger > eventTarget.offsetHeight
+          ) {
+            await fetchMoreData()
+          } else if (!isScrollDown && fetchMoreAvailable.value && eventTarget.scrollTop < fetchScrollTrigger) {
+            await fetchMoreData()
+            if (eventTarget.scrollTop < fetchScrollTrigger && fetchMoreAvailable.value) {
+              eventTarget.scrollTop = fetchScrollTrigger + 10
+            }
+          }
+        })
       }
-    }
+    })
   })
+
   /**
    * Обновление при совершении мутации
    * @param cache - хранилище
    * @param result - результат выполнения мутации
    * @param transform - функция преобразования
+   * @param isStrict - происходит ли исключение, если запись отсутствует в кеше
    */
   const update = <TResultMutation>(
     cache: DataProxy,
     result: Omit<FetchResult<TResultMutation>, 'context'>,
-    transform: TransformUpdate<TResult, TResultMutation>
+    transform: TransformUpdate<TResult, TResultMutation>,
+    isStrict: boolean = true
   ): void => {
-    const cacheData: TResult = cache.readQuery<TResult, TVariables>({
-      query: document as DocumentNode,
-      variables: queryVariables.value
-    })
-    const data: TResult = transform(cacheData, result)
-    cache.writeQuery({ query: document as DocumentNode, variables: queryVariables.value, data })
+    try {
+      const cacheData: TResult = cache.readQuery<TResult, TVariables>({
+        query: documentNode as DocumentNode,
+        variables: queryVariables.value
+      })
+      const data: TResult = transform(cacheData, result)
+      cache.writeQuery({ query: documentNode as DocumentNode, variables: queryVariables.value, data })
+    } catch (e) {
+      if (e instanceof InvariantError && !isStrict) {
+        return
+      }
+      throw e
+    }
   }
   /**
    * Получение __typename элементов
    * @param edges - список объектов из списка
-   * @param el - манипулируемый объек
+   * @param el - манипулируемый объект
    */
   const getEdgeTypename = (edges: { __typename: string }[], el: TNode & { __typename?: string }): string =>
     edges.length === 0 ? `${el.__typename}Edge` : edges[0].__typename
@@ -205,9 +255,9 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
 
   /**
    * Изменение при редактировании записи
-   * @param cache
-   * @param result
-   * @param key
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
+   * @param key - элемент в мутации
    */
   const changeUpdate = <TResultMutation>(
     cache: DataProxy,
@@ -230,12 +280,14 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
 
   /**
    * Удаление записи
-   * @param cache
-   * @param result
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
+   * @param isStrict - происходит ли исключение, если запись отсутствует в кеше
    */
   const deleteUpdate = <TResultMutation>(
     cache: DataProxy,
-    result: Omit<FetchResult<TResultMutation>, 'context'>
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    isStrict: boolean = true
   ): void => {
     update(cache, result, (dataCache) => {
       const { id } = getMutationResult(result)
@@ -245,7 +297,7 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
         --dataCache[k].totalCount
       }
       return dataCache
-    })
+    }, isStrict)
   }
 
   return {

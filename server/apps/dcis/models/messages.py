@@ -1,10 +1,10 @@
 from django.db import models
-from apps.core.models import User
 
+from apps.core.models import User
 from .document import Document
 
 
-class Message(models.Model):
+class DocumentMessage(models.Model):
     """Модель комментариев к документу"""
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')

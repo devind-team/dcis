@@ -1,0 +1,11 @@
+#import "../fragments/organization_fields.graphql"
+
+query CuratorGroupOrganizations($curatorGroupId: ID!) {
+  curatorGroup(curatorGroupId: $curatorGroupId) {
+    id
+    organization {
+      ...OrganizationField
+    }
+    __typename
+  }
+}

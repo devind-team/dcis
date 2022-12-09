@@ -29,7 +29,9 @@ export default defineComponent({
       value.value = money(props.attributeValue?.value || props.attribute.default)
     })
     const change = () => {
-      emit('change', value.value)
+      if (props.attribute.mutable && !props.readonly) {
+        emit('change', value.value)
+      }
     }
     return { value, change }
   }

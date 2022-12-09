@@ -15,6 +15,7 @@ mutation-modal-form(
   :show-table-errors-search="false"
   mutation-name="addDocumentStatus"
   errors-in-alert
+  @first-activated="firstActivated"
   @close="close"
   @done="addDocumentStatusDone"
 )
@@ -68,7 +69,6 @@ mutation-modal-form(
 import { WatchQueryFetchPolicy } from '@apollo/client'
 import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
-import { watchOnce } from '@vueuse/core'
 import type { PropType } from '#app'
 import { computed, defineComponent, onMounted, ref, watch } from '#app'
 import {
@@ -95,7 +95,7 @@ import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
 export type DeleteDocumentStatusMutationResult = { data: { deleteDocumentStatus: DeleteDocumentStatusMutationPayload } }
 
-type PeriodUpdateType = (
+export type PeriodUpdateType = (
   cache: DataProxy | ApolloCache<any>,
   result: AddDocumentStatusMutationResult | DeleteDocumentStatusMutationResult,
   transform: (cache: any, result: AddDocumentStatusMutationResult | DeleteDocumentStatusMutationResult) => any
@@ -112,18 +112,18 @@ export default defineComponent({
     const { t } = useI18n()
     const { dateTimeHM, getUserName } = useFilters()
 
-    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
     onMounted(() => {
-      watchOnce(() => form.value.active, (value: boolean) => {
-        statusesQueryOptions.value.enabled = value
-        documentStatusesQueryOptions.value.enabled = value
-      })
       watch(() => statuses.value, (statuses: StatusFieldsFragment[]) => {
         if (statuses) {
           status.value = statuses[0] || null
         }
       }, { immediate: true })
     })
+
+    const firstActivated = () => {
+      statusesQueryOptions.value.enabled = true
+      documentStatusesQueryOptions.value.enabled = true
+    }
 
     const canAdd = computed<boolean>(() => Boolean(statuses.value && statuses.value.length))
 
@@ -222,7 +222,7 @@ export default defineComponent({
 
     return {
       ErrorValidateDialogMode,
-      form,
+      firstActivated,
       canAdd,
       header,
       comment,

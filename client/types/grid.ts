@@ -1,9 +1,12 @@
+import { Ref, InjectionKey } from '#app'
 import {
   CellType,
   ColumnDimensionType,
   RowDimensionType,
+  SheetType,
+  DocumentType,
   DocumentSheetQuery,
-  DocumentsSheetQuery
+  PeriodSheetQuery
 } from '~/types/graphql'
 import { UpdateType } from '~/composables'
 
@@ -11,15 +14,25 @@ export type RangeType = string
 
 /**
  * Режим работы таблицы
- * CHANGE - пользователь может менять структуру документа
+ * READ - пользователь может только просматривать таблицу
+ * CHANGE - пользователь может менять структуру таблицы
  * WRITE - пользователь может вносить данные, изменяя модель Value
  */
 export enum GridMode {
+  READ,
+  REPORT,
+  WRITE,
   CHANGE,
-  WRITE
 }
 
-export type UpdateSheetType = UpdateType<DocumentsSheetQuery | DocumentSheetQuery>
+export type UpdateActiveSheetType = UpdateType<PeriodSheetQuery | DocumentSheetQuery>
+
+export const GridModeInject: InjectionKey<Ref<GridMode>> = Symbol('Mode')
+export const ActiveSheetInject: InjectionKey<Ref<SheetType>> = Symbol('ActiveSheet')
+export const UpdateActiveSheetInject: InjectionKey<
+  Ref<UpdateActiveSheetType | null>
+> = Symbol('UpdateActiveSheet')
+export const ActiveDocumentInject: InjectionKey<Ref<DocumentType | null>> = Symbol('ActiveDocument')
 
 /*
  * Кодовые ошибки

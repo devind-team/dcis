@@ -2,7 +2,7 @@
 div
   left-navigator-driver(v-model="drawer" :items="links")
   v-progress-circular(v-if="loading" color="primary" indeterminate)
-  nuxt-child(v-else :breadCrumbs="bc" :document="document" @update-drawer="drawer = !drawer")
+  nuxt-child(v-else :breadCrumbs="bc" :document="activeDocument" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">
@@ -10,10 +10,7 @@ import { computed, defineComponent, inject, onUnmounted, PropType, provide, ref,
 import { toGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
-import type {
-  DocumentQuery,
-  DocumentQueryVariables
-} from '~/types/graphql'
+import type { DocumentQuery, DocumentQueryVariables } from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -28,7 +25,7 @@ export default defineComponent({
     const route = useRoute()
 
     const {
-      data: document,
+      data: activeDocument,
       loading,
       update,
       changeUpdate
@@ -95,16 +92,6 @@ export default defineComponent({
       return result
     })
 
-    const { data: activeDocument } = useCommonQuery<
-      DocumentQuery,
-      DocumentQueryVariables
-    >({
-      document: documentQuery,
-      variables: () => ({
-        documentId: route.params.documentId
-      })
-    })
-
     const setFooter = inject<(state: boolean) => void>('setFooter')
     setFooter(false)
     onUnmounted(() => {
@@ -112,7 +99,7 @@ export default defineComponent({
     })
 
     return {
-      document,
+      activeDocument,
       loading,
       drawer,
       links,

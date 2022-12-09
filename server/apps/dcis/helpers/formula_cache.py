@@ -66,7 +66,7 @@ class FormulaContainerCache(ABC):
         :return: текущий контейнер для кеша зависимостей формул
         """
         self.dependency_cache.dependency = {
-            coord: counter for coord, counter in self.dependency_cache.dependency if coord != coordinate
+            coord: counter for coord, counter in self.dependency_cache.dependency.items() if coord != coordinate
         }
         inversion: dict[str, list[str]] = defaultdict(list)
         for ic, iv in self.dependency_cache.inversion.items():

@@ -1,1 +1,1 @@
-from .cell_helpers import CellHelpersTestCase
+from .cell import CellHelpersTestCase

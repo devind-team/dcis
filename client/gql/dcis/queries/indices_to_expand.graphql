@@ -1,0 +1,3 @@
+query IndicesGroupsToExpand($sheetId: ID!) {
+  indicesGroupsToExpand(sheetId: $sheetId)
+}

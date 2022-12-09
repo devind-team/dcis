@@ -7,7 +7,8 @@ v-container
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, useNuxt2Meta, useRouter } from '#app'
+import { defineComponent, toRefs, useNuxt2Meta } from '#app'
+import { useRouter } from '#imports'
 import { useApolloHelpers, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'
 

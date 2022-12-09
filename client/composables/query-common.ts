@@ -3,6 +3,7 @@ import { DataProxy } from '@apollo/client'
 import { UseQueryReturn } from '@vue/apollo-composable/dist/useQuery'
 import { FetchResult } from '@apollo/client/link/core'
 import { useQuery } from '@vue/apollo-composable'
+import { InvariantError } from 'ts-invariant'
 import { QueryRelayParams, TransformUpdate } from '~/composables/query-relay'
 import { getValue } from '~/services/graphql-relay'
 import { useResult } from '~/composables/query-result'
@@ -25,23 +26,32 @@ export function useCommonQuery<
    * @param cache - хранилище
    * @param result - результат выполнения мутации
    * @param transform - функция преобразования
+   * @param isStrict - происходит ли исключение, если запись отсутствует в кеше
    */
   const update = <TResultMutation>(
     cache: DataProxy,
     result: Omit<FetchResult<TResultMutation>, 'context'>,
-    transform: TransformUpdate<TResult, TResultMutation>
+    transform: TransformUpdate<TResult, TResultMutation>,
+    isStrict: boolean = true
   ): void => {
-    const variablesValue = getValue<TVariables>(variables)
-    const cacheData: TResult = cache.readQuery<TResult, TVariables>({
-      query: document as DocumentNode,
-      variables: variablesValue
-    })
-    const data: TResult = transform(cacheData, result)
-    cache.writeQuery({ query: document as DocumentNode, variables: variablesValue, data })
+    try {
+      const variablesValue = getValue<TVariables>(variables)
+      const cacheData: TResult = cache.readQuery<TResult, TVariables>({
+        query: document as DocumentNode,
+        variables: variablesValue
+      })
+      const data: TResult = transform(cacheData, result)
+      cache.writeQuery({ query: document as DocumentNode, variables: variablesValue, data })
+    } catch (e) {
+      if (e instanceof InvariantError && !isStrict) {
+        return
+      }
+      throw e
+    }
   }
   /**
-   * Результат выполнения мутации
-   * @param result
+   * Получение данных результата выполнения мутации
+   * @param result - результат выполнения мутации
    */
   const getMutationResult = (result: any): any => result.data[Object.keys(result.data)[0]]
   /**
@@ -65,6 +75,12 @@ export function useCommonQuery<
       return dataCache
     })
   }
+  /**
+   * Обновление запроса при изменении
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
+   * @param key - элемент в мутации
+   */
   const changeUpdate = <TResultMutation>(
     cache: DataProxy,
     result: Omit<FetchResult<TResultMutation>, 'context'>,
@@ -84,8 +100,8 @@ export function useCommonQuery<
   }
   /**
    * Замена записей на новые
-   * @param cache
-   * @param result
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
    */
   const resetUpdate = <TResultMutation>(
     cache: DataProxy,
@@ -100,12 +116,14 @@ export function useCommonQuery<
   }
   /**
    * Удаление записи
-   * @param cache
-   * @param result
+   * @param cache - хранилище
+   * @param result - результат выполнения мутации
+   * @param isStrict - происходит ли исключение, если запись отсутствует в кеше
    */
   const deleteUpdate = <TResultMutation>(
     cache: DataProxy,
-    result: Omit<FetchResult<TResultMutation>, 'context'>
+    result: Omit<FetchResult<TResultMutation>, 'context'>,
+    isStrict: boolean = true
   ): void => {
     update(cache, result, (dataCache) => {
       const { id } = getMutationResult(result)
@@ -114,7 +132,7 @@ export function useCommonQuery<
         dataCache[dataKey] = dataCache[dataKey].filter((e: any) => e.id !== id)
       }
       return dataCache
-    })
+    }, isStrict)
   }
 
   return {

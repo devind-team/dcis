@@ -12,17 +12,21 @@ apollo-query(
     :items="data || []"
     :item-key="itemKey"
     :modal="modal"
+    :fullscreen="fullscreen"
     :multiple="multiple"
     :has-select-all="hasSelectAll"
+    :disabled="disabled"
     :message-container-class="messageContainerClass"
     :title="title"
     :max-width="maxWidth"
     :max-height="maxHeight"
+    :message-function="messageFunction"
     :no-filtration-message="noFiltrationMessage"
     :multiple-message-function="multipleMessageFunction"
     :search-label="searchLabel"
     :search-function="searchType === 'client' ? searchFunction : undefined"
     :get-name="getName"
+    @active-changed="$emit('active-changed', $event)"
     @clear="$emit('clear')"
     @close="$emit('close')"
     @reset="$emit('reset')"
@@ -66,7 +70,15 @@ apollo-query(
 import { useVModel } from '@vueuse/core'
 import type { PropType } from '#app'
 import { computed, defineComponent } from '#app'
-import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, Variables } from '~/types/filters'
+import {
+  Class,
+  GetName,
+  Item,
+  MessageFunction,
+  MultipleMessageFunction,
+  SearchFunction,
+  Variables
+} from '~/types/filters'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import { useDebounceSearch } from '~/composables'
 
@@ -82,13 +94,16 @@ export default defineComponent({
     searchKey: { type: [String, Array] as PropType<string | string[]>, default: 'search' },
 
     itemKey: { type: String, default: undefined },
-    modal: { type: Boolean, default: undefined },
+    modal: { type: Boolean, default: false },
+    fullscreen: { type: Boolean, default: undefined },
     multiple: { type: Boolean, default: undefined },
     hasSelectAll: { type: Boolean, default: undefined },
+    disabled: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
     title: { type: String, default: undefined },
     maxWidth: { type: [String, Number], default: undefined },
     maxHeight: { type: [String, Number], default: undefined },
+    messageFunction: { type: Function as PropType<MessageFunction>, default: undefined },
     noFiltrationMessage: { type: String, default: undefined },
     multipleMessageFunction: { type: Function as PropType<MultipleMessageFunction>, default: undefined },
     getName: { type: Function as PropType<GetName>, default: undefined },

@@ -15,7 +15,8 @@ bread-crumbs(:items="bc")
 
 <script lang="ts">
 import type { ComputedRef, PropType } from '#app'
-import { defineComponent, useNuxt2Meta, useRoute, computed } from '#app'
+import { defineComponent, useNuxt2Meta, computed } from '#app'
+import { useRoute } from '#imports'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { NotificationQuery, NotificationQueryVariables } from '~/types/graphql'

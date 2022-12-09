@@ -1,3 +1,5 @@
+#import "../../fragments/document_message_fields.graphql"
+
 mutation AddDocumentMessage($documentId: ID!, $message: String!) {
   addDocumentMessage(input: {documentId: $documentId, message: $message}){
     success
@@ -6,20 +8,8 @@ mutation AddDocumentMessage($documentId: ID!, $message: String!) {
       messages
       __typename
     }
-    comment {
-      id
-      comment
-      createdAt
-      user {
-        id
-        username
-        __typename
-      }
-      document {
-        id
-        __typename
-      }
-      __typename
+    documentMessage {
+      ...DocumentMessageFields
     }
     __typename
   }

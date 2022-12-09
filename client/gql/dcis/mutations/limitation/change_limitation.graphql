@@ -1,0 +1,20 @@
+#import "../../fragments/limitation_fields.graphql"
+
+mutation ChangeLimitation($limitationId: ID!, $formula: String!, $errorMessage: String!, $sheetId: ID!) {
+  changeLimitation(input: {
+    limitationId: $limitationId,
+    formula: $formula,
+    errorMessage: $errorMessage,
+    sheetId: $sheetId
+  }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    limitation {
+      ...LimitationFields
+    }
+  }
+}

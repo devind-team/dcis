@@ -1,4 +1,5 @@
 """Модуль, отвечающий за работу с документами."""
+
 from typing import Type
 
 from devind_dictionaries.models import Department, Organization
@@ -10,26 +11,17 @@ from django.db.models import Max, Q, QuerySet
 
 from apps.core.models import User
 from apps.dcis.helpers.exceptions import is_raises
-from apps.dcis.models import (
-    Cell,
-    Message, Document,
-    Period,
-    Project,
-    RowDimension,
-    Sheet,
-    Status,
-    Value,
-)
+from apps.dcis.models import (Cell, Document, DocumentMessage, Period, Project, RowDimension, Sheet, Status, Value)
 from apps.dcis.permissions import (
     can_add_document,
-    can_change_document_base, can_change_document_comment,
+    can_add_document_message,
+    can_change_document_base,
+    can_change_document_comment,
 )
-from apps.dcis.permissions.document_permissions import can_add_document_message
 from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
 from apps.dcis.services.divisions_services import get_user_divisions, is_document_division_member
 from apps.dcis.services.privilege_services import has_privilege
-from apps.pages.models import Comment
 
 
 def get_user_documents(user: User, period: Period | int | str) -> QuerySet[Document]:
@@ -158,18 +150,10 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
     return document
 
 
-def create_document_message(user: User, document: Document, message: str) -> Message:
+def create_document_message(user: User, document: Document, message: str) -> DocumentMessage:
     """Добавление комментария к документу."""
     can_add_document_message(user, document)
-    return Message.objects.create(comment=message, user=user, document=document)
-
-
-def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
-    """Получение максимальной версии документа для периода."""
-    return Document.objects.filter(
-        period_id=period_id,
-        object_id=division_id
-    ).aggregate(version=Max('version'))['version']
+    return DocumentMessage.objects.create(comment=message, user=user, document=document)
 
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:

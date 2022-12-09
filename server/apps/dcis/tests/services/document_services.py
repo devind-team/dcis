@@ -12,9 +12,9 @@ from apps.dcis.models import (
     CuratorGroup,
     Division,
     Document,
-    Message,
+    DocumentMessage,
     Period,
-    PeriodGroup, Project,
+    Project,
     RowDimension,
     Sheet,
     Status,
@@ -318,6 +318,7 @@ class DocumentTestCase(TestCase):
 
 class DocumentMessageTestCase(TestCase):
     """Тестирование добавления сообщений к документу."""
+
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.user = User.objects.create(username='user', email='user@gmail.com')
@@ -379,5 +380,5 @@ class DocumentMessageTestCase(TestCase):
             document=self.superuser_document,
             message='Test message'
         )
-        expected_document_message = Message.objects.get(comment='Test message')
+        expected_document_message = DocumentMessage.objects.get(comment='Test message')
         self.assertEqual(expected_document_message, actual_document_message)

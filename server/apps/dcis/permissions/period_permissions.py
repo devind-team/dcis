@@ -6,6 +6,7 @@ from apps.core.models import User
 from apps.dcis.models import Period, Project
 from apps.dcis.services.privilege_services import has_privilege
 from .project_permissions import can_view_project
+from ..services.curator_services import is_period_curator
 
 
 def can_view_period(user: User, period: Period):
@@ -68,6 +69,23 @@ def can_change_period_divisions(user: User, period: Period):
     can_change_period_divisions_base(user, period)
 
 
+def can_change_period_limitations_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут изменять ограничения периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, period)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, period.id, 'change_period_limitations'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения ограничений периода.')
+
+
+def can_change_period_limitations(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать период и изменять в нем ограничения."""
+    can_view_period(user, period)
+    can_change_period_limitations_base(user, period)
+
+
 def can_change_period_groups_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять группы периода, без проверки возможности просмотра."""
     try:
@@ -102,6 +120,45 @@ def can_change_period_users(user: User, period: Period):
     can_change_period_users_base(user, period)
 
 
+def can_change_period_attributes_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут изменять атрибуты периода, без проверки возможности просмотра."""
+    try:
+        can_change_period_base(user, period)
+        return
+    except PermissionDenied:
+        if has_privilege(user.id, period.id, 'change_period_attributes'):
+            return
+    raise PermissionDenied('Недостаточно прав для изменения атрибутов периода.')
+
+
+def can_change_period_attributes(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать период и изменять в нем атрибуты."""
+    can_view_period(user, period)
+    can_change_period_attributes_base(user, period)
+
+
+def can_view_period_report_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать сводный отчет периода.
+
+    Функция не проверяет, может ли пользователь просматривать период.
+    """
+    try:
+        can_change_period_base(user, period)
+        return
+    except PermissionDenied:
+        if is_period_curator(user, period):
+            return
+        if has_privilege(user.id, period.id, 'view_period_report'):
+            return
+    raise PermissionDenied('Недостаточно прав для просмотра сводного отчета периода.')
+
+
+def can_view_period_report(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать сводный отчет периода."""
+    can_view_period(user, period)
+    can_view_period_report_base(user, period)
+
+
 def can_change_period_settings_base(user: User, period: Period):
     """Пропускает пользователей, которые могут изменять настройки периода, без проверки возможности просмотра."""
     try:
@@ -133,12 +190,6 @@ def can_change_period_sheet_base(user: User, period: Period):
 
 def can_change_period_sheet(user: User, period: Period):
     """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру листа."""
-    can_view_period(user, period)
-    can_change_period_sheet_base(user, period)
-
-
-def can_change_period_attributes(user: User, period: Period):
-    """Пропускает пользователей, которые могут просматривать период и изменять в нем структуру атрибутов."""
     can_view_period(user, period)
     can_change_period_sheet_base(user, period)
 

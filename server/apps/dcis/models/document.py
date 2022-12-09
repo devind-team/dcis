@@ -157,11 +157,14 @@ class Attribute(models.Model):
     mutable = models.BooleanField(default=True, help_text='Можно ли изменять')
     position = models.PositiveIntegerField(default=0, help_text='Позиция в выводе')
 
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
+
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительские данные для сбора')
 
     class Meta:
-        ordering = ('position',)
+        ordering = ('created_at',)
         unique_together = (('key', 'period',),)
 
 
@@ -185,10 +188,11 @@ class AttributeValue(models.Model):
 class Limitation(models.Model):
     """Ограничения, накладываемые на лист."""
 
+    index = models.PositiveSmallIntegerField(help_text='Индекс, начиная с 1, для вывода и расчета')
     formula = models.TextField(help_text='Формула')
-    error_message = models.TextField(help_text='Сообщение ошибки')
+    error_message = models.TextField(help_text='Сообщение об ошибке')
 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, help_text='Лист')
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('index',)
