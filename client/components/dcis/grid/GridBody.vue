@@ -188,7 +188,9 @@ export default defineComponent({
       if (cell.size) { style['font-size'] = `${cell.size}px` }
       if (cell.error) {
         style.color = 'red'
-      } else if (cell.color) { style.color = cell.color }
+      } else if (cell.color) {
+        style.color = cell.color
+      }
       if (textDecoration.length) {
         style['text-decoration'] = textDecoration.join(' ')
       }

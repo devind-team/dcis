@@ -41,7 +41,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
 import { DataTableHeader } from 'vuetify'
 import { getObjectValueByPath } from 'vuetify/lib/util/helpers'
 import { DocumentNode } from 'graphql'
-import { PropType, useNuxtApp } from '#app'
+import { computed, PropType, useNuxtApp } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n, useCommonQuery, useQueryRelay, useCursorPagination } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
@@ -83,6 +83,7 @@ export default defineComponent({
         variables: () => variables.value
       },
       {
+        isScrollDown: true,
         pagination: useCursorPagination({ pageSize: props.pageSize }),
         fetchScroll: typeof document === 'undefined' ? null : document
       })
@@ -90,7 +91,7 @@ export default defineComponent({
         document: props.query,
         variables: () => variables.value
       })
-    const totalCount = ref('pagination' in result ? result.pagination.totalCount : 0)
+    const totalCount = computed<number>(() => 'pagination' in result ? result.pagination.totalCount.value : 0)
     const { t } = useI18n()
     const search = ref<string>('')
     const countText = computed<string>(() => {
@@ -102,6 +103,7 @@ export default defineComponent({
       }
       return t('totalCount', { count: result.data.value && result.data.value.length }) as string
     })
+
     const tableHeaders = computed<DataTableHeader[]>(() => {
       return props.headers.map((header: Header) => {
         if (typeof header === 'string') {
@@ -116,7 +118,8 @@ export default defineComponent({
         }
       })
     })
-    const items = computed<any[]>(() => {
+
+    const items: unknown = computed(() => {
       return result.data.value
         ? props.convertItems
           ? props.convertItems(result.data.value)

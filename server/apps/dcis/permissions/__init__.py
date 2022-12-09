@@ -9,6 +9,8 @@ from .document_permissions import (
     can_add_budget_classification,
     can_add_child_row_dimension,
     can_add_document,
+    can_add_document_message,
+    can_add_document_message_base,
     can_add_document_status,
     can_add_document_status_base,
     can_change_attribute_value,

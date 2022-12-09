@@ -7,7 +7,6 @@ div
   )
     slot(name="settings")
     slot(name="tabs" :sheets="sheets" :update-size="updateSize")
-      v-tab(v-if="showAttributes" key="attributes") Атрибуты
       v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
   grid-sheet-toolbar(
     v-if="mode === GridMode.CHANGE"
@@ -19,7 +18,6 @@ div
   )
   grid-choice-cells(:grid-choice="gridChoice")
   v-tabs-items.grid-sheet__tabs-items(v-model="activeSheetIndex" ref="tabItems" :style="{ height: gridHeight }")
-    slot(v-if="showAttributes" name="attributes")
     v-tab-item(v-for="sheet in sheets" :key="sheet.id")
       grid(
         v-if="activeSheet && activeSheet.id === sheet.id && !loading"
@@ -63,8 +61,7 @@ export default defineComponent({
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
     activeDocument: { type: Object as PropType<DocumentType>, default: null },
-    loading: { type: Boolean, required: true },
-    showAttributes: { type: Boolean, default: false }
+    loading: { type: Boolean, required: true }
   },
   setup (props, { emit }) {
     const tabs = ref<InstanceType<typeof VTabs> | null>(null)

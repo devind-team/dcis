@@ -13,6 +13,7 @@ from .services import (
     ColumnDimensionTestCase,
     CuratorGroupTestCase,
     DivisionTestCase,
+    DocumentMessageTestCase,
     DocumentTestCase,
     GetUserDocumentsTestCase,
     GetUserPeriodsTestCase,

@@ -170,8 +170,8 @@ class StatusTestCase(TestCase):
         )
 
     def _delete_document_status(self) -> None:
-         """Удаление статуса документа."""
-         delete_document_status(user=self.superuser, status=self.delete_document_status)
+        """Удаление статуса документа."""
+        delete_document_status(user=self.superuser, status=self.delete_document_status)
 
 
 class AddStatusCheckTestCase(TestCase):

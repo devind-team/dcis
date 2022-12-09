@@ -255,6 +255,25 @@ type AddDocumentDataMutationPayload {
   success: Boolean!
 }
 
+input AddDocumentMessageMutationInput {
+  clientMutationId: String
+  """Документ"""
+  documentId: ID!
+  """Текст комментария"""
+  message: String
+}
+
+"""Добавление комментария к документу"""
+type AddDocumentMessageMutationPayload {
+  clientMutationId: String
+  """Созданный комментарий"""
+  documentMessage: DocumentMessageType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDocumentMutationInput {
   clientMutationId: String
   """Комментарий"""
@@ -2693,6 +2712,37 @@ type DjangoDebugSQL {
   vendor: String!
 }
 
+"""Тип комментариев для документа"""
+type DocumentMessageType implements Node {
+  """Комментарий"""
+  comment: String!
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  """The ID of the object."""
+  id: ID!
+  """Пользователь"""
+  user: UserType!
+}
+
+type DocumentMessageTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DocumentMessageTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DocumentMessageType` and its cursor."""
+type DocumentMessageTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DocumentMessageType
+}
+
 """Тип статусов для документов."""
 type DocumentStatusType {
   """Комментарий"""
@@ -3016,6 +3066,8 @@ type Mutation {
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
   """Загрузка данных из файла."""
   addDocumentData(input: AddDocumentDataMutationInput!): AddDocumentDataMutationPayload!
+  """Добавление комментария к документу"""
+  addDocumentMessage(input: AddDocumentMessageMutationInput!): AddDocumentMessageMutationPayload!
   """Добавление статуса документа."""
   addDocumentStatus(input: AddDocumentStatusMutationInput!): AddDocumentStatusMutationPayload!
   """Мутация для загрузки файлов"""
@@ -3981,6 +4033,16 @@ type Query {
     """Идентификатор документа"""
     documentId: ID!
   ): DocumentType
+  """Комментарии документов"""
+  documentMessages(
+    after: String
+    before: String
+    """Идентификатор документа"""
+    documentId: ID!
+    first: Int
+    last: Int
+    offset: Int
+  ): DocumentMessageTypeConnection
   """Выгрузка листа с несколькими документами"""
   documentSheet(
     """Идентификатор документа"""

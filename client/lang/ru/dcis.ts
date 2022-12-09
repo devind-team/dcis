@@ -258,6 +258,11 @@ export default {
   documents: {
     name: 'Документы',
     version: 'Версия {version}',
+    links: {
+      sheets: 'Листы',
+      attributes: 'Атрибуты',
+      comments: 'Комментарии'
+    },
     divisionFilterOrganization: {
       title: 'Фильтр организаций',
       noFiltrationMessage: 'Все организации',
@@ -340,6 +345,13 @@ export default {
       tabNameNotSupplied: {
         name: 'Не подавшие'
       }
+    },
+    attributes: {
+      noAttributes: 'Нет атрибутов'
+    },
+    comments: {
+      comment: 'Введите комментарий',
+      send: '@:send'
     }
   },
   grid: {

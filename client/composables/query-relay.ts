@@ -1,7 +1,7 @@
 import { DocumentNode } from 'graphql'
-import { DataProxy } from '@apollo/client'
+import { ApolloQueryResult, DataProxy } from '@apollo/client'
 import { useQuery } from '@vue/apollo-composable'
-import { useScroll } from '@vueuse/core'
+import { useEventListener } from '@vueuse/core'
 import { FetchResult } from '@apollo/client/link/core'
 import type {
   DocumentParameter,
@@ -10,7 +10,7 @@ import type {
   UseQueryReturn
 } from '@vue/apollo-composable/dist/useQuery'
 import type { ComputedRef } from '#app'
-import { computed } from '#app'
+import { computed, onMounted, watch } from '#app'
 import { UseResultReturn } from '@vue/apollo-composable/dist/useResult'
 import { ExtractSingleKey } from '@vue/apollo-composable/dist/util/ExtractSingleKey'
 import { InvariantError } from 'ts-invariant'
@@ -38,8 +38,9 @@ export type QueryRelayParams<TResult = any, TVariables = any> = {
 
 export type QueryRelayOptions = {
   pagination: PaginationInterface,
+  isScrollDown?: boolean,
+  fetchScrollTrigger?: number
   fetchScroll?: Document | HTMLElement | undefined
-  fetchThrottle?: number
 }
 
 export type UseResultDefaultValueType<TNode> = { totalCount: number, edges: { node: TNode }[] }
@@ -82,25 +83,28 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
     pagination: useOffsetPagination()
   }
 ): QueryRelayResult<TResult, TVariables, TNode> {
-  const { document, variables, options } = queryParams
-  const { pagination, fetchScroll, fetchThrottle } = queryOptions
+  const { document: documentNode, variables, options } = queryParams
+  const { pagination, fetchScroll } = queryOptions
+  const isScrollDown = queryOptions.isScrollDown ?? true
+  const fetchScrollTrigger = queryOptions.fetchScrollTrigger ?? 200
+
   /**
    * Переменные запроса
    */
-  const queryVariables: ComputedRef<TVariables> = computed<TVariables>(() => {
+  const queryVariables = computed<TVariables>(() => {
     return { ...pagination.variables.value, ...getValue<TVariables>(variables) }
   })
 
   /**
    * Запросы
    */
-  const q: UseQueryReturn<TResult, TVariables> = useQuery<TResult, TVariables>(document, queryVariables, options)
+  const q = useQuery<TResult, TVariables>(documentNode, queryVariables, options)
   const dataQuery = useResult<TResult, ResultDefaultValueType<any>>(q.result, { totalCount: 0, edges: [] })
 
   /**
    * Чистые данные
    */
-  const data: ComputedRef<TNode[]> = computed<TNode[]>(() => {
+  const data = computed<TNode[]>(() => {
     const { totalCount, pageInfo, edges } = (dataQuery.value as unknown as {
       totalCount: number,
       edges: { node: TNode }[],
@@ -116,18 +120,18 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
   /**
    * Могу ли я подгружать еще записи
    */
-  const fetchMoreAvailable: ComputedRef<boolean> = computed<boolean>(() => {
+  const fetchMoreAvailable = computed<boolean>(() => {
     return pagination.mode === 'fetch' && !q.loading.value && pagination.fetchMore.value
   })
   /**
    * Подгрузка записей
    */
-  const fetchMoreData = (): void => {
+  const fetchMoreData = (): Promise<ApolloQueryResult<TResult>> | undefined => {
     if (!fetchMoreAvailable.value) {
       return
     }
     pagination.setPage(++pagination.page.value)
-    q.fetchMore({
+    return q.fetchMore({
       variables: { ...getValue(variables), ...pagination.extendVariables.value },
       updateQuery: (previousResult: TResult, { fetchMoreResult }): TResult => {
         return Object.keys(previousResult).reduce((a, key) => ({
@@ -140,20 +144,39 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
           }
         }), {}) as TResult
       }
-    }).then()
+    })
   }
 
   /**
    * Событие на подгрузку по прокрутке
    */
-  const { y } = useScroll(fetchScroll, {
-    throttle: fetchThrottle ?? 300,
-    onScroll (event: Event | any) {
-      if (fetchMoreAvailable.value && y.value + window.innerHeight + 200 > event.target.documentElement.offsetHeight) {
-        fetchMoreData()
+  onMounted(() => {
+    watch(() => data.value, () => {
+      if (data.value.length === pagination.pageSize.value) {
+        if (!isScrollDown) {
+          document.documentElement.scrollTop = document.documentElement.scrollHeight
+        }
+        useEventListener(fetchScroll, 'scroll', async (e: Event) => {
+          const eventTarget = (
+            e.target === document ? (e.target as Document).documentElement : e.target
+          ) as HTMLElement
+          if (
+            isScrollDown &&
+            fetchMoreAvailable.value &&
+            eventTarget.scrollTop + window.innerHeight + fetchScrollTrigger > eventTarget.offsetHeight
+          ) {
+            await fetchMoreData()
+          } else if (!isScrollDown && fetchMoreAvailable.value && eventTarget.scrollTop < fetchScrollTrigger) {
+            await fetchMoreData()
+            if (eventTarget.scrollTop < fetchScrollTrigger && fetchMoreAvailable.value) {
+              eventTarget.scrollTop = fetchScrollTrigger + 10
+            }
+          }
+        })
       }
-    }
+    })
   })
+
   /**
    * Обновление при совершении мутации
    * @param cache - хранилище
@@ -169,11 +192,11 @@ export function useQueryRelay<TResult = any, TVariables = any, TNode extends { i
   ): void => {
     try {
       const cacheData: TResult = cache.readQuery<TResult, TVariables>({
-        query: document as DocumentNode,
+        query: documentNode as DocumentNode,
         variables: queryVariables.value
       })
       const data: TResult = transform(cacheData, result)
-      cache.writeQuery({ query: document as DocumentNode, variables: queryVariables.value, data })
+      cache.writeQuery({ query: documentNode as DocumentNode, variables: queryVariables.value, data })
     } catch (e) {
       if (e instanceof InvariantError && !isStrict) {
         return

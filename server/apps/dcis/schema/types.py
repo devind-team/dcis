@@ -22,6 +22,7 @@ from apps.dcis.models import (
     ColumnDimension,
     CuratorGroup,
     Document,
+    DocumentMessage,
     DocumentStatus,
     Limitation,
     Period,
@@ -389,6 +390,20 @@ class DocumentStatusType(DjangoObjectType):
             'status',
             'user',
         )
+
+
+class DocumentMessageType(DjangoObjectType):
+    """Тип комментариев для документа"""
+
+    document = graphene.Field(DocumentType, description='Документ')
+    user = graphene.Field(UserType, required=True, description='Пользователь')
+
+    class Meta:
+        model = DocumentMessage
+        interfaces = (graphene.relay.Node,)
+        fields = ('id', 'comment', 'created_at', 'document', 'user',)
+        filter_fields = {}
+        connection_class = CountableConnection
 
 
 class AttributeType(DjangoObjectType):

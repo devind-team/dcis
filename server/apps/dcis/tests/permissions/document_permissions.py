@@ -3,7 +3,7 @@
 from typing import Callable
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
@@ -14,7 +14,7 @@ from apps.dcis.models import (
     Attribute,
     Cell,
     ColumnDimension,
-    Document,
+    CuratorGroup, Document,
     Period,
     Project,
     RowDimension,
@@ -24,6 +24,7 @@ from apps.dcis.models import (
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
     can_add_document,
+    can_add_document_message,
     can_add_document_status,
     can_change_attribute_value,
     can_change_child_row_dimension_height,
@@ -42,8 +43,9 @@ class DocumentPermissionsTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
 
-        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
 
         self.status_edit = Status.objects.create(edit=True)
         self.status_edit_create_status = AddStatus.objects.create(
@@ -57,7 +59,7 @@ class DocumentPermissionsTestCase(TestCase):
             roles=['creator']
         )
 
-        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
         self.period_attribute = Attribute.objects.create(key='a', mutable=False, period=self.period)
         self.period_attribute_mutable = Attribute.objects.create(key='am', mutable=True, period=self.period)
@@ -68,7 +70,14 @@ class DocumentPermissionsTestCase(TestCase):
             user=self.user
         )
 
-        self.user_project = Project.objects.create(user=self.user, content_type=self.department_content_type)
+        self.organization = Organization.objects.create(attributes='')
+        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group.users.add(self.curator)
+        self.curator_group.organization.add(self.organization)
+        self.period.division_set.create(object_id=self.organization.id)
+        self.organization_document = Document.objects.create(period=self.period, object_id=self.organization.id)
+
+        self.user_project = Project.objects.create(user=self.user, content_type=self.organization_content_type)
         self.user_period = Period.objects.create(user=self.user, project=self.user_project)
         self.user_period_attribute = Attribute.objects.create(key='a', mutable=False, period=self.user_period)
         self.user_period_attribute_mutable = Attribute.objects.create(kind='am', mutable=True, period=self.user_period)
@@ -230,6 +239,11 @@ class DocumentPermissionsTestCase(TestCase):
     def test_can_delete_document_status(self) -> None:
         """Тестирование функции `can_delete_document_status`."""
         self._test_common(can_delete_document_status)
+
+    def test_can_add_document_message(self) -> None:
+        """Тестирование функции `can_add_document_message`."""
+        self._test_common(can_add_document_message)
+        can_add_document_message(self.curator, self.organization_document)
 
     def test_can_change_attribute_value(self) -> None:
         """Тестирование функции `can_change_attribute_value`."""

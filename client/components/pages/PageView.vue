@@ -62,6 +62,7 @@ export default defineComponent({
         search: unref(debounceSearch)
       })
     }, {
+      isScrollDown: true,
       pagination: useCursorPagination({ pageSize: props.pageSize }),
       fetchScroll: typeof document === 'undefined' ? null : document
     })

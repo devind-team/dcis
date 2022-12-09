@@ -1,0 +1,16 @@
+#import "../../fragments/document_message_fields.graphql"
+
+mutation AddDocumentMessage($documentId: ID!, $message: String!) {
+  addDocumentMessage(input: {documentId: $documentId, message: $message}){
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    documentMessage {
+      ...DocumentMessageFields
+    }
+    __typename
+  }
+}
