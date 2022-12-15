@@ -74,6 +74,7 @@ export default defineComponent({
         userId: user.value.id
       })
     }, {
+      isScrollDown: true,
       pagination: useCursorPagination(),
       fetchScroll: typeof document === 'undefined' ? null : document
     })

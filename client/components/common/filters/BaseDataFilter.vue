@@ -4,18 +4,22 @@ component(
   :is="modal ? 'v-dialog' : 'v-menu'"
   :max-width="maxWidth"
   :close-on-content-click="false"
+  :fullscreen="fullscreen"
   bottom
   scrollable
 )
-  template(#activator="{ on }")
+  template(#activator="{ on, attrs }")
     slot(
       name="message"
       :on="on"
+      :attrs="attrs"
       :message="message"
       :container-class="messageContainerClass"
     )
       v-chip(
         v-on="on"
+        v-bind="attrs"
+        :disabled="disabled"
         :class="messageContainerClass"
         :close="messageContainerClose"
         @click:close="$emit('clear')"
@@ -42,28 +46,29 @@ component(
 
 <script lang="ts">
 import { VMenu, VDialog } from 'vuetify/lib'
-import type { PropType, Ref, SetupContext } from '#app'
-import { defineComponent, ref } from '#app'
+import type { PropType } from '#app'
+import { defineComponent, ref, watch } from '#app'
 import { Class } from '~/types/filters'
 
 export default defineComponent({
   components: { VMenu, VDialog },
   props: {
+    title: { type: String, default: null },
     message: { type: String, required: true },
+    disabled: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: undefined },
     messageContainerClose: { type: Boolean, default: false },
     modal: { type: Boolean, default: false },
-    title: {
-      type: String,
-      default () {
-        return (this as any).$options.methods.t.call(this, 'title')
-      }
-    },
+    fullscreen: { type: Boolean, default: undefined },
     maxWidth: { type: [String, Number], default: '400px' },
     maxHeight: { type: [String, Number], default: '400px' }
   },
-  setup (_, { emit }: SetupContext) {
-    const active: Ref<boolean> = ref<boolean>(false)
+  setup (_, { emit }) {
+    const active = ref<boolean>(false)
+
+    watch(() => active.value, (newValue) => {
+      emit('active-changed', newValue)
+    })
 
     const close = () => {
       active.value = false

@@ -1,5 +1,4 @@
 """Разрешения на работу с документами периодов."""
-
 from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
@@ -7,6 +6,7 @@ from apps.dcis.models import AddStatus, Attribute, Cell, Document, Period, RowDi
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_sheet_base, can_view_period
+from ..services.curator_services import is_document_curator
 
 
 def can_add_budget_classification(user: User):
@@ -121,6 +121,19 @@ def can_delete_document_status(user: User, document: Document):
     """Пропускает пользователей, которые могут просматривать документ и удалять из него статус."""
     can_view_document(user, document)
     can_delete_document_status_base(user, document)
+
+
+def can_add_document_message_base(user: User, document: Document):
+    """Пропускает пользователей, которые могут добавлять сообщение к документу, без проверки возможности просмотра."""
+    if is_document_curator(user, document):
+        return
+    can_change_document_base(user, document)
+
+
+def can_add_document_message(user: User, document: Document):
+    """Пропускает пользователей, которые могут просматривать документ и добавлять к нему сообщение."""
+    can_view_document(user, document)
+    can_add_document_message_base(user, document)
 
 
 class ChangeDocumentSheetBase:

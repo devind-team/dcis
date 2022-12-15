@@ -22,6 +22,7 @@ from apps.dcis.models import (
     ColumnDimension,
     CuratorGroup,
     Document,
+    DocumentMessage,
     DocumentStatus,
     Limitation,
     Period,
@@ -39,7 +40,7 @@ from apps.dcis.permissions import (
     ChangeAttributeValueBase,
     can_add_period_base,
     can_change_document_base,
-    can_change_period_attributes,
+    can_change_period_attributes_base,
     can_change_period_divisions_base,
     can_change_period_groups_base,
     can_change_period_limitations_base,
@@ -49,7 +50,9 @@ from apps.dcis.permissions import (
     can_change_project_base,
     can_delete_period_base,
     can_delete_project_base,
+    can_view_period_report_base,
 )
+from apps.dcis.permissions.period_permissions import can_change_period_base
 from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.services.document_services import get_document_sheets
@@ -115,6 +118,10 @@ class PeriodType(DjangoObjectType):
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
+    is_admin = graphene.Boolean(
+        required=True,
+        description='Является ли пользователь администратором для периода',
+    )
     is_curator = graphene.Boolean(
         required=True,
         description='Является ли пользователь куратором для периода',
@@ -138,6 +145,10 @@ class PeriodType(DjangoObjectType):
     can_change_users = graphene.Boolean(
         required=True,
         description='Может ли пользователь изменять пользователей периода',
+    )
+    can_view_report = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь просматривать сводный отчет периода'
     )
     can_change_attributes = graphene.Boolean(
         required=True,
@@ -191,6 +202,10 @@ class PeriodType(DjangoObjectType):
         return period.sheet_set.all()
 
     @staticmethod
+    def resolve_is_admin(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_base, info.context.user, period)
+
+    @staticmethod
     def resolve_is_curator(period: Period, info: ResolveInfo) -> bool:
         return is_period_curator(info.context.user, period)
 
@@ -216,7 +231,11 @@ class PeriodType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_change_attributes(period: Period, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_change_period_attributes, info.context.user, period)
+        return not is_raises(PermissionDenied, can_change_period_attributes_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_view_report(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_view_period_report_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
@@ -373,6 +392,20 @@ class DocumentStatusType(DjangoObjectType):
         )
 
 
+class DocumentMessageType(DjangoObjectType):
+    """Тип комментариев для документа"""
+
+    document = graphene.Field(DocumentType, description='Документ')
+    user = graphene.Field(UserType, required=True, description='Пользователь')
+
+    class Meta:
+        model = DocumentMessage
+        interfaces = (graphene.relay.Node,)
+        fields = ('id', 'comment', 'created_at', 'document', 'user',)
+        filter_fields = {}
+        connection_class = CountableConnection
+
+
 class AttributeType(DjangoObjectType):
     """Тип атрибутов для документов."""
 
@@ -457,6 +490,7 @@ class RowDimensionType(graphene.ObjectType):
     object_id = graphene.ID(description='Идентификатор дивизиона')
     user_id = graphene.ID(description='Идентификатор пользователя')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
+    background = graphene.String(description='Цвет фона')
 
 
 class ChangeColumnDimensionType(DjangoObjectType):
@@ -564,9 +598,8 @@ class CellType(graphene.ObjectType):
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
 
-    # От Value
+    # От Value или Cell
     value = graphene.String(description='Значение')
-    verified = graphene.Boolean(required=True, description='Валидно ли поле')
     error = graphene.String(description='Текст ошибки')
 
 
@@ -585,7 +618,6 @@ class ValueType(DjangoObjectType):
             'id',
             'value',
             'payload',
-            'verified',
             'error',
             'document',
         )
@@ -602,10 +634,11 @@ class BaseSheetType(graphene.ObjectType):
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
-    show_head = graphene.Boolean(required=True, description='Показвать ли головам')
-    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным')
+    show_head = graphene.Boolean(required=True, description='Показывать ли головным организациям')
+    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным организациям')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
+
     period = graphene.Field(PeriodType, description='Период')
 
 
@@ -658,3 +691,18 @@ class GlobalIndicesInputType(graphene.InputObjectType):
 
     row_id = graphene.ID(required=True, description='Идентификатор строки')
     global_index = graphene.Int(required=True, description='Индекс в плоской структуре')
+
+
+class ReportDocumentInputType(graphene.InputObjectType):
+    """Документ для выгрузки сводного отчета."""
+
+    document_id = graphene.ID(required=True, description='Идентификатор документа')
+    is_visible = graphene.Boolean(required=True, description='Показывать ли дочерние строки')
+    color = graphene.String(description='Цвет выделения дочерних строк')
+
+
+class ReportRowGroupInputType(graphene.InputObjectType):
+    """Группа строк для выгрузки сводного отчета."""
+
+    group_index = graphene.Int(required=True, description='Индекс группы строк')
+    is_expanded = graphene.Boolean(required=True, description='Является ли строка расширенной')

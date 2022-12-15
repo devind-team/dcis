@@ -95,7 +95,7 @@ import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
 export type DeleteDocumentStatusMutationResult = { data: { deleteDocumentStatus: DeleteDocumentStatusMutationPayload } }
 
-type PeriodUpdateType = (
+export type PeriodUpdateType = (
   cache: DataProxy | ApolloCache<any>,
   result: AddDocumentStatusMutationResult | DeleteDocumentStatusMutationResult,
   transform: (cache: any, result: AddDocumentStatusMutationResult | DeleteDocumentStatusMutationResult) => any

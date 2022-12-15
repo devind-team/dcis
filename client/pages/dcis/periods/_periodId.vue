@@ -7,7 +7,8 @@ div
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, useRoute, provide } from '#app'
+import { computed, defineComponent, ref, provide } from '#app'
+import { useRoute } from '#imports'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
 import { usePeriodQuery } from '~/services/grapqhl/queries/dcis/periods'
@@ -37,7 +38,9 @@ export default defineComponent({
     const links = computed<LinksType[]>(() => {
       const result: LinksType[] = [
         {
-          title: t('dcis.periods.links.documents') as string,
+          title: period.value && (period.value.isAdmin || period.value.isCurator)
+            ? t('dcis.periods.links.monitoring') as string
+            : t('dcis.periods.links.documents') as string,
           to: 'dcis-periods-periodId-documents',
           icon: 'file-table-box-multiple-outline'
         }
@@ -83,6 +86,13 @@ export default defineComponent({
             title: t('dcis.periods.links.sheets') as string,
             to: 'dcis-periods-periodId-sheets',
             icon: 'table'
+          })
+        }
+        if (period.value.canViewReport) {
+          result.push({
+            title: t('dcis.periods.links.report') as string,
+            to: 'dcis-periods-periodId-report',
+            icon: 'table-multiple'
           })
         }
         if (period.value.canChangeSettings || period.value.canDelete) {

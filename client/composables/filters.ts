@@ -44,7 +44,7 @@ export function useFilters () {
 
   const getUserName = (user: UserType | Ref<UserType>) => {
     const u = unref(user)
-    return `${u.lastName} ${u.firstName[0]}.${u.sirName[0]}`
+    return `${u.lastName} ${u.firstName[0]}.${u.sirName[0]}.`
   }
 
   return { money, basename, date, dateTimeHM, timeHM, textLength, getUserFullName, getUserName }

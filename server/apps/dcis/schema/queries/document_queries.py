@@ -13,11 +13,22 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import AttributeValue, Cell, Document, DocumentStatus, Period, Sheet, Status, Value
+from apps.dcis.models import (
+    AttributeValue,
+    Cell,
+    Document,
+    DocumentMessage,
+    DocumentStatus,
+    Period,
+    Sheet,
+    Status,
+    Value,
+)
 from apps.dcis.permissions import can_view_document
 from apps.dcis.schema.types import (
     AttributeValueType,
     ChangeCellType,
+    DocumentMessageType,
     DocumentStatusType,
     DocumentType,
     SheetType,
@@ -42,6 +53,12 @@ class DocumentQueries(graphene.ObjectType):
         DocumentType,
         description='Документ',
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
+    )
+
+    document_messages = DjangoFilterConnectionField(
+        DocumentMessageType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        description='Комментарии документов'
     )
 
     statuses = DjangoListField(StatusType, description='Статусы')
@@ -102,6 +119,19 @@ class DocumentQueries(graphene.ObjectType):
         document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         return document
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_document_messages(
+        root: Any,
+        info: ResolveInfo,
+        document_id: str,
+        *args,
+        **kwarg
+    ) -> Iterable[DocumentMessage]:
+        document = get_object_or_404(Document, pk=gid2int(document_id))
+        can_view_document(info.context.user, document)
+        return DocumentMessage.objects.filter(document=document)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

@@ -1,6 +1,6 @@
 <template lang="pug">
 .grid__body
-  div.grid__container(ref="gridContainer")
+  div.grid__container(ref="gridContainer" :style="{ height }")
     table.grid__table(:style="{ width: `${gridWidth}px` }" ref="grid")
       grid-header(
         :row-name-column-width="rowNameColumnWidth"
@@ -64,29 +64,19 @@
           :key="view.id"
         )
   grid-element-resizing(
-    :message="String(t('dcis.grid.columnWidth'))"
+    :message="String($t('dcis.grid.columnWidth'))"
     :element-resizing="resizingColumnWidth"
   )
   grid-element-resizing(
-    :message="String(t('dcis.grid.rowHeight'))"
+    :message="String($t('dcis.grid.rowHeight'))"
     :element-resizing="resizingRowHeight"
   )
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, PropType, toRef, provide, ref } from '#app'
-import { fromGlobalId } from '~/services/graphql-relay'
-import { GridMode, UpdateSheetType } from '~/types/grid'
-import { DocumentType, SheetType, RowDimensionType, DocumentsSheetQuery, DocumentSheetQuery } from '~/types/graphql'
-import {
-  UpdateType,
-  useChangeColumnDimensionWidthMutation,
-  useChangeRowDimensionHeightMutation,
-  useChangeChildRowDimensionHeightMutation,
-  useGrid,
-  useI18n
-} from '~/composables'
-import { useAuthStore } from '~/stores'
+import { defineComponent, inject } from '#app'
+import { GridModeInject, GridMode } from '~/types/grid'
+import { useGrid } from '~/composables/grid'
 import GridHeader from '~/components/dcis/grid/GridHeader.vue'
 import GridBody from '~/components/dcis/grid/GridBody.vue'
 import GridElementResizing from '~/components/dcis/grid/GridElementResizing.vue'
@@ -100,51 +90,14 @@ export default defineComponent({
     GridSelectionView
   },
   props: {
-    mode: { type: Number, required: true },
-    activeSheet: { type: Object as PropType<SheetType>, required: true },
-    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true },
-    activeDocument: { type: Object as PropType<DocumentType>, default: null }
+    height: { type: String, required: true }
   },
-  setup (props) {
-    const { t } = useI18n()
-
-    const userStore = useAuthStore()
-
-    const activeSheet = toRef(props, 'activeSheet')
-    const updateActiveSheet = toRef(props, 'updateActiveSheet')
-    const activeDocument = toRef(props, 'activeDocument')
-
-    provide('mode', props.mode)
-    provide('activeSheet', activeSheet)
-    provide('updateActiveSheet', updateActiveSheet)
-    provide('activeDocument', activeDocument)
-
-    const gridContainer = ref<HTMLDivElement | null>(null)
-    const grid = ref<HTMLTableElement | null>(null)
-
-    const canChangeRowHeight = (rowDimension: RowDimensionType) => {
-      if (props.mode === GridMode.CHANGE) {
-        return true
-      }
-      if (!activeDocument.value.lastStatus.status.edit) {
-        return false
-      }
-      return rowDimension.parent !== null && (
-        activeSheet.value.canChange ||
-        activeSheet.value.canChangeChildRowDimensionHeight ||
-        activeDocument.value.user?.id === userStore.user.id ||
-        rowDimension.userId === String(fromGlobalId(userStore.user.id).id)
-      )
-    }
-
-    const changeColumnWidth = props.mode === GridMode.CHANGE
-      ? useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
-      : null
-    const changeRowHeight = props.mode === GridMode.CHANGE
-      ? useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentsSheetQuery>>)
-      : useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
+  setup () {
+    const mode = inject(GridModeInject)
 
     const {
+      gridContainer,
+      grid,
       rowNameColumnWidth,
       columnNameRowHeight,
       gridWidth,
@@ -193,19 +146,11 @@ export default defineComponent({
       mouseleaveRowName,
       mousedownRowName,
       mouseupRowName
-    } = useGrid(
-      props.mode,
-      activeSheet,
-      gridContainer,
-      grid,
-      canChangeRowHeight,
-      changeColumnWidth,
-      changeRowHeight
-    )
+    } = useGrid()
 
     return {
       GridMode,
-      t,
+      mode,
       gridContainer,
       grid,
       rowNameColumnWidth,
@@ -290,7 +235,6 @@ div.grid__body
   .grid__container
     position: relative
     overflow: auto
-    height: calc(100vh - 285px)
 
     table.grid__table
       height: 1px

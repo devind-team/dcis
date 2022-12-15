@@ -6,6 +6,7 @@ export const useProjects = (): QueryRelayResult<ProjectsQuery, ProjectsQueryVari
   return useQueryRelay<ProjectsQuery, ProjectsQueryVariables, ProjectType>({
     document: projectsQuery
   }, {
+    isScrollDown: true,
     pagination: useCursorPagination()
   })
 }

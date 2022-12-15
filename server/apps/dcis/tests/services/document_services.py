@@ -7,15 +7,27 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import AddStatus, CuratorGroup, Division, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import (
+    AddStatus,
+    CuratorGroup,
+    Division,
+    Document,
+    DocumentMessage,
+    Period,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+)
 from apps.dcis.permissions import (
     can_add_document,
     can_change_document_comment,
 )
+from apps.dcis.permissions.document_permissions import can_add_document_message
 from apps.dcis.services.document_services import (
     change_document_comment,
     create_document,
-    get_user_documents,
+    create_document_message, get_user_documents,
     get_user_roles,
 )
 
@@ -302,3 +314,71 @@ class DocumentTestCase(TestCase):
         )
         expected_document = Document.objects.get(comment=self.change_comment)
         self.assertEqual(expected_document, actual_document)
+
+
+class DocumentMessageTestCase(TestCase):
+    """Тестирование добавления сообщений к документу."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
+        self.another_curator = User.objects.create(username='another_curator', email='another_curator@gmail.com')
+        self.organization_member = User.objects.create(
+            username='organization_member',
+            email='organization_member@gmail.com',
+        )
+        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.organization = Organization.objects.create(name=f'Организация', attributes='')
+        self.organization.users.add(self.organization_member)
+
+        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа')
+        self.curator_group.users.add(self.curator)
+        self.curator_group.organization.add(self.organization)
+
+        self.another_organization = Organization.objects.create(name=f'Другая организация', attributes='')
+        self.another_organization.users.add(self.organization_member)
+        self.another_curator_group = CuratorGroup.objects.create(name='Другая кураторская группа')
+        self.another_curator_group.users.add(self.another_curator)
+
+        self.organization_project = Project.objects.create(content_type=self.organization_content_type)
+        self.organization_period = Period.objects.create(project=self.organization_project)
+
+        self.user_document = Document.objects.create(
+            user=self.user,
+            period=self.organization_period,
+            object_id=self.organization.id
+
+        )
+        self.superuser_document = Document.objects.create(
+            user=self.superuser,
+            period=self.organization_period,
+            comment='Test comment'
+        )
+
+    def test_create_document_user_and_superuser_message(self) -> None:
+        """Тестирование функции create_document_message на добавление сообщения к документу посторонним пользователем
+        и суперпользователем"""
+        with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
+            self.superuser_document.period.project,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser_document.period,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm not in ('dcis.change_document', 'dcis.add_project', 'dcis.add_period')
+        ):
+            self.assertRaises(PermissionDenied, can_add_document_message, self.superuser, self.superuser_document)
+        actual_document_message = create_document_message(
+            user=self.superuser,
+            document=self.superuser_document,
+            message='Test message'
+        )
+        expected_document_message = DocumentMessage.objects.get(comment='Test message')
+        self.assertEqual(expected_document_message, actual_document_message)

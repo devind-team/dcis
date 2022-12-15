@@ -3,7 +3,8 @@ export default {
   projects: {
     name: '@:dcis.home',
     divisions: 'Мои организации',
-    filters: {
+    filter: {
+      title: 'Фильтр проектов',
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
       hidden: 'Скрытые проекты',
@@ -51,6 +52,7 @@ export default {
     },
     links: {
       documents: 'Документы',
+      monitoring: 'Мониторинг',
       departments: 'Департаменты',
       organizations: 'Организации',
       groups: 'Группы',
@@ -58,6 +60,7 @@ export default {
       limitations: 'Ограничения',
       attributes: 'Атрибуты',
       sheets: 'Таблица',
+      report: 'Сводный отчет',
       settings: '@:settings'
     },
     statuses: {
@@ -214,11 +217,52 @@ export default {
     },
     sheets: {
       name: '@:dcis.periods.links.sheets'
+    },
+    report: {
+      name: '@:dcis.periods.links.report',
+      settings: {
+        unload: 'Выгрузить сводный отчет'
+      },
+      documentsFilter: {
+        title: 'Выбор документов',
+        noFiltrationMessage: 'Выбрать документы',
+        multipleMessage: 'Выбрано документов: {count}',
+        selectMainDocument: 'Выбрать основной документ',
+        mainDocumentSelection: 'Выбор основного документа',
+        mainDocument: 'Выбран основной документ: {divisionId}',
+        propertiesForm: {
+          header: 'Изменение свойств отображения документа',
+          subheader: 'Документ: {divisionId}',
+          isVisible: 'Отображать дочерние строки',
+          color: 'Выделять цветом',
+          buttonText: 'Изменить свойства'
+        },
+        aggregationFilter: {
+          title: 'Выбор метода агрегации',
+          selectAggregation: 'Выбрать метод агрегации',
+          aggregation: 'Выбран метод агрегации: {method}',
+          concat: 'Сцепление строк',
+          sum: 'Сумма',
+          avg: 'Среднее арифметическое',
+          max: 'Максимальное значение',
+          min: 'Минимальное значение'
+        }
+      },
+      rowsFilter: {
+        title: 'Выбор расширенных строки',
+        noFiltrationMessage: 'Выбрать расширенные строки',
+        multipleMessage: 'Выбрано расширенных строк: {count}'
+      }
     }
   },
   documents: {
     name: 'Документы',
     version: 'Версия {version}',
+    links: {
+      sheets: 'Листы',
+      attributes: 'Атрибуты',
+      comments: 'Комментарии'
+    },
     divisionFilterOrganization: {
       title: 'Фильтр организаций',
       noFiltrationMessage: 'Все организации',
@@ -293,6 +337,21 @@ export default {
       organizationHead: 'Начальник организации',
       user: 'Пользователь, добавивший строку',
       unload: 'Выгрузить'
+    },
+    tabs: {
+      tabNameDocuments: {
+        name: 'Документы'
+      },
+      tabNameNotSupplied: {
+        name: 'Не подавшие'
+      }
+    },
+    attributes: {
+      noAttributes: 'Нет атрибутов'
+    },
+    comments: {
+      comment: 'Введите комментарий',
+      send: '@:send'
     }
   },
   grid: {

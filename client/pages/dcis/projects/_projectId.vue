@@ -2,11 +2,12 @@
 div
   left-navigator-driver(v-model="drawer" :items="links")
   v-progress-circular(v-if="loading" color="primary" indeterminate)
-  nuxt-child(v-else  @update-drawer="drawer = !drawer" :breadCrumbs="bc" :project="project")
+  nuxt-child(v-else :breadCrumbs="bc" :project="project" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, provide, ref, useRoute } from '#app'
+import { computed, defineComponent, PropType, provide, ref } from '#app'
+import { useRoute } from '#imports'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useCommonQuery, useI18n } from '~/composables'
 import { ProjectQuery, ProjectQueryVariables } from '~/types/graphql'

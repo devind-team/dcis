@@ -25,7 +25,8 @@ import {
   ChangeAttributeValueMutation,
   ChangeAttributeValueMutationVariables
 } from '~/types/graphql'
-import { UpdateSheetType } from '~/types/grid'
+import { UpdateActiveSheetType } from '~/types/grid'
+import { changeSheetValues } from '~/composables/grid-mutations'
 import changeAttributeValueMutation from '~/gql/dcis/mutations/attributes/change_attribute_value.graphql'
 import AttributeValueMoney from '~/components/dcis/attributes/fields/AttributeValueMoney.vue'
 import AttributeValueNumeric from '~/components/dcis/attributes/fields/AttributeValueNumeric.vue'
@@ -34,7 +35,6 @@ import AttributeValueBigmoney from '~/components/dcis/attributes/fields/Attribut
 import AttributeValueBool from '~/components/dcis/attributes/fields/AttributeValueBool.vue'
 import AttributeValueFiles from '~/components/dcis/attributes/fields/AttributeValueFiles.vue'
 import AttributeValueDate from '~/components/dcis/attributes/fields/AttributeValueDate.vue'
-import { changeSheetValues } from '~/composables'
 
 type AttributeComponentsType = typeof AttributeValueNumeric | typeof AttributeValueMoney | typeof AttributeValueText
 
@@ -64,14 +64,17 @@ export default defineComponent({
       type: Function as PropType<(cache, result: ChangeAttributeValueMutationResult, key: string) => void>,
       required: true
     },
-    updateActiveSheet: { type: Function as PropType<UpdateSheetType>, required: true }
+    updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, required: true }
   },
   setup (props) {
     const { client } = useApolloClient()
     const values = computed<Record<number, AttributeValueType>>(() => (
       props.attributesValues.reduce((a, c) => ({ [c.attributeId]: c, ...a }), {}))
     )
-    const { mutate: changeAttributeValue } = useMutation<ChangeAttributeValueMutation, ChangeAttributeValueMutationVariables>(
+    const { mutate: changeAttributeValue } = useMutation<
+      ChangeAttributeValueMutation,
+      ChangeAttributeValueMutationVariables
+    >(
       changeAttributeValueMutation,
       {
         update: (cache, result: ChangeAttributeValueMutationResult) => {

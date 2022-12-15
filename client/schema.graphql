@@ -255,6 +255,25 @@ type AddDocumentDataMutationPayload {
   success: Boolean!
 }
 
+input AddDocumentMessageMutationInput {
+  clientMutationId: String
+  """Документ"""
+  documentId: ID!
+  """Текст комментария"""
+  message: String
+}
+
+"""Добавление комментария к документу"""
+type AddDocumentMessageMutationPayload {
+  clientMutationId: String
+  """Созданный комментарий"""
+  documentMessage: DocumentMessageType
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddDocumentMutationInput {
   clientMutationId: String
   """Комментарий"""
@@ -812,9 +831,9 @@ type BaseSheetType {
   period: PeriodType
   """Позиция"""
   position: Int!
-  """Показывать ли подведомственным"""
+  """Показывать ли подведомственным организациям"""
   showChild: Boolean!
-  """Показвать ли головам"""
+  """Показывать ли головным организациям"""
   showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
@@ -1039,8 +1058,6 @@ type CellType {
   underline: String
   """Значение"""
   value: String
-  """Валидно ли поле"""
-  verified: Boolean!
   """Вертикальное выравнивание"""
   verticalAlign: ID
 }
@@ -2695,6 +2712,37 @@ type DjangoDebugSQL {
   vendor: String!
 }
 
+"""Тип комментариев для документа"""
+type DocumentMessageType implements Node {
+  """Комментарий"""
+  comment: String!
+  """Дата создания"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  """The ID of the object."""
+  id: ID!
+  """Пользователь"""
+  user: UserType!
+}
+
+type DocumentMessageTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [DocumentMessageTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `DocumentMessageType` and its cursor."""
+type DocumentMessageTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: DocumentMessageType
+}
+
 """Тип статусов для документов."""
 type DocumentStatusType {
   """Комментарий"""
@@ -3018,6 +3066,8 @@ type Mutation {
   addDocument(input: AddDocumentMutationInput!): AddDocumentMutationPayload!
   """Загрузка данных из файла."""
   addDocumentData(input: AddDocumentDataMutationInput!): AddDocumentDataMutationPayload!
+  """Добавление комментария к документу"""
+  addDocumentMessage(input: AddDocumentMessageMutationInput!): AddDocumentMessageMutationPayload!
   """Добавление статуса документа."""
   addDocumentStatus(input: AddDocumentStatusMutationInput!): AddDocumentStatusMutationPayload!
   """Мутация для загрузки файлов"""
@@ -3711,6 +3761,8 @@ type PeriodType {
   canChangeUsers: Boolean!
   """Может ли пользователь удалять период"""
   canDelete: Boolean!
+  """Может ли пользователь просматривать сводный отчет периода"""
+  canViewReport: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
@@ -3718,6 +3770,8 @@ type PeriodType {
   """Дата окончания"""
   expiration: Date
   id: ID!
+  """Является ли пользователь администратором для периода"""
+  isAdmin: Boolean!
   """Является ли пользователь куратором для периода"""
   isCurator: Boolean!
   """Методическая поддержка"""
@@ -3979,6 +4033,16 @@ type Query {
     """Идентификатор документа"""
     documentId: ID!
   ): DocumentType
+  """Комментарии документов"""
+  documentMessages(
+    after: String
+    before: String
+    """Идентификатор документа"""
+    documentId: ID!
+    first: Int
+    last: Int
+    offset: Int
+  ): DocumentMessageTypeConnection
   """Выгрузка листа с несколькими документами"""
   documentSheet(
     """Идентификатор документа"""
@@ -4003,17 +4067,15 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): DocumentTypeConnection!
-  """Выгрузка листа с несколькими документами"""
-  documentsSheet(
-    """Идентификаторы документов"""
-    documentIds: [ID!]
-    """Идентификатор листа"""
-    sheetId: ID!
-  ): SheetType!
   files(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, userId: ID): FileTypeConnection!
   groups: [GroupType!]!
   """Установлены ли настройки приложения"""
   hasSettings: Boolean!
+  """Группы индексов строк, которые можно расширить"""
+  indicesGroupsToExpand(
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): [[Int!]!]
   """Возможные начальные статусы для нового документа"""
   initialStatuses(
     """Идентификатор периода"""
@@ -4055,6 +4117,11 @@ type Query {
     last: Int
     offset: Int
   ): OrganizationTypeConnection
+  """Получение организаций, у которых не поданы документы в периоде"""
+  organizationsHasNotDocument(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [OrganizationType]!
   """Страница"""
   page(pageId: ID!): PageType!
   """Получение типа страницы"""
@@ -4079,6 +4146,11 @@ type Query {
     """Запрос поиска"""
     search: String
   ): DivisionModelTypeConnection
+  """Выгрузка листа для периода"""
+  periodSheet(
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Пользователи, связанные периодом"""
   periodUsers(
     """Идентификатор периода"""
@@ -4124,6 +4196,19 @@ type Query {
     regionId: Int!
   ): RegionType
   regions: [RegionType!]
+  """Выгрузка листа для сводного отчета"""
+  reportSheet(
+    """Тип агрегации для сводного отчета"""
+    aggregation: ReportAggregation
+    """Основной документ"""
+    mainDocumentId: ID
+    """Документы для выгрузки сводного отчета"""
+    reportDocuments: [ReportDocumentInputType!]!
+    """Группы строк для выгрузки сводного отчета"""
+    reportRowGroups: [ReportRowGroupInputType!]!
+    """Идентификатор листа"""
+    sheetId: ID!
+  ): SheetType!
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
   """Сегменты страницы"""
@@ -4260,6 +4345,33 @@ type RenameSheetMutationPayload {
   success: Boolean!
 }
 
+"""Тип агрегации для сводного отчета."""
+enum ReportAggregation {
+  AVG
+  CONCAT
+  MAX
+  MIN
+  SUM
+}
+
+"""Документ для выгрузки сводного отчета."""
+input ReportDocumentInputType {
+  """Цвет выделения дочерних строк"""
+  color: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Показывать ли дочерние строки"""
+  isVisible: Boolean!
+}
+
+"""Группа строк для выгрузки сводного отчета."""
+input ReportRowGroupInputType {
+  """Индекс группы строк"""
+  groupIndex: Int!
+  """Является ли строка расширенной"""
+  isExpanded: Boolean!
+}
+
 input RequestCodeMutationInput {
   clientMutationId: String
   """Email адрес"""
@@ -4323,6 +4435,8 @@ type RestorePasswordMutationPayload {
 type RowDimensionType {
   """Агрегирование перечисление (мин, макс) для динамических строк"""
   aggregation: String
+  """Цвет фона"""
+  background: String
   """Ячейки"""
   cells: [CellType!]!
   """Дочерние строки"""
@@ -4610,9 +4724,9 @@ type SheetType {
   position: Int!
   """Строки"""
   rows: [RowDimensionType!]
-  """Показывать ли подведомственным"""
+  """Показывать ли подведомственным организациям"""
   showChild: Boolean!
-  """Показвать ли головам"""
+  """Показывать ли головным организациям"""
   showHead: Boolean!
   """Дата обновления"""
   updatedAt: DateTime!
@@ -4875,6 +4989,4 @@ type ValueType {
   sheetId: ID!
   """Значение"""
   value: String!
-  """Валидно ли поле"""
-  verified: Boolean!
 }

@@ -9,6 +9,8 @@ from .document_permissions import (
     can_add_budget_classification,
     can_add_child_row_dimension,
     can_add_document,
+    can_add_document_message,
+    can_add_document_message_base,
     can_add_document_status,
     can_add_document_status_base,
     can_change_attribute_value,
@@ -26,6 +28,7 @@ from .period_permissions import (
     can_add_period,
     can_add_period_base,
     can_change_period_attributes,
+    can_change_period_attributes_base,
     can_change_period_divisions,
     can_change_period_divisions_base,
     can_change_period_groups,
@@ -41,6 +44,8 @@ from .period_permissions import (
     can_delete_period,
     can_delete_period_base,
     can_view_period,
+    can_view_period_report,
+    can_view_period_report_base,
 )
 from .project_permissions import (
     can_add_project,

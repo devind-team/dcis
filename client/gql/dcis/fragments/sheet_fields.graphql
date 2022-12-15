@@ -1,3 +1,6 @@
+#import "./column_dimension_fields.graphql"
+#import "./row_dimension_fields.graphql"
+
 fragment SheetFields on SheetType {
   id
   name
@@ -7,5 +10,16 @@ fragment SheetFields on SheetType {
   showChild
   createdAt
   updatedAt
+  columns {
+    ...ColumnDimensionFields
+  }
+  rows {
+    ...RowDimensionFields
+  }
+  canChange
+  canChangeValue
+  canAddChildRowDimension
+  canChangeChildRowDimensionHeight
+  canDeleteChildRowDimension
   __typename
 }
