@@ -1,7 +1,11 @@
 #import "../fragments/organization_fields.graphql"
 
-query Organizations($first: Int, $after: String) {
-  organizations(first: $first, after: $after) {
+query Organizations($first: Int, $after: String, $search: String) {
+  organizations(
+    first: $first,
+    after: $after,
+    filter: { name: { icontains: $search } }
+  ) {
     edges {
       node {
         ...OrganizationField

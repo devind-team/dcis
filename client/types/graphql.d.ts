@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы измнения связей между записями в базе данных
+ * Типы изменения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -2156,7 +2156,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатет, готовиться отправить сообщение
+ * - TYPING - Печатает, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -2699,7 +2699,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы */
+/** Ошибка в поле формы. */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -5333,7 +5333,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представлющий собой таблицу. */
+/** Документ, представляющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
@@ -6316,6 +6316,7 @@ export type DocumentsSheetQuery = { __typename?: 'Query', documentsSheet: { __ty
 export type OrganizationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
+  search?: InputMaybe<Scalars['String']>;
 }>;
 
 export type OrganizationsQuery = { __typename?: 'Query', organizations?: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
