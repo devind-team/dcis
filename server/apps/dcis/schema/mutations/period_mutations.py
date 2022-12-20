@@ -6,10 +6,10 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.utils import gid2int
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.core.schema import UserType
@@ -30,6 +30,7 @@ from apps.dcis.services.period_services import (
     delete_period,
     delete_period_groups,
 )
+from apps.dcis.services.period_unload_services import unload_period
 
 
 class AddPeriodMutation(BaseMutation):
@@ -59,7 +60,7 @@ class AddPeriodMutation(BaseMutation):
         xlsx_file: InMemoryUploadedFile,
         limitations_file: InMemoryUploadedFile
     ):
-        project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        project = get_object_or_404(Project, pk=gid2int(project_id))
         return AddPeriodMutation(
             period=create_period(
                 name=name,
@@ -330,7 +331,7 @@ class ChangeUserPeriodGroupsMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_group_ids: list[str | int]):
-        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
+        user = get_object_or_404(User, pk=gid2int(user_id))
         return ChangeUserPeriodGroupsMutation(
             user=user,
             period_groups=change_user_period_groups(
@@ -358,7 +359,7 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_id: str, privileges_ids: list[str]):
-        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
+        user = get_object_or_404(User, pk=gid2int(user_id))
         return ChangeUserPeriodPrivilegesMutation(
             user=user,
             privileges=change_user_period_privileges(
@@ -368,6 +369,21 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
                 privileges_ids=privileges_ids
             )
         )
+
+
+class UnloadPeriodMutation(BaseMutation):
+    """Выгрузка периода в формате Excel."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+
+    src = graphene.String(description='Ссылка на сгенерированный файл')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return UnloadPeriodMutation(src=unload_period(info.context.user, period))
 
 
 class PeriodMutations(graphene.ObjectType):
@@ -389,3 +405,5 @@ class PeriodMutations(graphene.ObjectType):
 
     change_user_period_groups = ChangeUserPeriodGroupsMutation.Field(required=True)
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)
+
+    unload_period = UnloadPeriodMutation.Field(required=True)

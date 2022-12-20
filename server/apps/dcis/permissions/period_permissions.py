@@ -137,8 +137,8 @@ def can_change_period_attributes(user: User, period: Period):
     can_change_period_attributes_base(user, period)
 
 
-def can_view_period_report_base(user: User, period: Period):
-    """Пропускает пользователей, которые могут просматривать сводный отчет периода.
+def can_view_period_result_base(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать сводный отчет и выгрузки периода.
 
     Функция не проверяет, может ли пользователь просматривать период.
     """
@@ -148,15 +148,15 @@ def can_view_period_report_base(user: User, period: Period):
     except PermissionDenied:
         if is_period_curator(user, period):
             return
-        if has_privilege(user.id, period.id, 'view_period_report'):
+        if has_privilege(user.id, period.id, 'view_period_result'):
             return
     raise PermissionDenied('Недостаточно прав для просмотра сводного отчета периода.')
 
 
-def can_view_period_report(user: User, period: Period):
-    """Пропускает пользователей, которые могут просматривать сводный отчет периода."""
+def can_view_period_result(user: User, period: Period):
+    """Пропускает пользователей, которые могут просматривать сводный отчет и выгрузки периода."""
     can_view_period(user, period)
-    can_view_period_report_base(user, period)
+    can_view_period_result_base(user, period)
 
 
 def can_change_period_settings_base(user: User, period: Period):

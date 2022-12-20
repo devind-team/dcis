@@ -61,6 +61,7 @@ export default {
       attributes: 'Атрибуты',
       sheets: 'Таблица',
       report: 'Сводный отчет',
+      unload: 'Выгрузка',
       settings: '@:settings'
     },
     statuses: {
@@ -253,6 +254,9 @@ export default {
         noFiltrationMessage: 'Выбрать расширенные строки',
         multipleMessage: 'Выбрано расширенных строк: {count}'
       }
+    },
+    unload: {
+      name: '@:dcis.periods.links.unload'
     }
   },
   documents: {

@@ -14,7 +14,7 @@ query Period($periodId: ID!) {
     canChangeGroups
     canChangeUsers
     canChangeAttributes
-    canViewReport
+    canViewResult
     canChangeSettings
     canChangeSheet
     canDelete

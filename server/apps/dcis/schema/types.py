@@ -50,7 +50,7 @@ from apps.dcis.permissions import (
     can_change_project_base,
     can_delete_period_base,
     can_delete_project_base,
-    can_view_period_report_base,
+    can_view_period_result_base,
 )
 from apps.dcis.permissions.period_permissions import can_change_period_base
 from apps.dcis.services.curator_services import is_period_curator
@@ -146,9 +146,9 @@ class PeriodType(DjangoObjectType):
         required=True,
         description='Может ли пользователь изменять пользователей периода',
     )
-    can_view_report = graphene.Boolean(
+    can_view_result = graphene.Boolean(
         required=True,
-        description='Может ли пользователь просматривать сводный отчет периода'
+        description='Может ли пользователь просматривать сводный отчет выгрузки периода'
     )
     can_change_attributes = graphene.Boolean(
         required=True,
@@ -234,8 +234,8 @@ class PeriodType(DjangoObjectType):
         return not is_raises(PermissionDenied, can_change_period_attributes_base, info.context.user, period)
 
     @staticmethod
-    def resolve_can_view_report(period: Period, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_view_period_report_base, info.context.user, period)
+    def resolve_can_view_result(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_view_period_result_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:

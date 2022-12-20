@@ -88,11 +88,16 @@ export default defineComponent({
             icon: 'table'
           })
         }
-        if (period.value.canViewReport) {
+        if (period.value.canViewResult) {
           result.push({
             title: t('dcis.periods.links.report') as string,
             to: 'dcis-periods-periodId-report',
             icon: 'table-multiple'
+          })
+          result.push({
+            title: t('dcis.periods.links.unload') as string,
+            to: 'dcis-periods-periodId-unload',
+            icon: 'microsoft-excel'
           })
         }
         if (period.value.canChangeSettings || period.value.canDelete) {

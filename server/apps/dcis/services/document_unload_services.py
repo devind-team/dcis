@@ -47,13 +47,12 @@ class DocumentUnload:
     ALLOW_ADDITIONAL: list[str] = ['row_add_date', 'row_update_date', 'division_name', 'division_head', 'user']
     DIVISION_INFO_CACHE: dict[int, tuple[str, str]] = {}
 
-    def __init__(self, document: Document, host: str, additional: list[str], divisions_id=None):
-        """Инициализация
-
-            document - выгружаемый документ
-            host - текущий хост
-            additional - дополнительные параметры
-            divisions_id - выгружаемые дивизионы в запросе
+    def __init__(self, document: Document, host: str, additional: list[str], divisions_id=None) -> None:
+        """Инициализация.
+        - document - выгружаемый документ
+        - host - текущий хост
+        - additional - дополнительные параметры
+        - divisions_id - выгружаемые дивизионы в запросе
         """
         if divisions_id is None:
             divisions_id = []

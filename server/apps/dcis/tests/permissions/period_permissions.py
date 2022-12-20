@@ -21,7 +21,8 @@ from apps.dcis.permissions.period_permissions import (
     can_change_period_sheet,
     can_change_period_users,
     can_delete_period,
-    can_view_period, can_view_period_report,
+    can_view_period,
+    can_view_period_result,
 )
 
 
@@ -117,14 +118,14 @@ class PeriodPermissionsTestCase(TestCase):
             'change_period_attributes'
         )
 
-    def test_can_view_period_report(self) -> None:
-        """Тестирование функции `can_view_period_report`."""
-        can_view_period_report(self.curator, self.period)
+    def test_can_view_period_result(self) -> None:
+        """Тестирование функции `can_view_period_result`."""
+        can_view_period_result(self.curator, self.period)
         self._test_change_period_element(
-            can_view_period_report,
+            can_view_period_result,
             'dcis.change_period',
             'change_period',
-            'view_period_report'
+            'view_period_result'
         )
 
     def test_can_change_period_settings(self) -> None:

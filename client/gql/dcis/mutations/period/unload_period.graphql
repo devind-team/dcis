@@ -1,0 +1,11 @@
+mutation UnloadPeriod($periodId: ID!) {
+  unloadPeriod(input: { periodId: $periodId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    src
+  }
+}

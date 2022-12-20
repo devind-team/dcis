@@ -3260,6 +3260,8 @@ type Mutation {
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
   """Выгрузка архива значения ячейки типа `Файл`"""
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
+  """Выгрузка периода в формате Excel."""
+  unloadPeriod(input: UnloadPeriodMutationInput!): UnloadPeriodMutationPayload!
   """Обновление ограничений, накладываемых на лист, из json файла."""
   updateLimitationsFromFile(input: UpdateLimitationsFromFileMutationInput!): UpdateLimitationsFromFileMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
@@ -3761,8 +3763,8 @@ type PeriodType {
   canChangeUsers: Boolean!
   """Может ли пользователь удалять период"""
   canDelete: Boolean!
-  """Может ли пользователь просматривать сводный отчет периода"""
-  canViewReport: Boolean!
+  """Может ли пользователь просматривать сводный отчет выгрузки периода"""
+  canViewResult: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """Участвующие дивизионы"""
@@ -4866,6 +4868,23 @@ type UnloadFileValueArchiveMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Ссылка на сгенерированный архив"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UnloadPeriodMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Выгрузка периода в формате Excel."""
+type UnloadPeriodMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный файл"""
   src: String
   """Успех мутации"""
   success: Boolean!
