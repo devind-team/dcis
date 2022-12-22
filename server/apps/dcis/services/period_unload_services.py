@@ -14,15 +14,8 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, MergedCell, Period, Sheet
+from apps.dcis.models import Cell, Document, MergedCell, Period, Sheet, Value
 from apps.dcis.permissions import can_view_period_result
-
-
-@dataclass
-class Column:
-    """Выгружаемый столбец."""
-    key: str
-    names: list[str]
 
 
 @dataclass
@@ -30,7 +23,14 @@ class DataSource:
     """Источник данных для ячейки."""
     organization: Organization
     document: Document | None
-    sheet: dict[str, str]
+    values: list[str]
+
+
+@dataclass
+class Column:
+    """Выгружаемый столбец."""
+    get_value: Callable[[DataSource], str]
+    names: list[str]
 
 
 @dataclass
@@ -87,7 +87,7 @@ class PeriodUnload:
             cell_groups = self._get_cell_groups(sheet, cells)
             columns = self._build_columns(cell_groups)
             self._save_columns(worksheet, columns)
-            self._save_rows(worksheet, columns)
+            self._save_rows(worksheet, sheet, columns, cell_groups)
         workbook.save(self.path)
         return f'/{self.path.relative_to(settings.BASE_DIR)}'
 
@@ -98,14 +98,19 @@ class PeriodUnload:
             for row_index, name in enumerate(column.names, 1):
                 worksheet.cell(row=row_index, column=column_index, value=name)
 
-    def _save_rows(self, worksheet: Worksheet, columns: list[Column]) -> None:
+    def _save_rows(self, worksheet: Worksheet, sheet: Sheet, columns: list[Column], cell_groups: CellGroups) -> None:
         """Сохранение строки на лист Excel."""
         row_index = self._get_header_size(columns) + 1
+        values = Value.objects.filter(sheet=sheet)
         for organization in self._organizations:
             document = self.documents_map[organization.id]
-            data_source = DataSource(organization=organization, document=document, sheet={})
+            data_source = DataSource(
+                organization=organization,
+                document=document,
+                values=self._get_values(cell_groups.value_cells, values, document)
+            )
             for column_index, column in enumerate(columns, 1):
-                worksheet.cell(row=row_index, column=column_index, value=self._get_from_source(data_source, column))
+                worksheet.cell(row=row_index, column=column_index, value=column.get_value(data_source))
             row_index += 1
 
     def _build_documents_map(self) -> dict[int, Document | None]:
@@ -118,22 +123,34 @@ class PeriodUnload:
             )
         return result
 
-    @staticmethod
-    def _build_columns(cell_groups: CellGroups) -> list[Column]:
+    @classmethod
+    def _build_columns(cls, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
         columns = [
-            Column(key='organization.attributes.idlistedu', names=['IdListEdu']),
-            Column(key='organization.parent.attributes.idlistedu', names=['id_parent']),
-            Column(key='organization.kodbuhg', names=['Бухкод']),
-            Column(key='organization.region.common_id', names=['Код региона']),
-            Column(key='organization.region.name', names=['Регион']),
-            Column(key='organization.name', names=['Название учреждения']),
-            Column(key='organization.parent.name', names=['Название головного учреждения']),
-            Column(key='document.last_status.status.name', names=['Статус документа']),
-            Column(key='organization.kind', names=['Тип организации']),
+            Column(get_value=lambda s: s.organization.attributes['idlistedu'], names=['IdListEdu']),
+            Column(
+                get_value=lambda s: s.organization.parent.attributes['idlistedu'] if s.organization.parent else '',
+                names=['id_parent']
+            ),
+            Column(get_value=lambda s: s.organization.kodbuhg, names=['Бухкод']),
+            Column(
+                get_value=lambda s: s.organization.region.common_id if s.organization.region else '',
+                names=['Код региона']
+            ),
+            Column(get_value=lambda s: s.organization.region.name if s.organization.region else '', names=['Регион']),
+            Column(get_value=lambda s: s.organization.name, names=['Название учреждения']),
+            Column(
+                get_value=lambda s: s.organization.parent.name if s.organization.parent else '',
+                names=['Название головного учреждения']
+            ),
+            Column(
+                get_value=lambda s: s.document.last_status.status.name if s.document and s.document.last_status else '',
+                names=['Статус документа']
+            ),
+            Column(get_value=lambda s: s.organization.kind, names=['Тип организации']),
         ]
-        for cell in cell_groups.row_header_cells:
-            columns.append(Column(key='organization.kodbuhg', names=[f'{get_column_letter(cell.column.index)}{cell.row.index}']))
+        for i, cell in enumerate(cell_groups.row_header_cells):
+            columns.append(Column(get_value=cls.make_get_value(i), names=[cell.default_error or cell.default]))
         return columns
 
     @staticmethod
@@ -153,6 +170,18 @@ class PeriodUnload:
     def _get_merged_cells(sheet: Sheet) -> QuerySet[MergedCell]:
         """Получение объединенных ячеек листа."""
         return MergedCell.objects.filter(sheet=sheet)
+
+    @staticmethod
+    def _get_values(cells: list[Cell], values: QuerySet[Value], document: Document) -> list[str]:
+        """Получение значений для ячеек."""
+        result: list[str] = []
+        for cell in cells:
+            val = ''
+            for value in values:
+                if value.document == document and value.column == cell.column and value.row == cell.row:
+                    val = value.value
+            result.append(val)
+        return result
 
     @classmethod
     def _get_cell_groups(cls, sheet: Sheet, cells: QuerySet[Cell]) -> CellGroups:
@@ -186,8 +215,9 @@ class PeriodUnload:
     @classmethod
     def _normalize_cell_groups(cls, value_cells: list[Cell], header_cells: list[HeaderCell]) -> CellGroups:
         """Нормализация групп ячеек."""
-        column_header_index = cls._cut_dimension(value_cells, header_cells, lambda cell: cell.row.index)
-        row_header_index = cls._cut_dimension(value_cells, header_cells, lambda cell: cell.column.index)
+        cls._cut_dimension(value_cells, header_cells, lambda cell: cell.row.index)
+        cls._cut_dimension(value_cells, header_cells, lambda cell: cell.column.index)
+        row_header_index, column_header_index = cls._get_header_indices(value_cells)
         column_header_cells: list[HeaderCell] = []
         row_header_cells: list[Cell] = [
             hc.cell for hc in header_cells
@@ -205,7 +235,7 @@ class PeriodUnload:
         value_cells: list[Cell],
         header_cells: list[HeaderCell],
         get_index: Callable[[Cell], int]
-    ) -> int:
+    ) -> None:
         """Отрезание лишних элементов по измерению."""
         indices = sorted(set(map(get_index, value_cells)))
         header_index = cls._get_header_index(indices)
@@ -216,7 +246,16 @@ class PeriodUnload:
                 value_cells.append(cell)
             elif get_index(cell) == header_index:
                 header_cells.append(HeaderCell(cell=cell, merged_cell=None))
-        return header_index
+
+    @classmethod
+    def _get_header_indices(cls, cells: list[Cell]) -> tuple[int, int]:
+        """Получение индексов для заголовков столбцов и строк."""
+        column_indices: set[int] = set()
+        row_indices: set[int] = set()
+        for cell in cells:
+            column_indices.add(cell.column.index)
+            row_indices.add(cell.row.index)
+        return cls._get_header_index(sorted(column_indices)), cls._get_header_index(sorted(row_indices))
 
     @staticmethod
     def _get_header_index(indices: list[int]) -> int:
@@ -227,14 +266,12 @@ class PeriodUnload:
         return max(indices[0] - 1, 1)
 
     @staticmethod
-    def _get_from_source(data_source: DataSource, column: Column) -> str:
-        """Извлечение данных из источника."""
-        value = data_source
-        for key in column.key.split('.'):
-            if value is None:
-                return ''
-            value = value[key] if isinstance(value, dict) else getattr(value, key)
-        return value or ''
+    def make_get_value(i: int):
+        """Создание функции для получения значения."""
+        def get_value(s: DataSource):
+            return s.values[i]
+        return get_value
+
 
 def unload_period(user: User, period: Period) -> str:
     """Выгрузка периода в формате Excel."""
