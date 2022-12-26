@@ -4,12 +4,12 @@ from typing import Any
 
 import graphene
 from devind_core.schema import FileType
-from devind_helpers.utils import gid2int
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
+from devind_helpers.utils import gid2int
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
@@ -57,6 +57,7 @@ class ChangeValueMutation(BaseMutation):
             # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
             return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
         result = update_or_create_value(
+            user=info.context.user,
             document=document,
             cell=cell,
             sheet_id=sheet_id,

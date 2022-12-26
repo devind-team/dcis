@@ -17,6 +17,7 @@ from apps.core.models import User
 from apps.dcis.models import Cell, Document, Period, Sheet, Status, Value
 from apps.dcis.permissions import can_add_document
 
+
 DIVISION_NAME: str = 'idlistedu'  # Идентификатор поля для получения идентификатора дивизиона
 ValueType: Union = Union[str, int, float, bool, datetime.datetime]
 
@@ -90,7 +91,7 @@ def add_document_data(
     """Функция для создания документов."""
     period: Period = get_object_or_404(Period, pk=period_id)
     status: Status = get_object_or_404(Status, pk=status_id)
-    can_add_document(user, period, status)
+    can_add_document(user, period, status, None)
     reader: ExcelReaderSheets = ExcelReaderSheets(file)
     # 1. Проверяем пропуски листов
     sheets, mismatch_sheets = get_sheet(period, reader)
@@ -212,6 +213,7 @@ def add_documents(
         document: Document = Document.objects.create(
             comment=comment,
             version=max_versions.get(division_id, 1),
+            updated_by=user,
             user=user,
             period=period,
             object_id=division_id,

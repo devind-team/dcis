@@ -35,11 +35,11 @@ def change_attribute_value(
         }
     )
     context: Context = create_attribute_context(user, document)
-    values: Sequence[Value] = rerender_values(document, context)
+    values: Sequence[Value] = rerender_values(user, document, context)
     return attribute_value, values
 
 
-def rerender_values(document: Document, context: Context) -> Sequence[Value]:
+def rerender_values(user: User, document: Document, context: Context) -> Sequence[Value]:
     """Функция для ререндера параметров."""
     sheet_ids = document.sheets.values_list('id', flat=True)
     cell_values: QuerySet[Cell] = Cell.objects.filter(
@@ -51,6 +51,7 @@ def rerender_values(document: Document, context: Context) -> Sequence[Value]:
     for cell_value in cell_values:
         value = Template(cell_value.default).render(context)
         changed_values: UpdateOrCrateValuesResult = update_or_create_value(
+            user,
             document,
             cell_value,
             cast(int, cell_value.column.sheet_id),

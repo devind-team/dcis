@@ -85,6 +85,8 @@ def add_child_row_dimension(
         Cell.objects.create(row=row_dimension, column=column, kind=column.kind)
         for column in sheet.columndimension_set.all()
     ]
+    document.updated_by = user
+    document.save(update_fields=('updated_by', 'updated_at'))
     return SheetPartialRowsUploader(
         columns_unloader=SheetColumnsUnloader(sheet.columndimension_set.all()),
         rows=[row_dimension],
@@ -139,9 +141,13 @@ def delete_row_dimension(user: User, row_dimension: RowDimension) -> int:
     return delete_row_dimension_base(row_dimension)
 
 
+@transaction.atomic
 def delete_child_row_dimension(user: User, row_dimension: RowDimension) -> int:
     """Удаление дочерней строки."""
     can_delete_child_row_dimension(user, row_dimension)
+    if row_dimension.document:
+        row_dimension.document.updated_by = user
+        row_dimension.document.save(update_fields=('updated_by', 'updated_at'))
     return delete_row_dimension_base(row_dimension)
 
 

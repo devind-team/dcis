@@ -328,6 +328,7 @@ class StatusType(DjangoObjectType):
 class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
+    updated_by = graphene.Field(UserType, description='Пользователь, обновивший документ')
     user = graphene.Field(UserType, description='Пользователь, добавивший документ')
     period = graphene.Field(PeriodType, description='Период сбора')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')

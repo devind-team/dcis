@@ -119,6 +119,7 @@ def create_document(
         comment=comment,
         object_id=division_id,
         object_name=object_name,
+        updated_by=user,
         user=user,
         period=period
     )
@@ -138,7 +139,7 @@ def create_document(
                 rows_transform.update(_transfer_rows(user, sheet, source_document, document, parent_row_id))
             _transfer_cells(rows_transform)
             _transfer_values(sheet, document, source_document, rows_transform)
-    rerender_values(document, create_attribute_context(user, document))
+    rerender_values(user, document, create_attribute_context(user, document))
     return document, []
 
 
@@ -146,7 +147,7 @@ def change_document_comment(user: User, document: Document, comment: str) -> Doc
     """Изменение комментария версии документа."""
     can_change_document_comment(user, document)
     document.comment = comment
-    document.save(update_fields=('comment', 'updated_at'))
+    document.save(update_fields=('comment',))
     return document
 
 

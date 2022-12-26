@@ -283,8 +283,14 @@ class DocumentTestCase(TestCase):
             status=self.status,
             comment='Create document'
         )
-        expected_document = Document.objects.get(comment='Create document')
+        expected_document = Document.objects.get(
+            user=self.superuser,
+            period=self.department_period,
+            comment='Create document',
+            updated_by=self.superuser
+        )
         self.assertEqual(expected_document, actual_document)
+        self.assertEqual(self.status, actual_document.last_status.status)
 
     def test_get_user_roles(self) -> None:
         """Тестирование функции `get_user_roles`."""

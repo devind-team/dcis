@@ -40,6 +40,7 @@ class UpdateOrCrateValuesResult(NamedTuple):
 
 
 def update_or_create_value(
+    user: User,
     document: Document,
     cell: Cell,
     sheet_id: int | str,
@@ -51,7 +52,7 @@ def update_or_create_value(
     values = recalculate_cells(document, val)
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
-    Document.objects.filter(pk=document.pk).update(updated_at=updated_at)
+    Document.objects.filter(pk=document.pk).update(updated_at=updated_at, updated_by=user)
     return UpdateOrCrateValuesResult(values=values, updated_at=updated_at)
 
 
@@ -212,7 +213,7 @@ def update_or_create_file_value(
     )
     updated_at = now()
     RowDimension.objects.filter(pk=cell.row_id).update(updated_at=updated_at)
-    Document.objects.filter(pk=document.pk).update(updated_at=updated_at)
+    Document.objects.filter(pk=document.pk).update(updated_at=updated_at, updated_by=user)
     return UpdateOrCrateValueResult(value=val, updated_at=updated_at, created=created)
 
 
