@@ -18,7 +18,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Attribute, Division, Document, Limitation, Period, Privilege, Sheet
+from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
 from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_result
 from apps.dcis.schema.types import (
     AttributeType,
@@ -298,7 +298,7 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str):
+    def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_organizations_for_filter(info.context.user, period)
 

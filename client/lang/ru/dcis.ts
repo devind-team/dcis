@@ -256,7 +256,8 @@ export default {
       }
     },
     unload: {
-      name: '@:dcis.periods.links.unload'
+      name: '@:dcis.periods.links.unload',
+      organizationsFilterTitle: 'Выбор организаций'
     }
   },
   documents: {

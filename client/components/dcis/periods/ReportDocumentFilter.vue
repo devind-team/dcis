@@ -34,7 +34,6 @@ items-data-filter(
         :message-function="aggregationMessageFunction"
         :get-name="item => String($t(`dcis.periods.report.documentsFilter.aggregationFilter.${item.id.toLowerCase()}`))"
       )
-      pre {{ reportDocumentItems }}
   template(#items="{ searchItems, tempItems, setSelected, setAllSelected }")
     v-data-table(
       :value="tempItems"

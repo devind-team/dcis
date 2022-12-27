@@ -4,7 +4,7 @@ from datetime import date
 from io import BytesIO
 from typing import Type
 
-from devind_dictionaries.models import Organization, Department
+from devind_dictionaries.models import Department, Organization
 from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
@@ -130,10 +130,12 @@ def get_organizations_has_not_document(user: User, period: Period) -> QuerySet[O
         return organizations.filter(curatorgroup__id__in=user.curatorgroup_set.values_list('id', flat=True))
     raise PermissionDenied('Недостаточно прав для просмотра организаций, не подавших документ.')
 
+
 def get_organizations_for_filter(user: User, period: Period):
     """Получение организаций для фильтра."""
     organizations = Organization.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
     return organizations
+
 
 def get_departments_for_filter(user: User, period: Period):
     """Получение организаций для фильтра."""
