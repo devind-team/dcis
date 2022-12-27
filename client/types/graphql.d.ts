@@ -4786,6 +4786,10 @@ export type Query = {
   pages: PageTypeConnection;
   /** Период */
   period: PeriodType;
+  /** Получение департаментов периода */
+  periodFilterDepartments: Array<DepartmentType>;
+  /** Получение организаций периода */
+  periodFilterOrganizations: Array<OrganizationType>;
   /** Возможные дивизионы периода */
   periodPossibleDivisions?: Maybe<DivisionModelTypeConnection>;
   /** Выгрузка листа для периода */
@@ -5124,6 +5128,16 @@ export type QueryPagesArgs = {
 
 /** Схема запросов данных. */
 export type QueryPeriodArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryPeriodFilterDepartmentsArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryPeriodFilterOrganizationsArgs = {
   periodId: Scalars['ID'];
 };
 
@@ -6987,6 +7001,18 @@ export type PeriodQueryVariables = Exact<{
 }>;
 
 export type PeriodQuery = { __typename?: 'Query', period: { __typename: 'PeriodType', isCurator: boolean, isAdmin: boolean, canAddAnyDivisionDocument: boolean, canChangeDivisions: boolean, canChangeLimitations: boolean, canChangeGroups: boolean, canChangeUsers: boolean, canChangeAttributes: boolean, canViewResult: boolean, canChangeSettings: boolean, canChangeSheet: boolean, canDelete: boolean, id: string, name: string, status: string, multiple: boolean, privately: boolean, versioning: boolean, start?: any | null, expiration?: any | null, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, project?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, model: string, name: string } | null> | null, periodGroups?: Array<{ __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null> | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string, position: number, comment: string, showHead: boolean, showChild: boolean, createdAt: any, updatedAt: any } | null> } };
+
+export type PeriodFilterDepartmentsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type PeriodFilterDepartmentsQuery = { __typename?: 'Query', periodFilterDepartments: Array<{ __typename: 'DepartmentType', id: string, name: string, code?: number | null }> };
+
+export type PeriodFilterOrganizationsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: Array<{ __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null }> };
 
 export type PeriodPossibleDivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];

@@ -20,7 +20,12 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
                   :user-divisions="userPeriodDivision"
                 )
                   v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-            division-filter(v-if="showDivisionFilter" v-model="selectedDivisions" :period="period")
+            division-filter(
+              v-if="showDivisionFilter"
+              v-model="selectedDivisions"
+              :period="period"
+              message-container-class="mb-2 mr-1"
+            )
             status-filter(v-model="selectedStatuses" :period="period" @statuses-loaded="statusesLoaded")
             documents-table(
               :period="period"

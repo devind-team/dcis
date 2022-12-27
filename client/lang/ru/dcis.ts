@@ -269,15 +269,23 @@ export default {
     },
     divisionFilterOrganization: {
       title: 'Фильтр организаций',
-      noFiltrationMessage: 'Все организации',
-      multipleMessage: '{name} и еще {restLength} организаций | {name} и еще {restLength} организация |' +
-        ' {name} и еще {restLength} организации'
+      noFiltrationMessage: 'Выбрать организации',
+      multipleMessage: 'Выбрано организаций: {count}',
+      tableHeaders: {
+        name: 'Название',
+        kpp: 'Кбк',
+        inn: 'Индивидуальный номер',
+        kodbuhg: 'Бухгалтерский код'
+      }
     },
     divisionFilterDepartment: {
       title: 'Фильтр департаментов',
-      noFiltrationMessage: 'Все департаменты',
-      multipleMessage: '{name} и еще {restLength} департаментов | {name} и еще {restLength} департамент |' +
-        ' {name} и еще {restLength} департамента'
+      noFiltrationMessage: 'Выбрать департаменты',
+      multipleMessage: 'Выбрано департаментов: {count}',
+      tableHeaders: {
+        name: 'Название',
+        code: 'Код департамента'
+      }
     },
     statusFilter: {
       title: 'Фильтр статусов',
