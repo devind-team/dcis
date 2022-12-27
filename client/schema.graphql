@@ -4135,6 +4135,16 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): PeriodType!
+  """Получение департаментов периода"""
+  periodFilterDepartments(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [DepartmentType!]!
+  """Получение организаций периода"""
+  periodFilterOrganizations(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [OrganizationType!]!
   """Возможные дивизионы периода"""
   periodPossibleDivisions(
     after: String

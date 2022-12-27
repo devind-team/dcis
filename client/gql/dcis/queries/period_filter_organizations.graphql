@@ -1,0 +1,11 @@
+
+query PeriodFilterOrganizations($periodId: ID!) {
+  periodFilterOrganizations(periodId: $periodId) {
+    id
+    name
+    kpp
+    inn
+    kodbuhg
+    __typename
+  }
+}
