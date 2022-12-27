@@ -147,10 +147,23 @@ class PeriodUnload:
                 get_value=lambda s: s.document.last_status.status.name if s.document and s.document.last_status else '',
                 names=['Статус документа']
             ),
-            Column(get_value=lambda s: s.organization.kind, names=['Тип организации']),
+            Column(get_value=lambda s: s.organization.attributes['org_type'], names=['Тип организации']),
         ]
         for i, cell in enumerate(cell_groups.row_header_cells):
             columns.append(Column(get_value=cls.make_get_value(i), names=[cell.default_error or cell.default]))
+        columns.append(
+            Column(
+                get_value=lambda s: cls.format_datatime(s.document.updated_at) if s.document else '',
+                names=['Дата последнего редактирования']
+            )
+        )
+        columns.append(
+            Column(
+                get_value=lambda s: cls.format_user(s.document.updated_by)
+                if s.document and s.document.updated_by else '',
+                names=['Пользователь']
+            )
+        )
         return columns
 
     @staticmethod
@@ -271,6 +284,19 @@ class PeriodUnload:
         def get_value(s: DataSource):
             return s.values[i]
         return get_value
+
+    @staticmethod
+    def format_datatime(datatime: datetime) -> str:
+        """Форматирование даты."""
+        return f'{datatime:%d.%m.%Y %H:%M}'
+
+    @staticmethod
+    def format_user(user: User) -> str:
+        """Форматирование пользователя."""
+        result = f'{user.last_name} {user.first_name}'
+        if user.sir_name:
+            return f'{result} {user.sir_name}'
+        return result
 
 
 def unload_period(user: User, period: Period) -> str:
