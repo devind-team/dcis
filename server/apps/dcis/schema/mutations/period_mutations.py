@@ -407,8 +407,8 @@ class UnloadPeriodMutation(BaseMutation):
             src=unload_period(
                 user=info.context.user,
                 period=period,
-                organization_ids=organization_ids,
-                status_ids=status_ids,
+                organization_ids=[gid2int(organization_id) for organization_id in organization_ids],
+                status_ids=[gid2int(status_id) for status_id in status_ids],
                 unload_without_document=unload_without_document,
                 empty_cell=empty_cell,
             )

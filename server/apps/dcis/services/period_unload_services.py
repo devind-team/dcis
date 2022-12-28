@@ -71,6 +71,11 @@ class PeriodUnload:
         self._organizations = Organization.objects.filter(
             id__in=self.period.division_set.values_list('object_id', flat=True)
         )
+        if len(organization_ids):
+            self._organizations = self._organizations.filter(id__in=organization_ids)
+        self._status_ids = status_ids
+        self._unload_without_document = unload_without_document
+        self._empty_cell = empty_cell
         self._documents = Document.objects.filter(
             period=self.period,
             object_id__in=self._organizations.values_list('id', flat=True)
@@ -109,7 +114,7 @@ class PeriodUnload:
         """Сохранение строки на лист Excel."""
         row_index = self._get_header_size(columns) + 1
         values = Value.objects.filter(sheet=sheet)
-        for organization in self._organizations:
+        for organization in self._filter_organizations(self._organizations):
             document = self.documents_map[organization.id]
             data_source = DataSource(
                 organization=organization,
@@ -173,6 +178,20 @@ class PeriodUnload:
         )
         return columns
 
+    def _filter_organizations(self, organizations: list[Organization]) -> list[Organization]:
+        """Фильтрация организаций."""
+        result: list[Organization] = []
+        for organization in organizations:
+            document = self.documents_map[organization.id]
+            if (
+                self._unload_without_document and
+                document is None
+            ) or not len(self._status_ids) or (
+                document.last_status and document.last_status.status.id in self._status_ids
+            ):
+                result.append(organization)
+        return result
+
     @staticmethod
     def _get_header_size(columns: list[Column]) -> int:
         """Размер шапки таблицы."""
@@ -191,12 +210,11 @@ class PeriodUnload:
         """Получение объединенных ячеек листа."""
         return MergedCell.objects.filter(sheet=sheet)
 
-    @staticmethod
-    def _get_values(cells: list[Cell], values: QuerySet[Value], document: Document) -> list[str]:
+    def _get_values(self, cells: list[Cell], values: QuerySet[Value], document: Document) -> list[str]:
         """Получение значений для ячеек."""
         result: list[str] = []
         for cell in cells:
-            val = ''
+            val = self._empty_cell
             for value in values:
                 if value.document == document and value.column == cell.column and value.row == cell.row:
                     val = value.value
