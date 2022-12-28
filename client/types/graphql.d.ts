@@ -2927,6 +2927,8 @@ export type DocumentType = Node & {
   sheets: Array<Maybe<BaseSheetType>>;
   /** Дата обновления */
   updatedAt: Scalars['DateTime'];
+  /** Пользователь, обновивший документ */
+  updatedBy?: Maybe<UserType>;
   /** Пользователь, добавивший документ */
   user?: Maybe<UserType>;
   /** Версия документа */
@@ -5904,8 +5906,16 @@ export type UnloadFileValueArchiveMutationPayload = {
 
 export type UnloadPeriodMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Символы в пустой ячейке */
+  emptyCell: Scalars['String'];
+  /** Идентификаторы организаций */
+  organizationIds: Array<Scalars['ID']>;
   /** Идентификатор периода */
   periodId: Scalars['ID'];
+  /** Идентификаторы статусов */
+  statusIds: Array<Scalars['ID']>;
+  /** Выгружать организации без документов */
+  unloadWithoutDocument: Scalars['Boolean'];
 };
 
 /** Выгрузка периода в формате Excel. */
@@ -6742,6 +6752,10 @@ export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodG
 
 export type UnloadPeriodMutationVariables = Exact<{
   periodId: Scalars['ID'];
+  organizationIds: Array<Scalars['ID']> | Scalars['ID'];
+  statusIds: Array<Scalars['ID']> | Scalars['ID'];
+  unloadWithoutDocument: Scalars['Boolean'];
+  emptyCell: Scalars['String'];
 }>;
 
 export type UnloadPeriodMutation = { __typename?: 'Mutation', unloadPeriod: { __typename?: 'UnloadPeriodMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };

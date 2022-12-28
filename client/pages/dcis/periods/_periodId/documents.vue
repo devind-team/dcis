@@ -26,7 +26,12 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
               :period="period"
               message-container-class="mb-2 mr-1"
             )
-            status-filter(v-model="selectedStatuses" :period="period" @statuses-loaded="statusesLoaded")
+            status-filter(
+              v-model="selectedStatuses"
+              :period="period"
+              message-container-class="mb-2 mr-1"
+              @statuses-loaded="statusesLoaded"
+            )
             documents-table(
               :period="period"
               :documents="documents"
@@ -54,7 +59,12 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
         v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
   division-filter(v-if="showDivisionFilter" v-model="selectedDivisions" :period="period")
-  status-filter(v-model="selectedStatuses" :period="period" @statuses-loaded="statusesLoaded")
+  status-filter(
+    v-model="selectedStatuses"
+    :period="period"
+    message-container-class="mr-1 mb-1"
+    @statuses-loaded="statusesLoaded"
+  )
   documents-table(
     :period="period"
     :documents="documents"
@@ -93,7 +103,7 @@ import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import DivisionFilter from '~/components/dcis/documents/DivisionFilter.vue'
-import StatusFilter from '~/components/dcis/documents/StatusFilter.vue'
+import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
 import DocumentsTable from '~/components/dcis/documents/DocumentsTable.vue'
 
 export default defineComponent({

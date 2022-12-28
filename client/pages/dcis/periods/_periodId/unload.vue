@@ -1,30 +1,55 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
-  template(#header) {{ $t('dcis.periods.unload.name') }}
-  .d-flex.flex-column.align-start
-    organization-filter(
-      v-model="selectedOrganizations"
-      :period="period"
-      :title="String($t('dcis.periods.unload.organizationsFilterTitle'))"
-      message-container-class="mb-2"
-    )
-    v-btn(:loading="unloadPeriodLoading" color="primary" @click="unloadPeriod") {{ $t('upload') }}
+bread-crumbs(:items="bc")
+  apollo-mutation(
+    v-slot="{ mutate, loading, error }"
+    :mutation="require('~/gql/dcis/mutations/period/unload_period.graphql')"
+    :variables="variables"
+    @done="unloadPeriodOnDone"
+    tag
+  )
+    v-card
+      v-card-title.pb-0
+        v-app-bar-nav-icon(v-if="$vuetify.breakpoint.smAndDown" @click="$emit('update-drawer')")
+        | {{ $t('dcis.periods.unload.name') }}
+      form(@submit.prevent="mutate")
+        v-card-text
+          organization-filter(
+            v-model="selectedOrganizations"
+            :period="period"
+            :title="String($t('dcis.periods.unload.organizationsFilterTitle'))"
+            message-container-class="mr-1"
+          )
+          status-filter(
+            v-model="selectedStatuses"
+            :period="period"
+            :title="String($t('dcis.periods.unload.statusFilterTitle'))"
+            message-container-class="mr-1"
+          )
+          v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
+          v-text-field(v-model="emptyCell" :label="$t('dcis.periods.unload.emptyCell')")
+        v-card-actions
+          v-btn(:loading="loading" type="submit" color="primary") {{ $t('upload') }}
 </template>
 
 <script lang="ts">
 import { ref, computed, defineComponent, PropType } from '#app'
-import { useMutation } from '@vue/apollo-composable'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
-import { PeriodType, OrganizationType, UnloadPeriodMutation, UnloadPeriodMutationVariables } from '~/types/graphql'
-import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
+import {
+  PeriodType,
+  OrganizationType,
+  StatusType,
+  UnloadPeriodMutation,
+  UnloadPeriodMutationVariables
+} from '~/types/graphql'
+import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
-import unloadPeriodMutation from '~/gql/dcis/mutations/period/unload_period.graphql'
+import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
 
 type UnloadPeriodMutationResult = { data: UnloadPeriodMutation }
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, OrganizationFilter },
+  components: { BreadCrumbs, OrganizationFilter, StatusFilter },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -42,21 +67,33 @@ export default defineComponent({
     ]))
 
     const selectedOrganizations = ref<OrganizationType[]>([])
+    const selectedStatuses = ref<StatusType[]>([])
+    const unloadWithoutDocument = ref<boolean>(true)
+    const emptyCell = ref<string>('')
 
-    const { mutate: unloadPeriodMutate, loading: unloadPeriodLoading, onDone: unloadPeriodOnDone } = useMutation<
-      UnloadPeriodMutation,
-      UnloadPeriodMutationVariables
-    >(unloadPeriodMutation)
-    unloadPeriodOnDone(({ data: { unloadPeriod: { success, src } } }: UnloadPeriodMutationResult) => {
+    const variables = computed<UnloadPeriodMutationVariables>(() => ({
+      periodId: props.period.id,
+      organizationIds: selectedOrganizations.value.map((organization: OrganizationType) => organization.id),
+      statusIds: selectedStatuses.value.map((status: StatusType) => status.id),
+      unloadWithoutDocument: unloadWithoutDocument.value,
+      emptyCell: emptyCell.value
+    }))
+
+    const unloadPeriodOnDone = ({ data: { unloadPeriod: { success, src } } }: UnloadPeriodMutationResult) => {
       if (success) {
         window.open(src, '_blank')
       }
-    })
-    const unloadPeriod = () => {
-      unloadPeriodMutate({ periodId: props.period.id })
     }
 
-    return { bc, selectedOrganizations, unloadPeriod, unloadPeriodLoading }
+    return {
+      bc,
+      selectedOrganizations,
+      selectedStatuses,
+      unloadPeriodOnDone,
+      unloadWithoutDocument,
+      emptyCell,
+      variables
+    }
   }
 })
 </script>

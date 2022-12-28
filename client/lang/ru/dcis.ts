@@ -69,6 +69,12 @@ export default {
       open: 'Открыто',
       close: 'Закрыто'
     },
+    statusFilter: {
+      title: 'Фильтр статусов',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
     addDivisions: {
       file: 'Выберете файл'
     },
@@ -257,7 +263,10 @@ export default {
     },
     unload: {
       name: '@:dcis.periods.links.unload',
-      organizationsFilterTitle: 'Выбор организаций'
+      organizationsFilterTitle: 'Выбор организаций',
+      statusFilterTitle: 'Выбор статусов',
+      unloadWithoutDocument: 'Выгружать организации без документов',
+      emptyCell: 'Символы в пустой ячейке'
     }
   },
   documents: {
@@ -287,12 +296,6 @@ export default {
         name: 'Название',
         code: 'Код департамента'
       }
-    },
-    statusFilter: {
-      title: 'Фильтр статусов',
-      noFiltrationMessage: 'Все статусы',
-      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
-        ' {name} и еще {restLength} статуса'
     },
     tableHeaders: {
       version: 'Версия',

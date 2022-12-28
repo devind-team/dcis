@@ -376,14 +376,43 @@ class UnloadPeriodMutation(BaseMutation):
 
     class Input:
         period_id = graphene.ID(required=True, description='Идентификатор периода')
+        organization_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            required=True,
+            description='Идентификаторы организаций'
+        )
+        status_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            required=True,
+            description='Идентификаторы статусов'
+        )
+        unload_without_document = graphene.Boolean(required=True, description='Выгружать организации без документов')
+        empty_cell = graphene.String(required=True, description='Символы в пустой ячейке')
 
     src = graphene.String(description='Ссылка на сгенерированный файл')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str):
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        organization_ids: list[int],
+        status_ids: list[int],
+        unload_without_document: bool,
+        empty_cell: str
+    ):
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return UnloadPeriodMutation(src=unload_period(info.context.user, period))
+        return UnloadPeriodMutation(
+            src=unload_period(
+                user=info.context.user,
+                period=period,
+                organization_ids=organization_ids,
+                status_ids=status_ids,
+                unload_without_document=unload_without_document,
+                empty_cell=empty_cell,
+            )
+        )
 
 
 class PeriodMutations(graphene.ObjectType):

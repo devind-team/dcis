@@ -2782,6 +2782,8 @@ type DocumentType implements Node {
   sheets: [BaseSheetType]!
   """Дата обновления"""
   updatedAt: DateTime!
+  """Пользователь, обновивший документ"""
+  updatedBy: UserType
   """Пользователь, добавивший документ"""
   user: UserType
   """Версия документа"""
@@ -4885,8 +4887,16 @@ type UnloadFileValueArchiveMutationPayload {
 
 input UnloadPeriodMutationInput {
   clientMutationId: String
+  """Символы в пустой ячейке"""
+  emptyCell: String!
+  """Идентификаторы организаций"""
+  organizationIds: [ID!]!
   """Идентификатор периода"""
   periodId: ID!
+  """Идентификаторы статусов"""
+  statusIds: [ID!]!
+  """Выгружать организации без документов"""
+  unloadWithoutDocument: Boolean!
 }
 
 """Выгрузка периода в формате Excel."""

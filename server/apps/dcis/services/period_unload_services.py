@@ -55,7 +55,14 @@ class CellGroups:
 class PeriodUnload:
     """Выгрузка периода в формате Excel."""
 
-    def __init__(self, period: Period) -> None:
+    def __init__(
+        self,
+        period: Period,
+        organization_ids: list[int],
+        status_ids: list[int],
+        unload_without_document: bool,
+        empty_cell: str
+    ) -> None:
         """Инициализация.
         - period - выгружаемы период
         """
@@ -299,7 +306,20 @@ class PeriodUnload:
         return result
 
 
-def unload_period(user: User, period: Period) -> str:
+def unload_period(
+    user: User,
+    period: Period,
+    organization_ids: list[int],
+    status_ids: list[int],
+    unload_without_document: bool,
+    empty_cell: str
+) -> str:
     """Выгрузка периода в формате Excel."""
     can_view_period_result(user, period)
-    return PeriodUnload(period).unload()
+    return PeriodUnload(
+        period=period,
+        organization_ids=organization_ids,
+        status_ids=status_ids,
+        unload_without_document=unload_without_document,
+        empty_cell=empty_cell,
+    ).unload()
