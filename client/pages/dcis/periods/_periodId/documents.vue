@@ -102,10 +102,9 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
 import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
+import { computed, defineComponent, ref, unref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
-import { useFilters, useCursorPagination, useCommonQuery } from '~/composables'
-import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
+import { useFilters, useCursorPagination, useCommonQuery, useQueryRelay } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   ChangeDocumentCommentMutation,
@@ -115,12 +114,13 @@ import {
   PeriodType,
   StatusType,
   OrganizationsHasNotDocumentQuery,
-  OrganizationsHasNotDocumentQueryVariables
+  OrganizationsHasNotDocumentQueryVariables, DocumentsQuery, DocumentsQueryVariables
 } from '~/types/graphql'
 import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import organizationsHasNotDocumentQuery from '~/gql/dcis/queries/organizations_has_not_document.graphql'
+import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
@@ -168,15 +168,21 @@ export default defineComponent({
       addUpdate,
       changeUpdate,
       refetch: refetchDocuments
-    } = useDocumentsQuery(
-      route.params.periodId,
-      computed(() => selectedDivisions.value.map(division => division.id)),
-      computed(() => selectedStatuses.value.map(status => status.id)),
-      documentsQueryEnabled, {
-        pagination: useCursorPagination(),
-        fetchScroll: typeof document === 'undefined' ? null : document
-      }
-    )
+    } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
+      document: documentsQuery,
+      variables: () => ({
+        periodId: unref(route.params.periodId),
+        divisionIds: unref(computed(() => selectedDivisions.value.map(division => division.id))),
+        lastStatusIds: unref(computed(() => selectedStatuses.value.map(status => status.id)))
+      }),
+      options: computed(() => ({
+        enabled: documentsQueryEnabled.value
+      }))
+    },
+    {
+      pagination: useCursorPagination(),
+      fetchScroll: typeof document === 'undefined' ? null : document
+    })
 
     const statusesLoaded = () => {
       if (!documentsQueryEnabled.value) {
