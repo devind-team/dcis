@@ -20,12 +20,21 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
                   :user-divisions="userPeriodDivision"
                 )
                   v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-            division-filter(
-              v-if="showDivisionFilter"
-              v-model="selectedDivisions"
-              :period="period"
-              message-container-class="mb-2 mr-1"
-            )
+            template(v-if="showDivisionFilter")
+              organization-filter(
+                v-if="period.project.contentType.model === 'organization'"
+                v-model="selectedDivisions"
+                :period="period"
+                :title="String($t('dcis.periods.organizationFilter.title'))"
+                message-container-class="mb-2 mr-1"
+              )
+              department-filter(
+                v-else
+                v-model="selectedDivisions"
+                :period="period"
+                :title="String($t('dcis.periods.departmentFilter.title'))"
+                message-container-class="mb-2 mr-1"
+              )
             status-filter(
               v-model="selectedStatuses"
               :period="period"
@@ -58,7 +67,21 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
       )
         v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-  division-filter(v-if="showDivisionFilter" v-model="selectedDivisions" :period="period")
+  template(v-if="showDivisionFilter")
+    organization-filter(
+      v-if="period.project.contentType.model === 'organization'"
+      v-model="selectedDivisions"
+      :period="period"
+      :title="String($t('dcis.periods.organizationFilter.title'))"
+      message-container-class="mb-2 mr-1"
+    )
+    department-filter(
+      v-else
+      v-model="selectedDivisions"
+      :period="period"
+      :title="String($t('dcis.periods.departmentFilter.title'))"
+      message-container-class="mb-2 mr-1"
+    )
   status-filter(
     v-model="selectedStatuses"
     :period="period"
@@ -102,18 +125,20 @@ import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import DivisionFilter from '~/components/dcis/documents/DivisionFilter.vue'
 import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
 import DocumentsTable from '~/components/dcis/documents/DocumentsTable.vue'
+import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
+import DepartmentFilter from '~/components/dcis/periods/DepartmentFilter.vue'
 
 export default defineComponent({
   components: {
     BreadCrumbs,
     AddDocumentMenu,
     LeftNavigatorContainer,
-    DivisionFilter,
     StatusFilter,
-    DocumentsTable
+    DocumentsTable,
+    OrganizationFilter,
+    DepartmentFilter
   },
   middleware: 'auth',
   props: {

@@ -75,6 +75,27 @@ export default {
       multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
         ' {name} и еще {restLength} статуса'
     },
+    organizationFilter: {
+      title: 'Фильтр организаций',
+      noFiltrationMessage: 'Выбрать организации',
+      multipleMessage: 'Выбрано организаций: {count}',
+      tableHeaders: {
+        id: 'Идентификатор',
+        name: 'Название',
+        kpp: 'Кбк',
+        inn: 'ИНН',
+        kodbuhg: 'Бухгалтерский код'
+      }
+    },
+    departmentFilter: {
+      title: 'Фильтр департаментов',
+      noFiltrationMessage: 'Выбрать департаменты',
+      multipleMessage: 'Выбрано департаментов: {count}',
+      tableHeaders: {
+        name: 'Название',
+        code: 'Код департамента'
+      }
+    },
     addDivisions: {
       file: 'Выберете файл'
     },
@@ -276,26 +297,6 @@ export default {
       sheets: 'Листы',
       attributes: 'Атрибуты',
       comments: 'Комментарии'
-    },
-    divisionFilterOrganization: {
-      title: 'Фильтр организаций',
-      noFiltrationMessage: 'Выбрать организации',
-      multipleMessage: 'Выбрано организаций: {count}',
-      tableHeaders: {
-        name: 'Название',
-        kpp: 'Кбк',
-        inn: 'Индивидуальный номер',
-        kodbuhg: 'Бухгалтерский код'
-      }
-    },
-    divisionFilterDepartment: {
-      title: 'Фильтр департаментов',
-      noFiltrationMessage: 'Выбрать департаменты',
-      multipleMessage: 'Выбрано департаментов: {count}',
-      tableHeaders: {
-        name: 'Название',
-        code: 'Код департамента'
-      }
     },
     tableHeaders: {
       version: 'Версия',

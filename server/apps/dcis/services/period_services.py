@@ -133,12 +133,14 @@ def get_organizations_has_not_document(user: User, period: Period) -> QuerySet[O
 
 def get_organizations_for_filter(user: User, period: Period):
     """Получение организаций для фильтра."""
+    can_view_period(user, period)
     organizations = Organization.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
     return organizations
 
 
 def get_departments_for_filter(user: User, period: Period):
     """Получение организаций для фильтра."""
+    can_view_period(user, period)
     departments = Department.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
     return departments
 
