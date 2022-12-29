@@ -2,7 +2,7 @@
 items-data-filter(
   v-model="selectedOrganization"
   :title="title"
-  :items="organizations || []"
+  :items="changeOrganizations || []"
   :message-function="getFilterMessageFunction"
   :message-container-class="messageContainerClass"
   :search-function="filterSearchFunction"
@@ -24,8 +24,9 @@ items-data-filter(
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from '#app'
+import { computed, defineComponent, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
+import { fromGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
 import { Class } from '~/types/filters'
 import {
@@ -59,9 +60,9 @@ export default defineComponent({
 
     const getFilterMessageFunction = (selectedItems: []): string => {
       if (selectedItems.length === 0) {
-        return t('dcis.documents.divisionFilterOrganization.noFiltrationMessage') as string
+        return t('dcis.periods.organizationFilter.noFiltrationMessage') as string
       }
-      return t('dcis.documents.divisionFilterOrganization.multipleMessage', { count: selectedItems.length }) as string
+      return t('dcis.periods.organizationFilter.multipleMessage', { count: selectedItems.length }) as string
     }
 
     const filterSearchFunction = (item: OrganizationType, search: string): boolean => {
@@ -80,10 +81,11 @@ export default defineComponent({
     }
 
     const tableHeaders = computed<DataTableHeader[]>(() => [
-      { text: t('dcis.documents.divisionFilterOrganization.tableHeaders.name') as string, value: 'name' },
-      { text: t('dcis.documents.divisionFilterOrganization.tableHeaders.kpp') as string, value: 'kpp' },
-      { text: t('dcis.documents.divisionFilterOrganization.tableHeaders.inn') as string, value: 'inn' },
-      { text: t('dcis.documents.divisionFilterOrganization.tableHeaders.kodbuhg') as string, value: 'kodbuhg' }
+      { text: t('dcis.periods.organizationFilter.tableHeaders.id') as string, value: 'id' },
+      { text: t('dcis.periods.organizationFilter.tableHeaders.name') as string, value: 'name' },
+      { text: t('dcis.periods.organizationFilter.tableHeaders.kpp') as string, value: 'kpp' },
+      { text: t('dcis.periods.organizationFilter.tableHeaders.inn') as string, value: 'inn' },
+      { text: t('dcis.periods.organizationFilter.tableHeaders.kodbuhg') as string, value: 'kodbuhg' }
     ])
 
     const { data: organizations } = useCommonQuery<
@@ -96,18 +98,23 @@ export default defineComponent({
       })
     })
 
-    const active = ref<boolean>(false)
-    const activeChanged = (value: boolean) => {
-      active.value = value
-    }
+    const changeOrganizations = computed(() => {
+      if (!organizations.value) {
+        return []
+      }
+      return organizations.value.map(organization => ({
+        ...organization,
+        id: String(fromGlobalId(organization.id).id)
+      })
+      )
+    })
 
     return {
       selectedOrganization,
       getFilterMessageFunction,
       filterSearchFunction,
       tableHeaders,
-      organizations,
-      activeChanged
+      changeOrganizations
     }
   }
 })
