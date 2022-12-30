@@ -2,7 +2,7 @@ from typing import Any
 
 import graphene
 from devind_dictionaries.models import Organization
-from devind_dictionaries.schema import OrganizationType
+from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
@@ -19,7 +19,7 @@ from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
 from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
-from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_report
+from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_result
 from apps.dcis.schema.types import (
     AttributeType,
     DivisionModelTypeConnection,
@@ -32,7 +32,10 @@ from apps.dcis.schema.types import (
 )
 from apps.dcis.services.divisions_services import get_period_possible_divisions
 from apps.dcis.services.period_services import (
-    get_organizations_has_not_document, get_period_attributes,
+    get_departments_for_filter,
+    get_organizations_for_filter,
+    get_organizations_has_not_document,
+    get_period_attributes,
     get_period_users,
     get_user_period_privileges,
     get_user_periods,
@@ -102,6 +105,7 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Выгрузка листа для периода',
     )
+
     indices_groups_to_expand = graphene.List(
         graphene.NonNull(graphene.List(graphene.NonNull(graphene.Int))),
         sheet_id=graphene.ID(required=True, description='Идентификатор листа'),
@@ -149,6 +153,20 @@ class PeriodQueries(graphene.ObjectType):
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Получение организаций, у которых не поданы документы в периоде'
+    )
+
+    period_filter_organizations = DjangoListField(
+        OrganizationType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Получение организаций периода'
+    )
+
+    period_filter_departments = DjangoListField(
+        DepartmentType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Получение департаментов периода'
     )
 
     @staticmethod
@@ -216,7 +234,7 @@ class PeriodQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_indices_groups_to_expand(root: Any, info: ResolveInfo, sheet_id: str) -> list[list[int]]:
         sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
-        can_view_period_report(info.context.user, sheet.period)
+        can_view_period_result(info.context.user, sheet.period)
         return get_indices_groups_to_expand(sheet)
 
     @staticmethod
@@ -230,7 +248,7 @@ class PeriodQueries(graphene.ObjectType):
         **kwargs
     ) -> list[dict] | dict:
         sheet = get_object_or_404(Sheet, pk=gid2int(sheet_id))
-        can_view_period_report(info.context.user, sheet.period)
+        can_view_period_result(info.context.user, sheet.period)
         if 'main_document_id' in kwargs:
             main_document = get_object_or_404(Document, pk=gid2int(kwargs['main_document_id']))
         else:
@@ -277,3 +295,15 @@ class PeriodQueries(graphene.ObjectType):
     def resolve_organizations_has_not_document(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_organizations_has_not_document(info.context.user, period)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_organizations_for_filter(info.context.user, period)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_period_filter_departments(root: Any, info: ResolveInfo, period_id: str):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_departments_for_filter(info.context.user, period)

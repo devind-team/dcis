@@ -61,12 +61,41 @@ export default {
       attributes: 'Атрибуты',
       sheets: 'Таблица',
       report: 'Сводный отчет',
+      unload: 'Выгрузка',
       settings: '@:settings'
     },
     statuses: {
       preparation: 'Подготовка',
       open: 'Открыто',
       close: 'Закрыто'
+    },
+    statusFilter: {
+      title: 'Фильтр статусов',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
+    organizationFilter: {
+      title: 'Фильтр организаций',
+      noFiltrationMessage: 'Выбрать организации',
+      multipleMessage: 'Выбрано организаций: {count}',
+      tableHeaders: {
+        id: 'Идентификатор',
+        name: 'Название',
+        kpp: 'Кбк',
+        inn: 'ИНН',
+        kodbuhg: 'Бухгалтерский код'
+      }
+    },
+    departmentFilter: {
+      title: 'Фильтр департаментов',
+      noFiltrationMessage: 'Выбрать департаменты',
+      multipleMessage: 'Выбрано департаментов: {count}',
+      tableHeaders: {
+        id: 'Идентификатор',
+        name: 'Название',
+        code: 'Код департамента'
+      }
     },
     addDivisions: {
       file: 'Выберете файл'
@@ -253,6 +282,13 @@ export default {
         noFiltrationMessage: 'Выбрать расширенные строки',
         multipleMessage: 'Выбрано расширенных строк: {count}'
       }
+    },
+    unload: {
+      name: '@:dcis.periods.links.unload',
+      organizationsFilterTitle: 'Выбор организаций',
+      statusFilterTitle: 'Выбор статусов',
+      unloadWithoutDocument: 'Выгружать организации без документов',
+      emptyCell: 'Символы в пустой ячейке'
     }
   },
   documents: {
@@ -262,24 +298,6 @@ export default {
       sheets: 'Листы',
       attributes: 'Атрибуты',
       comments: 'Комментарии'
-    },
-    divisionFilterOrganization: {
-      title: 'Фильтр организаций',
-      noFiltrationMessage: 'Все организации',
-      multipleMessage: '{name} и еще {restLength} организаций | {name} и еще {restLength} организация |' +
-        ' {name} и еще {restLength} организации'
-    },
-    divisionFilterDepartment: {
-      title: 'Фильтр департаментов',
-      noFiltrationMessage: 'Все департаменты',
-      multipleMessage: '{name} и еще {restLength} департаментов | {name} и еще {restLength} департамент |' +
-        ' {name} и еще {restLength} департамента'
-    },
-    statusFilter: {
-      title: 'Фильтр статусов',
-      noFiltrationMessage: 'Все статусы',
-      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
-        ' {name} и еще {restLength} статуса'
     },
     tableHeaders: {
       version: 'Версия',

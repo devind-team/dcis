@@ -77,7 +77,20 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления')
 
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, help_text='Пользователь, добавивший документ')
+    updated_by = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='updated_by_document_set',
+        help_text='Пользователь, обновивший документ'
+    )
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='document_set',
+        help_text='Пользователь, добавивший документ'
+    )
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
     sheets = models.ManyToManyField(Sheet)
 

@@ -20,8 +20,27 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
                   :user-divisions="userPeriodDivision"
                 )
                   v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
-            division-filter(v-if="showDivisionFilter" v-model="selectedDivisions" :period="period")
-            status-filter(v-model="selectedStatuses" :period="period" @statuses-loaded="statusesLoaded")
+            template(v-if="showDivisionFilter")
+              organization-filter(
+                v-if="period.project.contentType.model === 'organization'"
+                v-model="selectedDivisions"
+                :period="period"
+                :title="String($t('dcis.periods.organizationFilter.title'))"
+                message-container-class="mb-2 mr-1"
+              )
+              department-filter(
+                v-else
+                v-model="selectedDivisions"
+                :period="period"
+                :title="String($t('dcis.periods.departmentFilter.title'))"
+                message-container-class="mb-2 mr-1"
+              )
+            status-filter(
+              v-model="selectedStatuses"
+              :period="period"
+              message-container-class="mb-2 mr-1"
+              @statuses-loaded="statusesLoaded"
+            )
             documents-table(
               :period="period"
               :documents="documents"
@@ -48,8 +67,27 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
       )
         v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.documents.addDocument.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount }) }}
-  division-filter(v-if="showDivisionFilter" v-model="selectedDivisions" :period="period")
-  status-filter(v-model="selectedStatuses" :period="period" @statuses-loaded="statusesLoaded")
+  template(v-if="showDivisionFilter")
+    organization-filter(
+      v-if="period.project.contentType.model === 'organization'"
+      v-model="selectedDivisions"
+      :period="period"
+      :title="String($t('dcis.periods.organizationFilter.title'))"
+      message-container-class="mb-2 mr-1"
+    )
+    department-filter(
+      v-else
+      v-model="selectedDivisions"
+      :period="period"
+      :title="String($t('dcis.periods.departmentFilter.title'))"
+      message-container-class="mb-2 mr-1"
+    )
+  status-filter(
+    v-model="selectedStatuses"
+    :period="period"
+    message-container-class="mr-1 mb-1"
+    @statuses-loaded="statusesLoaded"
+  )
   documents-table(
     :period="period"
     :documents="documents"
@@ -66,8 +104,7 @@ import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
-import { useFilters, useCursorPagination, useCommonQuery } from '~/composables'
-import { useDocumentsQuery } from '~/services/grapqhl/queries/dcis/documents'
+import { useFilters, useCursorPagination, useCommonQuery, useQueryRelay } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   ChangeDocumentCommentMutation,
@@ -77,28 +114,31 @@ import {
   PeriodType,
   StatusType,
   OrganizationsHasNotDocumentQuery,
-  OrganizationsHasNotDocumentQueryVariables
+  OrganizationsHasNotDocumentQueryVariables, DocumentsQuery, DocumentsQueryVariables
 } from '~/types/graphql'
 import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import organizationsHasNotDocumentQuery from '~/gql/dcis/queries/organizations_has_not_document.graphql'
+import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import DivisionFilter from '~/components/dcis/documents/DivisionFilter.vue'
-import StatusFilter from '~/components/dcis/documents/StatusFilter.vue'
+import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
 import DocumentsTable from '~/components/dcis/documents/DocumentsTable.vue'
+import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
+import DepartmentFilter from '~/components/dcis/periods/DepartmentFilter.vue'
 
 export default defineComponent({
   components: {
     BreadCrumbs,
     AddDocumentMenu,
     LeftNavigatorContainer,
-    DivisionFilter,
     StatusFilter,
-    DocumentsTable
+    DocumentsTable,
+    OrganizationFilter,
+    DepartmentFilter
   },
   middleware: 'auth',
   props: {
@@ -128,15 +168,21 @@ export default defineComponent({
       addUpdate,
       changeUpdate,
       refetch: refetchDocuments
-    } = useDocumentsQuery(
-      route.params.periodId,
-      computed(() => selectedDivisions.value.map(division => division.id)),
-      computed(() => selectedStatuses.value.map(status => status.id)),
-      documentsQueryEnabled, {
-        pagination: useCursorPagination(),
-        fetchScroll: typeof document === 'undefined' ? null : document
-      }
-    )
+    } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
+      document: documentsQuery,
+      variables: () => ({
+        periodId: route.params.periodId,
+        divisionIds: selectedDivisions.value.map(division => division.id),
+        lastStatusIds: selectedStatuses.value.map(status => status.id)
+      }),
+      options: computed(() => ({
+        enabled: documentsQueryEnabled.value
+      }))
+    },
+    {
+      pagination: useCursorPagination(),
+      fetchScroll: typeof document === 'undefined' ? null : document
+    })
 
     const statusesLoaded = () => {
       if (!documentsQueryEnabled.value) {

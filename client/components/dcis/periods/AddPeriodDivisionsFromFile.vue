@@ -22,7 +22,9 @@ mutation-modal-form(
         placeholder="Выберете файл"
         hint="Файл в формате xlsx"
         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        persistent-hint clearable)
+        persistent-hint
+        clearable
+      )
 </template>
 
 <script lang="ts">

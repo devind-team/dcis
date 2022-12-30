@@ -2,12 +2,12 @@
 items-data-filter(
   ref="filter"
   v-model="selectedStatuses"
-  :title="String($t('dcis.documents.statusFilter.title'))"
-  :no-filtration-message="String($t('dcis.documents.statusFilter.noFiltrationMessage'))"
+  :title="title || String($t('dcis.periods.statusFilter.title'))"
+  :no-filtration-message="String($t('dcis.periods.statusFilter.noFiltrationMessage'))"
   :multiple-message-function="multipleMessageFunction"
   :items="statuses ? statuses : []"
   :get-name="status => status.name"
-  message-container-class="mr-1 mb-1"
+  :message-container-class="messageContainerClass"
   multiple
   has-select-all
 )
@@ -16,6 +16,7 @@ items-data-filter(
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, PropType, ref, watch } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
+import { Class } from '~/types/filters'
 import { PeriodType, StatusesQuery, StatusesQueryVariables, StatusFieldsFragment, StatusType } from '~/types/graphql'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
@@ -24,7 +25,9 @@ export default defineComponent({
   components: { ItemsDataFilter },
   props: {
     value: { type: Array as PropType<StatusType[]>, required: true },
-    period: { type: Object as PropType<PeriodType>, required: true }
+    period: { type: Object as PropType<PeriodType>, required: true },
+    title: { type: String, default: null },
+    messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null }
   },
   setup (props, { emit }) {
     const { tc } = useI18n()
@@ -41,7 +44,7 @@ export default defineComponent({
     })
 
     const multipleMessageFunction = (name: string, restLength: number) =>
-      tc('dcis.documents.statusFilter.multipleMessage', restLength, { name, restLength }) as string
+      tc('dcis.periods.statusFilter.multipleMessage', restLength, { name, restLength }) as string
 
     const { data: statuses } = useCommonQuery<
       StatusesQuery,
