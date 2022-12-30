@@ -102,7 +102,7 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
 import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, unref, useNuxt2Meta, useRoute } from '#app'
+import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
 import { useFilters, useCursorPagination, useCommonQuery, useQueryRelay } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -171,9 +171,9 @@ export default defineComponent({
     } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
       document: documentsQuery,
       variables: () => ({
-        periodId: unref(route.params.periodId),
-        divisionIds: unref(computed(() => selectedDivisions.value.map(division => division.id))),
-        lastStatusIds: unref(computed(() => selectedStatuses.value.map(status => status.id)))
+        periodId: route.params.periodId,
+        divisionIds: selectedDivisions.value.map(division => division.id),
+        lastStatusIds: selectedStatuses.value.map(status => status.id)
       }),
       options: computed(() => ({
         enabled: documentsQueryEnabled.value
