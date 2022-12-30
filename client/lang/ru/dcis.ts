@@ -92,6 +92,7 @@ export default {
       noFiltrationMessage: 'Выбрать департаменты',
       multipleMessage: 'Выбрано департаментов: {count}',
       tableHeaders: {
+        id: 'Идентификатор',
         name: 'Название',
         code: 'Код департамента'
       }

@@ -66,7 +66,10 @@ export default defineComponent({
 
     const filterSearchFunction = (item: DepartmentType, search: string): boolean => {
       const searchLower = search.toLocaleLowerCase()
-      let result = item.name.toLocaleLowerCase().includes(searchLower)
+      let result = item.id.toLocaleLowerCase().includes(searchLower)
+      if (item.name) {
+        result = result || item.name.toLocaleLowerCase().includes(searchLower)
+      }
       if (item.code) {
         result = result || String(item.code).toLocaleLowerCase().includes(searchLower)
       }
@@ -74,6 +77,7 @@ export default defineComponent({
     }
 
     const tableHeaders = computed<DataTableHeader[]>(() => [
+      { text: t('dcis.periods.departmentFilter.tableHeaders.id') as string, value: 'id' },
       { text: t('dcis.periods.departmentFilter.tableHeaders.name') as string, value: 'name' },
       { text: t('dcis.periods.departmentFilter.tableHeaders.code') as string, value: 'code' }
     ])
