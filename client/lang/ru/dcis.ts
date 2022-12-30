@@ -266,6 +266,7 @@ export default {
       organizationsFilterTitle: 'Выбор организаций',
       statusFilterTitle: 'Выбор статусов',
       unloadWithoutDocument: 'Выгружать организации без документов',
+      applyNumberFormat: 'Применять числовой формат',
       emptyCell: 'Символы в пустой ячейке'
     }
   },

@@ -3,6 +3,7 @@ mutation UnloadPeriod(
   $organizationIds: [ID!]!,
   $statusIds: [ID!]!,
   $unloadWithoutDocument: Boolean!,
+  $applyNumberFormat: Boolean!,
   $emptyCell: String!
 ) {
   unloadPeriod(input: {
@@ -10,6 +11,7 @@ mutation UnloadPeriod(
     organizationIds: $organizationIds,
     statusIds: $statusIds,
     unloadWithoutDocument: $unloadWithoutDocument,
+    applyNumberFormat: $applyNumberFormat,
     emptyCell: $emptyCell
   }) {
     success

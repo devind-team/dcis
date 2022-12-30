@@ -9,13 +9,24 @@ from typing import Callable
 from devind_dictionaries.models import Organization
 from django.conf import settings
 from django.db.models import QuerySet
+from openpyxl.cell.cell import VALID_TYPES
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from apps.core.models import User
+from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import Cell, Document, MergedCell, Period, Sheet, Value
+from apps.dcis.models.sheet import KindCell
 from apps.dcis.permissions import can_view_period_result
+
+
+@dataclass
+class CellData:
+    """Данные ячейки."""
+    value: str
+    data_type: str = 's'
+    number_format: str = None
 
 
 @dataclass
@@ -23,13 +34,13 @@ class DataSource:
     """Источник данных для ячейки."""
     organization: Organization
     document: Document | None
-    values: list[str]
+    cells: list[CellData]
 
 
 @dataclass
 class Column:
     """Выгружаемый столбец."""
-    get_value: Callable[[DataSource], str]
+    get_cell: Callable[[DataSource], CellData]
     names: list[str]
 
 
@@ -61,6 +72,7 @@ class PeriodUnload:
         organization_ids: list[int],
         status_ids: list[int],
         unload_without_document: bool,
+        apply_number_format: bool,
         empty_cell: str
     ) -> None:
         """Инициализация.
@@ -75,6 +87,7 @@ class PeriodUnload:
             self._organizations = self._organizations.filter(id__in=organization_ids)
         self._status_ids = status_ids
         self._unload_without_document = unload_without_document
+        self._apply_number_format = apply_number_format
         self._empty_cell = empty_cell
         self._documents = Document.objects.filter(
             period=self.period,
@@ -119,10 +132,14 @@ class PeriodUnload:
             data_source = DataSource(
                 organization=organization,
                 document=document,
-                values=self._get_values(cell_groups.value_cells, values, document)
+                cells=self._get_cells_data(cell_groups.value_cells, values, document)
             )
             for column_index, column in enumerate(columns, 1):
-                worksheet.cell(row=row_index, column=column_index, value=column.get_value(data_source))
+                cell_data = column.get_cell(data_source)
+                cell = worksheet.cell(row=row_index, column=column_index, value=cell_data.value)
+                cell.data_type = cell_data.data_type
+                if self._apply_number_format and cell_data.number_format:
+                    cell.number_format = cell_data.number_format
             row_index += 1
 
     def _build_documents_map(self) -> dict[int, Document | None]:
@@ -139,41 +156,52 @@ class PeriodUnload:
     def _build_columns(cls, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
         columns = [
-            Column(get_value=lambda s: s.organization.attributes['idlistedu'], names=['IdListEdu']),
             Column(
-                get_value=lambda s: s.organization.parent.attributes['idlistedu'] if s.organization.parent else '',
-                names=['id_parent']
-            ),
-            Column(get_value=lambda s: s.organization.kodbuhg, names=['Бухкод']),
-            Column(
-                get_value=lambda s: s.organization.region.common_id if s.organization.region else '',
-                names=['Код региона']
-            ),
-            Column(get_value=lambda s: s.organization.region.name if s.organization.region else '', names=['Регион']),
-            Column(get_value=lambda s: s.organization.name, names=['Название учреждения']),
-            Column(
-                get_value=lambda s: s.organization.parent.name if s.organization.parent else '',
-                names=['Название головного учреждения']
+                get_cell=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
+                names=['IdListEdu'],
             ),
             Column(
-                get_value=lambda s: s.document.last_status.status.name if s.document and s.document.last_status else '',
-                names=['Статус документа']
+                get_cell=lambda s: CellData(s.organization.parent.attributes['idlistedu']
+                if s.organization.parent else '', KindCell.NUMERIC),
+                names=['id_parent'],
             ),
-            Column(get_value=lambda s: s.organization.attributes['org_type'], names=['Тип организации']),
+            Column(get_cell=lambda s: CellData(s.organization.kodbuhg, KindCell.NUMERIC), names=['Бухкод']),
+            Column(
+                get_cell=lambda s: CellData(
+                    s.organization.region.common_id if s.organization.region else '',
+                    KindCell.NUMERIC
+                ),
+                names=['Код региона'],
+            ),
+            Column(
+                get_cell=lambda s: CellData(s.organization.region.name if s.organization.region else ''),
+                names=['Регион'],
+            ),
+            Column(get_cell=lambda s: CellData(s.organization.name), names=['Название учреждения']),
+            Column(
+                get_cell=lambda s: CellData(s.organization.parent.name if s.organization.parent else ''),
+                names=['Название головного учреждения'],
+            ),
+            Column(
+                get_cell=lambda s: CellData(s.document.last_status.status.name
+                if s.document and s.document.last_status else ''),
+                names=['Статус документа'],
+            ),
+            Column(get_cell=lambda s: CellData(s.organization.attributes['org_type']), names=['Тип организации']),
         ]
         for i, cell in enumerate(cell_groups.row_header_cells):
-            columns.append(Column(get_value=cls.make_get_value(i), names=[cell.default_error or cell.default]))
+            columns.append(Column(get_cell=cls._make_get_cell(i), names=[cell.default_error or cell.default]))
         columns.append(
             Column(
-                get_value=lambda s: cls.format_datatime(s.document.updated_at) if s.document else '',
+                get_cell=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else ''),
                 names=['Дата последнего редактирования']
             )
         )
         columns.append(
             Column(
-                get_value=lambda s: cls.format_user(s.document.updated_by)
-                if s.document and s.document.updated_by else '',
-                names=['Пользователь']
+                get_cell=lambda s: CellData(cls._format_user(s.document.updated_by)
+                if s.document and s.document.updated_by else ''),
+                names=['Пользователь'],
             )
         )
         return columns
@@ -210,15 +238,23 @@ class PeriodUnload:
         """Получение объединенных ячеек листа."""
         return MergedCell.objects.filter(sheet=sheet)
 
-    def _get_values(self, cells: list[Cell], values: QuerySet[Value], document: Document) -> list[str]:
-        """Получение значений для ячеек."""
-        result: list[str] = []
+    def _get_cells_data(self, cells: list[Cell], values: QuerySet[Value], document: Document) -> list[CellData]:
+        """Получение данных для ячеек."""
+        result: list[CellData] = []
         for cell in cells:
             val = self._empty_cell
             for value in values:
                 if value.document == document and value.column == cell.column and value.row == cell.row:
                     val = value.value
-            result.append(val)
+            data_type = cell.kind
+            if data_type not in VALID_TYPES:
+                data_type = KindCell.STRING
+            if data_type == KindCell.FORMULA:
+                if self._is_numeric(val):
+                    data_type = KindCell.NUMERIC
+                else:
+                    data_type = KindCell.STRING
+            result.append(CellData(value=val, data_type=data_type, number_format=cell.number_format))
         return result
 
     @classmethod
@@ -304,24 +340,29 @@ class PeriodUnload:
         return max(indices[0] - 1, 1)
 
     @staticmethod
-    def make_get_value(i: int):
+    def _make_get_cell(i: int) -> Callable[[DataSource], CellData]:
         """Создание функции для получения значения."""
-        def get_value(s: DataSource):
-            return s.values[i]
-        return get_value
+        def get_cell(s: DataSource) -> CellData:
+            return s.cells[i]
+        return get_cell
 
     @staticmethod
-    def format_datatime(datatime: datetime) -> str:
+    def _format_datatime(datatime: datetime) -> str:
         """Форматирование даты."""
         return f'{datatime:%d.%m.%Y %H:%M}'
 
     @staticmethod
-    def format_user(user: User) -> str:
+    def _format_user(user: User) -> str:
         """Форматирование пользователя."""
         result = f'{user.last_name} {user.first_name}'
         if user.sir_name:
             return f'{result} {user.sir_name}'
         return result
+
+    @staticmethod
+    def _is_numeric(value: str) -> bool:
+        """Является ли значение типом `KindCell.NUMERIC`"""
+        return not is_raises(ValueError, lambda: int(value) or float(value))
 
 
 def unload_period(
@@ -330,6 +371,7 @@ def unload_period(
     organization_ids: list[int],
     status_ids: list[int],
     unload_without_document: bool,
+    apply_number_format: bool,
     empty_cell: str
 ) -> str:
     """Выгрузка периода в формате Excel."""
@@ -339,5 +381,6 @@ def unload_period(
         organization_ids=organization_ids,
         status_ids=status_ids,
         unload_without_document=unload_without_document,
+        apply_number_format=apply_number_format,
         empty_cell=empty_cell,
     ).unload()
