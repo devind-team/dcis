@@ -67,7 +67,10 @@ export default defineComponent({
 
     const filterSearchFunction = (item: OrganizationType, search: string): boolean => {
       const searchLower = search.toLocaleLowerCase()
-      let result = item.name.toLocaleLowerCase().includes(searchLower)
+      let result = item.id.toLocaleLowerCase().includes(searchLower)
+      if (item.name) {
+        result = result || item.name.toLocaleLowerCase().includes(searchLower)
+      }
       if (item.kpp) {
         result = result || item.kpp.toLocaleLowerCase().includes(searchLower)
       }
