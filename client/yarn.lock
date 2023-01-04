@@ -12828,10 +12828,10 @@ number-is-nan@^1.0.0:
   resolved "https://registry.yarnpkg.com/number-is-nan/-/number-is-nan-1.0.1.tgz#097b602b53422a522c1afb8790318336941a011d"
   integrity sha1-CXtgK1NCKlIsGvuHkDGDNpQaAR0=
 
-numfmt@^2.4.2:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-2.4.3.tgz#d25874f9ba8a795c7b71b9e416d60a5372ff579a"
-  integrity sha512-nkAvt0Rc+LnlI5z4E7Ty755EpYYcX+9mQ6RPUIAM4lbCuCqXWq/4osGyLmmlxIiFb2E/04NgIZ5tjuxNmttXAg==
+numfmt@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-2.5.0.tgz#93ec9ee31bd7261f6f256a6d52856427c8085bdc"
+  integrity sha512-adPpnLrjC7+RVdWXatyKdFjACV6j8FVdmejOYfoOBXHQnp11Yc5z2QLvyVoZccVHvsQKJAVmOj9umzElC5WBWA==
 
 "nuxi@npm:nuxi-edge@3.0.0-27460489.53fbca7":
   version "3.0.0-27460489.53fbca7"
