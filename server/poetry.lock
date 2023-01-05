@@ -1780,8 +1780,8 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
-name = "SnakeMD"
-version = "0.11.0"
+name = "snakemd"
+version = "0.12.1"
 description = "A markdown generation library for Python."
 category = "main"
 optional = false
@@ -2034,7 +2034,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "c14acbd03cab08c199382b8f2d6737d8ac9ca2c02dc09779ff5fbffd5353c21c"
+content-hash = "b20c8e1b0fb5516782f201a0ac2a747bb790ac55e27a919eac9854ec61a423bb"
 
 [metadata.files]
 aiohttp = [
@@ -3195,6 +3195,7 @@ pyparsing = [
 ]
 python-crontab = [
     {file = "python-crontab-2.6.0.tar.gz", hash = "sha256:1e35ed7a3cdc3100545b43e196d34754e6551e7f95e4caebbe0e1c0ca41c2f1b"},
+    {file = "python_crontab-2.6.0-py3-none-any.whl", hash = "sha256:f308a64b8b1d072da4a235e9320398a242e92d080c1d8143bd0c600b24e160f8"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
@@ -3232,6 +3233,7 @@ requests = [
     {file = "ruamel.yaml.clib-0.2.7-cp310-cp310-win_amd64.whl", hash = "sha256:d000f258cf42fec2b1bbf2863c61d7b8918d31ffee905da62dede869254d3b8a"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:045e0626baf1c52e5527bd5db361bc83180faaba2ff586e763d3d5982a876a9e"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_12_6_arm64.whl", hash = "sha256:721bc4ba4525f53f6a611ec0967bdcee61b31df5a56801281027a3a6d1c2daf5"},
+    {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:41d0f1fa4c6830176eef5b276af04c89320ea616655d01327d5ce65e50575c94"},
     {file = "ruamel.yaml.clib-0.2.7-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:4b3a93bb9bc662fc1f99c5c3ea8e623d8b23ad22f861eb6fce9377ac07ad6072"},
     {file = "ruamel.yaml.clib-0.2.7-cp36-cp36m-macosx_12_0_arm64.whl", hash = "sha256:a234a20ae07e8469da311e182e70ef6b199d0fbeb6c6cc2901204dd87fb867e8"},
     {file = "ruamel.yaml.clib-0.2.7-cp36-cp36m-manylinux2014_aarch64.whl", hash = "sha256:15910ef4f3e537eea7fe45f8a5d19997479940d9196f357152a09031c5be59f3"},
@@ -3305,9 +3307,9 @@ six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
-SnakeMD = [
-    {file = "SnakeMD-0.11.0-py3-none-any.whl", hash = "sha256:9e4c2a6b5b7c72dfc1115188bffe7eeda470cf703c21b32711d69ad6e665ff94"},
-    {file = "SnakeMD-0.11.0.tar.gz", hash = "sha256:228bbb2ad817e8f01d8f5396fde31d4a1dbe17f58f26d826026a7d70f4994598"},
+snakemd = [
+    {file = "SnakeMD-0.12.1-py3-none-any.whl", hash = "sha256:4f211cb1749ba972a7d40be7cb430317de2ac7263ccc8014e634ee982924147b"},
+    {file = "SnakeMD-0.12.1.tar.gz", hash = "sha256:52d76c997ec3ce9a27ca355932be88ec8002fbbebdc848a6aef9c0096b3ea9d4"},
 ]
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
