@@ -5905,6 +5905,8 @@ export type UnloadFileValueArchiveMutationPayload = {
 };
 
 export type UnloadPeriodMutationInput = {
+  /** Применять числовой формат */
+  applyNumberFormat: Scalars['Boolean'];
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Символы в пустой ячейке */
   emptyCell: Scalars['String'];
@@ -6755,6 +6757,7 @@ export type UnloadPeriodMutationVariables = Exact<{
   organizationIds: Array<Scalars['ID']> | Scalars['ID'];
   statusIds: Array<Scalars['ID']> | Scalars['ID'];
   unloadWithoutDocument: Scalars['Boolean'];
+  applyNumberFormat: Scalars['Boolean'];
   emptyCell: Scalars['String'];
 }>;
 

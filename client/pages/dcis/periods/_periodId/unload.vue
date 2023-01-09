@@ -26,6 +26,7 @@ bread-crumbs(:items="bc")
             message-container-class="mr-1"
           )
           v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
+          v-checkbox(v-model="applyNumberFormat" :label="$t('dcis.periods.unload.applyNumberFormat')")
           v-text-field(v-model="emptyCell" :label="$t('dcis.periods.unload.emptyCell')")
         v-card-actions
           v-btn(:loading="loading" type="submit" color="primary") {{ $t('upload') }}
@@ -69,6 +70,7 @@ export default defineComponent({
     const selectedOrganizations = ref<OrganizationType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
     const unloadWithoutDocument = ref<boolean>(true)
+    const applyNumberFormat = ref<boolean>(true)
     const emptyCell = ref<string>('')
 
     const variables = computed<UnloadPeriodMutationVariables>(() => ({
@@ -76,6 +78,7 @@ export default defineComponent({
       organizationIds: selectedOrganizations.value.map((organization: OrganizationType) => organization.id),
       statusIds: selectedStatuses.value.map((status: StatusType) => status.id),
       unloadWithoutDocument: unloadWithoutDocument.value,
+      applyNumberFormat: applyNumberFormat.value,
       emptyCell: emptyCell.value
     }))
 
@@ -91,6 +94,7 @@ export default defineComponent({
       selectedStatuses,
       unloadPeriodOnDone,
       unloadWithoutDocument,
+      applyNumberFormat,
       emptyCell,
       variables
     }
