@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@vuepress/plugin-register-components": "2.0.0-beta.51",
-    "rimraf": "^3.0.2",
+    "rimraf": "^4.0.4",
     "vue": "^3.2.37"
   }
 }
