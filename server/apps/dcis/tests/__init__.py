@@ -1,6 +1,7 @@
 from .helpers import CellHelpersTestCase
 from .models import (
     DocumentModelTestCase,
+    DocumentStatusModelTestCase,
     ProjectModelTestCase,
 )
 from .permissions import (

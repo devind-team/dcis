@@ -36,5 +36,5 @@ class Migration(migrations.Migration):
             name='user',
             field=models.ForeignKey(help_text='Пользователь, добавивший документ', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='document_set', to=settings.AUTH_USER_MODEL),
         ),
-        migrations.RunPython(set_updated_by, empty_reverse)
+        migrations.RunPython(set_updated_by, empty_reverse),
     ]
