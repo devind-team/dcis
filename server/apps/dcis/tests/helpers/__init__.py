@@ -1,1 +1,2 @@
 from .cell import CellHelpersTestCase
+from .ordering import OrderedDjangoFilterConnectionFieldTestCase

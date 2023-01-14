@@ -5,6 +5,7 @@ query Documents(
   $periodId: ID!,
   $divisionIds: [ID!]!,
   $lastStatusIds: [ID!]!,
+  $orderBy: [String!],
   $first: Int,
   $after: String
 ) {
@@ -12,6 +13,7 @@ query Documents(
     periodId: $periodId,
     divisionId_In: $divisionIds,
     lastStatus_StatusId_In: $lastStatusIds,
+    orderBy: $orderBy,
     first: $first,
     after: $after
   ) {

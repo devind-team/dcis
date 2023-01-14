@@ -3,8 +3,10 @@ v-data-table(
   :headers="headers"
   :items="documents"
   :loading="loading"
+  :custom-sort="customSort"
   disable-pagination
   hide-default-footer
+  multi-sort
 )
   template(#item.division="{ item }")
     nuxt-link(
@@ -41,6 +43,7 @@ v-data-table(
 import { computed, defineComponent, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { useFilters, useI18n } from '~/composables'
+import { collectOrderBy } from '~/services/ordering'
 import { useAuthStore } from '~/stores'
 import { PeriodType, DocumentType } from '~/types/graphql'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
@@ -54,7 +57,7 @@ export default defineComponent({
     loading: { type: Boolean, required: true },
     updateDocuments: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const { t } = useI18n()
     const userStore = useAuthStore()
     const { dateTimeHM } = useFilters()
@@ -82,8 +85,12 @@ export default defineComponent({
     const canDeleteDocumentStatus = (document: DocumentType) => {
       return document.canChange
     }
+    const customSort = (items: DocumentType[], sortBy: string[], sortDesc: boolean[]) => {
+      emit('update-order-by', collectOrderBy(sortBy, sortDesc))
+      return items
+    }
 
-    return { headers, canChangeDocumentComment, canDeleteDocumentStatus, dateTimeHM }
+    return { headers, canChangeDocumentComment, canDeleteDocumentStatus, dateTimeHM, customSort }
   }
 })
 </script>

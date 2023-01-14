@@ -1,9 +1,13 @@
-from .helpers import CellHelpersTestCase
+from .helpers import (
+    CellHelpersTestCase,
+    OrderedDjangoFilterConnectionFieldTestCase,
+)
 from .models import (
     DocumentModelTestCase,
     DocumentStatusModelTestCase,
     ProjectModelTestCase,
 )
+from .ordering import DocumentOrderedDjangoFilterConnectionFieldTestCase
 from .permissions import (
     DocumentPermissionsTestCase,
     PeriodPermissionsTestCase,

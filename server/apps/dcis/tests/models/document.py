@@ -46,7 +46,7 @@ class DocumentModelTestCase(TestCase):
         document_statuses = [DocumentStatus(document=document, status=status, user=self.user) for status in statuses]
         document.documentstatus_set.bulk_create(document_statuses)
         for i, ds in enumerate(document_statuses):
-            ds.created_at = ds.created_at + timedelta(days=i)
+            ds.created_at += timedelta(days=i)
             ds.save(update_fields=('created_at',))
         return document_statuses
 
