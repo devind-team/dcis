@@ -1,7 +1,7 @@
 """Тесты моделей документа."""
 from datetime import timedelta
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
@@ -16,8 +16,8 @@ class DocumentModelTestCase(TestCase):
         """Создание данных для тестирования."""
         self.user = User.objects.create(username='user', email='user@gmail.com')
 
-        self.department_content_type = ContentType.objects.get_for_model(Department)
-        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
 
         self.status = Status.objects.create(name='Testing status')
@@ -35,14 +35,6 @@ class DocumentModelTestCase(TestCase):
             [self.status, self.status, self.status_edit]
         )
 
-    def test_last_status(self) -> None:
-        """Тестирование свойства `last_status`."""
-        self.assertIs(None, self.document_without_status_document.last_status)
-        self.assertEqual(
-            self.document_statuses_with_last_not_edit_status[2],
-            self.document_with_last_not_edit_status.last_status
-        )
-
     def test_is_editable(self) -> None:
         """Тестирование свойства `is_editable`."""
         self.assertFalse(self.document_without_status_document.is_editable)
@@ -54,6 +46,39 @@ class DocumentModelTestCase(TestCase):
         document_statuses = [DocumentStatus(document=document, status=status, user=self.user) for status in statuses]
         document.documentstatus_set.bulk_create(document_statuses)
         for i, ds in enumerate(document_statuses):
-            ds.created_at = ds.created_at + timedelta(days=i)
+            ds.created_at += timedelta(days=i)
             ds.save(update_fields=('created_at',))
         return document_statuses
+
+
+class DocumentStatusModelTestCase(TestCase):
+    """Тестирование модели `DocumentStatus`."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
+        self.period = Period.objects.create(project=self.project)
+        self.document = Document.objects.create(period=self.period)
+
+        self.status = Status.objects.create()
+
+    def test_create_save_delete(self) -> None:
+        """Тестирование создания, обновления и удаления статуса документа."""
+        document_status1 = DocumentStatus.objects.create(document=self.document, status=self.status, user=self.user)
+        self.assertEqual(document_status1, self.document.last_status)
+        document_status2 = self.document.documentstatus_set.create(
+            document=self.document,
+            status=self.status,
+            user=self.user
+        )
+        self.assertEqual(document_status2, self.document.last_status)
+        document_status2.created_at = document_status2.created_at - timedelta(days=1)
+        document_status2.save(update_fields=('created_at',))
+        self.assertEqual(document_status1, self.document.last_status)
+        document_status1.delete()
+        self.assertEqual(document_status2, self.document.last_status)
+        document_status2.delete()
+        self.assertIsNone(self.document.last_status)

@@ -1,6 +1,7 @@
 from typing import Any, Iterable
 
 import graphene
+import graphene_django_optimizer as gql_optimizer
 from devind_core.models import File
 from devind_core.schema import FileType
 from devind_helpers.decorators import permission_classes
@@ -24,6 +25,7 @@ from apps.dcis.models import (
     Status,
     Value,
 )
+from apps.dcis.ordering import DocumentOrderedDjangoFilterConnectionField
 from apps.dcis.permissions import can_view_document
 from apps.dcis.schema.types import (
     AttributeValueType,
@@ -43,7 +45,7 @@ from apps.dcis.services.value_services import get_file_value_files
 
 class DocumentQueries(graphene.ObjectType):
     """Запросы записей, связанных с документами."""
-    documents = DjangoFilterConnectionField(
+    documents = DocumentOrderedDjangoFilterConnectionField(
         DocumentType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
@@ -111,7 +113,7 @@ class DocumentQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_documents(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs) -> Iterable[Document]:
-        return get_user_documents(info.context.user, gid2int(period_id))
+        return gql_optimizer.query(get_user_documents(info.context.user, gid2int(period_id)), info)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

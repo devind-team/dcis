@@ -1,2 +1,2 @@
-from .document import DocumentModelTestCase
+from .document import DocumentModelTestCase, DocumentStatusModelTestCase
 from .project import ProjectModelTestCase

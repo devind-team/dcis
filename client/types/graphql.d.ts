@@ -4997,6 +4997,7 @@ export type QueryDocumentsArgs = {
   last?: InputMaybe<Scalars['Int']>;
   lastStatus_StatusId_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   offset?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Array<Scalars['String']>>;
   periodId: Scalars['ID'];
 };
 
@@ -6970,6 +6971,7 @@ export type DocumentsQueryVariables = Exact<{
   periodId: Scalars['ID'];
   divisionIds: Array<Scalars['ID']> | Scalars['ID'];
   lastStatusIds: Array<Scalars['ID']> | Scalars['ID'];
+  orderBy?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
 }>;

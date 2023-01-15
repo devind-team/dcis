@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.db import models
 
 from apps.core.models import User
@@ -97,23 +95,34 @@ class Document(models.Model):
     object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
     object_name = models.CharField(max_length=512, null=True, help_text='Название дивизиона')
 
-    @property
-    def last_status(self) -> Optional['DocumentStatus']:
-        try:
-            return self.documentstatus_set.latest('created_at')
-        except DocumentStatus.DoesNotExist:
-            return None
+    last_status = models.ForeignKey(
+        'DocumentStatus',
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='last_status_document_set',
+        help_text='Последний статус документа',
+    )
 
     @property
     def is_editable(self) -> bool:
-        last_status = self.last_status
-        if last_status is None or not last_status.status.edit:
+        if self.last_status is None or not self.last_status.status.edit:
             return False
         return True
 
     class Meta:
         ordering = ('-version', '-created_at',)
         unique_together = (('period', 'version', 'object_id',),)
+
+
+class DocumentStatusManager(models.Manager):
+    """Менеджер модели статуса документа для управления последним статусом документа."""
+
+    def create(self, *args, **kwargs) -> 'DocumentStatus':
+        """Создание статуса документа."""
+        document_status = super().create(*args, **kwargs)
+        document_status.document.last_status = document_status
+        document_status.document.save(update_fields=('last_status',))
+        return document_status
 
 
 class DocumentStatus(models.Model):
@@ -126,6 +135,26 @@ class DocumentStatus(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')
     status = models.ForeignKey(Status, on_delete=models.CASCADE, help_text='Статус')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='Пользователь')
+
+    objects = DocumentStatusManager()
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
+        super().save(force_insert, force_update, using, update_fields)
+        if update_fields and 'created_at' in update_fields:
+            self.document.last_status = self.document.documentstatus_set.latest('created_at')
+            self.document.save(update_fields=('last_status',))
+
+    def delete(self, *args, **kwargs):
+        """Удаление статуса документа."""
+        is_last = self == self.document.last_status
+        result = super().delete(*args, **kwargs)
+        if is_last:
+            try:
+                self.document.last_status = self.document.documentstatus_set.latest('created_at')
+            except DocumentStatus.DoesNotExist:
+                self.document.last_status = None
+            self.document.save(update_fields=('last_status',))
+        return result
 
     class Meta:
         ordering = ('-created_at',)

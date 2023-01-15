@@ -48,6 +48,7 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
               :update-documents="updateDocuments"
               @change-document-comment="changeDocumentComment"
               @add-status="refetchDocuments"
+              @update-order-by="orderBy = $event"
             )
       v-tab-item
         v-list
@@ -95,6 +96,7 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
     :update-documents="updateDocuments"
     @change-document-comment="changeDocumentComment"
     @add-status="refetchDocuments"
+    @update-order-by="orderBy = $event"
   )
 </template>
 
@@ -159,6 +161,8 @@ export default defineComponent({
     const selectedDivisions = ref<DivisionModelType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
 
+    const orderBy = ref<string[]>([])
+
     const documentsQueryEnabled = ref<boolean>(false)
     const {
       data: documents,
@@ -173,7 +177,8 @@ export default defineComponent({
       variables: () => ({
         periodId: route.params.periodId,
         divisionIds: selectedDivisions.value.map(division => division.id),
-        lastStatusIds: selectedStatuses.value.map(status => status.id)
+        lastStatusIds: selectedStatuses.value.map(status => status.id),
+        orderBy: orderBy.value
       }),
       options: computed(() => ({
         enabled: documentsQueryEnabled.value
@@ -238,6 +243,7 @@ export default defineComponent({
       userPeriodDivision,
       selectedDivisions,
       selectedStatuses,
+      orderBy,
       documents,
       loading,
       count,

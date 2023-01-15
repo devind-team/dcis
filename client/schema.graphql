@@ -4068,6 +4068,8 @@ type Query {
     last: Int
     lastStatus_StatusId_In: [ID]
     offset: Int
+    """Сортировка с помощью `order_by`"""
+    orderBy: [String!]
     """Идентификатор периода"""
     periodId: ID!
   ): DocumentTypeConnection!
