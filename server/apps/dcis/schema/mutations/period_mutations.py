@@ -388,7 +388,9 @@ class UnloadPeriodMutation(BaseMutation):
         )
         unload_without_document = graphene.Boolean(required=True, description='Выгружать организации без документов')
         apply_number_format = graphene.Boolean(required=True, description='Применять числовой формат')
-        empty_cell = graphene.String(required=True, description='Символы в пустой ячейке')
+        unload_heads = graphene.Boolean(required=True, description='Выгружать листы для головных учреждений')
+        unload_children = graphene.Boolean(required=True, description='Выгружать листы для филиалов')
+        empty_cell = graphene.String(required=True, description='Строка в пустой ячейке')
 
     src = graphene.String(description='Ссылка на сгенерированный файл')
 
@@ -402,7 +404,9 @@ class UnloadPeriodMutation(BaseMutation):
         status_ids: list[int],
         unload_without_document: bool,
         apply_number_format: bool,
-        empty_cell: str
+        unload_heads: bool,
+        unload_children: bool,
+        empty_cell: str,
     ):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return UnloadPeriodMutation(
@@ -413,6 +417,8 @@ class UnloadPeriodMutation(BaseMutation):
                 status_ids=[gid2int(status_id) for status_id in status_ids],
                 unload_without_document=unload_without_document,
                 apply_number_format=apply_number_format,
+                unload_heads=unload_heads,
+                unload_children=unload_children,
                 empty_cell=empty_cell,
             )
         )

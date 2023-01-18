@@ -27,6 +27,7 @@ bread-crumbs(:items="bc")
           )
           v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
           v-checkbox(v-model="applyNumberFormat" :label="$t('dcis.periods.unload.applyNumberFormat')")
+          v-select(v-model="sheets" :label="$t('dcis.periods.unload.sheets.label')" :items="sheetsItems")
           v-text-field(v-model="emptyCell" :label="$t('dcis.periods.unload.emptyCell')")
         v-card-actions
           v-btn(:loading="loading" type="submit" color="primary") {{ $t('upload') }}
@@ -67,11 +68,44 @@ export default defineComponent({
       }
     ]))
 
+    const sheetsItems = computed<string[]>(() => [
+      t('dcis.periods.unload.sheets.onlyHeads') as string,
+      t('dcis.periods.unload.sheets.onlyChildren') as string,
+      t('dcis.periods.unload.sheets.headsAndChildrens') as string
+    ])
+
     const selectedOrganizations = ref<OrganizationType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
     const unloadWithoutDocument = ref<boolean>(true)
     const applyNumberFormat = ref<boolean>(true)
+    const unloadHeads = ref<boolean>(true)
+    const unloadChildren = ref<boolean>(false)
     const emptyCell = ref<string>('')
+    const sheets = computed<string>({
+      get () {
+        if (unloadHeads.value && !unloadChildren.value) {
+          return sheetsItems.value[0]
+        }
+        if (!unloadHeads.value && unloadChildren.value) {
+          return sheetsItems.value[1]
+        }
+        return sheetsItems.value[2]
+      },
+      set (value: string) {
+        if (value === sheetsItems.value[0]) {
+          unloadHeads.value = true
+          unloadChildren.value = false
+        }
+        if (value === sheetsItems.value[1]) {
+          unloadHeads.value = false
+          unloadChildren.value = true
+        }
+        if (value === sheetsItems.value[2]) {
+          unloadHeads.value = true
+          unloadChildren.value = true
+        }
+      }
+    })
 
     const variables = computed<UnloadPeriodMutationVariables>(() => ({
       periodId: props.period.id,
@@ -79,6 +113,8 @@ export default defineComponent({
       statusIds: selectedStatuses.value.map((status: StatusType) => status.id),
       unloadWithoutDocument: unloadWithoutDocument.value,
       applyNumberFormat: applyNumberFormat.value,
+      unloadHeads: unloadHeads.value,
+      unloadChildren: unloadChildren.value,
       emptyCell: emptyCell.value
     }))
 
@@ -90,11 +126,13 @@ export default defineComponent({
 
     return {
       bc,
+      sheetsItems,
       selectedOrganizations,
       selectedStatuses,
       unloadPeriodOnDone,
       unloadWithoutDocument,
       applyNumberFormat,
+      sheets,
       emptyCell,
       variables
     }

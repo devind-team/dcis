@@ -73,10 +73,19 @@ class PeriodUnload:
         status_ids: list[int],
         unload_without_document: bool,
         apply_number_format: bool,
+        unload_heads: bool,
+        unload_children: bool,
         empty_cell: str
     ) -> None:
         """Инициализация.
-        - period - выгружаемы период
+        - period - выгружаемый период
+        - organization_ids - фильтрация по идентификаторам организаций
+        - status_ids - фильтрация по идентификаторам статусов
+        - unload_without_document - выгружать организации без документов
+        - apply_number_format - применять числовой формат
+        - unload_heads - выгружать листы для головных учреждений
+        - unload_children - выгружать листы для филиалов
+        - empty_cell - строка в пустой ячейке
         """
         self.period = period
         self.path = Path(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
@@ -88,6 +97,10 @@ class PeriodUnload:
         self._status_ids = status_ids
         self._unload_without_document = unload_without_document
         self._apply_number_format = apply_number_format
+        if unload_heads and unload_children:
+            self._sheets = self.period.sheet_set.all()
+        else:
+            self._sheets = self.period.sheet_set.filter(show_head=unload_heads, show_child=unload_children)
         self._empty_cell = empty_cell
         self._documents = Document.objects.filter(
             period=self.period,
@@ -106,7 +119,7 @@ class PeriodUnload:
         """Выгрузка."""
         workbook = Workbook()
         workbook.remove(workbook.active)
-        for sheet in self.period.sheet_set.all():
+        for sheet in self._sheets:
             worksheet = workbook.create_sheet(sheet.name)
             cells = self._get_cells(sheet)
             cell_groups = self._get_cell_groups(sheet, cells)
@@ -127,7 +140,7 @@ class PeriodUnload:
         """Сохранение строки на лист Excel."""
         row_index = self._get_header_size(columns) + 1
         values = Value.objects.filter(sheet=sheet)
-        for organization in self._filter_organizations(self._organizations):
+        for organization in self._get_organizations(sheet):
             document = self.documents_map[organization.id]
             data_source = DataSource(
                 organization=organization,
@@ -206,10 +219,15 @@ class PeriodUnload:
         )
         return columns
 
-    def _filter_organizations(self, organizations: list[Organization]) -> list[Organization]:
-        """Фильтрация организаций."""
+    def _get_organizations(self, sheet: Sheet) -> list[Organization]:
+        """Получение организаций с фильтрацией."""
         result: list[Organization] = []
-        for organization in organizations:
+        parent_filter: dict[str, bool] = {}
+        if sheet.show_head and not sheet.show_child:
+            parent_filter['parent__isnull'] = True
+        elif not sheet.show_head and sheet.show_child:
+            parent_filter['parent__isnull'] = False
+        for organization in self._organizations.filter(**parent_filter):
             document = self.documents_map[organization.id]
             if (
                 self._unload_without_document and
@@ -372,6 +390,8 @@ def unload_period(
     status_ids: list[int],
     unload_without_document: bool,
     apply_number_format: bool,
+    unload_heads: bool,
+    unload_children: bool,
     empty_cell: str
 ) -> str:
     """Выгрузка периода в формате Excel."""
@@ -382,5 +402,7 @@ def unload_period(
         status_ids=status_ids,
         unload_without_document=unload_without_document,
         apply_number_format=apply_number_format,
+        unload_heads=unload_heads,
+        unload_children=unload_children,
         empty_cell=empty_cell,
     ).unload()

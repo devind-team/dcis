@@ -4891,7 +4891,7 @@ input UnloadPeriodMutationInput {
   """Применять числовой формат"""
   applyNumberFormat: Boolean!
   clientMutationId: String
-  """Символы в пустой ячейке"""
+  """Строка в пустой ячейке"""
   emptyCell: String!
   """Идентификаторы организаций"""
   organizationIds: [ID!]!
@@ -4899,6 +4899,10 @@ input UnloadPeriodMutationInput {
   periodId: ID!
   """Идентификаторы статусов"""
   statusIds: [ID!]!
+  """Выгружать листы для филиалов"""
+  unloadChildren: Boolean!
+  """Выгружать листы для головных учреждений"""
+  unloadHeads: Boolean!
   """Выгружать организации без документов"""
   unloadWithoutDocument: Boolean!
 }
