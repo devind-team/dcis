@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from itertools import chain
 from pathlib import Path
 from typing import Callable
 
@@ -132,8 +131,9 @@ class PeriodUnload:
     @staticmethod
     def _save_columns(worksheet: Worksheet, columns: list[Column]) -> None:
         """Сохранение название столбцов на лист Excel."""
+        max_row_count = max(len(column.names) for column in columns)
         for column_index, column in enumerate(columns, 1):
-            for row_index, name in enumerate(column.names, 1):
+            for row_index, name in enumerate(column.names, max_row_count - len(column.names) + 1):
                 worksheet.cell(row=row_index, column=column_index, value=name)
 
     def _save_rows(self, worksheet: Worksheet, sheet: Sheet, columns: list[Column], cell_groups: CellGroups) -> None:
@@ -168,7 +168,16 @@ class PeriodUnload:
     @classmethod
     def _build_columns(cls, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
-        columns = [
+        return [
+            *cls._build_left_columns(),
+            *cls._build_data_columns(cell_groups),
+            *cls._build_right_columns()
+        ]
+
+    @staticmethod
+    def _build_left_columns() -> list[Column]:
+        """Получение столбцов слева от данных."""
+        return [
             Column(
                 get_cell=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
                 names=['IdListEdu'],
@@ -202,22 +211,43 @@ class PeriodUnload:
             ),
             Column(get_cell=lambda s: CellData(s.organization.attributes['org_type']), names=['Тип организации']),
         ]
-        for i, cell in enumerate(cell_groups.row_header_cells):
-            columns.append(Column(get_cell=cls._make_get_cell(i), names=[cell.default_error or cell.default]))
-        columns.append(
+
+    @classmethod
+    def _build_data_columns(cls, cell_groups: CellGroups) -> list[Column]:
+        """Получение столбцов с данными."""
+        min_column_index = min((hc.cell.column.index for hc in cell_groups.column_header_cells), default=0)
+        max_column_index = max(
+            (hc.cell.column.index if hc.merged_cell is None else hc.merged_cell.max_col
+            for hc in cell_groups.column_header_cells),
+            default=0,
+        )
+        columns: list[Column] = []
+        if min_column_index != 0 or max_column_index != 0:
+            for column_start_index, column_index in enumerate(range(min_column_index, max_column_index + 1)):
+                for cell_index, cell in enumerate(cell_groups.row_header_cells):
+                    i = column_start_index * len(cell_groups.row_header_cells) + cell_index
+                    columns.append(Column(get_cell=cls._make_get_cell(i), names=[cell.default_error or cell.default]))
+        else:
+            for i, cell in enumerate(cell_groups.row_header_cells):
+                columns.append(Column(get_cell=cls._make_get_cell(i), names=[cell.default_error or cell.default]))
+        return columns
+
+    @classmethod
+    def _build_right_columns(cls) -> list[Column]:
+        """Получение столбцов справа от данных."""
+        return [
             Column(
                 get_cell=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else ''),
                 names=['Дата последнего редактирования']
-            )
-        )
-        columns.append(
+            ),
             Column(
-                get_cell=lambda s: CellData(cls._format_user(s.document.updated_by)
-                if s.document and s.document.updated_by else ''),
+                get_cell=lambda s: CellData(
+                    cls._format_user(s.document.updated_by)
+                    if s.document and s.document.updated_by else ''
+                ),
                 names=['Пользователь'],
-            )
-        )
-        return columns
+            ),
+        ]
 
     def _get_organizations(self, sheet: Sheet) -> list[Organization]:
         """Получение организаций с фильтрацией."""
@@ -259,7 +289,7 @@ class PeriodUnload:
     def _get_cells_data(self, cells: list[Cell], values: QuerySet[Value], document: Document) -> list[CellData]:
         """Получение данных для ячеек."""
         result: list[CellData] = []
-        for cell in cells:
+        for cell in sorted(cells, key=lambda c: [c.column.index, c.row.index]):
             val = self._empty_cell
             for value in values:
                 if value.document == document and value.column == cell.column and value.row == cell.row:
@@ -307,10 +337,8 @@ class PeriodUnload:
     @classmethod
     def _normalize_cell_groups(cls, value_cells: list[Cell], header_cells: list[HeaderCell]) -> CellGroups:
         """Нормализация групп ячеек."""
-        cls._cut_dimension(value_cells, header_cells, lambda cell: cell.row.index)
-        cls._cut_dimension(value_cells, header_cells, lambda cell: cell.column.index)
-        row_header_index, column_header_index = cls._get_header_indices(value_cells)
-        column_header_cells: list[HeaderCell] = []
+        column_header_index, row_header_index = cls._cut_excess_headers(value_cells, header_cells)
+        column_header_cells: list[HeaderCell] = [hc for hc in header_cells if hc.cell.column.index > row_header_index]
         row_header_cells: list[Cell] = [
             hc.cell for hc in header_cells
             if hc.cell.column.index == row_header_index and hc.cell.row.index > column_header_index
@@ -322,40 +350,39 @@ class PeriodUnload:
         )
 
     @classmethod
-    def _cut_dimension(
-        cls,
-        value_cells: list[Cell],
-        header_cells: list[HeaderCell],
-        get_index: Callable[[Cell], int]
-    ) -> None:
-        """Отрезание лишних элементов по измерению."""
-        indices = sorted(set(map(get_index, value_cells)))
-        header_index = cls._get_header_index(indices)
-        value_cells_copy = [*value_cells]
+    def _cut_excess_headers(cls, value_cells: list[Cell], header_cells: list[HeaderCell]) -> tuple[int, int]:
+        """Отрезание лишних ячеек от ячеек с данными."""
+        value_cells_copy: list[Cell] = [*value_cells]
         value_cells.clear()
-        for cell in value_cells_copy:
-            if get_index(cell) > header_index:
-                value_cells.append(cell)
-            elif get_index(cell) == header_index:
-                header_cells.append(HeaderCell(cell=cell, merged_cell=None))
-
-    @classmethod
-    def _get_header_indices(cls, cells: list[Cell]) -> tuple[int, int]:
-        """Получение индексов для заголовков столбцов и строк."""
-        column_indices: set[int] = set()
-        row_indices: set[int] = set()
-        for cell in cells:
-            column_indices.add(cell.column.index)
-            row_indices.add(cell.row.index)
-        return cls._get_header_index(sorted(column_indices)), cls._get_header_index(sorted(row_indices))
-
-    @staticmethod
-    def _get_header_index(indices: list[int]) -> int:
-        """Получение индекса столбца с заголовками."""
-        for current, previous in zip(reversed(indices), chain([indices[-1]], reversed(indices))):
-            if previous - current > 1:
-                return previous - 1
-        return max(indices[0] - 1, 1)
+        row, column = max(c.row.index for c in value_cells_copy), max(c.column.index for c in value_cells_copy)
+        row_size, column_size = 0, 0
+        while row > 0 and column > 0:
+            row_cells = [c for c in value_cells_copy if c.row.index == row and c.column.index >= column]
+            column_cells = [c for c in value_cells_copy if c.column.index == column and c.row.index >= row]
+            if len(row_cells) == row_size + 1 and len(column_cells) == column_size + 1:
+                value_cells.extend(row_cells)
+                value_cells.extend([c for c in column_cells if c.row.index != row or c.column.index != column])
+                row, column = row - 1, column - 1
+                row_size, column_size = row_size + 1, column_size + 1
+            elif len(row_cells) == row_size + 1 or len(row_cells) == row_size and next(
+                (c for c in row_cells if c.column.index == column),
+                None
+            ) is None:
+                value_cells.extend([c for c in row_cells if c.row.index != row or c.column.index != column])
+                row -= 1
+                column_size += 1
+            elif len(column_cells) == column_size + 1 or len(column_cells) == column_size and next(
+                (c for c in column_cells if c.row.index == row),
+                None
+            ) is None:
+                value_cells.extend([c for c in column_cells if c.row.index != row or c.column.index != column])
+                column -= 1
+                row_size += 1
+            else:
+                break
+        for cell in set(value_cells_copy) - set(value_cells):
+            header_cells.append(HeaderCell(cell=cell, merged_cell=None))
+        return row, column
 
     @staticmethod
     def _make_get_cell(i: int) -> Callable[[DataSource], CellData]:
