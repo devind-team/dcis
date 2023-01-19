@@ -26,6 +26,7 @@ bread-crumbs(:items="bc")
             message-container-class="mr-1"
           )
           v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
+          v-checkbox(v-model="unloadDefault" :label="$t('dcis.periods.unload.unloadDefault')")
           v-checkbox(v-model="applyNumberFormat" :label="$t('dcis.periods.unload.applyNumberFormat')")
           v-select(v-model="sheets" :label="$t('dcis.periods.unload.sheets.label')" :items="sheetsItems")
           v-text-field(v-model="emptyCell" :label="$t('dcis.periods.unload.emptyCell')")
@@ -77,6 +78,7 @@ export default defineComponent({
     const selectedOrganizations = ref<OrganizationType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
     const unloadWithoutDocument = ref<boolean>(true)
+    const unloadDefault = ref<boolean>(true)
     const applyNumberFormat = ref<boolean>(true)
     const unloadHeads = ref<boolean>(true)
     const unloadChildren = ref<boolean>(false)
@@ -112,6 +114,7 @@ export default defineComponent({
       organizationIds: selectedOrganizations.value.map((organization: OrganizationType) => organization.id),
       statusIds: selectedStatuses.value.map((status: StatusType) => status.id),
       unloadWithoutDocument: unloadWithoutDocument.value,
+      unloadDefault: unloadDefault.value,
       applyNumberFormat: applyNumberFormat.value,
       unloadHeads: unloadHeads.value,
       unloadChildren: unloadChildren.value,
@@ -131,6 +134,7 @@ export default defineComponent({
       selectedStatuses,
       unloadPeriodOnDone,
       unloadWithoutDocument,
+      unloadDefault,
       applyNumberFormat,
       sheets,
       emptyCell,

@@ -5919,6 +5919,8 @@ export type UnloadPeriodMutationInput = {
   statusIds: Array<Scalars['ID']>;
   /** Выгружать листы для филиалов */
   unloadChildren: Scalars['Boolean'];
+  /** Выгружать значение по умолчанию при отсутствии значения в документе */
+  unloadDefault: Scalars['Boolean'];
   /** Выгружать листы для головных учреждений */
   unloadHeads: Scalars['Boolean'];
   /** Выгружать организации без документов */
@@ -6762,6 +6764,7 @@ export type UnloadPeriodMutationVariables = Exact<{
   organizationIds: Array<Scalars['ID']> | Scalars['ID'];
   statusIds: Array<Scalars['ID']> | Scalars['ID'];
   unloadWithoutDocument: Scalars['Boolean'];
+  unloadDefault: Scalars['Boolean'];
   applyNumberFormat: Scalars['Boolean'];
   unloadHeads: Scalars['Boolean'];
   unloadChildren: Scalars['Boolean'];

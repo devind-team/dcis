@@ -288,6 +288,7 @@ export default {
       organizationsFilterTitle: 'Выбор организаций',
       statusFilterTitle: 'Выбор статусов',
       unloadWithoutDocument: 'Выгружать организации без документов',
+      unloadDefault: 'Выгружать значение по умолчанию при отсутствии значения в документе',
       applyNumberFormat: 'Применять числовой формат',
       sheets: {
         label: 'Выгружать листы',

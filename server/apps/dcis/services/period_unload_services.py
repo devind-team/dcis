@@ -86,6 +86,7 @@ class PeriodUnload:
         organization_ids: list[int],
         status_ids: list[int],
         unload_without_document: bool,
+        unload_default: bool,
         apply_number_format: bool,
         unload_heads: bool,
         unload_children: bool,
@@ -96,6 +97,7 @@ class PeriodUnload:
         - organization_ids - фильтрация по идентификаторам организаций
         - status_ids - фильтрация по идентификаторам статусов
         - unload_without_document - выгружать организации без документов
+        - unload_default - выгружать значение по умолчанию при отсутствии значения в документе
         - apply_number_format - применять числовой формат
         - unload_heads - выгружать листы для головных учреждений
         - unload_children - выгружать листы для филиалов
@@ -110,6 +112,7 @@ class PeriodUnload:
             self._organizations = self._organizations.filter(id__in=organization_ids)
         self._status_ids = status_ids
         self._unload_without_document = unload_without_document
+        self._unload_default = unload_default
         self._apply_number_format = apply_number_format
         if unload_heads and unload_children:
             self._sheets = self.period.sheet_set.all()
@@ -338,7 +341,7 @@ class PeriodUnload:
         """Получение данных для ячеек."""
         result: list[CellData] = []
         for cell in sorted(cells, key=lambda c: [c.column.index, c.row.index]):
-            val = self._empty_cell
+            val = cell.default_error or cell.default or self._empty_cell if self._unload_default else self._empty_cell
             for value in values:
                 if value.document == document and value.column == cell.column and value.row == cell.row:
                     val = value.value
@@ -464,6 +467,7 @@ def unload_period(
     organization_ids: list[int],
     status_ids: list[int],
     unload_without_document: bool,
+    unload_default: bool,
     apply_number_format: bool,
     unload_heads: bool,
     unload_children: bool,
@@ -476,6 +480,7 @@ def unload_period(
         organization_ids=organization_ids,
         status_ids=status_ids,
         unload_without_document=unload_without_document,
+        unload_default=unload_default,
         apply_number_format=apply_number_format,
         unload_heads=unload_heads,
         unload_children=unload_children,
