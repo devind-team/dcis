@@ -37,10 +37,25 @@ class DataSource:
 
 
 @dataclass
+class ColumnHeaderMerge:
+    """Объединение по горизонтали для ячейки заголовка столбца."""
+    start: int
+    end: int
+
+
+@dataclass
+class ColumnHeaderCell:
+    """Ячейка заголовка столбца."""
+    name: str
+    merge: ColumnHeaderMerge | None = None
+
+
+@dataclass
 class Column:
     """Выгружаемый столбец."""
-    get_cell: Callable[[DataSource], CellData]
-    names: list[str]
+    get_cell_data: Callable[[DataSource], CellData]
+    cells: list[ColumnHeaderCell]
+    top: bool = True
 
 
 @dataclass
@@ -131,10 +146,17 @@ class PeriodUnload:
     @staticmethod
     def _save_columns(worksheet: Worksheet, columns: list[Column]) -> None:
         """Сохранение название столбцов на лист Excel."""
-        max_row_count = max(len(column.names) for column in columns)
+        max_row_count = max(len(column.cells) for column in columns)
         for column_index, column in enumerate(columns, 1):
-            for row_index, name in enumerate(column.names, max_row_count - len(column.names) + 1):
-                worksheet.cell(row=row_index, column=column_index, value=name)
+            for row_index, cell in enumerate(column.cells, 1 if column.top else max_row_count - len(column.cells) + 1):
+                worksheet.cell(row=row_index, column=column_index, value=cell.name)
+                if cell.merge is not None:
+                    worksheet.merge_cells(
+                        start_row=row_index,
+                        start_column=cell.merge.start,
+                        end_row=row_index,
+                        end_column=cell.merge.end,
+                    )
 
     def _save_rows(self, worksheet: Worksheet, sheet: Sheet, columns: list[Column], cell_groups: CellGroups) -> None:
         """Сохранение строки на лист Excel."""
@@ -148,7 +170,7 @@ class PeriodUnload:
                 cells=self._get_cells_data(cell_groups.value_cells, values, document)
             )
             for column_index, column in enumerate(columns, 1):
-                cell_data = column.get_cell(data_source)
+                cell_data = column.get_cell_data(data_source)
                 cell = worksheet.cell(row=row_index, column=column_index, value=cell_data.value)
                 cell.data_type = cell_data.data_type
                 if self._apply_number_format and cell_data.number_format:
@@ -168,52 +190,60 @@ class PeriodUnload:
     @classmethod
     def _build_columns(cls, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
-        return [
-            *cls._build_left_columns(),
-            *cls._build_data_columns(cell_groups),
-            *cls._build_right_columns()
-        ]
+        left_columns = cls._build_left_columns()
+        data_columns = cls._build_data_columns(cell_groups, len(left_columns) + 1)
+        right_columns = cls._build_right_columns()
+        return [*left_columns, *data_columns, *right_columns]
 
     @staticmethod
     def _build_left_columns() -> list[Column]:
         """Получение столбцов слева от данных."""
         return [
             Column(
-                get_cell=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
-                names=['IdListEdu'],
+                get_cell_data=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
+                cells=[ColumnHeaderCell('IdListEdu')],
             ),
             Column(
-                get_cell=lambda s: CellData(s.organization.parent.attributes['idlistedu']
+                get_cell_data=lambda s: CellData(s.organization.parent.attributes['idlistedu']
                 if s.organization.parent else '', KindCell.NUMERIC),
-                names=['id_parent'],
+                cells=[ColumnHeaderCell(name='id_parent')],
             ),
-            Column(get_cell=lambda s: CellData(s.organization.kodbuhg, KindCell.NUMERIC), names=['Бухкод']),
             Column(
-                get_cell=lambda s: CellData(
+                get_cell_data=lambda s: CellData(s.organization.kodbuhg, KindCell.NUMERIC),
+                cells=[ColumnHeaderCell(name='Бухкод')],
+            ),
+            Column(
+                get_cell_data=lambda s: CellData(
                     s.organization.region.common_id if s.organization.region else '',
                     KindCell.NUMERIC
                 ),
-                names=['Код региона'],
+                cells=[ColumnHeaderCell(name='Код региона')],
             ),
             Column(
-                get_cell=lambda s: CellData(s.organization.region.name if s.organization.region else ''),
-                names=['Регион'],
-            ),
-            Column(get_cell=lambda s: CellData(s.organization.name), names=['Название учреждения']),
-            Column(
-                get_cell=lambda s: CellData(s.organization.parent.name if s.organization.parent else ''),
-                names=['Название головного учреждения'],
+                get_cell_data=lambda s: CellData(s.organization.region.name if s.organization.region else ''),
+                cells=[ColumnHeaderCell(name='Регион')],
             ),
             Column(
-                get_cell=lambda s: CellData(s.document.last_status.status.name
+                get_cell_data=lambda s: CellData(s.organization.name),
+                cells=[ColumnHeaderCell(name='Название учреждения')],
+            ),
+            Column(
+                get_cell_data=lambda s: CellData(s.organization.parent.name if s.organization.parent else ''),
+                cells=[ColumnHeaderCell(name='Название головного учреждения')],
+            ),
+            Column(
+                get_cell_data=lambda s: CellData(s.document.last_status.status.name
                 if s.document and s.document.last_status else ''),
-                names=['Статус документа'],
+                cells=[ColumnHeaderCell(name='Статус документа')],
             ),
-            Column(get_cell=lambda s: CellData(s.organization.attributes['org_type']), names=['Тип организации']),
+            Column(
+                get_cell_data=lambda s: CellData(s.organization.attributes['org_type']),
+                cells=[ColumnHeaderCell(name='Тип организации')],
+            ),
         ]
 
     @classmethod
-    def _build_data_columns(cls, cell_groups: CellGroups) -> list[Column]:
+    def _build_data_columns(cls, cell_groups: CellGroups, left_shift: int) -> list[Column]:
         """Получение столбцов с данными."""
         min_column_index = min((hc.cell.column.index for hc in cell_groups.column_header_cells), default=0)
         max_column_index = max(
@@ -222,14 +252,32 @@ class PeriodUnload:
             default=0,
         )
         columns: list[Column] = []
-        if min_column_index != 0 or max_column_index != 0:
-            for column_start_index, column_index in enumerate(range(min_column_index, max_column_index + 1)):
-                for cell_index, cell in enumerate(cell_groups.row_header_cells):
-                    i = column_start_index * len(cell_groups.row_header_cells) + cell_index
-                    columns.append(Column(get_cell=cls._make_get_cell(i), names=[cell.default_error or cell.default]))
-        else:
-            for i, cell in enumerate(cell_groups.row_header_cells):
-                columns.append(Column(get_cell=cls._make_get_cell(i), names=[cell.default_error or cell.default]))
+        row_header_chunk = len(cell_groups.row_header_cells)
+        for column_start_index, column_index in enumerate(range(min_column_index, max_column_index + 1)):
+            for cell_index, cell in enumerate(cell_groups.row_header_cells):
+                i = column_start_index * len(cell_groups.row_header_cells) + cell_index
+                cells: list[ColumnHeaderCell] = []
+                if cell_index == 0:
+                    header_cells = sorted(
+                        (hc for hc in cell_groups.column_header_cells if hc.cell.column.index == column_index),
+                        key=lambda hc: hc.cell.row.index
+                    )
+                    cells: list[ColumnHeaderCell] = []
+                    for hc in header_cells:
+                        if hc.merged_cell is None:
+                            merge_count = 1
+                        else:
+                            merge_count = hc.merged_cell.max_col - hc.merged_cell.min_col + 1
+                        cells.append(ColumnHeaderCell(
+                            name=hc.cell.default_error or hc.cell.default,
+                            merge=ColumnHeaderMerge(
+                                start=left_shift,
+                                end=left_shift + row_header_chunk * merge_count - 1
+                            )
+                        ))
+                cells.append(ColumnHeaderCell(cell.default_error or cell.default))
+                columns.append(Column(get_cell_data=cls._make_get_cell(i), cells=cells, top=False))
+            left_shift += row_header_chunk
         return columns
 
     @classmethod
@@ -237,15 +285,15 @@ class PeriodUnload:
         """Получение столбцов справа от данных."""
         return [
             Column(
-                get_cell=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else ''),
-                names=['Дата последнего редактирования']
+                get_cell_data=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else ''),
+                cells=[ColumnHeaderCell(name='Дата последнего редактирования')],
             ),
             Column(
-                get_cell=lambda s: CellData(
+                get_cell_data=lambda s: CellData(
                     cls._format_user(s.document.updated_by)
                     if s.document and s.document.updated_by else ''
                 ),
-                names=['Пользователь'],
+                cells=[ColumnHeaderCell(name='Пользователь')],
             ),
         ]
 
@@ -271,7 +319,7 @@ class PeriodUnload:
     @staticmethod
     def _get_header_size(columns: list[Column]) -> int:
         """Размер шапки таблицы."""
-        return max(len(column.names) for column in columns)
+        return max(len(column.cells) for column in columns)
 
     @staticmethod
     def _get_cells(sheet: Sheet) -> QuerySet[Cell]:
