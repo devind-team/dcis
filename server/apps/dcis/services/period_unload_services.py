@@ -208,7 +208,7 @@ class PeriodUnload:
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.parent.attributes['idlistedu']
-                if s.organization.parent else '', KindCell.NUMERIC),
+                if s.organization.parent else None, KindCell.NUMERIC),
                 cells=[ColumnHeaderCell(name='id_parent')],
             ),
             Column(
@@ -217,13 +217,13 @@ class PeriodUnload:
             ),
             Column(
                 get_cell_data=lambda s: CellData(
-                    s.organization.region.common_id if s.organization.region else '',
+                    s.organization.region.common_id if s.organization.region else None,
                     KindCell.NUMERIC
                 ),
                 cells=[ColumnHeaderCell(name='Код региона')],
             ),
             Column(
-                get_cell_data=lambda s: CellData(s.organization.region.name if s.organization.region else ''),
+                get_cell_data=lambda s: CellData(s.organization.region.name if s.organization.region else None),
                 cells=[ColumnHeaderCell(name='Регион')],
             ),
             Column(
@@ -231,12 +231,12 @@ class PeriodUnload:
                 cells=[ColumnHeaderCell(name='Название учреждения')],
             ),
             Column(
-                get_cell_data=lambda s: CellData(s.organization.parent.name if s.organization.parent else ''),
+                get_cell_data=lambda s: CellData(s.organization.parent.name if s.organization.parent else None),
                 cells=[ColumnHeaderCell(name='Название головного учреждения')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.document.last_status.status.name
-                if s.document and s.document.last_status else ''),
+                if s.document and s.document.last_status else None),
                 cells=[ColumnHeaderCell(name='Статус документа')],
             ),
             Column(
@@ -288,13 +288,13 @@ class PeriodUnload:
         """Получение столбцов справа от данных."""
         return [
             Column(
-                get_cell_data=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else ''),
+                get_cell_data=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else None),
                 cells=[ColumnHeaderCell(name='Дата последнего редактирования')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(
                     cls._format_user(s.document.updated_by)
-                    if s.document and s.document.updated_by else ''
+                    if s.document and s.document.updated_by else None
                 ),
                 cells=[ColumnHeaderCell(name='Пользователь')],
             ),
@@ -310,11 +310,10 @@ class PeriodUnload:
             parent_filter['parent__isnull'] = False
         for organization in self._organizations.filter(**parent_filter):
             document = self.documents_map[organization.id]
-            if (
-                self._unload_without_document and
-                document is None
-            ) or not len(self._status_ids) or (
-                document.last_status and document.last_status.status.id in self._status_ids
+            if document is None and not self._unload_without_document:
+                break
+            if not len(self._status_ids) or (
+                document and document.last_status and document.last_status.status.id in self._status_ids
             ):
                 result.append(organization)
         return result
@@ -342,6 +341,8 @@ class PeriodUnload:
         result: list[CellData] = []
         for cell in sorted(cells, key=lambda c: [c.column.index, c.row.index]):
             val = cell.default_error or cell.default or self._empty_cell if self._unload_default else self._empty_cell
+            if val == '':
+                val = None
             for value in values:
                 if value.document == document and value.column == cell.column and value.row == cell.row:
                     val = value.value
@@ -367,13 +368,13 @@ class PeriodUnload:
         for cell in cells:
             position = f'{get_column_letter(cell.column.index)}{cell.row.index}'
             merged_cell = next((mc for mc in merged_cells if position in mc.cells or position == mc.target), None)
-            if not cell.editable:
-                header_cells.append(HeaderCell(cell=cell, merged_cell=None))
-            elif merged_cell is not None:
+            if merged_cell is not None:
                 merged_cells_columns.update({*range(merged_cell.min_col, merged_cell.max_col + 1)})
                 merged_cells_rows.update({*range(merged_cell.min_row, merged_cell.max_row + 1)})
                 if merged_cell.target == position:
                     header_cells.append(HeaderCell(cell=cell, merged_cell=merged_cell))
+            elif not cell.editable:
+                header_cells.append(HeaderCell(cell=cell, merged_cell=None))
             else:
                 value_cells.append(cell)
         value_cells_copy = [*value_cells]
