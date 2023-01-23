@@ -37,25 +37,20 @@ class DataSource:
 
 
 @dataclass
-class ColumnHeaderMerge:
-    """Объединение по горизонтали для ячейки заголовка столбца."""
-    start: int
-    end: int
-
-
-@dataclass
-class ColumnHeaderCell:
-    """Ячейка заголовка столбца."""
+class UnloadHeaderCell:
+    """Ячейка заголовка столбца в выгрузке."""
     name: str
-    merge: ColumnHeaderMerge | None = None
+    start_row: int | None = None
+    start_column: int | None = None
+    end_row: int | None = None
+    end_column: int | None = None
 
 
 @dataclass
 class Column:
     """Выгружаемый столбец."""
     get_cell_data: Callable[[DataSource], CellData]
-    cells: list[ColumnHeaderCell]
-    top: bool = True
+    cells: list[UnloadHeaderCell]
 
 
 @dataclass
@@ -150,15 +145,20 @@ class PeriodUnload:
     def _save_columns(worksheet: Worksheet, columns: list[Column]) -> None:
         """Сохранение название столбцов на лист Excel."""
         max_row_count = max(len(column.cells) for column in columns)
-        for column_index, column in enumerate(columns, 1):
-            for row_index, cell in enumerate(column.cells, 1 if column.top else max_row_count - len(column.cells) + 1):
-                worksheet.cell(row=row_index, column=column_index, value=cell.name)
-                if cell.merge is not None:
+        for i, column in enumerate(columns, 1):
+            for cell in column.cells:
+                if cell.start_row is None:
+                    cell.start_row = 1
+                    cell.start_column = i
+                    cell.end_row = max_row_count
+                    cell.end_column = i
+                worksheet.cell(row=cell.start_row, column=cell.start_column, value=cell.name)
+                if cell.start_row != cell.end_row or cell.start_column != cell.end_column:
                     worksheet.merge_cells(
-                        start_row=row_index,
-                        start_column=cell.merge.start,
-                        end_row=row_index,
-                        end_column=cell.merge.end,
+                        start_row=cell.start_row,
+                        start_column=cell.start_column,
+                        end_row=cell.end_row,
+                        end_column=cell.end_column,
                     )
 
     def _save_rows(self, worksheet: Worksheet, sheet: Sheet, columns: list[Column], cell_groups: CellGroups) -> None:
@@ -205,84 +205,180 @@ class PeriodUnload:
         return [
             Column(
                 get_cell_data=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
-                cells=[ColumnHeaderCell('IdListEdu')],
+                cells=[UnloadHeaderCell('IdListEdu')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.parent.attributes['idlistedu']
                 if s.organization.parent else None, KindCell.NUMERIC),
-                cells=[ColumnHeaderCell(name='id_parent')],
+                cells=[UnloadHeaderCell(name='id_parent')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.kodbuhg, KindCell.NUMERIC),
-                cells=[ColumnHeaderCell(name='Бухкод')],
+                cells=[UnloadHeaderCell(name='Бухкод')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(
                     s.organization.region.common_id if s.organization.region else None,
                     KindCell.NUMERIC
                 ),
-                cells=[ColumnHeaderCell(name='Код региона')],
+                cells=[UnloadHeaderCell(name='Код региона')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.region.name if s.organization.region else None),
-                cells=[ColumnHeaderCell(name='Регион')],
+                cells=[UnloadHeaderCell(name='Регион')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.name),
-                cells=[ColumnHeaderCell(name='Название учреждения')],
+                cells=[UnloadHeaderCell(name='Название учреждения')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.parent.name if s.organization.parent else None),
-                cells=[ColumnHeaderCell(name='Название головного учреждения')],
+                cells=[UnloadHeaderCell(name='Название головного учреждения')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.document.last_status.status.name
                 if s.document and s.document.last_status else None),
-                cells=[ColumnHeaderCell(name='Статус документа')],
+                cells=[UnloadHeaderCell(name='Статус документа')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(s.organization.attributes['org_type']),
-                cells=[ColumnHeaderCell(name='Тип организации')],
+                cells=[UnloadHeaderCell(name='Тип организации')],
             ),
         ]
 
     @classmethod
     def _build_data_columns(cls, cell_groups: CellGroups, left_shift: int) -> list[Column]:
         """Получение столбцов с данными."""
-        min_column_index = min((hc.cell.column.index for hc in cell_groups.column_header_cells), default=0)
+        unload_header_cells = cls._build_unload_header_cells(cell_groups, left_shift)
+        min_column_index = min(hc.cell.column.index for hc in cell_groups.column_header_cells)
         max_column_index = max(
-            (hc.cell.column.index if hc.merged_cell is None else hc.merged_cell.max_col
-            for hc in cell_groups.column_header_cells),
-            default=0,
+            hc.cell.column.index if hc.merged_cell is None else hc.merged_cell.max_col
+            for hc in cell_groups.column_header_cells
         )
-        columns: list[Column] = []
         row_header_chunk = len(cell_groups.row_header_cells)
-        for column_start_index, column_index in enumerate(range(min_column_index, max_column_index + 1)):
-            for cell_index, cell in enumerate(cell_groups.row_header_cells):
-                i = column_start_index * len(cell_groups.row_header_cells) + cell_index
-                cells: list[ColumnHeaderCell] = []
-                if cell_index == 0:
-                    header_cells = sorted(
-                        (hc for hc in cell_groups.column_header_cells if hc.cell.column.index == column_index),
-                        key=lambda hc: hc.cell.row.index
-                    )
-                    cells: list[ColumnHeaderCell] = []
-                    for hc in header_cells:
-                        if hc.merged_cell is None:
-                            merge_count = 1
-                        else:
-                            merge_count = hc.merged_cell.max_col - hc.merged_cell.min_col + 1
-                        cells.append(ColumnHeaderCell(
-                            name=hc.cell.default_error or hc.cell.default,
-                            merge=ColumnHeaderMerge(
-                                start=left_shift,
-                                end=left_shift + row_header_chunk * merge_count - 1
-                            )
-                        ))
-                cells.append(ColumnHeaderCell(cell.default_error or cell.default))
-                columns.append(Column(get_cell_data=cls._make_get_cell(i), cells=cells, top=False))
-            left_shift += row_header_chunk
+        columns: list[Column] = []
+        for i in range(row_header_chunk * (max_column_index - min_column_index + 1)):
+            cells = [c for c in unload_header_cells if c.start_column == i + left_shift]
+            columns.append(Column(get_cell_data=cls._make_get_cell(i), cells=cells))
         return columns
+
+    @classmethod
+    def _build_unload_header_cells(
+        cls,
+        cell_groups: CellGroups,
+        left_shift: int
+    ) -> list[UnloadHeaderCell]:
+        """Построение ячеек заголовков столбцов в выгрузке."""
+        min_row_index = min(hc.cell.row.index for hc in cell_groups.column_header_cells)
+        min_row_header_cells = sorted(
+            (hc for hc in cell_groups.column_header_cells if hc.cell.row.index == min_row_index),
+            key=lambda hc: hc.cell.column.index
+        )
+        return cls._cast_header_cells_to_unload(cell_groups, 1, min_row_header_cells, left_shift, 1)
+
+    @classmethod
+    def _find_cell_children(
+        cls,
+        cell_groups: CellGroups,
+        header_cell: HeaderCell,
+        left_shift: int,
+        top_shift: int,
+    ) -> list[UnloadHeaderCell]:
+        """Поиск дочерних ячеек для ячейки `header_cell`."""
+        vertical_merge_count = cls._get_vertical_merge_count(header_cell)
+        top_shift += vertical_merge_count
+        min_column_index = header_cell.cell.column.index
+        if header_cell.merged_cell is None:
+            max_column_index = header_cell.cell.column.index
+        else:
+            max_column_index = header_cell.merged_cell.max_col
+        children_header_cells: list[HeaderCell] = []
+        for hc in cell_groups.column_header_cells:
+            if (
+                min_column_index <= hc.cell.column.index <= max_column_index and
+                header_cell.cell.row.index + vertical_merge_count == hc.cell.row.index
+            ):
+                children_header_cells.append(hc)
+        children_header_cells = sorted(children_header_cells, key=lambda h: h.cell.column.index)
+        return cls._cast_header_cells_to_unload(
+            cell_groups,
+            cls._get_horizontal_merge_count(header_cell),
+            children_header_cells,
+            left_shift,
+            top_shift,
+        )
+
+    @classmethod
+    def _cast_header_cells_to_unload(
+        cls,
+        cell_groups: CellGroups,
+        horizontal_merge_count: int,
+        header_cells: list[HeaderCell],
+        left_shift: int,
+        top_shift: int,
+    ) -> list[UnloadHeaderCell]:
+        """Приведение ячеек заголовков столбцов и строк к ячейкам заголовков столбцов в выгрузке."""
+        row_header_chunk = len(cell_groups.row_header_cells)
+        unload_header_cells: list[UnloadHeaderCell] = []
+        for hc in header_cells:
+            unload_header_cells.append(cls._cast_column_header_to_unload(cell_groups, hc, left_shift, top_shift))
+            unload_header_cells.extend(cls._find_cell_children(cell_groups, hc, left_shift, top_shift))
+            left_shift += row_header_chunk * cls._get_horizontal_merge_count(hc)
+        cells_horizontal_merge_count = sum(map(cls._get_horizontal_merge_count, header_cells))
+        for _ in range(horizontal_merge_count - cells_horizontal_merge_count):
+            for rh in cell_groups.row_header_cells:
+                unload_header_cells.append(cls._cast_row_header_to_unload(rh, left_shift, top_shift))
+                left_shift += 1
+        return unload_header_cells
+
+    @classmethod
+    def _cast_column_header_to_unload(
+        cls,
+        cell_groups: CellGroups,
+        header_cell: HeaderCell,
+        left_shift: int,
+        top_shift: int,
+    ) -> UnloadHeaderCell:
+        """Приведение ячейки заголовка столбца к ячейке заголовка столбца в выгрузке."""
+        row_header_chunk = len(cell_groups.row_header_cells)
+        vertical_merge_count = cls._get_vertical_merge_count(header_cell)
+        horizontal_merge_count = cls._get_horizontal_merge_count(header_cell)
+        return UnloadHeaderCell(
+            name=header_cell.cell.default_error or header_cell.cell.default,
+            start_row=top_shift,
+            start_column=left_shift,
+            end_row=top_shift + vertical_merge_count - 1,
+            end_column=left_shift + row_header_chunk * horizontal_merge_count - 1,
+        )
+
+    @classmethod
+    def _cast_row_header_to_unload(cls, header_cell: Cell, left_shift: int, top_shift: int) -> UnloadHeaderCell:
+        """Приведение ячейки заголовка строки к ячейке заголовка столбца в выгрузке."""
+        return UnloadHeaderCell(
+            name=header_cell.default_error or header_cell.default,
+            start_row=top_shift,
+            start_column=left_shift,
+            end_row=top_shift,
+            end_column=left_shift,
+        )
+
+    @staticmethod
+    def _get_vertical_merge_count(header_cell: HeaderCell) -> int:
+        """Получение числа объединенных ячеек по вертикали."""
+        if header_cell.merged_cell is None:
+            vertical_merge_count = 1
+        else:
+            vertical_merge_count = header_cell.merged_cell.max_row - header_cell.merged_cell.min_row + 1
+        return vertical_merge_count
+
+    @staticmethod
+    def _get_horizontal_merge_count(header_cell: HeaderCell) -> int:
+        """Получение числа объединенных ячеек по горизонтали."""
+        if header_cell.merged_cell is None:
+            horizontal_merge_count = 1
+        else:
+            horizontal_merge_count = header_cell.merged_cell.max_col - header_cell.merged_cell.min_col + 1
+        return horizontal_merge_count
 
     @classmethod
     def _build_right_columns(cls) -> list[Column]:
@@ -294,14 +390,14 @@ class PeriodUnload:
                     KindCell.DATE,
                     'dd/mm/yyyy\ hh:mm',
                 ),
-                cells=[ColumnHeaderCell(name='Дата последнего редактирования')],
+                cells=[UnloadHeaderCell(name='Дата последнего редактирования')],
             ),
             Column(
                 get_cell_data=lambda s: CellData(
                     cls._format_user(s.document.updated_by)
                     if s.document and s.document.updated_by else None
                 ),
-                cells=[ColumnHeaderCell(name='Пользователь')],
+                cells=[UnloadHeaderCell(name='Пользователь')],
             ),
         ]
 
