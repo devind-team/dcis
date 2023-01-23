@@ -51,7 +51,7 @@ type QueryVariables = {
   offset?: number,
   [key: string]: any
 }
-type Header = string | { name: string, value: string }
+type Header = string | { name: string, value: string, width?: string | number }
 
 export default defineComponent({
   components: { LeftNavigatorContainer },
@@ -82,7 +82,8 @@ export default defineComponent({
 
     const result = isRelayQuery.value
       ? useQueryRelay({
-        document: props.query
+        document: props.query,
+        variables: () => variables.value
       },
       {
         isScrollDown: true,
@@ -120,7 +121,8 @@ export default defineComponent({
         }
         return {
           text: t(`dictionaries.${props.queryName}.tableHeaders.${header.name}`) as string,
-          value: header.value
+          value: header.value,
+          width: header.width
         }
       })
     })
@@ -175,7 +177,8 @@ export default defineComponent({
       search,
       getObjectValueByPathFunc,
       result,
-      relaySearch
+      relaySearch,
+      variables
     }
   }
 })

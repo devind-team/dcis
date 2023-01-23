@@ -3,7 +3,7 @@ universal-dictionary(
   @update-drawer="$emit('update-drawer')"
   :bread-crumbs="bc"
   :query="require('~/gql/dcis/queries/budget_classifications.graphql')"
-  :headers="['id', 'code', 'name']"
+  :headers="['id', {name: 'code', value: 'code', width: 250}, 'name']"
   :page-size="20"
   query-name="budgetClassifications"
 )
