@@ -1,0 +1,19 @@
+#import "../fragments/document_message_fields.graphql"
+
+query DocumentMessages($documentId: ID!, $first: Int, $after: String) {
+  documentMessages(documentId: $documentId, first: $first, after: $after) {
+    edges {
+      node {
+        ...DocumentMessageFields
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    totalCount
+  }
+}

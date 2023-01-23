@@ -1,27 +1,34 @@
 """Вспомогательный модуль для расчета формул."""
 from collections import defaultdict
-from typing import Iterable, TypedDict
 from itertools import groupby
+from typing import Iterable, TypedDict
 
-from xlsx_evaluate import ModelCompiler, Model, Evaluator
-from django.db.models import QuerySet, Q
-from openpyxl.utils.cell import get_column_letter, column_index_from_string
-from openpyxl.utils.cell import coordinate_from_string
+from django.db.models import Q, QuerySet
+from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
+from xlsx_evaluate import Evaluator, Model, ModelCompiler
+from xlsx_evaluate.functions.xlerrors import (
+    DivZeroExcelError,
+    NaExcelError, NameExcelError,
+    NullExcelError,
+    NumExcelError, RefExcelError,
+    ValueExcelError,
+)
+
 from apps.dcis.models import Cell, Document, Sheet, Value
-from .sheet_cache import FormulaContainerCache
-from xlsx_evaluate.functions.xlerrors import DivZeroExcelError
+from .sheet_formula_cache import SheetFormulaContainerCache
+from ..models.sheet import KindCell
 
 
 def get_dependency_cells(
-        sheet_containers: list[FormulaContainerCache],
-        value: Value
+    sheet_containers: list[SheetFormulaContainerCache],
+    value: Value
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
     Возвращается кортеж:
-        - dependency - список зависимых ячеек, даже если там формула, она забирается как значение.
-        - inversion - список связных ячеек, которые нужно пересчитать
-        - sheet_containers - последовательность расчета листов
+        - dependency - список зависимых ячеек, даже если там формула, она забирается как значение;
+        - inversion - список связных ячеек, которые нужно пересчитать;
+        - sheet_containers - последовательность расчета листов.
     """
     dependency_cells: list[str] = []
     inversion_cells: list[str] = []
@@ -32,7 +39,7 @@ def get_dependency_cells(
         cell = cells.pop()
         sheet_name, column_letter, row_index = parse_coordinate(cell)
         sequence_evaluate.append(sheet_name)
-        sheet_container: FormulaContainerCache
+        sheet_container: SheetFormulaContainerCache
         for sheet_container in sheet_containers:
             coordinate: str = f'{column_letter}{row_index}' if sheet_name == sheet_container.sheet_name else cell
             inversions: list[str] = [
@@ -49,7 +56,11 @@ def get_dependency_cells(
     return dependency_cells, inversion_cells, [el for el, _ in groupby(sequence_evaluate)]
 
 
-def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) -> tuple[QuerySet[Cell], QuerySet[Value]]:
+def resolve_cells(
+    sheets: Iterable[Sheet],
+    document: Document,
+    cells: set[str]
+) -> tuple[QuerySet[Cell], QuerySet[Value]]:
     """Получаем строки в зависимости от координат."""
     sheet_mapping: dict[str, int] = {sheet.name: sheet.pk for sheet in sheets}
     sheet_cells: defaultdict[int, list[tuple[int, int]]] = defaultdict(list)
@@ -82,40 +93,42 @@ def resolve_cells(sheets: Iterable[Sheet], document: Document, cells: set[str]) 
 
 
 class ValueState(TypedDict):
-    """Результативное состояние для расчета новых значений по формулам."""
-    value: str | None
+    """Результативное состояние для расчета новых значений по формулам.
+
+        - value - значение;
+        - error - ошибка вычисления формулы;
+        - formula - формула;
+        - cell - ячейка, для которой ведем расчет.
+    """
+    value: str | float | None
     error: str | None
     formula: str | None
-    cell: Cell
 
 
 def resolve_evaluate_state(
-        cells: Iterable[Cell],
-        values: Iterable[Value],
-        inversion_cells: list[str]
+    cells: Iterable[Cell],
+    values: Iterable[Value],
+    inversion_cells: list[str]
 ) -> dict[str, ValueState]:
     """Строим массив для расчета.
 
-        - sheet - лист расчета;
         - cells - массив ячеек для расчета;
         - values - массив уже существующих значений, для расчета новых значений ячейки;
-        - inversion_cells - ячейки от которых зависит расчет;
-
-    Построение массива для расчета новых значений ячеек.
-    {
-        'A1': {
-            value: '', # Значение или формула
-            cell: cell, # Значение ячейки для которой ведем расчет
-        },
-    }
+        - inversion_cells - ячейки от которых зависит расчет.
     """
     state: dict[str, ValueState] = {}
     values_state: dict[str, str] = {get_coordinate(v.column.sheet, v): v.value.strip() for v in values}
     cell: Cell
     for cell in cells:
-        coord: str = get_coordinate(cell.column.sheet, cell)
+        coord = get_coordinate(cell.column.sheet, cell)
+        value = values_state.get(coord, cell.default)
+        if (cell.kind == KindCell.NUMERIC or cell.kind == KindCell.FORMULA) and value is not None:
+            try:
+                value = float(value)
+            except ValueError:
+                pass
         state[coord]: ValueState = {
-            'value': values_state.get(coord, cell.default),
+            'value': value,
             'error': None,
             'formula': cell.formula if cell.formula and coord in inversion_cells else None,
             'cell': cell
@@ -149,20 +162,10 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
         compiler: ModelCompiler = ModelCompiler()
         model: Model = compiler.read_and_parse_dict(input_dict=input_state, default_sheet=sheet_name)
         evaluator = Evaluator(model)
-        for formula in model.formulae:
-            try:
-                value = evaluator.evaluate(formula)
-                if isinstance(value, DivZeroExcelError):
-                    state[formula]['value'] = ''
-                    state[formula]['error'] = 'Деление на 0'
-                else:
-                    state[formula]['value'] = str(value)
-            except RuntimeError as e:
-                if 'Cycle detected' in str(e):
-                    state[formula]['value'] = ''
-                    state[formula]['error'] = 'Циклическая ссылка'
-                else:
-                    raise e
+        for coordinate in model.formulae:
+            success, value = evaluate_formula(evaluator, coordinate)
+            state[coordinate]['value'] = value if success else ''
+            state[coordinate]['error'] = value if not success else None
     return state
 
 
@@ -187,3 +190,31 @@ def normalize_coordinate(coord: str, sheet_name: str | None = None) -> str:
     """
     sheet_name, column, row = parse_coordinate(coord, sheet_name)
     return f'{sheet_name}!{column}{row}'
+
+
+def evaluate_formula(evaluator: Evaluator, coordinate: str) -> tuple[bool, str]:
+    """Вычисление формулы с возвратом возможной ошибки.
+
+    Возвращает (успех, рассчитанное значение или сообщение ошибки).
+    """
+    try:
+        value = evaluator.evaluate(coordinate)
+        value_type = type(value)
+        if value_type in EXCEL_ERRORS_MAP:
+            return False, EXCEL_ERRORS_MAP[value_type]
+        return True, str(value)
+    except RuntimeError as e:
+        if 'Cycle detected' in str(e):
+            return False, 'Циклическая ссылка'
+        raise e
+
+
+EXCEL_ERRORS_MAP = {
+    NullExcelError: 'Неверный диапазон или диапазоны',
+    DivZeroExcelError: 'Деление на 0',
+    ValueExcelError: 'Неверный тип операнда или аргумента функции',
+    RefExcelError: 'Недействительная ссылка',
+    NameExcelError: 'Неверное имя',
+    NumExcelError: 'Недопустимые числовые значения',
+    NaExcelError: 'Не удалось найти данные',
+}

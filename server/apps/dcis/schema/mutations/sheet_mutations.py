@@ -1,24 +1,24 @@
 from typing import Any
 
 import graphene
-from graphene.utils.str_converters import to_snake_case
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
+from graphene.utils.str_converters import to_snake_case
 from graphql import ResolveInfo
 
-from apps.dcis.permissions.period_permissions import can_change_period
 from apps.dcis.models import ColumnDimension, RowDimension, Sheet
+from apps.dcis.permissions.period_permissions import can_change_period
 from apps.dcis.schema.types import (
+    BaseSheetType,
     CellType,
     ChangeColumnDimensionType,
     ChangeRowDimensionType,
     GlobalIndicesInputType,
     RowDimensionType,
     SheetType,
-    BaseSheetType,
 )
 from apps.dcis.services.column_dimension_services import (change_column_dimension, change_column_dimensions_fixed)
 from apps.dcis.services.row_dimension_services import (
@@ -261,9 +261,11 @@ class DeleteRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(
-            user=info.context.user,
-            row_dimension=row_dimension)
+        return DeleteRowDimensionMutation(
+            row_dimension_id=delete_row_dimension(
+                user=info.context.user,
+                row_dimension=row_dimension,
+            )
         )
 
 

@@ -1,7 +1,8 @@
 import { useEventListener } from '@vueuse/core'
-import { Ref } from '#app'
-import { SheetType, ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
+import { computed, ref, inject, Ref } from '#app'
+import { ColumnDimensionType, RowDimensionType, CellType } from '~/types/graphql'
 import {
+  ActiveSheetInject,
   RangeIndicesType,
   SelectionType,
   SelectionViewType,
@@ -23,11 +24,11 @@ import {
 } from '~/services/grid'
 
 export function useGridSelection (
-  sheet: Ref<SheetType>,
   scroll: Ref<ScrollInfoType>,
   grid: Ref<HTMLTableElement | null>,
   setActiveCell: (cell: CellType | null) => void
 ) {
+  const activeSheet = inject(ActiveSheetInject)
   const selectionState = ref<'cell' | 'column' | 'row' | null>(null)
 
   const cellsSelection = ref<SelectionType<CellType> | null>(null)
@@ -52,7 +53,7 @@ export function useGridSelection (
       const relatedPositions = getRelatedGlobalPositions(selectedCells)
       const selectedPositions = rangeIndicesToPositions(positionsToRangeIndices(relatedPositions))
       for (const position of selectedPositions) {
-        const cell = findCell(sheet.value, (c: CellType) => c.relatedGlobalPositions.includes(position))
+        const cell = findCell(activeSheet.value, (c: CellType) => c.relatedGlobalPositions.includes(position))
         if (cell && !newSelectedCells.find((c: CellType) => c.id === cell.id)) {
           newSelectedCells.push(cell)
         }
@@ -67,7 +68,7 @@ export function useGridSelection (
     const indices = [columnsSelection.value.last.index, columnsSelection.value.first.index]
     const minIndex = Math.min(...indices)
     const maxIndex = Math.max(...indices)
-    return sheet.value.columns.slice(minIndex - 1, maxIndex)
+    return activeSheet.value.columns.slice(minIndex - 1, maxIndex)
   })
   const selectedRows = computed<RowDimensionType[]>(() => {
     if (!rowsSelection.value) {
@@ -76,12 +77,12 @@ export function useGridSelection (
     const indices = [rowsSelection.value.last.globalIndex, rowsSelection.value.first.globalIndex]
     const minIndex = Math.min(...indices)
     const maxIndex = Math.max(...indices)
-    return sheet.value.rows.slice(minIndex - 1, maxIndex)
+    return activeSheet.value.rows.slice(minIndex - 1, maxIndex)
   })
 
   const selectedColumnsCells = computed<CellType[]>(() => selectedColumns.value
     .reduce((acc: CellType[], column: ColumnDimensionType) => {
-      acc.push(...filterCells(sheet.value, (c: CellType) => {
+      acc.push(...filterCells(activeSheet.value, (c: CellType) => {
         const parsedPosition = parsePosition(c.globalPosition)
         return parsedPosition.column === column.name
       }))
@@ -104,8 +105,8 @@ export function useGridSelection (
     return selectedRangeIndices.value !== null &&
       selectedRangeIndices.value.minColumn === 1 &&
       selectedRangeIndices.value.minRow === 1 &&
-      selectedRangeIndices.value.maxColumn === sheet.value.columns.at(-1).index &&
-      selectedRangeIndices.value.maxRow === sheet.value.rows.at(-1).globalIndex
+      selectedRangeIndices.value.maxColumn === activeSheet.value.columns.at(-1).index &&
+      selectedRangeIndices.value.maxRow === activeSheet.value.rows.at(-1).globalIndex
   })
 
   const selectedColumnsPositions = computed<number[]>(() => {
@@ -145,13 +146,16 @@ export function useGridSelection (
   })
   const selectedColumnDimensionsOptions = computed<ColumnDimensionsOptionsType | null>(() => {
     if (columnsSelection.value) {
-      return getColumnDimensionsOptions(selectedColumns.value, selectedColumnsCells.value, sheet.value.rows.length)
+      return getColumnDimensionsOptions(
+        selectedColumns.value,
+        selectedColumnsCells.value, activeSheet.value.rows.length
+      )
     }
     return null
   })
   const selectedRowDimensionsOptions = computed<RowDimensionsOptionsType | null>(() => {
     if (rowsSelection.value) {
-      return getRowDimensionsOptions(selectedRows.value, selectedRowsCells.value, sheet.value.columns.length)
+      return getRowDimensionsOptions(selectedRows.value, selectedRowsCells.value, activeSheet.value.columns.length)
     }
     return null
   })
@@ -201,7 +205,7 @@ export function useGridSelection (
       rowsSelection.value &&
       [rowsSelection.value.first.globalIndex, rowsSelection.value.last.globalIndex].includes(1)
     ) {
-      return sheet.value.columns.map((column: ColumnDimensionType) => column.index)
+      return activeSheet.value.columns.map((column: ColumnDimensionType) => column.index)
     }
     if (columnsSelection.value) {
       return selectedColumnsPositions.value
@@ -209,10 +213,10 @@ export function useGridSelection (
     const result = []
     let i = 0
     let offset = 0
-    while (i < sheet.value.columns.length) {
-      const cell = sheet.value.rows[0].cells[i - offset]
+    while (i < activeSheet.value.columns.length) {
+      const cell = activeSheet.value.rows[0].cells[i - offset]
       if (selectedCellsPositions.value.includes(cell.globalPosition)) {
-        result.push(...sheet.value.columns.slice(i, i + cell.colspan)
+        result.push(...activeSheet.value.columns.slice(i, i + cell.colspan)
           .map((column: ColumnDimensionType) => column.index)
         )
       }
@@ -232,14 +236,14 @@ export function useGridSelection (
       columnsSelection.value &&
       [columnsSelection.value.first.index, columnsSelection.value.last.index].includes(1)
     ) {
-      return sheet.value.rows.map((row: RowDimensionType) => row.globalIndex)
+      return activeSheet.value.rows.map((row: RowDimensionType) => row.globalIndex)
     }
     const result: number[] = []
     let i = 0
-    while (i < sheet.value.rows.length) {
-      const cell = sheet.value.rows[i].cells[0]
+    while (i < activeSheet.value.rows.length) {
+      const cell = activeSheet.value.rows[i].cells[0]
       if (selectedCellsPositions.value.includes(cell.globalPosition)) {
-        result.push(...sheet.value.rows.slice(i, i + cell.rowspan)
+        result.push(...activeSheet.value.rows.slice(i, i + cell.rowspan)
           .map((row: RowDimensionType) => row.globalIndex))
       }
       i += cell.rowspan
@@ -315,18 +319,25 @@ export function useGridSelection (
     updateSelectionViews()
   }
 
+  const selectSelectionCell = (cell: CellType) => {
+    cellsSelection.value = {
+      first: cell,
+      last: cell
+    }
+  }
+
   const selectAllCells = () => {
     cellsSelection.value = {
-      first: sheet.value.rows[0].cells[0],
-      last: getRowLastCell(sheet.value.rows.at(-1))
+      first: activeSheet.value.rows[0].cells[0],
+      last: getRowLastCell(activeSheet.value.rows.at(-1))
     }
   }
   const getRowLastCell = (currentRow: RowDimensionType) => {
-    for (const row of [...sheet.value.rows].reverse()) {
+    for (const row of [...activeSheet.value.rows].reverse()) {
       if (
         row.cells.at(-1).relatedGlobalPositions.some((position: string) => {
           const { column, row } = parsePosition(position)
-          return column === sheet.value.columns.at(-1).name && row === currentRow.globalIndex
+          return column === activeSheet.value.columns.at(-1).name && row === currentRow.globalIndex
         })
       ) {
         return row.cells.at(-1)
@@ -433,6 +444,7 @@ export function useGridSelection (
     mouseenterColumnName,
     mouseDownColumnName,
     mouseenterRowName,
-    mousedownRowName
+    mousedownRowName,
+    selectSelectionCell
   }
 }

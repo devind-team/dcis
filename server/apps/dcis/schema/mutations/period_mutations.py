@@ -6,20 +6,20 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.utils import gid2int
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.core.schema import UserType
 from apps.dcis.models import Period, PeriodGroup, Project
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
 from apps.dcis.services.period_services import (
-    add_divisions_period,
-    add_period_group,
     add_divisions_from_file,
     add_divisions_from_period,
+    add_divisions_period,
+    add_period_group,
     change_period_group_privileges,
     change_settings_period,
     change_user_period_groups,
@@ -30,6 +30,7 @@ from apps.dcis.services.period_services import (
     delete_period,
     delete_period_groups,
 )
+from apps.dcis.services.period_unload_services import unload_period
 
 
 class AddPeriodMutation(BaseMutation):
@@ -38,10 +39,11 @@ class AddPeriodMutation(BaseMutation):
     class Input:
         name = graphene.String(required=True, description='Название периода')
         project_id = graphene.ID(required=True, description='Идентификатор проекта')
-        file = Upload(required=True, description='xlsx файл с проектом')
         multiple = graphene.Boolean(required=True, description='Множественный тип сбора')
-        readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
         versioning = graphene.Boolean(required=True, description='Разрешить множество версий')
+        readonly_fill_color = graphene.Boolean(required=True, description='Запретить редактирование ячеек с заливкой')
+        xlsx_file = Upload(required=True, description='xlsx файл с проектом')
+        limitations_file = Upload(description='json файл c ограничениями, накладываемыми на листы')
 
     period = graphene.Field(PeriodType, description='Добавленный период')
 
@@ -52,24 +54,25 @@ class AddPeriodMutation(BaseMutation):
         info: ResolveInfo,
         name: str,
         project_id: str,
-        file: InMemoryUploadedFile,
         multiple: bool,
+        versioning: bool,
         readonly_fill_color: bool,
-        versioning: bool
+        xlsx_file: InMemoryUploadedFile,
+        limitations_file: InMemoryUploadedFile
     ):
-        project = get_object_or_404(Project, pk=from_global_id(project_id)[1])
+        project = get_object_or_404(Project, pk=gid2int(project_id))
         return AddPeriodMutation(
             period=create_period(
                 name=name,
                 user=info.context.user,
                 project=project,
                 multiple=multiple,
-                file=file,
+                versioning=versioning,
+                xlsx_file=xlsx_file,
+                limitations_file=limitations_file,
                 readonly_fill_color=readonly_fill_color,
-                versioning=versioning
             )
         )
-
 
 class ChangePeriodMutation(BaseMutation):
     """Мутация на изменение настроек периода."""
@@ -328,11 +331,14 @@ class ChangeUserPeriodGroupsMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_group_ids: list[str | int]):
-        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
-        user.periodgroup_set.set(change_user_period_groups(user=info.context.user, period_group_ids=period_group_ids))
+        user = get_object_or_404(User, pk=gid2int(user_id))
         return ChangeUserPeriodGroupsMutation(
             user=user,
-            period_groups=change_user_period_groups(user=info.context.user, period_group_ids=period_group_ids)
+            period_groups=change_user_period_groups(
+                permission_user=info.context.user,
+                user=user,
+                period_group_ids=period_group_ids
+            )
         )
 
 
@@ -353,7 +359,7 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, user_id: str, period_id: str, privileges_ids: list[str]):
-        user = get_object_or_404(User, pk=from_global_id(user_id)[1])
+        user = get_object_or_404(User, pk=gid2int(user_id))
         return ChangeUserPeriodPrivilegesMutation(
             user=user,
             privileges=change_user_period_privileges(
@@ -361,6 +367,53 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
                 user_id=user.id,
                 period_id=period_id,
                 privileges_ids=privileges_ids
+            )
+        )
+
+
+class UnloadPeriodMutation(BaseMutation):
+    """Выгрузка периода в формате Excel."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        organization_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            required=True,
+            description='Идентификаторы организаций'
+        )
+        status_ids = graphene.List(
+            graphene.NonNull(graphene.ID),
+            required=True,
+            description='Идентификаторы статусов'
+        )
+        unload_without_document = graphene.Boolean(required=True, description='Выгружать организации без документов')
+        apply_number_format = graphene.Boolean(required=True, description='Применять числовой формат')
+        empty_cell = graphene.String(required=True, description='Символы в пустой ячейке')
+
+    src = graphene.String(description='Ссылка на сгенерированный файл')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        organization_ids: list[int],
+        status_ids: list[int],
+        unload_without_document: bool,
+        apply_number_format: bool,
+        empty_cell: str
+    ):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return UnloadPeriodMutation(
+            src=unload_period(
+                user=info.context.user,
+                period=period,
+                organization_ids=[gid2int(organization_id) for organization_id in organization_ids],
+                status_ids=[gid2int(status_id) for status_id in status_ids],
+                unload_without_document=unload_without_document,
+                apply_number_format=apply_number_format,
+                empty_cell=empty_cell,
             )
         )
 
@@ -384,3 +437,5 @@ class PeriodMutations(graphene.ObjectType):
 
     change_user_period_groups = ChangeUserPeriodGroupsMutation.Field(required=True)
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)
+
+    unload_period = UnloadPeriodMutation.Field(required=True)

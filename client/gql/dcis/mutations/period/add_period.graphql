@@ -4,18 +4,20 @@
 mutation AddPeriod(
   $name: String!,
   $projectId: ID!,
-  $file: Upload!,
   $multiple: Boolean!,
+  $versioning: Boolean!,
   $readonlyFillColor: Boolean!,
-  $versioning: Boolean!
+  $xlsxFile: Upload!,
+  $limitationsFile: Upload,
 ) {
   addPeriod(input: {
     name: $name,
     projectId: $projectId,
-    file: $file,
     multiple: $multiple,
+    versioning: $versioning,
     readonlyFillColor: $readonlyFillColor,
-    versioning: $versioning
+    xlsxFile: $xlsxFile,
+    limitationsFile: $limitationsFile,
   }) {
     success
     errors {

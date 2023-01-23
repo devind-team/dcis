@@ -1,9 +1,8 @@
 import json
 
 import graphene
-from devind_core.schema.types import ContentTypeType, FileType
-from devind_dictionaries.models import Organization, Department
-from devind_dictionaries.schema import DepartmentType
+from devind_core.schema.types import ContentTypeType, FileType, GroupType
+from devind_dictionaries.schema import OrganizationType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.core.exceptions import PermissionDenied
@@ -17,25 +16,44 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
-    Attribute, AttributeValue, ColumnDimension, Document,
-    DocumentStatus, Limitation, Period,
-    PeriodGroup, PeriodPrivilege, Privilege,
-    Project, RowDimension, Sheet,
-    Status, Value, Cell,
+    Attribute,
+    AttributeValue,
+    Cell,
+    ColumnDimension,
+    CuratorGroup,
+    Document,
+    DocumentMessage,
+    DocumentStatus,
+    Limitation,
+    Period,
+    PeriodGroup,
+    PeriodPrivilege,
+    Privilege,
+    Project,
+    RowDimension,
+    Sheet,
+    Status,
+    Value,
 )
 from apps.dcis.permissions import (
     AddDocumentBase,
+    ChangeAttributeValueBase,
     can_add_period_base,
     can_change_document_base,
+    can_change_period_attributes_base,
     can_change_period_divisions_base,
     can_change_period_groups_base,
+    can_change_period_limitations_base,
     can_change_period_settings_base,
     can_change_period_sheet_base,
     can_change_period_users_base,
     can_change_project_base,
     can_delete_period_base,
     can_delete_project_base,
+    can_view_period_result_base,
 )
+from apps.dcis.permissions.period_permissions import can_change_period_base
+from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.services.document_services import get_document_sheets
 
@@ -100,33 +118,53 @@ class PeriodType(DjangoObjectType):
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
 
-    can_add_document = graphene.Boolean(
+    is_admin = graphene.Boolean(
         required=True,
-        description='Может ли пользователь добавлять документы в период'
+        description='Является ли пользователь администратором для периода',
+    )
+    is_curator = graphene.Boolean(
+        required=True,
+        description='Является ли пользователь куратором для периода',
+    )
+    can_add_any_division_document = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь добавлять документы в период',
     )
     can_change_divisions = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять дивизионы периода'
+        description='Может ли пользователь изменять дивизионы периода',
+    )
+    can_change_limitations = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять ограничения периода',
     )
     can_change_groups = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять группы периода'
+        description='Может ли пользователь изменять группы периода',
     )
     can_change_users = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять пользователей периода'
+        description='Может ли пользователь изменять пользователей периода',
+    )
+    can_view_result = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь просматривать сводный отчет выгрузки периода'
+    )
+    can_change_attributes = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять атрибуты периода',
     )
     can_change_settings = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять настройки периода'
+        description='Может ли пользователь изменять настройки периода',
     )
     can_change_sheet = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять структуру листа периода'
+        description='Может ли пользователь изменять структуру листа периода',
     )
     can_delete = graphene.Boolean(
         required=True,
-        description='Может ли пользователь удалять период'
+        description='Может ли пользователь удалять период',
     )
 
     class Meta:
@@ -164,12 +202,24 @@ class PeriodType(DjangoObjectType):
         return period.sheet_set.all()
 
     @staticmethod
-    def resolve_can_add_document(period: Period, info: ResolveInfo) -> bool:
-        return AddDocumentBase(info.context.user, period).can_add_any_document
+    def resolve_is_admin(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_is_curator(period: Period, info: ResolveInfo) -> bool:
+        return is_period_curator(info.context.user, period)
+
+    @staticmethod
+    def resolve_can_add_any_division_document(period: Period, info: ResolveInfo) -> bool:
+        return AddDocumentBase(info.context.user, period).can_add_any_division_document
 
     @staticmethod
     def resolve_can_change_divisions(period: Period, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_period_divisions_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_change_limitations(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_limitations_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_groups(period: Period, info: ResolveInfo) -> bool:
@@ -178,6 +228,14 @@ class PeriodType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_users(period: Period, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_period_users_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_change_attributes(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_attributes_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_view_result(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_view_period_result_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
@@ -210,43 +268,24 @@ class DivisionModelTypeConnection(graphene.relay.Connection):
         node = DivisionModelType
 
 
-class OrganizationOriginalType(DjangoObjectType):
-    """Описание списка организаций."""
-
-    departments = graphene.List(DepartmentType, description='Департаменты')
-    users = graphene.List(UserType, description='Пользователи')
-
-    class Meta:
-        model = Organization
-        fields = (
-            'id', 'name', 'present_name',
-            'inn', 'kpp', 'kind',
-            'rubpnubp', 'kodbuhg', 'okpo',
-            'phone', 'site', 'mail', 'address',
-            'attributes',
-            'created_at', 'updated_at',
-            'parent',
-            'region',
-            'departments'
-        )
-
-    @staticmethod
-    @resolver_hints(model_field='department_set')
-    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
-        return organization.department_set.all()
-
-    @staticmethod
-    @resolver_hints(model_field='')
-    def resolve_departments(organization: Organization, info: ResolveInfo, *args, **kwargs) -> QuerySet:
-        return organization.users.all()
-
-
 class PrivilegeType(DjangoObjectType):
     """Описание сквозных привилегий."""
 
     class Meta:
         model = Privilege
         fields = ('id', 'name', 'created_at', 'key',)
+
+
+class CuratorGroupType(DjangoObjectType):
+    """Тип групп кураторов."""
+
+    group = graphene.Field(GroupType, description='Привилегии кураторской группы')
+    organization = DjangoListField(OrganizationType, description='Организация группы')
+    users = DjangoListField(UserType, description='Пользователи в кураторской группе')
+
+    class Meta:
+        model = CuratorGroup
+        fields = ('id', 'name', 'group', 'users', 'organization')
 
 
 class PeriodGroupType(DjangoObjectType):
@@ -283,19 +322,23 @@ class StatusType(DjangoObjectType):
 
     class Meta:
         model = Status
-        fields = ('id', 'name', 'edit', 'protected', 'comment',)
+        fields = ('id', 'name', 'edit', 'comment',)
 
 
 class DocumentType(DjangoObjectType):
     """Тип моделей документа."""
 
+    updated_by = graphene.Field(UserType, description='Пользователь, обновивший документ')
     user = graphene.Field(UserType, description='Пользователь, добавивший документ')
     period = graphene.Field(PeriodType, description='Период сбора')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
-    can_delete = graphene.Boolean(required=True, description='Может ли пользователь удалять документ')
+    can_change_attribute_value = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять значение атрибута в документе',
+    )
 
     object_id = graphene.ID(description='Идентификатор дивизиона')
 
@@ -326,6 +369,10 @@ class DocumentType(DjangoObjectType):
     def resolve_can_change(document: Document, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_change_document_base, info.context.user, document)
 
+    @staticmethod
+    def resolve_can_change_attribute_value(document: Document, info: ResolveInfo) -> bool:
+        return ChangeAttributeValueBase(info.context.user, document).can_change_some_attribute
+
 
 class DocumentStatusType(DjangoObjectType):
     """Тип статусов для документов."""
@@ -344,6 +391,20 @@ class DocumentStatusType(DjangoObjectType):
             'status',
             'user',
         )
+
+
+class DocumentMessageType(DjangoObjectType):
+    """Тип комментариев для документа"""
+
+    document = graphene.Field(DocumentType, description='Документ')
+    user = graphene.Field(UserType, required=True, description='Пользователь')
+
+    class Meta:
+        model = DocumentMessage
+        interfaces = (graphene.relay.Node,)
+        fields = ('id', 'comment', 'created_at', 'document', 'user',)
+        filter_fields = {}
+        connection_class = CountableConnection
 
 
 class AttributeType(DjangoObjectType):
@@ -430,6 +491,7 @@ class RowDimensionType(graphene.ObjectType):
     object_id = graphene.ID(description='Идентификатор дивизиона')
     user_id = graphene.ID(description='Идентификатор пользователя')
     cells = graphene.List(graphene.NonNull(lambda: CellType), required=True, description='Ячейки')
+    background = graphene.String(description='Цвет фона')
 
 
 class ChangeColumnDimensionType(DjangoObjectType):
@@ -537,9 +599,8 @@ class CellType(graphene.ObjectType):
     colspan = graphene.Int(required=True, description='Объединение колонок')
     rowspan = graphene.Int(required=True, description='Объединение строк')
 
-    # От Value
+    # От Value или Cell
     value = graphene.String(description='Значение')
-    verified = graphene.Boolean(required=True, description='Валидно ли поле')
     error = graphene.String(description='Текст ошибки')
 
 
@@ -558,7 +619,6 @@ class ValueType(DjangoObjectType):
             'id',
             'value',
             'payload',
-            'verified',
             'error',
             'document',
         )
@@ -575,10 +635,11 @@ class BaseSheetType(graphene.ObjectType):
     name = graphene.String(required=True, description='Наименование')
     position = graphene.Int(required=True, description='Позиция')
     comment = graphene.String(required=True, description='Комментарий')
-    show_head = graphene.Boolean(required=True, description='Показвать ли головам')
-    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным')
+    show_head = graphene.Boolean(required=True, description='Показывать ли головным организациям')
+    show_child = graphene.Boolean(required=True, description='Показывать ли подведомственным организациям')
     created_at = graphene.DateTime(required=True, description='Дата добавления')
     updated_at = graphene.DateTime(required=True, description='Дата обновления')
+
     period = graphene.Field(PeriodType, description='Период')
 
 
@@ -604,20 +665,18 @@ class SheetType(BaseSheetType):
 
 
 class LimitationType(DjangoObjectType):
-    """Ограничения на ячейку."""
+    """Тип ограничения, накладываемого на лист."""
 
-    cell = graphene.Field(CellType, description='Ячейка')
+    sheet = graphene.Field(BaseSheetType, description='Лист')
 
     class Meta:
         model = Limitation
         fields = (
             'id',
-            'operator',
-            'condition',
-            'value',
-            'cell',
+            'formula',
+            'error_message',
+            'sheet'
         )
-        convert_choices_to_enum = False
 
 
 class ChangedCellOption(graphene.ObjectType):
@@ -633,3 +692,18 @@ class GlobalIndicesInputType(graphene.InputObjectType):
 
     row_id = graphene.ID(required=True, description='Идентификатор строки')
     global_index = graphene.Int(required=True, description='Индекс в плоской структуре')
+
+
+class ReportDocumentInputType(graphene.InputObjectType):
+    """Документ для выгрузки сводного отчета."""
+
+    document_id = graphene.ID(required=True, description='Идентификатор документа')
+    is_visible = graphene.Boolean(required=True, description='Показывать ли дочерние строки')
+    color = graphene.String(description='Цвет выделения дочерних строк')
+
+
+class ReportRowGroupInputType(graphene.InputObjectType):
+    """Группа строк для выгрузки сводного отчета."""
+
+    group_index = graphene.Int(required=True, description='Индекс группы строк')
+    is_expanded = graphene.Boolean(required=True, description='Является ли строка расширенной')

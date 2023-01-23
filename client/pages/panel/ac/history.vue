@@ -68,6 +68,7 @@ export default defineComponent({
       }),
       options: { fetchPolicy: 'network-only' }
     }, {
+      isScrollDown: true,
       pagination: useCursorPagination(),
       fetchScroll: typeof document === 'undefined' ? null : document
     })

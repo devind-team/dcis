@@ -3,7 +3,8 @@ export default {
   projects: {
     name: '@:dcis.home',
     divisions: 'Мои организации',
-    filters: {
+    filter: {
+      title: 'Фильтр проектов',
       active: 'Активные проекты',
       archive: 'Проекты в архиве',
       hidden: 'Скрытые проекты',
@@ -51,18 +52,50 @@ export default {
     },
     links: {
       documents: 'Документы',
+      monitoring: 'Мониторинг',
       departments: 'Департаменты',
       organizations: 'Организации',
       groups: 'Группы',
       users: 'Пользователи',
+      limitations: 'Ограничения',
       attributes: 'Атрибуты',
       sheets: 'Таблица',
+      report: 'Сводный отчет',
+      unload: 'Выгрузка',
       settings: '@:settings'
     },
     statuses: {
       preparation: 'Подготовка',
       open: 'Открыто',
       close: 'Закрыто'
+    },
+    statusFilter: {
+      title: 'Фильтр статусов',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
+    organizationFilter: {
+      title: 'Фильтр организаций',
+      noFiltrationMessage: 'Выбрать организации',
+      multipleMessage: 'Выбрано организаций: {count}',
+      tableHeaders: {
+        id: 'Идентификатор',
+        name: 'Название',
+        kpp: 'Кбк',
+        inn: 'ИНН',
+        kodbuhg: 'Бухгалтерский код'
+      }
+    },
+    departmentFilter: {
+      title: 'Фильтр департаментов',
+      noFiltrationMessage: 'Выбрать департаменты',
+      multipleMessage: 'Выбрано департаментов: {count}',
+      tableHeaders: {
+        id: 'Идентификатор',
+        name: 'Название',
+        code: 'Код департамента'
+      }
     },
     addDivisions: {
       file: 'Выберете файл'
@@ -71,7 +104,9 @@ export default {
       buttonText: 'Добавить период',
       header: 'Добавление периода',
       name: 'Название периода',
-      file: 'Файл с формой сбора',
+      xlsxFile: 'Файл с формами сбора',
+      limitationsFile: 'Ограничения, накладываемые на формы',
+      downloadTemplate: 'Скачать шаблон файла',
       readonlyFillColor: 'Запретить редактирование ячеек с заливкой',
       multiple: 'Множественное заполнение',
       versioning: 'Разрешить множество версий'
@@ -112,6 +147,43 @@ export default {
         departmentItemName: 'департамент',
         organizationItemName: 'организацию'
       }
+    },
+    limitations: {
+      name: '@:dcis.periods.links.limitations',
+      changeMenu: {
+        buttonText: 'Изменить ограничения',
+        updateLimitationFromFile: {
+          buttonText: 'Обновить ограничения из файла',
+          header: 'Обновление ограничения из файла',
+          limitationsFile: 'Файл с новыми ограничениями',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        addLimitation: {
+          buttonText: 'Добавить ограничение',
+          header: 'Добавление ограничения',
+          formula: 'Формула ограничения',
+          errorMessage: 'Сообщение об ошибке',
+          sheet: 'Форма'
+        }
+      },
+      tableHeaders: {
+        sheet: 'Форма',
+        formula: 'Формула',
+        errorMessage: 'Сообщение об ошибке',
+        actions: '@:actions'
+      },
+      tooltips: {
+        delete: '@:delete',
+        change: '@:change'
+      },
+      changeLimitation: {
+        header: 'Изменение ограничения',
+        buttonText: 'Изменить ограничение',
+        formula: 'Формула ограничения',
+        errorMessage: 'Сообщение об ошибке',
+        sheet: 'Форма'
+      },
+      deleteItemName: 'ограничение'
     },
     groups: {
       name: '@:dcis.periods.links.groups',
@@ -174,28 +246,59 @@ export default {
     },
     sheets: {
       name: '@:dcis.periods.links.sheets'
+    },
+    report: {
+      name: '@:dcis.periods.links.report',
+      settings: {
+        unload: 'Выгрузить сводный отчет'
+      },
+      documentsFilter: {
+        title: 'Выбор документов',
+        noFiltrationMessage: 'Выбрать документы',
+        multipleMessage: 'Выбрано документов: {count}',
+        selectMainDocument: 'Выбрать основной документ',
+        mainDocumentSelection: 'Выбор основного документа',
+        mainDocument: 'Выбран основной документ: {divisionId}',
+        propertiesForm: {
+          header: 'Изменение свойств отображения документа',
+          subheader: 'Документ: {divisionId}',
+          isVisible: 'Отображать дочерние строки',
+          color: 'Выделять цветом',
+          buttonText: 'Изменить свойства'
+        },
+        aggregationFilter: {
+          title: 'Выбор метода агрегации',
+          selectAggregation: 'Выбрать метод агрегации',
+          aggregation: 'Выбран метод агрегации: {method}',
+          concat: 'Сцепление строк',
+          sum: 'Сумма',
+          avg: 'Среднее арифметическое',
+          max: 'Максимальное значение',
+          min: 'Минимальное значение'
+        }
+      },
+      rowsFilter: {
+        title: 'Выбор расширенных строки',
+        noFiltrationMessage: 'Выбрать расширенные строки',
+        multipleMessage: 'Выбрано расширенных строк: {count}'
+      }
+    },
+    unload: {
+      name: '@:dcis.periods.links.unload',
+      organizationsFilterTitle: 'Выбор организаций',
+      statusFilterTitle: 'Выбор статусов',
+      unloadWithoutDocument: 'Выгружать организации без документов',
+      applyNumberFormat: 'Применять числовой формат',
+      emptyCell: 'Символы в пустой ячейке'
     }
   },
   documents: {
     name: 'Документы',
     version: 'Версия {version}',
-    divisionFilterOrganization: {
-      title: 'Фильтр организаций',
-      noFiltrationMessage: 'Все организации',
-      multipleMessage: '{name} и еще {restLength} организаций | {name} и еще {restLength} организация |' +
-        ' {name} и еще {restLength} организации'
-    },
-    divisionFilterDepartment: {
-      title: 'Фильтр департаментов',
-      noFiltrationMessage: 'Все департаменты',
-      multipleMessage: '{name} и еще {restLength} департаментов | {name} и еще {restLength} департамент |' +
-        ' {name} и еще {restLength} департамента'
-    },
-    statusFilter: {
-      title: 'Фильтр статусов',
-      noFiltrationMessage: 'Все статусы',
-      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
-        ' {name} и еще {restLength} статуса'
+    links: {
+      sheets: 'Листы',
+      attributes: 'Атрибуты',
+      comments: 'Комментарии'
     },
     tableHeaders: {
       version: 'Версия',
@@ -232,6 +335,8 @@ export default {
       header: 'Изменение статусов',
       readonlyHeader: 'Статусы',
       subheader: '@:dcis.documents.version',
+      tableErrorsMessage: 'Возникли ошибки в ограничениях',
+      tableErrorsTitle: 'Ошибки в ограничениях',
       status: 'Статус',
       comment: 'Комментарий',
       buttonText: '@:add',
@@ -251,6 +356,21 @@ export default {
       organizationHead: 'Начальник организации',
       user: 'Пользователь, добавивший строку',
       unload: 'Выгрузить'
+    },
+    tabs: {
+      tabNameDocuments: {
+        name: 'Документы'
+      },
+      tabNameNotSupplied: {
+        name: 'Не подавшие'
+      }
+    },
+    attributes: {
+      noAttributes: 'Нет атрибутов'
+    },
+    comments: {
+      comment: 'Введите комментарий',
+      send: '@:send'
     }
   },
   grid: {

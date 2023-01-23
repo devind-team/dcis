@@ -1,26 +1,16 @@
 """Модуль для сервисов атрибутов."""
 
 from typing import Sequence, cast
-from django.db.models import QuerySet
-
-from django.template import Context, Template
 
 from django.core.exceptions import PermissionDenied
+from django.db.models import QuerySet
+from django.template import Context, Template
+from django.utils.safestring import mark_safe
+
 from apps.core.models import User
-from apps.dcis.models import Period, Attribute, Document, AttributeValue, Value, Cell, Sheet
-from apps.dcis.permissions import can_change_period_attributes
-
-from .value_services import update_or_create_value, UpdateOrCrateValuesResult
-
-
-def add_attribute(period: Period):
-    pass
-
-
-def delete_attribute(user: User, attribute: Attribute):
-    """Удаление атрибута."""
-    can_change_period_attributes(user, attribute.period)
-    attribute.delete()
+from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Value
+from apps.dcis.permissions import can_change_attribute_value
+from .value_services import UpdateOrCrateValuesResult, update_or_create_value
 
 
 def change_attribute_value(
@@ -34,22 +24,22 @@ def change_attribute_value(
     Кроме этого, необходимо собрать контекст из существующих атрибутов и перерендерить.
     """
     try:
-        can_change_period_attributes(user, document.period)
+        can_change_attribute_value(user, document, attribute)
     except PermissionDenied as error:
         raise PermissionDenied({'value': str(error)})
 
-    attribute_value, created = AttributeValue.objects.update_or_create(
+    attribute_value, _ = AttributeValue.objects.update_or_create(
         document=document,
         attribute=attribute, defaults={
             'value': value
         }
     )
     context: Context = create_attribute_context(user, document)
-    values: Sequence[Value] = rerender_values(document, context)
+    values: Sequence[Value] = rerender_values(user, document, context)
     return attribute_value, values
 
 
-def rerender_values(document: Document, context: Context) -> Sequence[Value]:
+def rerender_values(user: User, document: Document, context: Context) -> Sequence[Value]:
     """Функция для ререндера параметров."""
     sheet_ids = document.sheets.values_list('id', flat=True)
     cell_values: QuerySet[Cell] = Cell.objects.filter(
@@ -61,6 +51,7 @@ def rerender_values(document: Document, context: Context) -> Sequence[Value]:
     for cell_value in cell_values:
         value = Template(cell_value.default).render(context)
         changed_values: UpdateOrCrateValuesResult = update_or_create_value(
+            user,
             document,
             cell_value,
             cast(int, cell_value.column.sheet_id),
@@ -78,14 +69,13 @@ def create_attribute_context(user: User, document: Document) -> Context:
         for attribute_value in AttributeValue.objects.filter(document=document).values('attribute_id', 'value')
     }
     context: dict[str, str] = {
-        attribute.key: attribute_values.get(attribute.id, attribute.default)
+        attribute.key: mark_safe(attribute_values.get(attribute.id, attribute.default))
         for attribute in attributes
     }
     # Расширяем контекст с помощью встроенных переменных
     context.update({
-        'user': user.get_full_name,
-        'org_id': document.object_id,
-        'org_name': document.object_name
+        'user': mark_safe(user.get_full_name),
+        'org_id': mark_safe(document.object_id),
+        'org_name': mark_safe(document.object_name)
     })
     return Context(context)
-

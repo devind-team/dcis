@@ -7,11 +7,14 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
-from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.models import CuratorGroup, Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions.project_permissions import can_add_project, can_change_project, can_delete_project
 from apps.dcis.services.project_services import (
-    change_project, create_project,
-    delete_project, get_user_divisions_projects,
+    change_project,
+    create_project,
+    delete_project,
+    get_user_curator_projects,
+    get_user_divisions_projects,
     get_user_participant_projects,
     get_user_privileges_projects,
     get_user_projects,
@@ -64,6 +67,27 @@ class GetUserProjectsTestCase(TestCase):
             period_group = PeriodGroup.objects.create(period=period)
             period_group.users.add(self.user)
 
+        self.curator_group_department_projects = [Project.objects.create(
+            content_type=self.department_content_type, visibility=True
+        ) for _ in range(2)]
+        self.curator_group_organization_projects = [Project.objects.create(
+            content_type=self.organization_content_type, visibility=True
+        ) for _ in range(2)]
+        self.curator_group_organization_projects_invisible = [Project.objects.create(
+            content_type=self.organization_content_type, visibility=False
+        ) for _ in range(2)]
+        for project in [
+            *self.curator_group_department_projects,
+            *self.curator_group_organization_projects,
+            *self.curator_group_organization_projects_invisible
+        ]:
+            organization = Organization.objects.create(attributes='')
+            period = Period.objects.create(project=project)
+            period.division_set.create(object_id=organization.id)
+            curator_group = CuratorGroup.objects.create()
+            curator_group.users.add(self.user)
+            curator_group.organization.add(organization)
+
         self.privilege = Privilege.objects.create()
         self.privilege_project = Project.objects.create(content_type=self.department_content_type)
         self.privilege_period = Period.objects.create(project=self.privilege_project)
@@ -110,6 +134,13 @@ class GetUserProjectsTestCase(TestCase):
             set(get_user_participant_projects(self.user)),
         )
 
+    def test_get_user_curator_projects(self) -> None:
+        """Тестирование функции `get_user_curator_projects`."""
+        self.assertEqual(
+            {*self.curator_group_organization_projects},
+            set(get_user_curator_projects(self.user)),
+        )
+
     def test_get_user_privileges_projects(self) -> None:
         """Тестирование функции `get_user_privileges_projects`."""
         self.assertSetEqual(
@@ -146,6 +177,7 @@ class GetUserProjectsTestCase(TestCase):
                 *self.user_projects_invisible,
                 *self.user_period_projects,
                 *self.user_group_projects,
+                *self.curator_group_organization_projects,
                 self.department_project,
                 self.organization_project,
                 self.privilege_project,
@@ -154,7 +186,7 @@ class GetUserProjectsTestCase(TestCase):
         )
 
 
-class ProjectsTestCase(TestCase):
+class ProjectTestCase(TestCase):
     """Тестирование проекта и прав."""
 
     def setUp(self) -> None:

@@ -5,7 +5,8 @@ nuxt-child(v-if="!loading" :bread-crumbs="bc" :page="page")
 <script lang="ts">
 import { ApolloQueryResult } from '@apollo/client'
 import type { ComputedRef } from '#app'
-import { computed, defineComponent, onUnmounted, useRoute } from '#app'
+import { computed, defineComponent, onUnmounted } from '#app'
+import { useRoute } from '#imports'
 import { useCommonQuery, useI18n, usePage } from '~/composables'
 import { usePageStore } from '~/stores'
 import { PageQuery, PageQueryVariables } from '~/types/graphql'

@@ -1,32 +1,37 @@
+from collections import OrderedDict
 from io import BytesIO
 from typing import Any
 
 import graphene
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from graphene_file_upload.scalars import Upload
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.schema.types import TableCellType, TableRowType, TableType
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
 from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
-from apps.dcis.schema.types import DocumentStatusType, DocumentType, GlobalIndicesInputType, RowDimensionType
-from apps.dcis.services.add_document_data_services import add_document_data
-from apps.dcis.services.document_services import (
-    add_document_status,
-    change_document_comment,
-    create_document,
-    delete_document_status,
+from apps.dcis.schema.types import (
+    DocumentMessageType,
+    DocumentStatusType,
+    DocumentType,
+    GlobalIndicesInputType,
+    RowDimensionType,
 )
+from apps.dcis.services.add_document_data_services import add_document_data
+from apps.dcis.services.document_services import change_document_comment, create_document, create_document_message
 from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
     change_row_dimension_height,
-    delete_row_dimension,
+    delete_child_row_dimension,
 )
+from apps.dcis.services.status_services import add_document_status, delete_document_status
 
 
 class AddDocumentMutation(BaseMutation):
@@ -96,6 +101,24 @@ class ChangeDocumentCommentMutation(BaseMutation):
         return ChangeDocumentCommentMutation(document=change_document_comment(info.context.user, document, comment))
 
 
+class AddDocumentMessageMutation(BaseMutation):
+    """Добавление комментария к документу"""
+
+    class Input:
+        document_id = graphene.ID(required=True, description='Документ')
+        message = graphene.String(description='Текст комментария')
+
+    document_message = graphene.Field(DocumentMessageType, description='Созданный комментарий')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, message: str):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
+        return AddDocumentMessageMutation(
+            document_message=create_document_message(info.context.user, document, message)
+        )
+
+
 class AddDocumentStatusMutation(BaseMutation):
     """Добавление статуса документа."""
 
@@ -105,18 +128,39 @@ class AddDocumentStatusMutation(BaseMutation):
         comment = graphene.String(description='Комментарий')
 
     document_status = graphene.Field(DocumentStatusType, description='Статус документа')
+    table = graphene.Field(TableType, description='Документ с ошибками')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, status_id: str, comment: str):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
-        return AddDocumentStatusMutation(document_status=add_document_status(
-            user=info.context.user,
-            document=document,
-            status=status,
-            comment=comment,
-        ))
+        try:
+            return AddDocumentStatusMutation(document_status=add_document_status(
+                user=info.context.user,
+                document=document,
+                status=status,
+                comment=comment,
+            ))
+        except ValidationError as error:
+            headers_map = OrderedDict()
+            headers_map['form'] = 'Форма'
+            headers_map['formula'] = 'Формула'
+            headers_map['error_message'] = 'Ошибка'
+            headers_map['dependencies'] = 'Зависимости'
+            rows: list[TableRowType] = []
+            for i, le in enumerate(error.params):
+                rows.append(TableRowType(
+                    index=i,
+                    cells=[TableCellType(header=v, value=getattr(le, k)) for k, v in headers_map.items()]
+                ))
+            return AddDocumentStatusMutation(
+                success=False,
+                table=TableType(
+                    headers=headers_map.values(),
+                    rows=rows
+                )
+            )
 
 
 class DeleteDocumentStatusMutation(BaseMutation):
@@ -274,7 +318,7 @@ class DeleteChildRowDimensionMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, row_dimension_id: str):
         row_dimension = get_object_or_404(RowDimension, pk=row_dimension_id)
-        return DeleteRowDimensionMutation(row_dimension_id=delete_row_dimension(info.context.user, row_dimension))
+        return DeleteRowDimensionMutation(row_dimension_id=delete_child_row_dimension(info.context.user, row_dimension))
 
 
 class DocumentMutations(graphene.ObjectType):
@@ -282,6 +326,7 @@ class DocumentMutations(graphene.ObjectType):
 
     add_document = AddDocumentMutation.Field(required=True)
     change_document_comment = ChangeDocumentCommentMutation.Field(required=True)
+    add_document_message = AddDocumentMessageMutation.Field(required=True)
     add_document_status = AddDocumentStatusMutation.Field(required=True)
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)

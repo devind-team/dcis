@@ -25,7 +25,9 @@ export default defineComponent({
   setup (props, { emit }) {
     const value = ref<number | string>(props.attributeValue?.value || props.attribute.default)
     const change = () => {
-      emit('change', value.value)
+      if (props.attribute.mutable && !props.readonly) {
+        emit('change', value.value)
+      }
     }
     return { value, change }
   }

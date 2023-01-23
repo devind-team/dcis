@@ -27,7 +27,8 @@ v-list(two-line)
 <script lang="ts">
 import { ApolloError } from 'apollo-client'
 import type { PropType } from '#app'
-import { defineComponent, inject, useRouter } from '#app'
+import { defineComponent, inject } from '#app'
+import { useRouter } from '#imports'
 import { useFilters, useI18n } from '~/composables'
 import { NotificationType } from '~/types/graphql'
 import { notificationKinkView } from '~/services/notifications'

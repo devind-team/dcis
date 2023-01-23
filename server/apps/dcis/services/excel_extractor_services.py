@@ -14,8 +14,9 @@ from openpyxl.worksheet.dimensions import (
 from openpyxl.worksheet.merge import MergeCell as OpenpyxlMergedCell
 from xlsx_evaluate import Evaluator, ModelCompiler
 
-from apps.dcis.helpers.sheet_cache import FormulaContainerCache
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
+from ..helpers.cell import evaluate_formula
 from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
 from ..models.sheet import KindCell
 
@@ -62,6 +63,7 @@ class BuildCell(BuildStyle):
     number_format: str | None = None
     comment: str | None = None
     default: str | None = None
+    default_error: str | None = None
     border_color: dict[str, str] = None
 
 
@@ -84,10 +86,10 @@ class BuildSheet:
     cells: list[BuildCell]
     merged_cells: list[BuildMergedCell]
 
-    cache_container: FormulaContainerCache = field(init=False)
+    cache_container: SheetFormulaContainerCache = field(init=False)
 
     def __post_init__(self):
-        self.cache_container = FormulaContainerCache(self.name)
+        self.cache_container = SheetFormulaContainerCache(self.name)
 
 
 class ExcelExtractor:
@@ -295,14 +297,18 @@ class ExcelExtractor:
             evaluator = Evaluator(evaluate_model)
             for cell in sheet.cells:
                 if cell.formula:
-                    coordinate: str = self.coordinate(sheet.name, cell.column_id, cell.row_id)
-                    cell.default = str(evaluator.evaluate(coordinate))
-                    cells_values[coordinate] = cell.default
+                    coordinate = self.coordinate(sheet.name, cell.column_id, cell.row_id)
+                    success, value = evaluate_formula(evaluator, coordinate)
+                    cell.default = value if success else None
+                    cell.default_error = value if not success else None
+                    # cells_values - для локального пересчета, если все ок - изменяем, если нет, ничего не делаем
+                    if success:
+                        cells_values[coordinate] = cell.default
                     sheet.cache_container.add_formula(cell.coordinate, cell.formula)
         return sheets
 
     @staticmethod
-    def coordinate(sheet: str, column: int, row: int):
+    def coordinate(sheet: str, column: int, row: int) -> str:
         """Получаем координату."""
         return f'{sheet}!{get_column_letter(column)}{row}'
 

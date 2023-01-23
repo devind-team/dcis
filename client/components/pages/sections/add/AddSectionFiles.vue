@@ -35,7 +35,7 @@ mutation-form(
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType, useRouter } from '#app'
+import { defineComponent, ref, PropType } from '#app'
 import { DataProxy } from 'apollo-cache'
 import {
   AddSectionFilesMutationPayload,
@@ -44,6 +44,7 @@ import {
 import DropFileUpload from '~/components/common/DropFileUpload.vue'
 import MutationForm from '~/components/common/forms/MutationForm.vue'
 import { useI18n } from '~/composables'
+import { useRouter } from '#imports'
 
 export default defineComponent({
   components: { DropFileUpload, MutationForm },

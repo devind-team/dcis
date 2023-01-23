@@ -7,7 +7,8 @@ div
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { computed, defineComponent, ref, useRoute, provide } from '#app'
+import { computed, defineComponent, ref, provide } from '#app'
+import { useRoute } from '#imports'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
 import { usePeriodQuery } from '~/services/grapqhl/queries/dcis/periods'
@@ -37,7 +38,9 @@ export default defineComponent({
     const links = computed<LinksType[]>(() => {
       const result: LinksType[] = [
         {
-          title: t('dcis.periods.links.documents') as string,
+          title: period.value && (period.value.isAdmin || period.value.isCurator)
+            ? t('dcis.periods.links.monitoring') as string
+            : t('dcis.periods.links.documents') as string,
           to: 'dcis-periods-periodId-documents',
           icon: 'file-table-box-multiple-outline'
         }
@@ -51,26 +54,50 @@ export default defineComponent({
           icon: 'briefcase-outline'
         })
       }
+      result.push({
+        title: t('dcis.periods.links.limitations') as string,
+        to: 'dcis-periods-periodId-limitations',
+        icon: 'shield-outline'
+      })
       if (!loading.value) {
-        if (period.value.canChangeSheet) {
+        if (period.value.canChangeGroups) {
           result.push({
             title: t('dcis.periods.links.groups') as string,
             to: 'dcis-periods-periodId-groups',
             icon: 'account-group'
-          }, {
+          })
+        }
+        if (period.value.canChangeUsers) {
+          result.push({
             title: t('dcis.periods.links.users') as string,
             to: 'dcis-periods-periodId-users',
             icon: 'account-multiple'
           })
+        }
+        if (period.value.canChangeAttributes) {
           result.push({
             title: t('dcis.periods.links.attributes') as string,
             to: 'dcis-periods-periodId-attributes',
             icon: 'page-next'
           })
+        }
+        if (period.value.canChangeSheet) {
           result.push({
             title: t('dcis.periods.links.sheets') as string,
             to: 'dcis-periods-periodId-sheets',
             icon: 'table'
+          })
+        }
+        if (period.value.canViewResult) {
+          result.push({
+            title: t('dcis.periods.links.report') as string,
+            to: 'dcis-periods-periodId-report',
+            icon: 'table-multiple'
+          })
+          result.push({
+            title: t('dcis.periods.links.unload') as string,
+            to: 'dcis-periods-periodId-unload',
+            icon: 'microsoft-excel'
           })
         }
         if (period.value.canChangeSettings || period.value.canDelete) {

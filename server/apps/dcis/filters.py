@@ -1,11 +1,11 @@
 """Модуль описания фильтрации внешних выгрузок."""
-from django.db.models import OuterRef, QuerySet, Subquery
+
 from django.forms import MultipleChoiceField
 from django_filters import MultipleChoiceFilter, filterset
 from graphene import ID, List
 from graphene_django.forms.converter import convert_form_field
 
-from .models import Document, DocumentStatus
+from .models import Document
 
 
 class IDMultipleChoiceField(MultipleChoiceField):
@@ -35,16 +35,6 @@ class DocumentFilter(filterset.FilterSet):
 
     division_id__in = IDMultipleChoiceFilter(field_name='object_id')
     last_status__status_id__in = IDMultipleChoiceFilter(field_name='last_status__status_id')
-
-    def filter_queryset(self, queryset: QuerySet):
-        qs = queryset.annotate(
-            last_status__status_id=Subquery(
-                DocumentStatus.objects.filter(
-                    document_id=OuterRef('pk')
-                ).order_by('-created_at').values('status')[:1]
-            )
-        )
-        return super().filter_queryset(qs)
 
     class Meta:
         """Мета класс настроек."""

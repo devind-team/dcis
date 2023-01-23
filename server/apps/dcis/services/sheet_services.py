@@ -11,6 +11,7 @@ from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Period, Sheet, Value
 from apps.dcis.models.sheet import Cell
 from apps.dcis.permissions import (
@@ -53,6 +54,8 @@ def rename_sheet(user: User, sheet: Sheet, name: str) -> tuple[Sheet, list[Cell]
             changed_cell.append(cell)
     sheet.name = name
     sheet.save(update_fields=('name',))
+    for s in Sheet.objects.filter(period=sheet.period):
+        SheetFormulaContainerCache.update(s)
     return sheet, changed_cell
 
 
@@ -100,17 +103,21 @@ class CheckCellOptions:
                 )
         if field == 'number_format':
             return cls.Success(value)
+        if field == 'aggregation':
+            return cls._standard_check(field, value, cls._allow_aggregation)
 
     _allowed_fields = [
         'strong', 'italic', 'strike',
         'underline', 'horizontal_align', 'vertical_align',
         'editable', 'size', 'kind',
-        'number_format'
+        'number_format',
+        'aggregation'
     ]
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']
     _allowed_underline = [None, 'single', 'double', 'single_accounting', 'double_accounting']
     _allowed_kinds = [kind[0] for kind in Cell.KIND_VALUE]
+    _allow_aggregation = [None, *[kind[0] for kind in Cell.KIND_AGGREGATION]]
 
     @staticmethod
     def _get_value_error_message(field: str, value: str, allowed_values: list[str | None]) -> str:

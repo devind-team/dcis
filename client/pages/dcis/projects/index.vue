@@ -1,61 +1,56 @@
 <template lang="pug">
-bread-crumbs(:items="breadCrumbs")
+bread-crumbs(v-if="user.divisions.length" :items="breadCrumbs")
   v-card
     v-tabs(grow)
       v-tab {{ $t('dcis.projects.name') }}
       v-tab(v-if="user.divisions.length") {{ $t('dcis.projects.divisions') }}
       v-tab-item
         v-card(flat)
-          v-card-title(v-if="hasPerm('dcis.add_project')")
-            v-spacer
-            add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
-              template(#activator="{ on }")
-                v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
-          v-card-subtitle {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
           v-card-text
-            items-data-filter(
-              v-model="selectedFilters"
-              :items="filterOptions"
-              :get-name="i => i.tr"
-              :no-filtration-message="String($t('dcis.projects.filters.noFiltrationMessage'))"
-              :default-value="[defaultFilter]"
-              item-key="key"
-              multiple
-            )
-            v-data-table(
-              :headers="headers"
-              :items="projects"
-              :loading="loading"
-              disable-pagination
-              disable-filtering
-              hide-default-footer
-            )
-              template(#item.name="{ item }")
-                nuxt-link(
-                  :to="localePath({ name: 'dcis-projects-projectId-periods', params: { projectId: item.id } })"
-                ) {{ item.name }}
-              template(#item.createdAt="{ item }") {{ dateTimeHM(item.createdAt) }}
-      v-tab-item(v-if="user.divisions.length")
+            .d-flex
+              div {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
+              template(v-if="hasPerm('dcis.add_project')")
+                v-spacer
+                add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
+                  template(#activator="{ on }")
+                    v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
+            projects-filter(v-model="selectedFilters" :default-value="defaultFilter" :projects="projects")
+            projects-table(:projects="visibleProjects" :loading="loading")
+      v-tab-item
         v-list
           v-list-item(v-for="division in user.divisions" :key="division.id")
             v-list-item-content {{ division.name }} ({{ division.id }})
+left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.projects.name') }}
+    template(v-if="hasPerm('dcis.add_project')")
+      v-spacer
+      add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
+        template(#activator="{ on }")
+          v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
+  template(#subheader) {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
+  projects-filter(v-model="selectedFilters" :default-value="defaultFilter" :projects="projects")
+  projects-table(:projects="visibleProjects" :loading="loading")
 </template>
 
 <script lang="ts">
-import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta, useRoute, useRouter } from '#app'
+import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta } from '#app'
+import { useRoute, useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useApolloHelpers, useFilters, useI18n } from '~/composables'
+import { ProjectType } from '~/types/graphql'
+import { Item } from '~/types/filters'
+import { useApolloHelpers, useI18n } from '~/composables'
 import { useAuthStore } from '~/stores'
 import { useProjects } from '~/services/grapqhl/queries/dcis/projects'
+import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+import ProjectsFilter from '~/components/dcis/projects/ProjectsFilter.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
+import ProjectsTable from '~/components/dcis/projects/ProjectsTable.vue'
 
 export default defineComponent({
   name: 'DcisProjects',
-  components: { AddProject, BreadCrumbs, ItemsDataFilter },
+  components: { LeftNavigatorContainer, BreadCrumbs, ProjectsFilter, AddProject, ProjectsTable },
   middleware: 'auth',
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
@@ -66,15 +61,9 @@ export default defineComponent({
     const route = useRoute()
     const { defaultClient } = useApolloHelpers()
     const { t, localePath } = useI18n()
-    const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: t('dcis.home') as string })
     const active = ref<boolean>(false)
     const name = ref<string>('')
-    const headers: DataTableHeader[] = [
-      { text: t('dcis.projects.tableHeaders.name') as string, value: 'name' },
-      { text: t('dcis.projects.tableHeaders.description') as string, value: 'description' },
-      { text: t('dcis.projects.tableHeaders.createdAt') as string, value: 'createdAt' }
-    ]
     const user = toRef(authStore, 'user')
     const hasPerm = toRef(authStore, 'hasPerm')
 
@@ -86,21 +75,11 @@ export default defineComponent({
       deleteUpdate
     } = useProjects()
 
-    const defaultFilter = { key: 'active', tr: t('dcis.projects.filters.active') }
+    const defaultFilter: Item[] = [{ id: 'active' }]
+    const selectedFilters = ref<Item[]>([{ id: 'active' }])
 
-    const filterOptions = ref([
-      defaultFilter,
-      { key: 'archive', tr: t('dcis.projects.filters.archive') }
-    ])
-
-    if (projects.value.find(x => !x.visibility)) {
-      filterOptions.value.push({ key: 'hidden', tr: t('dcis.projects.filters.hidden') })
-    }
-
-    const selectedFilters = ref([defaultFilter])
-
-    const visibleProjects = computed(() => {
-      const filterKeys = selectedFilters.value.map(x => x.key)
+    const visibleProjects = computed<ProjectType[]>(() => {
+      const filterKeys = selectedFilters.value.map(x => x.id)
       return projects.value.filter((x) => {
         return (!x.visibility && filterKeys.includes('hidden')) ||
           (x.archive && filterKeys.includes('archive')) ||
@@ -110,7 +89,11 @@ export default defineComponent({
 
     onMounted(() => {
       if (route.query.deleteProjectId) {
-        deleteUpdate(defaultClient.cache, { data: { deleteProject: { id: route.query.deleteProjectId } } })
+        deleteUpdate(
+          defaultClient.cache,
+          { data: { deleteProject: { id: route.query.deleteProjectId } } },
+          false
+        )
         router.push(localePath({ name: 'dcis-projects' }))
       }
     })
@@ -119,9 +102,7 @@ export default defineComponent({
       hasPerm,
       active,
       name,
-      headers,
       projects,
-      filterOptions,
       selectedFilters,
       visibleProjects,
       count,
@@ -129,7 +110,6 @@ export default defineComponent({
       loading,
       defaultFilter,
       user,
-      dateTimeHM,
       addUpdate
     }
   }

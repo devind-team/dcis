@@ -1,12 +1,15 @@
 <template lang="pug">
 base-data-filter(
   :message="message"
+  :disabled="disabled"
   :message-container-class="messageContainerClass"
   :message-container-close="!!selectedItems.length"
   :title="title"
   :modal="modal"
+  :fullscreen="fullscreen"
   :max-width="maxWidth"
   :max-height="maxHeight"
+  @active-changed="$emit('active-changed', $event)"
   @clear="clear"
   @close="close"
   @reset="reset"
@@ -19,26 +22,31 @@ base-data-filter(
   template(#subtitle)
     slot(name="subtitle")
   template(#fixed-content)
-    slot(name="search" :search-label="searchLabel" :search-function="searchFunction" :on="searchOn")
-      v-card-text.flex-shrink-0(v-if="searchFunction")
+    slot(name="search" :search-label="searchLabelComputed" :search-function="searchFunction" :on="searchOn")
+      v-card-text(v-if="searchFunction" style="flex: none")
         v-text-field(
           v-model="search"
-          :label="searchLabel"
+          :label="searchLabelComputed"
           prepend-icon="mdi-magnify"
           hide-details
           clearable
         )
+    slot(name="fixed-content" :items="items" :searchItems="searchItems" :temp-items="tempItems")
   template(#item-content)
     slot(
       name="items"
       :items="items"
       :searchItems="searchItems"
+      :temp-items="tempItems"
       :item-key="itemKey"
       :multiple="multiple"
       :has-select-all="hasSelectAll"
+      :get-key="getKey"
       :get-name="getName"
       :get-selected="getSelected"
       :set-selected="setSelected"
+      :all-selected="allSelected"
+      :set-all-selected="setAllSelected"
     )
       template(v-if="multiple")
         v-checkbox.my-2(
@@ -51,6 +59,7 @@ base-data-filter(
           slot(
             name="item"
             :item="item"
+            :get-key="getKey"
             :get-name="getName"
             :is-selected="getSelected(item)"
             :change="setSelected.bind(this, item)"
@@ -67,20 +76,30 @@ base-data-filter(
           slot(
             name="item"
             :item="item"
+            :get-key="getKey"
             :get-name="getName"
             :is-selected="getSelected(item)"
             :change="setSelected.bind(this, item)"
           )
-            v-radio(:key="item[itemKey]" :value="item" :label="getName(item)")
+            v-radio(:key="getKey(item)" :value="item" :label="getName(item)")
   template(#actions="actions")
     slot(name="actions" v-bind="actions")
 </template>
 
 <script lang="ts">
 import type { PropType } from '#app'
-import { computed, defineComponent, ref } from '#app'
+import { computed, defineComponent, ref, watch } from '#app'
 import { useI18n } from '~/composables'
-import { Class, GetName, Item, MultipleMessageFunction, SearchFunction, SearchOn } from '~/types/filters'
+import {
+  Class,
+  GetName,
+  GetKey,
+  Item,
+  MessageFunction,
+  MultipleMessageFunction,
+  SearchFunction,
+  SearchOn
+} from '~/types/filters'
 import BaseDataFilter from '~/components/common/filters/BaseDataFilter.vue'
 
 export default defineComponent({
@@ -90,40 +109,42 @@ export default defineComponent({
     items: { type: Array as PropType<Item[]>, required: true },
     itemKey: { type: String, default: 'id' },
     modal: { type: Boolean, default: false },
+    fullscreen: { type: Boolean, default: undefined },
     multiple: { type: Boolean, default: false },
     hasSelectAll: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
     messageContainerClass: { type: [String, Array, Object] as PropType<Class>, default: null },
     title: { type: String, default: null },
     maxWidth: { type: [String, Number], default: undefined },
     maxHeight: { type: [String, Number], default: undefined },
-    noFiltrationMessage: {
-      type: String,
-      default () {
-        return (this as any).$t('common.filters.itemsDataFilter.noFiltrationMessage')
-      }
-    },
+    messageFunction: { type: Function as PropType<MessageFunction>, default: null },
+    noFiltrationMessage: { type: String, default: null },
     multipleMessageFunction: {
       type: Function as PropType<MultipleMessageFunction | null>,
       default: null
     },
-    searchLabel: {
-      type: String,
-      default () {
-        return (this as any).$t('common.filters.itemsDataFilter.search')
+    searchLabel: { type: String, default: null },
+    searchFunction: { type: Function as PropType<SearchFunction>, default: null },
+    getKey: {
+      type: Function as PropType<GetKey>,
+      default (item: Item) {
+        return item[(this as any).itemKey]
       }
     },
-    searchFunction: { type: Function as PropType<SearchFunction>, default: null },
     getName: {
       type: Function as PropType<GetName>,
       default (item: Item) {
-        return String(item[(this as any).itemKey])
+        return (this as any).getKey(item)
       }
     },
     defaultValue: { type: [Object, Array], default: () => ([]) }
   },
   setup (props, { emit }) {
-    const { tc } = useI18n()
+    const { t, tc } = useI18n()
 
+    const searchLabelComputed = computed<string>(() =>
+      props.searchLabel || t('common.filters.itemsDataFilter.search')
+    )
     const search = ref<string>('')
     const tempValue = ref<Item[] | Item>(props.value)
 
@@ -167,12 +188,15 @@ export default defineComponent({
         : props.items
       return [
         ...items,
-        ...tempItems.value.filter(tempItem => !items.find(item => item[props.itemKey] === tempItem[props.itemKey]))
+        ...tempItems.value.filter(tempItem => !items.find(item => props.getKey(item) === props.getKey(tempItem)))
       ]
     })
     const message = computed<string>(() => {
+      if (props.messageFunction) {
+        return props.messageFunction(selectedItems.value, props.getName)
+      }
       if (selectedItems.value.length === 0) {
-        return props.noFiltrationMessage
+        return props.noFiltrationMessage || t('common.filters.itemsDataFilter.noFiltrationMessage')
       }
       if (selectedItems.value.length === 1) {
         return props.getName(selectedItems.value[0])
@@ -186,49 +210,47 @@ export default defineComponent({
         tempItems.value = selected ? [...searchItems.value] : []
       }
     })
-    /** Очистка фильтра */
+
+    watch(() => tempItems.value, (newValue) => {
+      emit('temp-items-changed', newValue)
+    })
+
     const clear = () => {
       tempItems.value = props.defaultValue
       emit('clear')
       apply()
     }
-    /** Закрытие модального окна */
+
     const close = () => {
-      tempItems.value = []
+      tempItems.value = selectedItems.value
       search.value = ''
       emit('close')
     }
-    /** Сброс фильтра */
+
     const reset = () => {
-      clear()
       tempItems.value = props.defaultValue
       search.value = ''
       emit('reset')
       apply()
     }
-    /** Применение фильтра */
+
     const apply = () => {
       selectedItems.value = tempItems.value
       search.value = ''
       emit('apply')
     }
-    /**
-     * Получение состояния элемента (выбран или не выбран)
-     * @param item
-     * @return
-     */
+
     const getSelected = (item: Item): boolean => {
-      return !!tempItems.value.find(selectedItem => selectedItem[props.itemKey] === item[props.itemKey])
+      return !!tempItems.value.find(selectedItem => props.getKey(selectedItem) === props.getKey(item))
     }
-    /**
-     * Установка состояния элемента (выбран или не выбран)
-     * @param item
-     * @param selected
-     */
     const setSelected = (item: Item, selected: boolean) => {
       tempItems.value = selected
         ? [...tempItems.value, item]
-        : tempItems.value.filter(selectedItem => selectedItem[props.itemKey] !== item[props.itemKey])
+        : tempItems.value.filter(selectedItem => props.getKey(selectedItem) !== props.getKey(item))
+    }
+
+    const setAllSelected = (selected: boolean) => {
+      allSelected.value = selected
     }
 
     const defaultMultipleMessageFunction = (name: string, restLength: number): string => {
@@ -237,8 +259,16 @@ export default defineComponent({
         : tc('common.filters.itemsDataFilter.multipleMessage', restLength, { name, restLength })
     }
 
+    const select = (items: Item[]) => {
+      for (const item of items) {
+        setSelected(item, true)
+      }
+      apply()
+    }
+
     return {
       search,
+      searchLabelComputed,
       tempValue,
       selectedItems,
       tempItems,
@@ -251,7 +281,9 @@ export default defineComponent({
       reset,
       apply,
       getSelected,
-      setSelected
+      setSelected,
+      setAllSelected,
+      select
     }
   }
 })

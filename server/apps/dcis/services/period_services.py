@@ -4,18 +4,20 @@ from datetime import date
 from io import BytesIO
 from typing import Type
 
+from devind_dictionaries.models import Department, Organization
+from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.schema.types import ErrorFieldType
+from devind_helpers.utils import convert_str_to_int
+from django.core.exceptions import PermissionDenied
 from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from devind_helpers.import_from_file import ExcelReader
-from devind_helpers.utils import convert_str_to_int
-from devind_helpers.schema.types import ErrorFieldType
-
 from apps.core.models import User
-from apps.dcis.models import Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project, Attribute
+from apps.dcis.helpers.exceptions import is_raises
+from apps.dcis.models import Attribute, Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -25,14 +27,27 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
+from apps.dcis.permissions.period_permissions import can_change_period_base
+from apps.dcis.services.curator_services import get_curator_organizations, is_period_curator
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
+from apps.dcis.services.limitation_services import add_limitations_from_file
 
 
 def get_user_participant_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     """Получение периодов, в которых пользователь непосредственно участвует."""
     return Period.objects.filter(
         Q(project__user=user) | Q(user=user) | Q(periodgroup__users=user),
+        project_id=project_id
+    )
+
+
+def get_user_curator_periods(user: User, project_id: int | str) -> QuerySet[Period]:
+    """Получение периодов, для которых пользователь является куратором."""
+    organization_ids = get_curator_organizations(user).values_list('id', flat=True)
+    return Period.objects.filter(
+        division__object_id__in=organization_ids,
+        project__content_type__model='organization',
         project_id=project_id
     )
 
@@ -62,6 +77,7 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
       - пользователь обладает глобальной привилегией dcis.view_period
       - пользователь участвует в периоде
         (создал проект с периодом, или создал период, или состоит в группе периода)
+      - пользователь является куратором для периода
       - пользователь имеет привилегию для периода
       - пользователь состоит в дивизионе, который участвует в периоде
     """
@@ -69,6 +85,7 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
         return Period.objects.filter(project_id=project_id)
     return (
         get_user_participant_periods(user, project_id) |
+        get_user_curator_periods(user, project_id) |
         get_user_divisions_periods(user, project_id) |
         get_user_privileges_periods(user, project_id)
     ).distinct()
@@ -101,6 +118,33 @@ def get_user_period_privileges(user_id: int | str, period_id: int | str) -> Quer
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
 
 
+def get_organizations_has_not_document(user: User, period: Period) -> QuerySet[Organization]:
+    """Получение организаций, у которых не поданы документы в периоде."""
+    organizations = Organization.objects.filter(
+        id__in=period.division_set.exclude(
+            object_id__in=period.document_set.values_list('object_id', flat=True)).values_list('object_id', flat=True)
+    )
+    if not is_raises(PermissionDenied, can_change_period_base, user, period):
+        return organizations
+    if is_period_curator(user, period):
+        return organizations.filter(curatorgroup__id__in=user.curatorgroup_set.values_list('id', flat=True))
+    raise PermissionDenied('Недостаточно прав для просмотра организаций, не подавших документ.')
+
+
+def get_organizations_for_filter(user: User, period: Period):
+    """Получение организаций для фильтра."""
+    can_view_period(user, period)
+    organizations = Organization.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
+    return organizations
+
+
+def get_departments_for_filter(user: User, period: Period):
+    """Получение организаций для фильтра."""
+    can_view_period(user, period)
+    departments = Department.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
+    return departments
+
+
 @transaction.atomic
 def create_period(
     user: User,
@@ -108,7 +152,8 @@ def create_period(
     project: Project,
     multiple: bool,
     versioning: bool,
-    file: File,
+    xlsx_file: File,
+    limitations_file: File | None,
     readonly_fill_color: bool
 ) -> Period:
     """Создание периода."""
@@ -121,13 +166,15 @@ def create_period(
         versioning=versioning
     )
     fl = period.methodical_support.create(
-        name=file.name,
-        src=file,
+        name=xlsx_file.name,
+        src=xlsx_file,
         deleted=False,
         user=user
     )
     extractor = ExcelExtractor(fl.src.path, readonly_fill_color)
     extractor.save(period)
+    if limitations_file is not None:
+        add_limitations_from_file(period, limitations_file)
     return period
 
 
@@ -276,13 +323,14 @@ def change_period_group_privileges(
     return privileges
 
 
-def change_user_period_groups(user: User, period_group_ids: list[str | int]) -> list[PeriodGroup]:
+def change_user_period_groups(permission_user: User, user: User, period_group_ids: list[str | int]) -> list[PeriodGroup]:
     """Изменение групп пользователя в периоде."""
     period_groups: list[PeriodGroup] = []
     for period_group_id in period_group_ids:
         period_group = get_object_or_404(PeriodGroup, pk=period_group_id)
-        can_change_period_users(user, period_group.period)
+        can_change_period_users(permission_user, period_group.period)
         period_groups.append(period_group)
+    user.periodgroup_set.set(period_groups)
     return period_groups
 
 

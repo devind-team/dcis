@@ -21,6 +21,15 @@
     "model": "dcis.Privilege",
     "pk": 3,
     "fields": {
+      "name": "Изменение ограничений периода сбора",
+      "key": "change_period_limitations",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 4,
+    "fields": {
       "name": "Изменение групп периода сбора",
       "key": "change_period_groups",
       "created_at": "2021-01-01T12:00:00.000Z"
@@ -28,7 +37,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 4,
+    "pk": 5,
     "fields": {
       "name": "Изменение пользователей периода сбора",
       "key": "change_period_users",
@@ -37,7 +46,25 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 5,
+    "pk": 6,
+    "fields": {
+      "name": "Изменение атрибутов периода сбора",
+      "key": "change_period_attributes",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 7,
+    "fields": {
+      "name": "Просмотр сводного отчета и выгрузок",
+      "key": "view_period_result",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 8,
     "fields": {
       "name": "Изменение настроек периода сбора",
       "key": "change_period_settings",
@@ -46,7 +73,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 6,
+    "pk": 9,
     "fields": {
       "name": "Просмотр документа",
       "key": "view_document",
@@ -55,7 +82,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 7,
+    "pk": 10,
     "fields": {
       "name": "Добавление нового документа",
       "key": "add_document",
@@ -64,7 +91,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 8,
+    "pk": 11,
     "fields": {
       "name": "Изменение документа",
       "key": "change_document",
@@ -73,16 +100,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 9,
-    "fields": {
-      "name": "Удаление документа",
-      "key": "delete_document",
-      "created_at": "2021-01-01T12:00:00.000Z"
-    }
-  },
-  {
-    "model": "dcis.Privilege",
-    "pk": 10,
+    "pk": 12,
     "fields": {
       "name": "Изменение листа",
       "key": "change_sheet",
@@ -91,7 +109,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 11,
+    "pk": 13,
     "fields": {
       "name": "Добавление строки документа",
       "key": "add_rowdimension",
@@ -100,7 +118,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 12,
+    "pk": 14,
     "fields": {
       "name": "Изменение строки документа",
       "key": "change_rowdimension",
@@ -109,7 +127,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 13,
+    "pk": 15,
     "fields": {
       "name": "Удаление строки документа",
       "key": "delete_rowdimension",
@@ -118,7 +136,7 @@
   },
   {
     "model": "dcis.Privilege",
-    "pk": 14,
+    "pk": 16,
     "fields": {
       "name": "Изменение значения ячейки документа",
       "key": "change_value",

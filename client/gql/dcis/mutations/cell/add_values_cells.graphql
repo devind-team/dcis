@@ -1,0 +1,34 @@
+mutation AddValuesCells($cellId: ID!, $cellsId: [ID!]!) {
+  addValuesCells(input: { cellId: $cellId, cellsId: $cellsId }) {
+    success
+    errors {
+      field
+      messages
+     __typename
+    }
+    cells {
+      id
+      kind
+      tooltip
+      comment
+      aggregation
+      default
+      column {
+        id
+        index
+        __typename
+      }
+      row {
+        id
+        index
+        __typename
+      }
+      sheet {
+        id
+        name
+        __typename
+      }
+      __typename
+    }
+  }
+}

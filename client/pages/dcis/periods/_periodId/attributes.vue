@@ -2,7 +2,12 @@
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.links.attributes') }}
     v-spacer
-    add-attribute-menu(v-slot="{ on, attrs}" :period="period" :update="addAttributeUpdate")
+    add-attribute-menu(
+      v-if="period.canChangeAttributes"
+      v-slot="{ on, attrs}"
+      :period="period"
+      :update="addAttributeUpdate"
+    )
       v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
   v-data-table(
     :headers="headers"
@@ -17,13 +22,13 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
       change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
         v-tooltip(bottom)
           template(#activator="{ on: onTooltip, attrs}")
-            v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" icon)
+            v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" color="primary" icon)
               v-icon mdi-pencil
           span {{ $t('dcis.attributes.change') }}
       delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
         v-tooltip(bottom)
           template(#activator="{ on: onTooltip, attrs}")
-            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" icon)
+            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" color="error" icon)
               v-icon mdi-delete
           span {{ $t('dcis.attributes.delete') }}
 </template>
@@ -71,13 +76,18 @@ export default defineComponent({
       }
     ]))
 
-    const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => ([
-      { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '40%' },
-      { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '25%' },
-      { text: t('dcis.attributes.tableHeaders.key') as string, value: 'key', width: '10%' },
-      { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '15%' },
-      { text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '20%' }
-    ]))
+    const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => {
+      const result: DataTableHeader[] = [
+        { text: t('dcis.attributes.tableHeaders.name') as string, value: 'name', width: '40%' },
+        { text: t('dcis.attributes.tableHeaders.placeholder') as string, value: 'placeholder', width: '25%' },
+        { text: t('dcis.attributes.tableHeaders.key') as string, value: 'key', width: '10%' },
+        { text: t('dcis.attributes.tableHeaders.default') as string, value: 'default', width: '15%' }
+      ]
+      if (props.period.canChangeAttributes) {
+        result.push({ text: t('dcis.attributes.tableHeaders.action') as string, value: 'action', width: '20%' })
+      }
+      return result
+    })
 
     const {
       data: attributes,
@@ -104,7 +114,7 @@ export default defineComponent({
 
     const addAttributeUpdate = (cache, result: AddAttributeMutationResult) => {
       if (!result.data.addAttribute.errors.length) {
-        addUpdate(cache, result, 'attribute')
+        addUpdate(cache, result, 'attribute', false)
       }
     }
 

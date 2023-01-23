@@ -1,5 +1,6 @@
 <template lang="pug">
 mutation-modal-form(
+  ref="form"
   :header="header"
   :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
   :button-text="String($t('dcis.documents.status.buttonText'))"
@@ -7,14 +8,21 @@ mutation-modal-form(
   :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
   :variables="{ documentId: document.id, statusId: status && status.id, comment }"
   :update="addDocumentStatusUpdate"
+  :hide-alert-timeout="Infinity"
+  :table-errors-mode="ErrorValidateDialogMode.TABLE"
+  :table-errors-message="String($t('dcis.documents.status.tableErrorsMessage'))"
+  :table-errors-title="String($t('dcis.documents.status.tableErrorsTitle'))"
+  :show-table-errors-search="false"
   mutation-name="addDocumentStatus"
-  i18n-path="dcis.documents.status"
+  errors-in-alert
+  @first-activated="firstActivated"
   @close="close"
+  @done="addDocumentStatusDone"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
   template(#form)
-    v-list(two-line dense)
+    v-list(v-if="documentStatuses" two-line dense)
       v-list-item(v-for="item in documentStatuses" :key="item.id")
         v-list-item-content
           v-list-item-title {{ item.status.name }}
@@ -34,6 +42,7 @@ mutation-modal-form(
                     v-btn(color="error" icon)
                       v-icon mdi-delete
                 span {{ $t('dcis.documents.status.delete.tooltip') }}
+    v-progress-linear(v-else indeterminate)
     template(v-if="canAdd")
       v-divider
       v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
@@ -46,6 +55,7 @@ mutation-modal-form(
           v-model="status"
           :error-messages="errors"
           :success="valid"
+          :loading="statusesLoading"
           :items="statuses"
           :label="$t('dcis.documents.status.status')"
           item-text="name"
@@ -56,10 +66,11 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
+import { WatchQueryFetchPolicy } from '@apollo/client'
 import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
 import type { PropType } from '#app'
-import { computed, defineComponent, ref } from '#app'
+import { computed, defineComponent, onMounted, ref, watch } from '#app'
 import {
   AddDocumentStatusMutationPayload,
   DeleteDocumentStatusMutation,
@@ -68,21 +79,23 @@ import {
   DocumentStatusesQuery,
   DocumentStatusesQueryVariables,
   DocumentType,
-  StatusesQuery,
-  StatusesQueryVariables,
-  StatusType
+  NewStatusesQuery,
+  NewStatusesQueryVariables,
+  StatusType,
+  StatusFieldsFragment
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
-import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
+import newStatusesQuery from '~/gql/dcis/queries/new_statuses.graphql'
 import documentStatusesQuery from '~/gql/dcis/queries/document_statuses.graphql'
 import deleteDocumentStatusMutation from '~/gql/dcis/mutations/document/delete_document_status.graphql'
+import { ErrorValidateDialogMode } from '~/components/common/dialogs/ErrorValidateDialog.vue'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export type AddDocumentStatusMutationResult = { data: { addDocumentStatus: AddDocumentStatusMutationPayload } }
 export type DeleteDocumentStatusMutationResult = { data: { deleteDocumentStatus: DeleteDocumentStatusMutationPayload } }
 
-type PeriodUpdateType = (
+export type PeriodUpdateType = (
   cache: DataProxy | ApolloCache<any>,
   result: AddDocumentStatusMutationResult | DeleteDocumentStatusMutationResult,
   transform: (cache: any, result: AddDocumentStatusMutationResult | DeleteDocumentStatusMutationResult) => any
@@ -91,16 +104,30 @@ type PeriodUpdateType = (
 export default defineComponent({
   components: { MutationModalForm, DeleteMenu },
   props: {
-    canAdd: { type: Boolean, required: true },
     canDelete: { type: Boolean, required: true },
     document: { type: Object as PropType<DocumentType>, required: true },
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const { t } = useI18n()
     const { dateTimeHM, getUserName } = useFilters()
 
-    const header = computed<string>(() => props.canAdd || props.canDelete
+    onMounted(() => {
+      watch(() => statuses.value, (statuses: StatusFieldsFragment[]) => {
+        if (statuses) {
+          status.value = statuses[0] || null
+        }
+      }, { immediate: true })
+    })
+
+    const firstActivated = () => {
+      statusesQueryOptions.value.enabled = true
+      documentStatusesQueryOptions.value.enabled = true
+    }
+
+    const canAdd = computed<boolean>(() => Boolean(statuses.value && statuses.value.length))
+
+    const header = computed<string>(() => canAdd.value || props.canDelete
       ? t('dcis.documents.status.header') as string
       : t('dcis.documents.status.readonlyHeader') as string
     )
@@ -108,21 +135,29 @@ export default defineComponent({
     const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
 
-    const { data: statusesData, onResult } = useCommonQuery<StatusesQuery, StatusesQueryVariables>({
-      document: statusesQuery
+    const statusesQueryOptions = ref<{ enabled: boolean, fetchPolicy: WatchQueryFetchPolicy }>({
+      enabled: false,
+      fetchPolicy: 'cache-and-network'
     })
-    const statuses = computed<StatusType[]>(() => {
-      if (!statusesData.value) {
-        return []
-      }
-      return props.document.canChange
-        ? statusesData.value as StatusType[]
-        : statusesData.value.filter((status: StatusType) => !status.protected)
+    const documentStatusesQueryOptions = ref<{ enabled: boolean }>({ enabled: false })
+    const {
+      data: statuses,
+      loading: statusesLoading,
+      refetch: refetchStatuses
+    } = useCommonQuery<
+      NewStatusesQuery,
+      NewStatusesQueryVariables
+    >({
+      document: newStatusesQuery,
+      variables: () => ({
+        documentId: props.document.id
+      }),
+      options: statusesQueryOptions
     })
-
-    onResult(({ data: { statuses } }) => {
-      nextTick(() => { status.value = statuses[0] || null })
-    })
+    const addDocumentStatusDone = () => {
+      emit('add-status')
+      refetchStatuses()
+    }
 
     const {
       data: documentStatuses,
@@ -130,7 +165,8 @@ export default defineComponent({
       deleteUpdate
     } = useCommonQuery<DocumentStatusesQuery, DocumentStatusesQueryVariables>({
       document: documentStatusesQuery,
-      variables: { documentId: props.document.id }
+      variables: { documentId: props.document.id },
+      options: documentStatusesQueryOptions
     })
 
     const addDocumentStatusUpdate = (cache: DataProxy, result: AddDocumentStatusMutationResult) => {
@@ -150,7 +186,7 @@ export default defineComponent({
       }
     }
 
-    const { mutate: deleteDocumentStatus } = useMutation<
+    const { mutate: deleteDocumentStatusMutate } = useMutation<
       DeleteDocumentStatusMutation,
       DeleteDocumentStatusMutationVariables
     >(
@@ -174,6 +210,10 @@ export default defineComponent({
           )
         }
       })
+    const deleteDocumentStatus = async (variables: DeleteDocumentStatusMutationVariables) => {
+      await deleteDocumentStatusMutate(variables)
+      await refetchStatuses()
+    }
 
     const close = () => {
       status.value = statuses.value[0] || null
@@ -181,10 +221,15 @@ export default defineComponent({
     }
 
     return {
+      ErrorValidateDialogMode,
+      firstActivated,
+      canAdd,
       header,
       comment,
       status,
       statuses,
+      statusesLoading,
+      addDocumentStatusDone,
       documentStatuses,
       dateTimeHM,
       getUserName,

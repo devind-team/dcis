@@ -85,6 +85,7 @@ export default defineComponent({
         document: props.query
       },
       {
+        isScrollDown: true,
         pagination: useCursorPagination({ pageSize: props.pageSize }),
         fetchScroll: typeof document === 'undefined' ? null : document
       })

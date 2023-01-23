@@ -69,6 +69,7 @@ export default defineComponent({
       document: activeBudgetClassificationsQuery,
       variables: () => ({ code: debounceSearch.value })
     }, {
+      isScrollDown: true,
       pagination: useCursorPagination({ pageSize: 20 })
     })
 

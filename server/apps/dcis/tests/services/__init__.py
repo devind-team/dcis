@@ -1,7 +1,18 @@
 from .column_dimension_services import ColumnDimensionTestCase
-from .divisions_services import DivisionsServicesTestCase
-from .document_services import DocumentTestCase, GetUserDocumentsTestCase
-from .period_services import GetUserPeriodsTestCase
-from .privilege_services import PrivilegeServicesTestCase
-from .project_services import GetUserProjectsTestCase
+from .curator_services import CuratorGroupTestCase
+from .divisions_services import DivisionTestCase
+from .document_services import DocumentMessageTestCase, DocumentTestCase, GetUserDocumentsTestCase
+from .limitation_services import LimitationTestCase
+from .period_services import (
+    GetUserPeriodsTestCase,
+    PeriodDivisionTestCase,
+    PeriodGroupTestCase,
+    PeriodOrganizationsHasNotDocumentTestCase,
+    PeriodTestCase,
+    PeriodUserTestCase,
+)
+from .privilege_services import PrivilegeTestCase
+from .project_services import GetUserProjectsTestCase, ProjectTestCase
 from .row_dimension_services import RowDimensionTestCase
+from .status_services import AddStatusCheckTestCase, StatusTestCase
+from .values_services import ValueServicesTestCase

@@ -42,6 +42,7 @@ export default defineComponent({
         enabled: loginIn.value
       })
     }, {
+      isScrollDown: true,
       pagination: useCursorPagination()
     })
 

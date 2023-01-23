@@ -28,21 +28,13 @@ fragment PeriodFields on PeriodType {
   sheets {
     id
     name
+    position
+    comment
     showHead
     showChild
-    comment
     createdAt
-    position
     updatedAt
     __typename
-    __typename
   }
-  canAddDocument
-  canChangeDivisions
-  canChangeGroups
-  canChangeUsers
-  canChangeSettings
-  canChangeSheet
-  canDelete
   __typename
 }

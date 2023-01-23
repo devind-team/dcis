@@ -5,7 +5,6 @@ div
 </template>
 
 <script lang="ts">
-import type { ComputedRef, Ref } from '#app'
 import { computed, defineComponent, ref, useNuxt2Meta } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
@@ -16,16 +15,16 @@ export default defineComponent({
   middleware: 'auth',
   setup () {
     const { t, localePath } = useI18n()
-    useNuxt2Meta({ title: t('panel.ac.names') as string })
+    useNuxt2Meta({ title: t('panel.ac.name') as string })
 
-    const active: Ref<boolean> = ref<boolean>(false)
+    const active = ref<boolean>(false)
 
-    const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
+    const bc = computed<BreadCrumbsItem[]>(() => ([
       { text: t('panel.index') as string, to: localePath({ name: 'panel' }), exact: true },
       { text: t('panel.ac.name') as string, to: localePath({ name: 'panel-ac' }), exact: true }
     ]))
 
-    const links: ComputedRef<LinksType[]> = computed<LinksType[]>(() => ([
+    const links = computed<LinksType[]>(() => ([
       {
         title: t('panel.ac.users.name') as string,
         to: 'panel-ac-users',
@@ -37,6 +36,12 @@ export default defineComponent({
         to: 'panel-ac-groups',
         permissions: 'auth.view_group',
         icon: 'account-group'
+      },
+      {
+        title: t('curators.name') as string,
+        to: 'panel-ac-curator_groups',
+        permissions: 'dcis.view_curatorgroup',
+        icon: 'format-list-group'
       },
       {
         title: t('panel.ac.permissions.name') as string,

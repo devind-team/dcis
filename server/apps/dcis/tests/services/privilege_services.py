@@ -9,7 +9,7 @@ from apps.dcis.models import Period, PeriodGroup, PeriodPrivilege, Privilege, Pr
 from apps.dcis.services.privilege_services import has_group_privilege, has_individual_privilege, has_privilege
 
 
-class PrivilegeServicesTestCase(TestCase):
+class PrivilegeTestCase(TestCase):
     """Тесты модуля, отвечающего за работу с привилегиями."""
 
     def setUp(self) -> None:

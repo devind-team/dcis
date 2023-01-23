@@ -10,6 +10,7 @@ mutation-modal-form(
   :mutation-name="['changeUserPeriodGroups', 'changeUserPeriodPrivileges']"
   i18n-path="dcis.periods.users.addUser"
   errors-in-alert
+  @first-activated="firstActivated"
   @close="close"
 )
   template(#activator="{ on }")
@@ -96,7 +97,7 @@ import {
   UsersQueryVariables,
   AddPeriodUserMutationVariables,
   ChangeUserPeriodGroupsMutationPayload,
-  ChangeUserPeriodPrivilegesPayload
+  ChangeUserPeriodPrivilegesMutationPayload
 } from '~/types/graphql'
 import usersQuery from '~/gql/core/queries/users.graphql'
 import privilegesQuery from '~/gql/dcis/queries/privileges.graphql'
@@ -107,7 +108,7 @@ import AvatarDialog from '~/components/users/AvatarDialog.vue'
 export type AddPeriodUserMutationResult = {
   data: {
     changeUserPeriodGroups: ChangeUserPeriodGroupsMutationPayload
-    changeUserPeriodPrivileges: ChangeUserPeriodPrivilegesPayload
+    changeUserPeriodPrivileges: ChangeUserPeriodPrivilegesMutationPayload
   }
 }
 type UpdateFunction = (cache: DataProxy, result: AddPeriodUserMutationResult) => DataProxy
@@ -120,14 +121,9 @@ export default defineComponent({
     update: { type: Function as PropType<UpdateFunction>, required: true }
   },
   setup (props) {
-    const form = ref<InstanceType<typeof MutationModalForm> | null>(null)
-    onMounted(() => {
-      watch(() => form.value.active, (value: boolean) => {
-        if (value) {
-          options.value.enabled = true
-        }
-      })
-    })
+    const firstActivated = () => {
+      options.value.enabled = true
+    }
 
     const { getUserFullName } = useFilters()
 
@@ -175,7 +171,7 @@ export default defineComponent({
     }
 
     return {
-      form,
+      firstActivated,
       addPeriodUserMutation,
       getUserFullName,
       userId,

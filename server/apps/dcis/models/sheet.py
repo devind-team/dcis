@@ -252,6 +252,7 @@ class Cell(Style, KindCell, models.Model):
     number_format = models.TextField(null=True, help_text='Форматирование чисел')
     comment = models.TextField(null=True, help_text='Комментарий')
     default = models.TextField(null=True, help_text='Значение по умолчанию')
+    default_error = models.TextField(null=True, help_text='Значение ошибки по умолчанию')
     mask = models.TextField(null=True, help_text='Маска для ввода значений')
     tooltip = models.TextField(null=True, help_text='Подсказка')
     is_template = models.BooleanField(default=False, help_text='Является ли поле шаблоном')
@@ -282,7 +283,7 @@ class Cell(Style, KindCell, models.Model):
     @property
     def is_aggregation(self) -> bool:
         """Является ли ячейка агрегационной."""
-        return self.aggregation is None
+        return self.aggregation is not None
 
 
 class RelationshipCells(models.Model):
@@ -290,38 +291,6 @@ class RelationshipCells(models.Model):
 
     from_cell = models.ForeignKey(Cell, related_name='from_cells', on_delete=models.CASCADE)
     to_cell = models.ForeignKey(Cell, related_name='to_cells', on_delete=models.CASCADE)
-
-
-class Limitation(models.Model):
-    """Накладываемые на ячейку ограничения."""
-
-    AND = 'and'
-    OR = 'or'
-
-    KIND_OPERATOR = (
-        (AND, 'and'),
-        (OR, 'or')
-    )
-
-    LT = 'lt'
-    GT = 'gt'
-    EQUAL = 'equal'
-    LTE = 'lte'
-    GTE = 'gte'
-
-    KIND_CONDITION = (
-        (LT, '<'),
-        (GT, '>'),
-        (EQUAL, '='),
-        (LTE, '<='),
-        (GTE, '>=')
-    )
-    operator = models.CharField(max_length=3, default=AND, choices=KIND_OPERATOR, help_text='Оператор')
-    condition = models.CharField(max_length=8, default=EQUAL, choices=KIND_CONDITION, help_text='Состояние')
-    value = models.TextField(help_text='Значение')
-
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text='Родительское правило')
-    cell = models.ForeignKey(Cell, on_delete=models.CASCADE, help_text='Ячейка')
 
 
 class MergedCell(models.Model):
@@ -375,7 +344,6 @@ class Value(models.Model):
     value = models.TextField(help_text='Значение')
     extra_value = models.TextField(null=True, help_text='Дополнительное значение')
     payload = models.JSONField(null=True, help_text='Дополнительные данные')
-    verified = models.BooleanField(default=True, help_text='Валидно ли поле')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')
