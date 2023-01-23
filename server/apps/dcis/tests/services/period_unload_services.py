@@ -218,6 +218,7 @@ class UnloadPeriodTestCase(TestCase):
                     self.assertEqual(c1.data_type, c2.data_type)
                     self.assertEqual(c1.value, c2.value)
                     self.assertEqual(c1.number_format, c2.number_format)
+                    self.assertEqual(c1.alignment.vertical, c2.alignment.vertical)
 
     def _get_unload_default_settings(self) -> dict:
         """Получение настроек выгрузки по умолчанию."""

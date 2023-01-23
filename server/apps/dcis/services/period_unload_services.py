@@ -9,6 +9,7 @@ from devind_dictionaries.models import Organization
 from django.conf import settings
 from django.db.models import QuerySet
 from openpyxl.cell.cell import VALID_TYPES
+from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -146,19 +147,20 @@ class PeriodUnload:
         """Сохранение название столбцов на лист Excel."""
         max_row_count = max(len(column.cells) for column in columns)
         for i, column in enumerate(columns, 1):
-            for cell in column.cells:
-                if cell.start_row is None:
-                    cell.start_row = 1
-                    cell.start_column = i
-                    cell.end_row = max_row_count
-                    cell.end_column = i
-                worksheet.cell(row=cell.start_row, column=cell.start_column, value=cell.name)
-                if cell.start_row != cell.end_row or cell.start_column != cell.end_column:
+            for column_cell in column.cells:
+                if column_cell.start_row is None:
+                    column_cell.start_row = 1
+                    column_cell.start_column = i
+                    column_cell.end_row = max_row_count
+                    column_cell.end_column = i
+                cell = worksheet.cell(row=column_cell.start_row, column=column_cell.start_column, value=column_cell.name)
+                cell.alignment = Alignment(vertical='top')
+                if column_cell.start_row != column_cell.end_row or column_cell.start_column != column_cell.end_column:
                     worksheet.merge_cells(
-                        start_row=cell.start_row,
-                        start_column=cell.start_column,
-                        end_row=cell.end_row,
-                        end_column=cell.end_column,
+                        start_row=column_cell.start_row,
+                        start_column=column_cell.start_column,
+                        end_row=column_cell.end_row,
+                        end_column=column_cell.end_column,
                     )
 
     def _save_rows(self, worksheet: Worksheet, sheet: Sheet, columns: list[Column], cell_groups: CellGroups) -> None:
