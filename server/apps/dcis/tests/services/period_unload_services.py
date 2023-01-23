@@ -114,108 +114,106 @@ class UnloadPeriodTestCase(TestCase):
                 updated_at=datetime.datetime(2023, 1, 10 + i, tzinfo=datetime.timezone.utc)
             )
 
+        self.actual_path: str | None = None
+
+    def tearDown(self) -> None:
+        """Очистка данных после тестирования."""
+        if self.actual_path:
+            os.remove(self.actual_path)
+
     def test_without_filter(self) -> None:
         """Тестирование выгрузки без фильтрации."""
-        expected = self.RESOURCES_DIR / 'test_without_filter.xlsx'
-        actual = settings.BASE_DIR / unload_period(**self._get_unload_default_settings())[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        expected_path = self.RESOURCES_DIR / 'test_without_filter.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**self._get_unload_default_settings())[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_organization_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по организациям."""
-        expected = self.RESOURCES_DIR / 'test_organization_filter.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_organization_filter.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'organization_ids': [self.head_organizations[0].id, self.head_organizations[1].id],
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_status_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по статусам."""
-        expected = self.RESOURCES_DIR / 'test_status_filter.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_status_filter.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'status_ids': [self.statuses[0].id, self.statuses[2].id],
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_unload_without_document(self) -> None:
         """Тестирование выгрузки организаций без документов."""
-        expected = self.RESOURCES_DIR / 'test_unload_without_document.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_unload_without_document.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'unload_without_document': True,
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_unload_default(self) -> None:
         """Тестирование выгрузки значений по умолчанию при отсутствии значений в документе."""
-        expected = self.RESOURCES_DIR / 'test_unload_default.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_unload_default.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'unload_default': True,
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_apply_number_format(self) -> None:
         """Тестирование применения числового формата."""
-        expected = self.RESOURCES_DIR / 'test_apply_number_format.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_apply_number_format.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'apply_number_format': True,
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_unload_children(self) -> None:
         """Тестирование выгрузки листов только для филиалов."""
-        expected = self.RESOURCES_DIR / 'test_unload_children.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_unload_children.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'unload_heads': False,
             'unload_children': True,
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_unload_heads_and_children(self) -> None:
         """Тестирование выгрузки листов для головных учреждений и филиалов."""
-        expected = self.RESOURCES_DIR / 'test_unload_heads_and_children.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_unload_heads_and_children.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'unload_heads': True,
             'unload_children': True,
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
     def test_empty_cell(self) -> None:
         """Тестирование выгрузки строки в пустой ячейке."""
-        expected = self.RESOURCES_DIR / 'test_empty_cell.xlsx'
-        actual = settings.BASE_DIR / unload_period(**{
+        expected_path = self.RESOURCES_DIR / 'test_empty_cell.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'empty_cell': '-',
         })[1:]
-        self._assert_worksheets_equal(expected, actual)
-        os.remove(actual)
+        self._assert_worksheets_equal(expected_path, self.actual_path)
 
-    def _assert_worksheets_equal(self, wb1_path: Path, wb2_path: Path) -> None:
+    def _assert_worksheets_equal(self, expected_path: Path, actual_path: Path) -> None:
         """Проверка книг на равенство по значениям, типу данных и числовому формату."""
-        wb1 = load_workbook(filename=wb1_path)
-        wb2 = load_workbook(filename=wb2_path)
-        self.assertEqual(wb1.sheetnames, wb2.sheetnames)
-        for ws1, ws2 in zip(wb1.worksheets, wb2.worksheets):
-            self.assertEqual(ws1.title, ws2.title)
-            self.assertEqual(ws1.min_row, ws2.min_row)
-            self.assertEqual(ws1.max_row, ws2.max_row)
-            self.assertEqual(ws1.min_column, ws2.min_column)
-            self.assertEqual(ws1.max_column, ws2.max_column)
-            self.assertEqual(set(map(tuple, ws1.merged_cells)), set(map(tuple, ws2.merged_cells)))
-            for r1, r2 in zip(ws1, ws2):
+        expected_wb = load_workbook(filename=expected_path)
+        actual_wb = load_workbook(filename=actual_path)
+        self.assertEqual(expected_wb.sheetnames, actual_wb.sheetnames)
+        for expected_ws, actual_ws in zip(expected_wb.worksheets, actual_wb.worksheets):
+            self.assertEqual(expected_ws.title, actual_ws.title)
+            self.assertEqual(expected_ws.min_row, actual_ws.min_row)
+            self.assertEqual(expected_ws.max_row, actual_ws.max_row)
+            self.assertEqual(expected_ws.min_column, actual_ws.min_column)
+            self.assertEqual(expected_ws.max_column, actual_ws.max_column)
+            self.assertEqual(set(map(tuple, expected_ws.merged_cells)), set(map(tuple, actual_ws.merged_cells)))
+            for r1, r2 in zip(expected_ws, actual_ws):
                 for c1, c2 in zip(r1, r2):
                     self.assertEqual(c1.data_type, c2.data_type)
                     self.assertEqual(c1.value, c2.value)

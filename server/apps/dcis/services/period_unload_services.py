@@ -25,7 +25,7 @@ class CellData:
     """Данные ячейки."""
     value: str
     data_type: str = 's'
-    number_format: str = None
+    number_format: str | None = None
 
 
 @dataclass
@@ -175,8 +175,9 @@ class PeriodUnload:
             for column_index, column in enumerate(columns, 1):
                 cell_data = column.get_cell_data(data_source)
                 cell = worksheet.cell(row=row_index, column=column_index, value=cell_data.value)
-                cell.data_type = cell_data.data_type
-                if self._apply_number_format and cell_data.number_format:
+                if cell_data.data_type != KindCell.DATE or cell_data.value is not None:
+                    cell.data_type = cell_data.data_type
+                if cell_data.number_format:
                     cell.number_format = cell_data.number_format
             row_index += 1
 
@@ -288,7 +289,11 @@ class PeriodUnload:
         """Получение столбцов справа от данных."""
         return [
             Column(
-                get_cell_data=lambda s: CellData(cls._format_datatime(s.document.updated_at) if s.document else None),
+                get_cell_data=lambda s: CellData(
+                    s.document.updated_at.replace(tzinfo=None) if s.document else None,
+                    KindCell.DATE,
+                    'dd/mm/yyyy\ hh:mm',
+                ),
                 cells=[ColumnHeaderCell(name='Дата последнего редактирования')],
             ),
             Column(
@@ -354,7 +359,11 @@ class PeriodUnload:
                     data_type = KindCell.NUMERIC
                 else:
                     data_type = KindCell.STRING
-            result.append(CellData(value=val, data_type=data_type, number_format=cell.number_format))
+            result.append(CellData(
+                value=val,
+                data_type=data_type,
+                number_format=cell.number_format if self._apply_number_format else None,
+            ))
         return result
 
     @classmethod
@@ -442,11 +451,6 @@ class PeriodUnload:
         def get_cell(s: DataSource) -> CellData:
             return s.cells[i]
         return get_cell
-
-    @staticmethod
-    def _format_datatime(datatime: datetime) -> str:
-        """Форматирование даты."""
-        return f'{datatime:%d.%m.%Y %H:%M}'
 
     @staticmethod
     def _format_user(user: User) -> str:
