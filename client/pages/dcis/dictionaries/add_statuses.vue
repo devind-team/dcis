@@ -2,10 +2,9 @@
 universal-dictionary(
   @update-drawer="$emit('update-drawer')"
   :bread-crumbs="bc"
-  :query="require('~/gql/dcis/queries/budget_classifications.graphql')"
-  :headers="['id', {name: 'code', value: 'code', width: 250}, 'name']"
-  :page-size="20"
-  query-name="budgetClassifications"
+  :query="require('~/gql/dcis/queries/add_statuses.graphql')"
+  :headers="['id', 'roles', 'check', 'fromStatus', 'toStatus']"
+  query-name="addStatuses"
 )
 </template>
 
@@ -23,12 +22,12 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
-    useNuxt2Meta({ title: t('dictionaries.budgetClassifications.header') as string })
+    useNuxt2Meta({ title: t('dictionaries.addStatuses.header') as string })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
-        text: t('dictionaries.budgetClassifications.header') as string,
-        to: localePath({ name: 'dcis-dictionaries-budget_classifications' }),
+        text: t('dictionaries.addStatuses.header') as string,
+        to: localePath({ name: 'dcis-dictionaries-add_statuses' }),
         exact: true
       }
     ]))

@@ -37,6 +37,16 @@ export default defineComponent({
         title: t('dictionaries.budgetClassifications.header') as string,
         to: 'dcis-dictionaries-budget_classifications',
         icon: 'cash-multiple'
+      },
+      {
+        title: t('dictionaries.statuses.header') as string,
+        to: 'dcis-dictionaries-statuses',
+        icon: 'list-status'
+      },
+      {
+        title: t('dictionaries.addStatuses.header') as string,
+        to: 'dcis-dictionaries-add_statuses',
+        icon: 'check-all'
       }
     ]))
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
