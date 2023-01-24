@@ -4,10 +4,12 @@ fragment AddStatusFields on AddStatusType {
   check
   fromStatus {
     id
+    name
     __typename
   }
   toStatus {
     id
+    name
     __typename
   }
   __typename

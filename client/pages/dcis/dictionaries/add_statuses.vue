@@ -3,7 +3,7 @@ universal-dictionary(
   @update-drawer="$emit('update-drawer')"
   :bread-crumbs="bc"
   :query="require('~/gql/dcis/queries/add_statuses.graphql')"
-  :headers="['id', 'roles', 'check', 'fromStatus', 'toStatus']"
+  :headers="headers"
   query-name="addStatuses"
 )
 </template>
@@ -13,7 +13,7 @@ import type { PropType, ComputedRef } from '#app'
 import { defineComponent, computed, useNuxt2Meta } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n } from '~/composables'
-import UniversalDictionary from '~/components/dcis/dictionaries/UniversalDictionary.vue'
+import UniversalDictionary, { Header } from '~/components/dcis/dictionaries/UniversalDictionary.vue'
 export default defineComponent({
   components: { UniversalDictionary },
   middleware: ['auth'],
@@ -22,6 +22,13 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+    const headers: Header[] = [
+      'id',
+      'roles',
+      'check',
+      { name: 'fromStatus', value: 'fromStatus.name' },
+      { name: 'toStatus', value: 'toStatus.name' }
+    ]
     useNuxt2Meta({ title: t('dictionaries.addStatuses.header') as string })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
@@ -31,7 +38,7 @@ export default defineComponent({
         exact: true
       }
     ]))
-    return { bc }
+    return { bc, headers }
   }
 })
 </script>

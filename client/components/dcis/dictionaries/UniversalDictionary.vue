@@ -51,7 +51,7 @@ type QueryVariables = {
   offset?: number,
   [key: string]: any
 }
-type Header = string | { name: string, value: string, width?: string | number }
+export type Header = string | { name: string, value: string, width?: string | number }
 
 export default defineComponent({
   components: { LeftNavigatorContainer },

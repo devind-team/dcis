@@ -4,6 +4,7 @@ universal-dictionary(
   :bread-crumbs="bc"
   :query="require('~/gql/dcis/queries/statuses.graphql')"
   :headers="['id', 'name', 'comment', 'edit']"
+  :boolean-headers="['edit']"
   query-name="statuses"
 )
 </template>
