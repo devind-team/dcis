@@ -7,6 +7,7 @@ from typing import Callable
 
 from devind_dictionaries.models import Organization
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from openpyxl.cell.cell import VALID_TYPES
 from openpyxl.styles import Alignment
@@ -132,20 +133,22 @@ class PeriodUnload:
         """Выгрузка."""
         workbook = Workbook()
         workbook.remove(workbook.active)
+        if self._sheets.count() == 0:
+            raise ValidationError('Ни один лист периода не соответствует настройкам выгрузки.')
         for sheet in self._sheets:
             worksheet = workbook.create_sheet(sheet.name)
             cells = self._get_cells(sheet)
             cell_groups = self._get_cell_groups(sheet, cells)
-            columns = self._build_columns(cell_groups)
+            columns = self._build_columns(sheet, cell_groups)
             self._save_columns(worksheet, columns)
             self._save_rows(worksheet, sheet, columns, cell_groups)
         workbook.save(self.path)
         return f'/{self.path.relative_to(settings.BASE_DIR)}'
 
-    @staticmethod
-    def _save_columns(worksheet: Worksheet, columns: list[Column]) -> None:
+    @classmethod
+    def _save_columns(cls, worksheet: Worksheet, columns: list[Column]) -> None:
         """Сохранение название столбцов на лист Excel."""
-        max_row_count = max(len(column.cells) for column in columns)
+        max_row_count = cls._get_header_size(columns)
         for i, column in enumerate(columns, 1):
             for column_cell in column.cells:
                 if column_cell.start_row is None:
@@ -194,10 +197,10 @@ class PeriodUnload:
         return result
 
     @classmethod
-    def _build_columns(cls, cell_groups: CellGroups) -> list[Column]:
+    def _build_columns(cls, sheet: Sheet, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
         left_columns = cls._build_left_columns()
-        data_columns = cls._build_data_columns(cell_groups, len(left_columns) + 1)
+        data_columns = cls._build_data_columns(sheet, cell_groups, len(left_columns) + 1)
         right_columns = cls._build_right_columns()
         return [*left_columns, *data_columns, *right_columns]
 
@@ -249,17 +252,17 @@ class PeriodUnload:
         ]
 
     @classmethod
-    def _build_data_columns(cls, cell_groups: CellGroups, left_shift: int) -> list[Column]:
+    def _build_data_columns(cls, sheet: Sheet, cell_groups: CellGroups, left_shift: int) -> list[Column]:
         """Получение столбцов с данными."""
-        unload_header_cells = cls._build_unload_header_cells(cell_groups, left_shift)
-        min_column_index = min(hc.cell.column.index for hc in cell_groups.column_header_cells)
-        max_column_index = max(
-            hc.cell.column.index if hc.merged_cell is None else hc.merged_cell.max_col
-            for hc in cell_groups.column_header_cells
-        )
         row_header_chunk = len(cell_groups.row_header_cells)
+        if len(cell_groups.value_cells) % row_header_chunk != 0:
+            raise ValidationError(
+                f'Количество ячеек со значениями на листе "{sheet.name}" не соответствует числу заголовков строк. '
+                 'Проверьте правильность расстановки ячеек только для чтения.'
+            )
+        unload_header_cells = cls._build_unload_header_cells(cell_groups, left_shift)
         columns: list[Column] = []
-        for i in range(row_header_chunk * (max_column_index - min_column_index + 1)):
+        for i, _ in enumerate(cell_groups.value_cells):
             cells = [c for c in unload_header_cells if c.start_column == i + left_shift]
             columns.append(Column(get_cell_data=cls._make_get_cell(i), cells=cells))
         return columns
@@ -271,7 +274,15 @@ class PeriodUnload:
         left_shift: int
     ) -> list[UnloadHeaderCell]:
         """Построение ячеек заголовков столбцов в выгрузке."""
-        min_row_index = min(hc.cell.row.index for hc in cell_groups.column_header_cells)
+        row_header_chunk = len(cell_groups.row_header_cells)
+        min_row_index = min((hc.cell.row.index for hc in cell_groups.column_header_cells), default=0)
+        if min_row_index == 0:
+            unload_header_cells: list[UnloadHeaderCell] = []
+            for _ in range(len(cell_groups.value_cells) // row_header_chunk):
+                for rh in cell_groups.row_header_cells:
+                    unload_header_cells.append(cls._cast_row_header_to_unload(rh, left_shift, 1))
+                    left_shift += 1
+            return unload_header_cells
         min_row_header_cells = sorted(
             (hc for hc in cell_groups.column_header_cells if hc.cell.row.index == min_row_index),
             key=lambda hc: hc.cell.column.index
@@ -491,7 +502,18 @@ class PeriodUnload:
                 header_cells.append(HeaderCell(cell=cell, merged_cell=None))
             else:
                 value_cells.append(cell)
-        return cls._normalize_cell_groups(value_cells, header_cells)
+        if len(value_cells) == 0:
+            raise ValidationError(
+                f'Не удалось найти ячейки со значениями на листе "{sheet.name}". '
+                 'Проверьте правильность расстановки ячеек только для чтения.'
+            )
+        cell_groups = cls._normalize_cell_groups(value_cells, header_cells)
+        if len(cell_groups.row_header_cells) == 0:
+            raise ValidationError(
+                f'Не удалось найти ячейки с заголовками строк на листе "{sheet.name}". '
+                 'Проверьте правильность расстановки ячеек только для чтения.'
+            )
+        return cell_groups
 
     @classmethod
     def _normalize_cell_groups(cls, value_cells: list[Cell], header_cells: list[HeaderCell]) -> CellGroups:

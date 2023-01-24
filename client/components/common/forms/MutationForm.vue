@@ -76,7 +76,7 @@ export default defineComponent({
     const instance = getCurrentInstance()
     const vm = instance?.proxy || instance as unknown as InstanceType<VueConstructor>
     const validationObserver = ref<InstanceType<typeof ValidationObserver>>(null)
-    const mutationResultAlert = ref<InstanceType<typeof ValidationObserver>>(null)
+    const mutationResultAlert = ref<InstanceType<typeof MutationResultAlert>>(null)
 
     const setApolloError = (error: ApolloError): void => {
       mutationResultAlert.value.setApolloError(error)
@@ -97,7 +97,7 @@ export default defineComponent({
     const setFormErrors = (errors: ErrorFieldType[], showInAlert: boolean = false): void => {
       const allFields = errors.map((e: ErrorFieldType) => e.field).includes('__all__')
       if (allFields || showInAlert) {
-        const errorString: string = errors.reduce((a: string, c: ErrorFieldType) =>
+        const errorString = errors.reduce((a: string, c: ErrorFieldType) =>
           a ? `${a}, ${c.messages.join(', ')}` : c.messages.join(', '), '')
         setError(errorString, 'BusinessLogicError')
       } else {

@@ -5,6 +5,7 @@ bread-crumbs(:items="bc")
     :mutation="require('~/gql/dcis/mutations/period/unload_period.graphql')"
     :variables="variables"
     @done="unloadPeriodOnDone"
+    @error="unloadPeriodOnError"
     tag
   )
     v-card
@@ -13,6 +14,7 @@ bread-crumbs(:items="bc")
         | {{ $t('dcis.periods.unload.name') }}
       form(@submit.prevent="mutate")
         v-card-text
+          mutation-result-alert(ref="mutationResultAlert")
           organization-filter(
             v-model="selectedOrganizations"
             :period="period"
@@ -36,6 +38,7 @@ bread-crumbs(:items="bc")
 
 <script lang="ts">
 import { ref, computed, defineComponent, PropType } from '#app'
+import { ApolloError } from 'apollo-client'
 import { useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -43,16 +46,17 @@ import {
   OrganizationType,
   StatusType,
   UnloadPeriodMutation,
-  UnloadPeriodMutationVariables
+  UnloadPeriodMutationVariables, ErrorFieldType
 } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
+import MutationResultAlert from '~/components/common/MutationResultAlert.vue'
 import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
 import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
 
 type UnloadPeriodMutationResult = { data: UnloadPeriodMutation }
 
 export default defineComponent({
-  components: { BreadCrumbs, OrganizationFilter, StatusFilter },
+  components: { BreadCrumbs, MutationResultAlert, OrganizationFilter, StatusFilter },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -68,6 +72,16 @@ export default defineComponent({
         exact: true
       }
     ]))
+
+    const mutationResultAlert = ref<InstanceType<typeof MutationResultAlert>>(null)
+
+    const setApolloError = (error: ApolloError): void => {
+      mutationResultAlert.value.setApolloError(error)
+    }
+
+    const setBusinessLogicError = (message: string): void => {
+      mutationResultAlert.value.setError(message, 'BusinessLogicError')
+    }
 
     const sheetsItems = computed<string[]>(() => [
       t('dcis.periods.unload.sheets.onlyHeads') as string,
@@ -121,14 +135,23 @@ export default defineComponent({
       emptyCell: emptyCell.value
     }))
 
-    const unloadPeriodOnDone = ({ data: { unloadPeriod: { success, src } } }: UnloadPeriodMutationResult) => {
+    const unloadPeriodOnDone = ({ data: { unloadPeriod: { success, errors, src } } }: UnloadPeriodMutationResult) => {
       if (success) {
         window.open(src, '_blank')
+      } else {
+        const errorString = errors.reduce((a: string, c: ErrorFieldType) =>
+          a ? `${a}, ${c.messages.join(', ')}` : c.messages.join(', '), '')
+        setBusinessLogicError(errorString)
       }
+    }
+
+    const unloadPeriodOnError = (error: ApolloError): void => {
+      setApolloError(error)
     }
 
     return {
       bc,
+      mutationResultAlert,
       sheetsItems,
       selectedOrganizations,
       selectedStatuses,
@@ -138,7 +161,8 @@ export default defineComponent({
       applyNumberFormat,
       sheets,
       emptyCell,
-      variables
+      variables,
+      unloadPeriodOnError
     }
   }
 })
