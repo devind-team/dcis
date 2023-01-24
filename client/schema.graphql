@@ -497,6 +497,19 @@ type AddRowDimensionMutationPayload {
   success: Boolean!
 }
 
+"""Тип переназначений статусов документов."""
+type AddStatusType {
+  """Функция, проверяющая может ли статус быть изменен"""
+  check: String!
+  """Изначальный статус"""
+  fromStatus: StatusType
+  id: ID!
+  """Роли пользователей, которые могут изменять статус"""
+  roles: JSONString!
+  """Новый статус"""
+  toStatus: StatusType!
+}
+
 input AddUsersCuratorGroupInput {
   clientMutationId: String
   """Идентификатор кураторской группы"""
@@ -3331,6 +3344,8 @@ type Query {
   ): BudgetClassificationTypeConnection
   """Статистика активности"""
   activeStatistics: ActiveStatisticsType!
+  """Переназначение статусов"""
+  addStatuses: [AddStatusType!]
   """Приложения"""
   applications: [ApplicationType!]!
   """Получение атрибутов, привязанных к периоду"""

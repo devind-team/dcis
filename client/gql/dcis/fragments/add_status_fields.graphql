@@ -1,0 +1,16 @@
+fragment AddStatusFields on AddStatusType {
+  id
+  roles
+  check
+  fromStatus {
+    id
+    name
+    __typename
+  }
+  toStatus {
+    id
+    name
+    __typename
+  }
+  __typename
+}

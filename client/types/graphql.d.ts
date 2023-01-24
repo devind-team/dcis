@@ -530,6 +530,20 @@ export type AddRowDimensionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Тип переназначений статусов документов. */
+export type AddStatusType = {
+  __typename?: 'AddStatusType';
+  /** Функция, проверяющая может ли статус быть изменен */
+  check: Scalars['String'];
+  /** Изначальный статус */
+  fromStatus?: Maybe<StatusType>;
+  id: Scalars['ID'];
+  /** Роли пользователей, которые могут изменять статус */
+  roles: Scalars['JSONString'];
+  /** Новый статус */
+  toStatus: StatusType;
+};
+
 export type AddUsersCuratorGroupInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор кураторской группы */
@@ -3914,6 +3928,8 @@ export type Query = {
   activeBudgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Статистика активности */
   activeStatistics: ActiveStatisticsType;
+  /** Переназначение статусов */
+  addStatuses?: Maybe<Array<AddStatusType>>;
   /** Приложения */
   applications: Array<ApplicationType>;
   /** Получение атрибутов, привязанных к периоду */
@@ -5297,6 +5313,8 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
+export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
+
 export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean };
 
 export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, error?: string | null, aggregation?: string | null };
@@ -5815,6 +5833,10 @@ export type ActiveBudgetClassificationsQueryVariables = Exact<{
 
 export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBudgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
 
+export type AddStatusesQueryVariables = Exact<{ [key: string]: never; }>;
+
+export type AddStatusesQuery = { __typename?: 'Query', addStatuses?: Array<{ __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } }> | null };
+
 export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
@@ -5828,7 +5850,7 @@ export type AttributesValuesQueryVariables = Exact<{
 export type AttributesValuesQuery = { __typename?: 'Query', attributesValues: Array<{ __typename: 'AttributeValueType', id: string, value: string, createdAt: any, updatedAt: any, attributeId?: number | null } | null> };
 
 export type BudgetClassificationsQueryVariables = Exact<{
-  code?: InputMaybe<Scalars['String']>;
+  search?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
 }>;
@@ -5937,6 +5959,7 @@ export type NewStatusesQuery = { __typename?: 'Query', newStatuses?: Array<{ __t
 export type OrganizationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
+  search?: InputMaybe<Scalars['String']>;
 }>;
 
 export type OrganizationsQuery = { __typename?: 'Query', organizations?: { __typename?: 'OrganizationTypeConnection', totalCount: number, edges: Array<{ __typename: 'OrganizationTypeEdge', node?: { __typename: 'OrganizationType', id: string, name: string, createdAt: any } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };

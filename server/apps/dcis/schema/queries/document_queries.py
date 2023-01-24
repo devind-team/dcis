@@ -35,6 +35,7 @@ from apps.dcis.schema.types import (
     DocumentType,
     SheetType,
     StatusType,
+    AddStatusType
 )
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_services import get_aggregation_cells
@@ -64,6 +65,7 @@ class DocumentQueries(graphene.ObjectType):
     )
 
     statuses = DjangoListField(StatusType, description='Статусы')
+    add_statuses = DjangoListField(AddStatusType, description='Переназначение статусов')
     initial_statuses = DjangoListField(
         StatusType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),

@@ -1,0 +1,7 @@
+#import "../fragments/add_status_fields.graphql"
+
+query AddStatuses {
+  addStatuses {
+    ...AddStatusFields
+  }
+}

@@ -10,10 +10,9 @@ import { defineComponent, computed, useNuxt2Meta, ref } from '#app'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import { useI18n } from '~/composables'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
-import UniversalDictionary from '~/components/dcis/dictionaries/UniversalDictionary.vue'
 export default defineComponent({
-  components: { LeftNavigatorDriver, UniversalDictionary },
-  middleware: 'auth',
+  components: { LeftNavigatorDriver },
+  middleware: ['auth'],
   setup () {
     const { t, localePath } = useI18n()
     useNuxt2Meta({ title: t('dictionaries.name') as string })
@@ -38,6 +37,16 @@ export default defineComponent({
         title: t('dictionaries.budgetClassifications.header') as string,
         to: 'dcis-dictionaries-budget_classifications',
         icon: 'cash-multiple'
+      },
+      {
+        title: t('dictionaries.statuses.header') as string,
+        to: 'dcis-dictionaries-statuses',
+        icon: 'list-status'
+      },
+      {
+        title: t('dictionaries.addStatuses.header') as string,
+        to: 'dcis-dictionaries-add_statuses',
+        icon: 'check-all'
       }
     ]))
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
