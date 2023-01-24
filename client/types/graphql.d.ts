@@ -5909,7 +5909,7 @@ export type UnloadPeriodMutationInput = {
   /** Применять числовой формат */
   applyNumberFormat: Scalars['Boolean'];
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Символы в пустой ячейке */
+  /** Строка в пустой ячейке */
   emptyCell: Scalars['String'];
   /** Идентификаторы организаций */
   organizationIds: Array<Scalars['ID']>;
@@ -5917,6 +5917,12 @@ export type UnloadPeriodMutationInput = {
   periodId: Scalars['ID'];
   /** Идентификаторы статусов */
   statusIds: Array<Scalars['ID']>;
+  /** Выгружать листы для филиалов */
+  unloadChildren: Scalars['Boolean'];
+  /** Выгружать значение по умолчанию при отсутствии значения в документе */
+  unloadDefault: Scalars['Boolean'];
+  /** Выгружать листы для головных учреждений */
+  unloadHeads: Scalars['Boolean'];
   /** Выгружать организации без документов */
   unloadWithoutDocument: Scalars['Boolean'];
 };
@@ -6758,7 +6764,10 @@ export type UnloadPeriodMutationVariables = Exact<{
   organizationIds: Array<Scalars['ID']> | Scalars['ID'];
   statusIds: Array<Scalars['ID']> | Scalars['ID'];
   unloadWithoutDocument: Scalars['Boolean'];
+  unloadDefault: Scalars['Boolean'];
   applyNumberFormat: Scalars['Boolean'];
+  unloadHeads: Scalars['Boolean'];
+  unloadChildren: Scalars['Boolean'];
   emptyCell: Scalars['String'];
 }>;
 
