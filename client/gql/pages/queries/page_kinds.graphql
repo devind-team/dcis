@@ -1,7 +1,0 @@
-#import "../fragments/page_kind_fields.graphql"
-
-query PageKinds {
-  pageKinds {
-    ...PageKindFields
-  }
-}

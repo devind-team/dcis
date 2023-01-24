@@ -2,12 +2,8 @@
 bread-crumbs(:items="bc")
   v-row(v-if="!loading")
     v-col.mx-auto(md="8")
-      notification-page-view(
-        v-if="notificationKinkView[notification.notice.kind] === 'page'"
-        :page="notification.notice.page"
-      )
       notification-mailing-view(
-        v-else-if="notificationKinkView[notification.notice.kind] === 'mailing'"
+        v-if="notificationKinkView[notification.notice.kind] === 'mailing'"
         :mailing="notification.notice.mailing"
       )
   v-progress-circular(v-else color="primary" indeterminate)
@@ -20,14 +16,13 @@ import { useRoute } from '#imports'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import { NotificationQuery, NotificationQueryVariables } from '~/types/graphql'
-import notificationQuery from '~/gql/notifications/queries/notification.graphql'
 import { notificationKinkView } from '~/services/notifications'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import NotificationPageView from '~/components/notifications/views/NotificationPageView.vue'
 import NotificationMailingView from '~/components/notifications/views/NotificationMailingView.vue'
+import notificationQuery from '~/gql/notifications/queries/notification.graphql'
 
 export default defineComponent({
-  components: { BreadCrumbs, NotificationPageView, NotificationMailingView },
+  components: { BreadCrumbs, NotificationMailingView },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }

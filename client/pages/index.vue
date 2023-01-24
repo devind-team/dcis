@@ -1,21 +1,15 @@
 <template lang="pug">
 v-container
-  page-segment(v-if="!loading" v-for="segment in segments" :key="segment.id" :segment="segment")
-  v-row(v-else)
-    v-progress-circular.mt-12.mx-auto(size="60" color="primary" indeterminate)
+  v-progress-circular.mt-12.mx-auto(size="60" color="primary" indeterminate)
 </template>
 
 <script lang="ts">
 import { useNuxt2Meta, defineComponent, onMounted, toRefs } from '#app'
 import { useRouter } from '#imports'
 import { useAuthStore } from '~/stores'
-import { useCommonQuery, useI18n } from '~/composables'
-import segmentsQuery from '~/gql/pages/queries/segments.graphql'
-import { SegmentsQuery, SegmentsQueryVariables } from '~/types/graphql'
-import PageSegment from '~/components/pages/PageSegment.vue'
+import { useI18n } from '~/composables'
 
 export default defineComponent({
-  components: { PageSegment },
   setup () {
     const { t, localePath } = useI18n()
     const router = useRouter()
@@ -29,11 +23,6 @@ export default defineComponent({
         router.push(localePath({ name: 'dcis-projects' }))
       }
     })
-
-    const { data: segments, loading } = useCommonQuery<SegmentsQuery, SegmentsQueryVariables>({
-      document: segmentsQuery
-    })
-    return { segments, loading }
   }
 })
 </script>
