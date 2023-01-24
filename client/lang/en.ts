@@ -5,7 +5,6 @@ import core from '~/lang/en/core'
 import curators from '~/lang/en/curators'
 import dashboard from '~/lang/en/dashboard'
 import index from '~/lang/en/index'
-import pages from '~/lang/en/pages'
 import panel from '~/lang/en/panel'
 import profile from '~/lang/en/profile'
 import common from '~/lang/en/common'
@@ -27,7 +26,6 @@ export default {
   curators,
   dashboard,
   index,
-  pages,
   panel,
   profile,
   common,
