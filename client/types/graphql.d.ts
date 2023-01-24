@@ -121,28 +121,6 @@ export type AddBudgetClassificationMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-export type AddCategoryMutationInput = {
-  /** Аватар */
-  avatar?: InputMaybe<Scalars['Upload']>;
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор родительской категории */
-  parentId?: InputMaybe<Scalars['ID']>;
-  /** Название категории */
-  text: Scalars['String'];
-};
-
-/** Мутация для добавления категории */
-export type AddCategoryMutationPayload = {
-  __typename?: 'AddCategoryMutationPayload';
-  /** Добавленная котегория */
-  category?: Maybe<CategoryType>;
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
 export type AddChildRowDimensionMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор документа */
@@ -428,42 +406,6 @@ export type AddOrganizationsCuratorGroupPayload = {
   success: Scalars['Boolean'];
 };
 
-export type AddPageMutationInput = {
-  /** Аватар */
-  avatar?: InputMaybe<Scalars['Upload']>;
-  /** Категория страницы */
-  categoryId: Scalars['ID'];
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Скрываем ли страницу */
-  hide?: InputMaybe<Scalars['Boolean']>;
-  /** Тип страницы */
-  kindId?: InputMaybe<Scalars['Int']>;
-  /** Показывать параллакс или нет */
-  parallax?: InputMaybe<Scalars['Boolean']>;
-  /** Приоритет */
-  priority?: InputMaybe<Scalars['Boolean']>;
-  /** Подпись страницы */
-  signature?: InputMaybe<Scalars['String']>;
-  /** Теги на странице */
-  tagNames?: InputMaybe<Array<Scalars['String']>>;
-  /** Первоначальное добавление текста страницы */
-  text?: InputMaybe<Scalars['String']>;
-  /** Заголовок */
-  title: Scalars['String'];
-};
-
-/** Добавление страницы */
-export type AddPageMutationPayload = {
-  __typename?: 'AddPageMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Добавленная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
 export type AddPeriodGroupMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Название группы периода */
@@ -586,87 +528,6 @@ export type AddRowDimensionMutationPayload = {
   rowDimension: RowDimensionType;
   /** Успех мутации */
   success: Scalars['Boolean'];
-};
-
-export type AddSectionFilesMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Загружаемые изображения */
-  files: Array<Scalars['Upload']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Текст страницы */
-  text: Scalars['String'];
-};
-
-/** Добавление секции */
-export type AddSectionFilesMutationPayload = {
-  __typename?: 'AddSectionFilesMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Поле с файлами */
-  section?: Maybe<SectionFilesType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type AddSectionGalleryMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Загружаемые изображения */
-  images: Array<Scalars['Upload']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Текст страницы */
-  text: Scalars['String'];
-};
-
-/** Добавление секции */
-export type AddSectionGalleryMutationPayload = {
-  __typename?: 'AddSectionGalleryMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Поле с файлами */
-  section?: Maybe<SectionGalleryType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type AddSectionTextMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Текст страницы */
-  text: Scalars['String'];
-};
-
-/** Добавление секции */
-export type AddSectionTextMutationPayload = {
-  __typename?: 'AddSectionTextMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Текстовое поле */
-  section?: Maybe<SectionTextType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type AddTagMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  name: Scalars['String'];
-};
-
-/** Добавление тега */
-export type AddTagMutationPayload = {
-  __typename?: 'AddTagMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-  /** Добавленный тег */
-  tag?: Maybe<TagType>;
 };
 
 export type AddUsersCuratorGroupInput = {
@@ -949,66 +810,6 @@ export type BudgetClassificationTypeEdge = {
   node?: Maybe<BudgetClassificationType>;
 };
 
-/** Категория */
-export type CategoryType = Node & {
-  __typename?: 'CategoryType';
-  /** Аватар */
-  avatar?: Maybe<Scalars['String']>;
-  /** Дочерние категории */
-  children: Array<Maybe<CategoryType>>;
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  /** The ID of the object. */
-  id: Scalars['ID'];
-  /** Соседние категории */
-  nc: Array<Maybe<CategoryType>>;
-  /** Страницы */
-  pages?: Maybe<PageTypeConnection>;
-  /** Родительская категория */
-  parent?: Maybe<CategoryType>;
-  /** Позиция вывода */
-  position: Scalars['Int'];
-  /** Текст */
-  text: Scalars['String'];
-  /** Дата обновления */
-  updatedAt: Scalars['DateTime'];
-  /** Пользователь */
-  user?: Maybe<UserType>;
-};
-
-/** Категория */
-export type CategoryTypePagesArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  category_Id?: InputMaybe<Scalars['ID']>;
-  first?: InputMaybe<Scalars['Int']>;
-  kind_Id?: InputMaybe<Scalars['ID']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  title_Icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type CategoryTypeConnection = {
-  __typename?: 'CategoryTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<CategoryTypeEdge>>;
-  /** Number of nodes. */
-  nodeCount: Scalars['Int'];
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `CategoryType` and its cursor. */
-export type CategoryTypeEdge = {
-  __typename?: 'CategoryTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<CategoryType>;
-};
-
 /** An enumeration. */
 export type CellAggregation =
   /** avg */
@@ -1185,80 +986,6 @@ export type ChangeAvatarMutationPayload = {
   __typename?: 'ChangeAvatarMutationPayload';
   /** Загруженный аватар */
   avatar: Scalars['String'];
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeCategoryAvatarMutationInput = {
-  /** Аватар */
-  avatar?: InputMaybe<Scalars['Upload']>;
-  /** Идентификатор мутации */
-  categoryId: Scalars['ID'];
-  clientMutationId?: InputMaybe<Scalars['String']>;
-};
-
-/** Мутация для изменения аватара категории */
-export type ChangeCategoryAvatarMutationPayload = {
-  __typename?: 'ChangeCategoryAvatarMutationPayload';
-  /** Добавленная котегория */
-  category?: Maybe<CategoryType>;
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeCategoryMutationInput = {
-  /** Идентификатор мутации */
-  categoryId: Scalars['ID'];
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Название категории */
-  text: Scalars['String'];
-};
-
-/** Мутации для изменения категории */
-export type ChangeCategoryMutationPayload = {
-  __typename?: 'ChangeCategoryMutationPayload';
-  /** Добавленная котегория */
-  category?: Maybe<CategoryType>;
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeCategoryParentMutationInput = {
-  /** Идентификатор категории */
-  categoryId: Scalars['ID'];
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор родителя */
-  parentId?: InputMaybe<Scalars['ID']>;
-};
-
-/** Мутация для изменения родителя */
-export type ChangeCategoryParentMutationPayload = {
-  __typename?: 'ChangeCategoryParentMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeCategoryPositionMutationInput = {
-  /** Идентификаторы категорий */
-  categoriesId: Array<InputMaybe<Scalars['ID']>>;
-  clientMutationId?: InputMaybe<Scalars['String']>;
-};
-
-/** Мутация для изменения порядка следования вывода категорий */
-export type ChangeCategoryPositionMutationPayload = {
-  __typename?: 'ChangeCategoryPositionMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -1625,127 +1352,6 @@ export type ChangeNotificationsMutationPayload = {
   success: Scalars['Boolean'];
 };
 
-export type ChangePageAvatarMutationInput = {
-  /** Новый аватар страницы */
-  avatar?: InputMaybe<Scalars['Upload']>;
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-};
-
-/** Изменение аватара на странице */
-export type ChangePageAvatarMutationPayload = {
-  __typename?: 'ChangePageAvatarMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Измененная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangePageBooleanPropertyMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  field: Scalars['String'];
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Значение */
-  value: Scalars['Boolean'];
-};
-
-/** Изменение boolean свойств страницы */
-export type ChangePageBooleanPropertyMutationPayload = {
-  __typename?: 'ChangePageBooleanPropertyMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Измененная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangePageCategoryMutationInput = {
-  /** Идентификатор категории */
-  categoryId: Scalars['ID'];
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-};
-
-/** Изменение категории страницы */
-export type ChangePageCategoryMutationPayload = {
-  __typename?: 'ChangePageCategoryMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Измененная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangePageKindMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Идентификатор типа страницы */
-  pageKindId?: InputMaybe<Scalars['Int']>;
-};
-
-/** Изменение типа страницы */
-export type ChangePageKindMutationPayload = {
-  __typename?: 'ChangePageKindMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Измененная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangePageTagsMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Теги */
-  tagNames: Array<Scalars['String']>;
-};
-
-/** Изменения тегов страницы */
-export type ChangePageTagsMutationPayload = {
-  __typename?: 'ChangePageTagsMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Измененная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangePageTitleMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор страницы */
-  pageId: Scalars['ID'];
-  /** Заголовок страницы */
-  title: Scalars['String'];
-};
-
-/** Изменение названия страницы */
-export type ChangePageTitleMutationPayload = {
-  __typename?: 'ChangePageTitleMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Измененная страница */
-  page?: Maybe<PageType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
 export type ChangePasswordMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Старый пароль */
@@ -1943,74 +1549,6 @@ export type ChangeRowDimensionsFixedPayload = {
   errors: Array<ErrorFieldType>;
   /** Измененные строки */
   rowDimensions?: Maybe<Array<Maybe<ChangeRowDimensionType>>>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeSectionFilesMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Загружаемые изображения */
-  newFiles?: InputMaybe<Array<Scalars['Upload']>>;
-  /** Изображения */
-  oldFiles: Array<Scalars['ID']>;
-  /** Идентификатор секции */
-  sectionId: Scalars['ID'];
-  /** Текст мутации */
-  text: Scalars['String'];
-};
-
-/** Изменение текста секции */
-export type ChangeSectionFilesMutationPayload = {
-  __typename?: 'ChangeSectionFilesMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Секция галереи */
-  section?: Maybe<SectionFilesType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeSectionGalleryMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Загружаемые изображения */
-  newImages?: InputMaybe<Array<Scalars['Upload']>>;
-  /** Изображения */
-  oldImages: Array<Scalars['ID']>;
-  /** Идентификатор секции */
-  sectionId: Scalars['ID'];
-  /** Текст мутации */
-  text: Scalars['String'];
-};
-
-/** Изменение текста секции */
-export type ChangeSectionGalleryMutationPayload = {
-  __typename?: 'ChangeSectionGalleryMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Секция галереи */
-  section?: Maybe<SectionGalleryType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeSectionTextMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор секции */
-  sectionId: Scalars['ID'];
-  /** Текст мутации */
-  text: Scalars['String'];
-};
-
-/** Изменение текста секции */
-export type ChangeSectionTextMutationPayload = {
-  __typename?: 'ChangeSectionTextMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Текстовая секция */
-  section?: Maybe<SectionTextType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2215,48 +1753,6 @@ export type ColumnDimensionType = {
   width?: Maybe<Scalars['Int']>;
 };
 
-/** Комментарии */
-export type CommentType = Node & {
-  __typename?: 'CommentType';
-  /** Дочерние комментарии */
-  children: Array<Maybe<CategoryType>>;
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  /** The ID of the object. */
-  id: Scalars['ID'];
-  /** Страница */
-  page: PageType;
-  /** Рейтинг */
-  rating: Scalars['Int'];
-  /** Текст */
-  text: Scalars['String'];
-  /** Дата обновления */
-  updatedAt: Scalars['DateTime'];
-  /** Пользователь, оставивший комментарий */
-  user: UserType;
-};
-
-export type CommentTypeConnection = {
-  __typename?: 'CommentTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<CommentTypeEdge>>;
-  /** Number of nodes. */
-  nodeCount: Scalars['Int'];
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `CommentType` and its cursor. */
-export type CommentTypeEdge = {
-  __typename?: 'CommentTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<CommentType>;
-};
-
 export type ConfirmEmailMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Код, полученный по Email */
@@ -2385,22 +1881,6 @@ export type DeleteAttributeMutationInput = {
 /** Удаление записи модели "Attribute" */
 export type DeleteAttributeMutationPayload = {
   __typename?: 'DeleteAttributeMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type DeleteCategoryMutationInput = {
-  /** Идентификатор мутации */
-  categoryId: Scalars['ID'];
-  clientMutationId?: InputMaybe<Scalars['String']>;
-};
-
-/** Мутация для удаления категории */
-export type DeleteCategoryMutationPayload = {
-  __typename?: 'DeleteCategoryMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -2572,21 +2052,6 @@ export type DeleteOrganizationCuratorGroupPayload = {
   success: Scalars['Boolean'];
 };
 
-export type DeletePageMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  pageId: Scalars['ID'];
-};
-
-/** Удаление страницы */
-export type DeletePageMutationPayload = {
-  __typename?: 'DeletePageMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
 export type DeletePeriodGroupMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор группы периода */
@@ -2671,22 +2136,6 @@ export type DeleteRowDimensionMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Идентификатор удаленной строки */
   rowDimensionId: Scalars['ID'];
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type DeleteSectionMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Идентификатор секции */
-  sectionId: Scalars['ID'];
-};
-
-/** Удаление секции */
-export type DeleteSectionMutationPayload = {
-  __typename?: 'DeleteSectionMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -3221,8 +2670,6 @@ export type Mutation = {
   addAttribute: AddAttributeMutationPayload;
   /** Добавление нового КБК */
   addBudgetClassification: AddBudgetClassificationMutationPayload;
-  /** Мутация для добавления категории */
-  addCategory: AddCategoryMutationPayload;
   /** Добавление дочерней строки. */
   addChildRowDimension: AddChildRowDimensionMutationPayload;
   /** Мутация на добавление кураторской группы. */
@@ -3249,8 +2696,6 @@ export type Mutation = {
   addLimitation: AddLimitationMutationPayload;
   /** Мутация на добавление организации в кураторскую группу. */
   addOrganizationsCuratorGroup: AddOrganizationsCuratorGroupPayload;
-  /** Добавление страницы */
-  addPage: AddPageMutationPayload;
   /** Мутация для создания периода. */
   addPeriod: AddPeriodMutationPayload;
   /** Мутация на добавление группы в период. */
@@ -3261,14 +2706,6 @@ export type Mutation = {
   addProject: AddProjectMutationPayload;
   /** Добавление строки */
   addRowDimension: AddRowDimensionMutationPayload;
-  /** Добавление секции */
-  addSectionFiles: AddSectionFilesMutationPayload;
-  /** Добавление секции */
-  addSectionGallery: AddSectionGalleryMutationPayload;
-  /** Добавление секции */
-  addSectionText: AddSectionTextMutationPayload;
-  /** Добавление тега */
-  addTag: AddTagMutationPayload;
   /** Мутация на добавление пользователей в кураторскую группу. */
   addUsersCuratorGroup: AddUsersCuratorGroupPayload;
   /** Добавляем агрегирование ячейки */
@@ -3281,14 +2718,6 @@ export type Mutation = {
   changeAttributeValue: ChangeAttributeValueMutationPayload;
   /** Мутация для изменения аватара пользователя. */
   changeAvatar: ChangeAvatarMutationPayload;
-  /** Мутации для изменения категории */
-  changeCategory: ChangeCategoryMutationPayload;
-  /** Мутация для изменения аватара категории */
-  changeCategoryAvatar: ChangeCategoryAvatarMutationPayload;
-  /** Мутация для изменения родителя */
-  changeCategoryParent: ChangeCategoryParentMutationPayload;
-  /** Мутация для изменения порядка следования вывода категорий */
-  changeCategoryPosition: ChangeCategoryPositionMutationPayload;
   /** Изменение значения ячейки по умолчанию */
   changeCellDefault: ChangeCellDefaultPayload;
   /** Изменения опций ячейки */
@@ -3315,18 +2744,6 @@ export type Mutation = {
   changeNotification: ChangeNotificationMutationPayload;
   /** Изменение свойств уведомлений */
   changeNotifications: ChangeNotificationsMutationPayload;
-  /** Изменение аватара на странице */
-  changePageAvatar: ChangePageAvatarMutationPayload;
-  /** Изменение boolean свойств страницы */
-  changePageBooleanProperty: ChangePageBooleanPropertyMutationPayload;
-  /** Изменение категории страницы */
-  changePageCategory: ChangePageCategoryMutationPayload;
-  /** Изменение типа страницы */
-  changePageKind: ChangePageKindMutationPayload;
-  /** Изменения тегов страницы */
-  changePageTags: ChangePageTagsMutationPayload;
-  /** Изменение названия страницы */
-  changePageTitle: ChangePageTitleMutationPayload;
   /** Мутация для изменения пароля пользователя. */
   changePassword: ChangePasswordMutationPayload;
   /** Мутация на изменение настроек периода. */
@@ -3343,12 +2760,6 @@ export type Mutation = {
   changeRowDimension: ChangeRowDimensionMutationPayload;
   /** Изменение свойства fixed у строк */
   changeRowDimensionsFixed: ChangeRowDimensionsFixedPayload;
-  /** Изменение текста секции */
-  changeSectionFiles: ChangeSectionFilesMutationPayload;
-  /** Изменение текста секции */
-  changeSectionGallery: ChangeSectionGalleryMutationPayload;
-  /** Изменение текста секции */
-  changeSectionText: ChangeSectionTextMutationPayload;
   /** Мутация для изменения настроек */
   changeSettings: ChangeSettingsMutationPayload;
   /** Показ листов */
@@ -3369,8 +2780,6 @@ export type Mutation = {
   copyPeriodGroups: CopyPeriodGroupsMutationPayload;
   /** Удаление атрибута */
   deleteAttribute: DeleteAttributeMutationPayload;
-  /** Мутация для удаления категории */
-  deleteCategory: DeleteCategoryMutationPayload;
   /** Удаление дочерней строки. */
   deleteChildRowDimension: DeleteChildRowDimensionMutationPayload;
   /** Мутация удаления кураторской группы. */
@@ -3389,8 +2798,6 @@ export type Mutation = {
   deleteNotice: DeleteNoticeMutationPayload;
   /** Мутация на добавление пользователей в кураторскую группу. */
   deleteOrganizationCuratorGroup: DeleteOrganizationCuratorGroupPayload;
-  /** Удаление страницы */
-  deletePage: DeletePageMutationPayload;
   /** Мутация на удаление периода. */
   deletePeriod: DeletePeriodMutationPayload;
   /** Мутация на удаление группы периода. */
@@ -3401,8 +2808,6 @@ export type Mutation = {
   deleteProject: DeleteProjectMutationPayload;
   /** Удаление строки */
   deleteRowDimension: DeleteRowDimensionMutationPayload;
-  /** Удаление секции */
-  deleteSection: DeleteSectionMutationPayload;
   /** Мутация для удаления всех сессий кроме текущей. */
   deleteSessions: DeleteSessionsMutationPayload;
   /** Мутация на добавление пользователей в кураторскую группу. */
@@ -3447,11 +2852,6 @@ export type MutationAddAttributeArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddBudgetClassificationArgs = {
   input: AddBudgetClassificationMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationAddCategoryArgs = {
-  input: AddCategoryMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3520,11 +2920,6 @@ export type MutationAddOrganizationsCuratorGroupArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationAddPageArgs = {
-  input: AddPageMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
 export type MutationAddPeriodArgs = {
   input: AddPeriodMutationInput;
 };
@@ -3547,26 +2942,6 @@ export type MutationAddProjectArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddRowDimensionArgs = {
   input: AddRowDimensionMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationAddSectionFilesArgs = {
-  input: AddSectionFilesMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationAddSectionGalleryArgs = {
-  input: AddSectionGalleryMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationAddSectionTextArgs = {
-  input: AddSectionTextMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationAddTagArgs = {
-  input: AddTagMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3597,26 +2972,6 @@ export type MutationChangeAttributeValueArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeAvatarArgs = {
   input: ChangeAvatarMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeCategoryArgs = {
-  input: ChangeCategoryMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeCategoryAvatarArgs = {
-  input: ChangeCategoryAvatarMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeCategoryParentArgs = {
-  input: ChangeCategoryParentMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeCategoryPositionArgs = {
-  input: ChangeCategoryPositionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3685,36 +3040,6 @@ export type MutationChangeNotificationsArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationChangePageAvatarArgs = {
-  input: ChangePageAvatarMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangePageBooleanPropertyArgs = {
-  input: ChangePageBooleanPropertyMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangePageCategoryArgs = {
-  input: ChangePageCategoryMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangePageKindArgs = {
-  input: ChangePageKindMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangePageTagsArgs = {
-  input: ChangePageTagsMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangePageTitleArgs = {
-  input: ChangePageTitleMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
 export type MutationChangePasswordArgs = {
   input: ChangePasswordMutationInput;
 };
@@ -3752,21 +3077,6 @@ export type MutationChangeRowDimensionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeRowDimensionsFixedArgs = {
   input: ChangeRowDimensionsFixedInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeSectionFilesArgs = {
-  input: ChangeSectionFilesMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeSectionGalleryArgs = {
-  input: ChangeSectionGalleryMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeSectionTextArgs = {
-  input: ChangeSectionTextMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3820,11 +3130,6 @@ export type MutationDeleteAttributeArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationDeleteCategoryArgs = {
-  input: DeleteCategoryMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
 export type MutationDeleteChildRowDimensionArgs = {
   input: DeleteChildRowDimensionMutationInput;
 };
@@ -3870,11 +3175,6 @@ export type MutationDeleteOrganizationCuratorGroupArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationDeletePageArgs = {
-  input: DeletePageMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
 export type MutationDeletePeriodArgs = {
   input: DeletePeriodMutationInput;
 };
@@ -3897,11 +3197,6 @@ export type MutationDeleteProjectArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteRowDimensionArgs = {
   input: DeleteRowDimensionMutationInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationDeleteSectionArgs = {
-  input: DeleteSectionMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4062,25 +3357,6 @@ export type NoticeMailingType = NoticeInterface & {
   mailing?: Maybe<MailingType>;
   /** Идентификатор объекта */
   objectId: Scalars['String'];
-  /** Полезная нагрузка */
-  payload: Scalars['String'];
-  /** Пользователь */
-  user?: Maybe<UserType>;
-};
-
-/** Уведомление типа 'Добавлена новая страница' */
-export type NoticePageType = NoticeInterface & {
-  __typename?: 'NoticePageType';
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  /** The ID of the object. */
-  id: Scalars['ID'];
-  /** Тип уведомления */
-  kind: Scalars['Int'];
-  /** Идентификатор объекта */
-  objectId: Scalars['String'];
-  /** Страница */
-  page?: Maybe<PageType>;
   /** Полезная нагрузка */
   payload: Scalars['String'];
   /** Пользователь */
@@ -4394,88 +3670,6 @@ export type PageInfo = {
   startCursor?: Maybe<Scalars['String']>;
 };
 
-/** Тип страницы */
-export type PageKindType = {
-  __typename?: 'PageKindType';
-  id: Scalars['ID'];
-  /** Название */
-  name: Scalars['String'];
-  /** Странички */
-  pages: Array<Maybe<PageType>>;
-  /** Сегментные элементы */
-  segmentElements: Array<Maybe<SegmentElementType>>;
-};
-
-/** Страница */
-export type PageType = Node & {
-  __typename?: 'PageType';
-  /** Аватар */
-  avatar?: Maybe<Scalars['String']>;
-  /** Категория */
-  category: CategoryType;
-  /** Комментарии */
-  comments: CommentTypeConnection;
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  /** Скрываем ли страницу */
-  hide: Scalars['Boolean'];
-  /** The ID of the object. */
-  id: Scalars['ID'];
-  /** Тип */
-  kind?: Maybe<PageKindType>;
-  /** Показывать параллакс или нет */
-  parallax: Scalars['Boolean'];
-  /** Первая текстовая секция */
-  preview?: Maybe<Scalars['String']>;
-  /** Приоритет */
-  priority: Scalars['Boolean'];
-  /** Секции */
-  sections: Array<Maybe<SectionInterface>>;
-  /** Подпись страницы */
-  signature?: Maybe<Scalars['String']>;
-  /** Теги на странице */
-  tags: Array<Maybe<TagType>>;
-  /** Заголовок */
-  title: Scalars['String'];
-  /** Дата обновления */
-  updatedAt: Scalars['DateTime'];
-  /** Пользователь, создавший страницу */
-  user?: Maybe<UserType>;
-  /** Количество просмотров */
-  views: Scalars['Int'];
-};
-
-/** Страница */
-export type PageTypeCommentsArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  text_Icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type PageTypeConnection = {
-  __typename?: 'PageTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<PageTypeEdge>>;
-  /** Number of nodes. */
-  nodeCount: Scalars['Int'];
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `PageType` and its cursor. */
-export type PageTypeEdge = {
-  __typename?: 'PageTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<PageType>;
-};
-
 /** Группы с содержанием привилегий. */
 export type PeriodGroupType = {
   __typename?: 'PeriodGroupType';
@@ -4727,10 +3921,6 @@ export type Query = {
   /** Атрибуты со значениями документа */
   attributesValues: Array<Maybe<AttributeValueType>>;
   budgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
-  /** Категории */
-  categories: CategoryTypeConnection;
-  /** Категория */
-  category: CategoryType;
   /** Кураторская группа */
   curatorGroup: CuratorGroupType;
   /** Получение организаций не входящих ни в одну кураторскую группу */
@@ -4778,14 +3968,6 @@ export type Query = {
   organizations?: Maybe<OrganizationTypeConnection>;
   /** Получение организаций, у которых не поданы документы в периоде */
   organizationsHasNotDocument: Array<Maybe<OrganizationType>>;
-  /** Страница */
-  page: PageType;
-  /** Получение типа страницы */
-  pageKind: PageKindType;
-  /** Типы страниц */
-  pageKinds: Array<PageKindType>;
-  /** Страницы */
-  pages: PageTypeConnection;
   /** Период */
   period: PeriodType;
   /** Получение департаментов периода */
@@ -4819,16 +4001,12 @@ export type Query = {
   reportSheet: SheetType;
   /** Статистика запросов */
   requestStatistics: RequestStatisticsType;
-  /** Сегменты страницы */
-  segments: Array<SegmentType>;
   /** Доступные сессии */
   sessions: Array<SessionType>;
   /** Настройки приложения */
   settings: Array<SettingType>;
   /** Статусы */
   statuses?: Maybe<Array<StatusType>>;
-  /** Теги */
-  tags: TagTypeConnection;
   /** Информация о указанном пользователе */
   user?: Maybe<UserType>;
   /** Привилегии пользователя в группе периода */
@@ -4874,23 +4052,6 @@ export type QueryBudgetClassificationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-};
-
-/** Схема запросов данных. */
-export type QueryCategoriesArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  parent?: InputMaybe<Scalars['ID']>;
-  parent_Isnull?: InputMaybe<Scalars['Boolean']>;
-  text_Icontains?: InputMaybe<Scalars['String']>;
-};
-
-/** Схема запросов данных. */
-export type QueryCategoryArgs = {
-  categoryId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -5108,28 +4269,6 @@ export type QueryOrganizationsHasNotDocumentArgs = {
 };
 
 /** Схема запросов данных. */
-export type QueryPageArgs = {
-  pageId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryPageKindArgs = {
-  pageKindId: Scalars['ID'];
-};
-
-/** Схема запросов данных. */
-export type QueryPagesArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  category_Id?: InputMaybe<Scalars['ID']>;
-  first?: InputMaybe<Scalars['Int']>;
-  kind_Id?: InputMaybe<Scalars['ID']>;
-  last?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  title_Icontains?: InputMaybe<Scalars['String']>;
-};
-
-/** Схема запросов данных. */
 export type QueryPeriodArgs = {
   periodId: Scalars['ID'];
 };
@@ -5211,16 +4350,6 @@ export type QueryReportSheetArgs = {
 /** Схема запросов данных. */
 export type QuerySessionsArgs = {
   userId?: InputMaybe<Scalars['ID']>;
-};
-
-/** Схема запросов данных. */
-export type QueryTagsArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
-  name_Icontains?: InputMaybe<Scalars['String']>;
-  offset?: InputMaybe<Scalars['Int']>;
 };
 
 /** Схема запросов данных. */
@@ -5498,178 +4627,6 @@ export type RowFieldErrorType = {
   row: Scalars['Int'];
 };
 
-export type SectionFilesType = SectionInterface & {
-  __typename?: 'SectionFilesType';
-  /** Файлы */
-  files: Array<Maybe<FileType>>;
-  /** Идентификатор */
-  id: Scalars['Int'];
-  /** Тип страницы */
-  kind: Scalars['Int'];
-  /** Страница */
-  page: PageType;
-  /** Конструкции */
-  payload?: Maybe<Scalars['JSONString']>;
-  /** Порядок вывода */
-  position: Scalars['Int'];
-  /** Текст страницы */
-  text: Scalars['String'];
-  /** Пользователь */
-  user: UserType;
-};
-
-export type SectionGalleryType = SectionInterface & {
-  __typename?: 'SectionGalleryType';
-  /** Идентификатор */
-  id: Scalars['Int'];
-  /** Изображения */
-  images: Array<Maybe<FileType>>;
-  /** Тип страницы */
-  kind: Scalars['Int'];
-  /** Страница */
-  page: PageType;
-  /** Конструкции */
-  payload?: Maybe<Scalars['JSONString']>;
-  /** Порядок вывода */
-  position: Scalars['Int'];
-  /** Текст страницы */
-  text: Scalars['String'];
-  /** Пользователь */
-  user: UserType;
-};
-
-export type SectionInterface = {
-  /** Идентификатор */
-  id: Scalars['Int'];
-  /** Тип страницы */
-  kind: Scalars['Int'];
-  /** Страница */
-  page: PageType;
-  /** Порядок вывода */
-  position: Scalars['Int'];
-  /** Текст страницы */
-  text: Scalars['String'];
-  /** Пользователь */
-  user: UserType;
-};
-
-/** Секции */
-export type SectionTextType = SectionInterface & {
-  __typename?: 'SectionTextType';
-  /** Идентификатор */
-  id: Scalars['Int'];
-  /** Тип страницы */
-  kind: Scalars['Int'];
-  /** Страница */
-  page: PageType;
-  /** Порядок вывода */
-  position: Scalars['Int'];
-  /** Текст страницы */
-  text: Scalars['String'];
-  /** Пользователь */
-  user: UserType;
-};
-
-export type SectionUsersType = SectionInterface & {
-  __typename?: 'SectionUsersType';
-  /** Идентификатор */
-  id: Scalars['Int'];
-  /** Тип страницы */
-  kind: Scalars['Int'];
-  /** Страница */
-  page: PageType;
-  /** Конструкции */
-  payload?: Maybe<Scalars['JSONString']>;
-  /** Порядок вывода */
-  position: Scalars['Int'];
-  /** Текст страницы */
-  text: Scalars['String'];
-  /** Пользователь */
-  user: UserType;
-  /** Пользователи */
-  users: Array<Maybe<UserType>>;
-};
-
-/** An enumeration. */
-export type SegmentAlign =
-  /** Left */
-  | 'A_0'
-  /** Center */
-  | 'A_1'
-  /** Right */
-  | 'A_2';
-
-/** An enumeration. */
-export type SegmentElementRepresent =
-  /** grid */
-  | 'A_0'
-  /** card */
-  | 'A_1'
-  /** list */
-  | 'A_2'
-  /** slider */
-  | 'A_3';
-
-/** Элемент сегмента */
-export type SegmentElementType = {
-  __typename?: 'SegmentElementType';
-  /** Колонок в элементе */
-  columns: Scalars['Int'];
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  id: Scalars['ID'];
-  /** Тип страницы */
-  pageKind: PageKindType;
-  /** Количество страниц в запросе */
-  pageSize: Scalars['Int'];
-  /** Позиция в сортировке */
-  position: Scalars['Int'];
-  /** Представление */
-  represent?: Maybe<SegmentElementRepresent>;
-  /** Дата обновления */
-  updatedAt: Scalars['DateTime'];
-  /** Пользователь */
-  user: UserType;
-  /** Тип элемента для рендера */
-  view?: Maybe<SegmentElementView>;
-  /** Ширина колонки */
-  width: Scalars['Int'];
-};
-
-/** An enumeration. */
-export type SegmentElementView =
-  /** empty */
-  | 'A_0'
-  /** card */
-  | 'A_1';
-
-/** Сегмент */
-export type SegmentType = {
-  __typename?: 'SegmentType';
-  /** Выравнивание заголовка */
-  align: SegmentAlign;
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  /** Элементы сегмента страницы */
-  elements: Array<Maybe<SegmentElementType>>;
-  id: Scalars['ID'];
-  /** Заголовок страницы */
-  name?: Maybe<Scalars['String']>;
-  /** Позиция в сортировке */
-  position: Scalars['Int'];
-  /** Дата обновления */
-  updatedAt: Scalars['DateTime'];
-  /** Тип элемента для рендера */
-  view?: Maybe<SegmentView>;
-};
-
-/** An enumeration. */
-export type SegmentView =
-  /** empty */
-  | 'A_0'
-  /** card */
-  | 'A_1';
-
 /** Сессия пользователя. */
 export type SessionType = Node & {
   __typename?: 'SessionType';
@@ -5823,40 +4780,6 @@ export type TableType = {
   headers: Array<Maybe<Scalars['String']>>;
   /** Строки документа */
   rows: Array<Maybe<TableRowType>>;
-};
-
-/** Тег */
-export type TagType = Node & {
-  __typename?: 'TagType';
-  /** Дата создания */
-  createdAt: Scalars['DateTime'];
-  /** The ID of the object. */
-  id: Scalars['ID'];
-  /** Название */
-  name: Scalars['String'];
-  /** Пользователь, создавший тег */
-  user?: Maybe<UserType>;
-};
-
-export type TagTypeConnection = {
-  __typename?: 'TagTypeConnection';
-  /** Contains the nodes in this connection. */
-  edges: Array<Maybe<TagTypeEdge>>;
-  /** Number of nodes. */
-  nodeCount: Scalars['Int'];
-  /** Pagination data for this connection. */
-  pageInfo: PageInfo;
-  /** Number of items in the queryset. */
-  totalCount: Scalars['Int'];
-};
-
-/** A Relay edge containing a `TagType` and its cursor. */
-export type TagTypeEdge = {
-  __typename?: 'TagTypeEdge';
-  /** A cursor for use in pagination */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge */
-  node?: Maybe<TagType>;
 };
 
 export type UnloadDocumentMutationInput = {
@@ -7129,9 +6052,7 @@ type NoticeInterfaceFields_NoticeEmptyType_Fragment = { __typename: 'NoticeEmpty
 
 type NoticeInterfaceFields_NoticeMailingType_Fragment = { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null };
 
-type NoticeInterfaceFields_NoticePageType_Fragment = { __typename: 'NoticePageType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null };
-
-export type NoticeInterfaceFieldsFragment = NoticeInterfaceFields_NoticeEmptyType_Fragment | NoticeInterfaceFields_NoticeMailingType_Fragment | NoticeInterfaceFields_NoticePageType_Fragment;
+export type NoticeInterfaceFieldsFragment = NoticeInterfaceFields_NoticeEmptyType_Fragment | NoticeInterfaceFields_NoticeMailingType_Fragment;
 
 export type NotificationFieldsFragment = { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any };
 
@@ -7161,7 +6082,7 @@ export type NotificationQueryVariables = Exact<{
   notificationId: Scalars['ID'];
 }>;
 
-export type NotificationQuery = { __typename?: 'Query', notification: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, mailing?: { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticePageType', id: string, kind: number, payload: string, objectId: string, createdAt: any, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, sections: Array<{ __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionTextType', text: string, id: number, kind: number, position: number, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionUsersType', id: number, kind: number, position: number, users: Array<{ __typename: 'UserType', id: string, avatar?: string | null, lastName: string, firstName: string, sirName?: string | null } | null>, user: { __typename?: 'UserType', id: string } } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null> } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } };
+export type NotificationQuery = { __typename?: 'Query', notification: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, mailing?: { __typename: 'MailingType', id: string, dispatchers: any, address: string, header: string, text: string, attachments?: any | null, createdAt: any } | null, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } };
 
 export type NotificationsQueryVariables = Exact<{
   userId: Scalars['ID'];
@@ -7170,237 +6091,11 @@ export type NotificationsQueryVariables = Exact<{
   hide?: InputMaybe<Scalars['Boolean']>;
 }>;
 
-export type NotificationsQuery = { __typename?: 'Query', notifications: { __typename: 'NotificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename: 'NotificationTypeEdge', node?: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticePageType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } | null } | null> } };
+export type NotificationsQuery = { __typename?: 'Query', notifications: { __typename: 'NotificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean }, edges: Array<{ __typename: 'NotificationTypeEdge', node?: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } | null } | null> } };
 
 export type NotificationsSubscriptionSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
-export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications: { __typename: 'NotificationsSubscription', action: ConsumerActionType, id: string, notification?: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticePageType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } | null } };
-
-export type CategoryFieldsFragment = { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any };
-
-export type PageFieldsFragment = { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null };
-
-export type PageKindFieldsFragment = { __typename: 'PageKindType', id: string, name: string };
-
-type SectionFields_SectionFilesType_Fragment = { __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } };
-
-type SectionFields_SectionGalleryType_Fragment = { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } };
-
-type SectionFields_SectionTextType_Fragment = { __typename: 'SectionTextType', text: string, id: number, kind: number, position: number, user: { __typename?: 'UserType', id: string } };
-
-type SectionFields_SectionUsersType_Fragment = { __typename: 'SectionUsersType', id: number, kind: number, position: number, users: Array<{ __typename: 'UserType', id: string, avatar?: string | null, lastName: string, firstName: string, sirName?: string | null } | null>, user: { __typename?: 'UserType', id: string } };
-
-export type SectionFieldsFragment = SectionFields_SectionFilesType_Fragment | SectionFields_SectionGalleryType_Fragment | SectionFields_SectionTextType_Fragment | SectionFields_SectionUsersType_Fragment;
-
-export type SegmentElementFieldsFragment = { __typename: 'SegmentElementType', id: string, view?: SegmentElementView | null, represent?: SegmentElementRepresent | null, width: number, columns: number, pageSize: number };
-
-export type SegementFieldsFragment = { __typename: 'SegmentType', id: string, name?: string | null, align: SegmentAlign, view?: SegmentView | null, position: number, createdAt: any, updatedAt: any };
-
-export type TagFieldsFragment = { __typename: 'TagType', id: string, name: string, createdAt: any };
-
-export type AddCategoryMutationVariables = Exact<{
-  avatar?: InputMaybe<Scalars['Upload']>;
-  text: Scalars['String'];
-  parentId?: InputMaybe<Scalars['ID']>;
-}>;
-
-export type AddCategoryMutation = { __typename?: 'Mutation', addCategory: { __typename: 'AddCategoryMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, category?: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any, parent?: { __typename: 'CategoryType', id: string } | null, children: Array<{ __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null> } | null } };
-
-export type ChangeCategoryMutationVariables = Exact<{
-  categoryId: Scalars['ID'];
-  text: Scalars['String'];
-}>;
-
-export type ChangeCategoryMutation = { __typename?: 'Mutation', changeCategory: { __typename: 'ChangeCategoryMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, category?: { __typename: 'CategoryType', id: string, text: string } | null } };
-
-export type ChangeCategoryAvatarMutationVariables = Exact<{
-  categoryId: Scalars['ID'];
-  avatar?: InputMaybe<Scalars['Upload']>;
-}>;
-
-export type ChangeCategoryAvatarMutation = { __typename?: 'Mutation', changeCategoryAvatar: { __typename: 'ChangeCategoryAvatarMutationPayload', success: boolean, category?: { __typename: 'CategoryType', id: string, avatar?: string | null } | null } };
-
-export type DeleteCategoryMutationVariables = Exact<{
-  categoryId: Scalars['ID'];
-}>;
-
-export type DeleteCategoryMutation = { __typename?: 'Mutation', deleteCategory: { __typename: 'DeleteCategoryMutationPayload', success: boolean } };
-
-export type AddPageMutationVariables = Exact<{
-  avatar?: InputMaybe<Scalars['Upload']>;
-  parallax?: InputMaybe<Scalars['Boolean']>;
-  title: Scalars['String'];
-  signature?: InputMaybe<Scalars['String']>;
-  hide?: InputMaybe<Scalars['Boolean']>;
-  priority?: InputMaybe<Scalars['Boolean']>;
-  kindId?: InputMaybe<Scalars['Int']>;
-  categoryId: Scalars['ID'];
-  tagNames?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
-  text?: InputMaybe<Scalars['String']>;
-}>;
-
-export type AddPageMutation = { __typename?: 'Mutation', addPage: { __typename?: 'AddPageMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string } | null } };
-
-export type ChangePageAvatarMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  avatar?: InputMaybe<Scalars['Upload']>;
-}>;
-
-export type ChangePageAvatarMutation = { __typename?: 'Mutation', changePageAvatar: { __typename?: 'ChangePageAvatarMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } };
-
-export type ChangePageBooleanPropertyMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  field: Scalars['String'];
-  value: Scalars['Boolean'];
-}>;
-
-export type ChangePageBooleanPropertyMutation = { __typename?: 'Mutation', changePageBooleanProperty: { __typename?: 'ChangePageBooleanPropertyMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } };
-
-export type ChangePageCategoryMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  categoryId: Scalars['ID'];
-}>;
-
-export type ChangePageCategoryMutation = { __typename?: 'Mutation', changePageCategory: { __typename?: 'ChangePageCategoryMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } };
-
-export type ChangePageKindMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  pageKindId?: InputMaybe<Scalars['Int']>;
-}>;
-
-export type ChangePageKindMutation = { __typename?: 'Mutation', changePageKind: { __typename?: 'ChangePageKindMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } };
-
-export type ChangePageTagsMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  tagNames: Array<Scalars['String']> | Scalars['String'];
-}>;
-
-export type ChangePageTagsMutation = { __typename?: 'Mutation', changePageTags: { __typename?: 'ChangePageTagsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } };
-
-export type ChangePageTitleMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  title: Scalars['String'];
-}>;
-
-export type ChangePageTitleMutation = { __typename?: 'Mutation', changePageTitle: { __typename?: 'ChangePageTitleMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, page?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } };
-
-export type DeletePageMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-}>;
-
-export type DeletePageMutation = { __typename?: 'Mutation', deletePage: { __typename?: 'DeletePageMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
-
-export type AddSectionFilesMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  text: Scalars['String'];
-  files: Array<Scalars['Upload']> | Scalars['Upload'];
-}>;
-
-export type AddSectionFilesMutation = { __typename?: 'Mutation', addSectionFiles: { __typename: 'AddSectionFilesMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, section?: { __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } } | null } };
-
-export type AddSectionGalleryMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  text: Scalars['String'];
-  images: Array<Scalars['Upload']> | Scalars['Upload'];
-}>;
-
-export type AddSectionGalleryMutation = { __typename?: 'Mutation', addSectionGallery: { __typename: 'AddSectionGalleryMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, section?: { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } } | null } };
-
-export type AddSectionTextMutationVariables = Exact<{
-  pageId: Scalars['ID'];
-  text: Scalars['String'];
-}>;
-
-export type AddSectionTextMutation = { __typename?: 'Mutation', addSectionText: { __typename: 'AddSectionTextMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, section?: { __typename: 'SectionTextType', text: string, id: number, kind: number, position: number, user: { __typename?: 'UserType', id: string } } | null } };
-
-export type ChangeSectionFilesMutationVariables = Exact<{
-  sectionId: Scalars['ID'];
-  text: Scalars['String'];
-  newFiles?: InputMaybe<Array<Scalars['Upload']> | Scalars['Upload']>;
-  oldFiles: Array<Scalars['ID']> | Scalars['ID'];
-}>;
-
-export type ChangeSectionFilesMutation = { __typename?: 'Mutation', changeSectionFiles: { __typename: 'ChangeSectionFilesMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, section?: { __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } } | null } };
-
-export type ChangeSectionGalleryMutationVariables = Exact<{
-  sectionId: Scalars['ID'];
-  text: Scalars['String'];
-  newImages?: InputMaybe<Array<Scalars['Upload']> | Scalars['Upload']>;
-  oldImages: Array<Scalars['ID']> | Scalars['ID'];
-}>;
-
-export type ChangeSectionGalleryMutation = { __typename?: 'Mutation', changeSectionGallery: { __typename: 'ChangeSectionGalleryMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, section?: { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } } | null } };
-
-export type ChangeSectionTextMutationVariables = Exact<{
-  sectionId: Scalars['ID'];
-  text: Scalars['String'];
-}>;
-
-export type ChangeSectionTextMutation = { __typename?: 'Mutation', changeSectionText: { __typename: 'ChangeSectionTextMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, section?: { __typename: 'SectionTextType', id: number, text: string } | null } };
-
-export type DeleteSectionMutationVariables = Exact<{
-  sectionId: Scalars['ID'];
-}>;
-
-export type DeleteSectionMutation = { __typename?: 'Mutation', deleteSection: { __typename?: 'DeleteSectionMutationPayload', success: boolean } };
-
-export type AddTagMutationVariables = Exact<{
-  name: Scalars['String'];
-}>;
-
-export type AddTagMutation = { __typename?: 'Mutation', addTag: { __typename?: 'AddTagMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, tag?: { __typename: 'TagType', id: string, name: string, createdAt: any } | null } };
-
-export type CategoriesQueryVariables = Exact<{
-  search?: InputMaybe<Scalars['String']>;
-  isNull?: InputMaybe<Scalars['Boolean']>;
-  parent?: InputMaybe<Scalars['ID']>;
-}>;
-
-export type CategoriesQuery = { __typename?: 'Query', categories: { __typename: 'CategoryTypeConnection', totalCount: number, edges: Array<{ __typename: 'CategoryTypeEdge', node?: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any, children: Array<{ __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null> } | null } | null> } };
-
-export type CategoryQueryVariables = Exact<{
-  categoryId: Scalars['ID'];
-}>;
-
-export type CategoryQuery = { __typename?: 'Query', category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any, parent?: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null, children: Array<{ __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null>, nc: Array<{ __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null> } };
-
-export type PageQueryVariables = Exact<{
-  pageId: Scalars['ID'];
-}>;
-
-export type PageQuery = { __typename?: 'Query', page: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, sections: Array<{ __typename: 'SectionFilesType', text: string, id: number, kind: number, position: number, files: Array<{ __typename: 'FileType', id: string, name: string, src: string, size?: number | null, ext?: string | null, createdAt: any } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionGalleryType', text: string, id: number, kind: number, position: number, images: Array<{ __typename: 'FileType', id: string, name: string, src: string } | null>, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionTextType', text: string, id: number, kind: number, position: number, user: { __typename?: 'UserType', id: string } } | { __typename: 'SectionUsersType', id: number, kind: number, position: number, users: Array<{ __typename: 'UserType', id: string, avatar?: string | null, lastName: string, firstName: string, sirName?: string | null } | null>, user: { __typename?: 'UserType', id: string } } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any, parent?: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null, nc: Array<{ __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any } | null> }, kind?: { __typename: 'PageKindType', id: string, name: string } | null, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null> } };
-
-export type PageKindQueryVariables = Exact<{
-  pageKindId: Scalars['ID'];
-}>;
-
-export type PageKindQuery = { __typename?: 'Query', pageKind: { __typename: 'PageKindType', id: string, name: string } };
-
-export type PageKindsQueryVariables = Exact<{ [key: string]: never; }>;
-
-export type PageKindsQuery = { __typename?: 'Query', pageKinds: Array<{ __typename: 'PageKindType', id: string, name: string }> };
-
-export type PagesQueryVariables = Exact<{
-  first?: InputMaybe<Scalars['Int']>;
-  after?: InputMaybe<Scalars['String']>;
-  categoryId?: InputMaybe<Scalars['ID']>;
-  kindId?: InputMaybe<Scalars['ID']>;
-  search?: InputMaybe<Scalars['String']>;
-}>;
-
-export type PagesQuery = { __typename?: 'Query', pages: { __typename: 'PageTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename: 'PageTypeEdge', node?: { __typename: 'PageType', id: string, avatar?: string | null, parallax: boolean, title: string, views: number, signature?: string | null, hide: boolean, priority: boolean, createdAt: any, updatedAt: any, kind?: { __typename: 'PageKindType', id: string, name: string } | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null>, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | null } | null> } };
-
-export type SegmentsQueryVariables = Exact<{ [key: string]: never; }>;
-
-export type SegmentsQuery = { __typename?: 'Query', segments: Array<{ __typename: 'SegmentType', id: string, name?: string | null, align: SegmentAlign, view?: SegmentView | null, position: number, createdAt: any, updatedAt: any, elements: Array<{ __typename: 'SegmentElementType', id: string, view?: SegmentElementView | null, represent?: SegmentElementRepresent | null, width: number, columns: number, pageSize: number, pageKind: { __typename: 'PageKindType', id: string, name: string, pages: Array<{ __typename: 'PageType', id: string, avatar?: string | null, title: string, createdAt: any, updatedAt: any, signature?: string | null, preview?: string | null, category: { __typename: 'CategoryType', id: string, avatar?: string | null, text: string, position: number, createdAt: any, updatedAt: any }, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null, tags: Array<{ __typename: 'TagType', id: string, name: string, createdAt: any } | null> } | null> } } | null> }> };
-
-export type TagsQueryVariables = Exact<{
-  first?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  search?: InputMaybe<Scalars['String']>;
-}>;
-
-export type TagsQuery = { __typename?: 'Query', tags: { __typename?: 'TagTypeConnection', totalCount: number, edges: Array<{ __typename?: 'TagTypeEdge', node?: { __typename?: 'TagType', id: string, name: string } | null } | null> } };
+export type NotificationsSubscriptionSubscription = { __typename?: 'Subscription', notifications: { __typename: 'NotificationsSubscription', action: ConsumerActionType, id: string, notification?: { __typename: 'NotificationType', id: string, hide: boolean, read: boolean, createdAt: any, notice: { __typename: 'NoticeEmptyType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } | { __typename: 'NoticeMailingType', id: string, kind: number, payload: string, objectId: string, createdAt: any, user?: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any } | null } } | null } };
 
 export type UserInformationQueryVariables = Exact<{
   userId: Scalars['ID'];

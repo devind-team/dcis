@@ -1,6 +1,4 @@
 import { defineStore } from 'pinia'
-// import { acceptHMRUpdate } from 'pinia'
-import { useCookies } from '@vueuse/integrations/useCookies'
 import { useMutation } from '@vue/apollo-composable'
 import { LogoutMutation, LogoutMutationVariables, UserType } from '~/types/graphql'
 import logoutMutation from '~/gql/core/mutations/user/logout.graphql'
@@ -49,7 +47,3 @@ export const useAuthStore = defineStore<string, AuthStoreStateType, AuthStoreGet
     }
   }
 })
-
-// if (import.meta.hot) {
-//   import.meta.hot.accept(acceptHMRUpdate(useAuthStore, import.meta.hot))
-// }

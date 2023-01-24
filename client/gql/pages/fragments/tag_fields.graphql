@@ -1,6 +1,0 @@
-fragment TagFields on TagType {
-  id
-  name
-  createdAt
-  __typename
-}

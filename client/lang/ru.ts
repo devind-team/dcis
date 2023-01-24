@@ -5,7 +5,6 @@ import core from '~/lang/ru/core'
 import curators from '~/lang/ru/curators'
 import dashboard from '~/lang/ru/dashboard'
 import index from '~/lang/ru/index'
-import pages from '~/lang/ru/pages'
 import panel from '~/lang/ru/panel'
 import profile from '~/lang/ru/profile'
 import common from '~/lang/ru/common'
@@ -27,7 +26,6 @@ export default {
   curators,
   dashboard,
   index,
-  pages,
   panel,
   profile,
   common,

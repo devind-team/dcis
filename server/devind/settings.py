@@ -10,12 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
-import sentry_sdk
-from os.path import join, dirname, exists
-from pathlib import Path
-from sentry_sdk.integrations.django import DjangoIntegration
-from dotenv import load_dotenv
 from datetime import timedelta
+from os.path import dirname, exists, join
+from pathlib import Path
+
+import sentry_sdk
+from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
 
 
 # Настройки базовой директории приложения
@@ -61,7 +62,6 @@ INSTALLED_APPS = [
     'devind_notifications',
     'devind_dictionaries',
     'apps.core',
-    'apps.pages',
     'apps.dashboard',
     'apps.dcis',
     'push_notifications',
