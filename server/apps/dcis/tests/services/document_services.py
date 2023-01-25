@@ -19,13 +19,9 @@ from apps.dcis.models import (
     Sheet,
     Status,
 )
-from apps.dcis.permissions import (
-    can_add_document,
-    can_change_document_comment,
-)
+from apps.dcis.permissions import can_add_document
 from apps.dcis.permissions.document_permissions import can_add_document_message
 from apps.dcis.services.document_services import (
-    change_document_comment,
     create_document,
     create_document_message, get_user_documents,
     get_user_roles,
@@ -304,22 +300,6 @@ class DocumentTestCase(TestCase):
             ['division_member'],
             get_user_roles(self.organization_member, self.organization_multiple_document)
         )
-
-    def test_change_document_comment(self) -> None:
-        """Тестирование функции `change_document_comment`."""
-        with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
-            self.superuser,
-            'has_perm',
-            new=lambda perm: perm != 'dcis.change_document'
-        ):
-            self.assertRaises(PermissionDenied, can_change_document_comment, self.superuser, self.superuser_document)
-        actual_document = change_document_comment(
-            user=self.superuser,
-            document=self.superuser_document,
-            comment=self.change_comment
-        )
-        expected_document = Document.objects.get(comment=self.change_comment)
-        self.assertEqual(expected_document, actual_document)
 
 
 class DocumentMessageTestCase(TestCase):

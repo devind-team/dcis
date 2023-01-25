@@ -85,8 +85,7 @@ def add_document_data(
     user: User,
     period_id: str | int,
     file: str | BytesIO,
-    status_id: str | int,
-    comment: str = None
+    status_id: str | int
 ) -> tuple[list[Document] | None, list[ErrorFieldType]]:
     """Функция для создания документов."""
     period: Period = get_object_or_404(Period, pk=period_id)
@@ -127,8 +126,7 @@ def add_document_data(
         sheets,
         status,
         documents_data,
-        divisions,
-        comment
+        divisions
     )
     return documents, []
 

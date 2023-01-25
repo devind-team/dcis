@@ -28,7 +28,6 @@ from apps.dcis.permissions.document_permissions import (
     can_add_document_status,
     can_change_attribute_value,
     can_change_child_row_dimension_height,
-    can_change_document_comment,
     can_change_value,
     can_delete_child_row_dimension,
     can_delete_document_status,
@@ -223,10 +222,6 @@ class DocumentPermissionsTestCase(TestCase):
                     self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
                     can_add_document(self.user, self.user_period, self.status_edit, 1)
 
-    def test_can_change_document_comment(self) -> None:
-        """Тестирование функции `can_change_document_comment`."""
-        self._test_common(can_change_document_comment)
-        can_change_document_comment(self.user, self.user_document)
 
     def test_can_add_document_status(self) -> None:
         """Тестирование функции `can_add_document_status`."""
