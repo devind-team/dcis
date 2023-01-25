@@ -1,6 +1,5 @@
 <template lang="pug">
 v-container
-  v-progress-circular.mt-12.mx-auto(size="60" color="primary" indeterminate)
 </template>
 
 <script lang="ts">
