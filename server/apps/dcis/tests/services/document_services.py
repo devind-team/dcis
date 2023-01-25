@@ -245,9 +245,6 @@ class DocumentTestCase(TestCase):
         for period in [self.organization_period, self.organization_multiple_period]:
             Division.objects.create(period=period, object_id=self.organization.id)
 
-        self.comment = 'Test comment'
-        self.change_comment = 'Change comment'
-
         self.document = Document.objects.create(period=self.department_period)
         self.user_document = Document.objects.create(user=self.user, period=self.department_period)
         self.organization_document = Document.objects.create(period=self.organization_period)
@@ -258,8 +255,7 @@ class DocumentTestCase(TestCase):
 
         self.superuser_document = Document.objects.create(
             user=self.superuser,
-            period=self.department_period,
-            comment=self.comment
+            period=self.department_period
         )
 
     def test_create_document(self) -> None:
@@ -276,13 +272,11 @@ class DocumentTestCase(TestCase):
         actual_document, _ = create_document(
             user=self.superuser,
             period=self.department_period,
-            status=self.status,
-            comment='Create document'
+            status=self.status
         )
         expected_document = Document.objects.get(
             user=self.superuser,
             period=self.department_period,
-            comment='Create document',
             updated_by=self.superuser
         )
         self.assertEqual(expected_document, actual_document)
@@ -340,8 +334,7 @@ class DocumentMessageTestCase(TestCase):
         )
         self.superuser_document = Document.objects.create(
             user=self.superuser,
-            period=self.organization_period,
-            comment='Test comment'
+            period=self.organization_period
         )
 
     def test_create_document_user_and_superuser_message(self) -> None:

@@ -192,8 +192,7 @@ def add_documents(
     sheets: dict[str, Sheet],
     status: Status,
     documents_data: dict[int, dict[str, list[CellData]]],
-    divisions: dict[int, str],
-    comment: str
+    divisions: dict[int, str]
 ) -> list[Document]:
     """Создание и запись документов со значениями."""
     max_versions: dict[int, int] = {
@@ -209,7 +208,6 @@ def add_documents(
         if max_versions.get(division_id, 1) > 1 and not period.versioning:
             continue
         document: Document = Document.objects.create(
-            comment=comment,
             version=max_versions.get(division_id, 1),
             updated_by=user,
             user=user,
