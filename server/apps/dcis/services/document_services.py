@@ -15,8 +15,7 @@ from apps.dcis.models import (Cell, Document, DocumentMessage, Period, Project, 
 from apps.dcis.permissions import (
     can_add_document,
     can_add_document_message,
-    can_change_document_base,
-    can_change_document_comment,
+    can_change_document_base
 )
 from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator

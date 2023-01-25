@@ -46,7 +46,6 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
               :documents="documents"
               :loading="loading"
               :update-documents="updateDocuments"
-              @change-document-comment="changeDocumentComment"
               @add-status="refetchDocuments"
               @update-order-by="orderBy = $event"
             )
@@ -101,7 +100,6 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
 </template>
 
 <script lang="ts">
-import { useMutation } from '@vue/apollo-composable'
 import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
@@ -109,8 +107,6 @@ import { useAuthStore } from '~/stores'
 import { useFilters, useCursorPagination, useCommonQuery, useQueryRelay } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
-  ChangeDocumentCommentMutation,
-  ChangeDocumentCommentMutationVariables,
   DivisionModelType,
   DocumentType,
   PeriodType,
@@ -123,7 +119,6 @@ import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDo
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
 import organizationsHasNotDocumentQuery from '~/gql/dcis/queries/organizations_has_not_document.graphql'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
-import changeDocumentCommentMutation from '~/gql/dcis/mutations/document/change_document_comment.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
@@ -170,7 +165,6 @@ export default defineComponent({
       pagination: { count, totalCount },
       update: updateDocuments,
       addUpdate,
-      changeUpdate,
       refetch: refetchDocuments
     } = useQueryRelay<DocumentsQuery, DocumentsQueryVariables, DocumentType>({
       document: documentsQuery,
@@ -207,22 +201,6 @@ export default defineComponent({
       }
     }
 
-    const { mutate: changeDocumentCommentMutate } = useMutation<ChangeDocumentCommentMutation,
-      ChangeDocumentCommentMutationVariables>(
-        changeDocumentCommentMutation,
-        {
-          update: (cache, result) => {
-            if (!result.errors) {
-              changeUpdate(cache, result, 'document')
-            }
-          }
-        }
-      )
-
-    const changeDocumentComment = (document: DocumentType, comment: string): void => {
-      changeDocumentCommentMutate({ documentId: document.id, comment })
-    }
-
     const showDivisionFilter = computed<boolean>(() => props.period.multiple)
 
     const { data: organizationsHasNotDocument } = useCommonQuery<
@@ -254,7 +232,6 @@ export default defineComponent({
       addDocumentUpdate,
       addDocumentDataUpdate,
       dateTimeHM,
-      changeDocumentComment,
       showDivisionFilter,
       organizationsHasNotDocument
     }

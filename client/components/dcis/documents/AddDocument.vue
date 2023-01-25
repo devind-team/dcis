@@ -15,18 +15,6 @@ mutation-modal-form(
   template(#form)
     validation-provider(
       v-slot="{ errors, valid }"
-      :name="String($t('dcis.documents.addDocument.comment'))"
-      rules="required"
-    )
-      v-text-field(
-        v-model="comment"
-        :error-messages="errors"
-        :success="valid"
-        :label="$t('dcis.documents.addDocument.comment')"
-        autofocus
-      )
-    validation-provider(
-      v-slot="{ errors, valid }"
       :name="String($t('dcis.documents.addDocument.status'))"
       rules="required"
     )
@@ -117,7 +105,6 @@ export default defineComponent({
       : t('dcis.documents.addDocument.organization') as string
     )
 
-    const comment = ref<string>('')
     const status = ref<StatusType | null>(null)
     const division = ref<DivisionModelType | null>(null)
     const document = ref<DocumentType>(null)
@@ -147,7 +134,6 @@ export default defineComponent({
     })
 
     const variables = computed<AddDocumentMutationVariables>(() => ({
-      comment: comment.value,
       periodId: props.period.id,
       statusId: status.value?.id,
       divisionId: divisionId.value,
@@ -155,7 +141,6 @@ export default defineComponent({
     }))
 
     const close = () => {
-      comment.value = ''
       status.value = statuses.value[0] || null
       division.value = null
       document.value = null
@@ -172,7 +157,6 @@ export default defineComponent({
     return {
       divisionId,
       divisionLabel,
-      comment,
       status,
       division,
       document,

@@ -309,7 +309,6 @@ export default {
     },
     tableHeaders: {
       version: 'Версия',
-      comment: 'Комментарий',
       createdAt: 'Дата добавления',
       updatedAt: 'Дата последнего изменения',
       organization: '@:dcis.documents.addDocument.organization',
@@ -324,7 +323,6 @@ export default {
       buttonText: 'Добавить документ',
       formText: 'Добавить новый документ',
       header: 'Добавление документа',
-      comment: 'Комментарий',
       status: 'Статус',
       department: 'Департамент',
       organization: 'Организация',
@@ -335,8 +333,7 @@ export default {
       buttonText: 'Загрузить данные',
       header: 'Импорт документов',
       file: 'Выберете файл',
-      status: '@:dcis.documents.addDocument.status',
-      comment: '@:dcis.documents.addDocument.comment'
+      status: '@:dcis.documents.addDocument.status'
     },
     status: {
       header: 'Изменение статусов',
@@ -374,10 +371,6 @@ export default {
     },
     attributes: {
       noAttributes: 'Нет атрибутов'
-    },
-    comments: {
-      comment: 'Введите комментарий',
-      send: '@:send'
     }
   },
   grid: {
