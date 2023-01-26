@@ -2,11 +2,19 @@ import { useEventListener } from '@vueuse/core'
 import { computed, inject, ref } from '#app'
 import { CellType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
 import { useGridResizing } from '~/composables/grid-resizing'
-import { GridModeInject, ActiveSheetInject, GridMode, ScrollInfoType, FixedInfoType, RowFixedInfoType } from '~/types/grid'
+import {
+  GridModeInject,
+  ActiveSheetInject,
+  GridMode,
+  ScrollInfoType,
+  FixedInfoType,
+  RowFixedInfoType,
+  ActiveDocumentInject
+} from '~/types/grid'
 import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
 import { useGridSelection } from '~/composables/grid-selection'
-import { useCanChangeRowHeight } from '~/composables/grid-permissions'
 import { useChangeColumnDimensionWidth, useChangeRowDimensionHeight } from '~/composables/grid-actions'
+import { useColumnDimensionWidthMap, useRowDimensionHeightMap } from '~/composables/grid-local-mutations'
 
 export const cellKinds = {
   n: 'Numeric',
@@ -22,9 +30,13 @@ export const cellKinds = {
 export function useGrid () {
   const mode = inject(GridModeInject)
   const activeSheet = inject(ActiveSheetInject)
-  const canChangeRowHeight = useCanChangeRowHeight()
-  const changeColumnWidth = useChangeColumnDimensionWidth()
-  const changeRowHeight = useChangeRowDimensionHeight()
+  const activeDocument = inject(ActiveDocumentInject)
+
+  const columnDimensionWidthMap = useColumnDimensionWidthMap()
+  const rowDimensionHeightMap = useRowDimensionHeightMap()
+
+  const changeColumnWidth = useChangeColumnDimensionWidth(columnDimensionWidthMap)
+  const changeRowHeight = useChangeRowDimensionHeight(rowDimensionHeightMap)
 
   const gridContainer = ref<HTMLDivElement | null>(null)
   const grid = ref<HTMLTableElement | null>(null)
@@ -89,7 +101,9 @@ export function useGrid () {
     scroll,
     64,
     'x',
-    changeColumnWidth
+    changeColumnWidth,
+    columnDimensionWidthMap,
+    activeDocument
   )
   watch(resizingColumnWidth, () => updateSelectionViews(), { deep: true })
   const {
@@ -104,7 +118,9 @@ export function useGrid () {
     scroll,
     25,
     'y',
-    changeRowHeight
+    changeRowHeight,
+    rowDimensionHeightMap,
+    activeDocument
   )
   watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
 
@@ -234,16 +250,13 @@ export function useGrid () {
   )
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
-    if (mode.value === GridMode.CHANGE) {
-      mousemoveColumnNameResizing(
-        column,
-        column.index - 1 > 0
-          ? activeSheet.value.columns[column.index - 2]
-          : null,
-        event,
-        (_: ColumnDimensionType) => true
-      )
-    }
+    mousemoveColumnNameResizing(
+      column,
+      column.index - 1 > 0
+        ? activeSheet.value.columns[column.index - 2]
+        : null,
+      event
+    )
   }
   const mouseleaveColumnName = () => {
     mouseleaveColumnNameResizing()
@@ -265,8 +278,7 @@ export function useGrid () {
       row.globalIndex - 1 > 0
         ? activeSheet.value.rows[row.globalIndex - 2]
         : null,
-      event,
-      canChangeRowHeight
+      event
     )
   }
   const mouseleaveRowName = () => {

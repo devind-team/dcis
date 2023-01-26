@@ -64,6 +64,7 @@ export function useCanAddRowInside () {
     if (mode.value === GridMode.READ || mode.value === GridMode.REPORT || mode.value === GridMode.CHANGE) {
       return false
     }
+    console.log(rowDimension.dynamic)
     return rowDimension.dynamic && (
       activeSheet.value.canChange ||
       activeSheet.value.canAddChildRowDimension ||

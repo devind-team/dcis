@@ -1,4 +1,4 @@
-import { useEventListener } from '@vueuse/core'
+import { RemovableRef, useEventListener } from '@vueuse/core'
 import { computed, ref, Ref, UnwrapRef } from '#app'
 import {
   ElementPositionType,
@@ -7,12 +7,15 @@ import {
   ResizingType,
   ScrollInfoType
 } from '~/types/grid'
+import { DocumentType } from '~/types/graphql'
 
 export function useGridResizing<T extends { id: string, width?: number, height?: number }> (
   scroll: Ref<ScrollInfoType>,
   defaultSize: number,
   direction: 'x' | 'y',
-  changeSize: (dimension: T, size: number) => Promise<void> | null
+  changeSize: (dimension: T, size: number) => void | Promise<void>,
+  dimensionSizeMap: RemovableRef<Record<string, number>>,
+  activeDocument: Ref<DocumentType>
 ) {
   const borderGag = 6
 
@@ -33,15 +36,15 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     if (resizing.value && resizing.value.object.id === dimension.id) {
       return resizing.value.size
     } else {
-      return dimension[dimensionKey] ?? defaultElementSize.value
+      const key = activeDocument.value ? `${activeDocument.value.id}${dimension.id}` : dimension.id
+      return dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value
     }
   }
 
   const mousemove = (
     dimension: T,
     previousDimension: T | null,
-    event: MouseEvent,
-    canResize: (dimension: T) => boolean
+    event: MouseEvent
   ) => {
     const mousePosition = { x: event.clientX, y: event.clientY }
     const cell = event.target as HTMLTableCellElement
@@ -51,16 +54,12 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
       )
       resizing.value.mousePosition = mousePosition
     } else if (cell[offsetSizeKey] - event[eventOffsetKey] < borderGag) {
-      if (canResize(dimension)) {
-        setResizingHover(dimension, mousePosition)
-      }
+      setResizingHover(dimension, mousePosition)
     } else if (
       cell[offsetSizeKey] - event[eventOffsetKey] > cell[offsetSizeKey] - borderGag &&
       previousDimension
     ) {
-      if (canResize(previousDimension)) {
-        setResizingHover(previousDimension, mousePosition)
-      }
+      setResizingHover(previousDimension, mousePosition)
     } else {
       resizing.value = null
     }
@@ -126,9 +125,10 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   }
 
   const setResizingHover = (dimension: T, mousePosition: MousePositionType) => {
+    const key = activeDocument.value ? `${activeDocument.value.id}${dimension.id}` : dimension.id
     resizing.value = {
       object: dimension as UnwrapRef<T>,
-      size: dimension[dimensionKey] ?? defaultElementSize.value,
+      size: dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value,
       mousePosition,
       state: 'hover'
     }

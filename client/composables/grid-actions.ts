@@ -1,5 +1,10 @@
 import { computed, inject, Ref } from '#app'
+import { RemovableRef } from '@vueuse/core'
 import { UpdateType } from '~/composables/query-common'
+import {
+  useChangeColumnDimensionWidthLocalMutation,
+  useChangeRowDimensionHeightLocalMutation
+} from '~/composables/grid-local-mutations'
 import {
   useAddRowDimensionMutation,
   useAddChildRowDimensionMutation,
@@ -13,6 +18,7 @@ import {
   useChangeValueMutation,
   useUnloadFileValueArchiveMutation
 } from '~/composables/grid-mutations'
+import { useCanChangeRowHeight } from '~/composables/grid-permissions'
 import {
   GridModeInject,
   ActiveSheetInject,
@@ -23,7 +29,7 @@ import {
 import {
   CellType,
   DocumentSheetQuery,
-  PeriodSheetQuery,
+  PeriodSheetQuery, RowDimensionType,
   ValueFilesQuery
 } from '~/types/graphql'
 
@@ -61,25 +67,35 @@ export function useDeleteRowDimension () {
   return null
 }
 
-export function useChangeColumnDimensionWidth () {
+export function useChangeColumnDimensionWidth (columnDimensionWidthMap: RemovableRef<Record<string, number>>) {
   const mode = inject(GridModeInject)
-  const updateActiveSheet = inject(UpdateActiveSheetInject)
   if (mode.value === GridMode.CHANGE) {
+    const updateActiveSheet = inject(UpdateActiveSheetInject)
     return useChangeColumnDimensionWidthMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
-  return null
+  const activeDocument = inject(ActiveDocumentInject)
+  return useChangeColumnDimensionWidthLocalMutation(columnDimensionWidthMap, activeDocument)
 }
 
-export function useChangeRowDimensionHeight () {
+export function useChangeRowDimensionHeight (rowDimensionHeightMap: RemovableRef<Record<string, number>>) {
   const mode = inject(GridModeInject)
   const updateActiveSheet = inject(UpdateActiveSheetInject)
   if (mode.value === GridMode.CHANGE) {
     return useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
   if (mode.value === GridMode.WRITE) {
-    return useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
+    const activeDocument = inject(ActiveDocumentInject)
+    const canChangeRowHeight = useCanChangeRowHeight()
+    const localMutation = useChangeRowDimensionHeightLocalMutation(rowDimensionHeightMap, activeDocument)
+    const mutation = useChangeChildRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<DocumentSheetQuery>>)
+    return async function (rowDimension: RowDimensionType, height: number) {
+      if (canChangeRowHeight(rowDimension)) {
+        return await mutation(rowDimension, height)
+      }
+      return localMutation(rowDimension, height)
+    }
   }
-  return null
+  return useChangeRowDimensionHeightLocalMutation(rowDimensionHeightMap, ref(null))
 }
 
 export function useChangeValue () {
