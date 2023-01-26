@@ -166,7 +166,7 @@ def get_cells_aggregation(user: User, period: Period) -> list[CellsAggregation]:
 
 def transformation_position_cell(cell: Cell) -> str:
     """Преобразование ячейки к нужному отображению."""
-    return f'{cell.column.sheet.name} {get_column_letter(cell.column.index)}{cell.row.index}'
+    return f"'{cell.column.sheet.name}'!{get_column_letter(cell.column.index)}{cell.row.index}"
 
 def dependent_cells(cells: list[Cell]) -> list[str]:
     """Получение зависимых ячеек агрегации."""

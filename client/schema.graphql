@@ -960,6 +960,18 @@ enum CellAggregation {
   SUM
 }
 
+"""Тип ячейки агрегации."""
+type CellAggregationType {
+  """Метод агрегации"""
+  aggregation: String!
+  """Ячейки агрегации"""
+  cells: [String!]
+  """Идентификатор"""
+  id: ID!
+  """Позиция ячейки"""
+  position: String!
+}
+
 """An enumeration."""
 enum CellKind {
   """b"""
@@ -2942,6 +2954,8 @@ enum LogEntryAction {
   A_1
   """delete"""
   A_2
+  """access"""
+  A_3
 }
 
 """Логирование действия пользователя."""
@@ -3972,6 +3986,11 @@ type Query {
   ): BudgetClassificationTypeConnection
   """Статистика активности"""
   activeStatistics: ActiveStatisticsType!
+  """Агрегированные ячейки документов периода"""
+  aggregationCells(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [CellAggregationType]
   """Приложения"""
   applications: [ApplicationType!]!
   """Получение атрибутов, привязанных к периоду"""

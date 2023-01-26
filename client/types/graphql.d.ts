@@ -1020,6 +1020,19 @@ export type CellAggregation =
   /** sum */
   | 'SUM';
 
+/** Тип ячейки агрегации. */
+export type CellAggregationType = {
+  __typename?: 'CellAggregationType';
+  /** Метод агрегации */
+  aggregation: Scalars['String'];
+  /** Ячейки агрегации */
+  cells?: Maybe<Array<Scalars['String']>>;
+  /** Идентификатор */
+  id: Scalars['ID'];
+  /** Позиция ячейки */
+  position: Scalars['String'];
+};
+
 /** An enumeration. */
 export type CellKind =
   /** b */
@@ -3102,7 +3115,9 @@ export type LogEntryAction =
   /** update */
   | 'A_1'
   /** delete */
-  | 'A_2';
+  | 'A_2'
+  /** access */
+  | 'A_3';
 
 /** Логирование действия пользователя. */
 export type LogEntryType = Node & {
@@ -4720,6 +4735,8 @@ export type Query = {
   activeBudgetClassifications?: Maybe<BudgetClassificationTypeConnection>;
   /** Статистика активности */
   activeStatistics: ActiveStatisticsType;
+  /** Агрегированные ячейки документов периода */
+  aggregationCells?: Maybe<Array<Maybe<CellAggregationType>>>;
   /** Приложения */
   applications: Array<ApplicationType>;
   /** Получение атрибутов, привязанных к периоду */
@@ -4853,6 +4870,11 @@ export type QueryActiveBudgetClassificationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryAggregationCellsArgs = {
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -6882,6 +6904,12 @@ export type ActiveBudgetClassificationsQueryVariables = Exact<{
 }>;
 
 export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBudgetClassifications?: { __typename: 'BudgetClassificationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename: 'BudgetClassificationTypeEdge', node?: { __typename: 'BudgetClassificationType', id: string, code: string, name: string } | null } | null> } | null };
+
+export type AggregationCellsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type AggregationCellsQuery = { __typename?: 'Query', aggregationCells?: Array<{ __typename: 'CellAggregationType', id: string, position: string, aggregation: string, cells?: Array<string> | null } | null> | null };
 
 export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];

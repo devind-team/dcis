@@ -62,7 +62,8 @@ export default {
       sheets: 'Таблица',
       report: 'Сводный отчет',
       unload: 'Выгрузка',
-      settings: '@:settings'
+      settings: '@:settings',
+      aggregationCells: 'Агрегация'
     },
     statuses: {
       preparation: 'Подготовка',
@@ -184,6 +185,15 @@ export default {
         sheet: 'Форма'
       },
       deleteItemName: 'ограничение'
+    },
+    aggregationCells: {
+      name: '@:dcis.periods.links.aggregationCells',
+      tableHeaders: {
+        position: 'Ячейка',
+        aggregateType: 'Тип агрегации',
+        listAggregateCells: 'Агрегируемые ячейки',
+        actions: '@:actions'
+      }
     },
     groups: {
       name: '@:dcis.periods.links.groups',
