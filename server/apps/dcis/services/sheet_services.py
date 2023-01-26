@@ -1,5 +1,6 @@
 import re
 from argparse import ArgumentTypeError
+from dataclasses import dataclass
 from typing import NamedTuple, Sequence
 
 from devind_dictionaries.models import BudgetClassification
@@ -7,6 +8,7 @@ from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import QuerySet
+from openpyxl.utils import get_column_letter
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
@@ -18,6 +20,7 @@ from apps.dcis.permissions import (
     can_add_budget_classification,
     can_change_period_sheet,
 )
+from apps.dcis.permissions.period_permissions import can_change_period
 
 
 @transaction.atomic
@@ -138,6 +141,36 @@ def get_aggregation_cells(user: User, cell: Cell) -> list[Cell]:
     can_change_period_sheet(user, cell.row.sheet.period)
     to_cells = cell.to_cells.select_related('from_cell').all()
     return [to_cell.from_cell for to_cell in to_cells]
+
+@dataclass
+class CellsAggregation:
+    """Возвращаемый класс запроса."""
+    id: str | int
+    position: str
+    aggregation: str
+    cells: list[str]
+
+def get_cells_aggregation(user: User, period: Period) -> list[CellsAggregation]:
+    """Получение агрегированных ячеек периода."""
+    can_change_period(user, period)
+    cells = Cell.objects.filter(column__sheet__period_id=period.id, aggregation__isnull=False)
+    return [
+        CellsAggregation(
+            id=cell.id,
+            position=transformation_position_cell(cell),
+            aggregation=cell.aggregation,
+            cells=dependent_cells(cell.to_cells.all())
+        )
+        for cell in cells
+    ]
+
+def transformation_position_cell(cell: Cell) -> str:
+    """Преобразование ячейки к нужному отображению."""
+    return f'{cell.column.sheet.name} {get_column_letter(cell.column.index)}{cell.row.index}'
+
+def dependent_cells(cells: list[Cell]) -> list[str]:
+    """Получение зависимых ячеек агрегации."""
+    return [transformation_position_cell(cell.from_cell) for cell in cells]
 
 
 def change_cell_default(user: User, cell: Cell, default: str) -> Cell:

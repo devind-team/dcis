@@ -604,6 +604,18 @@ class CellType(graphene.ObjectType):
     error = graphene.String(description='Текст ошибки')
 
 
+class CellAggregationType(graphene.ObjectType):
+    """Тип ячейки агрегации."""
+
+    id = graphene.ID(required=True, description='Идентификатор')
+
+    position = graphene.String(required=True, description='Позиция ячейки')
+
+    aggregation = graphene.String(required=True, description='Метод агрегации')
+    cells = graphene.List(graphene.NonNull(graphene.String), description='Ячейки агрегации')
+
+
+
 class ValueType(DjangoObjectType):
     """Тип значения."""
 
