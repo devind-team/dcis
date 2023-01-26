@@ -39,17 +39,6 @@ mutation-modal-form(
         item-value="id"
         return-object
       )
-    validation-provider(
-      v-slot="{ errors, valid }"
-      :name="String($t('dcis.documents.addDocumentData.comment'))"
-      rules="required"
-    )
-      v-text-field(
-        v-model="comment"
-        :error-messages="errors"
-        :success="valid"
-        :label="$t('dcis.documents.addDocumentData.comment')"
-      )
 </template>
 
 <script lang="ts">
