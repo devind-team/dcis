@@ -4,12 +4,17 @@ from django.db import migrations
 
 
 def move_document_comments(apps, schema_editor):
-    """Перемещение комментариев документов в блок комментариев"""
+    """Перемещение комментариев документов в блок комментариев."""
     Document = apps.get_model('dcis', 'Document')
     DocumentMessage = apps.get_model('dcis', 'DocumentMessage')
     for document in Document.objects.all():
         user = document.user or document.period.user
         DocumentMessage.objects.create(comment=document.comment, user=user, document=document)
+
+
+def empty_reverse(apps, schema_editor):
+    """Пустая функция для отката миграции."""
+    pass
 
 
 class Migration(migrations.Migration):
@@ -19,7 +24,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(move_document_comments),
+        migrations.RunPython(move_document_comments, empty_reverse),
         migrations.RemoveField(
             model_name='document',
             name='comment',
