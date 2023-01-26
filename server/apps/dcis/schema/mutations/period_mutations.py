@@ -6,7 +6,9 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import gid2int
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
@@ -387,8 +389,14 @@ class UnloadPeriodMutation(BaseMutation):
             description='Идентификаторы статусов'
         )
         unload_without_document = graphene.Boolean(required=True, description='Выгружать организации без документов')
+        unload_default = graphene.Boolean(
+            required=True,
+            description='Выгружать значение по умолчанию при отсутствии значения в документе'
+        )
         apply_number_format = graphene.Boolean(required=True, description='Применять числовой формат')
-        empty_cell = graphene.String(required=True, description='Символы в пустой ячейке')
+        unload_heads = graphene.Boolean(required=True, description='Выгружать листы для головных учреждений')
+        unload_children = graphene.Boolean(required=True, description='Выгружать листы для филиалов')
+        empty_cell = graphene.String(required=True, description='Строка в пустой ячейке')
 
     src = graphene.String(description='Ссылка на сгенерированный файл')
 
@@ -401,21 +409,33 @@ class UnloadPeriodMutation(BaseMutation):
         organization_ids: list[int],
         status_ids: list[int],
         unload_without_document: bool,
+        unload_default: bool,
         apply_number_format: bool,
-        empty_cell: str
+        unload_heads: bool,
+        unload_children: bool,
+        empty_cell: str,
     ):
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return UnloadPeriodMutation(
-            src=unload_period(
-                user=info.context.user,
-                period=period,
-                organization_ids=[gid2int(organization_id) for organization_id in organization_ids],
-                status_ids=[gid2int(status_id) for status_id in status_ids],
-                unload_without_document=unload_without_document,
-                apply_number_format=apply_number_format,
-                empty_cell=empty_cell,
+        try:
+            return UnloadPeriodMutation(
+                src=unload_period(
+                    user=info.context.user,
+                    period=period,
+                    organization_ids=[gid2int(organization_id) for organization_id in organization_ids],
+                    status_ids=[gid2int(status_id) for status_id in status_ids],
+                    unload_without_document=unload_without_document,
+                    unload_default=unload_default,
+                    apply_number_format=apply_number_format,
+                    unload_heads=unload_heads,
+                    unload_children=unload_children,
+                    empty_cell=empty_cell,
+                )
             )
-        )
+        except ValidationError as error:
+            return UnloadPeriodMutation(
+                success=False,
+                errors=[ErrorFieldType(field='message', messages=[error.message])]
+            )
 
 
 class PeriodMutations(graphene.ObjectType):

@@ -1,13 +1,13 @@
-import graphene
 import devind_core.schema
-import devind_notifications.schema
 import devind_dictionaries.schema
+import devind_notifications.schema
+import graphene
+from graphene_django.debug import DjangoDebug
+
 import apps.core.schema
 import apps.dashboard.schema
 import apps.dcis.schema
-import apps.pages.schema
 import apps.notifications.schema
-from graphene_django.debug import DjangoDebug
 
 
 class Query(
@@ -15,7 +15,6 @@ class Query(
     devind_notifications.schema.Query,
     apps.dashboard.schema.Query,
     apps.dcis.schema.Query,
-    apps.pages.schema.Query,
     devind_dictionaries.schema.Query,
     graphene.ObjectType
 ):
@@ -29,7 +28,6 @@ class Mutation(
     devind_notifications.schema.Mutation,
     apps.core.schema.Mutation,
     apps.dcis.schema.Mutation,
-    apps.pages.schema.Mutation,
     graphene.ObjectType
 ):
     """Мутации на изменение чего-либо."""
@@ -50,5 +48,5 @@ schema = graphene.Schema(
     query=Query,
     mutation=Mutation,
     subscription=Subscription,
-    types=(*apps.pages.schema.types, *devind_notifications.schema.types, *apps.notifications.schema.types)
+    types=(*devind_notifications.schema.types,)
 )

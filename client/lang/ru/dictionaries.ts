@@ -40,5 +40,24 @@ export default {
       code: 'Код',
       name: '@:name'
     }
+  },
+  statuses: {
+    header: 'Статусы',
+    tableHeaders: {
+      id: '@:id',
+      name: '@:name',
+      comment: 'Комментарий',
+      edit: 'Возможность изменения'
+    }
+  },
+  addStatuses: {
+    header: 'Переназначение статусов',
+    tableHeaders: {
+      id: '@:id',
+      roles: 'Роли',
+      check: 'Комментарий',
+      fromStatus: 'Изначальный статус',
+      toStatus: 'Новый статус'
+    }
   }
 }

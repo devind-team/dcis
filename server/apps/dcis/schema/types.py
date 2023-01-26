@@ -33,6 +33,7 @@ from apps.dcis.models import (
     RowDimension,
     Sheet,
     Status,
+    AddStatus,
     Value,
 )
 from apps.dcis.permissions import (
@@ -323,6 +324,14 @@ class StatusType(DjangoObjectType):
     class Meta:
         model = Status
         fields = ('id', 'name', 'edit', 'comment',)
+
+
+class AddStatusType(DjangoObjectType):
+    """Тип переназначений статусов документов."""
+
+    class Meta:
+        model = AddStatus
+        fields = ('id', 'roles', 'check', 'from_status', 'to_status')
 
 
 class DocumentType(DjangoObjectType):

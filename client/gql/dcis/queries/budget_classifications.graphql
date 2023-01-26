@@ -1,8 +1,8 @@
-query BudgetClassifications($code: String, $first: Int, $after: String) {
+query BudgetClassifications($search: String, $first: Int, $after: String) {
   budgetClassifications(
     first: $first,
     after: $after,
-    filter: { code: { icontains: $code } },
+    filter: { code: { icontains: $search } },
   ) {
     pageInfo {
       startCursor

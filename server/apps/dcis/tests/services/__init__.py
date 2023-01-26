@@ -11,6 +11,7 @@ from .period_services import (
     PeriodTestCase,
     PeriodUserTestCase,
 )
+from .period_unload_services import UnloadPeriodTestCase
 from .privilege_services import PrivilegeTestCase
 from .project_services import GetUserProjectsTestCase, ProjectTestCase
 from .row_dimension_services import RowDimensionTestCase

@@ -298,8 +298,15 @@ export default {
       organizationsFilterTitle: 'Выбор организаций',
       statusFilterTitle: 'Выбор статусов',
       unloadWithoutDocument: 'Выгружать организации без документов',
+      unloadDefault: 'Выгружать значение по умолчанию при отсутствии значения в документе',
       applyNumberFormat: 'Применять числовой формат',
-      emptyCell: 'Символы в пустой ячейке'
+      sheets: {
+        label: 'Выгружать листы',
+        onlyHeads: 'Для головных учреждений',
+        onlyChildren: 'Для филиалов',
+        headsAndChildrens: 'Для головных учреждений и филиалов'
+      },
+      emptyCell: 'Строка в пустой ячейке'
     }
   },
   documents: {

@@ -1,9 +1,0 @@
-fragment CategoryFields on CategoryType {
-  id
-  avatar
-  text
-  position
-  createdAt
-  updatedAt
-  __typename
-}

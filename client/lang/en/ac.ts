@@ -1,5 +1,4 @@
 export default {
-  eleden: '@:eleden.name',
   name: 'Groups and users',
   teams: {
     name: 'Users groups',

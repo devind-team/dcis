@@ -1,6 +1,5 @@
 <template lang="pug">
 v-app
-  navigation(v-model="drawer")
   app-bar(v-model="drawer")
   v-main
     nuxt
@@ -17,12 +16,11 @@ import { NotificationsQuery, NotificationsQueryVariables, NotificationType, User
 import notificationsSubscription from '~/gql/notifications/subscriptions/notifications.graphql'
 import notificationsQuery from '~/gql/notifications/queries/notifications.graphql'
 import AppBar from '~/components/global/AppBar.vue'
-import Navigation from '~/components/global/Navigation.vue'
 import FooterComponent from '~/components/global/FooterComponent.vue'
 
 export default defineComponent({
   name: 'DefaultLayout',
-  components: { AppBar, Navigation, FooterComponent },
+  components: { AppBar, FooterComponent },
   setup () {
     const authStore = useAuthStore()
     const { vuetify, isDark } = useVuetify()

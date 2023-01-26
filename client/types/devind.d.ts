@@ -16,17 +16,6 @@ export type LinksType = {
   color?: string
 }
 
-export type PageKindChoices = {
-  TEXT: number
-  GALLERY: number
-  FILES: number
-  PROFILES: number
-  SLIDERS: number
-  FORM: number
-  JUPYTER: number
-  DATASET: number
-}
-
 export type ErrorType = 'BusinessLogicError' | 'GraphQLError' | 'NetworkError'
 
 export type WithTimer<T> = {
