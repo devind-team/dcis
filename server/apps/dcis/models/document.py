@@ -69,7 +69,6 @@ class Document(models.Model):
         None в случае если для всех дивизионов один сбор.
     """
 
-    comment = models.TextField(max_length=1023, help_text='Комментарий')
     version = models.PositiveIntegerField(default=0, help_text='Версия документа')
 
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')

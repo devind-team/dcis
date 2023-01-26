@@ -18,12 +18,6 @@ v-data-table(
       v-else
       :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
     ) {{ item.version }}
-  template(#item.comment="{ item }")
-    template(v-if="item.comment")
-      template(v-if="canChangeDocumentComment(item)")
-        text-menu(v-slot="{ on }" :value="item.comment" @update="$emit('change-document-comment', item, $event)")
-          a(v-on="on") {{ item.comment }}
-      template(v-else) {{ item.comment }}
   template(#item.lastStatus="{ item }")
     template(v-if="item.lastStatus")
       document-statuses(
@@ -44,7 +38,6 @@ import { computed, defineComponent, PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { useFilters, useI18n } from '~/composables'
 import { collectOrderBy } from '~/services/ordering'
-import { useAuthStore } from '~/stores'
 import { PeriodType, DocumentType } from '~/types/graphql'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import DocumentStatuses, { PeriodUpdateType } from '~/components/dcis/documents/DocumentStatuses.vue'
@@ -59,7 +52,6 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { t } = useI18n()
-    const userStore = useAuthStore()
     const { dateTimeHM } = useFilters()
 
     const headers = computed<DataTableHeader[]>(() => {
@@ -71,7 +63,6 @@ export default defineComponent({
         : []
       result.push(
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
@@ -79,9 +70,6 @@ export default defineComponent({
       return result
     })
 
-    const canChangeDocumentComment = (document: DocumentType) => {
-      return document.canChange || document.user?.id === userStore.user.id
-    }
     const canDeleteDocumentStatus = (document: DocumentType) => {
       return document.canChange
     }
@@ -90,7 +78,7 @@ export default defineComponent({
       return items
     }
 
-    return { headers, canChangeDocumentComment, canDeleteDocumentStatus, dateTimeHM, customSort }
+    return { headers, canDeleteDocumentStatus, dateTimeHM, customSort }
   }
 })
 </script>

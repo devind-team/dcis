@@ -85,19 +85,6 @@ def can_change_document_base(user: User, document: Document):
     raise PermissionDenied('Недостаточно прав для изменения документа в периоде.')
 
 
-def can_change_document_comment_base(user: User, document: Document):
-    """Пропускает пользователей, которые могут изменять комментарий документа, без проверки возможности просмотра."""
-    if document.user_id == user.id:
-        return
-    can_change_document_base(user, document)
-
-
-def can_change_document_comment(user: User, document: Document):
-    """Пропускает пользователей, которые могут просматривать документ и изменять его комментарий."""
-    can_view_document(user, document)
-    can_change_document_comment_base(user, document)
-
-
 def can_add_document_status_base(user: User, document: Document, add_status: AddStatus | None):
     """Пропускает пользователей, которые могут добавлять статус документа, без проверки возможности просмотра."""
     from apps.dcis.services.document_services import get_user_roles

@@ -24,7 +24,7 @@ from apps.dcis.schema.types import (
     RowDimensionType,
 )
 from apps.dcis.services.add_document_data_services import add_document_data
-from apps.dcis.services.document_services import change_document_comment, create_document, create_document_message
+from apps.dcis.services.document_services import create_document, create_document_message
 from apps.dcis.services.document_unload_services import document_upload
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
@@ -40,13 +40,11 @@ class AddDocumentMutation(BaseMutation):
     class Input:
         """Входные параметры мутации.
 
-          - comment - комментарий к документу
           - period_id - идентификатор периода
           - status_id - идентификатор устанавливаемого статуса
           - division_id - идентификатор дивизиона
           - document_id - идентификатор документа, от которого создавать копию
         """
-        comment = graphene.String(required=True, description='Комментарий')
         period_id = graphene.ID(required=True, description='Идентификатор периода')
         status_id = graphene.ID(required=True, description='Идентификатор начального статуса документа')
         division_id = graphene.ID(description='Идентификатор дивизиона')
@@ -59,7 +57,6 @@ class AddDocumentMutation(BaseMutation):
     def mutate_and_get_payload(
         root: None,
         info: ResolveInfo,
-        comment: str,
         period_id: str,
         status_id: str,
         document_id: str | None = None,
@@ -73,32 +70,10 @@ class AddDocumentMutation(BaseMutation):
             user=info.context.user,
             period=period,
             status=status,
-            comment=comment,
             document_id=document_id,
             division_id=division_id
         )
         return AddDocumentMutation(success=not errors, errors=errors, document=document)
-
-
-class ChangeDocumentCommentMutation(BaseMutation):
-    """Изменение комментария версии документа."""
-
-    class Input:
-        comment = graphene.String(required=True, description='Комментарий')
-        document_id = graphene.ID(description='Идентификатор документа')
-
-    document = graphene.Field(DocumentType, description='Созданный документ')
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(
-        root: None,
-        info: ResolveInfo,
-        document_id: str,
-        comment: str,
-    ):
-        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
-        return ChangeDocumentCommentMutation(document=change_document_comment(info.context.user, document, comment))
 
 
 class AddDocumentMessageMutation(BaseMutation):
@@ -186,7 +161,6 @@ class AddDocumentDataMutation(BaseMutation):
         period_id = graphene.ID(required=True, description='Идентификатор периода')
         file = Upload(required=True, description='Файл с данными')
         status_id = graphene.ID(required=True, description='Статус')
-        comment = graphene.String(description='Комментарий')
 
     documents = graphene.List(DocumentType, description='Список созданных документов')
 
@@ -197,15 +171,13 @@ class AddDocumentDataMutation(BaseMutation):
         info: ResolveInfo,
         period_id: str,
         file: InMemoryUploadedFile,
-        status_id: str,
-        comment: str = None
+        status_id: str
     ) -> 'AddDocumentDataMutation':
         documents, errors = add_document_data(
             info.context.user,
             period_id,
             BytesIO(file.read()),
-            status_id,
-            comment
+            status_id
         )
         return AddDocumentDataMutation(
             success=not errors,
@@ -325,7 +297,6 @@ class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
     add_document = AddDocumentMutation.Field(required=True)
-    change_document_comment = ChangeDocumentCommentMutation.Field(required=True)
     add_document_message = AddDocumentMessageMutation.Field(required=True)
     add_document_status = AddDocumentStatusMutation.Field(required=True)
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)

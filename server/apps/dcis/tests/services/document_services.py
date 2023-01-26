@@ -19,13 +19,9 @@ from apps.dcis.models import (
     Sheet,
     Status,
 )
-from apps.dcis.permissions import (
-    can_add_document,
-    can_change_document_comment,
-)
+from apps.dcis.permissions import can_add_document
 from apps.dcis.permissions.document_permissions import can_add_document_message
 from apps.dcis.services.document_services import (
-    change_document_comment,
     create_document,
     create_document_message, get_user_documents,
     get_user_roles,
@@ -249,9 +245,6 @@ class DocumentTestCase(TestCase):
         for period in [self.organization_period, self.organization_multiple_period]:
             Division.objects.create(period=period, object_id=self.organization.id)
 
-        self.comment = 'Test comment'
-        self.change_comment = 'Change comment'
-
         self.document = Document.objects.create(period=self.department_period)
         self.user_document = Document.objects.create(user=self.user, period=self.department_period)
         self.organization_document = Document.objects.create(period=self.organization_period)
@@ -262,8 +255,7 @@ class DocumentTestCase(TestCase):
 
         self.superuser_document = Document.objects.create(
             user=self.superuser,
-            period=self.department_period,
-            comment=self.comment
+            period=self.department_period
         )
 
     def test_create_document(self) -> None:
@@ -280,13 +272,11 @@ class DocumentTestCase(TestCase):
         actual_document, _ = create_document(
             user=self.superuser,
             period=self.department_period,
-            status=self.status,
-            comment='Create document'
+            status=self.status
         )
         expected_document = Document.objects.get(
             user=self.superuser,
             period=self.department_period,
-            comment='Create document',
             updated_by=self.superuser
         )
         self.assertEqual(expected_document, actual_document)
@@ -304,22 +294,6 @@ class DocumentTestCase(TestCase):
             ['division_member'],
             get_user_roles(self.organization_member, self.organization_multiple_document)
         )
-
-    def test_change_document_comment(self) -> None:
-        """Тестирование функции `change_document_comment`."""
-        with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
-            self.superuser,
-            'has_perm',
-            new=lambda perm: perm != 'dcis.change_document'
-        ):
-            self.assertRaises(PermissionDenied, can_change_document_comment, self.superuser, self.superuser_document)
-        actual_document = change_document_comment(
-            user=self.superuser,
-            document=self.superuser_document,
-            comment=self.change_comment
-        )
-        expected_document = Document.objects.get(comment=self.change_comment)
-        self.assertEqual(expected_document, actual_document)
 
 
 class DocumentMessageTestCase(TestCase):
@@ -360,8 +334,7 @@ class DocumentMessageTestCase(TestCase):
         )
         self.superuser_document = Document.objects.create(
             user=self.superuser,
-            period=self.organization_period,
-            comment='Test comment'
+            period=self.organization_period
         )
 
     def test_create_document_user_and_superuser_message(self) -> None:
