@@ -3,6 +3,7 @@ import { RemovableRef } from '@vueuse/core'
 import { UpdateType } from '~/composables/query-common'
 import {
   useChangeColumnDimensionWidthLocalMutation,
+  useResetColumnDimensionWidthLocalMutation,
   useChangeRowDimensionHeightLocalMutation
 } from '~/composables/grid-local-mutations'
 import {
@@ -75,6 +76,11 @@ export function useChangeColumnDimensionWidth (columnDimensionWidthMap: Removabl
   }
   const activeDocument = inject(ActiveDocumentInject)
   return useChangeColumnDimensionWidthLocalMutation(columnDimensionWidthMap, activeDocument)
+}
+
+export function useResetColumnDimensionWidth (columnDimensionWidthMap: RemovableRef<Record<string, number>>) {
+  const activeDocument = inject(ActiveDocumentInject)
+  return useResetColumnDimensionWidthLocalMutation(columnDimensionWidthMap, activeDocument)
 }
 
 export function useChangeRowDimensionHeight (rowDimensionHeightMap: RemovableRef<Record<string, number>>) {

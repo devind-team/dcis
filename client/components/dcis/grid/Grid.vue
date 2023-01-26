@@ -7,6 +7,8 @@
         :column-name-row-height="columnNameRowHeight"
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
+        :change-column-width="changeColumnWidth"
+        :reset-column-width="resetColumnWidth"
         :get-column-fixed-info="getColumnFixedInfo"
         :border-fixed-column="borderFixedColumn"
         :border-fixed-row="borderFixedRow"
@@ -107,6 +109,8 @@ export default defineComponent({
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
+      changeColumnWidth,
+      resetColumnWidth,
       resizingRow,
       resizingRowHeight,
       getRowHeight,
@@ -162,6 +166,8 @@ export default defineComponent({
       resizingColumn,
       resizingColumnWidth,
       getColumnWidth,
+      changeColumnWidth,
+      resetColumnWidth,
       resizingRow,
       resizingRowHeight,
       getRowHeight,

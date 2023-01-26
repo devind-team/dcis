@@ -20,13 +20,31 @@ export function useRowDimensionHeightMap () {
   )
 }
 
+export function getDimensionSizeKey<T extends { id: string, width?: number, height?: number }> (
+  activeDocument: Ref<DocumentType | null>,
+  dimension: T
+) {
+  return activeDocument.value ? `${activeDocument.value.id}${dimension.id}` : dimension.id
+}
+
 export function useChangeColumnDimensionWidthLocalMutation (
   columnDimensionWidthMap: RemovableRef<Record<string, number>>,
   activeDocument: Ref<DocumentType | null>
 ) {
   return function (columnDimension: ColumnDimensionType, width: number) {
-    const key = activeDocument.value ? `${activeDocument.value.id}${columnDimension.id}` : columnDimension.id
+    const key = getDimensionSizeKey(activeDocument, columnDimension)
     columnDimensionWidthMap.value = { ...columnDimensionWidthMap.value, [key]: width }
+  }
+}
+
+export function useResetColumnDimensionWidthLocalMutation (
+  columnDimensionWidthMap: RemovableRef<Record<string, number>>,
+  activeDocument: Ref<DocumentType | null>
+) {
+  return function (columnDimension: ColumnDimensionType) {
+    const key = getDimensionSizeKey(activeDocument, columnDimension)
+    const { [key]: _, ...rest } = columnDimensionWidthMap.value
+    columnDimensionWidthMap.value = rest
   }
 }
 
@@ -35,7 +53,7 @@ export function useChangeRowDimensionHeightLocalMutation (
   activeDocument: Ref<DocumentType | null>
 ) {
   return function (rowDimension: RowDimensionType, height: number) {
-    const key = activeDocument.value ? `${activeDocument.value.id}${rowDimension.id}` : rowDimension.id
+    const key = getDimensionSizeKey(activeDocument, rowDimension)
     rowDimensionHeightMap.value = { ...rowDimensionHeightMap.value, [key]: height }
   }
 }

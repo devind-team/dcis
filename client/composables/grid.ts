@@ -13,7 +13,11 @@ import {
 } from '~/types/grid'
 import { letterToPosition, parsePosition, positionsToRangeIndices } from '~/services/grid'
 import { useGridSelection } from '~/composables/grid-selection'
-import { useChangeColumnDimensionWidth, useChangeRowDimensionHeight } from '~/composables/grid-actions'
+import {
+  useChangeColumnDimensionWidth,
+  useResetColumnDimensionWidth,
+  useChangeRowDimensionHeight
+} from '~/composables/grid-actions'
 import { useColumnDimensionWidthMap, useRowDimensionHeightMap } from '~/composables/grid-local-mutations'
 
 export const cellKinds = {
@@ -36,6 +40,8 @@ export function useGrid () {
   const rowDimensionHeightMap = useRowDimensionHeightMap()
 
   const changeColumnWidth = useChangeColumnDimensionWidth(columnDimensionWidthMap)
+  const resetColumnWidth = useResetColumnDimensionWidth(columnDimensionWidthMap)
+
   const changeRowHeight = useChangeRowDimensionHeight(rowDimensionHeightMap)
 
   const gridContainer = ref<HTMLDivElement | null>(null)
@@ -103,6 +109,7 @@ export function useGrid () {
     'x',
     changeColumnWidth,
     columnDimensionWidthMap,
+    mode,
     activeDocument
   )
   watch(resizingColumnWidth, () => updateSelectionViews(), { deep: true })
@@ -120,6 +127,7 @@ export function useGrid () {
     'y',
     changeRowHeight,
     rowDimensionHeightMap,
+    mode,
     activeDocument
   )
   watch(resizingRowHeight, () => updateSelectionViews(), { deep: true })
@@ -329,6 +337,8 @@ export function useGrid () {
     resizingColumn,
     resizingColumnWidth,
     getColumnWidth,
+    changeColumnWidth,
+    resetColumnWidth,
     resizingRow,
     resizingRowHeight,
     getRowHeight,

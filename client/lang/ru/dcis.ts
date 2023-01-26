@@ -431,6 +431,12 @@ export default {
       kind: 'Тип ячейки по умолчанию',
       buttonText: '@:save'
     },
+    columnLocalSettings: {
+      header: 'Изменение локальных свойств',
+      width: 'Ширина',
+      reset: '@:reset',
+      buttonText: '@:save'
+    },
     rowControl: {
       properties: '@:properties',
       addRowAbove: 'Добавить строку выше',

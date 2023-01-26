@@ -1,8 +1,10 @@
 import { RemovableRef, useEventListener } from '@vueuse/core'
 import { computed, ref, Ref, UnwrapRef } from '#app'
+import { getDimensionSizeKey } from '~/composables/grid-local-mutations'
 import {
   ElementPositionType,
   ElementResizingType,
+  GridMode,
   MousePositionType,
   ResizingType,
   ScrollInfoType
@@ -15,6 +17,7 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   direction: 'x' | 'y',
   changeSize: (dimension: T, size: number) => void | Promise<void>,
   dimensionSizeMap: RemovableRef<Record<string, number>>,
+  mode: Ref<GridMode>,
   activeDocument: Ref<DocumentType>
 ) {
   const borderGag = 6
@@ -35,10 +38,12 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   const getSize = (dimension: T): number => {
     if (resizing.value && resizing.value.object.id === dimension.id) {
       return resizing.value.size
-    } else {
-      const key = activeDocument.value ? `${activeDocument.value.id}${dimension.id}` : dimension.id
-      return dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value
     }
+    if (mode.value === GridMode.CHANGE) {
+      return dimension[dimensionKey] ?? defaultElementSize.value
+    }
+    const key = getDimensionSizeKey(activeDocument, dimension)
+    return dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value
   }
 
   const mousemove = (
@@ -125,10 +130,16 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   }
 
   const setResizingHover = (dimension: T, mousePosition: MousePositionType) => {
-    const key = activeDocument.value ? `${activeDocument.value.id}${dimension.id}` : dimension.id
+    const key = getDimensionSizeKey(activeDocument, dimension)
+    let size = 0
+    if (mode.value === GridMode.CHANGE) {
+      size = dimension[dimensionKey] ?? defaultElementSize.value
+    } else {
+      size = dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value
+    }
     resizing.value = {
       object: dimension as UnwrapRef<T>,
-      size: dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value,
+      size,
       mousePosition,
       state: 'hover'
     }
