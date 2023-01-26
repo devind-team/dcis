@@ -3,7 +3,7 @@ bread-crumbs(v-if="user.divisions.length" :items="breadCrumbs")
   v-card
     v-tabs(grow)
       v-tab {{ $t('dcis.projects.name') }}
-      v-tab(v-if="user.divisions.length") {{ $t('dcis.projects.divisions') }}
+      v-tab {{ $t('dcis.projects.divisions') }}
       v-tab-item
         v-card(flat)
           v-card-text
@@ -37,16 +37,16 @@ import type { PropType } from '#app'
 import { computed, defineComponent, onMounted, ref, toRef, useNuxt2Meta } from '#app'
 import { useRoute, useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
-import { ProjectType } from '~/types/graphql'
+import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
 import { Item } from '~/types/filters'
-import { useApolloHelpers, useI18n } from '~/composables'
+import { useApolloHelpers, useCursorPagination, useI18n, useQueryRelay } from '~/composables'
 import { useAuthStore } from '~/stores'
-import { useProjects } from '~/services/grapqhl/queries/dcis/projects'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import ProjectsFilter from '~/components/dcis/projects/ProjectsFilter.vue'
 import AddProject from '~/components/dcis/projects/AddProject.vue'
 import ProjectsTable from '~/components/dcis/projects/ProjectsTable.vue'
+import projectsQuery from '~/gql/dcis/queries/projects.graphql'
 
 export default defineComponent({
   name: 'DcisProjects',
@@ -67,13 +67,21 @@ export default defineComponent({
     const user = toRef(authStore, 'user')
     const hasPerm = toRef(authStore, 'hasPerm')
 
+    const projectQueryEnabled = ref<boolean>(false)
     const {
       data: projects,
       pagination: { count, totalCount },
       loading,
       addUpdate,
       deleteUpdate
-    } = useProjects()
+    } = useQueryRelay<ProjectsQuery, ProjectsQueryVariables, ProjectType>({
+      document: projectsQuery,
+      options: computed(() => ({
+        enabled: projectQueryEnabled.value
+      }))
+    }, {
+      pagination: useCursorPagination()
+    })
 
     const defaultFilter: Item[] = [{ id: 'active' }]
     const selectedFilters = ref<Item[]>([{ id: 'active' }])
@@ -88,6 +96,7 @@ export default defineComponent({
     })
 
     onMounted(() => {
+      projectQueryEnabled.value = true
       if (route.query.deleteProjectId) {
         deleteUpdate(
           defaultClient.cache,
