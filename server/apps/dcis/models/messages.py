@@ -5,7 +5,7 @@ from .document import Document
 
 
 class DocumentMessage(models.Model):
-    """Модель комментариев к документу"""
+    """Модель комментариев к документу."""
 
     MESSAGE = 'message'
     STATUS = 'status'

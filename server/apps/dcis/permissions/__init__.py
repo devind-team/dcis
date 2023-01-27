@@ -16,8 +16,6 @@ from .document_permissions import (
     can_change_attribute_value,
     can_change_child_row_dimension_height,
     can_change_document_base,
-    can_change_document_comment,
-    can_change_document_comment_base,
     can_change_value,
     can_delete_child_row_dimension,
     can_delete_document_status,

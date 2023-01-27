@@ -3,7 +3,6 @@
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
     id
-    comment
     version
     createdAt
     updatedAt

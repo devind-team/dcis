@@ -1,6 +1,5 @@
 fragment DocumentFields on DocumentType {
   id
-  comment
   version
   createdAt
   updatedAt

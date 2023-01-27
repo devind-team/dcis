@@ -15,8 +15,7 @@ from apps.dcis.models import (Cell, Document, DocumentMessage, Period, Project, 
 from apps.dcis.permissions import (
     can_add_document,
     can_add_document_message,
-    can_change_document_base,
-    can_change_document_comment,
+    can_change_document_base
 )
 from apps.dcis.services.attribute_service import create_attribute_context, rerender_values
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
@@ -86,7 +85,6 @@ def create_document(
     user: User,
     period: Period,
     status: Status,
-    comment: str,
     document_id: int | str | None = None,
     division_id: int | str | None = None
 ) -> tuple[Document | None, list[ErrorFieldType]]:
@@ -95,7 +93,6 @@ def create_document(
     :param user: пользователь, который создает документ
     :param period: собираемый период
     :param status: начальный статус документа
-    :param comment: комментарий к документу
     :param document_id: идентификатор документа, от которого создавать копию
     :param division_id: идентификатор дивизиона
     """
@@ -116,7 +113,6 @@ def create_document(
         object_name = ''
     document = Document.objects.create(
         version=(get_documents_max_version(period.id, division_id) or 0) + 1,
-        comment=comment,
         object_id=division_id,
         object_name=object_name,
         updated_by=user,
@@ -141,14 +137,6 @@ def create_document(
             _transfer_values(sheet, document, source_document, rows_transform)
     rerender_values(user, document, create_attribute_context(user, document))
     return document, []
-
-
-def change_document_comment(user: User, document: Document, comment: str) -> Document:
-    """Изменение комментария версии документа."""
-    can_change_document_comment(user, document)
-    document.comment = comment
-    document.save(update_fields=('comment',))
-    return document
 
 
 def create_document_message(user: User, document: Document, message: str) -> DocumentMessage:
