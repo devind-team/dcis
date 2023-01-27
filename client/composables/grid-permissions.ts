@@ -25,11 +25,6 @@ export function useCanChangeRowHeight () {
   }
 }
 
-export function useCanChangeRowSettings () {
-  const mode = inject(GridModeInject)
-  return computed<boolean>(() => mode.value === GridMode.CHANGE)
-}
-
 export function useCanAddRowBeforeOrAfter () {
   const userStore = useAuthStore()
   const mode = inject(GridModeInject)

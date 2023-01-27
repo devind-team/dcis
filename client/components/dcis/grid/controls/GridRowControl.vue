@@ -1,10 +1,12 @@
 <template lang="pug">
 v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-content-click)
   v-list(dense)
-    grid-row-settings(
-      v-if="canChangeSettings"
+    component(
+      :is="settingsComponent"
       :row="row"
       :get-row-height="getRowHeight"
+      @submit="({ height }) => changeRowHeight(row, height)"
+      @reset="resetRowHeight(row)"
       @close="$emit('close')"
     )
       template(#activator="{ on }")
@@ -34,27 +36,46 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
+import { computed, inject, PropType } from '#app'
 import { AddRowDimensionPosition } from '~/composables/grid-mutations'
 import { useAddRowDimension, useDeleteRowDimension } from '~/composables/grid-actions'
 import { RowDimensionType } from '~/types/graphql'
+import { GridMode, GridModeInject } from '~/types/grid'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
+import GridChildRowSettings from '~/components/dcis/grid/settings/GridChildRowSettings.vue'
+import GridRowLocalSettings from '~/components/dcis/grid/settings/GridRowLocalSettings.vue'
 
 export default defineComponent({
-  components: { GridRowSettings },
+  components: { GridRowSettings, GridChildRowSettings, GridRowLocalSettings },
   props: {
     row: { type: Object as PropType<RowDimensionType>, required: true },
-    canChangeSettings: { type: Boolean, required: true },
     canAddBefore: { type: Boolean, required: true },
     canAddAfter: { type: Boolean, required: true },
     canAddInside: { type: Boolean, required: true },
     canDelete: { type: Boolean, required: true },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
+    changeRowHeight: {
+      type: Function as PropType<(rowDimension: RowDimensionType, height: number) => void>,
+      required: true
+    },
+    resetRowHeight: { type: Function as PropType<(rowDimension: RowDimensionType) => void>, required: true },
     clearSelection: { type: Function as PropType<() => void>, required: true },
     posX: { type: Number, required: true },
     posY: { type: Number, required: true }
   },
   setup (props) {
+    const mode = inject(GridModeInject)
+
+    const settingsComponent = computed<string>(() => {
+      if (mode.value === GridMode.CHANGE) {
+        return 'GridRowSettings'
+      }
+      if (mode.value !== GridMode.READ && props.row.parent !== null) {
+        return 'GridChildRowSettings'
+      }
+      return 'GridRowLocalSettings'
+    })
+
     const addRowDimension = useAddRowDimension()
     const deleteRowDimensionMutate = useDeleteRowDimension()
 
@@ -65,6 +86,7 @@ export default defineComponent({
 
     return {
       AddRowDimensionPosition,
+      settingsComponent,
       addRowDimension,
       deleteRowDimension
     }

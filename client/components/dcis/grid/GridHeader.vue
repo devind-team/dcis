@@ -20,9 +20,11 @@ thead
     )
       div(@contextmenu="(e) => showMenu(e, column)") {{ column.name }}
   grid-column-control(
-    v-if="!!currentCol && mode === GridMode.CHANGE"
+    v-if="!!currentCol"
     :column="currentCol"
     :get-column-width="getColumnWidth"
+    :change-column-width="changeColumnWidth"
+    :reset-column-width="resetColumnWidth"
     :pos-x="posX"
     :pos-y="posY"
     @close="currentCol = null"
@@ -42,6 +44,11 @@ export default defineComponent({
     columnNameRowHeight: { type: Number, required: true },
     resizingColumn: { type: Object as PropType<ResizingType<ColumnDimensionType>>, default: null },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
+    changeColumnWidth: {
+      type: Function as PropType<(columnDimension: ColumnDimensionType, width: number) => void>,
+      required: true
+    },
+    resetColumnWidth: { type: Function as PropType<(columnDimension: ColumnDimensionType) => void>, required: true },
     getColumnFixedInfo: { type: Function as PropType<(column: ColumnDimensionType) => FixedInfoType>, required: true },
     borderFixedColumn: { type: Object as PropType<ColumnDimensionType>, default: null },
     borderFixedRow: { type: Object as PropType<RowDimensionType>, default: null },

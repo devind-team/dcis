@@ -10,6 +10,7 @@ mutation-modal-form(
   i18n-path="dcis.grid.rowSettings"
   mutation-name="changeRowDimension"
   @close="$emit('close')"
+  @click:outside="$emit('close')"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")
@@ -68,7 +69,7 @@ export default defineComponent({
 
     const variables = computed<ChangeRowDimensionMutationVariables>(() => ({
       rowDimensionId: props.row.id,
-      height: +height.value,
+      height: Number(height.value),
       hidden: hidden.value,
       dynamic: dynamic.value
     }))
@@ -93,14 +94,14 @@ export default defineComponent({
     }
 
     return {
+      changeRowDimensionMutation,
       dateTimeHM,
       height,
       hidden,
       dynamic,
       variables,
       optimisticResponse,
-      update,
-      changeRowDimensionMutation
+      update
     }
   }
 })

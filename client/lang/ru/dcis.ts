@@ -424,6 +424,12 @@ export default {
       kind: 'Тип ячейки по умолчанию',
       buttonText: '@:save'
     },
+    columnLocalSettings: {
+      header: 'Изменение локальных свойств',
+      width: 'Ширина',
+      reset: '@:reset',
+      buttonText: '@:save'
+    },
     rowControl: {
       properties: '@:properties',
       addRowAbove: 'Добавить строку выше',
@@ -437,6 +443,18 @@ export default {
       height: 'Высота',
       hide: '@:hide',
       makeDynamic: 'Разрешить дочерние строки',
+      buttonText: '@:save'
+    },
+    childRowSettings: {
+      header: 'Изменение свойств',
+      subheader: 'Дата изменения: {updatedAt}',
+      height: 'Высота',
+      buttonText: '@:save'
+    },
+    rowLocalSettings: {
+      header: 'Изменение локальных свойств',
+      height: 'Высота',
+      reset: '@:reset',
       buttonText: '@:save'
     },
     changeValue: 'Изменение значения',

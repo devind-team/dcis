@@ -44,7 +44,12 @@ module.exports = {
       'no-undef': 'off',
       'import/no-mutable-exports': 'off',
       'vue/valid-attribute-name': 'off',
-      'vue/valid-model-definition': 'off'
+      'vue/valid-model-definition': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }]
     }
   },
   {
