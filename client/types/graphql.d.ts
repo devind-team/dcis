@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы изменения связей между записями в базе данных
+ * Типы измнения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -1771,7 +1771,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатает, готовиться отправить сообщение
+ * - TYPING - Печатет, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -2291,6 +2291,13 @@ export type DjangoDebugSql = {
   vendor: Scalars['String'];
 };
 
+/** An enumeration. */
+export type DocumentMessageKind =
+  /** message */
+  | 'MESSAGE'
+  /** status */
+  | 'STATUS';
+
 /** Тип комментариев для документа */
 export type DocumentMessageType = Node & {
   __typename?: 'DocumentMessageType';
@@ -2302,6 +2309,8 @@ export type DocumentMessageType = Node & {
   document?: Maybe<DocumentType>;
   /** The ID of the object. */
   id: Scalars['ID'];
+  /** Тип сообщения */
+  kind: DocumentMessageKind;
   /** Пользователь */
   user: UserType;
 };
@@ -2391,7 +2400,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы. */
+/** Ошибка в поле формы */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -4756,7 +4765,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представляющий собой таблицу. */
+/** Документ, представлющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
