@@ -10,6 +10,7 @@ mutation-modal-form(
   i18n-path="dcis.grid.rowSettings"
   mutation-name="changeRowDimension"
   @close="$emit('close')"
+  @click:outside="$emit('close')"
 )
   template(#activator="{ on }")
     slot(name="activator" :on="on")

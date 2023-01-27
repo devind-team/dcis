@@ -1,5 +1,5 @@
 <template lang="pug">
-v-dialog(v-model="active" width="600")
+v-dialog(v-model="active" width="600" @click:outside="$emit('close')")
   template(#activator="{ on, attrs }")
     slot(name="activator" :on="on" :attrs="attrs")
   validation-observer(v-slot="{ handleSubmit, invalid }" slim)
@@ -8,7 +8,7 @@ v-dialog(v-model="active" width="600")
         v-card-title
           | {{ String($t('dcis.grid.columnLocalSettings.header')) }}
           v-spacer
-          v-btn(@click="close" icon)
+          v-btn(@click="$emit('close')" icon)
             v-icon mdi-close
         v-card-text
           validation-provider(
@@ -47,7 +47,6 @@ export default defineComponent({
     const width = ref<string>(String(props.getColumnWidth(props.column)))
 
     const submit = () => {
-      active.value = false
       emit('submit', { width: Number(width.value) })
       emit('close')
     }
@@ -57,13 +56,7 @@ export default defineComponent({
       emit('close')
     }
 
-    const close = () => {
-      active.value = false
-      width.value = String(props.getColumnWidth(props.column))
-      emit('close')
-    }
-
-    return { active, width, submit, reset, close }
+    return { active, width, submit, reset }
   }
 })
 </script>
