@@ -10,10 +10,12 @@ bread-crumbs(:items="breadCrumbs")
                 .new-date.text-center(v-if="message.isNewDate")
                   v-divider
                   v-chip(small) {{ date(message.createdAt) }}
-                .message
+                .message(v-if="message.kind === 'MESSAGE'")
                   .user
                      .username {{ getUserName(message.user) }}
                      .time {{ timeHM(message.createdAt) }}
+                  .content {{ message.comment }}
+                div(v-else)
                   .content {{ message.comment }}
         footer.message__textarea
           form(@submit.prevent="addDocumentMessage")
