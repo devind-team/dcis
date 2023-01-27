@@ -73,7 +73,7 @@ export default defineComponent({
 
     const variables = computed<ChangeColumnDimensionMutationVariables>(() => ({
       columnDimensionId: props.column.id,
-      width: +width.value,
+      width: Number(width.value),
       hidden: hidden.value,
       kind: kind.value.value
     }))
@@ -98,6 +98,7 @@ export default defineComponent({
     }
 
     return {
+      changeColumnDimensionMutation,
       dateTimeHM,
       width,
       hidden,
@@ -105,8 +106,7 @@ export default defineComponent({
       kind,
       variables,
       optimisticResponse,
-      update,
-      changeColumnDimensionMutation
+      update
     }
   }
 })

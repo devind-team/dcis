@@ -42,10 +42,11 @@ import { useAddRowDimension, useDeleteRowDimension } from '~/composables/grid-ac
 import { RowDimensionType } from '~/types/graphql'
 import { GridMode, GridModeInject } from '~/types/grid'
 import GridRowSettings from '~/components/dcis/grid/settings/GridRowSettings.vue'
+import GridChildRowSettings from '~/components/dcis/grid/settings/GridChildRowSettings.vue'
 import GridRowLocalSettings from '~/components/dcis/grid/settings/GridRowLocalSettings.vue'
 
 export default defineComponent({
-  components: { GridRowSettings, GridRowLocalSettings },
+  components: { GridRowSettings, GridChildRowSettings, GridRowLocalSettings },
   props: {
     row: { type: Object as PropType<RowDimensionType>, required: true },
     canAddBefore: { type: Boolean, required: true },
@@ -65,9 +66,15 @@ export default defineComponent({
   setup (props) {
     const mode = inject(GridModeInject)
 
-    const settingsComponent = computed<string>(
-      () => mode.value === GridMode.CHANGE ? 'GridRowSettings' : 'GridRowLocalSettings'
-    )
+    const settingsComponent = computed<string>(() => {
+      if (mode.value === GridMode.CHANGE) {
+        return 'GridRowSettings'
+      }
+      if (mode.value !== GridMode.READ && props.row.parent !== null) {
+        return 'GridChildRowSettings'
+      }
+      return 'GridRowLocalSettings'
+    })
 
     const addRowDimension = useAddRowDimension()
     const deleteRowDimensionMutate = useDeleteRowDimension()

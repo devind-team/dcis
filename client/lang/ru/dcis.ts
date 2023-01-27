@@ -452,6 +452,12 @@ export default {
       makeDynamic: 'Разрешить дочерние строки',
       buttonText: '@:save'
     },
+    childRowSettings: {
+      header: 'Изменение свойств',
+      subheader: 'Дата изменения: {updatedAt}',
+      height: 'Высота',
+      buttonText: '@:save'
+    },
     rowLocalSettings: {
       header: 'Изменение локальных свойств',
       height: 'Высота',

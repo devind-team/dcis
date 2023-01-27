@@ -3,37 +3,32 @@ import { RemovableRef } from '@vueuse/core'
 import { UpdateType } from '~/composables/query-common'
 import {
   useChangeColumnDimensionWidthLocalMutation,
-  useResetColumnDimensionWidthLocalMutation,
   useChangeRowDimensionHeightLocalMutation,
+  useResetColumnDimensionWidthLocalMutation,
   useResetRowDimensionHeightLocalMutation
 } from '~/composables/grid-local-mutations'
 import {
-  useAddRowDimensionMutation,
   useAddChildRowDimensionMutation,
-  useDeleteRowDimensionMutation,
-  useDeleteChildRowDimensionMutation,
+  useAddRowDimensionMutation,
   useChangeCellDefaultMutation,
   useChangeChildRowDimensionHeightMutation,
   useChangeColumnDimensionWidthMutation,
   useChangeFileValueMutation,
   useChangeRowDimensionHeightMutation,
   useChangeValueMutation,
+  useDeleteChildRowDimensionMutation,
+  useDeleteRowDimensionMutation,
   useUnloadFileValueArchiveMutation
 } from '~/composables/grid-mutations'
 import { useCanChangeRowHeight } from '~/composables/grid-permissions'
 import {
-  GridModeInject,
-  ActiveSheetInject,
-  UpdateActiveSheetInject,
   ActiveDocumentInject,
-  GridMode
+  ActiveSheetInject,
+  GridMode,
+  GridModeInject,
+  UpdateActiveSheetInject
 } from '~/types/grid'
-import {
-  CellType,
-  DocumentSheetQuery,
-  PeriodSheetQuery, RowDimensionType,
-  ValueFilesQuery
-} from '~/types/graphql'
+import { CellType, DocumentSheetQuery, PeriodSheetQuery, RowDimensionType, ValueFilesQuery } from '~/types/graphql'
 
 export function useAddRowDimension () {
   const mode = inject(GridModeInject)
@@ -90,7 +85,7 @@ export function useChangeRowDimensionHeight (rowDimensionHeightMap: RemovableRef
   if (mode.value === GridMode.CHANGE) {
     return useChangeRowDimensionHeightMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
-  if (mode.value === GridMode.WRITE) {
+  if (mode.value === GridMode.READ || mode.value === GridMode.WRITE) {
     const activeDocument = inject(ActiveDocumentInject)
     const canChangeRowHeight = useCanChangeRowHeight()
     const localMutation = useChangeRowDimensionHeightLocalMutation(rowDimensionHeightMap, activeDocument)

@@ -68,7 +68,7 @@ export default defineComponent({
 
     const variables = computed<ChangeRowDimensionMutationVariables>(() => ({
       rowDimensionId: props.row.id,
-      height: +height.value,
+      height: Number(height.value),
       hidden: hidden.value,
       dynamic: dynamic.value
     }))
@@ -93,14 +93,14 @@ export default defineComponent({
     }
 
     return {
+      changeRowDimensionMutation,
       dateTimeHM,
       height,
       hidden,
       dynamic,
       variables,
       optimisticResponse,
-      update,
-      changeRowDimensionMutation
+      update
     }
   }
 })

@@ -1,6 +1,7 @@
 import { Ref } from '#app'
 import { RemovableRef, useStorage } from '@vueuse/core'
 import { DocumentType, ColumnDimensionType, RowDimensionType } from '~/types/graphql'
+import { DimensionType } from '~/composables/grid-resizing'
 
 export function useColumnDimensionWidthMap () {
   return useStorage<Record<string, number>>(
@@ -20,7 +21,7 @@ export function useRowDimensionHeightMap () {
   )
 }
 
-export function getDimensionSizeKey<T extends { id: string, width?: number, height?: number }> (
+export function getDimensionSizeKey<T extends DimensionType> (
   activeDocument: Ref<DocumentType | null>,
   dimension: T
 ) {

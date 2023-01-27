@@ -11,7 +11,14 @@ import {
 } from '~/types/grid'
 import { DocumentType } from '~/types/graphql'
 
-export function useGridResizing<T extends { id: string, width?: number, height?: number }> (
+export type DimensionType = {
+  id: string,
+  width?: number,
+  height?: number,
+  parent?: DimensionType | null
+}
+
+export function useGridResizing<T extends DimensionType> (
   scroll: Ref<ScrollInfoType>,
   defaultSize: number,
   direction: 'x' | 'y',
@@ -35,11 +42,15 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
     size: resizing.value ? resizing.value.size : 0
   }))
 
+  const isRemoteSource = (dimension: T) => mode.value === GridMode.CHANGE || (
+    direction === 'y' && mode.value !== GridMode.READ && dimension.parent !== null
+  )
+
   const getSize = (dimension: T): number => {
     if (resizing.value && resizing.value.object.id === dimension.id) {
       return resizing.value.size
     }
-    if (mode.value === GridMode.CHANGE) {
+    if (isRemoteSource(dimension)) {
       return dimension[dimensionKey] ?? defaultElementSize.value
     }
     const key = getDimensionSizeKey(activeDocument, dimension)
@@ -132,7 +143,7 @@ export function useGridResizing<T extends { id: string, width?: number, height?:
   const setResizingHover = (dimension: T, mousePosition: MousePositionType) => {
     const key = getDimensionSizeKey(activeDocument, dimension)
     let size = 0
-    if (mode.value === GridMode.CHANGE) {
+    if (isRemoteSource(dimension)) {
       size = dimension[dimensionKey] ?? defaultElementSize.value
     } else {
       size = dimensionSizeMap.value[key] ?? dimension[dimensionKey] ?? defaultElementSize.value
