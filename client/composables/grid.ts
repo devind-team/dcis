@@ -16,7 +16,8 @@ import { useGridSelection } from '~/composables/grid-selection'
 import {
   useChangeColumnDimensionWidth,
   useResetColumnDimensionWidth,
-  useChangeRowDimensionHeight
+  useChangeRowDimensionHeight,
+  useResetRowDimensionHeight
 } from '~/composables/grid-actions'
 import { useColumnDimensionWidthMap, useRowDimensionHeightMap } from '~/composables/grid-local-mutations'
 
@@ -43,6 +44,7 @@ export function useGrid () {
   const resetColumnWidth = useResetColumnDimensionWidth(columnDimensionWidthMap)
 
   const changeRowHeight = useChangeRowDimensionHeight(rowDimensionHeightMap)
+  const resetRowHeight = useResetRowDimensionHeight(rowDimensionHeightMap)
 
   const gridContainer = ref<HTMLDivElement | null>(null)
   const grid = ref<HTMLTableElement | null>(null)
@@ -342,6 +344,8 @@ export function useGrid () {
     resizingRow,
     resizingRowHeight,
     getRowHeight,
+    changeRowHeight,
+    resetRowHeight,
     getColumnFixedInfo,
     getRowFixedInfo,
     getCellFixedInfo,

@@ -33,14 +33,15 @@ tbody
         @clear-active="setActiveCell(null)"
       )
   grid-row-control(
-    v-if="!!currentRow && viewControl(currentRow)"
+    v-if="!!currentRow"
     :row="currentRow"
-    :can-change-settings="canChangeRowSettings"
     :can-add-before="canAddRowBeforeOrAfter(currentRow)"
     :can-add-after="canAddRowBeforeOrAfter(currentRow)"
     :can-add-inside="canAddRowInside(currentRow)"
     :can-delete="canDeleteRow(currentRow)"
     :get-row-height="getRowHeight"
+    :change-row-height="changeRowHeight"
+    :reset-row-height="resetRowHeight"
     :clear-selection="clearSelection"
     :pos-x="posX"
     :pos-y="posY"
@@ -60,12 +61,7 @@ import {
   RowFixedInfoType
 } from '~/types/grid'
 import { positionsToRangeIndices } from '~/services/grid'
-import {
-  useCanAddRowBeforeOrAfter,
-  useCanAddRowInside,
-  useCanChangeRowSettings,
-  useCanDeleteRow
-} from '~/composables/grid-permissions'
+import { useCanAddRowBeforeOrAfter, useCanAddRowInside, useCanDeleteRow } from '~/composables/grid-permissions'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
 
@@ -74,6 +70,11 @@ export default defineComponent({
   props: {
     resizingRow: { type: Object as PropType<ResizingType<RowDimensionType>>, default: null },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
+    changeRowHeight: {
+      type: Function as PropType<(rowDimension: RowDimensionType, height: number) => void>,
+      required: true
+    },
+    resetRowHeight: { type: Function as PropType<(rowDimension: RowDimensionType) => void>, required: true },
     getRowFixedInfo: { type: Function as PropType<(row: RowDimensionType) => RowFixedInfoType>, required: true },
     getCellFixedInfo: { type: Function as PropType<(cell: CellType) => FixedInfoType>, required: true },
     borderFixedColumn: { type: Object as PropType<ColumnDimensionType>, default: null },
@@ -132,16 +133,9 @@ export default defineComponent({
       return {}
     }
 
-    const canChangeRowSettings = useCanChangeRowSettings()
     const canAddRowBeforeOrAfter = useCanAddRowBeforeOrAfter()
     const canAddRowInside = useCanAddRowInside()
     const canDeleteRow = useCanDeleteRow()
-    const viewControl = (rowDimension: RowDimensionType): boolean => {
-      return canChangeRowSettings.value ||
-        canAddRowBeforeOrAfter(rowDimension) ||
-        canAddRowInside(rowDimension) ||
-        canDeleteRow(rowDimension)
-    }
 
     const getRowNameCellClass = (row: RowDimensionType): Record<string, boolean> => {
       return {
@@ -262,11 +256,9 @@ export default defineComponent({
       activeSheet,
       getRowClass,
       getRowStyle,
-      canChangeRowSettings,
       canAddRowBeforeOrAfter,
       canDeleteRow,
       canAddRowInside,
-      viewControl,
       getRowNameCellClass,
       getRowNameCellContentStyle,
       getCellClass,

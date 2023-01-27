@@ -4,7 +4,7 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
     slot(:on="on" :attrs="attrs")
   v-list(dense)
     component(
-      :is="component"
+      :is="settingsComponent"
       :column="column"
       :get-column-width="getColumnWidth"
       @submit="({ width }) => changeColumnWidth(column, width)"
@@ -42,11 +42,11 @@ export default defineComponent({
   setup () {
     const mode = inject(GridModeInject)
 
-    const component = computed<string>(
+    const settingsComponent = computed<string>(
       () => mode.value === GridMode.CHANGE ? 'GridColumnSettings' : 'GridColumnLocalSettings'
     )
 
-    return { component }
+    return { settingsComponent }
   }
 })
 </script>

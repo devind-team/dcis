@@ -57,3 +57,14 @@ export function useChangeRowDimensionHeightLocalMutation (
     rowDimensionHeightMap.value = { ...rowDimensionHeightMap.value, [key]: height }
   }
 }
+
+export function useResetRowDimensionHeightLocalMutation (
+  rowDimensionHeightMap: RemovableRef<Record<string, number>>,
+  activeDocument: Ref<DocumentType | null>
+) {
+  return function (rowDimension: RowDimensionType) {
+    const key = getDimensionSizeKey(activeDocument, rowDimension)
+    const { [key]: _, ...rest } = rowDimensionHeightMap.value
+    rowDimensionHeightMap.value = rest
+  }
+}

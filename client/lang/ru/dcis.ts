@@ -452,6 +452,12 @@ export default {
       makeDynamic: 'Разрешить дочерние строки',
       buttonText: '@:save'
     },
+    rowLocalSettings: {
+      header: 'Изменение локальных свойств',
+      height: 'Высота',
+      reset: '@:reset',
+      buttonText: '@:save'
+    },
     changeValue: 'Изменение значения',
     cellFiles: {
       readonlyHeader: 'Файлы',

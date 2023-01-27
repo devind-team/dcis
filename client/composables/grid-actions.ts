@@ -4,7 +4,8 @@ import { UpdateType } from '~/composables/query-common'
 import {
   useChangeColumnDimensionWidthLocalMutation,
   useResetColumnDimensionWidthLocalMutation,
-  useChangeRowDimensionHeightLocalMutation
+  useChangeRowDimensionHeightLocalMutation,
+  useResetRowDimensionHeightLocalMutation
 } from '~/composables/grid-local-mutations'
 import {
   useAddRowDimensionMutation,
@@ -102,6 +103,11 @@ export function useChangeRowDimensionHeight (rowDimensionHeightMap: RemovableRef
     }
   }
   return useChangeRowDimensionHeightLocalMutation(rowDimensionHeightMap, ref(null))
+}
+
+export function useResetRowDimensionHeight (rowDimensionHeightMap: RemovableRef<Record<string, number>>) {
+  const activeDocument = inject(ActiveDocumentInject)
+  return useResetRowDimensionHeightLocalMutation(rowDimensionHeightMap, activeDocument)
 }
 
 export function useChangeValue () {
