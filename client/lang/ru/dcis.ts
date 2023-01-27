@@ -369,6 +369,10 @@ export default {
         name: 'Не подавшие'
       }
     },
+    comments: {
+      comment: 'Введите комментарий',
+      send: '@:send'
+    },
     attributes: {
       noAttributes: 'Нет атрибутов'
     }
