@@ -7,8 +7,9 @@ def move_document_comments(apps, schema_editor):
     """Перемещение комментариев документов в блок комментариев."""
     Document = apps.get_model('dcis', 'Document')
     DocumentMessage = apps.get_model('dcis', 'DocumentMessage')
+    User = apps.get_model('core', 'User')
     for document in Document.objects.all():
-        user = document.user or document.period.user
+        user = document.user or document.period.user or User.objects.get(username='support@cbias.ru')
         DocumentMessage.objects.create(comment=document.comment, user=user, document=document)
 
 
