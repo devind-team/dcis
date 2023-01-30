@@ -1,19 +1,17 @@
 <template lang="pug">
   v-dialog(v-model="active" v-show="!gridChoice.active.value" width="600")
     template(#activator="{ on, attrs }")
-      div(class="mr-1 v-item-group theme--light v-btn-toggle")
+      .v-btn-toggle.mx-1(:class="themeClass" style="border-radius: 4px")
         v-btn(
           v-on="on"
           v-bind="attrs"
           :disabled="disabled || !cell"
-          :class="[{ 'v-btn--active': cell && cell.aggregation }, themeClass]"
-          class="v-btn--has-bg theme--light v-size--default"
-          width="40"
+          :class="{ 'v-btn--active': cell && cell.aggregation }"
           height="40"
         )
           v-icon mdi-sigma
     v-card
-      v-card-title {{ $t('dcis.grid.sheetToolbar.aggregationTitle') }}
+      v-card-title {{ $t('dcis.grid.sheetToolbar.aggregation.title') }}
         v-spacer
         v-btn(@click="cancel" icon)
           v-icon mdi-close
@@ -23,15 +21,16 @@
             v-combobox(
               v-model="aggregationKind"
               :items="aggregationItems"
-              :label="$t('dcis.grid.sheetToolbar.aggregationChoice')"
+              :label="$t('dcis.grid.sheetToolbar.aggregation.choice')"
             )
           v-col.text-right(v-if="aggregationKind && aggregationKind.value")
-            v-btn(@click="startChoice" color="primary") Добавить ячейки
+            v-btn(@click="startChoice" color="primary") {{ $t('dcis.grid.sheetToolbar.aggregation.addCells') }}
         v-list(v-if="!fromCellsLoading")
           v-list-item(v-for="fromCell in fromCells" :key="fromCell.id")
             v-list-item-content
               v-list-item-title {{ cellPosition(fromCell) }}
-              v-list-item-subtitle {{ $t('dcis.grid.sheetToolbar.aggregationDefault', { value: fromCell.default }) }}
+              v-list-item-subtitle
+                | {{ $t('dcis.grid.sheetToolbar.aggregation.defaultValue', { value: fromCell.default }) }}
             v-list-item-action
               v-btn(@click="deleteMutate({ cellId: cell.id, targetCellId: fromCell.id })" icon)
                 v-icon(color="error") mdi-close
@@ -56,9 +55,9 @@ import deleteValuesCellMutation from '~/gql/dcis/mutations/cell/delete_values_ce
 import { END_CHOICE_EVENT, EndChoiceEventType, GridChoiceType } from '~/composables/grid-choice'
 
 const aggregationKinds = t => ([
-  { text: t('dcis.grid.sheetToolbar.aggregationKind.empty'), value: null },
+  { text: t('dcis.grid.sheetToolbar.aggregation.kinds.empty'), value: null },
   ...['sum', 'avg', 'max', 'min'].map(value => ({
-    text: t(`dcis.grid.sheetToolbar.aggregationKind.${value}`),
+    text: t(`dcis.grid.sheetToolbar.aggregation.kinds.${value}`),
     value
   }))
 ])
@@ -70,7 +69,7 @@ export default defineComponent({
     activeSheetIndex: { type: Number, default: null },
     disabled: { type: Boolean, default: true },
     cell: { type: Object as PropType<CellType>, default: null },
-    themeClass: { type: String, default: 'theme--light' }
+    themeClass: { type: String, required: true }
   },
   emits: ['changeKind'],
   setup (props, { emit }) {
