@@ -109,7 +109,7 @@ export default defineComponent({
       DeleteCuratorGroupMutation,
       DeleteCuratorGroupMutationVariables
     >(deleteCuratorGroupMutation, {
-      update: deleteUpdate
+      update: (cache, result) => deleteUpdate(cache, result)
     })
 
     return {

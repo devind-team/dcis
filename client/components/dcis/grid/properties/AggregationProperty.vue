@@ -111,7 +111,7 @@ export default defineComponent({
       DeleteValueCellMutation,
       DeleteValueCellMutationVariables
     >(deleteValuesCellMutation, {
-      update: deleteUpdate
+      update: (cache, result) => deleteUpdate(cache, result)
     })
 
     const cancel = () => {
