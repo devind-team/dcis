@@ -7,6 +7,8 @@
         :column-name-row-height="columnNameRowHeight"
         :resizing-column="resizingColumn"
         :get-column-width="getColumnWidth"
+        :change-column-width="changeColumnWidth"
+        :reset-column-width="resetColumnWidth"
         :get-column-fixed-info="getColumnFixedInfo"
         :border-fixed-column="borderFixedColumn"
         :border-fixed-row="borderFixedRow"
@@ -24,6 +26,8 @@
       grid-body(
         :resizing-row="resizingRow"
         :get-row-height="getRowHeight"
+        :change-row-height="changeRowHeight"
+        :reset-row-height="resetRowHeight"
         :get-row-fixed-info="getRowFixedInfo"
         :get-cell-fixed-info="getCellFixedInfo"
         :border-fixed-column="borderFixedColumn"
@@ -95,112 +99,10 @@ export default defineComponent({
   setup () {
     const mode = inject(GridModeInject)
 
-    const {
-      gridContainer,
-      grid,
-      rowNameColumnWidth,
-      columnNameRowHeight,
-      gridWidth,
-      activeCell,
-      setActiveCell,
-      selectSelectionCell,
-      resizingColumn,
-      resizingColumnWidth,
-      getColumnWidth,
-      resizingRow,
-      resizingRowHeight,
-      getRowHeight,
-      getColumnFixedInfo,
-      getRowFixedInfo,
-      getCellFixedInfo,
-      borderFixedColumn,
-      borderFixedRow,
-      isColumnFixedBorder,
-      isRowFixedBorder,
-      isCellFixedBorderRight,
-      isCellFixedBorderBottom,
-      selectedCells,
-      cellsSelectionView,
-      rowsSelectionView,
-      columnsSelectionView,
-      boundarySelectedColumnsPositions,
-      boundarySelectedRowsPositions,
-      allCellsSelected,
-      selectedColumnsPositions,
-      selectedRowsPositions,
-      selectedCellsOptions,
-      selectedColumnDimensionsOptions,
-      selectedRowDimensionsOptions,
-      clearSelection,
-      selectAllCells,
-      mousedownCell,
-      mouseenterCell,
-      mouseupCell,
-      mouseenterColumnName,
-      mousemoveColumnName,
-      mouseleaveColumnName,
-      mousedownColumnName,
-      mouseupColumnName,
-      mouseenterRowName,
-      mousemoveRowName,
-      mouseleaveRowName,
-      mousedownRowName,
-      mouseupRowName
-    } = useGrid()
-
     return {
       GridMode,
       mode,
-      gridContainer,
-      grid,
-      rowNameColumnWidth,
-      columnNameRowHeight,
-      gridWidth,
-      activeCell,
-      setActiveCell,
-      selectSelectionCell,
-      resizingColumn,
-      resizingColumnWidth,
-      getColumnWidth,
-      resizingRow,
-      resizingRowHeight,
-      getRowHeight,
-      getColumnFixedInfo,
-      getRowFixedInfo,
-      getCellFixedInfo,
-      borderFixedColumn,
-      borderFixedRow,
-      isColumnFixedBorder,
-      isRowFixedBorder,
-      isCellFixedBorderRight,
-      isCellFixedBorderBottom,
-      selectedCells,
-      cellsSelectionView,
-      rowsSelectionView,
-      columnsSelectionView,
-      boundarySelectedColumnsPositions,
-      boundarySelectedRowsPositions,
-      allCellsSelected,
-      selectedColumnsPositions,
-      selectedRowsPositions,
-      selectedCellsOptions,
-      selectedColumnDimensionsOptions,
-      selectedRowDimensionsOptions,
-      clearSelection,
-      selectAllCells,
-      mousedownCell,
-      mouseenterCell,
-      mouseupCell,
-      mouseenterColumnName,
-      mousemoveColumnName,
-      mouseleaveColumnName,
-      mousedownColumnName,
-      mouseupColumnName,
-      mouseenterRowName,
-      mousemoveRowName,
-      mouseleaveRowName,
-      mousedownRowName,
-      mouseupRowName
+      ...useGrid()
     }
   }
 })
@@ -216,6 +118,8 @@ export default defineComponent({
 .grid__cursor_row-resize *
   cursor: row-resize !important
 
+$resizing-background-light: white
+$resizing-background-dark: #1E1E1E
 $border: 1px solid silver
 $border-selected: 1px solid blue
 $border-fixed: 1.5px solid gray
@@ -226,11 +130,18 @@ $arrow-right-cursor: url("/cursors/arrow-right.svg") 8 8, pointer
 $arrow-down-cursor: url("/cursors/arrow-down.svg") 8 8, pointer
 
 div.grid__body
+  line-height: 1.5
+
   .grid__element-resizing
     position: absolute
     z-index: 2
     font-size: 12px
-    background: white !important
+
+  .grid__element-resizing_light
+    background: $resizing-background-light !important
+
+  .grid__element-resizing_dark
+    background: $resizing-background-dark !important
 
   .grid__container
     position: relative

@@ -1,5 +1,12 @@
 <template lang="pug">
-v-dialog(v-model="active" :width="width" :fullscreen="fullscreen" :persistent="persistent" scrollable)
+v-dialog(
+  v-model="active"
+  :width="width"
+  :fullscreen="fullscreen"
+  :persistent="persistent"
+  scrollable
+  @click:outside="$emit('click:outside')"
+)
   template(#activator="{ on, attrs }")
     slot(name="activator" :on="on" :attrs="attrs" :close="close")
   mutation-form(

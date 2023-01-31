@@ -122,7 +122,7 @@ export default defineComponent({
       DeleteLimitationMutation,
       DeleteLimitationMutationVariables
     >(deleteLimitationMutation, {
-      update: limitationDeleteUpdate
+      update: (cache, result) => limitationDeleteUpdate(cache, result)
     })
 
     return {

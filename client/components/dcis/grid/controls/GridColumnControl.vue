@@ -3,9 +3,12 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
   template(#activator="{ on, attrs }")
     slot(:on="on" :attrs="attrs")
   v-list(dense)
-    grid-column-settings(
+    component(
+      :is="settingsComponent"
       :column="column"
       :get-column-width="getColumnWidth"
+      @submit="({ width }) => changeColumnWidth(column, width)"
+      @reset="resetColumnWidth(column)"
       @close="$emit('close')"
     )
       template(#activator="{ on }")
@@ -17,17 +20,33 @@ v-menu(:value="true" :position-x="posX" :position-y="posY" absolute close-on-con
 </template>
 
 <script lang="ts">
-import { PropType } from '#app'
+import { computed, inject, PropType } from '#app'
 import { ColumnDimensionType } from '~/types/graphql'
+import { GridMode, GridModeInject } from '~/types/grid'
 import GridColumnSettings from '~/components/dcis/grid/settings/GridColumnSettings.vue'
+import GridColumnLocalSettings from '~/components/dcis/grid/settings/GridColumnLocalSettings.vue'
 
 export default defineComponent({
-  components: { GridColumnSettings },
+  components: { GridColumnSettings, GridColumnLocalSettings },
   props: {
     column: { type: Object as PropType<ColumnDimensionType>, required: true },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
+    changeColumnWidth: {
+      type: Function as PropType<(columnDimension: ColumnDimensionType, width: number) => void>,
+      required: true
+    },
+    resetColumnWidth: { type: Function as PropType<(columnDimension: ColumnDimensionType) => void>, required: true },
     posX: { type: Number, required: true },
     posY: { type: Number, required: true }
+  },
+  setup () {
+    const mode = inject(GridModeInject)
+
+    const settingsComponent = computed<string>(
+      () => mode.value === GridMode.CHANGE ? 'GridColumnSettings' : 'GridColumnLocalSettings'
+    )
+
+    return { settingsComponent }
   }
 })
 </script>

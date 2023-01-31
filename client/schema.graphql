@@ -234,8 +234,6 @@ type AddDivisionsMutationPayload {
 
 input AddDocumentDataMutationInput {
   clientMutationId: String
-  """Комментарий"""
-  comment: String
   """Файл с данными"""
   file: Upload!
   """Идентификатор периода"""
@@ -276,8 +274,6 @@ type AddDocumentMessageMutationPayload {
 
 input AddDocumentMutationInput {
   clientMutationId: String
-  """Комментарий"""
-  comment: String!
   """Идентификатор дивизиона"""
   divisionId: ID
   """Идентификатор документа, от которого создавать копию"""
@@ -1375,25 +1371,6 @@ type ChangeColumnDimensionsFixedPayload {
   clientMutationId: String
   """Измененные колонки"""
   columnDimensions: [ChangeColumnDimensionType]
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeDocumentCommentMutationInput {
-  clientMutationId: String
-  """Комментарий"""
-  comment: String!
-  """Идентификатор документа"""
-  documentId: ID
-}
-
-"""Изменение комментария версии документа."""
-type ChangeDocumentCommentMutationPayload {
-  clientMutationId: String
-  """Созданный документ"""
-  document: DocumentType
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""
@@ -2776,8 +2753,6 @@ type DocumentType implements Node {
   canChange: Boolean!
   """Может ли пользователь изменять значение атрибута в документе"""
   canChangeAttributeValue: Boolean!
-  """Комментарий"""
-  comment: String!
   """Дата создания"""
   createdAt: DateTime!
   """The ID of the object."""
@@ -3144,8 +3119,6 @@ type Mutation {
   changeColumnDimension(input: ChangeColumnDimensionMutationInput!): ChangeColumnDimensionMutationPayload!
   """Изменение свойства fixed у колонок"""
   changeColumnDimensionsFixed(input: ChangeColumnDimensionsFixedInput!): ChangeColumnDimensionsFixedPayload!
-  """Изменение комментария версии документа."""
-  changeDocumentComment(input: ChangeDocumentCommentMutationInput!): ChangeDocumentCommentMutationPayload!
   """Мутация для изменения файла"""
   changeFile(input: ChangeFileMutationInput!): ChangeFileMutationPayload!
   """Изменение значения ячейки типа `Файл`"""

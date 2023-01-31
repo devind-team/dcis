@@ -319,7 +319,6 @@ export default {
     },
     tableHeaders: {
       version: 'Версия',
-      comment: 'Комментарий',
       createdAt: 'Дата добавления',
       updatedAt: 'Дата последнего изменения',
       organization: '@:dcis.documents.addDocument.organization',
@@ -334,7 +333,6 @@ export default {
       buttonText: 'Добавить документ',
       formText: 'Добавить новый документ',
       header: 'Добавление документа',
-      comment: 'Комментарий',
       status: 'Статус',
       department: 'Департамент',
       organization: 'Организация',
@@ -345,8 +343,7 @@ export default {
       buttonText: 'Загрузить данные',
       header: 'Импорт документов',
       file: 'Выберете файл',
-      status: '@:dcis.documents.addDocument.status',
-      comment: '@:dcis.documents.addDocument.comment'
+      status: '@:dcis.documents.addDocument.status'
     },
     status: {
       header: 'Изменение статусов',
@@ -384,10 +381,6 @@ export default {
     },
     attributes: {
       noAttributes: 'Нет атрибутов'
-    },
-    comments: {
-      comment: 'Введите комментарий',
-      send: '@:send'
     }
   },
   grid: {
@@ -415,16 +408,19 @@ export default {
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
       commaIncrease: 'Увеличить разрядность',
-      aggregation: 'Агрегация ячеек',
-      aggregationTitle: 'Настройки агрегации',
-      aggregationChoice: 'Метод агрегации',
-      aggregationDefault: 'Значение по умолчанию: {value}',
-      aggregationKind: {
-        empty: 'Не задано',
-        sum: 'Сумма',
-        avg: 'Среднее арифметическое',
-        max: 'Максимальное значение',
-        min: 'Минимальное значение'
+      aggregation: {
+        tooltip: 'Агрегация ячеек',
+        title: 'Настройки агрегации',
+        choice: 'Метод агрегации',
+        addCells: 'Добавить ячейки',
+        defaultValue: 'Значение по умолчанию: {value}',
+        kinds: {
+          empty: 'Не задано',
+          sum: 'Сумма',
+          avg: 'Среднее арифметическое',
+          max: 'Максимальное значение',
+          min: 'Минимальное значение'
+        }
       }
     },
     columnWidth: 'Ширина: ',
@@ -441,6 +437,12 @@ export default {
       kind: 'Тип ячейки по умолчанию',
       buttonText: '@:save'
     },
+    columnLocalSettings: {
+      header: 'Изменение локальных свойств',
+      width: 'Ширина',
+      reset: '@:reset',
+      buttonText: '@:save'
+    },
     rowControl: {
       properties: '@:properties',
       addRowAbove: 'Добавить строку выше',
@@ -454,6 +456,18 @@ export default {
       height: 'Высота',
       hide: '@:hide',
       makeDynamic: 'Разрешить дочерние строки',
+      buttonText: '@:save'
+    },
+    childRowSettings: {
+      header: 'Изменение свойств',
+      subheader: 'Дата изменения: {updatedAt}',
+      height: 'Высота',
+      buttonText: '@:save'
+    },
+    rowLocalSettings: {
+      header: 'Изменение локальных свойств',
+      height: 'Высота',
+      reset: '@:reset',
       buttonText: '@:save'
     },
     changeValue: 'Изменение значения',

@@ -356,7 +356,6 @@ class DocumentType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         fields = (
             'id',
-            'comment',
             'version',
             'created_at',
             'updated_at',

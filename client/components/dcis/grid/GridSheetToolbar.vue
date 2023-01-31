@@ -25,17 +25,17 @@ v-row
       v-btn(:disabled="disabled" value="bottom" height="40")
         v-icon mdi-format-align-bottom
     v-tooltip(bottom)
-      template(#activator="{ on: onTooltip, attrs }")
-        div(v-on="onTooltip" v-bind="attrs")
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
           aggregation-property(
-            @changeKind="aggregationCell ? changeCellsOption([aggregationCell], 'aggregation', $event) : null"
             :grid-choice="gridChoice"
             :active-sheet-index="activeSheetIndex"
             :cell="aggregationCell"
             :disabled="disabled"
-            :themeClass="themeClass"
+            :theme-class="themeClass"
+            @changeKind="aggregationCell ? changeCellsOption([aggregationCell], 'aggregation', $event) : null"
           )
-      span {{ $t('dcis.grid.sheetToolbar.aggregation') }}
+      span {{ $t('dcis.grid.sheetToolbar.aggregation.tooltip') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
@@ -119,7 +119,7 @@ export default defineComponent({
     const { t } = useI18n()
     const { isDark } = useVuetify()
 
-    const themeClass = computed<string>(() => isDark ? 'theme--light' : 'theme--dark')
+    const themeClass = computed<string>(() => isDark.value ? 'theme--dark' : 'theme--light')
 
     const updateActiveSheet = inject(UpdateActiveSheetInject) as Ref<UpdateType<PeriodSheetQuery>>
     const changeCellsOption = useChangeCellsOptionMutation(updateActiveSheet)

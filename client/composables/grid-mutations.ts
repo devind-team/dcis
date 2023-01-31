@@ -602,21 +602,7 @@ export function useChangeChildRowDimensionHeightMutation (updateSheet: Ref<Updat
     ChangeChildRowDimensionHeightMutationVariables
   >(changeChildRowDimensionHeightMutation, {
     update (dataProxy: DataProxy, result: Omit<FetchResult<ChangeChildRowDimensionHeightMutation>, 'context'>) {
-      if (result.data.changeChildRowDimensionHeight.success) {
-        updateSheet.value(
-          dataProxy,
-          result, (
-            data: DocumentSheetQuery,
-            { data: { changeChildRowDimensionHeight } }: Omit<FetchResult<ChangeChildRowDimensionHeightMutation>, 'context'>
-          ) => {
-            const rowDimension = data.documentSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
-              rowDimension.id === changeChildRowDimensionHeight.rowDimensionId)!
-            rowDimension.height = changeChildRowDimensionHeight.height
-            rowDimension.updatedAt = changeChildRowDimensionHeight.updatedAt
-            return data
-          }
-        )
-      }
+      updateChildRowDimension(updateSheet.value, dataProxy, result)
     }
   })
   return async function (rowDimension: RowDimensionType, height: number) {
@@ -706,6 +692,28 @@ export function updateRowDimension (
         rowDimension.hidden = changeRowDimension.rowDimension.hidden
         rowDimension.dynamic = changeRowDimension.rowDimension.dynamic
         rowDimension.updatedAt = changeRowDimension.rowDimension.updatedAt
+        return data
+      }
+    )
+  }
+}
+
+export function updateChildRowDimension (
+  updateSheet: UpdateType<DocumentSheetQuery>,
+  dataProxy: DataProxy,
+  result: Omit<FetchResult<ChangeChildRowDimensionHeightMutation>, 'context'>
+) {
+  if (result.data.changeChildRowDimensionHeight.success) {
+    updateSheet(
+      dataProxy,
+      result, (
+        data: DocumentSheetQuery,
+        { data: { changeChildRowDimensionHeight } }: Omit<FetchResult<ChangeChildRowDimensionHeightMutation>, 'context'>
+      ) => {
+        const rowDimension = data.documentSheet.rows.find((rowDimension: RowDimensionFieldsFragment) =>
+          rowDimension.id === changeChildRowDimensionHeight.rowDimensionId)!
+        rowDimension.height = changeChildRowDimensionHeight.height
+        rowDimension.updatedAt = changeChildRowDimensionHeight.updatedAt
         return data
       }
     )

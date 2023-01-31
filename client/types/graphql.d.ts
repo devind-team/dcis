@@ -255,8 +255,6 @@ export type AddDivisionsMutationPayload = {
 
 export type AddDocumentDataMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Комментарий */
-  comment?: InputMaybe<Scalars['String']>;
   /** Файл с данными */
   file: Scalars['Upload'];
   /** Идентификатор периода */
@@ -299,8 +297,6 @@ export type AddDocumentMessageMutationPayload = {
 
 export type AddDocumentMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Комментарий */
-  comment: Scalars['String'];
   /** Идентификатор дивизиона */
   divisionId?: InputMaybe<Scalars['ID']>;
   /** Идентификатор документа, от которого создавать копию */
@@ -1450,26 +1446,6 @@ export type ChangeColumnDimensionsFixedPayload = {
   clientMutationId?: Maybe<Scalars['String']>;
   /** Измененные колонки */
   columnDimensions?: Maybe<Array<Maybe<ChangeColumnDimensionType>>>;
-  /** Ошибки мутации */
-  errors: Array<ErrorFieldType>;
-  /** Успех мутации */
-  success: Scalars['Boolean'];
-};
-
-export type ChangeDocumentCommentMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']>;
-  /** Комментарий */
-  comment: Scalars['String'];
-  /** Идентификатор документа */
-  documentId?: InputMaybe<Scalars['ID']>;
-};
-
-/** Изменение комментария версии документа. */
-export type ChangeDocumentCommentMutationPayload = {
-  __typename?: 'ChangeDocumentCommentMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']>;
-  /** Созданный документ */
-  document?: Maybe<DocumentType>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Успех мутации */
@@ -2922,8 +2898,6 @@ export type DocumentType = Node & {
   canChange: Scalars['Boolean'];
   /** Может ли пользователь изменять значение атрибута в документе */
   canChangeAttributeValue: Scalars['Boolean'];
-  /** Комментарий */
-  comment: Scalars['String'];
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** The ID of the object. */
@@ -3314,8 +3288,6 @@ export type Mutation = {
   changeColumnDimension: ChangeColumnDimensionMutationPayload;
   /** Изменение свойства fixed у колонок */
   changeColumnDimensionsFixed: ChangeColumnDimensionsFixedPayload;
-  /** Изменение комментария версии документа. */
-  changeDocumentComment: ChangeDocumentCommentMutationPayload;
   /** Мутация для изменения файла */
   changeFile: ChangeFileMutationPayload;
   /** Изменение значения ячейки типа `Файл` */
@@ -3657,11 +3629,6 @@ export type MutationChangeColumnDimensionArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeColumnDimensionsFixedArgs = {
   input: ChangeColumnDimensionsFixedInput;
-};
-
-/** Мутации на изменение чего-либо. */
-export type MutationChangeDocumentCommentArgs = {
-  input: ChangeDocumentCommentMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -6400,7 +6367,7 @@ export type DepartmentFieldFragment = { __typename: 'DepartmentType', id: string
 
 export type DivisionModelFieldsFragment = { __typename: 'DivisionModelType', id: string, model: string, name: string };
 
-export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null };
+export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null };
 
 export type DocumentMessageFieldsFragment = { __typename: 'DocumentMessageType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null };
 
@@ -6560,23 +6527,21 @@ export type AddChildRowDimensionMutationVariables = Exact<{
 export type AddChildRowDimensionMutation = { __typename?: 'Mutation', addChildRowDimension: { __typename: 'AddChildRowDimensionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, rowDimension: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number, name: string, height?: number | null, fixed: boolean, hidden: boolean, dynamic: boolean, aggregation?: string | null, createdAt: any, updatedAt: any, documentId?: string | null, objectId?: string | null, userId?: string | null, background?: string | null, parent?: { __typename: 'RowDimensionType', id: string, index: number, globalIndex: number } | null, children: Array<{ __typename: 'RowDimensionType', id: string, index: number, globalIndex: number }>, cells: Array<{ __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, error?: string | null, aggregation?: string | null }> } } };
 
 export type AddDocumentMutationVariables = Exact<{
-  comment: Scalars['String'];
   periodId: Scalars['ID'];
   statusId: Scalars['ID'];
   divisionId?: InputMaybe<Scalars['ID']>;
   documentId?: InputMaybe<Scalars['ID']>;
 }>;
 
-export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
+export type AddDocumentMutation = { __typename?: 'Mutation', addDocument: { __typename?: 'AddDocumentMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, document?: { __typename: 'DocumentType', canChange: boolean, id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } };
 
 export type AddDocumentDataMutationVariables = Exact<{
   periodId: Scalars['ID'];
   file: Scalars['Upload'];
   statusId: Scalars['ID'];
-  comment: Scalars['String'];
 }>;
 
-export type AddDocumentDataMutation = { __typename?: 'Mutation', addDocumentData: { __typename: 'AddDocumentDataMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documents?: Array<{ __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null } };
+export type AddDocumentDataMutation = { __typename?: 'Mutation', addDocumentData: { __typename: 'AddDocumentDataMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documents?: Array<{ __typename: 'DocumentType', canChange: boolean, id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null> | null } };
 
 export type AddDocumentMessageMutationVariables = Exact<{
   documentId: Scalars['ID'];
@@ -6599,13 +6564,6 @@ export type ChangeChildRowDimensionHeightMutationVariables = Exact<{
 }>;
 
 export type ChangeChildRowDimensionHeightMutation = { __typename?: 'Mutation', changeChildRowDimensionHeight: { __typename: 'ChangeChildRowDimensionHeightMutationPayload', success: boolean, rowDimensionId: string, height?: number | null, updatedAt: any, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
-
-export type ChangeDocumentCommentMutationVariables = Exact<{
-  documentId: Scalars['ID'];
-  comment: Scalars['String'];
-}>;
-
-export type ChangeDocumentCommentMutation = { __typename?: 'Mutation', changeDocumentComment: { __typename: 'ChangeDocumentCommentMutationPayload', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null } | null } };
 
 export type DeleteChildRowDimensionMutationVariables = Exact<{
   rowDimensionId: Scalars['ID'];
@@ -6972,7 +6930,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, canChangeAttributeValue: boolean, user?: { __typename: 'UserType', id: string } | null, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, project?: { __typename: 'ProjectType', id: string, name: string, contentType: { __typename: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, name: string } | null> | null } | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null>, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, canChangeAttributeValue: boolean, user?: { __typename: 'UserType', id: string } | null, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, project?: { __typename: 'ProjectType', id: string, name: string, contentType: { __typename: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, name: string } | null> | null } | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null>, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null };
 
 export type DocumentMessagesQueryVariables = Exact<{
   documentId: Scalars['ID'];
@@ -7004,7 +6962,7 @@ export type DocumentsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']>;
 }>;
 
-export type DocumentsQuery = { __typename?: 'Query', documents: { __typename?: 'DocumentTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'DocumentTypeEdge', node?: { __typename: 'DocumentType', canChange: boolean, id: string, comment: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } | null> } };
+export type DocumentsQuery = { __typename?: 'Query', documents: { __typename?: 'DocumentTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'DocumentTypeEdge', node?: { __typename: 'DocumentType', canChange: boolean, id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null } | null> } };
 
 export type IndicesGroupsToExpandQueryVariables = Exact<{
   sheetId: Scalars['ID'];
