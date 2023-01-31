@@ -144,14 +144,16 @@ class DeleteDocumentStatusMutation(BaseMutation):
 
     class Input:
         document_status_id = graphene.ID(required=True, description='Идентификатор статуса документа')
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
 
     id = graphene.ID(required=True, description='Идентификатор статуса документа')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root: None, info: ResolveInfo, document_status_id: int):
+    def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, document_status_id: int):
+        document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         status = get_object_or_404(DocumentStatus, pk=document_status_id)
-        delete_document_status(info.context.user, status)
+        delete_document_status(info.context.user, document, status)
         return DeleteDocumentStatusMutation(id=document_status_id)
 
 

@@ -1,6 +1,6 @@
 
-mutation DeleteDocumentStatus($documentStatusId: ID!) {
-  deleteDocumentStatus(input: { documentStatusId: $documentStatusId }) {
+mutation DeleteDocumentStatus($documentStatusId: ID! $documentId: ID!) {
+  deleteDocumentStatus(input: { documentStatusId: $documentStatusId, documentId: $documentId }) {
     id
     errors {
       field

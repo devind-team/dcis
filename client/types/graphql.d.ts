@@ -31,7 +31,7 @@ export type AccessTokenType = {
 };
 
 /**
- * Типы изменения связей между записями в базе данных
+ * Типы измнения связей между записями в базе данных
  * - ADD - Добавление
  * - DELETE - Удаление
  */
@@ -1773,7 +1773,7 @@ export type ConfirmEmailMutationPayload = {
  * - CHANGE - Пользователь изменил данные
  * - DELETE - Удаление объекта
  * - ERROR - Ошибка ввода данных
- * - TYPING - Печатает, готовиться отправить сообщение
+ * - TYPING - Печатет, готовиться отправить сообщение
  * - TYPING_FINISH - Закончил печатать
  * - EXCEPTION - Пользователь исключен из потока уведомлений
  */
@@ -1938,6 +1938,8 @@ export type DeleteDivisionMutationPayload = {
 
 export type DeleteDocumentStatusMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
   /** Идентификатор статуса документа */
   documentStatusId: Scalars['ID'];
 };
@@ -2402,7 +2404,7 @@ export type DocumentTypeEdge = {
   node?: Maybe<DocumentType>;
 };
 
-/** Ошибка в поле формы. */
+/** Ошибка в поле формы */
 export type ErrorFieldType = {
   __typename?: 'ErrorFieldType';
   /** Поле формы */
@@ -4767,7 +4769,7 @@ export type TableRowType = {
   index: Scalars['Int'];
 };
 
-/** Документ, представляющий собой таблицу. */
+/** Документ, представлющий собой таблицу. */
 export type TableType = {
   __typename?: 'TableType';
   /** Заголовки документа */
@@ -5510,6 +5512,7 @@ export type DeleteChildRowDimensionMutation = { __typename?: 'Mutation', deleteC
 
 export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];
+  documentId: Scalars['ID'];
 }>;
 
 export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };

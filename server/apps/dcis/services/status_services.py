@@ -51,10 +51,11 @@ def get_new_statuses(user: User, document: Document) -> list[Status]:
     return [add_status.to_status for add_status in add_statuses if len(user_roles & set(add_status.roles)) > 0]
 
 
-def delete_document_status(user: User, status: DocumentStatus) -> None:
+def delete_document_status(user: User, document: Document, status: DocumentStatus) -> None:
     """Удаление статуса документа."""
     can_delete_document_status(user, status.document)
     status.delete()
+    create_document_message(user=user, document=document, message='Статус документа удалён', kind='status')
 
 
 @dataclass
