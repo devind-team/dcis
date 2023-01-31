@@ -11,14 +11,19 @@ def move_document_status_comments(apps, schema_editor):
     for document in Document.objects.all():
         if document.last_status:
             user = document.user or document.period.user or User.objects.get(username='support@cbias.ru')
-            status_part = f'Статус документа: {document.last_status.status.name}.'
-            comment_part = f' Комментарий: {document.last_status.comment}' if document.last_status.comment else ''
             DocumentMessage.objects.create(
-                comment=f'{status_part}{comment_part}',
+                comment=f'Статус документа: {document.last_status.status.name}.',
                 kind='status',
                 user=user,
                 document=document
             )
+            if document.last_status.comment:
+                DocumentMessage.objects.create(
+                    comment=document.last_status.comment,
+                    kind='message',
+                    user=user,
+                    document=document
+                )
 
 
 def empty_reverse(apps, schema_editor):

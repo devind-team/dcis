@@ -22,10 +22,9 @@ def add_document_status(user: User, document: Document, status: Status, comment:
     can_add_document_status(user, document, add_status)
     if add_status.check:
         getattr(AddStatusCheck, add_status.check)(document)
-    status_part = f'Статус документа: {status.name}.'
-    comment_part = f' Комментарий: {comment}' if comment else ''
-    message = f'{status_part}{comment_part}'
-    create_document_message(user=user, document=document, message=message, kind='status')
+    create_document_message(user=user, document=document, message=f'Статус документа: {status.name}.', kind='status')
+    if comment:
+        create_document_message(user=user, document=document, message=comment, kind='message')
     return DocumentStatus.objects.create(
         user=user,
         document=document,
@@ -54,8 +53,8 @@ def get_new_statuses(user: User, document: Document) -> list[Status]:
 def delete_document_status(user: User, document: Document, status: DocumentStatus) -> None:
     """Удаление статуса документа."""
     can_delete_document_status(user, status.document)
+    create_document_message(user=user, document=document, message=f'Статус документа "{status.status.name}" удалён.', kind='status')
     status.delete()
-    create_document_message(user=user, document=document, message='Статус документа удалён', kind='status')
 
 
 @dataclass
