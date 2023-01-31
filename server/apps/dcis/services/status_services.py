@@ -13,7 +13,7 @@ from apps.dcis.models import Document, Limitation, Period, Status
 from apps.dcis.models.document import AddStatus, DocumentStatus
 from apps.dcis.permissions import AddDocumentBase, can_add_document_status, can_delete_document_status
 from apps.dcis.services.divisions_services import is_period_division_member
-from apps.dcis.services.document_services import get_user_roles
+from apps.dcis.services.document_services import create_document_message, get_user_roles
 
 
 def add_document_status(user: User, document: Document, status: Status, comment: str) -> DocumentStatus:
@@ -22,6 +22,10 @@ def add_document_status(user: User, document: Document, status: Status, comment:
     can_add_document_status(user, document, add_status)
     if add_status.check:
         getattr(AddStatusCheck, add_status.check)(document)
+    status_part = f'Статус документа: {status.name}.'
+    comment_part = f' Комментарий: {comment}' if comment else ''
+    message = f'{status_part}{comment_part}'
+    create_document_message(user=user, document=document, message=message, kind='status')
     return DocumentStatus.objects.create(
         user=user,
         document=document,

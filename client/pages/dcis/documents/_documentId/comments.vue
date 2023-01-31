@@ -118,7 +118,8 @@ export default defineComponent({
 
     const addDocumentMessageVariables = computed<AddDocumentMessageMutationVariables>(() => ({
       documentId: props.document.id,
-      message: inputMessage.value.trim()
+      message: inputMessage.value.trim(),
+      kind: 'message'
     }))
 
     const bc = computed<BreadCrumbsItem[]>(() => ([
