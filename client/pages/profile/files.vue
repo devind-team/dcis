@@ -133,7 +133,7 @@ export default defineComponent({
     })
     // Мутация для удаления файла
     const { mutate: deleteFileMutate } = useMutation<DeleteFileMutation, DeleteFileMutationVariables>(deleteFile, {
-      update: deleteUpdate
+      update: (cache, result) => deleteUpdate(cache, result)
     })
 
     return {

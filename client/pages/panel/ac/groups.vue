@@ -168,7 +168,7 @@ export default defineComponent({
 
     // Мутация для удаления группы
     const { mutate: deleteGroupMutate } = useMutation<DeleteGroupMutation, DeleteGroupMutationVariables>(deleteGroup, {
-      update: deleteUpdate
+      update: (cache, result) => deleteUpdate(cache, result)
     })
 
     return {

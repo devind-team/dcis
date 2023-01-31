@@ -398,16 +398,19 @@ export default {
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
       commaIncrease: 'Увеличить разрядность',
-      aggregation: 'Агрегация ячеек',
-      aggregationTitle: 'Настройки агрегации',
-      aggregationChoice: 'Метод агрегации',
-      aggregationDefault: 'Значение по умолчанию: {value}',
-      aggregationKind: {
-        empty: 'Не задано',
-        sum: 'Сумма',
-        avg: 'Среднее арифметическое',
-        max: 'Максимальное значение',
-        min: 'Минимальное значение'
+      aggregation: {
+        tooltip: 'Агрегация ячеек',
+        title: 'Настройки агрегации',
+        choice: 'Метод агрегации',
+        addCells: 'Добавить ячейки',
+        defaultValue: 'Значение по умолчанию: {value}',
+        kinds: {
+          empty: 'Не задано',
+          sum: 'Сумма',
+          avg: 'Среднее арифметическое',
+          max: 'Максимальное значение',
+          min: 'Минимальное значение'
+        }
       }
     },
     columnWidth: 'Ширина: ',

@@ -118,6 +118,8 @@ export default defineComponent({
 .grid__cursor_row-resize *
   cursor: row-resize !important
 
+$resizing-background-light: white
+$resizing-background-dark: #1E1E1E
 $border: 1px solid silver
 $border-selected: 1px solid blue
 $border-fixed: 1.5px solid gray
@@ -134,7 +136,12 @@ div.grid__body
     position: absolute
     z-index: 2
     font-size: 12px
-    background: white !important
+
+  .grid__element-resizing_light
+    background: $resizing-background-light !important
+
+  .grid__element-resizing_dark
+    background: $resizing-background-dark !important
 
   .grid__container
     position: relative
