@@ -186,7 +186,7 @@ export default defineComponent({
 
     const properties = computed<string[]>({
       get: () => {
-        if (disabled.value) {
+        if (disabled.value || props.selectedCellsOptions.editable === null) {
           return []
         }
         if (!props.selectedCellsOptions.editable) {
@@ -212,7 +212,8 @@ export default defineComponent({
           if (field === 'readonly') {
             field = 'editable'
           }
-          changeCellsOption(props.selectedCellsOptions.cells, field, String(!props.selectedCellsOptions[field]))
+          const fieldValue = props.selectedCellsOptions[field] === null ? true : props.selectedCellsOptions[field]
+          changeCellsOption(props.selectedCellsOptions.cells, field, String(!fieldValue))
         }
       }
     })
