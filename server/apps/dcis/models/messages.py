@@ -9,14 +9,16 @@ class DocumentMessage(models.Model):
 
     MESSAGE = 'message'
     STATUS = 'status'
+    STATUS_MESSAGE = 'status_message'
 
     KIND_DOCUMENT_MESSAGE = (
         (MESSAGE, 'message'),
-        (STATUS, 'status')
+        (STATUS, 'status'),
+        (STATUS_MESSAGE, 'status_message')
     )
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')
-    kind = models.CharField(max_length=10, default=MESSAGE, choices=KIND_DOCUMENT_MESSAGE, help_text='Тип сообщения')
+    kind = models.CharField(max_length=30, default=MESSAGE, choices=KIND_DOCUMENT_MESSAGE, help_text='Тип сообщения')
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     user = models.ForeignKey(
         User,

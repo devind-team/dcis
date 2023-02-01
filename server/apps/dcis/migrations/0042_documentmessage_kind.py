@@ -20,7 +20,7 @@ def move_document_status_comments(apps, schema_editor):
             if document.last_status.comment:
                 DocumentMessage.objects.create(
                     comment=document.last_status.comment,
-                    kind='message',
+                    kind='status_message',
                     user=user,
                     document=document
                 )
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='documentmessage',
             name='kind',
-            field=models.CharField(choices=[('message', 'message'), ('status', 'status')], default='message', help_text='Тип сообщения', max_length=10),
+            field=models.CharField(choices=[('message', 'message'), ('status', 'status')], default='message', help_text='Тип сообщения', max_length=30),
         ),
         migrations.RunPython(move_document_status_comments, empty_reverse)
     ]

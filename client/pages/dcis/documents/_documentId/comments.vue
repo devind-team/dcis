@@ -15,6 +15,11 @@ bread-crumbs(:items="breadCrumbs")
                      .username {{ getUserName(message.user) }}
                      .time {{ timeHM(message.createdAt) }}
                   .content {{ message.comment }}
+                .message(v-else-if="message.kind === 'STATUS_MESSAGE'")
+                  .user
+                     .username {{ getUserName(message.user) }}
+                     .time {{ timeHM(message.createdAt) }}
+                  .status_message_content {{ message.comment }}
                 div(v-else)
                   .content {{ message.comment }}
         footer.message__textarea
@@ -190,6 +195,16 @@ export default defineComponent({
         background-color: #F3F3F3
         border-radius: 10px
         color: #333
+        font-size: 16px
+        line-height: 1.2em
+        text-align: left
+
+      .status_message_content
+        display: inline-block
+        padding: 10px 20px
+        background-color: #1976D2
+        border-radius: 10px
+        color: #F3F3F3
         font-size: 16px
         line-height: 1.2em
         text-align: left

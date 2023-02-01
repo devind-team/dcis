@@ -24,7 +24,7 @@ def add_document_status(user: User, document: Document, status: Status, comment:
         getattr(AddStatusCheck, add_status.check)(document)
     create_document_message(user=user, document=document, message=f'Статус документа: {status.name}.', kind='status')
     if comment:
-        create_document_message(user=user, document=document, message=comment, kind='message')
+        create_document_message(user=user, document=document, message=comment, kind='status_message')
     return DocumentStatus.objects.create(
         user=user,
         document=document,
