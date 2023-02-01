@@ -7,7 +7,7 @@ export function useColumnDimensionWidthMap () {
   return useStorage<Record<string, number>>(
     'column-dimension-width',
     {},
-    localStorage,
+    typeof localStorage === 'undefined' ? null : localStorage,
     { listenToStorageChanges: true }
   )
 }
@@ -16,7 +16,7 @@ export function useRowDimensionHeightMap () {
   return useStorage<Record<string, number>>(
     'row-dimension-height',
     {},
-    localStorage,
+    typeof localStorage === 'undefined' ? null : localStorage,
     { listenToStorageChanges: true }
   )
 }
