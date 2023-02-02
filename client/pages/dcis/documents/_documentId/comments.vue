@@ -15,13 +15,11 @@ bread-crumbs(:items="breadCrumbs")
                      .username {{ getUserName(message.user) }}
                      .time {{ timeHM(message.createdAt) }}
                   .content {{ message.comment }}
-                .message(v-else-if="message.kind === 'STATUS_MESSAGE'")
+                .message(v-else-if="message.kind === 'STATUS'")
                   .user
                      .username {{ getUserName(message.user) }}
                      .time {{ timeHM(message.createdAt) }}
                   .status_message_content {{ message.comment }}
-                div(v-else)
-                  .content {{ message.comment }}
         footer.message__textarea
           form(@submit.prevent="addDocumentMessage")
             v-textarea(
