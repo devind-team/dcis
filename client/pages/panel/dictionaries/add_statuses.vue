@@ -34,7 +34,7 @@ export default defineComponent({
       ...props.breadCrumbs,
       {
         text: t('dictionaries.addStatuses.header') as string,
-        to: localePath({ name: 'dcis-dictionaries-add_statuses' }),
+        to: localePath({ name: 'panel-dictionaries-add_statuses' }),
         exact: true
       }
     ]))

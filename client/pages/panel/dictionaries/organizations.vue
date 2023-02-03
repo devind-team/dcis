@@ -2,10 +2,11 @@
 universal-dictionary(
   @update-drawer="$emit('update-drawer')"
   :bread-crumbs="bc"
-  :query="require('~/gql/dcis/queries/privileges.graphql')"
-  :headers="['id', 'name', 'key', 'createdAt']"
+  :query="require('~/gql/dcis/queries/organizations.graphql')"
+  :headers="['id', 'name', 'createdAt']"
   :convert-item="{ createdAt: dateTimeHM }"
-  query-name="privileges"
+  :page-size="30"
+  query-name="organizations"
 )
 </template>
 
@@ -24,12 +25,12 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     const { dateTimeHM } = useFilters()
-    useNuxt2Meta({ title: t('dictionaries.privileges.header') as string })
+    useNuxt2Meta({ title: t('dictionaries.organizations.header') as string })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
-        text: t('dictionaries.privileges.header') as string,
-        to: localePath({ name: 'dcis-dictionaries-privileges' }),
+        text: t('dictionaries.organizations.header') as string,
+        to: localePath({ name: 'panel-dictionaries-organizations' }),
         exact: true
       }
     ]))
