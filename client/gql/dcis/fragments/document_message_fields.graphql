@@ -3,6 +3,7 @@
 fragment DocumentMessageFields on DocumentMessageType {
   id
   comment
+  kind
   createdAt
   user {
     ...UserFields

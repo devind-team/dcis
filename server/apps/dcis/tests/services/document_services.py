@@ -357,7 +357,8 @@ class DocumentMessageTestCase(TestCase):
         actual_document_message = create_document_message(
             user=self.superuser,
             document=self.superuser_document,
-            message='Test message'
+            message='Test message',
+            kind='message'
         )
         expected_document_message = DocumentMessage.objects.get(comment='Test message')
         self.assertEqual(expected_document_message, actual_document_message)

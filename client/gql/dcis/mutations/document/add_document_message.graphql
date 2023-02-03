@@ -1,7 +1,7 @@
 #import "../../fragments/document_message_fields.graphql"
 
-mutation AddDocumentMessage($documentId: ID!, $message: String!) {
-  addDocumentMessage(input: {documentId: $documentId, message: $message}){
+mutation AddDocumentMessage($documentId: ID!, $message: String!, $kind: String!) {
+  addDocumentMessage(input: {documentId: $documentId, message: $message, kind: $kind}){
     success
     errors {
       field
