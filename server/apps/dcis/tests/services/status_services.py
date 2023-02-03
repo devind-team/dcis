@@ -158,7 +158,7 @@ class StatusTestCase(TestCase):
             self.superuser, 'has_perm', new=lambda perm: perm != 'dcis.change_document'
         ), self.assertRaises(PermissionDenied):
             self._delete_document_status()
-        self.assertIsNone(delete_document_status(user=self.superuser, document=self.document, status=self.delete_document_status))
+        self.assertIsNone(delete_document_status(user=self.superuser, status=self.delete_document_status))
 
     def _add_document_status(self) -> DocumentStatus:
         """Добавление статуса документа."""

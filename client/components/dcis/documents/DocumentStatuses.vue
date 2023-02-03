@@ -217,8 +217,7 @@ export default defineComponent({
     }
 
     const deleteDocumentStatusVariables = computed<DeleteDocumentStatusMutationVariables>(() => ({
-      documentStatusId: props.document.lastStatus.id,
-      documentId: props.document.id
+      documentStatusId: props.document.lastStatus.id
     }))
 
     const close = () => {
