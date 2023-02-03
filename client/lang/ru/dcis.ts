@@ -305,7 +305,7 @@ export default {
     links: {
       sheets: 'Листы',
       attributes: 'Атрибуты',
-      comments: 'Комментарии'
+      comments: 'Журнал'
     },
     tableHeaders: {
       version: 'Версия',
