@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 from apps.core.models import User
 from .document import Document
@@ -18,7 +17,7 @@ class DocumentMessage(models.Model):
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')
     kind = models.CharField(max_length=30, default=MESSAGE, choices=KIND_DOCUMENT_MESSAGE, help_text='Тип сообщения')
-    created_at = models.DateTimeField(default=timezone.now, help_text='Дата создания')
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
