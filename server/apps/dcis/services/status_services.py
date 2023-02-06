@@ -120,3 +120,7 @@ class AddStatusCheck:
                     ))
         if len(errors):
             raise ValidationError(message=None, code=None, params=errors)
+
+    @classmethod
+    def archive(cls, document: Document) -> None:
+        pass
