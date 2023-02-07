@@ -531,8 +531,8 @@ export type AddRowDimensionMutationPayload = {
 /** Тип переназначений статусов документов. */
 export type AddStatusType = {
   __typename?: 'AddStatusType';
-  /** Функция, проверяющая может ли статус быть изменен */
-  check: Scalars['String'];
+  /** Действие при добавлении статуса в документ */
+  action: Scalars['String'];
   /** Изначальный статус */
   fromStatus?: Maybe<StatusType>;
   id: Scalars['ID'];
@@ -5291,7 +5291,7 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
-export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
+export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, action: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
 
 export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean };
 
@@ -5805,7 +5805,7 @@ export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBud
 
 export type AddStatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type AddStatusesQuery = { __typename?: 'Query', addStatuses?: Array<{ __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } }> | null };
+export type AddStatusesQuery = { __typename?: 'Query', addStatuses?: Array<{ __typename: 'AddStatusType', id: string, roles: any, action: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } }> | null };
 
 export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];

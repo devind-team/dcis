@@ -32,7 +32,7 @@ class AddStatus(models.Model):
         help_text='Новый статус'
     )
     roles = models.JSONField(help_text='Роли пользователей, которые могут изменять статус')
-    check = models.CharField(max_length=250, help_text='Функция, проверяющая может ли статус быть изменен')
+    action = models.CharField(max_length=250, help_text='Действие при добавлении статуса в документ')
 
 
 class Sheet(models.Model):
@@ -132,7 +132,7 @@ class DocumentStatus(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')
-    period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
+    archive_period = models.ForeignKey(Period, null=True, on_delete=models.CASCADE, help_text='Архивированный период')
     status = models.ForeignKey(Status, on_delete=models.CASCADE, help_text='Статус')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='Пользователь')
 

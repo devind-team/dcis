@@ -20,18 +20,20 @@ def add_document_status(user: User, document: Document, status: Status, comment:
     """Добавление статуса документа."""
     add_status = AddStatus.objects.filter(from_status=document.last_status.status, to_status=status).first()
     can_add_document_status(user, document, add_status)
-    if add_status.check:
-        getattr(AddStatusCheck, add_status.check)(document)
+    action_class = getattr(AddStatusActions, add_status.action) if add_status.action else StatusAction
+    action_class.pre_execute(document)
     status_part = f'Статус документа: {status.name}.'
     comment_part = f' {comment}' if comment else ''
     message = f'{status_part}{comment_part}'
     create_document_message(user=user, document=document, message=message, kind='status')
-    return DocumentStatus.objects.create(
+    document_status = DocumentStatus.objects.create(
         user=user,
         document=document,
         status=status,
         comment=comment,
     )
+    action_class.post_execute(document, document_status)
+    return document_status
 
 
 def get_initial_statuses(user: User, period: Period) -> QuerySet[Status]:
@@ -71,56 +73,76 @@ class LimitationError:
     dependencies: str
 
 
-class AddStatusCheck:
-    """Класс с методами, определяющими, может ли в документ быть добавлен новый статус.
-
-    Каждый метод выбрасывает ValidationError с ключом 'limitations', если добавление невозможно.
-    """
-    VIRTUAL_SHEET_NAME = '__virtual_sheet__'
+class StatusAction:
+    """Действие при добавлении статуса в документ."""
 
     @classmethod
-    def check_limitations(cls, document: Document) -> None:
+    def pre_execute(cls, document: Document) -> None:
+        """Проверка на возможность создания статуса.
+
+        Метод выбрасывает ValidationError с ключом 'limitations', если добавление невозможно.
+        """
+        ...
+
+    @classmethod
+    def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+        """Действие, выполняемое, после создания статуса."""
+        ...
+
+
+class AddStatusActions:
+    """Действие при добавлении статуса в документ."""
+
+    class CheckLimitations(StatusAction):
         """Проверка ограничений, накладываемых на лист."""
-        sheets = document.sheets.all()
-        limitations = Limitation.objects.filter(sheet__in=sheets)
-        dependency = LimitationFormulaContainerCache.get(document.period).dependency_cache.dependency
-        dependencies: set[str] = set()
-        for counter in dependency.values():
-            dependencies.update(counter.keys())
-        cells, values = resolve_cells(sheets, document, dependencies)
-        state = resolve_evaluate_state(cells, values, [])
-        for i, limitation in enumerate(limitations, 1):
-            error_message = limitation.error_message.replace('"', '""')
-            state[f'{cls.VIRTUAL_SHEET_NAME}!A{i}'] = cast(ValueState, {
-                'value': None,
-                'error': None,
-                'formula': f'=IF({limitation.formula}, "", "{error_message}")',
-                'limitation': limitation
-            })
-        evaluate_result = evaluate_state(state, [cls.VIRTUAL_SHEET_NAME])
-        errors: list[LimitationError] = []
-        for coordinate, result_value in evaluate_result.items():
-            sheet_name = parse_coordinate(coordinate)[0]
-            if sheet_name == cls.VIRTUAL_SHEET_NAME:
-                error: str | None = None
-                if result_value['error'] is not None:
-                    error = result_value['error']
-                elif result_value['value'] != '':
-                    error = result_value['value']
-                if error is not None:
-                    limitation_dependencies = dependency[coordinate.replace(f'{sheet_name}!', '')]
-                    dependency_values: dict[str, str] = {}
-                    for key in limitation_dependencies.keys():
-                        dependency_values[key] = evaluate_result[key]['value']
-                    errors.append(LimitationError(
-                        form=result_value['limitation'].sheet.name,
-                        formula=result_value['limitation'].formula,
-                        error_message=error,
-                        dependencies=encode(dependency_values).encode().decode('unicode-escape')
-                    ))
-        if len(errors):
-            raise ValidationError(message=None, code=None, params=errors)
 
-    @classmethod
-    def archive(cls, document: Document) -> None:
-        pass
+        VIRTUAL_SHEET_NAME = '__virtual_sheet__'
+
+        @classmethod
+        def pre_execute(cls, document: Document) -> None:
+            sheets = document.sheets.all()
+            limitations = Limitation.objects.filter(sheet__in=sheets)
+            dependency = LimitationFormulaContainerCache.get(document.period).dependency_cache.dependency
+            dependencies: set[str] = set()
+            for counter in dependency.values():
+                dependencies.update(counter.keys())
+            cells, values = resolve_cells(sheets, document, dependencies)
+            state = resolve_evaluate_state(cells, values, [])
+            for i, limitation in enumerate(limitations, 1):
+                error_message = limitation.error_message.replace('"', '""')
+                state[f'{cls.VIRTUAL_SHEET_NAME}!A{i}'] = cast(ValueState, {
+                    'value': None,
+                    'error': None,
+                    'formula': f'=IF({limitation.formula}, "", "{error_message}")',
+                    'limitation': limitation
+                })
+            evaluate_result = evaluate_state(state, [cls.VIRTUAL_SHEET_NAME])
+            errors: list[LimitationError] = []
+            for coordinate, result_value in evaluate_result.items():
+                sheet_name = parse_coordinate(coordinate)[0]
+                if sheet_name == cls.VIRTUAL_SHEET_NAME:
+                    error: str | None = None
+                    if result_value['error'] is not None:
+                        error = result_value['error']
+                    elif result_value['value'] != '':
+                        error = result_value['value']
+                    if error is not None:
+                        limitation_dependencies = dependency[coordinate.replace(f'{sheet_name}!', '')]
+                        dependency_values: dict[str, str] = {}
+                        for key in limitation_dependencies.keys():
+                            dependency_values[key] = evaluate_result[key]['value']
+                        errors.append(LimitationError(
+                            form=result_value['limitation'].sheet.name,
+                            formula=result_value['limitation'].formula,
+                            error_message=error,
+                            dependencies=encode(dependency_values).encode().decode('unicode-escape')
+                        ))
+            if len(errors):
+                raise ValidationError(message=None, code=None, params=errors)
+
+    class ArchivePeriod(StatusAction):
+        """Архивирование периода при добавлении статуса."""
+
+        @classmethod
+        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+            print(document, document_status)

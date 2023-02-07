@@ -16,6 +16,7 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
+    AddStatus,
     Attribute,
     AttributeValue,
     Cell,
@@ -33,7 +34,6 @@ from apps.dcis.models import (
     RowDimension,
     Sheet,
     Status,
-    AddStatus,
     Value,
 )
 from apps.dcis.permissions import (
@@ -331,7 +331,7 @@ class AddStatusType(DjangoObjectType):
 
     class Meta:
         model = AddStatus
-        fields = ('id', 'roles', 'check', 'from_status', 'to_status')
+        fields = ('id', 'roles', 'action', 'from_status', 'to_status')
 
 
 class DocumentType(DjangoObjectType):

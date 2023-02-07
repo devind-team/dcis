@@ -1,7 +1,7 @@
 fragment AddStatusFields on AddStatusType {
   id
   roles
-  check
+  action
   fromStatus {
     id
     name
