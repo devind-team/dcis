@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы измнения связей между записями в базе данных
+Типы изменения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -1611,20 +1611,18 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
-input ChangeValueMutationInput {
-  """Идентификатор ячейки"""
-  cellId: ID!
+input ChangeValuesMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
   documentId: ID!
   """Идентификатор листа"""
   sheetId: ID!
-  """Значение"""
-  value: String!
+  """Значения ячеек"""
+  values: [ValueInputType!]!
 }
 
-"""Изменение значения ячейки."""
-type ChangeValueMutationPayload {
+"""Изменение значений ячеек."""
+type ChangeValuesMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1697,7 +1695,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатет, готовиться отправить сообщение
+- TYPING - Печатает, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -1859,8 +1857,6 @@ type DeleteDivisionMutationPayload {
 
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
-  """Идентификатор документа"""
-  documentId: ID!
   """Идентификатор статуса документа"""
   documentStatusId: ID!
 }
@@ -2298,7 +2294,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы"""
+"""Ошибка в поле формы."""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2644,7 +2640,7 @@ type Mutation {
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
-  changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
+  changeValues(input: ChangeValuesMutationInput!): ChangeValuesMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
@@ -3979,7 +3975,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представлющий собой таблицу."""
+"""Документ, представляющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!
@@ -4163,6 +4159,14 @@ type UserTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: UserType
+}
+
+"""Значение ячейки."""
+input ValueInputType {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  """Значение"""
+  value: String!
 }
 
 """Тип значения."""

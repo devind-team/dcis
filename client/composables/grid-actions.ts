@@ -8,6 +8,7 @@ import {
   useResetRowDimensionHeightLocalMutation
 } from '~/composables/grid-local-mutations'
 import {
+  ValueInputType,
   useAddChildRowDimensionMutation,
   useAddRowDimensionMutation,
   useChangeCellDefaultMutation,
@@ -111,7 +112,12 @@ export function useChangeValue () {
   const updateActiveSheet = inject(UpdateActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.CHANGE) {
-    return useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
+    const changeDefaultValue = useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
+    return async (values: ValueInputType[]) => {
+      for (const value of values) {
+        await changeDefaultValue(value.cell, value.value)
+      }
+    }
   }
   if (mode.value === GridMode.WRITE) {
     return useChangeValueMutation(

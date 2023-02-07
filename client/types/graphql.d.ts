@@ -1683,21 +1683,19 @@ export type ChangeUserPropsMutationPayload = {
   user: UserType;
 };
 
-export type ChangeValueMutationInput = {
-  /** Идентификатор ячейки */
-  cellId: Scalars['ID'];
+export type ChangeValuesMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор документа */
   documentId: Scalars['ID'];
   /** Идентификатор листа */
   sheetId: Scalars['ID'];
-  /** Значение */
-  value: Scalars['String'];
+  /** Значения ячеек */
+  values: Array<ValueInputType>;
 };
 
-/** Изменение значения ячейки. */
-export type ChangeValueMutationPayload = {
-  __typename?: 'ChangeValueMutationPayload';
+/** Изменение значений ячеек. */
+export type ChangeValuesMutationPayload = {
+  __typename?: 'ChangeValuesMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -2770,7 +2768,7 @@ export type Mutation = {
   /** Мутация для изменения полей пользователя. */
   changeUserProps: ChangeUserPropsMutationPayload;
   /** Изменение значения ячейки */
-  changeValue: ChangeValueMutationPayload;
+  changeValues: ChangeValuesMutationPayload;
   /** Подтверждение кода. */
   confirmEmail: ConfirmEmailMutationPayload;
   /** Мутация на перенос групп с пользователями из другого периода. */
@@ -3102,8 +3100,8 @@ export type MutationChangeUserPropsArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
-export type MutationChangeValueArgs = {
-  input: ChangeValueMutationInput;
+export type MutationChangeValuesArgs = {
+  input: ChangeValuesMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4978,6 +4976,14 @@ export type UserTypeEdge = {
   node?: Maybe<UserType>;
 };
 
+/** Значение ячейки. */
+export type ValueInputType = {
+  /** Идентификатор ячейки */
+  cellId: Scalars['ID'];
+  /** Значение */
+  value: Scalars['String'];
+};
+
 /** Тип значения. */
 export type ValueType = {
   __typename?: 'ValueType';
@@ -5776,14 +5782,13 @@ export type ChangeFileValueMutationVariables = Exact<{
 
 export type ChangeFileValueMutation = { __typename?: 'Mutation', changeFileValue: { __typename?: 'ChangeFileValueMutationPayload', success: boolean, value: string, updatedAt: any, valueFiles?: Array<{ __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> | null } };
 
-export type ChangeValueMutationVariables = Exact<{
+export type ChangeValuesMutationVariables = Exact<{
   documentId: Scalars['ID'];
   sheetId: Scalars['ID'];
-  cellId: Scalars['ID'];
-  value: Scalars['String'];
+  values: Array<ValueInputType> | ValueInputType;
 }>;
 
-export type ChangeValueMutation = { __typename?: 'Mutation', changeValue: { __typename: 'ChangeValueMutationPayload', success: boolean, updatedAt?: any | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
+export type ChangeValuesMutation = { __typename?: 'Mutation', changeValues: { __typename: 'ChangeValuesMutationPayload', success: boolean, updatedAt?: any | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];

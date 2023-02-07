@@ -14,27 +14,25 @@ from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
-from graphql_relay import from_global_id
 
 from apps.dcis.models import Cell, Document, Value
 from apps.dcis.permissions import can_change_value
-from apps.dcis.schema.types import ValueType
+from apps.dcis.schema.types import ValueInputType, ValueType
 from apps.dcis.services.value_services import (
+    ValueInput,
     create_file_value_archive,
-    get_file_value_files,
-    update_or_create_file_value,
-    update_or_create_value,
+    get_file_value_files, update_or_create_file_value,
+    update_or_create_values,
 )
 
 
-class ChangeValueMutation(BaseMutation):
-    """Изменение значения ячейки."""
+class ChangeValuesMutation(BaseMutation):
+    """Изменение значений ячеек."""
 
     class Input:
         document_id = graphene.ID(required=True, description='Идентификатор документа')
         sheet_id = graphene.ID(required=True, description='Идентификатор листа')
-        cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
-        value = graphene.String(required=True, description='Значение')
+        values = graphene.List(graphene.NonNull(ValueInputType), required=True, description='Значения ячеек')
 
     values = graphene.List(ValueType, description='Измененные ячейки')
     updated_at = graphene.DateTime(description='Дата изменения')
@@ -46,24 +44,31 @@ class ChangeValueMutation(BaseMutation):
         info: ResolveInfo,
         document_id: str,
         sheet_id: str,
-        cell_id: str,
-        value: str
+        values: list[ValueInputType],
     ):
         document: Document = get_object_or_404(Document, pk=gid2int(document_id))
-        cell: Cell = get_object_or_404(Cell, pk=gid2int(cell_id))
-        try:
-            can_change_value(info.context.user, document, cell)
-        except PermissionDenied as e:
-            # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
-            return ChangeValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
-        result = update_or_create_value(
+        cells = Cell.objects.filter(id__in=[gid2int(v.cell_id) for v in values])
+        errors: list[ErrorFieldType] = []
+        for cell in cells:
+            try:
+                can_change_value(info.context.user, document, cell)
+            except PermissionDenied as e:
+                errors.append(ErrorFieldType('value', [str(e)]))
+        if len(errors):
+            return ChangeValuesMutation(success=False, errors=errors)
+        values_input: list[ValueInput] = []
+        for value in values:
+            values_input.append(ValueInput(
+                cell=next(cell for cell in cells if gid2int(value.cell_id) == cell.id),
+                value=value.value,
+            ))
+        result = update_or_create_values(
             user=info.context.user,
             document=document,
-            cell=cell,
             sheet_id=sheet_id,
-            value=value
+            values=values_input,
         )
-        return ChangeValueMutation(values=result.values, updated_at=result.updated_at)
+        return ChangeValuesMutation(values=result.values, updated_at=result.updated_at)
 
 
 class ChangeFileValueMutation(BaseMutation):
@@ -99,7 +104,6 @@ class ChangeFileValueMutation(BaseMutation):
         try:
             can_change_value(info.context.user, document, cell)
         except PermissionDenied as e:
-            # todo: на strawberry это будет raise PermissionDenied({'value': str(e)})
             return ChangeFileValueMutation(success=False, errors=[ErrorFieldType('value', [str(e)])])
         result = update_or_create_file_value(
             user=info.context.user,
@@ -107,7 +111,7 @@ class ChangeFileValueMutation(BaseMutation):
             cell=cell,
             sheet_id=sheet_id,
             value=value,
-            remaining_files=[int(from_global_id(global_id)[1]) for global_id in remaining_files],
+            remaining_files=[gid2int(file_id) for file_id in remaining_files],
             new_files=new_files
         )
         return ChangeFileValueMutation(
@@ -160,7 +164,7 @@ class UnloadFileValueArchiveMutation(BaseMutation):
 class ValueMutations(graphene.ObjectType):
     """Мутации, связанные с ячейками."""
 
-    change_value = ChangeValueMutation.Field(required=True, description='Изменение значения ячейки')
+    change_values = ChangeValuesMutation.Field(required=True, description='Изменение значения ячейки')
     change_file_value = ChangeFileValueMutation.Field(
         required=True,
         description='Изменение значения ячейки типа `Файл`'

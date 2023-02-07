@@ -16,6 +16,7 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
+    AddStatus,
     Attribute,
     AttributeValue,
     Cell,
@@ -33,7 +34,6 @@ from apps.dcis.models import (
     RowDimension,
     Sheet,
     Status,
-    AddStatus,
     Value,
 )
 from apps.dcis.permissions import (
@@ -693,6 +693,13 @@ class ChangedCellOption(graphene.ObjectType):
     cell_id = graphene.ID(required=True, description='Идентификаторы ячеек')
     field = graphene.String(required=True, description='Идентификатор поля')
     value = graphene.String(description='Значение поля')
+
+
+class ValueInputType(graphene.InputObjectType):
+    """Значение ячейки."""
+
+    cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
+    value = graphene.String(required=True, description='Значение')
 
 
 class GlobalIndicesInputType(graphene.InputObjectType):

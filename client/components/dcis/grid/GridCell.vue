@@ -120,7 +120,7 @@ export default defineComponent({
       if (props.cell.value === value || (props.cell.value === null && value === '')) {
         return
       }
-      await changeValue(props.cell, value)
+      await changeValue([{ cell: props.cell, value }])
     }
 
     const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {

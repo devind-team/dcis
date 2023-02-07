@@ -26,8 +26,8 @@ import {
   ChangeRowDimensionMutationVariables,
   ChangeRowDimensionsFixedMutation,
   ChangeRowDimensionsFixedMutationVariables,
-  ChangeValueMutation,
-  ChangeValueMutationVariables,
+  ChangeValuesMutation,
+  ChangeValuesMutationVariables,
   ColumnDimensionFieldsFragment,
   ColumnDimensionType,
   DeleteChildRowDimensionMutation,
@@ -60,7 +60,7 @@ import changeChildRowDimensionHeightMutation
   from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
 import changeCellDefaultMutation from '~/gql/dcis/mutations/cell/change_cell_default.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
-import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
+import changeValueMutation from '~/gql/dcis/mutations/values/change_values.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
 import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/values/unload_file_value_archive.graphql'
 
@@ -68,6 +68,11 @@ export enum AddRowDimensionPosition {
   BEFORE,
   AFTER,
   INSIDE
+}
+
+export type ValueInputType = {
+  value: string
+  cell: CellType
 }
 
 export function useAddRowDimensionMutation (
@@ -835,40 +840,37 @@ export const changeSheetValues = (
 export const useChangeValueMutation = (documentId: Ref<string | null>, sheetId: Ref<string>) => {
   const { client } = useApolloClient()
   const { mutate } = useMutation<
-    ChangeValueMutation,
-    ChangeValueMutationVariables
+    ChangeValuesMutation,
+    ChangeValuesMutationVariables
   >(changeValueMutation)
-  return async (cell: CellType, value: string) => {
+  return async (values: ValueInputType[]) => {
     await mutate({
       documentId: unref(documentId),
       sheetId: unref(sheetId),
-      cellId: cell.id,
-      value
+      values: values.map((value: ValueInputType) => ({ value: value.value, cellId: value.cell.id }))
     }, {
-      update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
-        if (result.data.changeValue.success) {
-          const { values, updatedAt } = result.data.changeValue
+      update: (_: DataProxy, result: Omit<FetchResult<ChangeValuesMutation>, 'context'>) => {
+        if (result.data.changeValues.success) {
+          const { values, updatedAt } = result.data.changeValues
           changeSheetValues(values, client, documentId, updatedAt)
         }
       },
       optimisticResponse: {
         __typename: 'Mutation',
-        changeValue: {
-          __typename: 'ChangeValueMutationPayload',
+        changeValues: {
+          __typename: 'ChangeValuesMutationPayload',
           success: true,
           errors: null,
-          values: [
-            {
-              id: '',
-              sheetId: sheetId.value,
-              value,
-              error: null,
-              columnId: cell.columnId,
-              rowId: cell.rowId,
-              payload: null,
-              __typename: 'ValueType'
-            }
-          ],
+          values: values.map((value: ValueInputType) => ({
+            id: '',
+            sheetId: sheetId.value,
+            value: value.value,
+            error: null,
+            columnId: value.cell.columnId,
+            rowId: value.cell.rowId,
+            payload: null,
+            __typename: 'ValueType'
+          })),
           updatedAt: new Date().toISOString()
         }
       }
