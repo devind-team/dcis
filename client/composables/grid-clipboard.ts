@@ -2,7 +2,14 @@ import { inject, Ref } from '#app'
 import { useEventListener } from '@vueuse/core'
 import { CellType, SheetType } from '~/types/graphql'
 import { ValueInputType } from '~/composables/grid-mutations'
-import { findCell, letterToPosition, parsePosition, positionToLetter } from '~/services/grid'
+import {
+  findCell,
+  getRelatedGlobalPositions,
+  letterToPosition,
+  parsePosition,
+  positionsToRangeIndices,
+  positionToLetter
+} from '~/services/grid'
 import { ActiveSheetInject, GridMode, GridModeInject } from '~/types/grid'
 import { usePaste } from '~/composables/grid-actions'
 import { useCanChangeValue } from '~/composables/grid-permissions'
@@ -18,7 +25,7 @@ export function useGridClipboard (selectedCells: Ref<CellType[]>) {
     if (
       event.target instanceof HTMLInputElement ||
       event.target instanceof HTMLTextAreaElement ||
-      (mode.value !== GridMode.WRITE) ||
+      mode.value !== GridMode.WRITE ||
       selectedCells.value.length === 0 ||
       data === ''
     ) {
@@ -29,11 +36,24 @@ export function useGridClipboard (selectedCells: Ref<CellType[]>) {
       .filter((value: ValueInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
     await paste(values)
   })
+
+  useEventListener(document, 'copy', (event: ClipboardEvent) => {
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement ||
+      selectedCells.value.length === 0
+    ) {
+      return
+    }
+    event.clipboardData.clearData()
+    event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
+    event.preventDefault()
+  })
 }
 
-function parsePlainTextTable (textTable): string[][] {
+function parsePlainTextTable (textTable: string): string[][] {
   const table: string[][] = []
-  for (const row of textTable.split(/\r?\n/)) {
+  for (const row of textTable.split(getEndOfLine())) {
     if (row === '') {
       break
     }
@@ -45,7 +65,27 @@ function parsePlainTextTable (textTable): string[][] {
   return table
 }
 
-function getTablesIntersection(
+function generatePlainTextTable (selectedCells: CellType[]): string {
+  const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(getRelatedGlobalPositions(selectedCells))
+  const endOfLine = getEndOfLine()
+  let result = ''
+  for (let row = minRow; row <= maxRow; row++) {
+    for (let column = minColumn; column <= maxColumn; column++) {
+      const position = `${positionToLetter(column)}${row}`
+      const cell = selectedCells.find((cell: CellType) => cell.globalPosition === position)
+      if (cell) {
+        result += cell.value
+      }
+      if (column !== maxColumn) {
+        result += '\t'
+      }
+    }
+    result += endOfLine
+  }
+  return result
+}
+
+function getTablesIntersection (
   selectedCells: CellType[],
   activeSheet: SheetType,
   table: string[][]
@@ -68,4 +108,17 @@ function getTablesIntersection(
     }
   }
   return result
+}
+
+function getEndOfLine () {
+  if (!navigator) {
+    return '\n'
+  }
+  if (navigator.userAgent.includes('Windows')) {
+    return '\r\n'
+  } else if (navigator.userAgent.includes('Mac')) {
+    return '\r'
+  } else {
+    return '\n'
+  }
 }
