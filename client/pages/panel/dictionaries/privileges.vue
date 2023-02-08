@@ -2,10 +2,10 @@
 universal-dictionary(
   @update-drawer="$emit('update-drawer')"
   :bread-crumbs="bc"
-  :query="require('~/gql/dcis/queries/budget_classifications.graphql')"
-  :headers="['id', {name: 'code', value: 'code', width: 250}, 'name']"
-  :page-size="20"
-  query-name="budgetClassifications"
+  :query="require('~/gql/dcis/queries/privileges.graphql')"
+  :headers="['id', 'name', 'key', 'createdAt']"
+  :convert-item="{ createdAt: dateTimeHM }"
+  query-name="privileges"
 )
 </template>
 
@@ -13,7 +13,7 @@ universal-dictionary(
 import type { PropType, ComputedRef } from '#app'
 import { defineComponent, computed, useNuxt2Meta } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useI18n } from '~/composables'
+import { useFilters, useI18n } from '~/composables'
 import UniversalDictionary from '~/components/dcis/dictionaries/UniversalDictionary.vue'
 export default defineComponent({
   components: { UniversalDictionary },
@@ -23,16 +23,17 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
-    useNuxt2Meta({ title: t('dictionaries.budgetClassifications.header') as string })
+    const { dateTimeHM } = useFilters()
+    useNuxt2Meta({ title: t('dictionaries.privileges.header') as string })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
-        text: t('dictionaries.budgetClassifications.header') as string,
-        to: localePath({ name: 'dcis-dictionaries-budget_classifications' }),
+        text: t('dictionaries.privileges.header') as string,
+        to: localePath({ name: 'panel-dictionaries-privileges' }),
         exact: true
       }
     ]))
-    return { bc }
+    return { bc, dateTimeHM }
   }
 })
 </script>

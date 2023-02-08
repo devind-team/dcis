@@ -29,7 +29,7 @@ export default defineComponent({
       ...props.breadCrumbs,
       {
         text: t('dictionaries.departments.header') as string,
-        to: localePath({ name: 'dcis-dictionaries-departments' }),
+        to: localePath({ name: 'panel-dictionaries-departments' }),
         exact: true
       }
     ]))

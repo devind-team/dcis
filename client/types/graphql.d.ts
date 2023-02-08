@@ -257,6 +257,8 @@ export type AddDocumentMessageMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Документ */
   documentId: Scalars['ID'];
+  /** Тип сообщения */
+  kind?: InputMaybe<Scalars['String']>;
   /** Текст комментария */
   message?: InputMaybe<Scalars['String']>;
 };
@@ -2322,6 +2324,13 @@ export type DjangoDebugSql = {
   vendor: Scalars['String'];
 };
 
+/** An enumeration. */
+export type DocumentMessageKind =
+  /** message */
+  | 'MESSAGE'
+  /** status */
+  | 'STATUS';
+
 /** Тип комментариев для документа */
 export type DocumentMessageType = Node & {
   __typename?: 'DocumentMessageType';
@@ -2333,6 +2342,8 @@ export type DocumentMessageType = Node & {
   document?: Maybe<DocumentType>;
   /** The ID of the object. */
   id: Scalars['ID'];
+  /** Тип сообщения */
+  kind: DocumentMessageKind;
   /** Пользователь */
   user: UserType;
 };
@@ -5368,7 +5379,7 @@ export type DivisionModelFieldsFragment = { __typename: 'DivisionModelType', id:
 
 export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null };
 
-export type DocumentMessageFieldsFragment = { __typename: 'DocumentMessageType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null };
+export type DocumentMessageFieldsFragment = { __typename: 'DocumentMessageType', id: string, comment: string, kind: DocumentMessageKind, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null };
 
 export type LimitationFieldsFragment = { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
 
@@ -5558,9 +5569,10 @@ export type AddDocumentDataMutation = { __typename?: 'Mutation', addDocumentData
 export type AddDocumentMessageMutationVariables = Exact<{
   documentId: Scalars['ID'];
   message: Scalars['String'];
+  kind: Scalars['String'];
 }>;
 
-export type AddDocumentMessageMutation = { __typename?: 'Mutation', addDocumentMessage: { __typename: 'AddDocumentMessageMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentMessage?: { __typename: 'DocumentMessageType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null } | null } };
+export type AddDocumentMessageMutation = { __typename?: 'Mutation', addDocumentMessage: { __typename: 'AddDocumentMessageMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, documentMessage?: { __typename: 'DocumentMessageType', id: string, comment: string, kind: DocumentMessageKind, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null } | null } };
 
 export type AddDocumentStatusMutationVariables = Exact<{
   comment: Scalars['String'];
@@ -5957,7 +5969,7 @@ export type DocumentMessagesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']>;
 }>;
 
-export type DocumentMessagesQuery = { __typename?: 'Query', documentMessages?: { __typename?: 'DocumentMessageTypeConnection', totalCount: number, edges: Array<{ __typename?: 'DocumentMessageTypeEdge', node?: { __typename: 'DocumentMessageType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+export type DocumentMessagesQuery = { __typename?: 'Query', documentMessages?: { __typename?: 'DocumentMessageTypeConnection', totalCount: number, edges: Array<{ __typename?: 'DocumentMessageTypeEdge', node?: { __typename: 'DocumentMessageType', id: string, comment: string, kind: DocumentMessageKind, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
 
 export type DocumentSheetQueryVariables = Exact<{
   documentId: Scalars['ID'];

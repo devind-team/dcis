@@ -210,10 +210,15 @@ export default defineComponent({
           )
         }
       })
-    const deleteDocumentStatus = async (variables: DeleteDocumentStatusMutationVariables) => {
-      await deleteDocumentStatusMutate(variables)
+
+    const deleteDocumentStatus = async () => {
+      await deleteDocumentStatusMutate(deleteDocumentStatusVariables.value)
       await refetchStatuses()
     }
+
+    const deleteDocumentStatusVariables = computed<DeleteDocumentStatusMutationVariables>(() => ({
+      documentStatusId: props.document.lastStatus.id
+    }))
 
     const close = () => {
       status.value = statuses.value[0] || null

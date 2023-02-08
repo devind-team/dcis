@@ -149,7 +149,8 @@ export default defineNuxtConfig({
       'subscriptions-transport-ws',
       'cross-fetch/polyfill',
       'universal-cookie',
-      'pinia'
+      'pinia',
+      'numfmt'
     ]
   }
 })

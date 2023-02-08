@@ -191,6 +191,7 @@ def add_documents(
     period: Period,
     sheets: dict[str, Sheet],
     status: Status,
+    comment: str,
     documents_data: dict[int, dict[str, list[CellData]]],
     divisions: dict[int, str]
 ) -> list[Document]:

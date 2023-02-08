@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы изменения связей между записями в базе данных
+Типы измнения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -236,6 +236,8 @@ input AddDocumentMessageMutationInput {
   clientMutationId: String
   """Документ"""
   documentId: ID!
+  """Тип сообщения"""
+  kind: String
   """Текст комментария"""
   message: String
 }
@@ -1707,7 +1709,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатает, готовиться отправить сообщение
+- TYPING - Печатет, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -1886,6 +1888,8 @@ type DeleteDivisionMutationPayload {
 
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
   """Идентификатор статуса документа"""
   documentStatusId: ID!
 }
@@ -2220,6 +2224,14 @@ type DjangoDebugSQL {
   vendor: String!
 }
 
+"""An enumeration."""
+enum DocumentMessageKind {
+  """message"""
+  MESSAGE
+  """status"""
+  STATUS
+}
+
 """Тип комментариев для документа"""
 type DocumentMessageType implements Node {
   """Комментарий"""
@@ -2230,6 +2242,8 @@ type DocumentMessageType implements Node {
   document: DocumentType
   """The ID of the object."""
   id: ID!
+  """Тип сообщения"""
+  kind: DocumentMessageKind!
   """Пользователь"""
   user: UserType!
 }
@@ -2313,7 +2327,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы."""
+"""Ошибка в поле формы"""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -4005,7 +4019,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представляющий собой таблицу."""
+"""Документ, представлющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!

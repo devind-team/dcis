@@ -139,10 +139,10 @@ def create_document(
     return document, []
 
 
-def create_document_message(user: User, document: Document, message: str) -> DocumentMessage:
+def create_document_message(user: User, document: Document, message: str, kind: str) -> DocumentMessage:
     """Добавление комментария к документу."""
     can_add_document_message(user, document)
-    return DocumentMessage.objects.create(comment=message, user=user, document=document)
+    return DocumentMessage.objects.create(comment=message, user=user, document=document, kind=kind)
 
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:

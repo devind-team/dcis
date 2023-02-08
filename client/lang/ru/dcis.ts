@@ -339,7 +339,7 @@ export default {
     links: {
       sheets: 'Листы',
       attributes: 'Атрибуты',
-      comments: 'Комментарии'
+      comments: 'Журнал'
     },
     tableHeaders: {
       version: 'Версия',
@@ -402,6 +402,10 @@ export default {
       tabNameNotSupplied: {
         name: 'Не подавшие'
       }
+    },
+    comments: {
+      comment: 'Введите комментарий',
+      send: '@:send'
     },
     attributes: {
       noAttributes: 'Нет атрибутов'
