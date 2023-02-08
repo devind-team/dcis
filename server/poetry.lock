@@ -2801,20 +2801,18 @@ six = ">=1.15.0"
 
 [[package]]
 name = "redis"
-version = "4.3.4"
+version = "4.5.0"
 description = "Python client for Redis database and key-value store"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 files = [
-    {file = "redis-4.3.4-py3-none-any.whl", hash = "sha256:a52d5694c9eb4292770084fa8c863f79367ca19884b329ab574d5cb2036b3e54"},
-    {file = "redis-4.3.4.tar.gz", hash = "sha256:ddf27071df4adf3821c4f2ca59d67525c3a82e5f268bed97b813cb4fabf87880"},
+    {file = "redis-4.5.0-py3-none-any.whl", hash = "sha256:98d265eea4d2255f4d0ea98c53326adf30c0a581b6cfba9d77eefb341ed8145c"},
+    {file = "redis-4.5.0.tar.gz", hash = "sha256:16135483fd35fb6c3927e4bb056780a0ad11234f61e0aa81f1db89292129c714"},
 ]
 
 [package.dependencies]
 async-timeout = ">=4.0.2"
-deprecated = ">=1.2.3"
-packaging = ">=20.4"
 
 [package.extras]
 hiredis = ["hiredis (>=1.0.0)"]
@@ -3561,4 +3559,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "2ce0d2e795103130564c6f1ff947dc582dc2700aac90f78bcb42df273ed5385c"
+content-hash = "f873d86596537bfd58757d09fb3058d3950137953fac52986e572237a8d9a8a1"
