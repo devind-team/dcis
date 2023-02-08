@@ -71,8 +71,8 @@ export enum AddRowDimensionPosition {
 }
 
 export type ValueInputType = {
-  value: string
   cell: CellType
+  value: string
 }
 
 export function useAddRowDimensionMutation (
@@ -847,7 +847,7 @@ export const useChangeValueMutation = (documentId: Ref<string | null>, sheetId: 
     await mutate({
       documentId: unref(documentId),
       sheetId: unref(sheetId),
-      values: values.map((value: ValueInputType) => ({ value: value.value, cellId: value.cell.id }))
+      values: values.map((value: ValueInputType) => ({ cellId: value.cell.id, value: value.value }))
     }, {
       update: (_: DataProxy, result: Omit<FetchResult<ChangeValuesMutation>, 'context'>) => {
         if (result.data.changeValues.success) {

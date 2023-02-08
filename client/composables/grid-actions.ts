@@ -8,7 +8,6 @@ import {
   useResetRowDimensionHeightLocalMutation
 } from '~/composables/grid-local-mutations'
 import {
-  ValueInputType,
   useAddChildRowDimensionMutation,
   useAddRowDimensionMutation,
   useChangeCellDefaultMutation,
@@ -112,18 +111,16 @@ export function useChangeValue () {
   const updateActiveSheet = inject(UpdateActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.CHANGE) {
-    const changeDefaultValue = useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
-    return async (values: ValueInputType[]) => {
-      for (const value of values) {
-        await changeDefaultValue(value.cell, value.value)
-      }
-    }
+    return useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
   if (mode.value === GridMode.WRITE) {
-    return useChangeValueMutation(
+    const changeValue = useChangeValueMutation(
       computed(() => activeDocument.value.id),
       computed(() => activeSheet.value.id)
     )
+    return async function (cell: CellType, value: string) {
+      await changeValue([{ cell, value }])
+    }
   }
   return null
 }
@@ -154,6 +151,19 @@ export function useUnloadFileValueArchive (cell: Ref<CellType>) {
       computed(() => activeDocument.value ? activeDocument.value.id : ''),
       computed(() => activeSheet.value.id),
       cell
+    )
+  }
+  return null
+}
+
+export function usePaste () {
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
+  if (mode.value === GridMode.WRITE) {
+    return useChangeValueMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id)
     )
   }
   return null

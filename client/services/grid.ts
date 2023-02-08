@@ -375,7 +375,8 @@ const isRowDimensionsRectangular = (
   columnsCount: number
 ): boolean => {
   const relatedGlobalPositions = getRelatedGlobalPositions(cells)
-  const columnsPositions = Array.from({ length: columnsCount }).map((_, i: number) => positionToLetter(i + 1))
+  const columnsPositions = Array.from({ length: columnsCount })
+    .map((_, i: number) => positionToLetter(i + 1))
   for (const rowDimension of rowDimensions) {
     for (const columnPosition of columnsPositions) {
       const index = relatedGlobalPositions.indexOf(`${columnPosition}${rowDimension.globalIndex}`)

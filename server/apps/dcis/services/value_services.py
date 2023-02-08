@@ -173,25 +173,22 @@ def recalculate_cells(document: Document, values: list[Value]) -> list[Value]:
     if not inversion_cells:
         return values
     # 2. Получаем связанные ячейки и значения из базы данных
-    cells, values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
+    cells, resolve_values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
     # 3. Строим изначальное состояние всех значений
-    state: dict[str, ValueState] = resolve_evaluate_state(cells, values, inversion_cells)
+    state: dict[str, ValueState] = resolve_evaluate_state(cells, resolve_values, inversion_cells)
     # 4. Рассчитываем значения
     evaluate_result: dict[str, ValueState] = evaluate_state(state, sequence_evaluate)
     # 5. Сохраняем значения
     result_values: list[Value] = []
     for cell_name, result_value in evaluate_result.items():
         cell = result_value['cell']
-        if (
-            result_value['value'] is None or
-            cell_name not in inversion_cells or
-            next((
-                value for value in values if
-                cell.column_id == value.column_id and
-                cell.row_id == value.row_id and
-                cell.column.sheet_id == value.sheet_id
-            ), None) is None
-        ):
+        exist_cell = next((
+            value for value in values if
+            cell.column_id == value.column_id and
+            cell.row_id == value.row_id and
+            cell.column.sheet_id == value.sheet_id
+        ), None)
+        if result_value['value'] is None or cell_name not in inversion_cells or exist_cell is not None:
             continue
         val, created = Value.objects.update_or_create(
             column_id=cell.column_id,

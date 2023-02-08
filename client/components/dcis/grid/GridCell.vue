@@ -69,7 +69,8 @@ export default defineComponent({
       }))
     })
 
-    const canChangeValue = useCanChangeValue(cell)
+    const canChangeValueFunction = useCanChangeValue()
+    const canChangeValue = computed<boolean>(() => canChangeValueFunction(props.cell))
 
     const changeValue = useChangeValue()
     const changeFileValue = useChangeFileValue(cell, updateFiles)
@@ -120,7 +121,7 @@ export default defineComponent({
       if (props.cell.value === value || (props.cell.value === null && value === '')) {
         return
       }
-      await changeValue([{ cell: props.cell, value }])
+      await changeValue(props.cell, value)
     }
 
     const setFileValue = async (value: string, remainingFiles: string[], newFiles: File[]) => {

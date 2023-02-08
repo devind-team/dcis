@@ -19,6 +19,7 @@ import {
   useChangeRowDimensionHeight,
   useResetRowDimensionHeight
 } from '~/composables/grid-actions'
+import { useGridClipboard } from '~/composables/grid-clipboard'
 import { useColumnDimensionWidthMap, useRowDimensionHeightMap } from '~/composables/grid-local-mutations'
 
 export const cellKinds = {
@@ -258,6 +259,8 @@ export function useGrid () {
     grid,
     setActiveCell
   )
+
+  useGridClipboard(selectedCells)
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     mousemoveColumnNameResizing(
