@@ -106,27 +106,6 @@ type AddBudgetClassificationMutationPayload {
   success: Boolean!
 }
 
-input AddCategoryMutationInput {
-  """Аватар"""
-  avatar: Upload
-  clientMutationId: String
-  """Идентификатор родительской категории"""
-  parentId: ID
-  """Название категории"""
-  text: String!
-}
-
-"""Мутация для добавления категории"""
-type AddCategoryMutationPayload {
-  """Добавленная котегория"""
-  category: CategoryType
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
 input AddChildRowDimensionMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
@@ -395,41 +374,6 @@ type AddOrganizationsCuratorGroupPayload {
   success: Boolean!
 }
 
-input AddPageMutationInput {
-  """Аватар"""
-  avatar: Upload
-  """Категория страницы"""
-  categoryId: ID!
-  clientMutationId: String
-  """Скрываем ли страницу"""
-  hide: Boolean
-  """Тип страницы"""
-  kindId: Int
-  """Показывать параллакс или нет"""
-  parallax: Boolean
-  """Приоритет"""
-  priority: Boolean
-  """Подпись страницы"""
-  signature: String
-  """Теги на странице"""
-  tagNames: [String!]
-  """Первоначальное добавление текста страницы"""
-  text: String
-  """Заголовок"""
-  title: String!
-}
-
-"""Добавление страницы"""
-type AddPageMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Добавленная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
 input AddPeriodGroupMutationInput {
   clientMutationId: String
   """Название группы периода"""
@@ -549,81 +493,17 @@ type AddRowDimensionMutationPayload {
   success: Boolean!
 }
 
-input AddSectionFilesMutationInput {
-  clientMutationId: String
-  """Загружаемые изображения"""
-  files: [Upload!]!
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Текст страницы"""
-  text: String!
-}
-
-"""Добавление секции"""
-type AddSectionFilesMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Поле с файлами"""
-  section: SectionFilesType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input AddSectionGalleryMutationInput {
-  clientMutationId: String
-  """Загружаемые изображения"""
-  images: [Upload!]!
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Текст страницы"""
-  text: String!
-}
-
-"""Добавление секции"""
-type AddSectionGalleryMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Поле с файлами"""
-  section: SectionGalleryType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input AddSectionTextMutationInput {
-  clientMutationId: String
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Текст страницы"""
-  text: String!
-}
-
-"""Добавление секции"""
-type AddSectionTextMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Текстовое поле"""
-  section: SectionTextType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input AddTagMutationInput {
-  clientMutationId: String
-  name: String!
-}
-
-"""Добавление тега"""
-type AddTagMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-  """Добавленный тег"""
-  tag: TagType
+"""Тип переназначений статусов документов."""
+type AddStatusType {
+  """Функция, проверяющая может ли статус быть изменен"""
+  check: String!
+  """Изначальный статус"""
+  fromStatus: StatusType
+  id: ID!
+  """Роли пользователей, которые могут изменять статус"""
+  roles: JSONString!
+  """Новый статус"""
+  toStatus: StatusType!
 }
 
 input AddUsersCuratorGroupInput {
@@ -899,51 +779,6 @@ type BudgetClassificationTypeEdge {
   node: BudgetClassificationType
 }
 
-"""Категория"""
-type CategoryType implements Node {
-  """Аватар"""
-  avatar: String
-  """Дочерние категории"""
-  children: [CategoryType]!
-  """Дата создания"""
-  createdAt: DateTime!
-  """The ID of the object."""
-  id: ID!
-  """Соседние категории"""
-  nc: [CategoryType]!
-  """Страницы"""
-  pages(after: String, before: String, category_Id: ID, first: Int, kind_Id: ID, last: Int, offset: Int, title_Icontains: String): PageTypeConnection
-  """Родительская категория"""
-  parent: CategoryType
-  """Позиция вывода"""
-  position: Int!
-  """Текст"""
-  text: String!
-  """Дата обновления"""
-  updatedAt: DateTime!
-  """Пользователь"""
-  user: UserType
-}
-
-type CategoryTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [CategoryTypeEdge]!
-  """Number of nodes."""
-  nodeCount: Int!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `CategoryType` and its cursor."""
-type CategoryTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: CategoryType
-}
-
 """An enumeration."""
 enum CellAggregation {
   """avg"""
@@ -1130,76 +965,6 @@ input ChangeAvatarMutationInput {
 type ChangeAvatarMutationPayload {
   """Загруженный аватар"""
   avatar: String!
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeCategoryAvatarMutationInput {
-  """Аватар"""
-  avatar: Upload
-  """Идентификатор мутации"""
-  categoryId: ID!
-  clientMutationId: String
-}
-
-"""Мутация для изменения аватара категории"""
-type ChangeCategoryAvatarMutationPayload {
-  """Добавленная котегория"""
-  category: CategoryType
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeCategoryMutationInput {
-  """Идентификатор мутации"""
-  categoryId: ID!
-  clientMutationId: String
-  """Название категории"""
-  text: String!
-}
-
-"""Мутации для изменения категории"""
-type ChangeCategoryMutationPayload {
-  """Добавленная котегория"""
-  category: CategoryType
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeCategoryParentMutationInput {
-  """Идентификатор категории"""
-  categoryId: ID!
-  clientMutationId: String
-  """Идентификатор родителя"""
-  parentId: ID
-}
-
-"""Мутация для изменения родителя"""
-type ChangeCategoryParentMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeCategoryPositionMutationInput {
-  """Идентификаторы категорий"""
-  categoriesId: [ID]!
-  clientMutationId: String
-}
-
-"""Мутация для изменения порядка следования вывода категорий"""
-type ChangeCategoryPositionMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1532,121 +1297,6 @@ type ChangeNotificationsMutationPayload {
   success: Boolean!
 }
 
-input ChangePageAvatarMutationInput {
-  """Новый аватар страницы"""
-  avatar: Upload
-  clientMutationId: String
-  """Идентификатор страницы"""
-  pageId: ID!
-}
-
-"""Изменение аватара на странице"""
-type ChangePageAvatarMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Измененная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangePageBooleanPropertyMutationInput {
-  clientMutationId: String
-  field: String!
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Значение"""
-  value: Boolean!
-}
-
-"""Изменение boolean свойств страницы"""
-type ChangePageBooleanPropertyMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Измененная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangePageCategoryMutationInput {
-  """Идентификатор категории"""
-  categoryId: ID!
-  clientMutationId: String
-  """Идентификатор страницы"""
-  pageId: ID!
-}
-
-"""Изменение категории страницы"""
-type ChangePageCategoryMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Измененная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangePageKindMutationInput {
-  clientMutationId: String
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Идентификатор типа страницы"""
-  pageKindId: Int
-}
-
-"""Изменение типа страницы"""
-type ChangePageKindMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Измененная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangePageTagsMutationInput {
-  clientMutationId: String
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Теги"""
-  tagNames: [String!]!
-}
-
-"""Изменения тегов страницы"""
-type ChangePageTagsMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Измененная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangePageTitleMutationInput {
-  clientMutationId: String
-  """Идентификатор страницы"""
-  pageId: ID!
-  """Заголовок страницы"""
-  title: String!
-}
-
-"""Изменение названия страницы"""
-type ChangePageTitleMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Измененная страница"""
-  page: PageType
-  """Успех мутации"""
-  success: Boolean!
-}
-
 input ChangePasswordMutationInput {
   clientMutationId: String
   """Старый пароль"""
@@ -1835,71 +1485,6 @@ type ChangeRowDimensionsFixedPayload {
   errors: [ErrorFieldType!]!
   """Измененные строки"""
   rowDimensions: [ChangeRowDimensionType]
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeSectionFilesMutationInput {
-  clientMutationId: String
-  """Загружаемые изображения"""
-  newFiles: [Upload!]
-  """Изображения"""
-  oldFiles: [ID!]!
-  """Идентификатор секции"""
-  sectionId: ID!
-  """Текст мутации"""
-  text: String!
-}
-
-"""Изменение текста секции"""
-type ChangeSectionFilesMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Секция галереи"""
-  section: SectionFilesType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeSectionGalleryMutationInput {
-  clientMutationId: String
-  """Загружаемые изображения"""
-  newImages: [Upload!]
-  """Изображения"""
-  oldImages: [ID!]!
-  """Идентификатор секции"""
-  sectionId: ID!
-  """Текст мутации"""
-  text: String!
-}
-
-"""Изменение текста секции"""
-type ChangeSectionGalleryMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Секция галереи"""
-  section: SectionGalleryType
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input ChangeSectionTextMutationInput {
-  clientMutationId: String
-  """Идентификатор секции"""
-  sectionId: ID!
-  """Текст мутации"""
-  text: String!
-}
-
-"""Изменение текста секции"""
-type ChangeSectionTextMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Текстовая секция"""
-  section: SectionTextType
   """Успех мутации"""
   success: Boolean!
 }
@@ -2095,45 +1680,6 @@ type ColumnDimensionType {
   width: Int
 }
 
-"""Комментарии"""
-type CommentType implements Node {
-  """Дочерние комментарии"""
-  children: [CategoryType]!
-  """Дата создания"""
-  createdAt: DateTime!
-  """The ID of the object."""
-  id: ID!
-  """Страница"""
-  page: PageType!
-  """Рейтинг"""
-  rating: Int!
-  """Текст"""
-  text: String!
-  """Дата обновления"""
-  updatedAt: DateTime!
-  """Пользователь, оставивший комментарий"""
-  user: UserType!
-}
-
-type CommentTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [CommentTypeEdge]!
-  """Number of nodes."""
-  nodeCount: Int!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `CommentType` and its cursor."""
-type CommentTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: CommentType
-}
-
 input ConfirmEmailMutationInput {
   clientMutationId: String
   """Код, полученный по Email"""
@@ -2243,6 +1789,23 @@ value as specified by
 """
 scalar DateTime
 
+input DeleteAggregationMutationInput {
+  """Идентификатор агрегирующей ячеуки"""
+  aggregationCellId: ID!
+  clientMutationId: String
+}
+
+"""Удаление агрегации."""
+type DeleteAggregationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленной агрегации"""
+  id: ID
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteAttributeMutationInput {
   """
   Идентификатор модели "Не табличные данные хранятся в атрибутах.
@@ -2261,21 +1824,6 @@ input DeleteAttributeMutationInput {
 Удаление записи модели "Attribute"
 """
 type DeleteAttributeMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input DeleteCategoryMutationInput {
-  """Идентификатор мутации"""
-  categoryId: ID!
-  clientMutationId: String
-}
-
-"""Мутация для удаления категории"""
-type DeleteCategoryMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -2438,20 +1986,6 @@ type DeleteOrganizationCuratorGroupPayload {
   success: Boolean!
 }
 
-input DeletePageMutationInput {
-  clientMutationId: String
-  pageId: ID!
-}
-
-"""Удаление страницы"""
-type DeletePageMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
-  """Успех мутации"""
-  success: Boolean!
-}
-
 input DeletePeriodGroupMutationInput {
   clientMutationId: String
   """Идентификатор группы периода"""
@@ -2531,21 +2065,6 @@ type DeleteRowDimensionMutationPayload {
   errors: [ErrorFieldType!]!
   """Идентификатор удаленной строки"""
   rowDimensionId: ID!
-  """Успех мутации"""
-  success: Boolean!
-}
-
-input DeleteSectionMutationInput {
-  clientMutationId: String
-  """Идентификатор секции"""
-  sectionId: ID!
-}
-
-"""Удаление секции"""
-type DeleteSectionMutationPayload {
-  clientMutationId: String
-  """Ошибки мутации"""
-  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -3041,8 +2560,6 @@ type Mutation {
   addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
   addBudgetClassification(input: AddBudgetClassificationMutationInput!): AddBudgetClassificationMutationPayload!
-  """Мутация для добавления категории"""
-  addCategory(input: AddCategoryMutationInput!): AddCategoryMutationPayload!
   """Добавление дочерней строки."""
   addChildRowDimension(input: AddChildRowDimensionMutationInput!): AddChildRowDimensionMutationPayload!
   """Мутация на добавление кураторской группы."""
@@ -3069,8 +2586,6 @@ type Mutation {
   addLimitation(input: AddLimitationMutationInput!): AddLimitationMutationPayload!
   """Мутация на добавление организации в кураторскую группу."""
   addOrganizationsCuratorGroup(input: AddOrganizationsCuratorGroupInput!): AddOrganizationsCuratorGroupPayload!
-  """Добавление страницы"""
-  addPage(input: AddPageMutationInput!): AddPageMutationPayload!
   """Мутация для создания периода."""
   addPeriod(input: AddPeriodMutationInput!): AddPeriodMutationPayload!
   """Мутация на добавление группы в период."""
@@ -3081,14 +2596,6 @@ type Mutation {
   addProject(input: AddProjectMutationInput!): AddProjectMutationPayload!
   """Добавление строки"""
   addRowDimension(input: AddRowDimensionMutationInput!): AddRowDimensionMutationPayload!
-  """Добавление секции"""
-  addSectionFiles(input: AddSectionFilesMutationInput!): AddSectionFilesMutationPayload!
-  """Добавление секции"""
-  addSectionGallery(input: AddSectionGalleryMutationInput!): AddSectionGalleryMutationPayload!
-  """Добавление секции"""
-  addSectionText(input: AddSectionTextMutationInput!): AddSectionTextMutationPayload!
-  """Добавление тега"""
-  addTag(input: AddTagMutationInput!): AddTagMutationPayload!
   """Мутация на добавление пользователей в кураторскую группу."""
   addUsersCuratorGroup(input: AddUsersCuratorGroupInput!): AddUsersCuratorGroupPayload!
   """Добавляем агрегирование ячейки"""
@@ -3101,14 +2608,6 @@ type Mutation {
   changeAttributeValue(input: ChangeAttributeValueMutationInput!): ChangeAttributeValueMutationPayload!
   """Мутация для изменения аватара пользователя."""
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
-  """Мутации для изменения категории"""
-  changeCategory(input: ChangeCategoryMutationInput!): ChangeCategoryMutationPayload!
-  """Мутация для изменения аватара категории"""
-  changeCategoryAvatar(input: ChangeCategoryAvatarMutationInput!): ChangeCategoryAvatarMutationPayload!
-  """Мутация для изменения родителя"""
-  changeCategoryParent(input: ChangeCategoryParentMutationInput!): ChangeCategoryParentMutationPayload!
-  """Мутация для изменения порядка следования вывода категорий"""
-  changeCategoryPosition(input: ChangeCategoryPositionMutationInput!): ChangeCategoryPositionMutationPayload!
   """Изменение значения ячейки по умолчанию"""
   changeCellDefault(input: ChangeCellDefaultInput!): ChangeCellDefaultPayload!
   """Изменения опций ячейки"""
@@ -3133,18 +2632,6 @@ type Mutation {
   changeNotification(input: ChangeNotificationMutationInput!): ChangeNotificationMutationPayload!
   """Изменение свойств уведомлений"""
   changeNotifications(input: ChangeNotificationsMutationInput!): ChangeNotificationsMutationPayload!
-  """Изменение аватара на странице"""
-  changePageAvatar(input: ChangePageAvatarMutationInput!): ChangePageAvatarMutationPayload!
-  """Изменение boolean свойств страницы"""
-  changePageBooleanProperty(input: ChangePageBooleanPropertyMutationInput!): ChangePageBooleanPropertyMutationPayload!
-  """Изменение категории страницы"""
-  changePageCategory(input: ChangePageCategoryMutationInput!): ChangePageCategoryMutationPayload!
-  """Изменение типа страницы"""
-  changePageKind(input: ChangePageKindMutationInput!): ChangePageKindMutationPayload!
-  """Изменения тегов страницы"""
-  changePageTags(input: ChangePageTagsMutationInput!): ChangePageTagsMutationPayload!
-  """Изменение названия страницы"""
-  changePageTitle(input: ChangePageTitleMutationInput!): ChangePageTitleMutationPayload!
   """Мутация для изменения пароля пользователя."""
   changePassword(input: ChangePasswordMutationInput!): ChangePasswordMutationPayload!
   """Мутация на изменение настроек периода."""
@@ -3161,12 +2648,6 @@ type Mutation {
   changeRowDimension(input: ChangeRowDimensionMutationInput!): ChangeRowDimensionMutationPayload!
   """Изменение свойства fixed у строк"""
   changeRowDimensionsFixed(input: ChangeRowDimensionsFixedInput!): ChangeRowDimensionsFixedPayload!
-  """Изменение текста секции"""
-  changeSectionFiles(input: ChangeSectionFilesMutationInput!): ChangeSectionFilesMutationPayload!
-  """Изменение текста секции"""
-  changeSectionGallery(input: ChangeSectionGalleryMutationInput!): ChangeSectionGalleryMutationPayload!
-  """Изменение текста секции"""
-  changeSectionText(input: ChangeSectionTextMutationInput!): ChangeSectionTextMutationPayload!
   """Мутация для изменения настроек"""
   changeSettings(input: ChangeSettingsMutationInput!): ChangeSettingsMutationPayload!
   """Показ листов"""
@@ -3185,10 +2666,10 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
+  """Удаление агрегации."""
+  deleteAggregation(input: DeleteAggregationMutationInput!): DeleteAggregationMutationPayload!
   """Удаление атрибута"""
   deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
-  """Мутация для удаления категории"""
-  deleteCategory(input: DeleteCategoryMutationInput!): DeleteCategoryMutationPayload!
   """Удаление дочерней строки."""
   deleteChildRowDimension(input: DeleteChildRowDimensionMutationInput!): DeleteChildRowDimensionMutationPayload!
   """Мутация удаления кураторской группы."""
@@ -3207,8 +2688,6 @@ type Mutation {
   deleteNotice(input: DeleteNoticeMutationInput!): DeleteNoticeMutationPayload!
   """Мутация на добавление пользователей в кураторскую группу."""
   deleteOrganizationCuratorGroup(input: DeleteOrganizationCuratorGroupInput!): DeleteOrganizationCuratorGroupPayload!
-  """Удаление страницы"""
-  deletePage(input: DeletePageMutationInput!): DeletePageMutationPayload!
   """Мутация на удаление периода."""
   deletePeriod(input: DeletePeriodMutationInput!): DeletePeriodMutationPayload!
   """Мутация на удаление группы периода."""
@@ -3219,8 +2698,6 @@ type Mutation {
   deleteProject(input: DeleteProjectMutationInput!): DeleteProjectMutationPayload!
   """Удаление строки"""
   deleteRowDimension(input: DeleteRowDimensionMutationInput!): DeleteRowDimensionMutationPayload!
-  """Удаление секции"""
-  deleteSection(input: DeleteSectionMutationInput!): DeleteSectionMutationPayload!
   """Мутация для удаления всех сессий кроме текущей."""
   deleteSessions(input: DeleteSessionsMutationInput!): DeleteSessionsMutationPayload!
   """Мутация на добавление пользователей в кураторскую группу."""
@@ -3251,6 +2728,8 @@ type Mutation {
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
   """Выгрузка периода в формате Excel."""
   unloadPeriod(input: UnloadPeriodMutationInput!): UnloadPeriodMutationPayload!
+  """Обновление агрегации из json файла."""
+  updateAggregationsFromFile(input: UpdateAggregationsFromFileMutationInput!): UpdateAggregationsFromFileMutationPayload!
   """Обновление ограничений, накладываемых на лист, из json файла."""
   updateLimitationsFromFile(input: UpdateLimitationsFromFileMutationInput!): UpdateLimitationsFromFileMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
@@ -3329,24 +2808,6 @@ type NoticeMailingType implements NoticeInterface {
   mailing: MailingType
   """Идентификатор объекта"""
   objectId: String!
-  """Полезная нагрузка"""
-  payload: String!
-  """Пользователь"""
-  user: UserType
-}
-
-"""Уведомление типа 'Добавлена новая страница'"""
-type NoticePageType implements NoticeInterface {
-  """Дата создания"""
-  createdAt: DateTime!
-  """The ID of the object."""
-  id: ID!
-  """Тип уведомления"""
-  kind: Int!
-  """Идентификатор объекта"""
-  objectId: String!
-  """Страница"""
-  page: PageType
   """Полезная нагрузка"""
   payload: String!
   """Пользователь"""
@@ -3649,74 +3110,6 @@ type PageInfo {
   startCursor: String
 }
 
-"""Тип страницы"""
-type PageKindType {
-  id: ID!
-  """Название"""
-  name: String!
-  """Странички"""
-  pages: [PageType]!
-  """Сегментные элементы"""
-  segmentElements: [SegmentElementType]!
-}
-
-"""Страница"""
-type PageType implements Node {
-  """Аватар"""
-  avatar: String
-  """Категория"""
-  category: CategoryType!
-  """Комментарии"""
-  comments(after: String, before: String, first: Int, last: Int, offset: Int, text_Icontains: String): CommentTypeConnection!
-  """Дата создания"""
-  createdAt: DateTime!
-  """Скрываем ли страницу"""
-  hide: Boolean!
-  """The ID of the object."""
-  id: ID!
-  """Тип"""
-  kind: PageKindType
-  """Показывать параллакс или нет"""
-  parallax: Boolean!
-  """Первая текстовая секция"""
-  preview: String
-  """Приоритет"""
-  priority: Boolean!
-  """Секции"""
-  sections: [SectionInterface]!
-  """Подпись страницы"""
-  signature: String
-  """Теги на странице"""
-  tags: [TagType]!
-  """Заголовок"""
-  title: String!
-  """Дата обновления"""
-  updatedAt: DateTime!
-  """Пользователь, создавший страницу"""
-  user: UserType
-  """Количество просмотров"""
-  views: Int!
-}
-
-type PageTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [PageTypeEdge]!
-  """Number of nodes."""
-  nodeCount: Int!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `PageType` and its cursor."""
-type PageTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: PageType
-}
-
 """Группы с содержанием привилегий."""
 type PeriodGroupType {
   """Дата создания"""
@@ -3959,6 +3352,8 @@ type Query {
   ): BudgetClassificationTypeConnection
   """Статистика активности"""
   activeStatistics: ActiveStatisticsType!
+  """Переназначение статусов"""
+  addStatuses: [AddStatusType!]
   """Агрегированные ячейки документов периода"""
   aggregationCells(
     """Идентификатор периода"""
@@ -3987,10 +3382,6 @@ type Query {
     last: Int
     offset: Int
   ): BudgetClassificationTypeConnection
-  """Категории"""
-  categories(after: String, before: String, first: Int, last: Int, offset: Int, parent: ID, parent_Isnull: Boolean, text_Icontains: String): CategoryTypeConnection!
-  """Категория"""
-  category(categoryId: ID!): CategoryType!
   """Кураторская группа"""
   curatorGroup(
     """Идентификатор кураторской группы"""
@@ -4120,14 +3511,6 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): [OrganizationType]!
-  """Страница"""
-  page(pageId: ID!): PageType!
-  """Получение типа страницы"""
-  pageKind(pageKindId: ID!): PageKindType!
-  """Типы страниц"""
-  pageKinds: [PageKindType!]!
-  """Страницы"""
-  pages(after: String, before: String, category_Id: ID, first: Int, kind_Id: ID, last: Int, offset: Int, title_Icontains: String): PageTypeConnection!
   """Период"""
   period(
     """Идентификатор периода"""
@@ -4219,16 +3602,12 @@ type Query {
   ): SheetType!
   """Статистика запросов"""
   requestStatistics: RequestStatisticsType!
-  """Сегменты страницы"""
-  segments: [SegmentType!]!
   """Доступные сессии"""
   sessions(userId: ID): [SessionType!]!
   """Настройки приложения"""
   settings: [SettingType!]!
   """Статусы"""
   statuses: [StatusType!]
-  """Теги"""
-  tags(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): TagTypeConnection!
   """Информация о указанном пользователе"""
   user(userId: ID!): UserType
   """Привилегии пользователя в группе периода"""
@@ -4487,176 +3866,6 @@ type RowFieldErrorType {
   row: Int!
 }
 
-type SectionFilesType implements SectionInterface {
-  """Файлы"""
-  files: [FileType]!
-  """Идентификатор"""
-  id: Int!
-  """Тип страницы"""
-  kind: Int!
-  """Страница"""
-  page: PageType!
-  """Конструкции"""
-  payload: JSONString
-  """Порядок вывода"""
-  position: Int!
-  """Текст страницы"""
-  text: String!
-  """Пользователь"""
-  user: UserType!
-}
-
-type SectionGalleryType implements SectionInterface {
-  """Идентификатор"""
-  id: Int!
-  """Изображения"""
-  images: [FileType]!
-  """Тип страницы"""
-  kind: Int!
-  """Страница"""
-  page: PageType!
-  """Конструкции"""
-  payload: JSONString
-  """Порядок вывода"""
-  position: Int!
-  """Текст страницы"""
-  text: String!
-  """Пользователь"""
-  user: UserType!
-}
-
-interface SectionInterface {
-  """Идентификатор"""
-  id: Int!
-  """Тип страницы"""
-  kind: Int!
-  """Страница"""
-  page: PageType!
-  """Порядок вывода"""
-  position: Int!
-  """Текст страницы"""
-  text: String!
-  """Пользователь"""
-  user: UserType!
-}
-
-"""Секции"""
-type SectionTextType implements SectionInterface {
-  """Идентификатор"""
-  id: Int!
-  """Тип страницы"""
-  kind: Int!
-  """Страница"""
-  page: PageType!
-  """Порядок вывода"""
-  position: Int!
-  """Текст страницы"""
-  text: String!
-  """Пользователь"""
-  user: UserType!
-}
-
-type SectionUsersType implements SectionInterface {
-  """Идентификатор"""
-  id: Int!
-  """Тип страницы"""
-  kind: Int!
-  """Страница"""
-  page: PageType!
-  """Конструкции"""
-  payload: JSONString
-  """Порядок вывода"""
-  position: Int!
-  """Текст страницы"""
-  text: String!
-  """Пользователь"""
-  user: UserType!
-  """Пользователи"""
-  users: [UserType]!
-}
-
-"""An enumeration."""
-enum SegmentAlign {
-  """Left"""
-  A_0
-  """Center"""
-  A_1
-  """Right"""
-  A_2
-}
-
-"""An enumeration."""
-enum SegmentElementRepresent {
-  """grid"""
-  A_0
-  """card"""
-  A_1
-  """list"""
-  A_2
-  """slider"""
-  A_3
-}
-
-"""Элемент сегмента"""
-type SegmentElementType {
-  """Колонок в элементе"""
-  columns: Int!
-  """Дата создания"""
-  createdAt: DateTime!
-  id: ID!
-  """Тип страницы"""
-  pageKind: PageKindType!
-  """Количество страниц в запросе"""
-  pageSize: Int!
-  """Позиция в сортировке"""
-  position: Int!
-  """Представление"""
-  represent: SegmentElementRepresent
-  """Дата обновления"""
-  updatedAt: DateTime!
-  """Пользователь"""
-  user: UserType!
-  """Тип элемента для рендера"""
-  view: SegmentElementView
-  """Ширина колонки"""
-  width: Int!
-}
-
-"""An enumeration."""
-enum SegmentElementView {
-  """empty"""
-  A_0
-  """card"""
-  A_1
-}
-
-"""Сегмент"""
-type SegmentType {
-  """Выравнивание заголовка"""
-  align: SegmentAlign!
-  """Дата создания"""
-  createdAt: DateTime!
-  """Элементы сегмента страницы"""
-  elements: [SegmentElementType]!
-  id: ID!
-  """Заголовок страницы"""
-  name: String
-  """Позиция в сортировке"""
-  position: Int!
-  """Дата обновления"""
-  updatedAt: DateTime!
-  """Тип элемента для рендера"""
-  view: SegmentView
-}
-
-"""An enumeration."""
-enum SegmentView {
-  """empty"""
-  A_0
-  """card"""
-  A_1
-}
-
 """Сессия пользователя."""
 type SessionType implements Node {
   """Количество действий в сессии пользователя"""
@@ -4804,37 +4013,6 @@ type TableType {
   rows: [TableRowType]!
 }
 
-"""Тег"""
-type TagType implements Node {
-  """Дата создания"""
-  createdAt: DateTime!
-  """The ID of the object."""
-  id: ID!
-  """Название"""
-  name: String!
-  """Пользователь, создавший тег"""
-  user: UserType
-}
-
-type TagTypeConnection {
-  """Contains the nodes in this connection."""
-  edges: [TagTypeEdge]!
-  """Number of nodes."""
-  nodeCount: Int!
-  """Pagination data for this connection."""
-  pageInfo: PageInfo!
-  """Number of items in the queryset."""
-  totalCount: Int!
-}
-
-"""A Relay edge containing a `TagType` and its cursor."""
-type TagTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-  """The item at the end of the edge"""
-  node: TagType
-}
-
 input UnloadDocumentMutationInput {
   """Дополнительные параметры"""
   additional: [String!]
@@ -4883,7 +4061,7 @@ input UnloadPeriodMutationInput {
   """Применять числовой формат"""
   applyNumberFormat: Boolean!
   clientMutationId: String
-  """Символы в пустой ячейке"""
+  """Строка в пустой ячейке"""
   emptyCell: String!
   """Идентификаторы организаций"""
   organizationIds: [ID!]!
@@ -4891,6 +4069,12 @@ input UnloadPeriodMutationInput {
   periodId: ID!
   """Идентификаторы статусов"""
   statusIds: [ID!]!
+  """Выгружать листы для филиалов"""
+  unloadChildren: Boolean!
+  """Выгружать значение по умолчанию при отсутствии значения в документе"""
+  unloadDefault: Boolean!
+  """Выгружать листы для головных учреждений"""
+  unloadHeads: Boolean!
   """Выгружать организации без документов"""
   unloadWithoutDocument: Boolean!
 }
@@ -4902,6 +4086,25 @@ type UnloadPeriodMutationPayload {
   errors: [ErrorFieldType!]!
   """Ссылка на сгенерированный файл"""
   src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UpdateAggregationsFromFileMutationInput {
+  """json файл агрегации ячеек"""
+  aggregationsFile: Upload!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Обновление агрегации из json файла."""
+type UpdateAggregationsFromFileMutationPayload {
+  """Новая агрегация"""
+  aggregations: [CellAggregationType]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }

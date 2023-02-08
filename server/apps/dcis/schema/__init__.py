@@ -1,6 +1,7 @@
 import graphene
 
 from apps.dcis.schema.mutations import (
+    AggregationMutations,
     AttributeMutations,
     CellMutations,
     CuratorMutations,
@@ -36,6 +37,7 @@ class Mutation(
     AttributeMutations,
     CuratorMutations,
     LimitationMutations,
+    AggregationMutations,
     graphene.ObjectType
 ):
     """Мутации приложения dcis."""

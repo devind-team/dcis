@@ -188,12 +188,36 @@ export default {
     },
     aggregationCells: {
       name: '@:dcis.periods.links.aggregationCells',
+      kinds: {
+        sum: 'Сумма',
+        avg: 'Среднее арифметическое',
+        max: 'Максимальное значение',
+        min: 'Минимальное значение'
+      },
+      changeMenu: {
+        buttonText: 'Изменить агрегацию',
+        updateAggregationFromFile: {
+          buttonText: 'Обновить агрегацию из файла',
+          header: 'Обновление агрегацию из файла',
+          aggregationsFile: 'Файл с новой агрегацией',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        addAggregation: {
+          buttonText: 'Добавить агрегацию',
+          header: 'Добавление агрегацию',
+          errorMessage: 'Сообщение об ошибке'
+        }
+      },
       tableHeaders: {
         position: 'Ячейка',
-        aggregateType: 'Тип агрегации',
+        aggregateType: 'Метод агрегации',
         listAggregateCells: 'Агрегируемые ячейки',
         actions: '@:actions'
-      }
+      },
+      tooltips: {
+        delete: '@:delete'
+      },
+      deleteItemName: 'агрегацию ячейки'
     },
     groups: {
       name: '@:dcis.periods.links.groups',

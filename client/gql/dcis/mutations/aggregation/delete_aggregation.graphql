@@ -1,0 +1,12 @@
+mutation DeleteAggregation($aggregationCellId: ID!) {
+  deleteAggregation(input: { aggregationCellId: $aggregationCellId}) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    id
+    __typename
+  }
+}

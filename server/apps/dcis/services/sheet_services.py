@@ -1,6 +1,5 @@
 import re
 from argparse import ArgumentTypeError
-from dataclasses import dataclass
 from typing import NamedTuple, Sequence
 
 from devind_dictionaries.models import BudgetClassification
@@ -9,6 +8,7 @@ from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import QuerySet
 from openpyxl.utils import get_column_letter
+from pydantic import BaseModel
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
@@ -142,13 +142,14 @@ def get_aggregation_cells(user: User, cell: Cell) -> list[Cell]:
     to_cells = cell.to_cells.select_related('from_cell').all()
     return [to_cell.from_cell for to_cell in to_cells]
 
-@dataclass
-class CellsAggregation:
+
+class CellsAggregation(BaseModel):
     """Возвращаемый класс запроса."""
     id: str | int
     position: str
     aggregation: str
     cells: list[str]
+
 
 def get_cells_aggregation(user: User, period: Period) -> list[CellsAggregation]:
     """Получение агрегированных ячеек периода."""
@@ -164,9 +165,11 @@ def get_cells_aggregation(user: User, period: Period) -> list[CellsAggregation]:
         for cell in cells
     ]
 
+
 def transformation_position_cell(cell: Cell) -> str:
     """Преобразование ячейки к нужному отображению."""
     return f"'{cell.column.sheet.name}'!{get_column_letter(cell.column.index)}{cell.row.index}"
+
 
 def dependent_cells(cells: list[Cell]) -> list[str]:
     """Получение зависимых ячеек агрегации."""
@@ -189,7 +192,7 @@ def success_check_cell_options(user: User, cells: QuerySet[Cell]) -> QuerySet[Ce
 
 
 @transaction.atomic
-def change_cells_option(cells: Sequence[Cell], field: str, value:  str | int | bool | None) -> list[dict]:
+def change_cells_option(cells: Sequence[Cell], field: str, value: str | int | bool | None) -> list[dict]:
     """Изменение свойств ячеек."""
     result: list[dict] = []
     for cell in cells:

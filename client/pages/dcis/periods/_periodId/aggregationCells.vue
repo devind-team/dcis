@@ -2,6 +2,14 @@
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.aggregationCells.name') }}
     template(v-if="period.canChangeSettings")
+      v-spacer
+      change-period-aggregation-cells-menu(
+        :period="period"
+        :from-file-update="aggregationCellsResetUpdate"
+        :add-update="aggregationCellsAddUpdate"
+      )
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.periods.aggregationCells.changeMenu.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount: count }) }}
   v-data-table(
     :headers="tableHeaders"
@@ -13,17 +21,18 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     template(#item.cells="{ item }")
       span(v-if="item.cells.length === 0") &mdash;
       strong(v-else) {{ item.cells.join(', ') }}
+    template(#item.aggregation="{ item }") {{ $t(`dcis.periods.aggregationCells.kinds.${item.aggregation}`) }}
     template(#item.actions="{ item }")
       delete-menu(
-        :item-name="String($t('dcis.periods.limitations.deleteItemName'))"
-        @confirm="deleteLimitation({ limitationId: item.id })"
+        :item-name="String($t('dcis.periods.aggregationCells.deleteItemName'))"
+        @confirm="deleteAggregationCell({ aggregationCellId : item.id })"
       )
         template(#default="{ on: onMenu }")
           v-tooltip(bottom)
             template(#activator="{ on: onTooltip, attrs }")
               v-btn.ml-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" icon, color="error")
                 v-icon mdi-delete
-            span {{ String($t('dcis.periods.limitations.tooltips.delete')) }}
+            span {{ String($t('dcis.periods.aggregationCells.tooltips.delete')) }}
 
 </template>
 
@@ -32,19 +41,22 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import type { PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
+import { useMutation } from '@vue/apollo-composable'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   PeriodType,
   AggregationCellsQuery,
-  AggregationCellsQueryVariables
+  AggregationCellsQueryVariables, DeleteAggregationMutationVariables, DeleteAggregationMutation
 } from '~/types/graphql'
 import { useI18n, useCommonQuery } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
+import ChangePeriodAggregationCellsMenu from '~/components/dcis/periods/ChangePeriodAggregationCellsMenu.vue'
 import aggregationCellsQuery from '~/gql/dcis/queries/aggregation_cells.graphql'
+import deleteAggregationMutation from '~/gql/dcis/mutations/aggregation/delete_aggregation.graphql'
 
 export default defineComponent({
-  components: { DeleteMenu, LeftNavigatorContainer },
+  components: { ChangePeriodAggregationCellsMenu, DeleteMenu, LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -86,13 +98,24 @@ export default defineComponent({
       resetUpdate: aggregationCellsResetUpdate,
       addUpdate: aggregationCellsAddUpdate,
       deleteUpdate: aggregationCellsDeleteUpdate
-    } = useCommonQuery<AggregationCellsQuery, AggregationCellsQueryVariables>({
+    } = useCommonQuery<
+      AggregationCellsQuery,
+      AggregationCellsQueryVariables
+    >({
       document: aggregationCellsQuery,
       variables: () => ({
         periodId: props.period.id
       })
     })
     const count = computed<number>(() => aggregationCells.value ? aggregationCells.value.length : 0)
+
+    const { mutate: deleteAggregationCell } = useMutation<
+      DeleteAggregationMutation,
+      DeleteAggregationMutationVariables
+    >(deleteAggregationMutation, {
+      update: (cache, result) => aggregationCellsDeleteUpdate(cache, result)
+    })
+
     return {
       bc,
       tableHeaders,
@@ -101,7 +124,8 @@ export default defineComponent({
       aggregationCellsResetUpdate,
       aggregationCellsAddUpdate,
       aggregationCellsDeleteUpdate,
-      count
+      count,
+      deleteAggregationCell
     }
   }
 })
