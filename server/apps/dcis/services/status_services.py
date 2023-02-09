@@ -1,4 +1,5 @@
 """Модуль, отвечающий за работу со статусами."""
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import cast
 
@@ -145,4 +146,21 @@ class AddStatusActions:
 
         @classmethod
         def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
-            print(document, document_status)
+            old_document = deepcopy(document)
+            document.period.pk = None
+            document.period.save()
+
+            document.pk = None
+            document.period_id = document.period.id
+            period_id = document.period.id
+            document.save()
+
+            document_status.pk = None
+            document_status.document_id = document.id
+            document_status.archive_period_id = period_id
+            document_status.save()
+
+            for sheet in old_document.period.sheet_set.all():
+                sheet.pk = None
+                sheet.period_id = period_id
+                sheet.save()
