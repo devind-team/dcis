@@ -22,36 +22,44 @@ export function useGridClipboard (selectedCells: Ref<CellType[]>) {
   const canChangeValue = useCanChangeValue()
   const paste = usePaste()
 
-  useEventListener(document, 'paste', async (event: ClipboardEvent) => {
-    const data = event.clipboardData.getData('text/plain')
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      mode.value !== GridMode.WRITE ||
-      selectedCells.value.length === 0 ||
-      data === ''
-    ) {
-      return
+  useEventListener(
+    typeof document === 'undefined' ? null : document,
+    'paste',
+    async (event: ClipboardEvent) => {
+      const data = event.clipboardData.getData('text/plain')
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        mode.value !== GridMode.WRITE ||
+        selectedCells.value.length === 0 ||
+        data === ''
+      ) {
+        return
+      }
+      const table = parsePlainTextTable(data)
+      const values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
+        .filter((value: ValueInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
+      await paste(values)
     }
-    const table = parsePlainTextTable(data)
-    const values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
-      .filter((value: ValueInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
-    await paste(values)
-  })
+  )
 
-  useEventListener(document, 'copy', (event: ClipboardEvent) => {
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      selectedCells.value.length === 0
-    ) {
-      return
+  useEventListener(
+    typeof document === 'undefined' ? null : document,
+    'copy',
+    (event: ClipboardEvent) => {
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        selectedCells.value.length === 0
+      ) {
+        return
+      }
+      event.clipboardData.clearData()
+      event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
+      event.clipboardData.setData('text/html', generateHTMLTable(selectedCells.value))
+      event.preventDefault()
     }
-    event.clipboardData.clearData()
-    event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
-    event.clipboardData.setData('text/html', generateHTMLTable(selectedCells.value))
-    event.preventDefault()
-  })
+  )
 }
 
 function parsePlainTextTable (textTable: string): string[][] {
