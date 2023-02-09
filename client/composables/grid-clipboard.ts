@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { inject, Ref } from '#app'
 import { useEventListener } from '@vueuse/core'
 import { CellType, SheetType } from '~/types/graphql'
@@ -13,6 +14,7 @@ import {
 import { ActiveSheetInject, GridMode, GridModeInject } from '~/types/grid'
 import { usePaste } from '~/composables/grid-actions'
 import { useCanChangeValue } from '~/composables/grid-permissions'
+import ClipboardTable from '~/components/dcis/grid/clipboard/ClipboardTable.vue'
 
 export function useGridClipboard (selectedCells: Ref<CellType[]>) {
   const mode = inject(GridModeInject)
@@ -47,6 +49,7 @@ export function useGridClipboard (selectedCells: Ref<CellType[]>) {
     }
     event.clipboardData.clearData()
     event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
+    event.clipboardData.setData('text/html', generateHTMLTable(selectedCells.value))
     event.preventDefault()
   })
 }
@@ -83,6 +86,22 @@ function generatePlainTextTable (selectedCells: CellType[]): string {
     result += endOfLine
   }
   return result
+}
+
+function generateHTMLTable (selectedCells: CellType[]): string {
+  const cells: CellType[][] = []
+  let rowId = ''
+  for (const cell of selectedCells) {
+    if (cell.rowId !== rowId) {
+      cells.push([])
+      rowId = cell.rowId
+    }
+    cells.at(-1).push(cell)
+  }
+  const vm = new Vue({
+    render: h => h(ClipboardTable, { props: { selectedCells: cells } })
+  })
+  return vm.$mount().$el.outerHTML
 }
 
 function getTablesIntersection (
