@@ -260,7 +260,7 @@ export function useGrid () {
     setActiveCell
   )
 
-  useGridClipboard(selectedCells)
+  useGridClipboard(selectedCells, getColumnWidth, getRowHeight)
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     mousemoveColumnNameResizing(

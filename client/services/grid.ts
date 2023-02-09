@@ -389,6 +389,125 @@ const isRowDimensionsRectangular = (
   return relatedGlobalPositions.length === 0
 }
 
+/**
+ * Получение стиля ширины ячейки
+ * @param cell
+ * @param getColumnWidth
+ * @param activeSheet
+ */
+const getCellWidthStyle = (
+  cell: CellType,
+  getColumnWidth: (column: ColumnDimensionType) => number,
+  activeSheet: SheetType
+): Record<string, string> => {
+  const { minColumn, maxColumn } = positionsToRangeIndices(cell.relatedGlobalPositions)
+  let width = 0
+  for (let i = minColumn - 1; i <= maxColumn - 1; i++) {
+    width += getColumnWidth(activeSheet.columns[i])
+  }
+  return { width: `${width}px` }
+}
+
+/**
+ * Получение стиля высоты ячейки
+ * @param cell
+ * @param getRowHeight
+ * @param activeSheet
+ */
+const getCellHeightStyle = (
+  cell: CellType,
+  getRowHeight: (row: RowDimensionType) => number,
+  activeSheet: SheetType
+): Record<string, string> => {
+  const { minRow, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
+  let height = 0
+  for (let i = minRow - 1; i <= maxRow - 1; i++) {
+    height += getRowHeight(activeSheet.rows[i])
+  }
+  return { height: `${height}px` }
+}
+
+/**
+ * Получение стилей для оформления текста ячейки
+ * @param cell
+ */
+const getCellTextFormattingStyle = (cell: CellType): Record<string, string> => {
+  const style: Record<string, string> = {}
+  const textDecoration: string[] = []
+  if (cell.strong) { style['font-weight'] = 'bold' }
+  if (cell.italic) { style['font-style'] = 'italic' }
+  if (cell.strike) { textDecoration.push('line-through') }
+  if (cell.underline) { textDecoration.push('underline') }
+  if (cell.size) { style['font-size'] = `${cell.size}px` }
+  if (textDecoration.length) {
+    style['text-decoration'] = textDecoration.join(' ')
+  }
+  if (cell.error) {
+    style.color = 'red'
+  } else if (cell.color) {
+    style.color = cell.color
+  }
+  return style
+}
+
+/**
+ * Получение стилей для выравнивания текста ячейки
+ * @param cell
+ */
+const getCellTextAlignmentStyle = (cell: CellType): Record<string, string> => {
+  const style: Record<string, string> = {}
+  if (cell.horizontalAlign) {
+    style['text-align'] = cell.horizontalAlign
+  }
+  if (cell.verticalAlign) {
+    style['vertical-align'] = cell.verticalAlign
+  }
+  return style
+}
+
+/**
+ * Получение стилей для оформления границы ячейки
+ * @param cell
+ */
+const getCellBorderStyle = (cell: CellType): Record<string, string> => {
+  const style: Record<string, string> = {}
+  const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
+  for (const position of ['top', 'right', 'bottom', 'left']) {
+    if (borderColor[position]) {
+      style[`border-${position}`] = `1px solid ${borderColor[position] || 'black'}`
+    }
+  }
+  return style
+}
+
+/**
+ * Получение стилей для оформления фона ячейки
+ * @param cell
+ * @param activeSheet
+ */
+const getCellBackgroundStyle = (cell: CellType, activeSheet: SheetType): Record<string, string> => {
+  const style: Record<string, string> = {}
+  const row = activeSheet.rows.find((row: RowDimensionType) => row.id === cell.rowId)
+  if (cell.background && cell.background !== '#FFFFFF') {
+    style.background = cell.background
+  } else if (row.background) {
+    style.background = row.background
+  }
+  return style
+}
+
+/**
+ * Получение стилей ячейки, связанных с Excel
+ * @param cell
+ */
+const getCellExcelStyle = (cell: CellType): Record<string, string> => {
+  const style: Record<string, string> = {}
+  if (cell.numberFormat) {
+    style['mso-number-format'] = cell.numberFormat
+  }
+  return style
+}
+
 export {
   positionToLetter,
   letterToPosition,
@@ -407,5 +526,12 @@ export {
   getRelatedGlobalPositions,
   getCellOptions,
   getRowDimensionsOptions,
-  getColumnDimensionsOptions
+  getColumnDimensionsOptions,
+  getCellWidthStyle,
+  getCellHeightStyle,
+  getCellTextFormattingStyle,
+  getCellTextAlignmentStyle,
+  getCellBorderStyle,
+  getCellBackgroundStyle,
+  getCellExcelStyle
 }
