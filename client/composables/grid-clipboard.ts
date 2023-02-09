@@ -100,14 +100,17 @@ export function useGridClipboard (
   }
 
   const generateHTMLTable = (selectedCells: CellType[]): string => {
+    const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(getRelatedGlobalPositions(selectedCells))
     const cells: CellType[][] = []
-    let rowId = ''
-    for (const cell of selectedCells) {
-      if (cell.rowId !== rowId) {
-        cells.push([])
-        rowId = cell.rowId
+    for (let row = minRow; row <= maxRow; row++) {
+      cells.push([])
+      for (let column = minColumn; column <= maxColumn; column++) {
+        const position = `${positionToLetter(column)}${row}`
+        const cell = selectedCells.find((cell: CellType) => cell.globalPosition === position)
+        if (cell) {
+          cells.at(-1).push(cell)
+        }
       }
-      cells.at(-1).push(cell)
     }
     const vm = new Vue({
       render: h => h(

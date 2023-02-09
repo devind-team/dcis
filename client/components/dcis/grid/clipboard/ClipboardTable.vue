@@ -6,7 +6,7 @@ html(lang="ru")
   body
     table(style="border-spacing: 0; border-collapse: collapse")
       tbody
-        tr(v-for="row in selectedCells" :style="getRowStyle(row)")
+        tr(v-for="(row, index) in selectedCells" :style="getRowStyle(index)")
           td(
             v-for="cell in row"
             :colspan="cell.colspan"
@@ -37,10 +37,10 @@ export default defineComponent({
     activeSheet: { type: Object as PropType<SheetType>, required: true }
   },
   setup (props) {
-    const getRowStyle = (row: CellType[]) => {
-      const rowIndex = parsePosition(row[0].globalPosition).row
+    const getRowStyle = (rowIndex: number) => {
+      const rowStartIndex = parsePosition(props.selectedCells[0][0].globalPosition).row
       return {
-        height: `${props.getRowHeight(props.activeSheet.rows[rowIndex - 1])}px`
+        height: `${props.getRowHeight(props.activeSheet.rows[rowStartIndex + rowIndex - 1])}px`
       }
     }
     const getCellStyle = (cell: CellType) => {
