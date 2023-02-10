@@ -13,6 +13,7 @@ component(
       name="message"
       :on="on"
       :attrs="attrs"
+      :disabled="disabled"
       :message="message"
       :container-class="messageContainerClass"
     )

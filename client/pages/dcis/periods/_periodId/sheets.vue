@@ -1,10 +1,10 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+left-navigator-container.period-sheets__left-navigator-container(
+  :bread-crumbs="bc"
+  fluid
+  @update-drawer="$emit('update-drawer')"
+)
   template(#header) {{ $t('dcis.periods.sheets.name') }}
-    v-spacer
-    sheets-settings-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
-      v-btn(v-on="on" v-bind="attrs" icon)
-        v-icon mdi-cog
   grid-sheets(
     v-model="activeSheetIndex"
     :mode="GridMode.CHANGE"
@@ -13,6 +13,9 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
     :update-active-sheet="updateActiveSheet"
     :loading="activeSheetLoading"
   )
+    template(#menus)
+      edit-menu(:mode="GridMode.CHANGE")
+      table-settings(:sheets="period.sheets")
     template(#tabs="{ sheets, updateSize }")
       template(v-for="sheet in sheets")
         sheet-control(
@@ -20,7 +23,7 @@ left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-
           :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
           :key="sheet.id"
         )
-          v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
+          v-tab.grid-sheet__tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
 </template>
 
 <script lang="ts">
@@ -41,10 +44,11 @@ import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import SheetsSettingsMenu from '~/components/dcis/periods/SheetsSettingsMenu.vue'
+import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
+import TableSettings from '~/components/dcis/grid/menus/TableSettingsMenu.vue'
 
 export default defineComponent({
-  components: { SheetsSettingsMenu, LeftNavigatorContainer, SheetControl, GridSheets },
+  components: { LeftNavigatorContainer, SheetControl, GridSheets, EditMenu, TableSettings },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -114,3 +118,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="sass">
+.period-sheets__left-navigator-container
+  .v-card__title
+    padding-bottom: 8px
+</style>

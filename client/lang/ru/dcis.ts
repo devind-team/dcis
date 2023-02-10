@@ -249,13 +249,8 @@ export default {
     },
     report: {
       name: '@:dcis.periods.links.report',
-      settings: {
-        unload: 'Выгрузить сводный отчет'
-      },
       documentsFilter: {
         title: 'Выбор документов',
-        noFiltrationMessage: 'Выбрать документы',
-        multipleMessage: 'Выбрано документов: {count}',
         selectMainDocument: 'Выбрать основной документ',
         mainDocumentSelection: 'Выбор основного документа',
         mainDocument: 'Выбран основной документ: {divisionId}',
@@ -278,9 +273,7 @@ export default {
         }
       },
       rowsFilter: {
-        title: 'Выбор расширенных строки',
-        noFiltrationMessage: 'Выбрать расширенные строки',
-        multipleMessage: 'Выбрано расширенных строк: {count}'
+        title: 'Выбор расширенных строк'
       }
     },
     unload: {
@@ -394,6 +387,28 @@ export default {
     },
     toolbar: {
       addRow: 'Добавить строку'
+    },
+    sheetMenu: {
+      editMenu: {
+        buttonText: 'Правка',
+        copy: 'Копировать',
+        copyWithStyles: 'Копировать со стилями',
+        paste: 'Вставить',
+        pasteWithStyles: 'Вставить со стилями'
+      },
+      documentUnloadMenu: {
+        buttonText: 'Выгрузка',
+        unload: '@:dcis.documents.unloadDocument.name'
+      },
+      tableSettings: {
+        buttonText: '@:settings',
+        showSettings: '@:dcis.sheets.settings.show'
+      },
+      reportUnloadMenu: {
+        buttonText: '@:settings',
+        documentFilter: '@:dcis.periods.report.documentsFilter.title',
+        rowsFilter: '@:dcis.periods.report.rowsFilter.title'
+      }
     },
     sheetToolbar: {
       readonly: 'Только для чтения',

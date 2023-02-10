@@ -1,13 +1,7 @@
 <template lang="pug">
 div
-  v-tabs(
-    ref="tabs"
-    :class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.REPORT || mode === GridMode.WRITE }"
-    v-model="activeSheetIndex"
-  )
-    slot(name="settings")
-    slot(name="tabs" :sheets="sheets" :update-size="updateSize")
-      v-tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
+  grid-sheet-menu(:class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.REPORT || mode === GridMode.WRITE }")
+    slot(name="menus")
   grid-sheet-toolbar(
     v-if="mode === GridMode.CHANGE"
     :grid-choice="gridChoice"
@@ -25,6 +19,9 @@ div
         :height="gridHeight"
       )
       v-progress-circular(v-else color="primary" indeterminate)
+  v-tabs(v-model="activeSheetIndex" ref="tabs" height="36")
+    slot(name="tabs" :sheets="sheets" :update-size="updateSize")
+      v-tab.grid-sheet__tab(v-for="sheet in sheets" :key="sheet.id") {{ sheet.name }}
 </template>
 
 <script lang="ts">
@@ -47,16 +44,17 @@ import {
   RowDimensionsOptionsType,
   UpdateActiveSheetType
 } from '~/types/grid'
+import GridSheetMenu from '~/components/dcis/grid/GridSheetMenu.vue'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
 import GridChoiceCells from '~/components/dcis/grid/GridChoiceCells.vue'
 import { CANCEL_EVENT, CancelEventType, END_CHOICE_EVENT, useGridChoice } from '~/composables/grid-choice'
 
 export default defineComponent({
-  components: { GridChoiceCells, GridSheetToolbar, Grid },
+  components: { GridSheetMenu, GridChoiceCells, GridSheetToolbar, Grid },
   props: {
     value: { type: Number, required: true },
-    mode: { type: Number, required: true },
+    mode: { type: Number as PropType<GridMode>, required: true },
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true },
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
@@ -78,7 +76,7 @@ export default defineComponent({
     const { top: tabItemsTop } = useElementBounding(
       () => tabItems.value ? tabItems.value.$el as HTMLDivElement : null
     )
-    const gridHeight = computed<string>(() => `calc(100vh - ${tabItemsTop.value + 30}px)`)
+    const gridHeight = computed<string>(() => `calc(100vh - ${tabItemsTop.value + 68}px)`)
     onMounted(() => {
       document.documentElement.scrollTop = 0
     })
@@ -142,4 +140,7 @@ export default defineComponent({
 <style lang="sass">
 .grid-sheet__tabs-items
   overflow: visible !important
+
+.grid-sheet__tab
+  text-transform: none !important
 </style>

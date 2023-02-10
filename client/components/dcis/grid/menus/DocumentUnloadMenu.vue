@@ -1,20 +1,23 @@
 <template lang="pug">
-v-menu(v-model="active" bottom left)
+v-menu(v-model="active" offset-y)
   template(#activator="{ on, attrs }")
-    slot(name="activator" :on="on" :attrs="attrs")
-  v-list
+    v-btn.grid-sheet-menu__button(
+      v-on="on"
+      v-bind="attrs"
+      elevation="0"
+      tile
+    ) {{ $t('dcis.grid.sheetMenu.documentUnloadMenu.buttonText') }}
+  v-list(dense)
     document-unload(:document="document" @close="close")
       template(#activator="{ on, attrs }")
         v-list-item(v-on="on" v-bind="attrs")
-          v-list-item-icon
-            v-icon mdi-download
-          v-list-item-content {{ $t('dcis.documents.unloadDocument.name') }}
+          v-list-item-title {{ $t('dcis.grid.sheetMenu.documentUnloadMenu.unload') }}
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from '#app'
-import { DocumentType } from '~/types/graphql'
 import DocumentUnload from '~/components/dcis/documents/DocumentUnload.vue'
+import { DocumentType } from '~/types/graphql'
 
 export default defineComponent({
   components: { DocumentUnload },
@@ -28,6 +31,7 @@ export default defineComponent({
       active.value = false
       emit('close')
     }
+
     return { active, close }
   }
 })
