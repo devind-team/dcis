@@ -13,12 +13,13 @@ class DocumentOrderedDjangoFilterConnectionField(OrderedDjangoFilterConnectionFi
     @classmethod
     def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class):
         order: list[str] | None = args.get('orderBy', None)
-        for key in ('lastStatus', '-lastStatus'):
-            try:
-                index = order.index(key)
-                order[index] = order[index].replace('lastStatus', 'combinedLastStatus')
-            except ValueError:
-                pass
+        if order:
+            for key in ('lastStatus', '-lastStatus'):
+                try:
+                    index = order.index(key)
+                    order[index] = order[index].replace('lastStatus', 'combinedLastStatus')
+                except ValueError:
+                    pass
         return super().resolve_queryset(connection, iterable, info, args, filtering_args, filterset_class)
 
     @classmethod
