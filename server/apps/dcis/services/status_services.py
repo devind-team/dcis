@@ -1,6 +1,7 @@
 """Модуль, отвечающий за работу со статусами."""
 from copy import deepcopy
 from dataclasses import dataclass
+from itertools import product
 from typing import cast
 
 from django.core.exceptions import ValidationError
@@ -161,6 +162,35 @@ class AddStatusActions:
             document_status.save()
 
             for sheet in old_document.period.sheet_set.all():
+                old_sheet = deepcopy(sheet)
                 sheet.pk = None
                 sheet.period_id = period_id
                 sheet.save()
+                for merged_cell in old_sheet.mergedcell_set.all():
+                    merged_cell.pk = None
+                    merged_cell.sheet_id = sheet.id
+                    merged_cell.save()
+                column_dimension_set = old_sheet.columndimension_set.all()
+                for column_dimension in column_dimension_set:
+                    column_dimension.pk = None
+                    column_dimension.sheet_id = sheet.id
+                    column_dimension.save()
+                for row_dimension in old_sheet.rowdimension_set.all():
+                    old_row_dimension = deepcopy(row_dimension)
+                    row_dimension.pk = None
+                    row_dimension.document_id = document.id
+                    row_dimension.sheet_id = sheet.id
+                    row_dimension.save()
+                    cell_set = old_row_dimension.cell_set.all()
+                    value_set = old_row_dimension.value_set.all()
+                    for cell, value, column_dimension in zip(cell_set, value_set, column_dimension_set):
+                        cell.pk = None
+                        cell.row_id = row_dimension.id
+                        cell.column_id = column_dimension.id
+                        cell.save()
+                        value.pk = None
+                        value.row_id = row_dimension.id
+                        value.column_id = column_dimension.id
+                        value.sheet_id = sheet.id
+                        value.document_id = document.id
+                        value.save()
