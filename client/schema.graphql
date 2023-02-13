@@ -4138,7 +4138,7 @@ input UpdateAggregationsFromFileMutationInput {
 """Обновление агрегации из json файла."""
 type UpdateAggregationsFromFileMutationPayload {
   """Новая агрегация"""
-  aggregations: [CellAggregationType]
+  aggregationCells: [CellAggregationType]
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!

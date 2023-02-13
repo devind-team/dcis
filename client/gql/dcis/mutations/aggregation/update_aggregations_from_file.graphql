@@ -1,6 +1,6 @@
 mutation UpdateAggregationsFromFile($periodId: ID!, $aggregationsFile: Upload!) {
   updateAggregationsFromFile(input: { periodId: $periodId, aggregationsFile: $aggregationsFile }) {
-    aggregations {
+    aggregationCells {
       id
       aggregation
       cells

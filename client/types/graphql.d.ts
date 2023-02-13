@@ -4953,7 +4953,7 @@ export type UpdateAggregationsFromFileMutationInput = {
 export type UpdateAggregationsFromFileMutationPayload = {
   __typename?: 'UpdateAggregationsFromFileMutationPayload';
   /** Новая агрегация */
-  aggregations?: Maybe<Array<Maybe<CellAggregationType>>>;
+  aggregationCells?: Maybe<Array<Maybe<CellAggregationType>>>;
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -5452,7 +5452,7 @@ export type UpdateAggregationsFromFileMutationVariables = Exact<{
   aggregationsFile: Scalars['Upload'];
 }>;
 
-export type UpdateAggregationsFromFileMutation = { __typename?: 'Mutation', updateAggregationsFromFile: { __typename: 'UpdateAggregationsFromFileMutationPayload', success: boolean, aggregations?: Array<{ __typename: 'CellAggregationType', id: string, aggregation: string, cells?: Array<string> | null, position: string } | null> | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type UpdateAggregationsFromFileMutation = { __typename?: 'Mutation', updateAggregationsFromFile: { __typename: 'UpdateAggregationsFromFileMutationPayload', success: boolean, aggregationCells?: Array<{ __typename: 'CellAggregationType', id: string, aggregation: string, cells?: Array<string> | null, position: string } | null> | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddAttributeMutationVariables = Exact<{
   period: Scalars['ID'];

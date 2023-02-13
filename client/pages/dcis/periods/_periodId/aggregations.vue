@@ -19,8 +19,8 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
     hide-default-footer
   )
     template(#item.cells="{ item }")
-      span(v-if="item.cells.length === 0") &mdash;
-      strong(v-else) {{ item.cells.join(', ') }}
+      strong(v-if="item.cells.length === 0") &mdash;
+      span(v-else) {{ item.cells.join(', ') }}
     template(#item.aggregation="{ item }") {{ $t(`dcis.periods.aggregationCells.kinds.${item.aggregation}`) }}
     template(#item.actions="{ item }")
       delete-menu(

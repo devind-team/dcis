@@ -28,7 +28,7 @@ class UpdateAggregationsFromFileMutation(BaseMutation):
         period_id = graphene.ID(required=True, description='Идентификатор периода')
         aggregations_file = Upload(required=True, description='json файл агрегации ячеек')
 
-    aggregations = graphene.List(CellAggregationType, description='Новая агрегация')
+    aggregation_cells = graphene.List(CellAggregationType, description='Новая агрегация')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
