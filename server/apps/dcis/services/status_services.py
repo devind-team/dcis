@@ -5,6 +5,7 @@ from itertools import product
 from typing import cast
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import QuerySet
 from jsonpickle import encode
 
@@ -146,6 +147,7 @@ class AddStatusActions:
         """Архивирование периода при добавлении статуса."""
 
         @classmethod
+        @transaction.atomic
         def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
             old_document = deepcopy(document)
             document.period.pk = None
@@ -163,14 +165,18 @@ class AddStatusActions:
 
             for sheet in old_document.period.sheet_set.all():
                 old_sheet = deepcopy(sheet)
+                in_document = sheet in old_document.sheets.all()
                 sheet.pk = None
                 sheet.period_id = period_id
                 sheet.save()
+                if in_document:
+                    document.sheets.add(sheet)
                 for merged_cell in old_sheet.mergedcell_set.all():
                     merged_cell.pk = None
                     merged_cell.sheet_id = sheet.id
                     merged_cell.save()
-                column_dimension_set = old_sheet.columndimension_set.all()
+                column_dimension_set = list(old_sheet.columndimension_set.order_by('id').all())
+                old_column_dimension_set = deepcopy(column_dimension_set)
                 for column_dimension in column_dimension_set:
                     column_dimension.pk = None
                     column_dimension.sheet_id = sheet.id
@@ -181,16 +187,24 @@ class AddStatusActions:
                     row_dimension.document_id = document.id
                     row_dimension.sheet_id = sheet.id
                     row_dimension.save()
-                    cell_set = old_row_dimension.cell_set.all()
-                    value_set = old_row_dimension.value_set.all()
-                    for cell, value, column_dimension in zip(cell_set, value_set, column_dimension_set):
+                    cell_set = old_row_dimension.cell_set.order_by('column_id').all()
+                    for cell, column_dimension, old_column_dimension in zip(
+                        cell_set,
+                        column_dimension_set,
+                        old_column_dimension_set
+                    ):
                         cell.pk = None
                         cell.row_id = row_dimension.id
                         cell.column_id = column_dimension.id
                         cell.save()
-                        value.pk = None
-                        value.row_id = row_dimension.id
-                        value.column_id = column_dimension.id
-                        value.sheet_id = sheet.id
-                        value.document_id = document.id
-                        value.save()
+                        value = old_document.value_set.filter(
+                            column_id=old_column_dimension.id,
+                            row_id=old_row_dimension.id
+                        ).first()
+                        if value:
+                            value.pk = None
+                            value.row_id = row_dimension.id
+                            value.column_id = column_dimension.id
+                            value.sheet_id = sheet.id
+                            value.document_id = document.id
+                            value.save()
