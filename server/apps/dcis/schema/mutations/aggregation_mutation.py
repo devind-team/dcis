@@ -14,7 +14,11 @@ from graphql import ResolveInfo
 
 from apps.dcis.models import Cell, Period
 from apps.dcis.schema.types import CellAggregationType
-from apps.dcis.services.cell_service import delete_cells_aggregation, update_aggregations_from_file
+from apps.dcis.services.cell_service import (
+    add_aggregation_cell,
+    delete_cells_aggregation,
+    update_aggregations_from_file,
+)
 
 
 class UpdateAggregationsFromFileMutation(BaseMutation):
@@ -40,6 +44,39 @@ class UpdateAggregationsFromFileMutation(BaseMutation):
         )
 
 
+class AddAggregationMutation(BaseMutation):
+    """Добавление агрегации."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        aggregation_cell = graphene.String(required=True, description='Агрегируемая ячейка')
+        aggregation_method = graphene.String(required=True, description='Метод агрегации')
+        aggregation_cells = graphene.List(graphene.String, description='Агрегируемые ячейки')
+
+    aggregation_cells = graphene.Field(CellAggregationType, description='Добавлена агрегация')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str | int,
+        aggregation_cell: str,
+        aggregation_method: str,
+        aggregation_cells: list[str]
+    ):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return AddAggregationMutation(
+            aggregation_cells=add_aggregation_cell(
+                info.context.user,
+                period,
+                aggregation_cell,
+                aggregation_method,
+                aggregation_cells
+            )
+        )
+
+
 class DeleteAggregationMutation(BaseMutation):
     """Удаление агрегации."""
 
@@ -58,4 +95,5 @@ class AggregationMutations(graphene.ObjectType):
     """Мутации, связанные с агрегацией."""
 
     update_aggregations_from_file = UpdateAggregationsFromFileMutation.Field(required=True)
+    add_aggregation = AddAggregationMutation.Field(required=True)
     delete_aggregation = DeleteAggregationMutation.Field(required=True)

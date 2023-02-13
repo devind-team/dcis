@@ -38,7 +38,7 @@ from apps.dcis.schema.types import (
     AddStatusType
 )
 from apps.dcis.services.document_services import get_user_documents
-from apps.dcis.services.sheet_services import get_aggregation_cells, get_cells_aggregation
+from apps.dcis.services.sheet_services import CellsAggregation, get_aggregation_cells, get_cells_aggregation
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
 from apps.dcis.services.status_services import get_initial_statuses, get_new_statuses
 from apps.dcis.services.value_services import get_file_value_files
@@ -224,6 +224,6 @@ class DocumentQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_aggregation_cells(root, info: ResolveInfo, period_id: str | int):
+    def resolve_aggregation_cells(root, info: ResolveInfo, period_id: str | int) -> list[CellsAggregation]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_cells_aggregation(info.context.user, period)

@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы измнения связей между записями в базе данных
+Типы изменения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -60,6 +60,29 @@ type ActiveStatisticsType {
   queries: [DateStatisticsType]!
   """Время ответа сервера"""
   times: [DateStatisticsType]!
+}
+
+input AddAggregationMutationInput {
+  """Агрегируемая ячейка"""
+  aggregationCell: String!
+  """Агрегируемые ячейки"""
+  aggregationCells: [String]
+  """Метод агрегации"""
+  aggregationMethod: String!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Добавление агрегации."""
+type AddAggregationMutationPayload {
+  """Добавлена агрегация"""
+  aggregationCells: CellAggregationType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input AddAttributeMutationInput {
@@ -1709,7 +1732,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатет, готовиться отправить сообщение
+- TYPING - Печатает, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -1888,8 +1911,6 @@ type DeleteDivisionMutationPayload {
 
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
-  """Идентификатор документа"""
-  documentId: ID!
   """Идентификатор статуса документа"""
   documentStatusId: ID!
 }
@@ -2327,7 +2348,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы"""
+"""Ошибка в поле формы."""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2570,6 +2591,8 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Добавление агрегации."""
+  addAggregation(input: AddAggregationMutationInput!): AddAggregationMutationPayload!
   """Добавление атрибута"""
   addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
@@ -4019,7 +4042,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представлющий собой таблицу."""
+"""Документ, представляющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!

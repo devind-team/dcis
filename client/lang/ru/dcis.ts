@@ -63,7 +63,7 @@ export default {
       report: 'Сводный отчет',
       unload: 'Выгрузка',
       settings: '@:settings',
-      aggregationCells: 'Агрегация'
+      aggregations: 'Агрегация'
     },
     statuses: {
       preparation: 'Подготовка',
@@ -187,7 +187,7 @@ export default {
       deleteItemName: 'ограничение'
     },
     aggregationCells: {
-      name: '@:dcis.periods.links.aggregationCells',
+      name: '@:dcis.periods.links.aggregations',
       kinds: {
         sum: 'Сумма',
         avg: 'Среднее арифметическое',
@@ -205,7 +205,14 @@ export default {
         addAggregation: {
           buttonText: 'Добавить агрегацию',
           header: 'Добавление агрегацию',
-          errorMessage: 'Сообщение об ошибке'
+          errorMessage: 'Сообщение об ошибке',
+          cell: 'Ячейка',
+          method: 'Метод агрегации',
+          cells: 'Агрегируемые ячейки',
+          sheet: 'Лист'
+        },
+        addCell: {
+          buttonText: 'Добавить ячейку'
         }
       },
       tableHeaders: {

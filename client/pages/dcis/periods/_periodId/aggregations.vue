@@ -5,16 +5,16 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
       v-spacer
       change-period-aggregation-cells-menu(
         :period="period"
-        :from-file-update="aggregationCellsResetUpdate"
-        :add-update="aggregationCellsAddUpdate"
+        :from-file-update="aggregationsResetUpdate"
+        :add-update="aggregationsAddUpdate"
       )
         template(#activator="{ on, attrs }")
           v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.periods.aggregationCells.changeMenu.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count, totalCount: count }) }}
   v-data-table(
     :headers="tableHeaders"
-    :items="aggregationCells"
-    :loading="aggregationCellsLoading"
+    :items="aggregations"
+    :loading="aggregationsLoading"
     disable-pagination
     hide-default-footer
   )
@@ -37,7 +37,6 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 </template>
 
 <script lang="ts">
-
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import type { PropType } from '#app'
 import { DataTableHeader } from 'vuetify'
@@ -49,11 +48,11 @@ import {
   AggregationCellsQueryVariables, DeleteAggregationMutationVariables, DeleteAggregationMutation
 } from '~/types/graphql'
 import { useI18n, useCommonQuery } from '~/composables'
+import aggregationCellsQuery from '~/gql/dcis/queries/aggregation_cells.graphql'
+import deleteAggregationMutation from '~/gql/dcis/mutations/aggregation/delete_aggregation.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 import ChangePeriodAggregationCellsMenu from '~/components/dcis/periods/ChangePeriodAggregationCellsMenu.vue'
-import aggregationCellsQuery from '~/gql/dcis/queries/aggregation_cells.graphql'
-import deleteAggregationMutation from '~/gql/dcis/mutations/aggregation/delete_aggregation.graphql'
 
 export default defineComponent({
   components: { ChangePeriodAggregationCellsMenu, DeleteMenu, LeftNavigatorContainer },
@@ -70,7 +69,7 @@ export default defineComponent({
       ...props.breadCrumbs,
       {
         text: t('dcis.periods.aggregationCells.name') as string,
-        to: localePath({ name: 'dcis-periods-periodId-aggregationCells' }),
+        to: localePath({ name: 'dcis-periods-periodId-aggregations' }),
         exact: true
       }
     ]))
@@ -93,11 +92,11 @@ export default defineComponent({
     })
 
     const {
-      data: aggregationCells,
-      loading: aggregationCellsLoading,
-      resetUpdate: aggregationCellsResetUpdate,
-      addUpdate: aggregationCellsAddUpdate,
-      deleteUpdate: aggregationCellsDeleteUpdate
+      data: aggregations,
+      loading: aggregationsLoading,
+      resetUpdate: aggregationsResetUpdate,
+      addUpdate: aggregationsAddUpdate,
+      deleteUpdate: aggregationsDeleteUpdate
     } = useCommonQuery<
       AggregationCellsQuery,
       AggregationCellsQueryVariables
@@ -107,23 +106,23 @@ export default defineComponent({
         periodId: props.period.id
       })
     })
-    const count = computed<number>(() => aggregationCells.value ? aggregationCells.value.length : 0)
+    const count = computed<number>(() => aggregations.value ? aggregations.value.length : 0)
 
     const { mutate: deleteAggregationCell } = useMutation<
       DeleteAggregationMutation,
       DeleteAggregationMutationVariables
     >(deleteAggregationMutation, {
-      update: (cache, result) => aggregationCellsDeleteUpdate(cache, result)
+      update: (cache, result) => aggregationsDeleteUpdate(cache, result)
     })
 
     return {
       bc,
       tableHeaders,
-      aggregationCells,
-      aggregationCellsLoading,
-      aggregationCellsResetUpdate,
-      aggregationCellsAddUpdate,
-      aggregationCellsDeleteUpdate,
+      aggregations,
+      aggregationsLoading,
+      aggregationsResetUpdate,
+      aggregationsAddUpdate,
+      aggregationsDeleteUpdate,
       count,
       deleteAggregationCell
     }

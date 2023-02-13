@@ -34,7 +34,6 @@ mutation-modal-form(
 </template>
 
 <script lang="ts">
-
 import { defineComponent, PropType, computed } from '#app'
 import { ResetUpdateType } from '~/composables'
 import { PeriodType, UpdateAggregationsFromFileMutationVariables } from '~/types/graphql'

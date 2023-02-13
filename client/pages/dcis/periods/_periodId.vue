@@ -60,9 +60,9 @@ export default defineComponent({
         icon: 'shield-outline'
       })
       result.push({
-        title: t('dcis.periods.links.aggregationCells') as string,
-        to: 'dcis-periods-periodId-aggregationCells',
-        icon: 'aggregate'
+        title: t('dcis.periods.links.aggregations') as string,
+        to: 'dcis-periods-periodId-aggregations',
+        icon: 'table-row'
       })
       if (!loading.value) {
         if (period.value.canChangeGroups) {

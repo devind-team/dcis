@@ -141,3 +141,26 @@ def delete_cells_aggregation(user: User, cell_id: str | int) -> int | str:
     cell.aggregation = None
     cell.save(update_fields=('aggregation',))
     return cell_id
+
+
+def add_aggregation_cell(
+    user: User,
+    period: Period,
+    aggregation_cell: str,
+    aggregation_method: str,
+    aggregation_cells: list[str]
+) -> CellsAggregation:
+
+    to_cell_id = get_cell_aggregation_id(aggregation_cell, period.id)
+    from_cell_ids = [get_cell_aggregation_id(cell, period.id) for cell in aggregation_cells]
+    cell = Cell.objects.get(id=to_cell_id)
+    cell.aggregation = aggregation_method
+    cell.save(update_fields=('aggregation',))
+    add_cell_aggregation(user, to_cell_id, from_cell_ids)
+    return CellsAggregation(
+        id=to_cell_id,
+        position=aggregation_cell,
+        aggregation=aggregation_method,
+        cells=dependent_cells(cell.to_cells.all())
+    )
+
