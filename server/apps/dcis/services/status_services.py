@@ -214,6 +214,6 @@ class AddStatusActions:
                             value.document_id = document.id
                             value.save()
                 for old_row, archive_row in zip(old_row_dimensions, archive_row_dimensions):
-                    if old_row.parent_id:
+                    if old_row.document_id == old_document.id and old_row.parent_id:
                         archive_row.parent_id = old_archive_row_dimensions[old_row.parent_id]
                         archive_row.save(update_fields=('parent_id',))
