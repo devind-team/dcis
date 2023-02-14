@@ -1,7 +1,6 @@
 """Модуль, отвечающий за работу со статусами."""
 from copy import deepcopy
 from dataclasses import dataclass
-from itertools import product
 from typing import cast
 
 from django.core.exceptions import ValidationError
@@ -181,12 +180,18 @@ class AddStatusActions:
                     column_dimension.pk = None
                     column_dimension.sheet_id = sheet.id
                     column_dimension.save()
+                old_archive_row_dimensions = {}
+                old_row_dimensions = []
+                archive_row_dimensions = []
                 for row_dimension in old_sheet.rowdimension_set.all():
                     old_row_dimension = deepcopy(row_dimension)
+                    old_row_dimensions.append(old_row_dimension)
                     row_dimension.pk = None
                     row_dimension.document_id = document.id
                     row_dimension.sheet_id = sheet.id
                     row_dimension.save()
+                    archive_row_dimensions.append(row_dimension)
+                    old_archive_row_dimensions[old_row_dimension.id] = row_dimension.id
                     cell_set = old_row_dimension.cell_set.order_by('column_id').all()
                     for cell, column_dimension, old_column_dimension in zip(
                         cell_set,
@@ -208,3 +213,7 @@ class AddStatusActions:
                             value.sheet_id = sheet.id
                             value.document_id = document.id
                             value.save()
+                for old_row, archive_row in zip(old_row_dimensions, archive_row_dimensions):
+                    if old_row.parent_id:
+                        archive_row.parent_id = old_archive_row_dimensions[old_row.parent_id]
+                        archive_row.save(update_fields=('parent_id',))
