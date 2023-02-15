@@ -21,7 +21,7 @@ from apps.dcis.models import (
     Status, Value,
 )
 from apps.dcis.services.status_services import (
-    AddStatusCheck,
+    AddStatusActions,
     LimitationError,
     add_document_status,
     delete_document_status,
@@ -174,8 +174,8 @@ class StatusTestCase(TestCase):
         delete_document_status(user=self.superuser, status=self.delete_document_status)
 
 
-class AddStatusCheckTestCase(TestCase):
-    """Тестирование класса `AddStatusCheck`."""
+class CheckLimitationsTestCase(TestCase):
+    """Тестирование класса `CheckLimitations`."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
@@ -250,7 +250,7 @@ class AddStatusCheckTestCase(TestCase):
     def test_check_limitations_with_calculation_errors(self) -> None:
         """Тестирование функции `check_limitations` с ошибками вычислений."""
         with self.assertRaises(ValidationError) as error:
-            AddStatusCheck.check_limitations(self.document_with_calculation_errors)
+            AddStatusActions.CheckLimitations.pre_execute(self.document_with_calculation_errors)
         self.assertEqual(
             [
                 LimitationError(
@@ -267,7 +267,7 @@ class AddStatusCheckTestCase(TestCase):
     def test_check_limitations_with_limitation_errors(self) -> None:
         """Тестирование функции `check_limitations` с ошибками ограничений."""
         with self.assertRaises(ValidationError) as error:
-            AddStatusCheck.check_limitations(self.document_with_limitation_errors)
+            AddStatusActions.CheckLimitations.pre_execute(self.document_with_limitation_errors)
         self.assertEqual(
             [
                 LimitationError(
@@ -303,7 +303,7 @@ class AddStatusCheckTestCase(TestCase):
     @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
     def test_check_limitations(self) -> None:
         """Тестирование функции `check_limitations` без ошибок."""
-        AddStatusCheck.check_limitations(self.document_without_errors)
+        AddStatusActions.CheckLimitations.pre_execute(self.document_without_errors)
 
     def _create_document(
         self,
@@ -339,3 +339,11 @@ class AddStatusCheckTestCase(TestCase):
                 row=dimensions[0],
             )
         return document
+
+
+class ArchivePeriodTestCase(TestCase):
+    """Тестирование класса `ArchivePeriod`."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        pass
