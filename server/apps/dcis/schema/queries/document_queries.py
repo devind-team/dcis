@@ -37,8 +37,9 @@ from apps.dcis.schema.types import (
     StatusType,
     AddStatusType
 )
+from apps.dcis.services.cell_service import CellsAggregation, get_cells_aggregation
 from apps.dcis.services.document_services import get_user_documents
-from apps.dcis.services.sheet_services import CellsAggregation, get_aggregation_cells, get_cells_aggregation
+from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
 from apps.dcis.services.status_services import get_initial_statuses, get_new_statuses
 from apps.dcis.services.value_services import get_file_value_files

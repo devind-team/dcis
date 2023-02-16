@@ -40,7 +40,7 @@ class UpdateAggregationsFromFileMutation(BaseMutation):
     ):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return UpdateAggregationsFromFileMutation(
-            aggregations=update_aggregations_from_file(info.context.user, period, aggregations_file)
+            aggregation_cells=update_aggregations_from_file(info.context.user, period, aggregations_file)
         )
 
 
@@ -88,7 +88,8 @@ class DeleteAggregationMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, aggregation_cell_id: int | str):
-        return DeleteAggregationMutation(id=delete_cells_aggregation(info.context.user, aggregation_cell_id))
+        delete_cells_aggregation(info.context.user, aggregation_cell_id)
+        return DeleteAggregationMutation(id=aggregation_cell_id)
 
 
 class AggregationMutations(graphene.ObjectType):
