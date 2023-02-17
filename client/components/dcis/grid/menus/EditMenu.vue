@@ -8,11 +8,11 @@ v-menu(offset-y)
       tile
     ) {{ $t('dcis.grid.sheetMenu.editMenu.buttonText') }}
   v-list(dense)
-    v-list-item
+    v-list-item(@click="copy")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.copy') }}
-    v-list-item
+    v-list-item(@click="copyWithStyles")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.copyWithStyles') }}
-    v-list-item(v-if="mode === GridMode.WRITE || mode === GridMode.CHANGE")
+    v-list-item(v-if="mode === GridMode.WRITE || mode === GridMode.CHANGE" @click="paste")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.paste') }}
     v-list-item(v-if="mode === GridMode.CHANGE")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.pasteWithStyles') }}
@@ -27,7 +27,22 @@ export default defineComponent({
     mode: { type: Number as PropType<GridMode>, required: true }
   },
   setup () {
-    return { GridMode }
+    const copy = () => {
+      const event = new Event('copy')
+      document.dispatchEvent(event)
+    }
+
+    const copyWithStyles = () => {
+      const event = new CustomEvent('copy-with-styles')
+      document.dispatchEvent(event)
+    }
+
+    const paste = () => {
+      const event = new Event('paste')
+      document.dispatchEvent(event)
+    }
+
+    return { GridMode, copy, copyWithStyles, paste }
   }
 })
 </script>
