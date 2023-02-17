@@ -1,4 +1,5 @@
 from django.db import models
+from model_clone import CloneMixin
 
 from apps.core.models import User
 from .project import Period
@@ -35,7 +36,7 @@ class AddStatus(models.Model):
     action = models.CharField(max_length=250, help_text='Действие при добавлении статуса в документ')
 
 
-class Sheet(models.Model):
+class Sheet(models.Model, CloneMixin):
     """Модель листа для вывода."""
 
     name = models.CharField(max_length=250, help_text='Наименование')
@@ -57,7 +58,7 @@ class Sheet(models.Model):
         ]
 
 
-class Document(models.Model):
+class Document(models.Model, CloneMixin):
     """Модель документа.
 
     Когда начинается сбор, берутся атрибуты и листы привязанные к периоду.
@@ -124,7 +125,7 @@ class DocumentStatusManager(models.Manager):
         return document_status
 
 
-class DocumentStatus(models.Model):
+class DocumentStatus(models.Model, CloneMixin):
     """Модель статуса документа."""
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')

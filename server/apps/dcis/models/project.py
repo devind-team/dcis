@@ -4,6 +4,7 @@ from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from model_clone import CloneMixin
 
 from apps.core.models import User
 
@@ -50,7 +51,7 @@ class Project(models.Model):
         return self.DIVISION_KIND.get(self.division_name, Department)
 
 
-class Period(models.Model):
+class Period(models.Model, CloneMixin):
     """Модель периода проекта.
 
     - multiple - множественное заполнение, в случае если False, предоставляется один документ на все дивизионы.

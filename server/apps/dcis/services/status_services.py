@@ -1,6 +1,7 @@
 """Модуль, отвечающий за работу со статусами."""
 from copy import deepcopy
 from dataclasses import dataclass
+from itertools import product
 from typing import cast
 
 from django.core.exceptions import ValidationError
@@ -148,6 +149,46 @@ class AddStatusActions:
         @classmethod
         @transaction.atomic
         def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+            cloned_period = document.period.make_clone()
+            cloned_document = document.make_clone(attrs={'period_id': cloned_period.id})
+            document_status.make_clone(attrs={'document_id': cloned_document.id, 'archive_period_id': cloned_period.id})
+            for sheet in document.period.sheet_set.all():
+                in_document = sheet in document.sheets.all()
+                cloned_sheet = sheet.make_clone(attrs={'period_id': cloned_period.id})
+                if in_document:
+                    cloned_document.sheets.add(cloned_sheet)
+                for merged_cell in sheet.mergedcell_set.all():
+                    merged_cell.make_clone(attrs={'sheet_id': cloned_sheet.id})
+                column_dimensions = sheet.columndimension_set.order_by('id').all()
+                cloned_column_dimensions =[]
+                for col in column_dimensions:
+                    cloned_col = col.make_clone(attrs={'sheet_id': cloned_sheet.id})
+                    cloned_column_dimensions.append(cloned_col)
+                old_archive_row_dimensions = {}
+                old_row_dimensions = []
+                archive_row_dimensions = []
+                for row in sheet.rowdimension_set.all():
+                    archive_row_dimensions.append(row)
+                    cloned_row = row.make_clone(attrs={'sheet_id': cloned_sheet.id, 'document_id': cloned_document.id})
+                    old_archive_row_dimensions[row.id] = cloned_row.id
+                    cell_set = row.cell_set.order_by('column_id').all()
+                    for cell, col, cloned_col in zip(cell_set, column_dimensions, cloned_column_dimensions):
+                        cell.make_clone(attrs={'row_id': cloned_row.id, 'column_id': cloned_col.id})
+                        value = document.value_set.filter(
+                            column_id=col.id,
+                            row_id=row.id
+                        ).first()
+                        if value:
+                            value.make_clone(attrs={
+                                'row_id': cloned_row.id,
+                                'column_id': cloned_col.id,
+                                'sheet_id': cloned_sheet.id,
+                                'document_id': cloned_document.id
+                            })
+
+        @classmethod
+        @transaction.atomic
+        def post_execute1(cls, document: Document, document_status: DocumentStatus) -> None:
             old_document = deepcopy(document)
             document.period.pk = None
             document.period.save()
