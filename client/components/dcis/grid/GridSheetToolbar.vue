@@ -266,13 +266,10 @@ export default defineComponent({
       }
     })
 
-    const sizes = Array
-      .from(new Array(19).keys())
-      .map((e: number) => e + 6)
-      .map((e: number) => ({ text: `${e}px`, value: e }))
-    const size = computed<{text: string, value: number} | null>({
-      get: () => !disabled.value ? sizes.find(s => s.value === props.selectedCellsOptions.size) : null,
-      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'size', String(value.value))
+    const sizes = [6, 7, 8, 9, 10, 11, 12, 14, 18, 24, 36]
+    const size = computed<number | null>({
+      get: () => props.selectedCellsOptions ? props.selectedCellsOptions.size : null,
+      set: value => changeCellsOption(props.selectedCellsOptions.cells, 'size', String(value))
     })
 
     const kinds = computed<{ text: string, value: string }[]>(() => (

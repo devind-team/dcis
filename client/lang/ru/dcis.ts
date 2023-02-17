@@ -413,7 +413,7 @@ export default {
     sheetToolbar: {
       readonly: 'Только для чтения',
       fix: 'Закрепление столбцов/строк',
-      fontSize: 'Шрифт',
+      fontSize: 'Размер шрифта',
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
       commaIncrease: 'Увеличить разрядность',

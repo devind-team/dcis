@@ -438,7 +438,7 @@ const getCellTextFormattingStyle = (cell: CellType): Record<string, string> => {
   if (cell.italic) { style['font-style'] = 'italic' }
   if (cell.strike) { textDecoration.push('line-through') }
   if (cell.underline) { textDecoration.push('underline') }
-  if (cell.size) { style['font-size'] = `${cell.size}px` }
+  if (cell.size) { style['font-size'] = `${cell.size}pt` }
   if (textDecoration.length) {
     style['text-decoration'] = textDecoration.join(' ')
   }

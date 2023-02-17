@@ -84,10 +84,10 @@ class CheckCellOptions:
             value = convert_str_to_int(value)
             if not value:
                 return cls.Error('value', f'Значение свойства {field} не является числом: {value}.')
-            if not (6 <= value <= 24):
+            if not (6 <= value <= 36):
                 return cls.Error(
                     'value',
-                    f'Значение свойства {field} не входит в разрешенный диапазон: 10 <= {value} <= 24.'
+                    f'Значение свойства {field} не входит в разрешенный диапазон: 6 <= {value} <= 36.'
                 )
             return cls.Success(value)
         if field in ['strong', 'italic', 'strike', 'editable']:
