@@ -10,7 +10,7 @@ insert_final_newline = true
 max_line_length = 120
 
 [*.vue]
-ij_continuation_indent_size = 4
+ij_continuation_indent_size = 2
 ij_vue_indent_children_of_top_level = template
 ij_vue_interpolation_new_line_after_start_delimiter = true
 ij_vue_interpolation_new_line_before_end_delimiter = true
