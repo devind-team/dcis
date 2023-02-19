@@ -164,13 +164,14 @@ class AddStatusActions:
                 for col in column_dimensions:
                     cloned_col = col.make_clone(attrs={'sheet_id': cloned_sheet.id})
                     cloned_column_dimensions.append(cloned_col)
-                old_archive_row_dimensions = {}
+                old_cloned_row_dimensions = {}
                 old_row_dimensions = []
-                archive_row_dimensions = []
+                cloned_row_dimensions = []
                 for row in sheet.rowdimension_set.all():
-                    archive_row_dimensions.append(row)
+                    old_row_dimensions.append(row)
                     cloned_row = row.make_clone(attrs={'sheet_id': cloned_sheet.id, 'document_id': cloned_document.id})
-                    old_archive_row_dimensions[row.id] = cloned_row.id
+                    cloned_row_dimensions.append(cloned_row)
+                    old_cloned_row_dimensions[row.id] = cloned_row.id
                     cell_set = row.cell_set.order_by('column_id').all()
                     for cell, col, cloned_col in zip(cell_set, column_dimensions, cloned_column_dimensions):
                         cell.make_clone(attrs={'row_id': cloned_row.id, 'column_id': cloned_col.id})
@@ -185,76 +186,7 @@ class AddStatusActions:
                                 'sheet_id': cloned_sheet.id,
                                 'document_id': cloned_document.id
                             })
-
-        @classmethod
-        @transaction.atomic
-        def post_execute1(cls, document: Document, document_status: DocumentStatus) -> None:
-            old_document = deepcopy(document)
-            document.period.pk = None
-            document.period.save()
-
-            document.pk = None
-            document.period_id = document.period.id
-            period_id = document.period.id
-            document.save()
-
-            document_status.pk = None
-            document_status.document_id = document.id
-            document_status.archive_period_id = period_id
-            document_status.save()
-
-            for sheet in old_document.period.sheet_set.all():
-                old_sheet = deepcopy(sheet)
-                in_document = sheet in old_document.sheets.all()
-                sheet.pk = None
-                sheet.period_id = period_id
-                sheet.save()
-                if in_document:
-                    document.sheets.add(sheet)
-                for merged_cell in old_sheet.mergedcell_set.all():
-                    merged_cell.pk = None
-                    merged_cell.sheet_id = sheet.id
-                    merged_cell.save()
-                column_dimension_set = list(old_sheet.columndimension_set.order_by('id').all())
-                old_column_dimension_set = deepcopy(column_dimension_set)
-                for column_dimension in column_dimension_set:
-                    column_dimension.pk = None
-                    column_dimension.sheet_id = sheet.id
-                    column_dimension.save()
-                old_archive_row_dimensions = {}
-                old_row_dimensions = []
-                archive_row_dimensions = []
-                for row_dimension in old_sheet.rowdimension_set.all():
-                    old_row_dimension = deepcopy(row_dimension)
-                    old_row_dimensions.append(old_row_dimension)
-                    row_dimension.pk = None
-                    row_dimension.document_id = document.id
-                    row_dimension.sheet_id = sheet.id
-                    row_dimension.save()
-                    archive_row_dimensions.append(row_dimension)
-                    old_archive_row_dimensions[old_row_dimension.id] = row_dimension.id
-                    cell_set = old_row_dimension.cell_set.order_by('column_id').all()
-                    for cell, column_dimension, old_column_dimension in zip(
-                        cell_set,
-                        column_dimension_set,
-                        old_column_dimension_set
-                    ):
-                        cell.pk = None
-                        cell.row_id = row_dimension.id
-                        cell.column_id = column_dimension.id
-                        cell.save()
-                        value = old_document.value_set.filter(
-                            column_id=old_column_dimension.id,
-                            row_id=old_row_dimension.id
-                        ).first()
-                        if value:
-                            value.pk = None
-                            value.row_id = row_dimension.id
-                            value.column_id = column_dimension.id
-                            value.sheet_id = sheet.id
-                            value.document_id = document.id
-                            value.save()
-                for old_row, archive_row in zip(old_row_dimensions, archive_row_dimensions):
-                    if old_row.document_id == old_document.id and old_row.parent_id:
-                        archive_row.parent_id = old_archive_row_dimensions[old_row.parent_id]
-                        archive_row.save(update_fields=('parent_id',))
+                for old_row, cloned_row in zip(old_row_dimensions, cloned_row_dimensions):
+                    if old_row.document_id == document.id and old_row.parent_id:
+                        cloned_row.parent_id = old_cloned_row_dimensions[old_row.parent_id]
+                        cloned_row.save(update_fields=('parent_id',))
