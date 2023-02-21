@@ -360,11 +360,11 @@ class ArchivePeriodTestCase(TestCase):
 
         self.sheet = Sheet.objects.create(period=self.period, name='sheet1')
         self.sheet_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 4)]
-        self.sheet_rows = [
-            RowDimension.objects.create(index=1, sheet=self.sheet),
-            RowDimension.objects.create(index=2, sheet=self.sheet),
-            RowDimension.objects.create(index=1, parent_id=1, sheet=self.sheet)
-        ]
+        self.sheet_row1 = RowDimension.objects.create(index=1, sheet=self.sheet)
+        self.sheet_row2 = RowDimension.objects.create(index=2, sheet=self.sheet)
+        self.sheet_row3 = RowDimension.objects.create(index=1, parent_id=self.sheet_row1.id, sheet=self.sheet)
+        self.sheet_row4 = RowDimension.objects.create(index=1, parent_id=self.sheet_row3.id, sheet=self.sheet)
+        self.sheet_row5 = RowDimension.objects.create(index=1, parent_id=self.sheet_row1.id, sheet=self.sheet)
 
     def test_archive_period(self) -> None:
         """Тестирование функции архивирования периода"""
@@ -372,9 +372,11 @@ class ArchivePeriodTestCase(TestCase):
         AddStatusActions.ArchivePeriod.post_execute(self.document, self.document_status)
         archive_period = Period.objects.get(id=self.document_status.archive_period_id)
         archive_document = archive_period.document_set.all().first()
-        archive_rows = archive_document.rowdimension_set.order_by('id').all()
-        for test_row, archive_row in zip(self.sheet_rows, archive_rows):
-            if test_row.parent_id:
-                self.assertEqual(test_row.document_id, archive_row.document_id)
-                self.assertEqual(test_row.sheet_id, archive_row.sheet_id)
-                self.assertEqual(test_row.index, archive_row.index)
+        test_rows = self.document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
+        archive_rows = archive_document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
+        for test_row, archive_row in zip(test_rows, archive_rows):
+            self.assertEqual(test_row.height, archive_row.height)
+            self.assertEqual(test_row.dynamic, archive_row.dynamic)
+            self.assertEqual(test_row.index, archive_row.index)
+            self.assertEqual(test_row.fixed, archive_row.fixed)
+            self.assertEqual(test_row.hidden, archive_row.hidden)
