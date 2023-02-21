@@ -1,7 +1,7 @@
 <template lang="pug">
 div
   grid-sheet-menu(:class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.REPORT || mode === GridMode.WRITE }")
-    slot(name="menus")
+    slot(name="menus" :selected-cells-options="selectedCellsOptions")
   grid-sheet-toolbar(
     v-if="mode === GridMode.CHANGE"
     :grid-choice="gridChoice"

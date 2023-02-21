@@ -15,8 +15,8 @@ left-navigator-container.document-sheets__left-navigator-container(
     :active-document="activeDocument"
     :loading="activeDocumentLoading"
   )
-    template(#menus)
-      edit-menu(:mode="mode")
+    template(#menus="{ selectedCellsOptions }")
+      edit-menu(:mode="mode" :selected-cells-options="selectedCellsOptions")
       document-unload-menu(:document="activeDocument")
 v-progress-circular(v-else color="primary" indeterminate)
 </template>

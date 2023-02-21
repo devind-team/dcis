@@ -12,7 +12,8 @@ left-navigator-container.report-sheets__left-navigator-container(
     :active-sheet="activeSheet"
     :loading="loading"
   )
-    template(#menus)
+    template(#menus="{ selectedCellsOptions }")
+      edit-menu(:mode="GridMode.REPORT" :selected-cells-options="selectedCellsOptions")
       report-unload-menu
         template(#documents-filter="{ title }")
           report-document-filter(v-model="reportDocumentFilterData" :period="period")
@@ -55,6 +56,7 @@ import indicesToExpandQuery from '~/gql/dcis/queries/indices_to_expand.graphql'
 import reportSheetQuery from '~/gql/dcis/queries/report_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
+import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
 import ReportUnloadMenu from '~/components/dcis/grid/menus/ReportUnloadMenu.vue'
 import ReportDocumentFilter, {
   ReportDocumentType,
@@ -68,6 +70,7 @@ export default defineComponent({
   components: {
     LeftNavigatorContainer,
     GridSheets,
+    EditMenu,
     ReportUnloadMenu,
     ReportDocumentFilter,
     ItemsDataFilter

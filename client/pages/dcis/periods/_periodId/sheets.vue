@@ -13,8 +13,8 @@ left-navigator-container.period-sheets__left-navigator-container(
     :update-active-sheet="updateActiveSheet"
     :loading="activeSheetLoading"
   )
-    template(#menus)
-      edit-menu(:mode="GridMode.CHANGE")
+    template(#menus="{ selectedCellsOptions }")
+      edit-menu(:mode="GridMode.CHANGE" :selected-cells-options="selectedCellsOptions")
       table-settings(:sheets="period.sheets")
     template(#tabs="{ sheets, updateSize }")
       template(v-for="sheet in sheets")
