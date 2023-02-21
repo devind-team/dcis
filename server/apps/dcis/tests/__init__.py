@@ -14,7 +14,6 @@ from .permissions import (
     ProjectPermissionsTestCase,
 )
 from .services import (
-    AddStatusCheckTestCase,
     ColumnDimensionTestCase,
     CuratorGroupTestCase,
     DivisionTestCase,
@@ -33,6 +32,8 @@ from .services import (
     ProjectTestCase,
     RowDimensionTestCase,
     StatusTestCase,
+    CheckLimitationsTestCase,
+    ArchivePeriodTestCase,
     UnloadPeriodTestCase,
     ValueServicesTestCase,
 )

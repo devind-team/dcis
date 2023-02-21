@@ -151,7 +151,8 @@ class AddStatusActions:
         def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
             cloned_period = document.period.make_clone()
             cloned_document = document.make_clone(attrs={'period_id': cloned_period.id})
-            document_status.make_clone(attrs={'document_id': cloned_document.id, 'archive_period_id': cloned_period.id})
+            document_status.archive_period_id = cloned_period.id
+            document_status.save(update_fields=('archive_period_id',))
             for sheet in document.period.sheet_set.all():
                 in_document = sheet in document.sheets.all()
                 cloned_sheet = sheet.make_clone(attrs={'period_id': cloned_period.id})

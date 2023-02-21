@@ -339,3 +339,42 @@ class CheckLimitationsTestCase(TestCase):
                 row=dimensions[0],
             )
         return document
+
+class ArchivePeriodTestCase(TestCase):
+    """Тестирование класса `ArchivePeriod`."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.period = Period.objects.create(project=self.project)
+        self.document = Document.objects.create(period=self.period)
+        self.status = Status.objects.create(name='new_status')
+        self.document_status = DocumentStatus.objects.create(
+            document=self.document,
+            status=self.status,
+            user_id=self.user.id
+        )
+
+        self.sheet = Sheet.objects.create(period=self.period, name='sheet1')
+        self.sheet_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 4)]
+        self.sheet_rows = [
+            RowDimension.objects.create(index=1, sheet=self.sheet),
+            RowDimension.objects.create(index=2, sheet=self.sheet),
+            RowDimension.objects.create(index=1, parent_id=1, sheet=self.sheet)
+        ]
+
+    def test_archive_period(self) -> None:
+        """Тестирование функции архивирования периода"""
+
+        AddStatusActions.ArchivePeriod.post_execute(self.document, self.document_status)
+        archive_period = Period.objects.get(id=self.document_status.archive_period_id)
+        archive_document = archive_period.document_set.all().first()
+        archive_rows = archive_document.rowdimension_set.order_by('id').all()
+        for test_row, archive_row in zip(self.sheet_rows, archive_rows):
+            if test_row.parent_id:
+                self.assertEqual(test_row.document_id, archive_row.document_id)
+                self.assertEqual(test_row.sheet_id, archive_row.sheet_id)
+                self.assertEqual(test_row.index, archive_row.index)
