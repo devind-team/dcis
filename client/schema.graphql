@@ -2236,6 +2236,8 @@ type DocumentMessageTypeEdge {
 
 """Тип статусов для документов."""
 type DocumentStatusType {
+  """Архивированный период"""
+  archivePeriod: PeriodType
   """Комментарий"""
   comment: String!
   """Дата создания"""
