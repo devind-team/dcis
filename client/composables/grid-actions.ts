@@ -15,10 +15,10 @@ import {
   useChangeColumnDimensionWidthMutation,
   useChangeFileValueMutation,
   useChangeRowDimensionHeightMutation,
-  useChangeValueMutation,
+  useChangeValuesMutation,
   useDeleteChildRowDimensionMutation,
   useDeleteRowDimensionMutation,
-  useUnloadFileValueArchiveMutation
+  useUnloadFileValueArchiveMutation, ValueInputType, ValueStyleInputType
 } from '~/composables/grid-mutations'
 import { useCanChangeRowHeight } from '~/composables/grid-permissions'
 import {
@@ -28,7 +28,13 @@ import {
   GridModeInject,
   UpdateActiveSheetInject
 } from '~/types/grid'
-import { CellType, DocumentSheetQuery, PeriodSheetQuery, RowDimensionType, ValueFilesQuery } from '~/types/graphql'
+import {
+  CellType,
+  DocumentSheetQuery,
+  PeriodSheetQuery,
+  RowDimensionType,
+  ValueFilesQuery
+} from '~/types/graphql'
 
 export function useAddRowDimension () {
   const mode = inject(GridModeInject)
@@ -114,12 +120,12 @@ export function useChangeValue () {
     return useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
   if (mode.value === GridMode.WRITE) {
-    const changeValue = useChangeValueMutation(
+    const changeValues = useChangeValuesMutation(
       computed(() => activeDocument.value.id),
       computed(() => activeSheet.value.id)
     )
     return async function (cell: CellType, value: string) {
-      await changeValue([{ cell, value }])
+      await changeValues([{ cell, value }])
     }
   }
   return null
@@ -161,10 +167,23 @@ export function usePaste () {
   const activeSheet = inject(ActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.WRITE) {
-    return useChangeValueMutation(
-      computed(() => activeDocument.value.id),
-      computed(() => activeSheet.value.id)
-    )
+    return {
+      paste: useChangeValuesMutation(
+        computed(() => activeDocument.value.id),
+        computed(() => activeSheet.value.id)
+      ),
+      pasteWithStyles: null
+    }
+  }
+  if (mode.value === GridMode.CHANGE) {
+    return {
+      paste: (values: ValueInputType[]) => {
+        console.log(values)
+      },
+      pasteWithStyles: (values: ValueStyleInputType[]) => {
+        console.log(values)
+      }
+    }
   }
   return null
 }

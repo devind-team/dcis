@@ -60,7 +60,7 @@ import changeChildRowDimensionHeightMutation
   from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
 import changeCellDefaultMutation from '~/gql/dcis/mutations/cell/change_cell_default.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
-import changeValueMutation from '~/gql/dcis/mutations/values/change_values.graphql'
+import changeValuesMutation from '~/gql/dcis/mutations/values/change_values.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
 import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/values/unload_file_value_archive.graphql'
 
@@ -73,6 +73,12 @@ export enum AddRowDimensionPosition {
 export type ValueInputType = {
   cell: CellType
   value: string
+}
+
+export type ValueStyleInputType = {
+  cell: CellType
+  value: string
+  styles: Record<string, string>
 }
 
 export function useAddRowDimensionMutation (
@@ -837,12 +843,12 @@ export const changeSheetValues = (
   }
 }
 
-export const useChangeValueMutation = (documentId: Ref<string | null>, sheetId: Ref<string>) => {
+export const useChangeValuesMutation = (documentId: Ref<string | null>, sheetId: Ref<string>) => {
   const { client } = useApolloClient()
   const { mutate } = useMutation<
     ChangeValuesMutation,
     ChangeValuesMutationVariables
-  >(changeValueMutation)
+  >(changeValuesMutation)
   return async (values: ValueInputType[]) => {
     await mutate({
       documentId: unref(documentId),
