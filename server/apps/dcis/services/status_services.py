@@ -161,7 +161,7 @@ class AddStatusActions:
                 for merged_cell in sheet.mergedcell_set.all():
                     merged_cell.make_clone(attrs={'sheet_id': cloned_sheet.id})
                 column_dimensions = sheet.columndimension_set.order_by('id').all()
-                cloned_column_dimensions =[]
+                cloned_column_dimensions = []
                 for col in column_dimensions:
                     cloned_col = col.make_clone(attrs={'sheet_id': cloned_sheet.id})
                     cloned_column_dimensions.append(cloned_col)

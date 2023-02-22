@@ -14,7 +14,7 @@ from apps.dcis.models import (
     Cell, ColumnDimension,
     Document,
     DocumentStatus,
-    Limitation, MergedCell, Period,
+    Limitation, Period,
     Project,
     RowDimension,
     Sheet,
@@ -340,6 +340,7 @@ class CheckLimitationsTestCase(TestCase):
             )
         return document
 
+
 class ArchivePeriodTestCase(TestCase):
     """Тестирование класса `ArchivePeriod`."""
 
@@ -362,15 +363,22 @@ class ArchivePeriodTestCase(TestCase):
         self.sheet_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 4)]
         self.sheet_row1 = RowDimension.objects.create(index=1, sheet=self.sheet)
         self.sheet_row2 = RowDimension.objects.create(index=2, sheet=self.sheet)
-        self.sheet_row3 = RowDimension.objects.create(index=1, parent_id=self.sheet_row1.id, sheet=self.sheet)
+        self.sheet_row3 = RowDimension.objects.create(
+            dynamic=False,
+            index=1,
+            parent_id=self.sheet_row1.id,
+            sheet=self.sheet,
+            fixed=True,
+            hidden=True
+        )
         self.sheet_row4 = RowDimension.objects.create(index=1, parent_id=self.sheet_row3.id, sheet=self.sheet)
-        self.sheet_row5 = RowDimension.objects.create(index=1, parent_id=self.sheet_row1.id, sheet=self.sheet)
+        self.sheet_row5 = RowDimension.objects.create(index=2, parent_id=self.sheet_row1.id, sheet=self.sheet)
 
     def test_archive_period(self) -> None:
         """Тестирование функции архивирования периода"""
 
         AddStatusActions.ArchivePeriod.post_execute(self.document, self.document_status)
-        archive_period = Period.objects.get(id=self.document_status.archive_period_id)
+        archive_period = self.document_status.archive_period
         archive_document = archive_period.document_set.all().first()
         test_rows = self.document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
         archive_rows = archive_document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
