@@ -4421,10 +4421,10 @@
     regenerator-runtime "^0.13.9"
     systemjs "^6.12.1"
 
-"@vue/apollo-composable@^4.0.0-beta.1":
-  version "4.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@vue/apollo-composable/-/apollo-composable-4.0.0-beta.1.tgz#ef7181503785c464bfddb8025870d24b5c8813af"
-  integrity sha512-WjyePUFYft7dZMNrO63DuP5bsl1AO1SKhfy688r2HXlyrCQAxvfRXOiPqnPzhmRn7kyWTKfrwwhkFJfnSq7vyA==
+"@vue/apollo-composable@^4.0.0-beta.3":
+  version "4.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@vue/apollo-composable/-/apollo-composable-4.0.0-beta.3.tgz#dcf7540d91178e48c80025dc30ee9c9407c89abd"
+  integrity sha512-/D4v9efeWt5doJBS7UrmdqKP7f/9eyD5yB0b14q5C6hg8ouXOU2uX+Rnv8I1HckzpQcaxhI4GpRFv6a/AQixEg==
   dependencies:
     throttle-debounce "^3.0.1"
     ts-essentials "^9.1.2"
