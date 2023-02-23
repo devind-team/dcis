@@ -48,7 +48,7 @@
         :mouseup-row-name="mouseupRowName"
         :mousedown-cell="mousedownCell"
         :mouseenter-cell="mouseenterCell"
-        :mouseup-cell="mouseupCell"
+        :dblclick-cell="dblclickCell"
       )
     template(v-if="mode === GridMode.CHANGE")
       grid-selection-view(

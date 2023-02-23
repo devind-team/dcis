@@ -24,7 +24,7 @@ tbody
       :rowspan="cell.rowspan"
       @mousedown="mousedownCell(cell)"
       @mouseenter="mouseenterCell(cell)"
-      @mouseup="mouseupCell(cell)"
+      @dblclick="dblclickCell(cell)"
     )
       grid-cell(
         :style="getCellContentStyle(cell)"
@@ -110,7 +110,7 @@ export default defineComponent({
     mouseupRowName: { type: Function as PropType<() => void>, required: true },
     mousedownCell: { type: Function as PropType<(cell: CellType) => void>, required: true },
     mouseenterCell: { type: Function as PropType<(cell: CellType) => void>, required: true },
-    mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
+    dblclickCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
     const mode = inject(GridModeInject)
