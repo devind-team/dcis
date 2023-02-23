@@ -31,29 +31,6 @@ export function useGridClipboard (
   const canChangeValue = useCanChangeValue()
   const { paste, pasteWithStyles } = usePaste()
 
-  const copyHandler = async (event: Event, withStyles: boolean) => {
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      selectedCells.value.length === 0
-    ) {
-      return
-    }
-    const text = generatePlainTextTable(selectedCells.value)
-    const html = generateHTMLTable(selectedCells.value, withStyles)
-    if (event instanceof ClipboardEvent && event.clipboardData) {
-      event.clipboardData.clearData()
-      event.clipboardData.setData('text/plain', text)
-      event.clipboardData.setData('text/html', html)
-    } else {
-      await navigator.clipboard.write([new ClipboardItem({
-        'text/plain': new Blob([text], { type: 'text/plain' }),
-        'text/html': new Blob([html], { type: 'text/html' })
-      })])
-    }
-    event.preventDefault()
-  }
-
   const pasteHandler = async (event: Event, withStyles: boolean) => {
     if (
       event.target instanceof HTMLInputElement ||
@@ -91,16 +68,18 @@ export function useGridClipboard (
   useEventListener(
     typeof document === 'undefined' ? null : document,
     'copy',
-    async (event: ClipboardEvent) => {
-      await copyHandler(event, false)
-    }
-  )
-
-  useEventListener(
-    typeof document === 'undefined' ? null : document,
-    'copy-with-styles',
-    async (event: CustomEvent) => {
-      await copyHandler(event, true)
+    (event: ClipboardEvent) => {
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        selectedCells.value.length === 0
+      ) {
+        return
+      }
+      event.clipboardData.clearData()
+      event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
+      event.clipboardData.setData('text/html', generateHTMLTable(selectedCells.value))
+      event.preventDefault()
     }
   )
 
@@ -140,7 +119,7 @@ export function useGridClipboard (
     return result
   }
 
-  const generateHTMLTable = (selectedCells: CellType[], withStyles: boolean): string => {
+  const generateHTMLTable = (selectedCells: CellType[]): string => {
     const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(getRelatedGlobalPositions(selectedCells))
     const cells: CellType[][] = []
     for (let row = minRow; row <= maxRow; row++) {
@@ -156,7 +135,7 @@ export function useGridClipboard (
     const vm = new Vue({
       render: h => h(
         ClipboardTable,
-        { props: { selectedCells: cells, getColumnWidth, getRowHeight, activeSheet: activeSheet.value, withStyles } }
+        { props: { selectedCells: cells, getColumnWidth, getRowHeight, activeSheet: activeSheet.value } }
       )
     })
     return `

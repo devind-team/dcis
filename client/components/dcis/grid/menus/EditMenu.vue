@@ -7,11 +7,11 @@ v-menu(offset-y)
       elevation="0"
       tile
     ) {{ $t('dcis.grid.sheetMenu.editMenu.buttonText') }}
-  v-list(dense)
+  v-list(dense width="200")
     v-list-item(@click="copy" :disabled="copyDisabled")
-      v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.copy') }}
-    v-list-item(@click="copyWithStyles" :disabled="copyDisabled")
-      v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.copyWithStyles') }}
+      v-list-item-title.d-flex.justify-space-between
+        span {{ $t('dcis.grid.sheetMenu.editMenu.copy') }}
+        span {{ $t('dcis.grid.sheetMenu.editMenu.copyShortcut') }}
     v-list-item(v-if="pasteVisible" @click="paste")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.paste') }}
     v-list-item(v-if="pasteWithStylesVisible" @click="pasteWithStyles")
@@ -31,13 +31,7 @@ export default defineComponent({
     const copyDisabled = computed(() => !props.selectedCellsOptions)
 
     const copy = () => {
-      const event = new Event('copy')
-      document.dispatchEvent(event)
-    }
-
-    const copyWithStyles = () => {
-      const event = new CustomEvent('copy-with-styles')
-      document.dispatchEvent(event)
+      document.execCommand('copy')
     }
 
     const pasteVisible = computed(() => props.mode === GridMode.WRITE || props.mode === GridMode.CHANGE)
@@ -56,7 +50,6 @@ export default defineComponent({
       copyDisabled,
       GridMode,
       copy,
-      copyWithStyles,
       pasteVisible,
       paste,
       pasteWithStylesVisible,

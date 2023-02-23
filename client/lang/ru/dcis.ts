@@ -392,7 +392,7 @@ export default {
       editMenu: {
         buttonText: 'Правка',
         copy: 'Копировать',
-        copyWithStyles: 'Копировать со стилями',
+        copyShortcut: 'Ctrl + C',
         paste: 'Вставить',
         pasteWithStyles: 'Вставить со стилями'
       },

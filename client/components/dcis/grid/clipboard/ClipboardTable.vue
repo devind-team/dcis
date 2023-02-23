@@ -6,12 +6,12 @@ html(lang="ru")
   body
     table(style="border-spacing: 0; border-collapse: collapse")
       tbody
-        tr(v-for="(row, rowIndex) in selectedCells" :style="withStyles ? getRowStyle(rowIndex) : null")
+        tr(v-for="(row, rowIndex) in selectedCells" :style="getRowStyle(rowIndex)")
           td(
             v-for="cell in row"
             :colspan="cell.colspan"
             :rowspan="cell.rowspan"
-            :style="withStyles ? getCellStyle(cell) : null"
+            :style="getCellStyle(cell)"
           ) {{ cell.value }}
 </template>
 
@@ -34,8 +34,7 @@ export default defineComponent({
     selectedCells: { type: Array as PropType<CellType[][]>, required: true },
     getColumnWidth: { type: Function as PropType<(column: ColumnDimensionType) => number>, required: true },
     getRowHeight: { type: Function as PropType<(row: RowDimensionType) => number>, required: true },
-    activeSheet: { type: Object as PropType<SheetType>, required: true },
-    withStyles: { type: Boolean, required: true }
+    activeSheet: { type: Object as PropType<SheetType>, required: true }
   },
   setup (props) {
     const getRowStyle = (rowIndex: number) => {
