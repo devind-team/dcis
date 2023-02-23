@@ -33,10 +33,8 @@ mutation-modal-form(
         v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
           v-tooltip(v-if="item.archivePeriod" bottom)
             template(#activator="{ on }")
-              nuxt-link(:to="localePath({ name: 'dcis-periods-archiveId', params: { periodId: item.archivePeriod.id } })") 'qwerty'
-              pre {{ localePath({ name: 'dcis-periods-archiveId', params: { periodId: item.archivePeriod.id } }) }}
-              v-btn(v-on="on" :to="localePath({ name: 'dcis-periods-archiveId', params: { archiveId: item.archivePeriod.id } })" :nuxt="true" color="primary" icon)
-                v-icon mdi-pencil
+              v-btn(v-on="on" :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: item.document.id } })" color="primary" icon)
+                v-icon mdi-archive-outline
             span {{ "Открыть историю" }}
           delete-menu(
             :item-name="String($t('dcis.documents.status.delete.itemName'))"

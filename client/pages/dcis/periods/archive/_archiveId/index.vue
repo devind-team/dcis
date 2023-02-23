@@ -13,7 +13,7 @@ export default defineComponent({
   setup () {
     const { localePath } = useI18n()
     const router = useRouter()
-    router.push(localePath({ name: 'dcis-periods-archiveId-sheets' }))
+    router.push(localePath({ name: 'dcis-periods-archive-archiveId-sheets' }))
   }
 })
 </script>

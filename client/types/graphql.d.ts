@@ -5891,7 +5891,7 @@ export type DocumentStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: Array<{ __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, archivePeriod?: { __typename: 'PeriodType', id: string } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } }> | null };
+export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: Array<{ __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, archivePeriod?: { __typename: 'PeriodType', id: string } | null, document?: { __typename: 'DocumentType', id: string } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } }> | null };
 
 export type DocumentsQueryVariables = Exact<{
   periodId: Scalars['ID'];
