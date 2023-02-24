@@ -8,14 +8,14 @@ v-menu(offset-y)
       tile
     ) {{ $t('dcis.grid.sheetMenu.editMenu.buttonText') }}
   v-list(dense width="200")
-    v-list-item(@click="copy" :disabled="copyDisabled")
+    v-list-item(@click="copy" :disabled="copyPasteDisabled")
       v-list-item-title.d-flex.justify-space-between
         span {{ $t('dcis.grid.sheetMenu.editMenu.copy') }}
         span {{ $t('dcis.grid.sheetMenu.editMenu.copyShortcut') }}
-    v-list-item(v-if="pasteVisible" @click="paste")
-      v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.paste') }}
-    v-list-item(v-if="pasteWithStylesVisible" @click="pasteWithStyles")
-      v-list-item-title {{ $t('dcis.grid.sheetMenu.editMenu.pasteWithStyles') }}
+    v-list-item(v-if="pasteVisible" :disabled="copyPasteDisabled" @click="paste")
+      v-list-item-title.d-flex.justify-space-between
+        span {{ $t('dcis.grid.sheetMenu.editMenu.paste') }}
+        span {{ $t('dcis.grid.sheetMenu.editMenu.pasteShortcut') }}
 </template>
 
 <script lang="ts">
@@ -28,9 +28,11 @@ export default defineComponent({
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
   },
   setup (props) {
-    const copyDisabled = computed(() => !props.selectedCellsOptions)
+    const copyPasteDisabled = computed(() => !props.selectedCellsOptions)
 
     const copy = () => {
+      /// Несмотря на статус `deprecated`, работает лучше современного варианта с navigator.clipboard.
+      /// navigator.clipboard.write не работает в Firefox без установки специальных разрешений.
       document.execCommand('copy')
     }
 
@@ -40,20 +42,12 @@ export default defineComponent({
       document.dispatchEvent(event)
     }
 
-    const pasteWithStylesVisible = computed(() => props.mode === GridMode.CHANGE)
-    const pasteWithStyles = () => {
-      const event = new CustomEvent('paste-with-styles')
-      document.dispatchEvent(event)
-    }
-
     return {
-      copyDisabled,
+      copyPasteDisabled,
       GridMode,
       copy,
       pasteVisible,
-      paste,
-      pasteWithStylesVisible,
-      pasteWithStyles
+      paste
     }
   }
 })

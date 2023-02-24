@@ -4,25 +4,25 @@ from typing import Any
 
 import graphene
 from devind_dictionaries.schema.types import BudgetClassificationType
-from devind_helpers.utils import gid2int
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
+from devind_helpers.utils import gid2int
 from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
-from apps.dcis.schema.types import ChangedCellOption, ChangeCellType
+from apps.dcis.schema.types import ChangeCellType, ChangedCellOption
+from apps.dcis.services.cell_service import add_cell_aggregation, delete_cell_aggregation
 from apps.dcis.services.sheet_services import (
     CheckCellOptions,
+    add_budget_classification,
     change_cell_default,
-    success_check_cell_options,
     change_cells_option,
-    add_budget_classification
+    success_check_cell_options,
 )
-from apps.dcis.services.cell_service import add_cell_aggregation, delete_cell_aggregation
 
 
 class ChangeCellDefault(BaseMutation):
@@ -48,8 +48,8 @@ class ChangeCellsOptionMutation(BaseMutation):
 
         - strong - true, false
         - italic - true, false
-        - strike - true, false
         - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
+        - strike - true, false
         - horizontal_align - ['left', 'center', 'right']
         - vertical_align - ['top', 'middle', 'bottom']
         - size - число от 6 до 24

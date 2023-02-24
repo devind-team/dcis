@@ -29,41 +29,7 @@ export function useGridClipboard (
   const mode = inject(GridModeInject)
   const activeSheet = inject(ActiveSheetInject)
   const canChangeValue = useCanChangeValue()
-  const { paste, pasteWithStyles } = usePaste()
-
-  const pasteHandler = async (event: Event, withStyles: boolean) => {
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      (mode.value !== GridMode.WRITE && mode.value !== GridMode.CHANGE) ||
-      selectedCells.value.length === 0
-    ) {
-      return
-    }
-    let textData: string | null = null
-    let htmlData: string | null = null
-    if (event instanceof ClipboardEvent && event.clipboardData) {
-      textData = event.clipboardData.getData('text/plain')
-      htmlData = event.clipboardData.getData('text/html')
-    } else {
-      textData = await navigator.clipboard.readText()
-      const items = await navigator.clipboard.read()
-      const item = items.find((item: ClipboardItem) => item.types.includes('text/html'))
-      const blob = await item.getType('text/html')
-      htmlData = await blob.text()
-    }
-    if (htmlData === '' && textData === '') {
-      return
-    }
-    const table = htmlData.includes('<table') ? parseHTMLTable(htmlData, withStyles) : parsePlainTextTable(textData)
-    const values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
-      .filter((value: ValueStyleInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
-    if (withStyles) {
-      pasteWithStyles(values)
-    } else {
-      paste(values)
-    }
-  }
+  const paste = usePaste()
 
   useEventListener(
     typeof document === 'undefined' ? null : document,
@@ -87,15 +53,35 @@ export function useGridClipboard (
     typeof document === 'undefined' ? null : document,
     'paste',
     async (event: ClipboardEvent) => {
-      await pasteHandler(event, false)
-    }
-  )
-
-  useEventListener(
-    typeof document === 'undefined' ? null : document,
-    'paste-with-styles',
-    async (event: ClipboardEvent) => {
-      await pasteHandler(event, true)
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        (mode.value !== GridMode.WRITE && mode.value !== GridMode.CHANGE) ||
+        selectedCells.value.length === 0
+      ) {
+        return
+      }
+      let textData: string | null = null
+      let htmlData: string | null = null
+      if (event.clipboardData) {
+        textData = event.clipboardData.getData('text/plain')
+        htmlData = event.clipboardData.getData('text/html')
+      } else {
+        textData = await navigator.clipboard.readText()
+        const items = await navigator.clipboard.read()
+        const item = items.find((item: ClipboardItem) => item.types.includes('text/html'))
+        const blob = await item.getType('text/html')
+        htmlData = await blob.text()
+      }
+      if (htmlData === '' && textData === '') {
+        return
+      }
+      const table = htmlData.includes('<table')
+        ? parseHTMLTable(htmlData, mode.value === GridMode.CHANGE)
+        : parsePlainTextTable(textData)
+      const values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
+        .filter((value: ValueStyleInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
+      paste(values)
     }
   )
 
@@ -159,8 +145,12 @@ export function useGridClipboard (
   }
 
   const parseHTMLTable = (htmlTable: string, withStyles: boolean): TableCellType[][] => {
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(htmlTable, 'text/html')
+    const iframe = document.createElement('iframe')
+    document.body.append(iframe)
+    const doc = iframe.contentDocument
+    doc.open()
+    doc.write(htmlTable)
+    doc.close()
     const tableElement = doc.querySelector('table')
     const columnsNumber = getColumnsNumber(tableElement)
     const table: TableCellType[][] = Array.from(
@@ -172,11 +162,12 @@ export function useGridClipboard (
       for (const cell of tableElement.rows[rowIndex].cells) {
         table[rowIndex][columnIndex] = {
           value: cell.innerText,
-          styles: withStyles ? getCellStyles(cell) : {}
+          styles: withStyles ? getCellStyles(cell, iframe.contentWindow) : {}
         }
         columnIndex += cell.colSpan
       }
     }
+    iframe.remove()
     return table
   }
 
@@ -219,15 +210,25 @@ export function useGridClipboard (
     return result
   }
 
-  const getCellStyles = (cell: HTMLTableCellElement): Record<string, string> => {
+  const getCellStyles = (cell: HTMLTableCellElement, contentWindow: Window): Record<string, string | null> => {
+    const computedStyle = contentWindow.getComputedStyle(cell)
+    const s = cell.querySelector('s')
+    const horizontalAlign = {
+      left: 'left',
+      center: 'center',
+      right: 'right',
+      start: 'left',
+      end: 'right',
+      '-webkit-right': 'right'
+    }
     return {
-      strong: getComputedStyle(cell).fontWeight === 'bold' ? 'true' : 'false',
-      italic: getComputedStyle(cell).fontStyle === 'italic' ? 'true' : 'false',
-      strike: getComputedStyle(cell).textDecoration === 'line-through' ? 'true' : 'false',
-      underline: getComputedStyle(cell).textDecorationLine || null,
-      horizontal_align: getComputedStyle(cell).textAlign,
-      vertical_align: getComputedStyle(cell).verticalAlign,
-      size: getComputedStyle(cell).fontSize
+      strong: computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 700 ? 'true' : 'false',
+      italic: computedStyle.fontStyle === 'italic' ? 'true' : 'false',
+      underline: computedStyle.textDecorationLine === 'underline' ? 'single' : null,
+      strike: s !== null || computedStyle.textDecoration.includes('line-through') ? 'true' : 'false',
+      horizontalAlign: horizontalAlign[computedStyle.textAlign] ?? 'left',
+      verticalAlign: computedStyle.verticalAlign,
+      size: String(Math.floor(parseFloat(computedStyle.fontSize) * 0.75))
     }
   }
 

@@ -167,22 +167,14 @@ export function usePaste () {
   const activeSheet = inject(ActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.WRITE) {
-    return {
-      paste: useChangeValuesMutation(
-        computed(() => activeDocument.value.id),
-        computed(() => activeSheet.value.id)
-      ),
-      pasteWithStyles: null
-    }
+    return useChangeValuesMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id)
+    )
   }
   if (mode.value === GridMode.CHANGE) {
-    return {
-      paste: (values: ValueInputType[]) => {
-        console.log(values)
-      },
-      pasteWithStyles: (values: ValueStyleInputType[]) => {
-        console.log(values)
-      }
+    return (values: ValueStyleInputType[]) => {
+      console.log(values)
     }
   }
   return null
