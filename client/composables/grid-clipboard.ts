@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { inject, Ref } from '#app'
 import { useEventListener } from '@vueuse/core'
-import { CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
+import { CellPasteStyleInputType, CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { ValueStyleInputType } from '~/composables/grid-mutations'
 import {
   findCell,
@@ -18,7 +18,7 @@ import ClipboardTable from '~/components/dcis/grid/clipboard/ClipboardTable.vue'
 
 type TableCellType = {
   value: string,
-  styles: Record<string, string>
+  style: CellPasteStyleInputType | null
 }
 
 export function useGridClipboard (
@@ -61,8 +61,8 @@ export function useGridClipboard (
       ) {
         return
       }
-      let textData: string | null = null
-      let htmlData: string | null = null
+      let textData: string | null
+      let htmlData: string | null
       if (event.clipboardData) {
         textData = event.clipboardData.getData('text/plain')
         htmlData = event.clipboardData.getData('text/html')
@@ -81,7 +81,7 @@ export function useGridClipboard (
         : parsePlainTextTable(textData)
       const values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
         .filter((value: ValueStyleInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
-      paste(values)
+      await paste(values)
     }
   )
 
@@ -138,7 +138,7 @@ export function useGridClipboard (
       }
       table.push([])
       for (const value of row.split('\t')) {
-        table.at(-1).push({ value, styles: {} })
+        table.at(-1).push({ value, style: null })
       }
     }
     return table
@@ -162,7 +162,7 @@ export function useGridClipboard (
       for (const cell of tableElement.rows[rowIndex].cells) {
         table[rowIndex][columnIndex] = {
           value: cell.innerText,
-          styles: withStyles ? getCellStyles(cell, iframe.contentWindow) : {}
+          style: withStyles ? getCellStyles(cell, iframe.contentWindow) : null
         }
         columnIndex += cell.colSpan
       }
@@ -188,7 +188,7 @@ export function useGridClipboard (
           const position = `${positionToLetter(columnIndex + j)}${rowIndex + i}`
           const cell = findCell(activeSheet, (cell: CellType) => cell.globalPosition === position)
           if (cell) {
-            result.push({ cell, value: tableCell.value, styles: tableCell.styles })
+            result.push({ cell, value: tableCell.value, style: tableCell.style })
           }
         }
       }
@@ -210,7 +210,7 @@ export function useGridClipboard (
     return result
   }
 
-  const getCellStyles = (cell: HTMLTableCellElement, contentWindow: Window): Record<string, string | null> => {
+  const getCellStyles = (cell: HTMLTableCellElement, contentWindow: Window): CellPasteStyleInputType => {
     const computedStyle = contentWindow.getComputedStyle(cell)
     const s = cell.querySelector('s')
     const horizontalAlign = {
@@ -222,13 +222,13 @@ export function useGridClipboard (
       '-webkit-right': 'right'
     }
     return {
-      strong: computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 700 ? 'true' : 'false',
-      italic: computedStyle.fontStyle === 'italic' ? 'true' : 'false',
+      strong: computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 700,
+      italic: computedStyle.fontStyle === 'italic',
       underline: computedStyle.textDecorationLine === 'underline' ? 'single' : null,
-      strike: s !== null || computedStyle.textDecoration.includes('line-through') ? 'true' : 'false',
+      strike: s !== null || computedStyle.textDecoration.includes('line-through'),
       horizontalAlign: horizontalAlign[computedStyle.textAlign] ?? 'left',
       verticalAlign: computedStyle.verticalAlign,
-      size: String(Math.floor(parseFloat(computedStyle.fontSize) * 0.75))
+      size: Math.round(parseFloat(computedStyle.fontSize) * 0.75)
     }
   }
 

@@ -11,6 +11,7 @@ import {
   useAddChildRowDimensionMutation,
   useAddRowDimensionMutation,
   useChangeCellDefaultMutation,
+  usePasteIntoCellsMutation,
   useChangeChildRowDimensionHeightMutation,
   useChangeColumnDimensionWidthMutation,
   useChangeFileValueMutation,
@@ -18,7 +19,7 @@ import {
   useChangeValuesMutation,
   useDeleteChildRowDimensionMutation,
   useDeleteRowDimensionMutation,
-  useUnloadFileValueArchiveMutation, ValueInputType, ValueStyleInputType
+  useUnloadFileValueArchiveMutation
 } from '~/composables/grid-mutations'
 import { useCanChangeRowHeight } from '~/composables/grid-permissions'
 import {
@@ -165,6 +166,7 @@ export function useUnloadFileValueArchive (cell: Ref<CellType>) {
 export function usePaste () {
   const mode = inject(GridModeInject)
   const activeSheet = inject(ActiveSheetInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
   if (mode.value === GridMode.WRITE) {
     return useChangeValuesMutation(
@@ -173,9 +175,7 @@ export function usePaste () {
     )
   }
   if (mode.value === GridMode.CHANGE) {
-    return (values: ValueStyleInputType[]) => {
-      console.log(values)
-    }
+    return usePasteIntoCellsMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
   return null
 }

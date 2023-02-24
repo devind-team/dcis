@@ -1,5 +1,6 @@
 import re
 from argparse import ArgumentTypeError
+from dataclasses import dataclass
 from typing import NamedTuple, Sequence
 
 from devind_dictionaries.models import BudgetClassification
@@ -110,8 +111,7 @@ class CheckCellOptions:
         'strong', 'italic', 'strike',
         'underline', 'horizontal_align', 'vertical_align',
         'editable', 'size', 'kind',
-        'number_format',
-        'aggregation'
+        'number_format', 'aggregation'
     ]
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']
@@ -148,7 +148,8 @@ def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     return cell
 
 
-def success_check_cell_options(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+def check_cells_permissions(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+    """Проверка разрешений на изменение ячеек."""
     if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
         raise PermissionDenied('Ошибка доступа')
     can_change_period_sheet(user, cells.first().row.sheet.period)
@@ -174,6 +175,54 @@ def change_cells_option(cells: Sequence[Cell], field: str, value:  str | int | b
         cell.save(update_fields=update_fields)
         result.append({'cell_id': cell.id, 'field': camelcase(field), 'value': value})
     return result
+
+
+@dataclass
+class CellPasteStyle:
+    """Стили для вставки в ячейку."""
+    strong: bool
+    italic: bool
+    underline: str | None
+    strike: bool
+    horizontal_align: str
+    vertical_align: str
+    size: int
+
+
+@dataclass
+class CellPasteOptions:
+    """Входные данные для вставки в ячейку."""
+
+    cell: Cell
+    default: str
+    style: CellPasteStyle | None
+
+
+@transaction.atomic
+def paste_into_cells(paste_options: list[CellPasteOptions]) -> list[Cell]:
+    """Вставка в ячейки."""
+    cells: list[Cell] = []
+    for paste_option in paste_options:
+        cell = paste_option.cell
+        cell.default = paste_option.default
+        update_fields = ['default']
+        if paste_option.style:
+            style = paste_option.style
+            cell.strong = style.strong
+            cell.italic = style.italic
+            cell.underline = style.underline
+            cell.strike = style.strike
+            cell.horizontal_align = style.horizontal_align
+            cell.vertical_align = style.vertical_align
+            cell.size = style.size
+            update_fields.extend([
+                'strong', 'italic', 'underline',
+                'strike', 'horizontal_align', 'vertical_align',
+                'size',
+            ])
+        cell.save(update_fields=update_fields)
+        cells.append(cell)
+    return cells
 
 
 def add_budget_classification(user: User, code: str, name: str) -> BudgetClassification:

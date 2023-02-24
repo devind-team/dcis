@@ -1,4 +1,5 @@
 """Модуль, отвечающий за работу с метаданными ячейки."""
+
 import contextlib
 
 from devind_helpers.orm_utils import get_object_or_404

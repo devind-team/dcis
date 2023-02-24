@@ -14,14 +14,22 @@ from graphql import ResolveInfo
 from stringcase import snakecase
 
 from apps.dcis.models import Cell
-from apps.dcis.schema.types import ChangeCellType, ChangedCellOption
+from apps.dcis.schema.types import (
+    CellPasteOptionsInputType,
+    CellPasteOptionsType,
+    ChangeCellType,
+    ChangedCellOptionType,
+)
 from apps.dcis.services.cell_service import add_cell_aggregation, delete_cell_aggregation
 from apps.dcis.services.sheet_services import (
+    CellPasteOptions,
+    CellPasteStyle,
     CheckCellOptions,
     add_budget_classification,
     change_cell_default,
     change_cells_option,
-    success_check_cell_options,
+    check_cells_permissions,
+    paste_into_cells,
 )
 
 
@@ -67,7 +75,7 @@ class ChangeCellsOptionMutation(BaseMutation):
         value = graphene.String(description='Значение поля')
 
     changed_options = graphene.List(
-        graphene.NonNull(ChangedCellOption),
+        graphene.NonNull(ChangedCellOptionType),
         description='Измененные свойства ячеек'
     )
 
@@ -76,7 +84,7 @@ class ChangeCellsOptionMutation(BaseMutation):
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        cell_ids: list[int],
+        cell_ids: list[str],
         field: str,
         value: str | None = None
     ):
@@ -85,9 +93,53 @@ class ChangeCellsOptionMutation(BaseMutation):
             case CheckCellOptions.Error(field, error):
                 return ChangeCellsOptionMutation(success=False, errors=[ErrorFieldType(field, [error])])
             case CheckCellOptions.Success(value):
-                cells = Cell.objects.filter(pk__in=cell_ids).all()
-                success_check_cell_options(user=info.context.user, cells=cells)
+                cells = Cell.objects.filter(pk__in=map(gid2int, cell_ids))
+                check_cells_permissions(user=info.context.user, cells=cells)
                 return ChangeCellsOptionMutation(changed_options=change_cells_option(cells, field, value))
+
+
+class PasteIntoCellsMutation(BaseMutation):
+    """Вставка в ячейки."""
+
+    class Input:
+        options = graphene.List(
+            graphene.NonNull(CellPasteOptionsInputType),
+            required=True,
+            description='Данные для вставки в ячейки'
+        )
+
+    changed_options = graphene.List(
+        graphene.NonNull(CellPasteOptionsType),
+        description='Результат вставки в ячейки'
+    )
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, options: list[CellPasteOptionsInputType]):
+        cells = Cell.objects.filter(pk__in=(gid2int(option.cell_id) for option in options))
+        check_cells_permissions(user=info.context.user, cells=cells)
+        past_options: list[CellPasteOptions] = []
+        for option in options:
+            if option.style:
+                for field in ['horizontal_align', 'vertical_align', 'underline', 'size']:
+                    match CheckCellOptions(field, getattr(option.style, field)):
+                        case CheckCellOptions.Error(field, error):
+                            return PasteIntoCellsMutation(success=False, errors=[ErrorFieldType(field, [error])])
+            cell = next(cell for cell in cells if cell.id == gid2int(option.cell_id))
+            past_options.append(CellPasteOptions(
+                cell=cell,
+                default=option.default,
+                style=CellPasteStyle(
+                    strong=option.style.strong,
+                    italic=option.style.italic,
+                    underline=option.style.underline,
+                    strike=option.style.strike,
+                    horizontal_align=option.style.horizontal_align,
+                    vertical_align=option.style.vertical_align,
+                    size=option.style.size
+                ) if option.style else None
+            ))
+        return PasteIntoCellsMutation(changed_options=paste_into_cells(past_options))
 
 
 class AddBudgetClassificationMutation(BaseMutation):
@@ -107,10 +159,12 @@ class AddBudgetClassificationMutation(BaseMutation):
         code: str,
         name: str
     ):
-        return AddBudgetClassificationMutation(budget_classification=add_budget_classification(
-            info.context.user,
-            code,
-            name)
+        return AddBudgetClassificationMutation(
+            budget_classification=add_budget_classification(
+                info.context.user,
+                code,
+                name,
+            )
         )
 
 
@@ -164,6 +218,7 @@ class CellMutations(graphene.ObjectType):
 
     change_cell_default = ChangeCellDefault.Field(required=True, description='Изменение значения ячейки по умолчанию')
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
+    paste_into_cells = PasteIntoCellsMutation.Field(required=True, description='Вставка в ячейки')
     add_budget_classification = AddBudgetClassificationMutation.Field(
         required=True,
         description='Добавление нового КБК'

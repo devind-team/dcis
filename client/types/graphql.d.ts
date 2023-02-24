@@ -870,6 +870,56 @@ export type CellKind =
   /** user */
   | 'USER';
 
+/** Входные данные для вставки в ячейку. */
+export type CellPasteOptionsInputType = {
+  /** Идентификатор ячейки */
+  cellId: Scalars['ID'];
+  /** Значение по умолчанию */
+  default: Scalars['String'];
+  /** Стили */
+  style?: InputMaybe<CellPasteStyleInputType>;
+};
+
+/** Результат вставки в ячейку. */
+export type CellPasteOptionsType = {
+  __typename?: 'CellPasteOptionsType';
+  /** Значение по умолчанию */
+  default?: Maybe<Scalars['String']>;
+  /** Горизонтальное выравнивание */
+  horizontalAlign?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  /** Курсив */
+  italic: Scalars['Boolean'];
+  /** Размер шрифта */
+  size: Scalars['Int'];
+  /** Зачеркнутый */
+  strike: Scalars['Boolean'];
+  /** Жирный шрифт */
+  strong: Scalars['Boolean'];
+  /** Тип подчеркивания */
+  underline?: Maybe<Scalars['String']>;
+  /** Вертикальное выравнивание */
+  verticalAlign?: Maybe<Scalars['String']>;
+};
+
+/** Стили для вставки в ячейку. */
+export type CellPasteStyleInputType = {
+  /** Горизонтальное выравнивание */
+  horizontalAlign?: InputMaybe<Scalars['String']>;
+  /** Курсив */
+  italic: Scalars['Boolean'];
+  /** Размер шрифта */
+  size: Scalars['Int'];
+  /** Зачеркнутый */
+  strike: Scalars['Boolean'];
+  /** Жирный шрифт */
+  strong: Scalars['Boolean'];
+  /** Тип подчеркивания */
+  underline?: InputMaybe<Scalars['String']>;
+  /** Вертикальное выравнивание */
+  verticalAlign?: InputMaybe<Scalars['String']>;
+};
+
 /** Тип ячейки. */
 export type CellType = {
   __typename?: 'CellType';
@@ -898,7 +948,7 @@ export type CellType = {
   /** Позиция в плоской структуре */
   globalPosition: Scalars['String'];
   /** Горизонтальное выравнивание */
-  horizontalAlign?: Maybe<Scalars['ID']>;
+  horizontalAlign?: Maybe<Scalars['String']>;
   /** Идентификатор */
   id: Scalars['ID'];
   /** Является ли поле шаблоном */
@@ -932,7 +982,7 @@ export type CellType = {
   /** Значение */
   value?: Maybe<Scalars['String']>;
   /** Вертикальное выравнивание */
-  verticalAlign?: Maybe<Scalars['ID']>;
+  verticalAlign?: Maybe<Scalars['String']>;
 };
 
 export type ChangeAttributeMutationInput = {
@@ -1074,8 +1124,8 @@ export type ChangeCellsOptionMutationInput = {
  *
  * - strong - true, false
  * - italic - true, false
- * - strike - true, false
  * - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
+ * - strike - true, false
  * - horizontal_align - ['left', 'center', 'right']
  * - vertical_align - ['top', 'middle', 'bottom']
  * - size - число от 6 до 24
@@ -1089,7 +1139,7 @@ export type ChangeCellsOptionMutationInput = {
 export type ChangeCellsOptionMutationPayload = {
   __typename?: 'ChangeCellsOptionMutationPayload';
   /** Измененные свойства ячеек */
-  changedOptions?: Maybe<Array<ChangedCellOption>>;
+  changedOptions?: Maybe<Array<ChangedCellOptionType>>;
   clientMutationId?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
@@ -1708,8 +1758,8 @@ export type ChangeValuesMutationPayload = {
 };
 
 /** Измененное свойство ячейки. */
-export type ChangedCellOption = {
-  __typename?: 'ChangedCellOption';
+export type ChangedCellOptionType = {
+  __typename?: 'ChangedCellOptionType';
   /** Идентификаторы ячеек */
   cellId: Scalars['ID'];
   /** Идентификатор поля */
@@ -2813,6 +2863,8 @@ export type Mutation = {
   getToken: GetTokenMutationPayload;
   /** Мутация выхода */
   logout: LogoutMutationPayload;
+  /** Вставка в ячейки */
+  pasteIntoCells: PasteIntoCellsMutationPayload;
   /** Мутация для сброса пароля пользователя. */
   recoveryPassword: RecoveryPasswordMutationPayload;
   /** Мутация регистрации новых пользователей. */
@@ -3212,6 +3264,11 @@ export type MutationGetTokenArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationLogoutArgs = {
   input: LogoutMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationPasteIntoCellsArgs = {
+  input: PasteIntoCellsMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3658,6 +3715,24 @@ export type PageInfo = {
   hasPreviousPage: Scalars['Boolean'];
   /** When paginating backwards, the cursor to continue. */
   startCursor?: Maybe<Scalars['String']>;
+};
+
+export type PasteIntoCellsMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Данные для вставки в ячейки */
+  options: Array<CellPasteOptionsInputType>;
+};
+
+/** Вставка в ячейки. */
+export type PasteIntoCellsMutationPayload = {
+  __typename?: 'PasteIntoCellsMutationPayload';
+  /** Результат вставки в ячейки */
+  changedOptions?: Maybe<Array<CellPasteOptionsType>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
 };
 
 /** Группы с содержанием привилегий. */
@@ -5407,7 +5482,7 @@ export type ChangeCellsOptionMutationVariables = Exact<{
   value?: InputMaybe<Scalars['String']>;
 }>;
 
-export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOption', cellId: string, field: string, value?: string | null }> | null } };
+export type ChangeCellsOptionMutation = { __typename?: 'Mutation', changeCellsOption: { __typename: 'ChangeCellsOptionMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'ChangedCellOptionType', cellId: string, field: string, value?: string | null }> | null } };
 
 export type DeleteValueCellMutationVariables = Exact<{
   cellId: Scalars['ID'];
@@ -5415,6 +5490,12 @@ export type DeleteValueCellMutationVariables = Exact<{
 }>;
 
 export type DeleteValueCellMutation = { __typename?: 'Mutation', deleteValuesCell: { __typename: 'DeleteValuesCellMutationPayload', success: boolean, id?: string | null } };
+
+export type PasteIntoCellsMutationVariables = Exact<{
+  options: Array<CellPasteOptionsInputType> | CellPasteOptionsInputType;
+}>;
+
+export type PasteIntoCellsMutation = { __typename?: 'Mutation', pasteIntoCells: { __typename?: 'PasteIntoCellsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'CellPasteOptionsType', id: string, default?: string | null, strong: boolean, italic: boolean, underline?: string | null, strike: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number }> | null } };
 
 export type AddCuratorGroupMutationVariables = Exact<{
   name: Scalars['String'];
