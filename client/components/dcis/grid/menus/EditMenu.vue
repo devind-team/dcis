@@ -7,12 +7,28 @@ v-menu(offset-y)
       elevation="0"
       tile
     ) {{ $t('dcis.grid.sheetMenu.editMenu.buttonText') }}
+  v-dialog(v-model="shortcutDialogActive" width="570")
+    v-card
+      v-card-title
+        | {{ $t('dcis.grid.sheetMenu.editMenu.shortcutDialog.title') }}
+        v-spacer
+        v-btn(@click="shortcutDialogActive = false" icon)
+          v-icon mdi-close
+      v-card-text
+        span {{ $t('dcis.grid.sheetMenu.editMenu.shortcutDialog.message') }}
+        .d-flex.mt-3
+          .d-flex.flex-column.mr-7
+            .text-h4 {{ $t('dcis.grid.sheetMenu.editMenu.copyShortcut') }}
+            span {{ $t('dcis.grid.sheetMenu.editMenu.shortcutDialog.toCopy') }}
+          .d-flex.flex-column
+            .text-h4 {{ $t('dcis.grid.sheetMenu.editMenu.pasteShortcut') }}
+            span {{ $t('dcis.grid.sheetMenu.editMenu.shortcutDialog.toPaste') }}
   v-list(dense width="200")
     v-list-item(@click="copy" :disabled="copyPasteDisabled")
       v-list-item-title.d-flex.justify-space-between
         span {{ $t('dcis.grid.sheetMenu.editMenu.copy') }}
         span {{ $t('dcis.grid.sheetMenu.editMenu.copyShortcut') }}
-    v-list-item(v-if="pasteVisible" :disabled="copyPasteDisabled" @click="paste")
+    v-list-item(v-if="pasteVisible" :disabled="copyPasteDisabled" @click.stop="paste")
       v-list-item-title.d-flex.justify-space-between
         span {{ $t('dcis.grid.sheetMenu.editMenu.paste') }}
         span {{ $t('dcis.grid.sheetMenu.editMenu.pasteShortcut') }}
@@ -28,6 +44,8 @@ export default defineComponent({
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
   },
   setup (props) {
+    const shortcutDialogActive = ref(false)
+
     const copyPasteDisabled = computed(() => !props.selectedCellsOptions)
 
     const copy = () => {
@@ -38,11 +56,16 @@ export default defineComponent({
 
     const pasteVisible = computed(() => props.mode === GridMode.WRITE || props.mode === GridMode.CHANGE)
     const paste = () => {
-      const event = new Event('paste')
-      document.dispatchEvent(event)
+      if (!navigator.clipboard.readText || !navigator.clipboard.read) {
+        shortcutDialogActive.value = true
+      } else {
+        const event = new Event('paste')
+        document.dispatchEvent(event)
+      }
     }
 
     return {
+      shortcutDialogActive,
       copyPasteDisabled,
       GridMode,
       copy,

@@ -394,7 +394,13 @@ export default {
         copy: 'Копировать',
         copyShortcut: 'Ctrl+C',
         paste: 'Вставить',
-        pasteShortcut: 'Ctrl+V'
+        pasteShortcut: 'Ctrl+V',
+        shortcutDialog: {
+          title: 'Копирование и вставка',
+          message: 'Через меню "Правка" эта операция недоступна, однако можно использовать:',
+          toCopy: 'для копирования',
+          toPaste: 'для вставки'
+        }
       },
       documentUnloadMenu: {
         buttonText: 'Выгрузка',
