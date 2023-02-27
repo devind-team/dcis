@@ -18,7 +18,7 @@ type AccessTokenType {
 }
 
 """
-Типы измнения связей между записями в базе данных
+Типы изменения связей между записями в базе данных
 - ADD - Добавление
 - DELETE - Удаление
 """
@@ -60,6 +60,29 @@ type ActiveStatisticsType {
   queries: [DateStatisticsType]!
   """Время ответа сервера"""
   times: [DateStatisticsType]!
+}
+
+input AddAggregationMutationInput {
+  """Агрегируемая ячейка"""
+  aggregationCell: String!
+  """Агрегируемые ячейки"""
+  aggregationCells: [String]
+  """Метод агрегации"""
+  aggregationMethod: String!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Добавление агрегации."""
+type AddAggregationMutationPayload {
+  """Добавлена агрегация"""
+  aggregationCells: CellAggregationType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input AddAttributeMutationInput {
@@ -791,6 +814,18 @@ enum CellAggregation {
   MIN
   """sum"""
   SUM
+}
+
+"""Тип ячейки агрегации."""
+type CellAggregationType {
+  """Метод агрегации"""
+  aggregation: String!
+  """Ячейки агрегации"""
+  cells: [String!]
+  """Идентификатор"""
+  id: ID!
+  """Позиция ячейки"""
+  position: String!
 }
 
 """An enumeration."""
@@ -1697,7 +1732,7 @@ type ConfirmEmailMutationPayload {
 - CHANGE - Пользователь изменил данные
 - DELETE - Удаление объекта
 - ERROR - Ошибка ввода данных
-- TYPING - Печатет, готовиться отправить сообщение
+- TYPING - Печатает, готовиться отправить сообщение
 - TYPING_FINISH - Закончил печатать
 - EXCEPTION - Пользователь исключен из потока уведомлений
 """
@@ -1779,6 +1814,23 @@ value as specified by
 """
 scalar DateTime
 
+input DeleteAggregationMutationInput {
+  """Идентификатор агрегирующей ячеуки"""
+  aggregationCellId: ID!
+  clientMutationId: String
+}
+
+"""Удаление агрегации."""
+type DeleteAggregationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленной агрегации"""
+  id: ID
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteAttributeMutationInput {
   """
   Идентификатор модели "Не табличные данные хранятся в атрибутах.
@@ -1859,8 +1911,6 @@ type DeleteDivisionMutationPayload {
 
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
-  """Идентификатор документа"""
-  documentId: ID!
   """Идентификатор статуса документа"""
   documentStatusId: ID!
 }
@@ -2298,7 +2348,7 @@ type DocumentTypeEdge {
   node: DocumentType
 }
 
-"""Ошибка в поле формы"""
+"""Ошибка в поле формы."""
 type ErrorFieldType {
   """Поле формы"""
   field: String!
@@ -2433,6 +2483,8 @@ enum LogEntryAction {
   A_1
   """delete"""
   A_2
+  """access"""
+  A_3
 }
 
 """Логирование действия пользователя."""
@@ -2539,6 +2591,8 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Добавление агрегации."""
+  addAggregation(input: AddAggregationMutationInput!): AddAggregationMutationPayload!
   """Добавление атрибута"""
   addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
@@ -2649,6 +2703,8 @@ type Mutation {
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
+  """Удаление агрегации."""
+  deleteAggregation(input: DeleteAggregationMutationInput!): DeleteAggregationMutationPayload!
   """Удаление атрибута"""
   deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
   """Удаление дочерней строки."""
@@ -2709,6 +2765,8 @@ type Mutation {
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
   """Выгрузка периода в формате Excel."""
   unloadPeriod(input: UnloadPeriodMutationInput!): UnloadPeriodMutationPayload!
+  """Обновление агрегации из json файла."""
+  updateAggregationsFromFile(input: UpdateAggregationsFromFileMutationInput!): UpdateAggregationsFromFileMutationPayload!
   """Обновление ограничений, накладываемых на лист, из json файла."""
   updateLimitationsFromFile(input: UpdateLimitationsFromFileMutationInput!): UpdateLimitationsFromFileMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
@@ -3333,6 +3391,11 @@ type Query {
   activeStatistics: ActiveStatisticsType!
   """Переназначение статусов"""
   addStatuses: [AddStatusType!]
+  """Агрегированные ячейки документов периода"""
+  aggregationCells(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [CellAggregationType]
   """Приложения"""
   applications: [ApplicationType!]!
   """Получение атрибутов, привязанных к периоду"""
@@ -3979,7 +4042,7 @@ type TableRowType {
   index: Int!
 }
 
-"""Документ, представлющий собой таблицу."""
+"""Документ, представляющий собой таблицу."""
 type TableType {
   """Заголовки документа"""
   headers: [String]!
@@ -4060,6 +4123,25 @@ type UnloadPeriodMutationPayload {
   errors: [ErrorFieldType!]!
   """Ссылка на сгенерированный файл"""
   src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UpdateAggregationsFromFileMutationInput {
+  """json файл агрегации ячеек"""
+  aggregationsFile: Upload!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Обновление агрегации из json файла."""
+type UpdateAggregationsFromFileMutationPayload {
+  """Новая агрегация"""
+  aggregationCells: [CellAggregationType]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
   """Успех мутации"""
   success: Boolean!
 }

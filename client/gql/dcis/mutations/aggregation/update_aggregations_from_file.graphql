@@ -1,0 +1,18 @@
+mutation UpdateAggregationsFromFile($periodId: ID!, $aggregationsFile: Upload!) {
+  updateAggregationsFromFile(input: { periodId: $periodId, aggregationsFile: $aggregationsFile }) {
+    aggregationCells {
+      id
+      aggregation
+      cells
+      position
+      __typename
+    }
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    __typename
+  }
+}

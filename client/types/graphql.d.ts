@@ -75,6 +75,30 @@ export type ActiveStatisticsType = {
   times: Array<Maybe<DateStatisticsType>>;
 };
 
+export type AddAggregationMutationInput = {
+  /** Агрегируемая ячейка */
+  aggregationCell: Scalars['String'];
+  /** Агрегируемые ячейки */
+  aggregationCells?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  /** Метод агрегации */
+  aggregationMethod: Scalars['String'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Добавление агрегации. */
+export type AddAggregationMutationPayload = {
+  __typename?: 'AddAggregationMutationPayload';
+  /** Добавлена агрегация */
+  aggregationCells?: Maybe<CellAggregationType>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type AddAttributeMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   default?: InputMaybe<Scalars['String']>;
@@ -832,6 +856,19 @@ export type CellAggregation =
   | 'MIN'
   /** sum */
   | 'SUM';
+
+/** Тип ячейки агрегации. */
+export type CellAggregationType = {
+  __typename?: 'CellAggregationType';
+  /** Метод агрегации */
+  aggregation: Scalars['String'];
+  /** Ячейки агрегации */
+  cells?: Maybe<Array<Scalars['String']>>;
+  /** Идентификатор */
+  id: Scalars['ID'];
+  /** Позиция ячейки */
+  position: Scalars['String'];
+};
 
 /** An enumeration. */
 export type CellKind =
@@ -1856,6 +1893,24 @@ export type DateStatisticsType = {
   value: Scalars['Float'];
 };
 
+export type DeleteAggregationMutationInput = {
+  /** Идентификатор агрегирующей ячеуки */
+  aggregationCellId: Scalars['ID'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+};
+
+/** Удаление агрегации. */
+export type DeleteAggregationMutationPayload = {
+  __typename?: 'DeleteAggregationMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаленной агрегации */
+  id?: Maybe<Scalars['ID']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteAttributeMutationInput = {
   /**
    * Идентификатор модели "Не табличные данные хранятся в атрибутах.
@@ -2550,7 +2605,9 @@ export type LogEntryAction =
   /** update */
   | 'A_1'
   /** delete */
-  | 'A_2';
+  | 'A_2'
+  /** access */
+  | 'A_3';
 
 /** Логирование действия пользователя. */
 export type LogEntryType = Node & {
@@ -2665,6 +2722,8 @@ export type MailingType = {
 /** Мутации на изменение чего-либо. */
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Добавление агрегации. */
+  addAggregation: AddAggregationMutationPayload;
   /** Добавление атрибута */
   addAttribute: AddAttributeMutationPayload;
   /** Добавление нового КБК */
@@ -2775,6 +2834,8 @@ export type Mutation = {
   confirmEmail: ConfirmEmailMutationPayload;
   /** Мутация на перенос групп с пользователями из другого периода. */
   copyPeriodGroups: CopyPeriodGroupsMutationPayload;
+  /** Удаление агрегации. */
+  deleteAggregation: DeleteAggregationMutationPayload;
   /** Удаление атрибута */
   deleteAttribute: DeleteAttributeMutationPayload;
   /** Удаление дочерней строки. */
@@ -2835,10 +2896,17 @@ export type Mutation = {
   unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
   /** Выгрузка периода в формате Excel. */
   unloadPeriod: UnloadPeriodMutationPayload;
+  /** Обновление агрегации из json файла. */
+  updateAggregationsFromFile: UpdateAggregationsFromFileMutationPayload;
   /** Обновление ограничений, накладываемых на лист, из json файла. */
   updateLimitationsFromFile: UpdateLimitationsFromFileMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddAggregationArgs = {
+  input: AddAggregationMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3117,6 +3185,11 @@ export type MutationCopyPeriodGroupsArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationDeleteAggregationArgs = {
+  input: DeleteAggregationMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationDeleteAttributeArgs = {
   input: DeleteAttributeMutationInput;
 };
@@ -3264,6 +3337,11 @@ export type MutationUnloadFileValueArchiveArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUnloadPeriodArgs = {
   input: UnloadPeriodMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUpdateAggregationsFromFileArgs = {
+  input: UpdateAggregationsFromFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3908,6 +3986,8 @@ export type Query = {
   activeStatistics: ActiveStatisticsType;
   /** Переназначение статусов */
   addStatuses?: Maybe<Array<AddStatusType>>;
+  /** Агрегированные ячейки документов периода */
+  aggregationCells?: Maybe<Array<Maybe<CellAggregationType>>>;
   /** Приложения */
   applications: Array<ApplicationType>;
   /** Получение атрибутов, привязанных к периоду */
@@ -4025,6 +4105,11 @@ export type QueryActiveBudgetClassificationsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryAggregationCellsArgs = {
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -4856,6 +4941,26 @@ export type UnloadPeriodMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UpdateAggregationsFromFileMutationInput = {
+  /** json файл агрегации ячеек */
+  aggregationsFile: Scalars['Upload'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Обновление агрегации из json файла. */
+export type UpdateAggregationsFromFileMutationPayload = {
+  __typename?: 'UpdateAggregationsFromFileMutationPayload';
+  /** Новая агрегация */
+  aggregationCells?: Maybe<Array<Maybe<CellAggregationType>>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UpdateLimitationsFromFileMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** json файл c ограничениями, накладываемыми на листы */
@@ -5326,6 +5431,28 @@ export type SheetFieldsFragment = { __typename: 'SheetType', id: string, name: s
 export type StatusFieldsFragment = { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean };
 
 export type ValueFieldsFragment = { __typename: 'ValueType', id: string, value: string, payload?: string | null, error?: string | null, columnId: string, rowId: string, sheetId: string };
+
+export type AddAggregationMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  aggregationCell: Scalars['String'];
+  aggregationMethod: Scalars['String'];
+  aggregationCells?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
+}>;
+
+export type AddAggregationMutation = { __typename?: 'Mutation', addAggregation: { __typename: 'AddAggregationMutationPayload', success: boolean, aggregationCells?: { __typename: 'CellAggregationType', id: string, position: string, aggregation: string, cells?: Array<string> | null } | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type DeleteAggregationMutationVariables = Exact<{
+  aggregationCellId: Scalars['ID'];
+}>;
+
+export type DeleteAggregationMutation = { __typename?: 'Mutation', deleteAggregation: { __typename: 'DeleteAggregationMutationPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UpdateAggregationsFromFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  aggregationsFile: Scalars['Upload'];
+}>;
+
+export type UpdateAggregationsFromFileMutation = { __typename?: 'Mutation', updateAggregationsFromFile: { __typename: 'UpdateAggregationsFromFileMutationPayload', success: boolean, aggregationCells?: Array<{ __typename: 'CellAggregationType', id: string, aggregation: string, cells?: Array<string> | null, position: string } | null> | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddAttributeMutationVariables = Exact<{
   period: Scalars['ID'];
@@ -5806,6 +5933,12 @@ export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBud
 export type AddStatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AddStatusesQuery = { __typename?: 'Query', addStatuses?: Array<{ __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } }> | null };
+
+export type AggregationCellsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type AggregationCellsQuery = { __typename?: 'Query', aggregationCells?: Array<{ __typename: 'CellAggregationType', id: string, position: string, aggregation: string, cells?: Array<string> | null } | null> | null };
 
 export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];

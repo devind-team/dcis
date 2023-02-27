@@ -1,0 +1,10 @@
+
+query AggregationCells($periodId: ID!){
+	aggregationCells(periodId: $periodId) {
+    id
+    position
+    aggregation
+    cells
+    __typename
+  }
+}

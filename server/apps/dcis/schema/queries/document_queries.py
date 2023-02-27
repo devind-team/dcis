@@ -29,7 +29,7 @@ from apps.dcis.ordering import DocumentOrderedDjangoFilterConnectionField
 from apps.dcis.permissions import can_view_document
 from apps.dcis.schema.types import (
     AttributeValueType,
-    ChangeCellType,
+    CellAggregationType, ChangeCellType,
     DocumentMessageType,
     DocumentStatusType,
     DocumentType,
@@ -37,6 +37,7 @@ from apps.dcis.schema.types import (
     StatusType,
     AddStatusType
 )
+from apps.dcis.services.cell_service import CellsAggregation, get_cells_aggregation
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader
@@ -110,6 +111,12 @@ class DocumentQueries(graphene.ObjectType):
         ChangeCellType,
         cell_id=graphene.ID(required=True, description='Идентификатор ячейки'),
         description='Ячейка и ее зависимости'
+    )
+
+    aggregation_cells = graphene.List(
+        CellAggregationType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        description='Агрегированные ячейки документов периода'
     )
 
     @staticmethod
@@ -214,3 +221,10 @@ class DocumentQueries(graphene.ObjectType):
     def resolve_value_cells(root, info: ResolveInfo, cell_id: str) -> list[Cell]:
         cell = get_object_or_404(Cell, pk=gid2int(cell_id))
         return get_aggregation_cells(info.context.user, cell)
+
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_aggregation_cells(root, info: ResolveInfo, period_id: str | int) -> list[CellsAggregation]:
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_cells_aggregation(info.context.user, period)
