@@ -16,4 +16,4 @@ from .privilege_services import PrivilegeTestCase
 from .project_services import GetUserProjectsTestCase, ProjectTestCase
 from .row_dimension_services import RowDimensionTestCase
 from .status_services import AddStatusCheckTestCase, StatusTestCase
-from .values_services import ValueServicesTestCase
+from .values_services import UpdateOrCreateValuesTestCase

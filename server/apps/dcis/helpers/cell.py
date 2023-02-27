@@ -7,10 +7,8 @@ from django.db.models import Q, QuerySet
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
 from xlsx_evaluate import Evaluator, Model, ModelCompiler
 from xlsx_evaluate.functions.xlerrors import (
-    DivZeroExcelError,
-    NaExcelError, NameExcelError,
-    NullExcelError,
-    NumExcelError, RefExcelError,
+    DivZeroExcelError, NaExcelError, NameExcelError,
+    NullExcelError, NumExcelError, RefExcelError,
     ValueExcelError,
 )
 
@@ -98,6 +96,7 @@ class ValueState(TypedDict):
         - value - значение;
         - error - ошибка вычисления формулы;
         - formula - формула;
+        - cell - ячейка
     """
     value: str | float | None
     error: str | None

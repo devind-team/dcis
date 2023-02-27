@@ -34,5 +34,5 @@ from .services import (
     RowDimensionTestCase,
     StatusTestCase,
     UnloadPeriodTestCase,
-    ValueServicesTestCase,
+    UpdateOrCreateValuesTestCase,
 )

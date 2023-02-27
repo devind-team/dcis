@@ -20,7 +20,7 @@ from apps.dcis.schema.types import (
     ChangeCellType,
     ChangedCellOptionType,
 )
-from apps.dcis.services.cell_service import add_cell_aggregation, delete_cell_aggregation
+from apps.dcis.services.aggregation_services import add_cell_aggregation, delete_cell_aggregation
 from apps.dcis.services.sheet_services import (
     CellPasteOptions,
     CellPasteStyle,

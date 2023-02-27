@@ -54,7 +54,7 @@ def rerender_values(user: User, document: Document, context: Context) -> Sequenc
             user=user,
             document=document,
             sheet_id=cell.column.sheet_id,
-            values=[ValueInput(cell=cell, value=value)]
+            value_inputs=[ValueInput(cell=cell, value=value)]
         )
         values.append(*changed_values.values)
     return values

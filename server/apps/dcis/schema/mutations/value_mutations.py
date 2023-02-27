@@ -66,7 +66,7 @@ class ChangeValuesMutation(BaseMutation):
             user=info.context.user,
             document=document,
             sheet_id=sheet_id,
-            values=values_input,
+            value_inputs=values_input,
         )
         return ChangeValuesMutation(values=result.values, updated_at=result.updated_at)
 
