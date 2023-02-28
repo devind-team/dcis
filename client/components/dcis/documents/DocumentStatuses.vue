@@ -33,7 +33,7 @@ mutation-modal-form(
         v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
           v-tooltip(v-if="item.archivePeriod" bottom)
             template(#activator="{ on }")
-              v-btn(v-on="on" :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: item.document.id } })" color="primary" icon)
+              v-btn(v-on="on" :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) } })" :nuxt="true" color="primary" icon)
                 v-icon mdi-archive-outline
             span {{ "Открыть историю" }}
           delete-menu(
@@ -76,6 +76,7 @@ import { ApolloCache, DataProxy } from 'apollo-cache'
 import { useMutation } from '@vue/apollo-composable'
 import type { PropType } from '#app'
 import { computed, defineComponent, onMounted, ref, watch } from '#app'
+import { toGlobalId } from '~/services/graphql-relay'
 import {
   AddDocumentStatusMutationPayload,
   DeleteDocumentStatusMutation,
@@ -231,6 +232,7 @@ export default defineComponent({
     }
 
     return {
+      toGlobalId,
       ErrorValidateDialogMode,
       firstActivated,
       canAdd,
