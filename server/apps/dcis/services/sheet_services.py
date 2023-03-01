@@ -1,3 +1,5 @@
+"""Модуль, отвечающий за работу с листами."""
+
 import re
 from argparse import ArgumentTypeError
 from dataclasses import dataclass
@@ -81,13 +83,15 @@ class CheckCellOptions:
             return cls._standard_check(field, value, cls._allowed_underline)
         if field == 'kind':
             return cls._standard_check(field, value, cls._allowed_kinds)
+        if field == 'aggregation':
+            return cls._standard_check(field, value, cls._allow_aggregation)
         if field == 'size':
             value = convert_str_to_int(value)
             if not value:
-                return cls.Error('value', f'Значение свойства {field} не является числом: {value}.')
+                return cls.Error('size', f'Значение свойства {field} не является числом: {value}.')
             if not (6 <= value <= 36):
                 return cls.Error(
-                    'value',
+                    'size',
                     f'Значение свойства {field} не входит в разрешенный диапазон: 6 <= {value} <= 36.'
                 )
             return cls.Success(value)
@@ -97,15 +101,13 @@ class CheckCellOptions:
                 return cls.Success(value)
             except ArgumentTypeError:
                 return cls.Error(
-                    'value',
+                    field,
                     cls._get_value_error_message(
                         field, value, ['yes', 'true', 't', 'y', '1', 'no', 'false', 'f', 'n', '0']
                     )
                 )
         if field == 'number_format':
             return cls.Success(value)
-        if field == 'aggregation':
-            return cls._standard_check(field, value, cls._allow_aggregation)
 
     _allowed_fields = [
         'strong', 'italic', 'strike',
@@ -130,7 +132,7 @@ class CheckCellOptions:
         """Проверка для большинства случаев."""
         if value in allowed_values:
             return cls.Success(value)
-        return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
+        return cls.Error(field, cls._get_value_error_message(field, value, allowed_values))
 
 
 def get_aggregation_cells(user: User, cell: Cell) -> list[Cell]:
