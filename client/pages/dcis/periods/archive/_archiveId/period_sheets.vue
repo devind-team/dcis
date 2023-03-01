@@ -51,7 +51,7 @@ export default defineComponent({
       ...props.breadCrumbs,
       {
         text: t('dcis.periods.sheets.name') as string,
-        to: localePath({ name: 'dcis-periods-periodId-sheets' }),
+        to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' }),
         exact: true
       }
     ]))

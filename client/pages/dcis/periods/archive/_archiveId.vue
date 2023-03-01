@@ -31,17 +31,17 @@ export default defineComponent({
       const result: LinksType[] = [
         {
           title: t('dcis.documents.links.sheets') as string,
-          to: 'dcis-archive-archiveId-document_sheets',
+          to: 'dcis-periods-archive-archiveId-document_sheets',
           icon: 'file-table-box-multiple-outline'
         },
         {
           title: t('dcis.documents.links.attributes') as string,
-          to: 'dcis-archive-archiveId-attributes',
+          to: 'dcis-periods-archive-archiveId-attributes',
           icon: 'page-next'
         },
         {
           title: t('dcis.periods.links.sheets') as string,
-          to: 'dcis-archive-archiveId-period_sheets',
+          to: 'dcis-periods-archive-archiveId-period_sheets',
           icon: 'table'
         }
       ]
@@ -54,7 +54,7 @@ export default defineComponent({
       }
       return [
         ...props.breadCrumbs,
-        { text: archivePeriod.value.name, to: localePath({ name: 'dcis-periods-periodId-documents' }), exact: true }
+        { text: archivePeriod.value.name, to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' }), exact: true }
       ]
     })
 
