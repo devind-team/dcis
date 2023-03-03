@@ -13,7 +13,7 @@ html(lang="ru")
             :colspan="cell.colspan"
             :rowspan="cell.rowspan"
             :style="getCellStyle(cell)"
-          ) {{ cell.value }}
+          ) {{ getCellValue(cell) }}
 </template>
 
 <script lang="ts">
@@ -61,8 +61,14 @@ export default defineComponent({
       }
       return style
     }
+    const getCellValue = (cell: CellType) => {
+      if (cell.kind === 'n' && /\d+\.\d+/.test(cell.value)) {
+        return cell.value.replace('.', ',')
+      }
+      return cell
+    }
 
-    return { getRowStyle, getCellStyle }
+    return { getRowStyle, getCellStyle, getCellValue }
   }
 })
 </script>
