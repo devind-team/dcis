@@ -3,6 +3,7 @@ html(lang="ru")
   head
     meta(charset="utf-8")
     meta(name="viewport" content="width=device-width, initial-scale=1")
+    meta(name="source" content="dcis")
   body
     table(style="border-spacing: 0; border-collapse: collapse")
       tbody

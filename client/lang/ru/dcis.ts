@@ -391,6 +391,8 @@ export default {
     sheetMenu: {
       editMenu: {
         buttonText: 'Правка',
+        cut: 'Вырезать',
+        cutShortcut: 'Ctrl+X',
         copy: 'Копировать',
         copyShortcut: 'Ctrl+C',
         paste: 'Вставить',
@@ -398,6 +400,7 @@ export default {
         shortcutDialog: {
           title: 'Копирование и вставка',
           message: 'Через меню "Правка" эта операция недоступна, однако можно использовать:',
+          toCut: 'для вырезания',
           toCopy: 'для копирования',
           toPaste: 'для вставки'
         }

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { inject, Ref } from '#app'
+import { inject, ref, Ref } from '#app'
 import { useEventListener } from '@vueuse/core'
 import { CellPasteStyleInputType, CellType, ColumnDimensionType, RowDimensionType, SheetType } from '~/types/graphql'
 import { ValueStyleInputType } from '~/composables/grid-mutations'
@@ -31,9 +31,11 @@ export function useGridClipboard (
   const canChangeValue = useCanChangeValue()
   const paste = usePaste()
 
+  const cutCells = ref<CellType[] | null>(null)
+
   useEventListener(
     typeof document === 'undefined' ? null : document,
-    'copy',
+    'cut',
     (event: ClipboardEvent) => {
       if (
         event.target instanceof HTMLInputElement ||
@@ -42,9 +44,25 @@ export function useGridClipboard (
       ) {
         return
       }
-      event.clipboardData.clearData()
-      event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
-      event.clipboardData.setData('text/html', generateHTMLTable(selectedCells.value))
+      copy(event)
+      cutCells.value = selectedCells.value
+      event.preventDefault()
+    }
+  )
+
+  useEventListener(
+    typeof document === 'undefined' ? null : document,
+    'copy',
+    (event: ClipboardEvent) => {
+      cutCells.value = null
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        selectedCells.value.length === 0
+      ) {
+        return
+      }
+      copy(event)
       event.preventDefault()
     }
   )
@@ -61,29 +79,60 @@ export function useGridClipboard (
       ) {
         return
       }
-      let textData: string | null
-      let htmlData: string | null
-      if (event.clipboardData) {
-        textData = event.clipboardData.getData('text/plain')
-        htmlData = event.clipboardData.getData('text/html')
-      } else {
-        textData = await navigator.clipboard.readText()
-        const items = await navigator.clipboard.read()
-        const item = items.find((item: ClipboardItem) => item.types.includes('text/html'))
-        const blob = await item.getType('text/html')
-        htmlData = await blob.text()
-      }
+      const { textData, htmlData } = await readClipboardData(event)
       if (htmlData === '' && textData === '') {
         return
       }
-      const table = htmlData.includes('<table')
-        ? parseHTMLTable(htmlData, mode.value === GridMode.CHANGE)
-        : parsePlainTextTable(textData)
-      const values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
+      let table: TableCellType[][]
+      let isCurrentSource = false
+      if (htmlData.includes('<table')) {
+        const iframe = document.createElement('iframe')
+        document.body.append(iframe)
+        const doc = iframe.contentDocument
+        doc.open()
+        doc.write(htmlData)
+        doc.close()
+        const meta: HTMLMetaElement | null = doc.querySelector('meta[name="source"]')
+        if (meta && meta.content === 'dcis') {
+          isCurrentSource = true
+        }
+        table = parseHTMLTable(iframe, mode.value === GridMode.CHANGE)
+        iframe.remove()
+      } else {
+        table = parsePlainTextTable(textData)
+      }
+      let values = getTablesIntersection(selectedCells.value, activeSheet.value, table)
         .filter((value: ValueStyleInputType) => canChangeValue(value.cell) && value.cell.kind !== 'fl')
+      if (cutCells.value && cutCells.value.length && isCurrentSource) {
+        values = addCutCells(values)
+      }
+      cutCells.value = null
       await paste(values)
+      event.preventDefault()
     }
   )
+
+  const readClipboardData = async (event: ClipboardEvent): Promise<{ textData: string, htmlData: string }> => {
+    if (event.clipboardData) {
+      return {
+        textData: event.clipboardData.getData('text/plain'),
+        htmlData: event.clipboardData.getData('text/html')
+      }
+    } else {
+      const textData = await navigator.clipboard.readText()
+      const items = await navigator.clipboard.read()
+      const item = items.find((item: ClipboardItem) => item.types.includes('text/html'))
+      const blob = await item.getType('text/html')
+      const htmlData = await blob.text()
+      return { textData, htmlData }
+    }
+  }
+
+  const copy = (event: ClipboardEvent) => {
+    event.clipboardData.clearData()
+    event.clipboardData.setData('text/plain', generatePlainTextTable(selectedCells.value))
+    event.clipboardData.setData('text/html', generateHTMLTable(selectedCells.value))
+  }
 
   const generatePlainTextTable = (selectedCells: CellType[]): string => {
     const { minColumn, minRow, maxColumn, maxRow } = positionsToRangeIndices(getRelatedGlobalPositions(selectedCells))
@@ -144,13 +193,8 @@ export function useGridClipboard (
     return table
   }
 
-  const parseHTMLTable = (htmlTable: string, withStyles: boolean): TableCellType[][] => {
-    const iframe = document.createElement('iframe')
-    document.body.append(iframe)
+  const parseHTMLTable = (iframe: HTMLIFrameElement, withStyles: boolean): TableCellType[][] => {
     const doc = iframe.contentDocument
-    doc.open()
-    doc.write(htmlTable)
-    doc.close()
     const tableElement = doc.querySelector('table')
     const columnsNumber = getColumnsNumber(tableElement)
     const table: TableCellType[][] = Array.from(
@@ -167,8 +211,28 @@ export function useGridClipboard (
         columnIndex += cell.colSpan
       }
     }
-    iframe.remove()
     return table
+  }
+
+  const addCutCells = (values: ValueStyleInputType[]): ValueStyleInputType[] => {
+    const cells = mode.value === GridMode.CHANGE
+      ? cutCells.value
+      : cutCells.value.filter((cell: CellType) => cell.editable)
+    return [...values, ...cells
+      .filter((cell: CellType) => !values.find((value: ValueStyleInputType) => value.cell.id === cell.id))
+      .map((cell: CellType) => ({
+        cell,
+        value: '',
+        style: {
+          strong: false,
+          italic: false,
+          underline: null,
+          strike: false,
+          horizontalAlign: 'left',
+          verticalAlign: 'top',
+          size: 12
+        }
+      }))]
   }
 
   const getTablesIntersection = (
