@@ -16,6 +16,8 @@ mutation PasteIntoCells($options: [CellPasteOptionsInputType!]!) {
       horizontalAlign
       verticalAlign
       size
+      color
+      background
       __typename
     }
   }

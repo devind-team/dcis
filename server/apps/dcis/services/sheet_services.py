@@ -189,6 +189,8 @@ class CellPasteStyle:
     horizontal_align: str
     vertical_align: str
     size: int
+    color: str
+    background: str
 
 
 @dataclass
@@ -217,10 +219,12 @@ def paste_into_cells(paste_options: list[CellPasteOptions]) -> list[Cell]:
             cell.horizontal_align = style.horizontal_align
             cell.vertical_align = style.vertical_align
             cell.size = style.size
+            cell.color = style.color
+            cell.background = style.background
             update_fields.extend([
                 'strong', 'italic', 'underline',
                 'strike', 'horizontal_align', 'vertical_align',
-                'size',
+                'size', 'color', 'background',
             ])
         cell.save(update_fields=update_fields)
         cells.append(cell)

@@ -136,7 +136,9 @@ class PasteIntoCellsMutation(BaseMutation):
                     strike=option.style.strike,
                     horizontal_align=option.style.horizontal_align,
                     vertical_align=option.style.vertical_align,
-                    size=option.style.size
+                    size=option.style.size,
+                    color=option.style.color,
+                    background=option.style.background,
                 ) if option.style else None
             ))
         return PasteIntoCellsMutation(changed_options=paste_into_cells(past_options))

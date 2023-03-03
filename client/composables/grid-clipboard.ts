@@ -299,8 +299,22 @@ export function useGridClipboard (
       strike: s !== null || computedStyle.textDecoration.includes('line-through'),
       horizontalAlign: horizontalAlign[computedStyle.textAlign] ?? 'left',
       verticalAlign: computedStyle.verticalAlign,
-      size: Math.round(parseFloat(computedStyle.fontSize) * 0.75)
+      size: Math.round(parseFloat(computedStyle.fontSize) * 0.75),
+      color: toHex(computedStyle.color),
+      background: toHex(computedStyle.backgroundColor)
     }
+  }
+
+  const toHex = (color: string) => {
+    const match = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/)
+    if (!match) {
+      return color
+    }
+    const r = parseInt(match[1])
+    const g = parseInt(match[2])
+    const b = parseInt(match[3])
+    const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')
+    return `#${hex}`
   }
 
   const getEndOfLine = (): string => {

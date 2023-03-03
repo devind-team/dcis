@@ -843,6 +843,10 @@ input CellPasteOptionsInputType {
 
 """Результат вставки в ячейку."""
 type CellPasteOptionsType {
+  """Цвет фона"""
+  background: String!
+  """Цвет текста"""
+  color: String!
   """Значение по умолчанию"""
   default: String
   """Горизонтальное выравнивание"""
@@ -864,6 +868,10 @@ type CellPasteOptionsType {
 
 """Стили для вставки в ячейку."""
 input CellPasteStyleInputType {
+  """Цвет фона"""
+  background: String = "#FFFFFF"
+  """Цвет текста"""
+  color: String = "#000000"
   """Горизонтальное выравнивание"""
   horizontalAlign: String
   """Курсив"""

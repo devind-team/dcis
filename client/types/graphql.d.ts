@@ -883,6 +883,10 @@ export type CellPasteOptionsInputType = {
 /** Результат вставки в ячейку. */
 export type CellPasteOptionsType = {
   __typename?: 'CellPasteOptionsType';
+  /** Цвет фона */
+  background: Scalars['String'];
+  /** Цвет текста */
+  color: Scalars['String'];
   /** Значение по умолчанию */
   default?: Maybe<Scalars['String']>;
   /** Горизонтальное выравнивание */
@@ -904,6 +908,10 @@ export type CellPasteOptionsType = {
 
 /** Стили для вставки в ячейку. */
 export type CellPasteStyleInputType = {
+  /** Цвет фона */
+  background?: InputMaybe<Scalars['String']>;
+  /** Цвет текста */
+  color?: InputMaybe<Scalars['String']>;
   /** Горизонтальное выравнивание */
   horizontalAlign?: InputMaybe<Scalars['String']>;
   /** Курсив */
@@ -5495,7 +5503,7 @@ export type PasteIntoCellsMutationVariables = Exact<{
   options: Array<CellPasteOptionsInputType> | CellPasteOptionsInputType;
 }>;
 
-export type PasteIntoCellsMutation = { __typename?: 'Mutation', pasteIntoCells: { __typename?: 'PasteIntoCellsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'CellPasteOptionsType', id: string, default?: string | null, strong: boolean, italic: boolean, underline?: string | null, strike: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number }> | null } };
+export type PasteIntoCellsMutation = { __typename?: 'Mutation', pasteIntoCells: { __typename?: 'PasteIntoCellsMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, changedOptions?: Array<{ __typename: 'CellPasteOptionsType', id: string, default?: string | null, strong: boolean, italic: boolean, underline?: string | null, strike: boolean, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, color: string, background: string }> | null } };
 
 export type AddCuratorGroupMutationVariables = Exact<{
   name: Scalars['String'];

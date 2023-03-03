@@ -841,6 +841,8 @@ export function usePasteIntoCellsMutation (updateSheet: Ref<UpdateType<PeriodShe
             cell.horizontalAlign = option.horizontalAlign
             cell.verticalAlign = option.verticalAlign
             cell.size = option.size
+            cell.color = option.color
+            cell.background = option.background
           }
           return data
         })

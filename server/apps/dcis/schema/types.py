@@ -714,6 +714,8 @@ class CellPasteOptionsType(DjangoObjectType):
             'horizontal_align',
             'vertical_align',
             'size',
+            'color',
+            'background',
         )
 
 
@@ -727,6 +729,8 @@ class CellPasteStyleInputType(graphene.InputObjectType):
     horizontal_align = graphene.String(description='Горизонтальное выравнивание')
     vertical_align = graphene.String(description='Вертикальное выравнивание')
     size = graphene.Int(required=True, description='Размер шрифта')
+    color = graphene.String(default_value='#000000', description='Цвет текста')
+    background = graphene.String(default_value='#FFFFFF', description='Цвет фона')
 
 
 class CellPasteOptionsInputType(graphene.InputObjectType):

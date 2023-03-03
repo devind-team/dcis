@@ -117,6 +117,8 @@ class PasteTestCase(TestCase):
                 horizontal_align=Style.LEFT,
                 vertical_align=Style.TOP,
                 size=20,
+                color='#FF0000',
+                background='#00FF00',
             ),
         )])
         self.assertEqual([cell], actual_cells)
@@ -129,6 +131,8 @@ class PasteTestCase(TestCase):
         self.assertEqual(Style.LEFT, actual_cell.horizontal_align)
         self.assertEqual(Style.TOP, actual_cell.vertical_align)
         self.assertEqual(20, actual_cell.size)
+        self.assertEqual('#FF0000', actual_cell.color)
+        self.assertEqual('#00FF00', actual_cell.background)
 
     def test_multiple_cells(self) -> None:
         """Тестирование вставки в несколько ячеек."""
@@ -143,7 +147,9 @@ class PasteTestCase(TestCase):
                 strike=False,
                 horizontal_align=Style.LEFT,
                 vertical_align=Style.TOP,
-                size=10 + i
+                size=10 + i,
+                color='#FF0000',
+                background='#00FF00',
             )
         ) for i, cell in enumerate(cells)])
         self.assertEqual(set(cells), set(actual_cells))
@@ -156,3 +162,5 @@ class PasteTestCase(TestCase):
             self.assertEqual(Style.LEFT, actual_cell.horizontal_align)
             self.assertEqual(Style.TOP, actual_cell.vertical_align)
             self.assertEqual(10 + i, actual_cell.size)
+            self.assertEqual('#FF0000', actual_cell.color)
+            self.assertEqual('#00FF00', actual_cell.background)
