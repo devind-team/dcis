@@ -187,7 +187,7 @@ export function useGridClipboard (
       }
       table.push([])
       for (const value of row.split('\t')) {
-        table.at(-1).push({ value, style: null })
+        table.at(-1).push({ value: convertValue(value), style: null })
       }
     }
     return table
@@ -205,13 +205,20 @@ export function useGridClipboard (
       let columnIndex = 0
       for (const cell of tableElement.rows[rowIndex].cells) {
         table[rowIndex][columnIndex] = {
-          value: cell.innerText,
+          value: convertValue(cell.innerText),
           style: withStyles ? getCellStyles(cell, iframe.contentWindow) : null
         }
         columnIndex += cell.colSpan
       }
     }
     return table
+  }
+
+  const convertValue = (value: string) => {
+    if (/\d+,\d+/.test(value)) {
+      return value.replace(',', '.')
+    }
+    return value
   }
 
   const addCutCells = (values: ValueStyleInputType[]): ValueStyleInputType[] => {
