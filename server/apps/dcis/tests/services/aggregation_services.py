@@ -1,4 +1,5 @@
 """Тесты модуля, отвечающего за работу с ячейками."""
+
 import json
 from unittest.mock import patch
 
@@ -19,7 +20,7 @@ from apps.dcis.models import (
     RowDimension,
     Sheet,
 )
-from apps.dcis.services.cell_service import (
+from apps.dcis.services.aggregation_services import (
     add_aggregation_cell,
     add_cell_aggregation,
     check_cell_permission,
@@ -166,17 +167,17 @@ class AggregationTestCase(TestCase):
         """Тестирование функции `update_aggregations_from_file`."""
         file_data = [
             {
-                "to_cell": "'Форма1'!A1",
-                "aggregation": "avg",
-                "from_cells": [
+                'to_cell': "'Форма1'!A1",
+                'aggregation': "avg",
+                'from_cells': [
                     "'Форма2'!A2",
                     "'Форма1'!A3"
                 ]
             },
             {
-                "to_cell": "'Форма2'!A1",
-                "aggregation": "sum",
-                "from_cells": [
+                'to_cell': "'Форма2'!A1",
+                'aggregation': 'sum',
+                'from_cells': [
                     "'Форма1'!A2",
                     "'Форма1'!A3"
                 ]

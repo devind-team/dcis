@@ -1,4 +1,4 @@
-from .cell_services import AggregationTestCase
+from .aggregation_services import AggregationTestCase
 from .column_dimension_services import ColumnDimensionTestCase
 from .curator_services import CuratorGroupTestCase
 from .divisions_services import DivisionTestCase
