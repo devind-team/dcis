@@ -1,0 +1,28 @@
+mutation AddAggregation(
+  $periodId: ID!,
+  $aggregationCell: String!,
+  $aggregationMethod: String!,
+  $aggregationCells: [String]
+) {
+  addAggregation(input: {
+    periodId: $periodId,
+    aggregationCell: $aggregationCell,
+    aggregationMethod: $aggregationMethod,
+    aggregationCells: $aggregationCells
+  }) {
+    aggregationCells {
+      id
+      position
+      aggregation
+      cells
+      __typename
+    }
+    errors {
+      field
+      messages
+      __typename
+    }
+    success
+    __typename
+  }
+}

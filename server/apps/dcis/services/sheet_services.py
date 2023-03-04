@@ -159,7 +159,7 @@ def check_cells_permissions(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]
 
 
 @transaction.atomic
-def change_cells_option(cells: Sequence[Cell], field: str, value:  str | int | bool | None) -> list[dict]:
+def change_cells_option(cells: Sequence[Cell], field: str, value: str | int | bool | None) -> list[dict]:
     """Изменение свойств ячеек."""
     result: list[dict] = []
     for cell in cells:
