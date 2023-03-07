@@ -65,7 +65,7 @@ export default defineComponent({
     onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
       if (success) {
         close()
-        window.location.href = `/${src}`
+        window.open(`/${src}`, '_blank')
       }
     })
 

@@ -1,4 +1,5 @@
-"""Модуль, отвечающий за работу с метаданными ячейки."""
+"""Модуль, отвечающий за работу с агрегациями."""
+
 import contextlib
 import json
 
@@ -57,7 +58,8 @@ def delete_cell_aggregation(user: User, cell_id: CellIDType, target_cell_id: Cel
     return target_cell_id
 
 
-def calculate_aggregation_cell(cell: Cell, *raw_values: tuple[str, float, int, bytes, ...]) -> float:
+def calculate_aggregation_cell(cell: Cell, *raw_values) -> float:
+    """Расчет агрегации для ячейки."""
     values: list[float] = []
     for raw_value in raw_values:
         with contextlib.suppress(ValueError):

@@ -28,16 +28,17 @@ from apps.dcis.models import (
 from apps.dcis.ordering import DocumentOrderedDjangoFilterConnectionField
 from apps.dcis.permissions import can_view_document
 from apps.dcis.schema.types import (
+    AddStatusType,
     AttributeValueType,
-    CellAggregationType, ChangeCellType,
+    CellAggregationType,
+    ChangeCellType,
     DocumentMessageType,
     DocumentStatusType,
     DocumentType,
     SheetType,
     StatusType,
-    AddStatusType
 )
-from apps.dcis.services.cell_service import CellsAggregation, get_cells_aggregation
+from apps.dcis.services.aggregation_services import CellsAggregation, get_cells_aggregation
 from apps.dcis.services.document_services import get_user_documents
 from apps.dcis.services.sheet_services import get_aggregation_cells
 from apps.dcis.services.sheet_unload_services import DocumentSheetUnloader

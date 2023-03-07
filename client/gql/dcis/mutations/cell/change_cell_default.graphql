@@ -7,7 +7,6 @@ mutation ChangeCellDefault($cellId: ID!, $default: String!) {
       __typename
     }
     cellId
-
     default
     __typename
   }

@@ -15,6 +15,7 @@ from .permissions import (
 )
 from .services import (
     AddStatusCheckTestCase,
+    CheckCellOptionsTestCase,
     ColumnDimensionTestCase,
     CuratorGroupTestCase,
     DivisionTestCase,
@@ -24,6 +25,7 @@ from .services import (
     GetUserPeriodsTestCase,
     GetUserProjectsTestCase,
     LimitationTestCase,
+    PasteTestCase,
     PeriodDivisionTestCase,
     PeriodGroupTestCase,
     PeriodOrganizationsHasNotDocumentTestCase,
@@ -34,5 +36,5 @@ from .services import (
     RowDimensionTestCase,
     StatusTestCase,
     UnloadPeriodTestCase,
-    ValueServicesTestCase,
+    UpdateOrCreateValuesTestCase,
 )

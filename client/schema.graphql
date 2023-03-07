@@ -866,6 +866,63 @@ enum CellKind {
   USER
 }
 
+"""Входные данные для вставки в ячейку."""
+input CellPasteOptionsInputType {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  """Значение по умолчанию"""
+  default: String!
+  """Стили"""
+  style: CellPasteStyleInputType
+}
+
+"""Результат вставки в ячейку."""
+type CellPasteOptionsType {
+  """Цвет фона"""
+  background: String!
+  """Цвет текста"""
+  color: String!
+  """Значение по умолчанию"""
+  default: String
+  """Горизонтальное выравнивание"""
+  horizontalAlign: String
+  id: ID!
+  """Курсив"""
+  italic: Boolean!
+  """Размер шрифта"""
+  size: Int!
+  """Зачеркнутый"""
+  strike: Boolean!
+  """Жирный шрифт"""
+  strong: Boolean!
+  """Тип подчеркивания"""
+  underline: String
+  """Вертикальное выравнивание"""
+  verticalAlign: String
+}
+
+"""Стили для вставки в ячейку."""
+input CellPasteStyleInputType {
+  """Цвет фона"""
+  background: String = "#FFFFFF"
+  """Цвет текста"""
+  color: String = "#000000"
+  """Горизонтальное выравнивание"""
+  horizontalAlign: String
+  """Курсив"""
+  italic: Boolean!
+  """Размер шрифта"""
+  size: Int!
+  """Зачеркнутый"""
+  strike: Boolean!
+  """Жирный шрифт"""
+  strong: Boolean!
+  """Тип подчеркивания"""
+  underline: String
+  """Вертикальное выравнивание"""
+  verticalAlign: String
+}
+
 """Тип ячейки."""
 type CellType {
   """Метод агрегации"""
@@ -893,7 +950,7 @@ type CellType {
   """Позиция в плоской структуре"""
   globalPosition: String!
   """Горизонтальное выравнивание"""
-  horizontalAlign: ID
+  horizontalAlign: String
   """Идентификатор"""
   id: ID!
   """Является ли поле шаблоном"""
@@ -927,7 +984,7 @@ type CellType {
   """Значение"""
   value: String
   """Вертикальное выравнивание"""
-  verticalAlign: ID
+  verticalAlign: String
 }
 
 input ChangeAttributeMutationInput {
@@ -1064,8 +1121,8 @@ input ChangeCellsOptionMutationInput {
 
 - strong - true, false
 - italic - true, false
-- strike - true, false
 - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
+- strike - true, false
 - horizontal_align - ['left', 'center', 'right']
 - vertical_align - ['top', 'middle', 'bottom']
 - size - число от 6 до 24
@@ -1078,7 +1135,7 @@ input ChangeCellsOptionMutationInput {
 """
 type ChangeCellsOptionMutationPayload {
   """Измененные свойства ячеек"""
-  changedOptions: [ChangedCellOption!]
+  changedOptions: [ChangedCellOptionType!]
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1646,20 +1703,18 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
-input ChangeValueMutationInput {
-  """Идентификатор ячейки"""
-  cellId: ID!
+input ChangeValuesMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
   documentId: ID!
   """Идентификатор листа"""
   sheetId: ID!
-  """Значение"""
-  value: String!
+  """Значения ячеек"""
+  values: [ValueInputType!]!
 }
 
-"""Изменение значения ячейки."""
-type ChangeValueMutationPayload {
+"""Изменение значений ячеек."""
+type ChangeValuesMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1672,7 +1727,7 @@ type ChangeValueMutationPayload {
 }
 
 """Измененное свойство ячейки."""
-type ChangedCellOption {
+type ChangedCellOptionType {
   """Идентификаторы ячеек"""
   cellId: ID!
   """Идентификатор поля"""
@@ -2698,7 +2753,7 @@ type Mutation {
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
-  changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
+  changeValues(input: ChangeValuesMutationInput!): ChangeValuesMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
@@ -2745,6 +2800,8 @@ type Mutation {
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
   logout(input: LogoutMutationInput!): LogoutMutationPayload!
+  """Вставка в ячейки"""
+  pasteIntoCells(input: PasteIntoCellsMutationInput!): PasteIntoCellsMutationPayload!
   """Мутация для сброса пароля пользователя."""
   recoveryPassword(input: RecoveryPasswordMutationInput!): RecoveryPasswordMutationPayload!
   """Мутация регистрации новых пользователей."""
@@ -3145,6 +3202,23 @@ type PageInfo {
   hasPreviousPage: Boolean!
   """When paginating backwards, the cursor to continue."""
   startCursor: String
+}
+
+input PasteIntoCellsMutationInput {
+  clientMutationId: String
+  """Данные для вставки в ячейки"""
+  options: [CellPasteOptionsInputType!]!
+}
+
+"""Вставка в ячейки."""
+type PasteIntoCellsMutationPayload {
+  """Результат вставки в ячейки"""
+  changedOptions: [CellPasteOptionsType!]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 """Группы с содержанием привилегий."""
@@ -4245,6 +4319,14 @@ type UserTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: UserType
+}
+
+"""Значение ячейки."""
+input ValueInputType {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  """Значение"""
+  value: String!
 }
 
 """Тип значения."""

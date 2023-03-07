@@ -19,6 +19,7 @@ import {
   useChangeRowDimensionHeight,
   useResetRowDimensionHeight
 } from '~/composables/grid-actions'
+import { useGridClipboard } from '~/composables/grid-clipboard'
 import { useColumnDimensionWidthMap, useRowDimensionHeightMap } from '~/composables/grid-local-mutations'
 
 export const cellKinds = {
@@ -247,7 +248,7 @@ export function useGrid () {
     selectAllCells,
     mousedownCell,
     mouseenterCell,
-    mouseupCell,
+    dblclickCell,
     mouseenterColumnName,
     mouseDownColumnName: mouseDownColumnNameSelection,
     mouseenterRowName,
@@ -258,6 +259,8 @@ export function useGrid () {
     grid,
     setActiveCell
   )
+
+  useGridClipboard(selectedCells, getColumnWidth, getRowHeight)
 
   const mousemoveColumnName = (column: ColumnDimensionType, event: MouseEvent) => {
     mousemoveColumnNameResizing(
@@ -371,7 +374,7 @@ export function useGrid () {
     selectAllCells,
     mousedownCell,
     mouseenterCell,
-    mouseupCell,
+    dblclickCell,
     mouseenterColumnName,
     mousemoveColumnName,
     mouseleaveColumnName,

@@ -16,6 +16,7 @@ from apps.core.schema import UserType
 from apps.dcis.filters import DocumentFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
+    AddStatus,
     Attribute,
     AttributeValue,
     Cell,
@@ -33,7 +34,6 @@ from apps.dcis.models import (
     RowDimension,
     Sheet,
     Status,
-    AddStatus,
     Value,
 )
 from apps.dcis.permissions import (
@@ -584,13 +584,13 @@ class CellType(graphene.ObjectType):
     aggregation = graphene.String(description='Метод агрегации')
 
     # apps.dcis.models.Style
-    horizontal_align = graphene.ID(description='Горизонтальное выравнивание')
-    vertical_align = graphene.ID(description='Вертикальное выравнивание')
+    horizontal_align = graphene.String(description='Горизонтальное выравнивание')
+    vertical_align = graphene.String(description='Вертикальное выравнивание')
     size = graphene.Int(required=True, description='Размер шрифта')
     strong = graphene.Boolean(required=True, description='Жирный шрифт')
     italic = graphene.Boolean(required=True, description='Курсив')
-    strike = graphene.Boolean(required=True, description='Зачеркнутый')
     underline = graphene.String(description='Тип подчеркивания')
+    strike = graphene.Boolean(required=True, description='Зачеркнутый')
     color = graphene.String(required=True, description='Цвет индекса')
     background = graphene.String(required=True, description='Цвет фона')
     border_style = graphene.JSONString(required=True, description='Стили границ')
@@ -695,16 +695,69 @@ class LimitationType(DjangoObjectType):
             'id',
             'formula',
             'error_message',
-            'sheet'
+            'sheet',
         )
 
 
-class ChangedCellOption(graphene.ObjectType):
+class ChangedCellOptionType(graphene.ObjectType):
     """Измененное свойство ячейки."""
 
     cell_id = graphene.ID(required=True, description='Идентификаторы ячеек')
     field = graphene.String(required=True, description='Идентификатор поля')
     value = graphene.String(description='Значение поля')
+
+
+class CellPasteOptionsType(DjangoObjectType):
+    """Результат вставки в ячейку."""
+
+    underline = graphene.String(description='Тип подчеркивания')
+    horizontal_align = graphene.String(description='Горизонтальное выравнивание')
+    vertical_align = graphene.String(description='Вертикальное выравнивание')
+
+    class Meta:
+        model = Cell
+        fields = (
+            'id',
+            'default',
+            'strong',
+            'italic',
+            'underline',
+            'strike',
+            'horizontal_align',
+            'vertical_align',
+            'size',
+            'color',
+            'background',
+        )
+
+
+class CellPasteStyleInputType(graphene.InputObjectType):
+    """Стили для вставки в ячейку."""
+
+    strong = graphene.Boolean(required=True, description='Жирный шрифт')
+    italic = graphene.Boolean(required=True, description='Курсив')
+    underline = graphene.String(description='Тип подчеркивания')
+    strike = graphene.Boolean(required=True, description='Зачеркнутый')
+    horizontal_align = graphene.String(description='Горизонтальное выравнивание')
+    vertical_align = graphene.String(description='Вертикальное выравнивание')
+    size = graphene.Int(required=True, description='Размер шрифта')
+    color = graphene.String(default_value='#000000', description='Цвет текста')
+    background = graphene.String(default_value='#FFFFFF', description='Цвет фона')
+
+
+class CellPasteOptionsInputType(graphene.InputObjectType):
+    """Входные данные для вставки в ячейку."""
+
+    cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
+    default = graphene.String(required=True, description='Значение по умолчанию')
+    style = graphene.InputField(CellPasteStyleInputType, description='Стили')
+
+
+class ValueInputType(graphene.InputObjectType):
+    """Значение ячейки."""
+
+    cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
+    value = graphene.String(required=True, description='Значение')
 
 
 class GlobalIndicesInputType(graphene.InputObjectType):

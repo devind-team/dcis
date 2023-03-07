@@ -1,0 +1,24 @@
+mutation PasteIntoCells($options: [CellPasteOptionsInputType!]!) {
+  pasteIntoCells(input: { options: $options }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    changedOptions {
+      id
+      default
+      strong
+      italic
+      underline
+      strike
+      horizontalAlign
+      verticalAlign
+      size
+      color
+      background
+      __typename
+    }
+  }
+}

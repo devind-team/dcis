@@ -85,8 +85,10 @@ export function useGridChoice (
     currentChoice.value = false
   }
 
-  const on = (eventName: string | symbol, listener: (...args: any[]) => void): EventEmitter => eventEmitter.on(eventName, listener)
-  const removeListener = (eventName: string | symbol, listener: (...args: any[]) => void): EventEmitter => eventEmitter.removeListener(eventName, listener)
+  const on = (eventName: string | symbol, listener: (...args: any[]) => void): EventEmitter =>
+    eventEmitter.on(eventName, listener)
+  const removeListener = (eventName: string | symbol, listener: (...args: any[]) => void): EventEmitter =>
+    eventEmitter.removeListener(eventName, listener)
 
   const text = computed<string>(() => {
     if (unref(sheet) && unref(selectedCellsOptions)) {

@@ -1,21 +1,22 @@
 """Мутации, связанные с атрибутами."""
+
 from typing import Any
 
 import graphene
-from devind_helpers.utils import gid2int
-from graphene_django.forms.mutation import DjangoModelFormMutation
-from devind_helpers.schema.mutations import BaseMutation
-from graphql import ResolveInfo
 from devind_helpers.decorators import permission_classes
+from devind_helpers.mutation_factories import DeleteMutation
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
-from devind_helpers.mutation_factories import DeleteMutation
+from devind_helpers.schema.mutations import BaseMutation
+from devind_helpers.utils import gid2int
+from graphene_django.forms.mutation import DjangoModelFormMutation
+from graphql import ResolveInfo
 
-from apps.dcis.services.attribute_service import change_attribute_value
-from apps.dcis.permissions import can_change_period_attributes
-from apps.dcis.models import Attribute, Period, Document
 from apps.dcis.forms import AddAttributeForm, ChangeAttributeForm
+from apps.dcis.models import Attribute, Document, Period
+from apps.dcis.permissions import can_change_period_attributes
 from apps.dcis.schema.types import AttributeValueType, ValueType
+from apps.dcis.services.attribute_services import change_attribute_value
 
 
 class AddAttributeMutation(DjangoModelFormMutation):

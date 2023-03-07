@@ -89,7 +89,7 @@ class Document(models.Model):
         help_text='Пользователь, добавивший документ'
     )
     period = models.ForeignKey(Period, on_delete=models.CASCADE, help_text='Период')
-    sheets = models.ManyToManyField(Sheet)
+    sheets = models.ManyToManyField(Sheet, help_text='Листы документа')
 
     object_id = models.PositiveIntegerField(null=True, help_text='Идентификатор дивизиона')
     object_name = models.CharField(max_length=512, null=True, help_text='Название дивизиона')

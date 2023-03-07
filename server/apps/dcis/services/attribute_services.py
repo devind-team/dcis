@@ -1,6 +1,6 @@
 """Модуль для сервисов атрибутов."""
 
-from typing import Sequence, cast
+from typing import Sequence
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 from apps.core.models import User
 from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Value
 from apps.dcis.permissions import can_change_attribute_value
-from .value_services import UpdateOrCrateValuesResult, update_or_create_value
+from .value_services import UpdateOrCrateValuesResult, ValueInput, update_or_create_values
 
 
 def change_attribute_value(
@@ -42,20 +42,19 @@ def change_attribute_value(
 def rerender_values(user: User, document: Document, context: Context) -> Sequence[Value]:
     """Функция для ререндера параметров."""
     sheet_ids = document.sheets.values_list('id', flat=True)
-    cell_values: QuerySet[Cell] = Cell.objects.filter(
+    cells = Cell.objects.filter(
         is_template=True,
         column__sheet__in=sheet_ids,
         row__sheet__in=sheet_ids
     ).select_related('column').all()
     values: list[Value] = []
-    for cell_value in cell_values:
-        value = Template(cell_value.default).render(context)
-        changed_values: UpdateOrCrateValuesResult = update_or_create_value(
-            user,
-            document,
-            cell_value,
-            cast(int, cell_value.column.sheet_id),
-            value
+    for cell in cells:
+        value = Template(cell.default).render(context)
+        changed_values: UpdateOrCrateValuesResult = update_or_create_values(
+            user=user,
+            document=document,
+            sheet_id=cell.column.sheet_id,
+            value_inputs=[ValueInput(cell=cell, value=value)]
         )
         values.append(*changed_values.values)
     return values
