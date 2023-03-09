@@ -2890,6 +2890,8 @@ export type Mutation = {
   restorePassword: RestorePasswordMutationPayload;
   /** Отправка письма поддержки */
   supportSubmit: SupportSubmitMutationPayload;
+  /** Выгрузка атребутов периода в json файл. */
+  unloadAttributesInFile: UnloadAttributesInFileMutationPayload;
   /** Выгрузка документа. */
   unloadDocument: UnloadDocumentMutationPayload;
   /** Выгрузка архива значения ячейки типа `Файл` */
@@ -2900,6 +2902,8 @@ export type Mutation = {
   updateAggregationsFromFile: UpdateAggregationsFromFileMutationPayload;
   /** Обновление ограничений, накладываемых на лист, из json файла. */
   updateLimitationsFromFile: UpdateLimitationsFromFileMutationPayload;
+  /** Загрузка атребутов через json файл */
+  uploadAttributesFromFile: UploadAttributesFromFileMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -3325,6 +3329,11 @@ export type MutationSupportSubmitArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationUnloadAttributesInFileArgs = {
+  input: UnloadAttributesInFileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationUnloadDocumentArgs = {
   input: UnloadDocumentMutationInput;
 };
@@ -3347,6 +3356,11 @@ export type MutationUpdateAggregationsFromFileArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUpdateLimitationsFromFileArgs = {
   input: UpdateLimitationsFromFileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUploadAttributesFromFileArgs = {
+  input: UploadAttributesFromFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4861,6 +4875,24 @@ export type TableType = {
   rows: Array<Maybe<TableRowType>>;
 };
 
+export type UnloadAttributesInFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Выгрузка атребутов периода в json файл. */
+export type UnloadAttributesInFileMutationPayload = {
+  __typename?: 'UnloadAttributesInFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UnloadDocumentMutationInput = {
   /** Дополнительные параметры */
   additional?: InputMaybe<Array<Scalars['String']>>;
@@ -4977,6 +5009,26 @@ export type UpdateLimitationsFromFileMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Новые ограничения */
   limitations?: Maybe<Array<Maybe<LimitationType>>>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type UploadAttributesFromFileMutationInput = {
+  /** json файл агрегации ячеек */
+  attributesFile: Scalars['Upload'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Загрузка атребутов периода через json файл. */
+export type UploadAttributesFromFileMutationPayload = {
+  __typename?: 'UploadAttributesFromFileMutationPayload';
+  /** Новая агрегация */
+  attributes?: Maybe<Array<Maybe<AttributeType>>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -5492,6 +5544,19 @@ export type DeleteAttributeMutationVariables = Exact<{
 }>;
 
 export type DeleteAttributeMutation = { __typename?: 'Mutation', deleteAttribute: { __typename?: 'DeleteAttributeMutationPayload', success: boolean } };
+
+export type UploadAttributesFromFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  attributesFile: Scalars['Upload'];
+}>;
+
+export type UploadAttributesFromFileMutation = { __typename?: 'Mutation', uploadAttributesFromFile: { __typename: 'UploadAttributesFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', messages: Array<string>, field: string }>, attributes?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } };
+
+export type UnloadAttributesInFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type UnloadAttributesInFileMutation = { __typename?: 'Mutation', unloadAttributesInFile: { __typename: 'UnloadAttributesInFileMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
