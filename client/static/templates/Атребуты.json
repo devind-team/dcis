@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Должность Руководителя организации",
+        "placeholder": "Должность Руководителя организации",
+        "key": "rektor_doljnost",
+        "kind": "text",
+        "default": "",
+        "mutable": true
+    },
+    {
+        "name": "ФИО Ответственного исполнителя",
+        "placeholder": "ФИО Ответственного исполнителя",
+        "key": "ispolnitel",
+        "kind": "text",
+        "default": "",
+        "mutable": true
+    },
+    {
+        "name": "Телефон ответственного исполнителя",
+        "placeholder": "Телефон ответственного исполнителя",
+        "key": "ispolnitel_phone",
+        "kind": "text",
+        "default": "",
+        "mutable": true
+    },
+    {
+        "name": "ФИО Руководителя организации",
+        "placeholder": "ФИО Руководителя организации",
+        "key": "rektor",
+        "kind": "text",
+        "default": "",
+        "mutable": true
+    },
+    {
+        "name": "ФИО Руководителя ПФУ",
+        "placeholder": "ФИО Руководителя ПФУ",
+        "key": "pfu",
+        "kind": "text",
+        "default": "",
+        "mutable": true
+    }
+]

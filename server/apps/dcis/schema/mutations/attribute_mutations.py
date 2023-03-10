@@ -98,7 +98,7 @@ class UploadAttributesFromFileMutation(BaseMutation):
     ):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return UploadAttributesFromFileMutation(
-            aggregation_cells=upload_attributes_from_file(info.context.user, period, attributes_file)
+            attributes=upload_attributes_from_file(info.context.user, period, attributes_file)
         )
 
 

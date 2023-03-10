@@ -5450,7 +5450,7 @@ export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: 
 
 export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
 
-export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean };
+export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null };
 
 export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, error?: string | null, aggregation?: string | null };
 
@@ -5517,7 +5517,7 @@ export type AddAttributeMutationVariables = Exact<{
   parent?: InputMaybe<Scalars['ID']>;
 }>;
 
-export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
+export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
 
 export type ChangeAttributeMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -5529,7 +5529,7 @@ export type ChangeAttributeMutationVariables = Exact<{
   mutable?: InputMaybe<Scalars['Boolean']>;
 }>;
 
-export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
+export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
 
 export type ChangeAttributeValueMutationVariables = Exact<{
   attributeId: Scalars['ID'];
@@ -5545,18 +5545,18 @@ export type DeleteAttributeMutationVariables = Exact<{
 
 export type DeleteAttributeMutation = { __typename?: 'Mutation', deleteAttribute: { __typename?: 'DeleteAttributeMutationPayload', success: boolean } };
 
-export type UploadAttributesFromFileMutationVariables = Exact<{
-  periodId: Scalars['ID'];
-  attributesFile: Scalars['Upload'];
-}>;
-
-export type UploadAttributesFromFileMutation = { __typename?: 'Mutation', uploadAttributesFromFile: { __typename: 'UploadAttributesFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', messages: Array<string>, field: string }>, attributes?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> | null } };
-
 export type UnloadAttributesInFileMutationVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
 export type UnloadAttributesInFileMutation = { __typename?: 'Mutation', unloadAttributesInFile: { __typename: 'UnloadAttributesInFileMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UploadAttributesFromFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  attributesFile: Scalars['Upload'];
+}>;
+
+export type UploadAttributesFromFileMutation = { __typename?: 'Mutation', uploadAttributesFromFile: { __typename: 'UploadAttributesFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', messages: Array<string>, field: string }>, attributes?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null> | null } };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
@@ -6009,7 +6009,7 @@ export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> };
+export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null> };
 
 export type AttributesValuesQueryVariables = Exact<{
   documentId: Scalars['ID'];

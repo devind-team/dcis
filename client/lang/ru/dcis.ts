@@ -561,7 +561,7 @@ export default {
     uploadAttributes: {
       buttonText: 'Обновить атребуты из файла',
       header: 'Обновление атребуты из файла',
-      aggregationsFile: 'Файл с новыми атребутами',
+      attributesFile: 'Файл с новыми атребутами',
       downloadTemplate: 'Скачать шаблон файла'
     },
     tableHeaders: {

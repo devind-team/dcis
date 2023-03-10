@@ -124,7 +124,8 @@ def upload_attributes_from_file(user: User, period: Period, attributes_file: Fil
             key=attribute.key,
             kind=attribute.kind,
             default=attribute.default,
-            mutable=attribute.mutable
+            mutable=attribute.mutable,
+            period=period
         ) for attribute in data
     ]
 

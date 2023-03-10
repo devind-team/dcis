@@ -2,19 +2,25 @@
 v-menu(v-model="active")
   template(#activator="{ on, attrs }")
     slot(name="default" :on="on" :attrs="attrs")
-  v-list
+  v-list(dense)
     add-attribute(@close="close" :period="period" :update="addUpdate")
       template(#activator="{ on }")
         v-list-item(v-on="on")
           v-list-item-icon
             v-icon mdi-form-select
           v-list-item-content Заполнить форму
+    upload-attributes-from-file(:period="period", :update="fromFileUpdate")
+      template(#activator="{ on, attrs }")
+        v-list-item(v-on="on" v-bind="attrs")
+          v-list-item-icon
+            v-icon mdi-file-import-outline
+          v-list-item-content {{ $t('dcis.attributes.uploadAttributes.buttonText') }}
     v-list-item(
       loading="loading"
       @click="unloadAttributesInFile"
     )
       v-list-item-icon
-        v-icon mdi-file
+        v-icon mdi-file-export-outline
       v-list-item-content {{ $t('dcis.attributes.unloadAttributes.content') }}
 </template>
 
@@ -32,6 +38,7 @@ import {
 } from '~/types/graphql'
 import unloadAttributesInFileMutation from '~/gql/dcis/mutations/attributes/unload_attributes_in_file.graphql'
 import AddAttribute, { AddAttributeMutationResult } from '~/components/dcis/attributes/AddAttribute.vue'
+import UploadAttributesFromFile from '~/components/dcis/attributes/UploadAttributesFromFile.vue'
 export type UnloadAttributesInFileMutationResult = { data: UnloadAttributesInFileMutation }
 
 export const getAttributeKinds = t => ([
@@ -48,7 +55,7 @@ export const getAttributeKinds = t => ([
 })))
 
 export default defineComponent({
-  components: { AddAttribute },
+  components: { AddAttribute, UploadAttributesFromFile },
   props: {
     period: { type: Object as PropType<PeriodType>, required: true },
     addUpdate: {
