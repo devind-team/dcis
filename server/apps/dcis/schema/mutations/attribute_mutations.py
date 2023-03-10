@@ -19,8 +19,8 @@ from apps.dcis.permissions import can_change_period_attributes
 from apps.dcis.schema.types import AttributeType, AttributeValueType, ValueType
 from apps.dcis.services.attribute_service import (
     change_attribute_value,
+    unload_attributes_in_file,
     upload_attributes_from_file,
-    upload_attributes_in_file,
 )
 
 
@@ -115,7 +115,7 @@ class UnloadAttributesInFileMutation(BaseMutation):
     def mutate_and_get_payload(root: None, info: ResolveInfo, period_id: str):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return UnloadAttributesInFileMutation(
-            src=upload_attributes_in_file(
+            src=unload_attributes_in_file(
                 user=info.context.user,
                 get_host=info.context.get_host(),
                 period=period

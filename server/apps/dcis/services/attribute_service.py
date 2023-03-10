@@ -130,7 +130,7 @@ def upload_attributes_from_file(user: User, period: Period, attributes_file: Fil
     ]
 
 
-def upload_attributes_in_file(user: User, get_host: Any | None, period: Period) -> str:
+def unload_attributes_in_file(user: User, get_host: Any | None, period: Period) -> str:
     """Выгрузка атребутов периода в json файл."""
 
     can_change_period_attributes(user, period)
