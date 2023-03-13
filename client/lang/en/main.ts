@@ -20,6 +20,7 @@ export default {
   clear: 'Clear',
   fix: 'Fix',
   hide: 'Hide',
+  select: 'Select',
   fillForm: 'Fill form',
   loadMore: 'Load more',
   search: 'Search',

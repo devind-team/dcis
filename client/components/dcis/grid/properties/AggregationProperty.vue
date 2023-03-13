@@ -126,7 +126,9 @@ export default defineComponent({
 
     const endChoiceEventHandler = ({ controlName, targetCell, cells }: EndChoiceEventType) => {
       if (controlName === 'AggregationProperty') {
-        addMutate({ cellId: targetCell.id, cellsId: cells.map((c: CellType) => c.id) })
+        if (cells.length) {
+          addMutate({ cellId: targetCell.id, cellsId: cells.map((c: CellType) => c.id) })
+        }
         active.value = true
       }
     }

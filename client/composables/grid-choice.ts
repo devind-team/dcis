@@ -3,7 +3,7 @@
  */
 
 import { EventEmitter } from 'events'
-import { computed, ComputedRef, Ref, ref, unref } from '#app'
+import { computed, ComputedRef, Ref, ref } from '#app'
 import { CellsOptionsType, GridMode } from '~/types/grid'
 import { CellType, SheetType } from '~/types/graphql'
 
@@ -42,7 +42,7 @@ export function useGridChoice (
 
   const currentChoice = ref<boolean>(false)
   const active = computed<boolean>(() => (
-    currentChoice.value && mode === GridMode.CHANGE && Boolean(unref(sheet))
+    currentChoice.value && mode === GridMode.CHANGE && Boolean(sheet.value)
   ))
 
   const targetCell = ref<CellType | null>(null)
@@ -61,19 +61,19 @@ export function useGridChoice (
    */
   const endChoice = () => {
     eventEmitter.emit(END_CHOICE_EVENT, {
-      targetCell: unref(targetCell),
-      sheetIndex: unref(sheetIndex),
-      controlName: unref(controlName),
-      cells: unref(selectedCellsOptions).cells
+      targetCell: targetCell.value,
+      sheetIndex: sheetIndex.value,
+      controlName: controlName.value,
+      cells: selectedCellsOptions.value ? selectedCellsOptions.value.cells : []
     } as EndChoiceEventType)
     close()
   }
 
   const cancel = () => {
     eventEmitter.emit(CANCEL_EVENT, {
-      targetCell: unref(targetCell),
-      sheetIndex: unref(sheetIndex),
-      controlName: unref(controlName)
+      targetCell: targetCell.value,
+      sheetIndex: sheetIndex.value,
+      controlName: controlName.value
     } as CancelEventType)
     close()
   }
@@ -91,9 +91,9 @@ export function useGridChoice (
     eventEmitter.removeListener(eventName, listener)
 
   const text = computed<string>(() => {
-    if (unref(sheet) && unref(selectedCellsOptions)) {
-      return `${unref(sheet).name}!` +
-          unref(selectedCellsOptions).cells.map<string>((cell: CellType) => cell.position).join(',')
+    if (sheet.value && selectedCellsOptions.value) {
+      return `${sheet.value.name}!` +
+          selectedCellsOptions.value.cells.map<string>((cell: CellType) => cell.position).join(',')
     }
     return '-'
   })
