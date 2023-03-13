@@ -33,7 +33,7 @@ mutation-modal-form(
         v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
           delete-menu(
             :item-name="String($t('dcis.documents.status.delete.itemName'))"
-            @confirm="deleteDocumentStatus({ documentStatusId: item.id })"
+            @confirm="deleteDocumentStatus(item.id)"
           )
             template(#default="{ on: onMenu }")
               v-tooltip(bottom)
@@ -211,14 +211,10 @@ export default defineComponent({
         }
       })
 
-    const deleteDocumentStatus = async () => {
-      await deleteDocumentStatusMutate(deleteDocumentStatusVariables.value)
+    const deleteDocumentStatus = async (documentStatusId: string) => {
+      await deleteDocumentStatusMutate({ documentStatusId })
       await refetchStatuses()
     }
-
-    const deleteDocumentStatusVariables = computed<DeleteDocumentStatusMutationVariables>(() => ({
-      documentStatusId: props.document.lastStatus.id
-    }))
 
     const close = () => {
       status.value = statuses.value[0] || null
