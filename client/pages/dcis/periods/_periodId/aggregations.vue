@@ -114,8 +114,6 @@ export default defineComponent({
       update: (cache, result) => aggregationsDeleteUpdate(cache, result)
     })
 
-    watch(aggregations, (new_value) => { console.log(new_value) })
-
     return {
       bc,
       tableHeaders,
