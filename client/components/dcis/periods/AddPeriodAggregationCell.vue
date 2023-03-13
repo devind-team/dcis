@@ -5,7 +5,7 @@ mutation-modal-form(
   :button-text="String($t('dcis.periods.aggregationCells.changeMenu.addAggregation.buttonText'))"
   :mutation="addAggregationMutation"
   :variables="variables"
-  :update="(cache, result) => update(cache, result, 'aggregation', false)",
+  :update="(cache, result) => update(cache, result, 'aggregationCells', false)",
   mutation-name="addAggregation"
   i18n-path="dcis.periods.aggregationCells.changeMenu.addAggregation"
   @close="close"
