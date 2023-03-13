@@ -83,6 +83,8 @@ class AddStatusCheck:
         """Проверка ограничений, накладываемых на лист."""
         sheets = document.sheets.all()
         limitations = Limitation.objects.filter(sheet__in=sheets)
+        if len(limitations) == 0:
+            return
         dependency = LimitationFormulaContainerCache.get(document.period).dependency_cache.dependency
         dependencies: set[str] = set()
         for counter in dependency.values():
