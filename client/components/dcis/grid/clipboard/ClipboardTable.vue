@@ -65,7 +65,7 @@ export default defineComponent({
       if (cell.kind === 'n' && /\d+\.\d+/.test(cell.value)) {
         return cell.value.replace('.', ',')
       }
-      return cell
+      return cell.value
     }
 
     return { getRowStyle, getCellStyle, getCellValue }
