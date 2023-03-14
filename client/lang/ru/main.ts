@@ -20,6 +20,7 @@ export default {
   clear: 'Очистить',
   fix: 'Зафиксировать',
   hide: 'Скрыть',
+  select: 'Выбрать',
   fillForm: 'Заполнить форму',
   loadMore: 'Загрузить еще',
   search: 'Поиск',
