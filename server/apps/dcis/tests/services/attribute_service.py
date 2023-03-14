@@ -16,7 +16,10 @@ from apps.dcis.models import (
     Period,
     Project,
 )
-from apps.dcis.services.attribute_service import unload_attributes_in_file, upload_attributes_from_file
+from apps.dcis.services.attribute_services import (
+    unload_attributes_in_file,
+    upload_attributes_from_file
+)
 
 
 class AttributeTestCase(TestCase):

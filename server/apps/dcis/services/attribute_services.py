@@ -3,9 +3,7 @@ import json
 from datetime import datetime
 from os.path import join
 from posixpath import relpath
-from typing import Any, Sequence, cast
-
-from typing import Sequence
+from typing import Any, Sequence
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -17,13 +15,10 @@ from django.utils.safestring import mark_safe
 from pydantic import BaseModel, ValidationError, parse_obj_as
 
 from apps.core.models import User
-from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Value
-from apps.dcis.permissions import can_change_attribute_value
-from .value_services import UpdateOrCrateValuesResult, ValueInput, update_or_create_values
 from apps.dcis.helpers.pydantic_translate import translate
 from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Period, Value
 from apps.dcis.permissions import can_change_attribute_value, can_change_period_attributes
-from .value_services import UpdateOrCrateValuesResult, update_or_create_value
+from .value_services import UpdateOrCrateValuesResult, ValueInput, update_or_create_values
 
 
 def change_attribute_value(
@@ -85,11 +80,13 @@ def create_attribute_context(user: User, document: Document) -> Context:
         for attribute in attributes
     }
     # Расширяем контекст с помощью встроенных переменных
-    context.update({
-        'user': mark_safe(user.get_full_name),
-        'org_id': mark_safe(document.object_id),
-        'org_name': mark_safe(document.object_name)
-    })
+    context.update(
+        {
+            'user': mark_safe(user.get_full_name),
+            'org_id': mark_safe(document.object_id),
+            'org_name': mark_safe(document.object_name)
+        }
+    )
     return Context(context)
 
 
