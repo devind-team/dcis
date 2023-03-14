@@ -33,7 +33,6 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
               v-btn.ml-1(v-on="{ ...onMenu, ...onTooltip }" v-bind="attrs" icon, color="error")
                 v-icon mdi-delete
             span {{ String($t('dcis.periods.aggregationCells.tooltips.delete')) }}
-
 </template>
 
 <script lang="ts">
