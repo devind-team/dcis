@@ -17,7 +17,7 @@ from apps.dcis.forms import AddAttributeForm, ChangeAttributeForm
 from apps.dcis.models import Attribute, Document, Period
 from apps.dcis.permissions import can_change_period_attributes
 from apps.dcis.schema.types import AttributeType, AttributeValueType, ValueType
-from apps.dcis.services.attribute_service import (
+from apps.dcis.services.attribute_services import (
     change_attribute_value,
     unload_attributes_in_file,
     upload_attributes_from_file,
