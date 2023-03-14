@@ -93,7 +93,7 @@ class UploadAttributesFromFileMutation(BaseMutation):
     def mutate_and_get_payload(
         root: Any,
         info: ResolveInfo,
-        period_id: str | int,
+        period_id: str,
         attributes_file: InMemoryUploadedFile
     ):
         period = get_object_or_404(Period, pk=gid2int(period_id))

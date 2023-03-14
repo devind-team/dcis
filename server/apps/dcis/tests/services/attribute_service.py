@@ -1,4 +1,4 @@
-'''Тесты модуля, отвечающего за работу с атребутами.'''
+"""Тесты модуля, отвечающего за работу с атребутами."""
 import json
 from io import BytesIO
 from os import listdir, remove
@@ -6,6 +6,7 @@ from os.path import isfile, join
 from unittest.mock import MagicMock
 
 from devind_dictionaries.models import Organization
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
@@ -16,7 +17,6 @@ from apps.dcis.models import (
     Project,
 )
 from apps.dcis.services.attribute_service import unload_attributes_in_file, upload_attributes_from_file
-from devind import settings
 
 
 class AttributeTestCase(TestCase):

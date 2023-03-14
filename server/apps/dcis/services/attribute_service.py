@@ -5,6 +5,7 @@ from os.path import join
 from posixpath import relpath
 from typing import Any, Sequence, cast
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import File
 from django.db import transaction
@@ -17,7 +18,6 @@ from apps.core.models import User
 from apps.dcis.helpers.pydantic_translate import translate
 from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Period, Value
 from apps.dcis.permissions import can_change_attribute_value, can_change_period_attributes
-from devind import settings
 from .value_services import UpdateOrCrateValuesResult, update_or_create_value
 
 
