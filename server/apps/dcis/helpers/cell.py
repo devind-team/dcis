@@ -7,10 +7,8 @@ from django.db.models import Q, QuerySet
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
 from xlsx_evaluate import Evaluator, Model, ModelCompiler
 from xlsx_evaluate.functions.xlerrors import (
-    DivZeroExcelError,
-    NaExcelError, NameExcelError,
-    NullExcelError,
-    NumExcelError, RefExcelError,
+    DivZeroExcelError, NaExcelError, NameExcelError,
+    NullExcelError, NumExcelError, RefExcelError,
     ValueExcelError,
 )
 
@@ -21,7 +19,7 @@ from ..models.sheet import KindCell
 
 def get_dependency_cells(
     sheet_containers: list[SheetFormulaContainerCache],
-    value: Value
+    values: list[Value]
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
@@ -33,7 +31,7 @@ def get_dependency_cells(
     dependency_cells: list[str] = []
     inversion_cells: list[str] = []
     sequence_evaluate: list[str] = []
-    cells: list[str] = [f'{value.sheet.name}!{get_column_letter(value.column.index)}{value.row.index}']
+    cells = [f'{value.sheet.name}!{get_column_letter(value.column.index)}{value.row.index}' for value in values]
 
     while cells:
         cell = cells.pop()
@@ -98,11 +96,12 @@ class ValueState(TypedDict):
         - value - значение;
         - error - ошибка вычисления формулы;
         - formula - формула;
-        - cell - ячейка, для которой ведем расчет.
+        - cell - ячейка
     """
     value: str | float | None
     error: str | None
     formula: str | None
+    cell: Cell
 
 
 def resolve_evaluate_state(

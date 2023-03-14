@@ -1,5 +1,8 @@
+"""Модуль, отвечающий за работу с листами."""
+
 import re
 from argparse import ArgumentTypeError
+from dataclasses import dataclass
 from typing import NamedTuple, Sequence
 
 from devind_dictionaries.models import BudgetClassification
@@ -80,14 +83,16 @@ class CheckCellOptions:
             return cls._standard_check(field, value, cls._allowed_underline)
         if field == 'kind':
             return cls._standard_check(field, value, cls._allowed_kinds)
+        if field == 'aggregation':
+            return cls._standard_check(field, value, cls._allow_aggregation)
         if field == 'size':
             value = convert_str_to_int(value)
             if not value:
-                return cls.Error('value', f'Значение свойства {field} не является числом: {value}.')
-            if not (6 <= value <= 24):
+                return cls.Error('size', f'Значение свойства {field} не является числом: {value}.')
+            if not (6 <= value <= 36):
                 return cls.Error(
-                    'value',
-                    f'Значение свойства {field} не входит в разрешенный диапазон: 10 <= {value} <= 24.'
+                    'size',
+                    f'Значение свойства {field} не входит в разрешенный диапазон: 6 <= {value} <= 36.'
                 )
             return cls.Success(value)
         if field in ['strong', 'italic', 'strike', 'editable']:
@@ -96,22 +101,19 @@ class CheckCellOptions:
                 return cls.Success(value)
             except ArgumentTypeError:
                 return cls.Error(
-                    'value',
+                    field,
                     cls._get_value_error_message(
                         field, value, ['yes', 'true', 't', 'y', '1', 'no', 'false', 'f', 'n', '0']
                     )
                 )
         if field == 'number_format':
             return cls.Success(value)
-        if field == 'aggregation':
-            return cls._standard_check(field, value, cls._allow_aggregation)
 
     _allowed_fields = [
         'strong', 'italic', 'strike',
         'underline', 'horizontal_align', 'vertical_align',
         'editable', 'size', 'kind',
-        'number_format',
-        'aggregation'
+        'number_format', 'aggregation'
     ]
     _allowed_horizontal_align = [None, 'left', 'center', 'right']
     _allowed_vertical_align = [None, 'top', 'middle', 'bottom']
@@ -130,7 +132,7 @@ class CheckCellOptions:
         """Проверка для большинства случаев."""
         if value in allowed_values:
             return cls.Success(value)
-        return cls.Error('value', cls._get_value_error_message(field, value, allowed_values))
+        return cls.Error(field, cls._get_value_error_message(field, value, allowed_values))
 
 
 def get_aggregation_cells(user: User, cell: Cell) -> list[Cell]:
@@ -148,7 +150,8 @@ def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     return cell
 
 
-def success_check_cell_options(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+def check_cells_permissions(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
+    """Проверка разрешений на изменение ячеек."""
     if len(set(cells.values_list('row__sheet__period', flat=True))) != 1:
         raise PermissionDenied('Ошибка доступа')
     can_change_period_sheet(user, cells.first().row.sheet.period)
@@ -174,6 +177,58 @@ def change_cells_option(cells: Sequence[Cell], field: str, value: str | int | bo
         cell.save(update_fields=update_fields)
         result.append({'cell_id': cell.id, 'field': camelcase(field), 'value': value})
     return result
+
+
+@dataclass
+class CellPasteStyle:
+    """Стили для вставки в ячейку."""
+    strong: bool
+    italic: bool
+    underline: str | None
+    strike: bool
+    horizontal_align: str
+    vertical_align: str
+    size: int
+    color: str
+    background: str
+
+
+@dataclass
+class CellPasteOptions:
+    """Входные данные для вставки в ячейку."""
+
+    cell: Cell
+    default: str
+    style: CellPasteStyle | None
+
+
+@transaction.atomic
+def paste_into_cells(paste_options: list[CellPasteOptions]) -> list[Cell]:
+    """Вставка в ячейки."""
+    cells: list[Cell] = []
+    for paste_option in paste_options:
+        cell = paste_option.cell
+        cell.default = paste_option.default
+        update_fields = ['default']
+        if paste_option.style:
+            style = paste_option.style
+            cell.strong = style.strong
+            cell.italic = style.italic
+            cell.underline = style.underline
+            cell.strike = style.strike
+            cell.horizontal_align = style.horizontal_align
+            cell.vertical_align = style.vertical_align
+            cell.size = style.size
+            cell.color = style.color
+            cell.background = style.background
+            update_fields.extend([
+                'strong', 'italic', 'underline',
+                'strike', 'horizontal_align', 'vertical_align',
+                'size', 'color', 'background',
+            ])
+        cell.save(update_fields=update_fields)
+        cells.append(cell)
+    return cells
 
 
 def add_budget_classification(user: User, code: str, name: str) -> BudgetClassification:

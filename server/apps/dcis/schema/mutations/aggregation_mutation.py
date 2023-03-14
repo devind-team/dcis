@@ -12,9 +12,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 
-from apps.dcis.models import Cell, Period
+from apps.dcis.models import Period
 from apps.dcis.schema.types import CellAggregationType
-from apps.dcis.services.cell_service import (
+from apps.dcis.services.aggregation_services import (
     add_aggregation_cell,
     delete_cells_aggregation,
     update_aggregations_from_file,

@@ -91,20 +91,20 @@ export function useCanDeleteRow () {
   }
 }
 
-export function useCanChangeValue (cell: Ref<CellType>) {
+export function useCanChangeValue () {
   const userStore = useAuthStore()
   const mode = inject(GridModeInject)
   const activeSheet = inject(ActiveSheetInject)
   const activeDocument = inject(ActiveDocumentInject)
-  return computed<boolean>(() => {
+  return function (cell: CellType) {
     if (mode.value === GridMode.CHANGE) {
       return true
     }
     if (
       mode.value === GridMode.READ ||
       mode.value === GridMode.REPORT ||
-      !cell.value.editable ||
-      cell.value.kind === 'f'
+      !cell.editable ||
+      cell.kind === 'f'
     ) {
       return false
     }
@@ -119,9 +119,9 @@ export function useCanChangeValue (cell: Ref<CellType>) {
     if (activeDocument.value.period.multiple) {
       return userDivisionIds.includes(activeDocument.value.objectId)
     }
-    const row = activeSheet.value.rows.find((r: RowDimensionType) => r.id === cell.value.rowId)
+    const row = activeSheet.value.rows.find((r: RowDimensionType) => r.id === cell.rowId)
     return userDivisionIds.includes(row.objectId)
-  })
+  }
 }
 
 function canAddRowRegardingDivisions (

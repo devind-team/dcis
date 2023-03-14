@@ -1,13 +1,16 @@
 <template lang="pug">
-v-menu(v-model="active" origin="center center" transition="scale-transition")
+v-menu(v-model="active" offset-y)
   template(#activator="{ on, attrs }")
-    slot(name="default" :on="on" :attr="attrs")
-  v-list
-    change-show-sheets(v-slot="{ on, attrs }" @close="active = false" :sheets="sheets")
+    v-btn.grid-sheet-menu__button(
+      v-on="on"
+      v-bind="attrs"
+      elevation="0"
+      tile
+    ) {{ $t('dcis.grid.sheetMenu.tableSettings.buttonText') }}
+  v-list(dense)
+    change-show-sheets(v-slot="{ on, attrs }" :sheets="sheets" @close="close")
       v-list-item(v-on="on" v-bind="attrs")
-        v-list-item-icon
-          v-icon mdi-checkbox-blank-off
-        v-list-item-content {{ $t('dcis.sheets.settings.show') }}
+        v-list-item-title {{ $t('dcis.grid.sheetMenu.tableSettings.showSettings') }}
 </template>
 
 <script lang="ts">
@@ -20,10 +23,15 @@ export default defineComponent({
   props: {
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true }
   },
-  setup () {
+  setup (_, { emit }) {
     const active = ref<boolean>(false)
 
-    return { active }
+    const close = () => {
+      active.value = false
+      emit('close')
+    }
+
+    return { active, close }
   }
 })
 </script>

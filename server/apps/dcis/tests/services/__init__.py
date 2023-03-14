@@ -1,4 +1,4 @@
-from .cell_services import AggregationTestCase
+from .aggregation_services import AggregationTestCase
 from .column_dimension_services import ColumnDimensionTestCase
 from .curator_services import CuratorGroupTestCase
 from .divisions_services import DivisionTestCase
@@ -16,5 +16,6 @@ from .period_unload_services import UnloadPeriodTestCase
 from .privilege_services import PrivilegeTestCase
 from .project_services import GetUserProjectsTestCase, ProjectTestCase
 from .row_dimension_services import RowDimensionTestCase
+from .sheet_services import CheckCellOptionsTestCase, PasteTestCase
 from .status_services import AddStatusCheckTestCase, StatusTestCase
-from .values_services import ValueServicesTestCase
+from .values_services import UpdateOrCreateValuesTestCase

@@ -290,13 +290,8 @@ export default {
     },
     report: {
       name: '@:dcis.periods.links.report',
-      settings: {
-        unload: 'Выгрузить сводный отчет'
-      },
       documentsFilter: {
         title: 'Выбор документов',
-        noFiltrationMessage: 'Выбрать документы',
-        multipleMessage: 'Выбрано документов: {count}',
         selectMainDocument: 'Выбрать основной документ',
         mainDocumentSelection: 'Выбор основного документа',
         mainDocument: 'Выбран основной документ: {divisionId}',
@@ -319,9 +314,7 @@ export default {
         }
       },
       rowsFilter: {
-        title: 'Выбор расширенных строки',
-        noFiltrationMessage: 'Выбрать расширенные строки',
-        multipleMessage: 'Выбрано расширенных строк: {count}'
+        title: 'Выбор расширенных строк'
       }
     },
     unload: {
@@ -436,10 +429,41 @@ export default {
     toolbar: {
       addRow: 'Добавить строку'
     },
+    sheetMenu: {
+      editMenu: {
+        buttonText: 'Правка',
+        cut: 'Вырезать',
+        cutShortcut: 'Ctrl+X',
+        copy: 'Копировать',
+        copyShortcut: 'Ctrl+C',
+        paste: 'Вставить',
+        pasteShortcut: 'Ctrl+V',
+        shortcutDialog: {
+          title: 'Копирование и вставка',
+          message: 'Через меню "Правка" эта операция недоступна, однако можно использовать:',
+          toCut: 'для вырезания',
+          toCopy: 'для копирования',
+          toPaste: 'для вставки'
+        }
+      },
+      documentUnloadMenu: {
+        buttonText: 'Выгрузка',
+        unload: '@:dcis.documents.unloadDocument.name'
+      },
+      tableSettings: {
+        buttonText: '@:settings',
+        showSettings: '@:dcis.sheets.settings.show'
+      },
+      reportUnloadMenu: {
+        buttonText: '@:settings',
+        documentFilter: '@:dcis.periods.report.documentsFilter.title',
+        rowsFilter: '@:dcis.periods.report.rowsFilter.title'
+      }
+    },
     sheetToolbar: {
       readonly: 'Только для чтения',
       fix: 'Закрепление столбцов/строк',
-      fontSize: 'Шрифт',
+      fontSize: 'Размер шрифта',
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
       commaIncrease: 'Увеличить разрядность',
