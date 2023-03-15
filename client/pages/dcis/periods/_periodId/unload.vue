@@ -4,9 +4,9 @@ bread-crumbs(:items="bc")
     v-slot="{ mutate, loading, error }"
     :mutation="require('~/gql/dcis/mutations/period/unload_period.graphql')"
     :variables="variables"
+    tag
     @done="unloadPeriodOnDone"
     @error="unloadPeriodOnError"
-    tag
   )
     v-card
       v-card-title.pb-0
