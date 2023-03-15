@@ -1,0 +1,16 @@
+#import "../../fragments/attribute_fields.graphql"
+
+mutation UploadAttributesFromFile($periodId: ID!, $attributesFile: Upload!) {
+  uploadAttributesFromFile(input: { periodId: $periodId, attributesFile: $attributesFile }) {
+    success
+    errors {
+      messages
+      field
+      __typename
+    }
+    attributes {
+      ...AttributeFields
+    }
+    __typename
+  }
+}

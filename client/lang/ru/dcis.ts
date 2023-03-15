@@ -548,11 +548,11 @@ export default {
   attributes: {
     adds: 'Добавить атрибуты',
     add: 'Добавить атрибут',
-    change: 'Изменить',
-    delete: 'Удалить',
+    change: '@:change',
+    delete: '@:delete',
     addMenu: {
       header: 'Добавление атрибута',
-      buttonText: 'Добавить',
+      buttonText: '@:add',
       name: 'Наименование',
       placeholder: 'Подсказка',
       key: 'Ключ',
@@ -571,13 +571,22 @@ export default {
     },
     changeMenu: {
       header: 'Изменение атрибута',
-      buttonText: 'Изменить',
+      buttonText: '@:change',
       name: 'Наименование',
       placeholder: 'Подсказка',
       key: 'Ключ',
       kind: 'Тип',
       default: 'Значение по умолчанию',
       mutable: 'Разрешить изменение'
+    },
+    unloadAttributes: {
+      content: 'Выгрузить атрибуры'
+    },
+    uploadAttributes: {
+      buttonText: 'Обновить атребуты из файла',
+      header: 'Обновление атребуты из файла',
+      attributesFile: 'Файл с новыми атребутами',
+      downloadTemplate: 'Скачать шаблон файла'
     },
     tableHeaders: {
       name: 'Название параметра',

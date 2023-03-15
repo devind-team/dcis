@@ -6,7 +6,8 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
       v-if="period.canChangeAttributes"
       v-slot="{ on, attrs}"
       :period="period"
-      :update="addAttributeUpdate"
+      :from-file-update="resetUpdate"
+      :add-update="addAttributeUpdate"
     )
       v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
   v-data-table(
@@ -94,7 +95,8 @@ export default defineComponent({
       addUpdate,
       changeUpdate,
       deleteUpdate,
-      loading
+      loading,
+      resetUpdate
     } = useCommonQuery<AttributesQuery, AttributesQueryVariables, 'attributes'>({
       document: attributesQuery,
       variables: () => ({
@@ -124,7 +126,16 @@ export default defineComponent({
       }
     }
 
-    return { bc, headers, attributes, loading, changeAttributeUpdate, addAttributeUpdate, deleteAttribute }
+    return {
+      bc,
+      headers,
+      attributes,
+      loading,
+      resetUpdate,
+      changeAttributeUpdate,
+      addAttributeUpdate,
+      deleteAttribute
+    }
   }
 })
 </script>

@@ -1,0 +1,12 @@
+mutation UnloadAttributesInFile($periodId: ID!) {
+  unloadAttributesInFile(input: { periodId: $periodId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    src
+    __typename
+  }
+}

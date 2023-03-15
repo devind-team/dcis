@@ -6,5 +6,9 @@ fragment AttributeFields on AttributeType {
   kind
   default
   mutable
+  period {
+    id
+    __typename
+  }
   __typename
 }
