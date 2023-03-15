@@ -4,13 +4,14 @@ from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
 from apps.dcis.models import CuratorGroup, Document, Period, Project
 from apps.dcis.services.divisions_services import (
     get_divisions,
-    get_period_divisions,
+    get_organizations_without_document, get_period_divisions,
     get_user_division_ids,
     get_user_divisions,
     is_document_division_member,
@@ -51,10 +52,12 @@ class DivisionTestCase(TestCase):
             parent=self.organization
         )
         self.organization.users.add(self.user)
-        self.organization_division, self.organization_child_division = get_divisions([
-            self.organization,
-            self.organization_child,
-        ])
+        self.organization_division, self.organization_child_division = get_divisions(
+            [
+                self.organization,
+                self.organization_child,
+            ]
+        )
 
         self.department_project = Project.objects.create(content_type=self.department_content_type)
         self.organization_project = Project.objects.create(content_type=self.organization_content_type)
@@ -137,10 +140,12 @@ class DivisionTestCase(TestCase):
         ) as mock:
             user_division_ids = get_user_division_ids(self.admin, self.department_project)
             mock.assert_called_once_with(self.admin, self.department_project)
-            self.assertDictEqual({
-                'department': [self.department.id],
-                'organization': [self.organization.id],
-            }, user_division_ids)
+            self.assertDictEqual(
+                {
+                    'department': [self.department.id],
+                    'organization': [self.organization.id],
+                }, user_division_ids
+            )
 
     def test_get_period_divisions(self) -> None:
         """Тестирование функции `get_period_divisions`."""
@@ -178,11 +183,82 @@ class DivisionTestCase(TestCase):
         ]:
             self.assertFalse(is_document_division_member(self.extra_user, document))
             self.assertTrue(is_document_division_member(self.document_division_member, document))
-        self.assertFalse(is_document_division_member(
-            self.extra_user,
-            self.document_division_member_multiple_not_division_document,
-        ))
-        self.assertFalse(is_document_division_member(
-            self.document_division_member,
-            self.document_division_member_multiple_not_division_document,
-        ))
+        self.assertFalse(
+            is_document_division_member(
+                self.extra_user,
+                self.document_division_member_multiple_not_division_document,
+            )
+        )
+        self.assertFalse(
+            is_document_division_member(
+                self.document_division_member,
+                self.document_division_member_multiple_not_division_document,
+            )
+        )
+
+
+class PeriodOrganizationsWithoutDocumentTestCase(TestCase):
+    """Тестирование организаций, у которых не поданы документы в периоде."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.admin = User.objects.create(username='admin', email='admin@gmain.com', is_superuser=True)
+        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
+        self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+
+        self.project = Project.objects.create(content_type=self.organization_content_type)
+        self.period = Period.objects.create(project=self.project)
+
+        self.filled_organizations = [Organization.objects.create(attributes='') for _ in range(3)]
+        self.filled_organizations_curator = [Organization.objects.create(attributes='') for _ in range(3)]
+        self.not_filled_organizations = [Organization.objects.create(attributes='') for _ in range(3)]
+        self.not_filled_organizations_curator = [Organization.objects.create(attributes='') for _ in range(3)]
+
+        for organization in [
+            *self.filled_organizations,
+            *self.filled_organizations_curator,
+            *self.not_filled_organizations,
+            *self.not_filled_organizations_curator,
+        ]:
+            self.period.division_set.create(object_id=organization.id)
+
+        for organization in [*self.filled_organizations, *self.filled_organizations_curator]:
+            Document.objects.create(period=self.period, object_id=organization.id)
+
+        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group.users.add(self.curator)
+        self.curator_group.organization.set(
+            [
+                *self.filled_organizations_curator,
+                *self.not_filled_organizations_curator
+            ]
+        )
+
+    def test_is_admin(self) -> None:
+        """Тестирование функции `get_organizations_has_not_document`.
+
+        Пользователь является администратором периода.
+        """
+        self.assertEqual(
+            {*self.not_filled_organizations, *self.not_filled_organizations_curator},
+            set(get_organizations_without_document(self.admin, self.period))
+        )
+
+    def test_is_curator(self) -> None:
+        """Тестирование функции `get_organizations_has_not_document`.
+
+        Пользователь является куратором периода.
+        """
+        self.assertEqual(
+            set(self.not_filled_organizations_curator),
+            set(get_organizations_without_document(self.curator, self.period))
+        )
+
+    def test_is_extra_user(self) -> None:
+        """Тестирование функции `get_organizations_has_not_document`.
+
+        Пользователь не имеет отношения к периоду.
+        """
+        self.assertRaises(PermissionDenied, get_organizations_without_document, self.extra_user, self.period)
