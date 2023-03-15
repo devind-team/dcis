@@ -12,7 +12,7 @@ from apps.core.models import User
 from apps.dcis.models import (
     CuratorGroup,
     Division,
-    Document, Period,
+    Period,
     PeriodGroup,
     PeriodPrivilege,
     Privilege,
@@ -30,7 +30,7 @@ from apps.dcis.services.period_services import (
     delete_divisions_period,
     delete_period,
     delete_period_groups,
-    get_organizations_has_not_document, get_user_curator_periods,
+    get_user_curator_periods,
     get_user_divisions_periods,
     get_user_participant_periods,
     get_user_periods,
@@ -192,7 +192,7 @@ class PeriodTestCase(TestCase):
             'versioning': True,
             'privately': True,
             'start': date.today(),
-            'expiration':date.today() + timedelta(days=7),
+            'expiration': date.today() + timedelta(days=7),
         }
 
     def test_create_period(self) -> None:
@@ -495,68 +495,3 @@ class PeriodUserTestCase(TestCase):
             period_id=self.period.id,
             privileges_ids=[p.id for p in self.privileges]
         )
-
-
-class PeriodOrganizationsHasNotDocumentTestCase(TestCase):
-    """Тестирование организаций, у которых не поданы документы в периоде."""
-
-    def setUp(self) -> None:
-        """Создание данных для тестирования."""
-        self.admin = User.objects.create(username='admin', email='admin@gmain.com', is_superuser=True)
-        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
-        self.extra_user = User.objects.create(username='extra_user', email='extra_user@gmail.com')
-
-        self.organization_content_type = ContentType.objects.get_for_model(Organization)
-
-        self.project = Project.objects.create(content_type=self.organization_content_type)
-        self.period = Period.objects.create(project=self.project)
-
-        self.filled_organizations = [Organization.objects.create(attributes='') for _ in range(3)]
-        self.filled_organizations_curator = [Organization.objects.create(attributes='') for _ in range(3)]
-        self.not_filled_organizations = [Organization.objects.create(attributes='') for _ in range(3)]
-        self.not_filled_organizations_curator = [Organization.objects.create(attributes='') for _ in range(3)]
-
-        for organization in [
-            *self.filled_organizations,
-            *self.filled_organizations_curator,
-            *self.not_filled_organizations,
-            *self.not_filled_organizations_curator,
-        ]:
-            self.period.division_set.create(object_id=organization.id)
-
-        for organization in [*self.filled_organizations, *self.filled_organizations_curator]:
-            Document.objects.create(period=self.period, object_id=organization.id)
-
-        self.curator_group = CuratorGroup.objects.create()
-        self.curator_group.users.add(self.curator)
-        self.curator_group.organization.set([
-            *self.filled_organizations_curator,
-            *self.not_filled_organizations_curator
-        ])
-
-    def test_is_admin(self) -> None:
-        """Тестирование функции `get_organizations_has_not_document`.
-
-        Пользователь является администратором периода.
-        """
-        self.assertEqual(
-            {*self.not_filled_organizations, *self.not_filled_organizations_curator},
-            set(get_organizations_has_not_document(self.admin, self.period))
-        )
-
-    def test_is_curator(self) -> None:
-        """Тестирование функции `get_organizations_has_not_document`.
-
-        Пользователь является куратором периода.
-        """
-        self.assertEqual(
-            set(self.not_filled_organizations_curator),
-            set(get_organizations_has_not_document(self.curator, self.period))
-        )
-
-    def test_is_extra_user(self) -> None:
-        """Тестирование функции `get_organizations_has_not_document`.
-
-        Пользователь не имеет отношения к периоду.
-        """
-        self.assertRaises(PermissionDenied, get_organizations_has_not_document, self.extra_user, self.period)
