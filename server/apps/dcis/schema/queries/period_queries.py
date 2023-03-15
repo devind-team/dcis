@@ -1,7 +1,7 @@
 from typing import Any
 
 import graphene
-from devind_dictionaries.models import Department, Organization
+from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
@@ -33,7 +33,7 @@ from apps.dcis.schema.types import (
 from apps.dcis.services.divisions_services import (
     get_organizations_without_document,
     get_period_possible_divisions,
-    get_user_divisions_model,
+    get_user_period_divisions,
 )
 from apps.dcis.services.period_services import (
     get_period_attributes,
@@ -305,10 +305,10 @@ class PeriodQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs):
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return get_user_divisions_model(info.context.user, period)
+        return get_user_period_divisions(info.context.user, period)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_period_filter_departments(root: Any, info: ResolveInfo, period_id: str):
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return get_user_divisions_model(info.context.user, period)
+        return get_user_period_divisions(info.context.user, period)
