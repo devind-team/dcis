@@ -18,14 +18,17 @@ def get_user_divisions(user: User, project: Project | int | str | None = None) -
     :param project: объект проекта, или идентификатор проекта, или None
     :return [{'id': int, name: string, 'model': 'department' | 'organization'}, ...]
     """
+
     def get_slave_divisions(
         mdl: Type[Organization | Department],
         parent_divisions: QuerySet[Organization | Department]
     ) -> QuerySet | list:
         if hasattr(mdl, 'parent_id'):
-            return mdl.objects.filter(parent_id__in=[
-                parent_division.id for parent_division in parent_divisions
-            ])
+            return mdl.objects.filter(
+                parent_id__in=[
+                    parent_division.id for parent_division in parent_divisions
+                ]
+            )
         return []
 
     if project is None:
@@ -69,10 +72,12 @@ def get_period_divisions(user: User, period: Period, search: str = '') -> list[d
         if period.project.division_name == 'organization':
             limitations |= Q(object_id__in=get_curator_organizations(user))
 
-    return get_divisions(period.project.division.objects.filter(
-        name__contains=search,
-        pk__in=period.division_set.filter(limitations).values_list('object_id', flat=True)
-    ))
+    return get_divisions(
+        period.project.division.objects.filter(
+            name__contains=search,
+            pk__in=period.division_set.filter(limitations).values_list('object_id', flat=True)
+        )
+    )
 
 
 def get_period_possible_divisions(period: Period, search: str = '') -> list[dict[str, int | str]]:
@@ -117,3 +122,20 @@ def is_document_division_member(user: User, document: Document) -> bool:
         return document.object_id in user_division_ids
     else:
         return Division.objects.filter(period=document.period, object_id__in=user_division_ids).count() > 0
+
+
+def get_organizations_without_document(user: User, period: Period) -> QuerySet[Organization]:
+    """Получение организаций, у которых не поданы документы в периоде."""
+    return get_user_divisions_model(user, period).filter(
+        id__in=period.division_set.exclude(
+            object_id__in=period.document_set.values_list('object_id', flat=True)
+        ).values_list('object_id', flat=True)
+    )
+
+
+def get_user_divisions_model(user: User, period: Period) -> QuerySet[Organization | Department]:
+    """Получение организаций для фильтра."""
+    from apps.dcis.permissions import can_view_period
+
+    can_view_period(user, period)
+    return period.project.division.objects.filter(id__in=[d['id'] for d in get_period_divisions(user, period)])

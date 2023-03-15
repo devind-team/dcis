@@ -4,19 +4,16 @@ from datetime import date
 from io import BytesIO
 from typing import Type
 
-from devind_dictionaries.models import Department, Organization
 from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import convert_str_to_int
-from django.core.exceptions import PermissionDenied
 from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import Attribute, Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
 from apps.dcis.permissions import (
     can_add_period,
@@ -27,8 +24,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
-from apps.dcis.permissions.period_permissions import can_change_period_base
-from apps.dcis.services.curator_services import get_curator_organizations, is_period_curator
+from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.services.limitation_services import add_limitations_from_file
@@ -118,33 +114,6 @@ def get_user_period_privileges(user_id: int | str, period_id: int | str) -> Quer
     return Privilege.objects.filter(periodprivilege__user__id=user_id, periodprivilege__period__id=period_id)
 
 
-def get_organizations_has_not_document(user: User, period: Period) -> QuerySet[Organization]:
-    """Получение организаций, у которых не поданы документы в периоде."""
-    organizations = Organization.objects.filter(
-        id__in=period.division_set.exclude(
-            object_id__in=period.document_set.values_list('object_id', flat=True)).values_list('object_id', flat=True)
-    )
-    if not is_raises(PermissionDenied, can_change_period_base, user, period):
-        return organizations
-    if is_period_curator(user, period):
-        return organizations.filter(curatorgroup__id__in=user.curatorgroup_set.values_list('id', flat=True))
-    raise PermissionDenied('Недостаточно прав для просмотра организаций, не подавших документ.')
-
-
-def get_organizations_for_filter(user: User, period: Period):
-    """Получение организаций для фильтра."""
-    can_view_period(user, period)
-    organizations = Organization.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
-    return organizations
-
-
-def get_departments_for_filter(user: User, period: Period):
-    """Получение организаций для фильтра."""
-    can_view_period(user, period)
-    departments = Department.objects.filter(id__in=period.division_set.values_list('object_id', flat=True))
-    return departments
-
-
 @transaction.atomic
 def create_period(
     user: User,
@@ -200,7 +169,7 @@ def add_divisions_from_file(
     """Добавление дивизионов из файла формата csv/xlsx."""
     period = get_object_or_404(Period, pk=period_id)
     can_change_period_divisions(user, period)
-    reader: ExcelReader = ExcelReader(BytesIO(file.read())) # noqa
+    reader: ExcelReader = ExcelReader(BytesIO(file.read()))  # noqa
     divisions_id: dict[int, int] = {}
     for item in reader.items:
         division_id: int | None = convert_str_to_int(item.get(field))
@@ -256,7 +225,7 @@ def add_divisions_from_period(
     period_divisions: list[int] = period.division_set.values_list('object_id', flat=True)
     for period_division in period_divisions:
         period_divisions_from[period_division] = 1
-    Division = period.project.division # noqa
+    Division = period.project.division  # noqa
     divisions: dict[int, Type[Division]] = Division.objects \
         .filter(pk__in=[division_id for division_id, freq in period_divisions_from.items() if freq == 0]) \
         .in_bulk()
@@ -323,7 +292,8 @@ def change_period_group_privileges(
     return privileges
 
 
-def change_user_period_groups(permission_user: User, user: User, period_group_ids: list[str | int]) -> list[PeriodGroup]:
+def change_user_period_groups(permission_user: User, user: User, period_group_ids: list[str | int]) -> list[
+    PeriodGroup]:
     """Изменение групп пользователя в периоде."""
     period_groups: list[PeriodGroup] = []
     for period_group_id in period_group_ids:
