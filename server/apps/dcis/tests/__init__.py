@@ -28,7 +28,7 @@ from .services import (
     PasteTestCase,
     PeriodDivisionTestCase,
     PeriodGroupTestCase,
-    PeriodOrganizationsHasNotDocumentTestCase,
+    PeriodOrganizationsWithoutDocumentTestCase,
     PeriodTestCase,
     PeriodUserTestCase,
     PrivilegeTestCase,

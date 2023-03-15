@@ -1,0 +1,8 @@
+#import "../fragments/organization_fields.graphql"
+
+query OrganizationsWithoutDocument($periodId: ID!) {
+	organizationsWithoutDocument(periodId: $periodId) {
+    ...OrganizationField
+    __typename
+  }
+}

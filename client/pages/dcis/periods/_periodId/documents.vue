@@ -51,7 +51,7 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
             )
       v-tab-item
         v-list
-          v-list-item(v-for="organization in organizationsHasNotDocument" :key="organization.id")
+          v-list-item(v-for="organization in organizationsWithoutDocument" :key="organization.id")
             v-list-item-content {{ organization.name }}
 left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.documents.name') }}
@@ -111,13 +111,13 @@ import {
   DocumentType,
   PeriodType,
   StatusType,
-  OrganizationsHasNotDocumentQuery,
-  OrganizationsHasNotDocumentQueryVariables, DocumentsQuery, DocumentsQueryVariables
+  OrganizationsWithoutDocumentQuery,
+  OrganizationsWithoutDocumentQueryVariables, DocumentsQuery, DocumentsQueryVariables
 } from '~/types/graphql'
 import { AddDocumentsDataMutationsResultType } from '~/components/dcis/documents/AddDocumentData.vue'
 import { AddDocumentMutationResultType } from '~/components/dcis/documents/AddDocument.vue'
 import statusesQuery from '~/gql/dcis/queries/statuses.graphql'
-import organizationsHasNotDocumentQuery from '~/gql/dcis/queries/organizations_has_not_document.graphql'
+import organizationsWithoutDocumentQuery from '~/gql/dcis/queries/organizations_without_document.graphql'
 import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
@@ -203,11 +203,11 @@ export default defineComponent({
 
     const showDivisionFilter = computed<boolean>(() => props.period.multiple)
 
-    const { data: organizationsHasNotDocument } = useCommonQuery<
-      OrganizationsHasNotDocumentQuery,
-      OrganizationsHasNotDocumentQueryVariables
+    const { data: organizationsWithoutDocument } = useCommonQuery<
+      OrganizationsWithoutDocumentQuery,
+      OrganizationsWithoutDocumentQueryVariables
     >({
-      document: organizationsHasNotDocumentQuery,
+      document: organizationsWithoutDocumentQuery,
       variables: () => ({
         periodId: props.period.id
       }),
@@ -233,7 +233,7 @@ export default defineComponent({
       addDocumentDataUpdate,
       dateTimeHM,
       showDivisionFilter,
-      organizationsHasNotDocument
+      organizationsWithoutDocument
     }
   }
 })

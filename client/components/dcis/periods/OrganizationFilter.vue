@@ -10,6 +10,7 @@ items-data-filter(
   modal
   fullscreen
 )
+  template(#subtitle) {{ $t('shownOf', { count, totalCount: count }) }}
   template(#items="{ searchItems, tempItems, setSelected, setAllSelected }")
     v-data-table(
       :value="tempItems"
@@ -101,6 +102,8 @@ export default defineComponent({
       })
     })
 
+    const count = computed<number>(() => organizations.value ? organizations.value.length : 0)
+
     const changeOrganizations = computed(() => {
       if (!organizations.value) {
         return []
@@ -117,6 +120,7 @@ export default defineComponent({
       getFilterMessageFunction,
       filterSearchFunction,
       tableHeaders,
+      count,
       changeOrganizations
     }
   }
