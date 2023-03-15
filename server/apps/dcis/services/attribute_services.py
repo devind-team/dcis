@@ -1,15 +1,23 @@
 """Модуль для сервисов атрибутов."""
+import json
+from datetime import datetime
+from os.path import join
+from posixpath import relpath
+from typing import Any, Sequence
 
-from typing import Sequence
-
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.core.files.base import File
+from django.db import transaction
 from django.db.models import QuerySet
 from django.template import Context, Template
 from django.utils.safestring import mark_safe
+from pydantic import BaseModel, ValidationError, parse_obj_as
 
 from apps.core.models import User
-from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Value
-from apps.dcis.permissions import can_change_attribute_value
+from apps.dcis.helpers.pydantic_translate import translate
+from apps.dcis.models import Attribute, AttributeValue, Cell, Document, Period, Value
+from apps.dcis.permissions import can_change_attribute_value, can_change_period_attributes
 from .value_services import UpdateOrCrateValuesResult, ValueInput, update_or_create_values
 
 
@@ -72,9 +80,80 @@ def create_attribute_context(user: User, document: Document) -> Context:
         for attribute in attributes
     }
     # Расширяем контекст с помощью встроенных переменных
-    context.update({
-        'user': mark_safe(user.get_full_name),
-        'org_id': mark_safe(document.object_id),
-        'org_name': mark_safe(document.object_name)
-    })
+    context.update(
+        {
+            'user': mark_safe(user.get_full_name),
+            'org_id': mark_safe(document.object_id),
+            'org_name': mark_safe(document.object_name)
+        }
+    )
     return Context(context)
+
+
+class AttributeFromJsonFile(BaseModel):
+    """Вспомогательный класс для загрузки атребутов через json файл."""
+    name: str
+    placeholder: str
+    key: str
+    kind: str
+    default: str
+    mutable: bool
+
+
+@transaction.atomic()
+def upload_attributes_from_file(user: User, period: Period, attributes_file: File) -> list[Attribute]:
+    """Функция загрузки атребутов периода через json файл."""
+
+    can_change_period_attributes(user, period)
+
+    Attribute.objects.filter(period=period).delete()
+
+    try:
+        data = parse_obj_as(list[AttributeFromJsonFile], json.load(attributes_file))
+    except json.JSONDecodeError as e:
+        raise ValueError(f'Неверный формат JSON: {e.msg}.')
+    except ValidationError as error:
+        e = translate.translate(error.errors(), locale="ru_RU")
+        raise ValueError(f"Недопустимые данные JSON: запись {e[0]['loc'][1] + 1} {e[0]['msg']} {e[0]['loc'][2]}.")
+
+    return [
+        Attribute.objects.create(
+            name=attribute.name,
+            placeholder=attribute.placeholder,
+            key=attribute.key,
+            kind=attribute.kind,
+            default=attribute.default,
+            mutable=attribute.mutable,
+            period=period
+        ) for attribute in data
+    ]
+
+
+def unload_attributes_in_file(user: User, get_host: Any | None, period: Period) -> str:
+    """Выгрузка атребутов периода в json файл."""
+
+    can_change_period_attributes(user, period)
+
+    data = [
+        dict(
+            AttributeFromJsonFile(
+                name=attribute.name,
+                placeholder=attribute.placeholder,
+                key=attribute.key,
+                kind=attribute.kind,
+                default=attribute.default,
+                mutable=attribute.mutable
+            )
+        )
+        for attribute in Attribute.objects.filter(period=period)
+    ]
+
+    path = join(
+        settings.STATICFILES_DIRS[1],
+        'temp_files',
+        f'period_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.json'
+    )
+    with open(path, 'w') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+    return relpath(path, settings.BASE_DIR)

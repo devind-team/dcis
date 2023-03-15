@@ -2948,6 +2948,8 @@ export type Mutation = {
   restorePassword: RestorePasswordMutationPayload;
   /** Отправка письма поддержки */
   supportSubmit: SupportSubmitMutationPayload;
+  /** Выгрузка атребутов периода в json файл. */
+  unloadAttributesInFile: UnloadAttributesInFileMutationPayload;
   /** Выгрузка документа. */
   unloadDocument: UnloadDocumentMutationPayload;
   /** Выгрузка архива значения ячейки типа `Файл` */
@@ -2958,6 +2960,8 @@ export type Mutation = {
   updateAggregationsFromFile: UpdateAggregationsFromFileMutationPayload;
   /** Обновление ограничений, накладываемых на лист, из json файла. */
   updateLimitationsFromFile: UpdateLimitationsFromFileMutationPayload;
+  /** Загрузка атребутов через json файл */
+  uploadAttributesFromFile: UploadAttributesFromFileMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -3388,6 +3392,11 @@ export type MutationSupportSubmitArgs = {
 };
 
 /** Мутации на изменение чего-либо. */
+export type MutationUnloadAttributesInFileArgs = {
+  input: UnloadAttributesInFileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
 export type MutationUnloadDocumentArgs = {
   input: UnloadDocumentMutationInput;
 };
@@ -3410,6 +3419,11 @@ export type MutationUpdateAggregationsFromFileArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUpdateLimitationsFromFileArgs = {
   input: UpdateLimitationsFromFileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUploadAttributesFromFileArgs = {
+  input: UploadAttributesFromFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4942,6 +4956,24 @@ export type TableType = {
   rows: Array<Maybe<TableRowType>>;
 };
 
+export type UnloadAttributesInFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Выгрузка атребутов периода в json файл. */
+export type UnloadAttributesInFileMutationPayload = {
+  __typename?: 'UnloadAttributesInFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UnloadDocumentMutationInput = {
   /** Дополнительные параметры */
   additional?: InputMaybe<Array<Scalars['String']>>;
@@ -5058,6 +5090,26 @@ export type UpdateLimitationsFromFileMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Новые ограничения */
   limitations?: Maybe<Array<Maybe<LimitationType>>>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type UploadAttributesFromFileMutationInput = {
+  /** json файл агрегации ячеек */
+  attributesFile: Scalars['Upload'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Загрузка атребутов периода через json файл. */
+export type UploadAttributesFromFileMutationPayload = {
+  __typename?: 'UploadAttributesFromFileMutationPayload';
+  /** Новая агрегация */
+  attributes?: Maybe<Array<Maybe<AttributeType>>>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -5487,7 +5539,7 @@ export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: 
 
 export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
 
-export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean };
+export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null };
 
 export type CellFieldsFragment = { __typename: 'CellType', id: string, kind: string, editable: boolean, formula?: string | null, numberFormat?: string | null, comment?: string | null, mask?: string | null, tooltip?: string | null, columnId?: string | null, rowId?: string | null, horizontalAlign?: string | null, verticalAlign?: string | null, size: number, strong: boolean, italic: boolean, strike: boolean, underline?: string | null, color: string, background: string, borderStyle: any, borderColor: any, position: string, globalPosition: string, relatedGlobalPositions: Array<string>, colspan: number, rowspan: number, value?: string | null, error?: string | null, aggregation?: string | null };
 
@@ -5554,7 +5606,7 @@ export type AddAttributeMutationVariables = Exact<{
   parent?: InputMaybe<Scalars['ID']>;
 }>;
 
-export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
+export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
 
 export type ChangeAttributeMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -5566,7 +5618,7 @@ export type ChangeAttributeMutationVariables = Exact<{
   mutable?: InputMaybe<Scalars['Boolean']>;
 }>;
 
-export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null } };
+export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
 
 export type ChangeAttributeValueMutationVariables = Exact<{
   attributeId: Scalars['ID'];
@@ -5581,6 +5633,19 @@ export type DeleteAttributeMutationVariables = Exact<{
 }>;
 
 export type DeleteAttributeMutation = { __typename?: 'Mutation', deleteAttribute: { __typename?: 'DeleteAttributeMutationPayload', success: boolean } };
+
+export type UnloadAttributesInFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type UnloadAttributesInFileMutation = { __typename?: 'Mutation', unloadAttributesInFile: { __typename: 'UnloadAttributesInFileMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UploadAttributesFromFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  attributesFile: Scalars['Upload'];
+}>;
+
+export type UploadAttributesFromFileMutation = { __typename?: 'Mutation', uploadAttributesFromFile: { __typename: 'UploadAttributesFromFileMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', messages: Array<string>, field: string }>, attributes?: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null> | null } };
 
 export type AuthCbiasMutationVariables = Exact<{
   uid: Scalars['String'];
@@ -6038,7 +6103,7 @@ export type AttributesQueryVariables = Exact<{
   periodId: Scalars['ID'];
 }>;
 
-export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean } | null> };
+export type AttributesQuery = { __typename?: 'Query', attributes: Array<{ __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null> };
 
 export type AttributesValuesQueryVariables = Exact<{
   documentId: Scalars['ID'];
