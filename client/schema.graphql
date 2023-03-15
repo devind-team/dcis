@@ -3622,7 +3622,7 @@ type Query {
     offset: Int
   ): OrganizationTypeConnection
   """Получение организаций, у которых не поданы документы в периоде"""
-  organizationsHasNotDocument(
+  organizationsWithoutDocument(
     """Идентификатор периода"""
     periodId: ID!
   ): [OrganizationType]!
