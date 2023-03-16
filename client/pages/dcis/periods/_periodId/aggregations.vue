@@ -1,7 +1,7 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.aggregationCells.name') }}
-    template(v-if="period.canChangeSettings")
+    template
       v-spacer
       change-period-aggregation-cells-menu(
         :period="period"
@@ -79,7 +79,7 @@ export default defineComponent({
         { text: t('dcis.periods.aggregationCells.tableHeaders.aggregateType') as string, value: 'aggregation' },
         { text: t('dcis.periods.aggregationCells.tableHeaders.listAggregateCells') as string, value: 'cells' }
       ]
-      if (props.period.canChangeSettings) {
+      if (props.period.canChangeSheet) {
         result.push({
           text: t('dcis.periods.aggregationCells.tableHeaders.actions') as string,
           value: 'actions',

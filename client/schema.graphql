@@ -2816,6 +2816,8 @@ type Mutation {
   restorePassword(input: RestorePasswordMutationInput!): RestorePasswordMutationPayload!
   """Отправка письма поддержки"""
   supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
+  """Выгрузка агригации периода в json файл."""
+  unloadAggregationsInFile(input: UnloadAggregationsInFileMutationInput!): UnloadAggregationsInFileMutationPayload!
   """Выгрузка атребутов периода в json файл."""
   unloadAttributesInFile(input: UnloadAttributesInFileMutationInput!): UnloadAttributesInFileMutationPayload!
   """Выгрузка документа."""
@@ -4126,6 +4128,23 @@ type TableType {
   headers: [String]!
   """Строки документа"""
   rows: [TableRowType]!
+}
+
+input UnloadAggregationsInFileMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Выгрузка агригации периода в json файл."""
+type UnloadAggregationsInFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный файл"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input UnloadAttributesInFileMutationInput {
