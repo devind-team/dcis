@@ -2948,6 +2948,8 @@ export type Mutation = {
   restorePassword: RestorePasswordMutationPayload;
   /** Отправка письма поддержки */
   supportSubmit: SupportSubmitMutationPayload;
+  /** Выгрузка агригации периода в json файл. */
+  unloadAggregationsInFile: UnloadAggregationsInFileMutationPayload;
   /** Выгрузка атребутов периода в json файл. */
   unloadAttributesInFile: UnloadAttributesInFileMutationPayload;
   /** Выгрузка документа. */
@@ -3389,6 +3391,11 @@ export type MutationRestorePasswordArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationSupportSubmitArgs = {
   input: SupportSubmitMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUnloadAggregationsInFileArgs = {
+  input: UnloadAggregationsInFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4956,6 +4963,24 @@ export type TableType = {
   rows: Array<Maybe<TableRowType>>;
 };
 
+export type UnloadAggregationsInFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Выгрузка агригации периода в json файл. */
+export type UnloadAggregationsInFileMutationPayload = {
+  __typename?: 'UnloadAggregationsInFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UnloadAttributesInFileMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор периода */
@@ -5587,6 +5612,12 @@ export type DeleteAggregationMutationVariables = Exact<{
 }>;
 
 export type DeleteAggregationMutation = { __typename?: 'Mutation', deleteAggregation: { __typename: 'DeleteAggregationMutationPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UnloadAggregationsInFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type UnloadAggregationsInFileMutation = { __typename?: 'Mutation', unloadAggregationsInFile: { __typename: 'UnloadAggregationsInFileMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UpdateAggregationsFromFileMutationVariables = Exact<{
   periodId: Scalars['ID'];
