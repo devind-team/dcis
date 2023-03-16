@@ -2,10 +2,14 @@
 
 import contextlib
 import json
+from datetime import datetime
+from os.path import join
+from posixpath import relpath
 
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import gid2int
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.base import File
 from django.db import transaction
@@ -17,7 +21,7 @@ from apps.core.models import User
 from apps.dcis.helpers.pydantic_translate import translate
 from apps.dcis.models import Cell, Period, RelationshipCells, Sheet
 from apps.dcis.permissions import can_change_period_sheet
-from apps.dcis.permissions.period_permissions import can_change_period
+from apps.dcis.permissions.period_permissions import can_view_period
 
 
 CellIDType = int | str
@@ -26,7 +30,7 @@ CellIDType = int | str
 def check_cell_permission(user: User, cell_id: CellIDType) -> Cell:
     """Проверяем привилегию на возможность изменения."""
     cell = get_object_or_404(Cell, pk=gid2int(cell_id))
-    period: Period = Period.objects.get(sheet__columndimension__cell=cell)
+    period = Period.objects.get(sheet__columndimension__cell=cell)
     can_change_period_sheet(user, period)
     return cell
 
@@ -52,7 +56,7 @@ def add_cell_aggregation(
 
 def delete_cell_aggregation(user: User, cell_id: CellIDType, target_cell_id: CellIDType) -> CellIDType:
     """Удаляем запись об агрегации ячеек."""
-    cell: Cell = check_cell_permission(user, cell_id)
+    cell = check_cell_permission(user, cell_id)
     target_cell = check_cell_permission(user, target_cell_id)
     RelationshipCells.objects.filter(to_cell=cell, from_cell=target_cell).delete()
     return target_cell_id
@@ -86,7 +90,7 @@ class CellsAggregation(BaseModel):
 
 def get_cells_aggregation(user: User, period: Period) -> list[CellsAggregation]:
     """Получение агрегированных ячеек периода."""
-    can_change_period(user, period)
+    can_view_period(user, period)
     cells = Cell.objects.filter(
         column__sheet__period_id=period.id,
         aggregation__isnull=False
@@ -112,22 +116,23 @@ def dependent_cells(cells: list[Cell]) -> list[str]:
     return [transformation_position_cell(cell.from_cell) for cell in cells]
 
 
-class AggregationFromFileJson(BaseModel):
+class AggregationFileJson(BaseModel):
     """Вспомогательный класс для загрузки агрегации через json файл."""
     to_cell: str
     aggregation: str
     from_cells: list[str] | None
 
 
-@transaction.atomic()
+@transaction.atomic
 def update_aggregations_from_file(user: User, period: Period, aggregation_file: File) -> list[CellsAggregation]:
     """Обновление агрегации из json файла."""
+    can_change_period_sheet(user, period)
 
     for cell in get_cells_aggregation(user, period):
         delete_cells_aggregation(user, cell.id)
 
     try:
-        data = parse_obj_as(list[AggregationFromFileJson], json.load(aggregation_file))
+        data = parse_obj_as(list[AggregationFileJson], json.load(aggregation_file))
     except json.JSONDecodeError as e:
         raise ValueError(f'Неверный формат JSON: {e.msg}.')
     except ValidationError as error:
@@ -143,6 +148,35 @@ def update_aggregations_from_file(user: User, period: Period, aggregation_file: 
             aggregation_cells=aggregation.from_cells
         ) for aggregation in data
     ]
+
+
+def unload_aggregations_in_file(user: User, period: Period) -> str:
+    """Выгрузка агрегации периода в json файл."""
+    can_view_period(user, period)
+
+    data = [
+        dict(
+            AggregationFileJson(
+                to_cell=transformation_position_cell(cell),
+                aggregation=cell.aggregation,
+                from_cells=dependent_cells(cell.to_cells.all())
+            )
+        )
+        for cell in Cell.objects.filter(
+            column__sheet__period_id=period.id,
+            aggregation__isnull=False
+        ).prefetch_related('to_cells')
+    ]
+
+    path = join(
+        settings.STATICFILES_DIRS[1],
+        'temp_files',
+        f'aggregation_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.json'
+    )
+    with open(path, 'w') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+    return relpath(path, settings.BASE_DIR)
 
 
 def get_cell_aggregation_id(data_cell: str, period_id: str | int) -> str | int:
@@ -165,8 +199,8 @@ def get_cell_aggregation_id(data_cell: str, period_id: str | int) -> str | int:
 
 def delete_cells_aggregation(user: User, cell_id: str | int) -> None:
     """Удаление агрегации и зависимых ячеек."""
+    cell = check_cell_permission(user, cell_id)
     RelationshipCells.objects.filter(to_cell=cell_id).delete()
-    cell = Cell.objects.get(id=cell_id)
     cell.aggregation = None
     cell.save(update_fields=('aggregation',))
 
@@ -179,6 +213,8 @@ def add_aggregation_cell(
     aggregation_method: str,
     aggregation_cells: list[str]
 ) -> CellsAggregation:
+    """Добавление агрегации."""
+    can_change_period_sheet(user, period)
 
     to_cell_id = get_cell_aggregation_id(aggregation_cell, period.id)
     from_cell_ids = [get_cell_aggregation_id(cell, period.id) for cell in aggregation_cells]

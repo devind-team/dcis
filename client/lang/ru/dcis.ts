@@ -199,12 +199,6 @@ export default {
       },
       changeMenu: {
         buttonText: 'Изменить агрегацию',
-        updateAggregationFromFile: {
-          buttonText: 'Обновить агрегацию из файла',
-          header: 'Обновление агрегацию из файла',
-          aggregationsFile: 'Файл с новой агрегацией',
-          downloadTemplate: 'Скачать шаблон файла'
-        },
         addAggregation: {
           buttonText: 'Добавить агрегацию',
           header: 'Добавление агрегацию',
@@ -216,6 +210,15 @@ export default {
         },
         addCell: {
           buttonText: 'Добавить ячейку'
+        },
+        updateAggregationFromFile: {
+          buttonText: 'Обновить агрегацию из файла',
+          header: 'Обновление агрегацию из файла',
+          aggregationsFile: 'Файл с новой агрегацией',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        unloadAggregation: {
+          content: 'Выгрузить агрегацию'
         }
       },
       tableHeaders: {
