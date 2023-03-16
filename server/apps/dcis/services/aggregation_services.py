@@ -2,10 +2,14 @@
 
 import contextlib
 import json
+from datetime import datetime
+from os.path import join
+from typing import Any
 
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
 from devind_helpers.utils import gid2int
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.base import File
 from django.db import transaction
@@ -18,7 +22,7 @@ from apps.dcis.helpers.pydantic_translate import translate
 from apps.dcis.models import Cell, Period, RelationshipCells, Sheet
 from apps.dcis.permissions import can_change_period_sheet
 from apps.dcis.permissions.period_permissions import can_change_period
-
+from posixpath import relpath
 
 CellIDType = int | str
 
@@ -112,7 +116,7 @@ def dependent_cells(cells: list[Cell]) -> list[str]:
     return [transformation_position_cell(cell.from_cell) for cell in cells]
 
 
-class AggregationFromFileJson(BaseModel):
+class AggregationFileJson(BaseModel):
     """Вспомогательный класс для загрузки агрегации через json файл."""
     to_cell: str
     aggregation: str
@@ -127,7 +131,7 @@ def update_aggregations_from_file(user: User, period: Period, aggregation_file: 
         delete_cells_aggregation(user, cell.id)
 
     try:
-        data = parse_obj_as(list[AggregationFromFileJson], json.load(aggregation_file))
+        data = parse_obj_as(list[AggregationFileJson], json.load(aggregation_file))
     except json.JSONDecodeError as e:
         raise ValueError(f'Неверный формат JSON: {e.msg}.')
     except ValidationError as error:
@@ -143,6 +147,36 @@ def update_aggregations_from_file(user: User, period: Period, aggregation_file: 
             aggregation_cells=aggregation.from_cells
         ) for aggregation in data
     ]
+
+
+def unload_aggregations_in_file(user: User, get_host: Any | None, period: Period) -> str:
+    """Выгрузка аггрегации периода в json файл."""
+
+    can_change_period(user, period)
+
+    data = [
+        dict(
+            AggregationFileJson(
+                to_cell=transformation_position_cell(cell),
+                aggregation=cell.aggregation,
+                from_cells=dependent_cells(cell.to_cells.all())
+            )
+        )
+        for cell in Cell.objects.filter(
+            column__sheet__period_id=period.id,
+            aggregation__isnull=False
+        ).prefetch_related('to_cells')
+    ]
+
+    path = join(
+        settings.STATICFILES_DIRS[1],
+        'temp_files',
+        f'aggregation_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.json'
+    )
+    with open(path, 'w') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+    return relpath(path, settings.BASE_DIR)
 
 
 def get_cell_aggregation_id(data_cell: str, period_id: str | int) -> str | int:

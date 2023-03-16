@@ -17,7 +17,7 @@ from apps.dcis.schema.types import CellAggregationType
 from apps.dcis.services.aggregation_services import (
     add_aggregation_cell,
     delete_cells_aggregation,
-    update_aggregations_from_file,
+    unload_aggregations_in_file, update_aggregations_from_file,
 )
 
 
@@ -41,6 +41,27 @@ class UpdateAggregationsFromFileMutation(BaseMutation):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return UpdateAggregationsFromFileMutation(
             aggregation_cells=update_aggregations_from_file(info.context.user, period, aggregations_file)
+        )
+
+
+class UnloadAggregationsInFileMutation(BaseMutation):
+    """Выгрузка агригации периода в json файл."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+
+    src = graphene.String(description='Ссылка на сгенерированный файл')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, period_id: str):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return UnloadAggregationsInFileMutation(
+            src=unload_aggregations_in_file(
+                user=info.context.user,
+                get_host=info.context.get_host(),
+                period=period
+            )
         )
 
 
@@ -96,5 +117,6 @@ class AggregationMutations(graphene.ObjectType):
     """Мутации, связанные с агрегацией."""
 
     update_aggregations_from_file = UpdateAggregationsFromFileMutation.Field(required=True)
+    unload_aggregations_in_file = UnloadAggregationsInFileMutation.Field(required=True)
     add_aggregation = AddAggregationMutation.Field(required=True)
     delete_aggregation = DeleteAggregationMutation.Field(required=True)
