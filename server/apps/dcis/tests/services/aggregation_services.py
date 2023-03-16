@@ -1,10 +1,13 @@
 """Тесты модуля, отвечающего за работу с ячейками."""
 
 import json
-from unittest.mock import patch
+from os import listdir, remove
+from os.path import isfile, join
+from unittest.mock import MagicMock, patch
 
 from devind_dictionaries.models import Organization
 from devind_helpers.schema.types import ErrorFieldType
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -28,7 +31,7 @@ from apps.dcis.services.aggregation_services import (
     dependent_cells,
     get_cells_aggregation,
     transformation_position_cell,
-    update_aggregations_from_file,
+    unload_aggregations_in_file, update_aggregations_from_file,
 )
 
 
@@ -207,3 +210,24 @@ class AggregationTestCase(TestCase):
             update_aggregations_from_file(self.superuser, self.add_period, file)
 
         self.assertIn('Недопустимые данные JSON:', str(context.exception))
+
+    def test_unload_aggregations_in_file(self):
+        """Тестирование функции `unload_attributes_in_file`."""
+        get_host = MagicMock(return_value='http://testserver')
+        result = unload_aggregations_in_file(self.superuser, get_host, self.add_period)
+
+        self.assertIsInstance(result, str)
+        self.assertTrue(result.endswith('.json'))
+
+        with open(join(settings.BASE_DIR, result)) as file:
+            data = json.load(file)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 1)
+
+    def tearDown(self):
+        """Remove the temporary files created during the test."""
+        temp_dir = join(settings.STATICFILES_DIRS[1], 'temp_files')
+        for file in listdir(temp_dir):
+            file_path = join(temp_dir, file)
+            if isfile(file_path):
+                remove(file_path)
