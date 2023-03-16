@@ -3,13 +3,13 @@ v-menu(v-model="active", transition="slide-y-transition" offset-y left)
   template(#activator="{ on, attrs }")
     slot(name="activator" :on="on" :attrs="attrs")
   v-list(dense)
-    add-period-aggregation-cell(:period="period" :update="addUpdate")
+    add-period-aggregation-cell(v-if="period.canChangeSheet" :period="period" :update="addUpdate")
       template(#activator="{ on, attrs }")
         v-list-item(v-on="on" v-bind="attrs")
           v-list-item-icon
             v-icon mdi-form-select
           v-list-item-content {{ $t('dcis.periods.aggregationCells.changeMenu.addAggregation.buttonText') }}
-    update-period-aggregation-cells-from-file(:period="period", :update="fromFileUpdate")
+    update-period-aggregation-cells-from-file(v-if="period.canChangeSheet" :period="period", :update="fromFileUpdate")
       template(#activator="{ on, attrs }")
         v-list-item(v-on="on" v-bind="attrs")
           v-list-item-icon

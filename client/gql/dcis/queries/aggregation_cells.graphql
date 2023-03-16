@@ -1,4 +1,3 @@
-
 query AggregationCells($periodId: ID!){
 	aggregationCells(periodId: $periodId) {
     id

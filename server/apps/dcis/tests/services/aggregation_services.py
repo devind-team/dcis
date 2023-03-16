@@ -3,7 +3,7 @@
 import json
 from os import listdir, remove
 from os.path import isfile, join
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
 from devind_helpers.schema.types import ErrorFieldType
@@ -114,7 +114,7 @@ class AggregationTestCase(TestCase):
     def test_get_cells_aggregation_permission(self):
         """Тестирование функции `get_cells_aggregation` на права."""
         with patch.object(
-            self.superuser, 'has_perm', lambda perm: perm != 'dcis.change_period'
+            self.superuser, 'has_perm', lambda perm: perm != 'dcis.view_period'
         ), self.assertRaises(PermissionDenied):
             get_cells_aggregation(self.superuser, self.add_period)
 
@@ -213,8 +213,7 @@ class AggregationTestCase(TestCase):
 
     def test_unload_aggregations_in_file(self):
         """Тестирование функции `unload_attributes_in_file`."""
-        get_host = MagicMock(return_value='http://testserver')
-        result = unload_aggregations_in_file(self.superuser, get_host, self.add_period)
+        result = unload_aggregations_in_file(self.superuser, self.add_period)
 
         self.assertIsInstance(result, str)
         self.assertTrue(result.endswith('.json'))

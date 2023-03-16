@@ -59,7 +59,6 @@ class UnloadAggregationsInFileMutation(BaseMutation):
         return UnloadAggregationsInFileMutation(
             src=unload_aggregations_in_file(
                 user=info.context.user,
-                get_host=info.context.get_host(),
                 period=period
             )
         )
