@@ -8,7 +8,7 @@ left-navigator-container(
   template(#subheader) {{ activeDocument.objectName }}
   grid-sheets(
     v-model="activeSheetIndex"
-    :mode="mode"
+    :mode="GridMode.READ"
     :sheets="activeDocument.sheets"
     :active-sheet="activeSheet"
     :update-active-sheet="updateActiveSheet"
@@ -28,8 +28,6 @@ import { computed, defineComponent, PropType, ref, useRoute } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
-import SettingsDocument from '~/components/dcis/documents/SettingsDocument.vue'
-import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import { useCommonQuery } from '~/composables'
 import { DocumentQuery, DocumentQueryVariables, DocumentSheetQuery, DocumentSheetQueryVariables } from '~/types/graphql'
@@ -38,7 +36,7 @@ import { GridMode } from '~/types/grid'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, BreadCrumbs, SettingsDocument, SheetControl, GridSheets },
+  components: { LeftNavigatorContainer, BreadCrumbs, GridSheets },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
@@ -56,10 +54,6 @@ export default defineComponent({
       })
     })
 
-    const mode = computed<GridMode>(
-      () => activeDocument.value.lastStatus.status.edit ? GridMode.WRITE : GridMode.READ
-    )
-
     const { data: activeSheet, loading: activeSheetLoading, update: updateActiveSheet } = useCommonQuery<
       DocumentSheetQuery,
       DocumentSheetQueryVariables
@@ -76,10 +70,10 @@ export default defineComponent({
     })
 
     return {
+      GridMode,
       activeSheetIndex,
       activeDocument,
       activeDocumentLoading,
-      mode,
       activeSheet,
       activeSheetLoading,
       updateActiveSheet

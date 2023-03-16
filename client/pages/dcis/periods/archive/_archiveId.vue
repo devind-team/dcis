@@ -54,7 +54,15 @@ export default defineComponent({
       }
       return [
         ...props.breadCrumbs,
-        { text: archivePeriod.value.name, to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' }), exact: true }
+        {
+          text: archivePeriod.value.name,
+          to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' }),
+          exact: true
+        },
+        {
+          text: 'Архив',
+          to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' })
+        }
       ]
     })
 
@@ -65,6 +73,7 @@ export default defineComponent({
     })
 
     return {
+      route,
       archivePeriod,
       loading,
       drawer,

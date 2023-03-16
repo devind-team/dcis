@@ -36,10 +36,9 @@ import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import SheetsSettingsMenu from '~/components/dcis/periods/SheetsSettingsMenu.vue'
 
 export default defineComponent({
-  components: { SheetsSettingsMenu, LeftNavigatorContainer, SheetControl, GridSheets },
+  components: { LeftNavigatorContainer, SheetControl, GridSheets },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
