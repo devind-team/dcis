@@ -3,7 +3,7 @@ import json
 from collections import Counter
 from os import listdir, remove
 from os.path import isfile, join
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
 from django.conf import settings
@@ -289,8 +289,7 @@ class LimitationTestCase(TestCase):
 
     def test_unload_limitations_in_file(self):
         """Тестирование функции `unload_limitations_in_file`."""
-        get_host = MagicMock(return_value='http://testserver')
-        result = unload_limitations_in_file(self.superuser, get_host, self.update_file_period)
+        result = unload_limitations_in_file(self.superuser, self.update_file_period)
 
         self.assertIsInstance(result, str)
         self.assertTrue(result.endswith('.json'))

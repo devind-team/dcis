@@ -4,7 +4,6 @@ import json
 from datetime import datetime
 from os.path import join
 from posixpath import relpath
-from typing import Any
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -16,7 +15,7 @@ from pydantic import BaseModel
 from apps.core.models import User
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
 from apps.dcis.models import Limitation, Period
-from apps.dcis.permissions import can_change_period_limitations
+from apps.dcis.permissions import can_change_period_limitations, can_view_period
 
 
 @transaction.atomic
@@ -75,10 +74,10 @@ class LimitationFromJsonFile(BaseModel):
     message: str
 
 
-def unload_limitations_in_file(user: User, get_host: Any | None, period: Period) -> str:
-    """Выгрузка атребутов периода в json файл."""
+def unload_limitations_in_file(user: User, period: Period) -> str:
+    """Выгрузка ограничений периода в json файл."""
 
-    can_change_period_limitations(user, period)
+    can_view_period(user, period)
 
     data = [
         dict(
