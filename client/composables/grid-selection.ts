@@ -381,8 +381,8 @@ export function useGridSelection (
       cellsSelection.value.last = cell
     }
   }
-  const mouseupCell = (cell: CellType): void => {
-    if (selectionState.value === 'cell' && cellsSelection.value.first.id === cellsSelection.value.last.id) {
+  const dblclickCell = (cell: CellType): void => {
+    if (cellsSelection.value && cellsSelection.value.first.id === cellsSelection.value.last.id) {
       setActiveCell(cell)
     }
   }
@@ -440,7 +440,7 @@ export function useGridSelection (
     selectAllCells,
     mousedownCell,
     mouseenterCell,
-    mouseupCell,
+    dblclickCell,
     mouseenterColumnName,
     mouseDownColumnName,
     mouseenterRowName,

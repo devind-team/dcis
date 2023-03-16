@@ -11,11 +11,12 @@ import {
   useAddChildRowDimensionMutation,
   useAddRowDimensionMutation,
   useChangeCellDefaultMutation,
+  usePasteIntoCellsMutation,
   useChangeChildRowDimensionHeightMutation,
   useChangeColumnDimensionWidthMutation,
   useChangeFileValueMutation,
   useChangeRowDimensionHeightMutation,
-  useChangeValueMutation,
+  useChangeValuesMutation,
   useDeleteChildRowDimensionMutation,
   useDeleteRowDimensionMutation,
   useUnloadFileValueArchiveMutation
@@ -28,7 +29,13 @@ import {
   GridModeInject,
   UpdateActiveSheetInject
 } from '~/types/grid'
-import { CellType, DocumentSheetQuery, PeriodSheetQuery, RowDimensionType, ValueFilesQuery } from '~/types/graphql'
+import {
+  CellType,
+  DocumentSheetQuery,
+  PeriodSheetQuery,
+  RowDimensionType,
+  ValueFilesQuery
+} from '~/types/graphql'
 
 export function useAddRowDimension () {
   const mode = inject(GridModeInject)
@@ -114,10 +121,13 @@ export function useChangeValue () {
     return useChangeCellDefaultMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
   if (mode.value === GridMode.WRITE) {
-    return useChangeValueMutation(
+    const changeValues = useChangeValuesMutation(
       computed(() => activeDocument.value.id),
       computed(() => activeSheet.value.id)
     )
+    return async function (cell: CellType, value: string) {
+      await changeValues([{ cell, value }])
+    }
   }
   return null
 }
@@ -149,6 +159,23 @@ export function useUnloadFileValueArchive (cell: Ref<CellType>) {
       computed(() => activeSheet.value.id),
       cell
     )
+  }
+  return null
+}
+
+export function usePaste () {
+  const mode = inject(GridModeInject)
+  const activeSheet = inject(ActiveSheetInject)
+  const updateActiveSheet = inject(UpdateActiveSheetInject)
+  const activeDocument = inject(ActiveDocumentInject)
+  if (mode.value === GridMode.WRITE) {
+    return useChangeValuesMutation(
+      computed(() => activeDocument.value.id),
+      computed(() => activeSheet.value.id)
+    )
+  }
+  if (mode.value === GridMode.CHANGE) {
+    return usePasteIntoCellsMutation(updateActiveSheet as Ref<UpdateType<PeriodSheetQuery>>)
   }
   return null
 }

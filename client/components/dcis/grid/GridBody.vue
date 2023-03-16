@@ -24,7 +24,7 @@ tbody
       :rowspan="cell.rowspan"
       @mousedown="mousedownCell(cell)"
       @mouseenter="mouseenterCell(cell)"
-      @mouseup="mouseupCell(cell)"
+      @dblclick="dblclickCell(cell)"
     )
       grid-cell(
         :style="getCellContentStyle(cell)"
@@ -60,7 +60,13 @@ import {
   ResizingType,
   RowFixedInfoType
 } from '~/types/grid'
-import { positionsToRangeIndices } from '~/services/grid'
+import {
+  getCellHeightStyle,
+  getCellTextFormattingStyle,
+  getCellBorderStyle,
+  getCellBackgroundStyle,
+  getCellExcelStyle
+} from '~/services/grid'
 import { useCanAddRowBeforeOrAfter, useCanAddRowInside, useCanDeleteRow } from '~/composables/grid-permissions'
 import GridRowControl from '~/components/dcis/grid/controls/GridRowControl.vue'
 import GridCell from '~/components/dcis/grid/GridCell.vue'
@@ -104,7 +110,7 @@ export default defineComponent({
     mouseupRowName: { type: Function as PropType<() => void>, required: true },
     mousedownCell: { type: Function as PropType<(cell: CellType) => void>, required: true },
     mouseenterCell: { type: Function as PropType<(cell: CellType) => void>, required: true },
-    mouseupCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
+    dblclickCell: { type: Function as PropType<(cell: CellType) => void>, required: true }
   },
   setup (props) {
     const mode = inject(GridModeInject)
@@ -167,41 +173,21 @@ export default defineComponent({
       }
     }
     const getCellStyle = (cell: CellType): Record<string, string> => {
-      const textDecoration: string[] = []
-      const style: Record<string, string> = {}
+      const style: Record<string, string> = {
+        ...getCellTextFormattingStyle(cell),
+        ...getCellBorderStyle(cell),
+        ...getCellExcelStyle(cell)
+      }
       if (isFixedSelection.value) {
         const fixedInfo = props.getCellFixedInfo(cell)
         if (fixedInfo.fixed) {
           style.left = `${fixedInfo.position}px`
         }
       }
-      if (cell.strong) { style['font-weight'] = 'bold' }
-      if (cell.italic) { style['font-style'] = 'italic' }
-      if (cell.strike) { textDecoration.push('line-through') }
-      if (cell.underline) { textDecoration.push('underline') }
-      if (cell.size) { style['font-size'] = `${cell.size}px` }
-      if (cell.error) {
-        style.color = 'red'
-      } else if (cell.color) {
-        style.color = cell.color
-      }
-      if (textDecoration.length) {
-        style['text-decoration'] = textDecoration.join(' ')
-      }
-      const borderColor: Record<string, string | null> = JSON.parse(cell.borderColor)
-      for (const position of ['top', 'right', 'bottom', 'left']) {
-        if (borderColor[position]) {
-          style[`border-${position}`] = `1 px solid ${borderColor[position] || 'black'}`
-        }
-      }
-      if (cell.numberFormat) {
-        style['mso-number-format'] = cell.numberFormat
-      }
       return style
     }
 
     const getCellContentStyle = (cell: CellType): Record<string, string> => {
-      const row = activeSheet.value.rows.find((row: RowDimensionType) => row.id === cell.rowId)
       const valuesMap = {
         left: 'flex-start',
         top: 'flex-start',
@@ -211,28 +197,15 @@ export default defineComponent({
         bottom: 'flex-end'
       }
       const style: Record<string, string> = {
-        height: `${getCellHeight(cell)}px`
+        ...getCellHeightStyle(cell, props.getRowHeight, activeSheet.value),
+        ...getCellBackgroundStyle(cell, activeSheet.value)
       }
       if (cell.horizontalAlign) {
         style['justify-content'] = valuesMap[cell.horizontalAlign]
         style['text-align'] = cell.horizontalAlign
       }
       if (cell.verticalAlign) { style['align-items'] = valuesMap[cell.verticalAlign] }
-      if (cell.background && cell.background !== '#FFFFFF') {
-        style.background = cell.background
-      } else if (row.background) {
-        style.background = row.background
-      }
       return style
-    }
-
-    const getCellHeight = (cell: CellType) => {
-      const { minRow, maxRow } = positionsToRangeIndices(cell.relatedGlobalPositions)
-      let height = 0
-      for (let i = minRow - 1; i <= maxRow - 1; i++) {
-        height += props.getRowHeight(activeSheet.value.rows[i])
-      }
-      return height
     }
 
     const currentRow = ref<RowDimensionType | null>(null)

@@ -62,6 +62,29 @@ type ActiveStatisticsType {
   times: [DateStatisticsType]!
 }
 
+input AddAggregationMutationInput {
+  """Агрегируемая ячейка"""
+  aggregationCell: String!
+  """Агрегируемые ячейки"""
+  aggregationCells: [String]
+  """Метод агрегации"""
+  aggregationMethod: String!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Добавление агрегации."""
+type AddAggregationMutationPayload {
+  """Добавлена агрегация"""
+  aggregationCells: CellAggregationType
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddAttributeMutationInput {
   clientMutationId: String
   default: String
@@ -793,6 +816,18 @@ enum CellAggregation {
   SUM
 }
 
+"""Тип ячейки агрегации."""
+type CellAggregationType {
+  """Метод агрегации"""
+  aggregation: String!
+  """Ячейки агрегации"""
+  cells: [String!]
+  """Идентификатор"""
+  id: ID!
+  """Позиция ячейки"""
+  position: String!
+}
+
 """An enumeration."""
 enum CellKind {
   """b"""
@@ -831,6 +866,63 @@ enum CellKind {
   USER
 }
 
+"""Входные данные для вставки в ячейку."""
+input CellPasteOptionsInputType {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  """Значение по умолчанию"""
+  default: String!
+  """Стили"""
+  style: CellPasteStyleInputType
+}
+
+"""Результат вставки в ячейку."""
+type CellPasteOptionsType {
+  """Цвет фона"""
+  background: String!
+  """Цвет текста"""
+  color: String!
+  """Значение по умолчанию"""
+  default: String
+  """Горизонтальное выравнивание"""
+  horizontalAlign: String
+  id: ID!
+  """Курсив"""
+  italic: Boolean!
+  """Размер шрифта"""
+  size: Int!
+  """Зачеркнутый"""
+  strike: Boolean!
+  """Жирный шрифт"""
+  strong: Boolean!
+  """Тип подчеркивания"""
+  underline: String
+  """Вертикальное выравнивание"""
+  verticalAlign: String
+}
+
+"""Стили для вставки в ячейку."""
+input CellPasteStyleInputType {
+  """Цвет фона"""
+  background: String = "#FFFFFF"
+  """Цвет текста"""
+  color: String = "#000000"
+  """Горизонтальное выравнивание"""
+  horizontalAlign: String
+  """Курсив"""
+  italic: Boolean!
+  """Размер шрифта"""
+  size: Int!
+  """Зачеркнутый"""
+  strike: Boolean!
+  """Жирный шрифт"""
+  strong: Boolean!
+  """Тип подчеркивания"""
+  underline: String
+  """Вертикальное выравнивание"""
+  verticalAlign: String
+}
+
 """Тип ячейки."""
 type CellType {
   """Метод агрегации"""
@@ -858,7 +950,7 @@ type CellType {
   """Позиция в плоской структуре"""
   globalPosition: String!
   """Горизонтальное выравнивание"""
-  horizontalAlign: ID
+  horizontalAlign: String
   """Идентификатор"""
   id: ID!
   """Является ли поле шаблоном"""
@@ -892,7 +984,7 @@ type CellType {
   """Значение"""
   value: String
   """Вертикальное выравнивание"""
-  verticalAlign: ID
+  verticalAlign: String
 }
 
 input ChangeAttributeMutationInput {
@@ -1029,8 +1121,8 @@ input ChangeCellsOptionMutationInput {
 
 - strong - true, false
 - italic - true, false
-- strike - true, false
 - underline - [None, 'single', 'double', 'single_accounting', 'double_accounting']
+- strike - true, false
 - horizontal_align - ['left', 'center', 'right']
 - vertical_align - ['top', 'middle', 'bottom']
 - size - число от 6 до 24
@@ -1043,7 +1135,7 @@ input ChangeCellsOptionMutationInput {
 """
 type ChangeCellsOptionMutationPayload {
   """Измененные свойства ячеек"""
-  changedOptions: [ChangedCellOption!]
+  changedOptions: [ChangedCellOptionType!]
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1611,20 +1703,18 @@ type ChangeUserPropsMutationPayload {
   user: UserType!
 }
 
-input ChangeValueMutationInput {
-  """Идентификатор ячейки"""
-  cellId: ID!
+input ChangeValuesMutationInput {
   clientMutationId: String
   """Идентификатор документа"""
   documentId: ID!
   """Идентификатор листа"""
   sheetId: ID!
-  """Значение"""
-  value: String!
+  """Значения ячеек"""
+  values: [ValueInputType!]!
 }
 
-"""Изменение значения ячейки."""
-type ChangeValueMutationPayload {
+"""Изменение значений ячеек."""
+type ChangeValuesMutationPayload {
   clientMutationId: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
@@ -1637,7 +1727,7 @@ type ChangeValueMutationPayload {
 }
 
 """Измененное свойство ячейки."""
-type ChangedCellOption {
+type ChangedCellOptionType {
   """Идентификаторы ячеек"""
   cellId: ID!
   """Идентификатор поля"""
@@ -1778,6 +1868,23 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar DateTime
+
+input DeleteAggregationMutationInput {
+  """Идентификатор агрегирующей ячеуки"""
+  aggregationCellId: ID!
+  clientMutationId: String
+}
+
+"""Удаление агрегации."""
+type DeleteAggregationMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаленной агрегации"""
+  id: ID
+  """Успех мутации"""
+  success: Boolean!
+}
 
 input DeleteAttributeMutationInput {
   """
@@ -2433,6 +2540,8 @@ enum LogEntryAction {
   A_1
   """delete"""
   A_2
+  """access"""
+  A_3
 }
 
 """Логирование действия пользователя."""
@@ -2539,6 +2648,8 @@ type MailingType {
 
 """Мутации на изменение чего-либо."""
 type Mutation {
+  """Добавление агрегации."""
+  addAggregation(input: AddAggregationMutationInput!): AddAggregationMutationPayload!
   """Добавление атрибута"""
   addAttribute(input: AddAttributeMutationInput!): AddAttributeMutationPayload!
   """Добавление нового КБК"""
@@ -2644,11 +2755,13 @@ type Mutation {
   """Мутация для изменения полей пользователя."""
   changeUserProps(input: ChangeUserPropsMutationInput!): ChangeUserPropsMutationPayload!
   """Изменение значения ячейки"""
-  changeValue(input: ChangeValueMutationInput!): ChangeValueMutationPayload!
+  changeValues(input: ChangeValuesMutationInput!): ChangeValuesMutationPayload!
   """Подтверждение кода."""
   confirmEmail(input: ConfirmEmailMutationInput!): ConfirmEmailMutationPayload!
   """Мутация на перенос групп с пользователями из другого периода."""
   copyPeriodGroups(input: CopyPeriodGroupsMutationInput!): CopyPeriodGroupsMutationPayload!
+  """Удаление агрегации."""
+  deleteAggregation(input: DeleteAggregationMutationInput!): DeleteAggregationMutationPayload!
   """Удаление атрибута"""
   deleteAttribute(input: DeleteAttributeMutationInput!): DeleteAttributeMutationPayload!
   """Удаление дочерней строки."""
@@ -2689,6 +2802,8 @@ type Mutation {
   getToken(input: GetTokenMutationInput!): GetTokenMutationPayload!
   """Мутация выхода"""
   logout(input: LogoutMutationInput!): LogoutMutationPayload!
+  """Вставка в ячейки"""
+  pasteIntoCells(input: PasteIntoCellsMutationInput!): PasteIntoCellsMutationPayload!
   """Мутация для сброса пароля пользователя."""
   recoveryPassword(input: RecoveryPasswordMutationInput!): RecoveryPasswordMutationPayload!
   """Мутация регистрации новых пользователей."""
@@ -2703,14 +2818,22 @@ type Mutation {
   restorePassword(input: RestorePasswordMutationInput!): RestorePasswordMutationPayload!
   """Отправка письма поддержки"""
   supportSubmit(input: SupportSubmitMutationInput!): SupportSubmitMutationPayload!
+  """Выгрузка агригации периода в json файл."""
+  unloadAggregationsInFile(input: UnloadAggregationsInFileMutationInput!): UnloadAggregationsInFileMutationPayload!
+  """Выгрузка атребутов периода в json файл."""
+  unloadAttributesInFile(input: UnloadAttributesInFileMutationInput!): UnloadAttributesInFileMutationPayload!
   """Выгрузка документа."""
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
   """Выгрузка архива значения ячейки типа `Файл`"""
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
   """Выгрузка периода в формате Excel."""
   unloadPeriod(input: UnloadPeriodMutationInput!): UnloadPeriodMutationPayload!
+  """Обновление агрегации из json файла."""
+  updateAggregationsFromFile(input: UpdateAggregationsFromFileMutationInput!): UpdateAggregationsFromFileMutationPayload!
   """Обновление ограничений, накладываемых на лист, из json файла."""
   updateLimitationsFromFile(input: UpdateLimitationsFromFileMutationInput!): UpdateLimitationsFromFileMutationPayload!
+  """Загрузка атребутов через json файл"""
+  uploadAttributesFromFile(input: UploadAttributesFromFileMutationInput!): UploadAttributesFromFileMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
 }
@@ -3089,6 +3212,23 @@ type PageInfo {
   startCursor: String
 }
 
+input PasteIntoCellsMutationInput {
+  clientMutationId: String
+  """Данные для вставки в ячейки"""
+  options: [CellPasteOptionsInputType!]!
+}
+
+"""Вставка в ячейки."""
+type PasteIntoCellsMutationPayload {
+  """Результат вставки в ячейки"""
+  changedOptions: [CellPasteOptionsType!]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 """Группы с содержанием привилегий."""
 type PeriodGroupType {
   """Дата создания"""
@@ -3333,6 +3473,11 @@ type Query {
   activeStatistics: ActiveStatisticsType!
   """Переназначение статусов"""
   addStatuses: [AddStatusType!]
+  """Агрегированные ячейки документов периода"""
+  aggregationCells(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [CellAggregationType]
   """Приложения"""
   applications: [ApplicationType!]!
   """Получение атрибутов, привязанных к периоду"""
@@ -3481,7 +3626,7 @@ type Query {
     offset: Int
   ): OrganizationTypeConnection
   """Получение организаций, у которых не поданы документы в периоде"""
-  organizationsHasNotDocument(
+  organizationsWithoutDocument(
     """Идентификатор периода"""
     periodId: ID!
   ): [OrganizationType]!
@@ -3987,6 +4132,40 @@ type TableType {
   rows: [TableRowType]!
 }
 
+input UnloadAggregationsInFileMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Выгрузка агригации периода в json файл."""
+type UnloadAggregationsInFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный файл"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UnloadAttributesInFileMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Выгрузка атребутов периода в json файл."""
+type UnloadAttributesInFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный файл"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input UnloadDocumentMutationInput {
   """Дополнительные параметры"""
   additional: [String!]
@@ -4064,6 +4243,25 @@ type UnloadPeriodMutationPayload {
   success: Boolean!
 }
 
+input UpdateAggregationsFromFileMutationInput {
+  """json файл агрегации ячеек"""
+  aggregationsFile: Upload!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Обновление агрегации из json файла."""
+type UpdateAggregationsFromFileMutationPayload {
+  """Новая агрегация"""
+  aggregationCells: [CellAggregationType]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input UpdateLimitationsFromFileMutationInput {
   clientMutationId: String
   """json файл c ограничениями, накладываемыми на листы"""
@@ -4088,6 +4286,25 @@ Create scalar that ignores normal serialization/deserialization, since
 that will be handled by the multipart request spec
 """
 scalar Upload
+
+input UploadAttributesFromFileMutationInput {
+  """json файл агрегации ячеек"""
+  attributesFile: Upload!
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Загрузка атребутов периода через json файл."""
+type UploadAttributesFromFileMutationPayload {
+  """Новая агрегация"""
+  attributes: [AttributeType]
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
 
 input UploadUsersMutationInput {
   clientMutationId: String
@@ -4163,6 +4380,14 @@ type UserTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: UserType
+}
+
+"""Значение ячейки."""
+input ValueInputType {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  """Значение"""
+  value: String!
 }
 
 """Тип значения."""

@@ -1,7 +1,5 @@
 """Модуль, отвечающий за работу со статусами."""
-from copy import deepcopy
 from dataclasses import dataclass
-from itertools import product
 from typing import cast
 
 from django.core.exceptions import ValidationError

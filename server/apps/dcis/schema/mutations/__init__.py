@@ -1,3 +1,4 @@
+from .aggregation_mutation import AggregationMutations
 from .attribute_mutations import AttributeMutations
 from .cell_mutations import CellMutations
 from .curator_mutation import CuratorMutations

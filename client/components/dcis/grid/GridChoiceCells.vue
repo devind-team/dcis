@@ -1,7 +1,7 @@
 <template lang="pug">
-v-snackbar(:value="gridChoice.active.value" timeout="-1") {{ gridChoice.text.value }}
+v-snackbar(:value="gridChoice.active.value" timeout="-1" top) {{ gridChoice.text.value }}
   template(#action="{ attrs }")
-    v-btn(@click="gridChoice.endChoice" v-bind="attrs" text) Выбрать
+    v-btn(@click="gridChoice.endChoice" v-bind="attrs" text) {{ $t('select') }}
     v-btn(@click="gridChoice.cancel" v-bind="attrs" icon)
       v-icon mdi-close
 </template>

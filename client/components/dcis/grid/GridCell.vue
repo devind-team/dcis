@@ -69,7 +69,8 @@ export default defineComponent({
       }))
     })
 
-    const canChangeValue = useCanChangeValue(cell)
+    const canChangeValueFunction = useCanChangeValue()
+    const canChangeValue = computed<boolean>(() => canChangeValueFunction(props.cell))
 
     const changeValue = useChangeValue()
     const changeFileValue = useChangeFileValue(cell, updateFiles)

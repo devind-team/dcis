@@ -191,7 +191,6 @@ def add_documents(
     period: Period,
     sheets: dict[str, Sheet],
     status: Status,
-    comment: str,
     documents_data: dict[int, dict[str, list[CellData]]],
     divisions: dict[int, str]
 ) -> list[Document]:
@@ -217,7 +216,7 @@ def add_documents(
             object_name=divisions[division_id]
         )
         document.sheets.add(*sheets.values())
-        document.documentstatus_set.create(comment=comment, status=status, user=user)
+        document.documentstatus_set.create(status=status, user=user)
         cell_data: CellData
         values.extend([
             Value(

@@ -62,7 +62,8 @@ export default {
       sheets: 'Таблица',
       report: 'Сводный отчет',
       unload: 'Выгрузка',
-      settings: '@:settings'
+      settings: '@:settings',
+      aggregations: 'Агрегация'
     },
     statuses: {
       preparation: 'Подготовка',
@@ -185,6 +186,49 @@ export default {
       },
       deleteItemName: 'ограничение'
     },
+    aggregationCells: {
+      name: '@:dcis.periods.links.aggregations',
+      kinds: {
+        sum: 'Сумма',
+        avg: 'Среднее арифметическое',
+        max: 'Максимальное значение',
+        min: 'Минимальное значение'
+      },
+      changeMenu: {
+        buttonText: 'Изменить агрегацию',
+        addAggregation: {
+          buttonText: 'Добавить агрегацию',
+          header: 'Добавление агрегацию',
+          errorMessage: 'Сообщение об ошибке',
+          cell: 'Ячейка',
+          method: 'Метод агрегации',
+          cells: 'Агрегируемые ячейки',
+          sheet: 'Лист'
+        },
+        addCell: {
+          buttonText: 'Добавить ячейку'
+        },
+        updateAggregationFromFile: {
+          buttonText: 'Обновить агрегацию из файла',
+          header: 'Обновление агрегацию из файла',
+          aggregationsFile: 'Файл с новой агрегацией',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        unloadAggregation: {
+          content: 'Выгрузить агрегацию'
+        }
+      },
+      tableHeaders: {
+        position: 'Ячейка',
+        aggregateType: 'Метод агрегации',
+        listAggregateCells: 'Агрегируемые ячейки',
+        actions: '@:actions'
+      },
+      tooltips: {
+        delete: '@:delete'
+      },
+      deleteItemName: 'агрегацию ячейки'
+    },
     groups: {
       name: '@:dcis.periods.links.groups',
       addGroup: {
@@ -249,13 +293,8 @@ export default {
     },
     report: {
       name: '@:dcis.periods.links.report',
-      settings: {
-        unload: 'Выгрузить сводный отчет'
-      },
       documentsFilter: {
         title: 'Выбор документов',
-        noFiltrationMessage: 'Выбрать документы',
-        multipleMessage: 'Выбрано документов: {count}',
         selectMainDocument: 'Выбрать основной документ',
         mainDocumentSelection: 'Выбор основного документа',
         mainDocument: 'Выбран основной документ: {divisionId}',
@@ -278,9 +317,7 @@ export default {
         }
       },
       rowsFilter: {
-        title: 'Выбор расширенных строки',
-        noFiltrationMessage: 'Выбрать расширенные строки',
-        multipleMessage: 'Выбрано расширенных строк: {count}'
+        title: 'Выбор расширенных строк'
       }
     },
     unload: {
@@ -395,10 +432,41 @@ export default {
     toolbar: {
       addRow: 'Добавить строку'
     },
+    sheetMenu: {
+      editMenu: {
+        buttonText: 'Правка',
+        cut: 'Вырезать',
+        cutShortcut: 'Ctrl+X',
+        copy: 'Копировать',
+        copyShortcut: 'Ctrl+C',
+        paste: 'Вставить',
+        pasteShortcut: 'Ctrl+V',
+        shortcutDialog: {
+          title: 'Копирование и вставка',
+          message: 'Через меню "Правка" эта операция недоступна, однако можно использовать:',
+          toCut: 'для вырезания',
+          toCopy: 'для копирования',
+          toPaste: 'для вставки'
+        }
+      },
+      documentUnloadMenu: {
+        buttonText: 'Выгрузка',
+        unload: '@:dcis.documents.unloadDocument.name'
+      },
+      tableSettings: {
+        buttonText: '@:settings',
+        showSettings: '@:dcis.sheets.settings.show'
+      },
+      reportUnloadMenu: {
+        buttonText: '@:settings',
+        documentFilter: '@:dcis.periods.report.documentsFilter.title',
+        rowsFilter: '@:dcis.periods.report.rowsFilter.title'
+      }
+    },
     sheetToolbar: {
       readonly: 'Только для чтения',
       fix: 'Закрепление столбцов/строк',
-      fontSize: 'Шрифт',
+      fontSize: 'Размер шрифта',
       kind: 'Тип',
       commaDecrease: 'Уменьшить разрядность',
       commaIncrease: 'Увеличить разрядность',
@@ -483,11 +551,11 @@ export default {
   attributes: {
     adds: 'Добавить атрибуты',
     add: 'Добавить атрибут',
-    change: 'Изменить',
-    delete: 'Удалить',
+    change: '@:change',
+    delete: '@:delete',
     addMenu: {
       header: 'Добавление атрибута',
-      buttonText: 'Добавить',
+      buttonText: '@:add',
       name: 'Наименование',
       placeholder: 'Подсказка',
       key: 'Ключ',
@@ -506,13 +574,22 @@ export default {
     },
     changeMenu: {
       header: 'Изменение атрибута',
-      buttonText: 'Изменить',
+      buttonText: '@:change',
       name: 'Наименование',
       placeholder: 'Подсказка',
       key: 'Ключ',
       kind: 'Тип',
       default: 'Значение по умолчанию',
       mutable: 'Разрешить изменение'
+    },
+    unloadAttributes: {
+      content: 'Выгрузить атрибуры'
+    },
+    uploadAttributes: {
+      buttonText: 'Обновить атребуты из файла',
+      header: 'Обновление атребуты из файла',
+      attributesFile: 'Файл с новыми атребутами',
+      downloadTemplate: 'Скачать шаблон файла'
     },
     tableHeaders: {
       name: 'Название параметра',

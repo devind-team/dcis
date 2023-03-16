@@ -13,16 +13,60 @@ mutation-modal-form(
   template(#activator="{ on }")
     slot(name="activator" :on="on")
   template(#form)
-    validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.attributes.addMenu.name'))" rules="required")
-      v-text-field(v-model="name" :error-messages="errors" :label="String($t('dcis.attributes.addMenu.name'))" :success="valid" autofocus)
-    validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.attributes.addMenu.placeholder'))" rules="required")
-      v-text-field(v-model="placeholder" :error-messages="errors" :label="String($t('dcis.attributes.addMenu.placeholder'))" :success="valid")
-    validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.attributes.addMenu.key'))" rules="required")
-      v-text-field(v-model="key" :error-messages="errors" :label="String($t('dcis.attributes.addMenu.key'))" :success="valid")
-    validation-provider(v-slot="{ errors, valid }" :name="String($t('dcis.attributes.addMenu.kind'))" rules="required")
-      v-select(v-model="kind" :items="kinds" :label="String($t('dcis.attributes.addMenu.kind'))" :error-messages="errors" :success="valid")
-    v-text-field(v-model="def" :label="String($t('dcis.attributes.addMenu.default'))")
-    v-checkbox(v-model="mutable" :label="String($t('dcis.attributes.addMenu.mutable'))")
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.attributes.addMenu.name'))"
+      rules="required"
+    )
+      v-text-field(
+        v-model="name"
+        :error-messages="errors"
+        :label="String($t('dcis.attributes.addMenu.name'))"
+        :success="valid"
+        autofocus
+      )
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.attributes.addMenu.placeholder'))"
+      rules="required"
+    )
+      v-text-field(
+        v-model="placeholder"
+        :error-messages="errors"
+        :label="String($t('dcis.attributes.addMenu.placeholder'))"
+        :success="valid"
+      )
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.attributes.addMenu.key'))"
+      rules="required"
+    )
+      v-text-field(
+        v-model="key"
+        :error-messages="errors"
+        :label="String($t('dcis.attributes.addMenu.key'))"
+        :success="valid"
+      )
+    validation-provider(
+      v-slot="{ errors, valid }"
+      :name="String($t('dcis.attributes.addMenu.kind'))"
+      rules="required"
+    )
+      v-select(
+        v-model="kind"
+        :items="kinds"
+        :label="String($t('dcis.attributes.addMenu.kind'))"
+        :error-messages="errors"
+        :success="valid"
+      )
+    v-text-field(
+      v-model="def"
+      :label="String($t('dcis.attributes.addMenu.default'))"
+    )
+    v-checkbox(
+      v-model="mutable"
+      :label="String($t('dcis.attributes.addMenu.mutable'))"
+    )
 </template>
 
 <script lang="ts">

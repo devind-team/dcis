@@ -1,0 +1,31 @@
+[
+  {
+    "to_cell": "'Форма 1'!A1",
+    "aggregation": "sum",
+    "from_cells": [
+      "'Форма 1'!B1",
+      "'Форма 1б'!C7"
+    ]
+  },
+  {
+    "to_cell": "'Форма 1б'!A1",
+    "aggregation": "avg",
+    "from_cells": [
+      "'Форма 1'!B1",
+      "'Форма 1б'!C7"
+    ]
+  },
+  {
+    "to_cell": "'Форма 1б'!A1",
+    "aggregation": "min",
+    "from_cells": [
+      "'Форма 1'!B1",
+      "'Форма 1б'!C7"
+    ]
+  },
+  {
+    "to_cell": "'Форма 1б'!A1",
+    "aggregation": "max",
+    "from_cells": []
+  }
+]

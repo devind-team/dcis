@@ -5,7 +5,7 @@ v-dialog(v-model="active" width="50vw" )
   v-card
     v-card-title {{ $t('dcis.sheets.settings.show') }}
       v-spacer
-      v-btn(@click="close" icon)
+      v-btn(icon @click="close")
         v-icon mdi-close
     v-card-text
       v-data-table(:headers="headers" :items="sheets" dense disable-sort disable-pagination hide-default-footer)

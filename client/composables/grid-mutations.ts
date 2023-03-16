@@ -14,6 +14,8 @@ import {
   ChangeCellDefaultMutationVariables,
   ChangeCellsOptionMutation,
   ChangeCellsOptionMutationVariables,
+  PasteIntoCellsMutation,
+  PasteIntoCellsMutationVariables,
   ChangeChildRowDimensionHeightMutation,
   ChangeChildRowDimensionHeightMutationVariables,
   ChangeColumnDimensionMutation,
@@ -26,8 +28,8 @@ import {
   ChangeRowDimensionMutationVariables,
   ChangeRowDimensionsFixedMutation,
   ChangeRowDimensionsFixedMutationVariables,
-  ChangeValueMutation,
-  ChangeValueMutationVariables,
+  ChangeValuesMutation,
+  ChangeValuesMutationVariables,
   ColumnDimensionFieldsFragment,
   ColumnDimensionType,
   DeleteChildRowDimensionMutation,
@@ -44,7 +46,9 @@ import {
   UnloadFileValueArchiveMutation,
   UnloadFileValueArchiveMutationVariables,
   ValueFilesQuery,
-  ValueType
+  ValueType,
+  CellPasteStyleInputType,
+  CellPasteOptionsInputType
 } from '~/types/graphql'
 import { findCell, parsePosition } from '~/services/grid'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
@@ -60,7 +64,8 @@ import changeChildRowDimensionHeightMutation
   from '~/gql/dcis/mutations/document/change_child_row_dimension_height.graphql'
 import changeCellDefaultMutation from '~/gql/dcis/mutations/cell/change_cell_default.graphql'
 import changeCellsOptionMutation from '~/gql/dcis/mutations/cell/change_cells_option.graphql'
-import changeValueMutation from '~/gql/dcis/mutations/values/change_value.graphql'
+import pasteIntoCellsMutation from '~/gql/dcis/mutations/cell/paste_into_cells.graphql'
+import changeValuesMutation from '~/gql/dcis/mutations/values/change_values.graphql'
 import changeFileValueMutation from '~/gql/dcis/mutations/values/change_file_value.graphql'
 import unloadFileValueArchiveMutation from '~/gql/dcis/mutations/values/unload_file_value_archive.graphql'
 
@@ -68,6 +73,17 @@ export enum AddRowDimensionPosition {
   BEFORE,
   AFTER,
   INSIDE
+}
+
+export type ValueInputType = {
+  cell: CellType
+  value: string
+}
+
+export type ValueStyleInputType = {
+  cell: CellType
+  value: string
+  style: CellPasteStyleInputType | null
 }
 
 export function useAddRowDimensionMutation (
@@ -800,6 +816,51 @@ export function useChangeCellsOptionMutation (updateSheet: Ref<UpdateType<Period
   }
 }
 
+export function usePasteIntoCellsMutation (updateSheet: Ref<UpdateType<PeriodSheetQuery>>) {
+  const { mutate } = useMutation<
+    PasteIntoCellsMutation,
+    PasteIntoCellsMutationVariables
+  >(pasteIntoCellsMutation, {
+    update (dataProxy: DataProxy, result: Omit<FetchResult<PasteIntoCellsMutation>, 'context'>) {
+      if (result.data.pasteIntoCells.success) {
+        updateSheet.value(dataProxy, result, (
+          data: PeriodSheetQuery, {
+            data: { pasteIntoCells: { changedOptions } }
+          }: Omit<FetchResult<PasteIntoCellsMutation>, 'context'>
+        ) => {
+          for (const option of changedOptions) {
+            const cell = findCell(
+              data.periodSheet as SheetType,
+              (c: CellType) => c.id === option.id
+            )
+            cell.value = option.default
+            cell.strong = option.strong
+            cell.italic = option.italic
+            cell.underline = option.underline
+            cell.strike = option.strike
+            cell.horizontalAlign = option.horizontalAlign
+            cell.verticalAlign = option.verticalAlign
+            cell.size = option.size
+            cell.color = option.color
+            cell.background = option.background
+          }
+          return data
+        })
+      }
+    }
+  })
+  return async function (valueStyles: ValueStyleInputType[]) {
+    const pasteOptions: CellPasteOptionsInputType[] = valueStyles.map((valueStyle: ValueStyleInputType) => ({
+      cellId: valueStyle.cell.id,
+      default: valueStyle.value,
+      style: valueStyle.style
+    }))
+    await mutate({
+      options: pasteOptions
+    })
+  }
+}
+
 export const changeSheetValues = (
   values: ValueType[],
   client: ApolloClient<DocumentSheetQuery>,
@@ -832,43 +893,40 @@ export const changeSheetValues = (
   }
 }
 
-export const useChangeValueMutation = (documentId: Ref<string | null>, sheetId: Ref<string>) => {
+export const useChangeValuesMutation = (documentId: Ref<string | null>, sheetId: Ref<string>) => {
   const { client } = useApolloClient()
   const { mutate } = useMutation<
-    ChangeValueMutation,
-    ChangeValueMutationVariables
-  >(changeValueMutation)
-  return async (cell: CellType, value: string) => {
+    ChangeValuesMutation,
+    ChangeValuesMutationVariables
+  >(changeValuesMutation)
+  return async (values: ValueInputType[]) => {
     await mutate({
       documentId: unref(documentId),
       sheetId: unref(sheetId),
-      cellId: cell.id,
-      value
+      values: values.map((value: ValueInputType) => ({ cellId: value.cell.id, value: value.value }))
     }, {
-      update: (_: DataProxy, result: Omit<FetchResult<ChangeValueMutation>, 'context'>) => {
-        if (result.data.changeValue.success) {
-          const { values, updatedAt } = result.data.changeValue
+      update: (_: DataProxy, result: Omit<FetchResult<ChangeValuesMutation>, 'context'>) => {
+        if (result.data.changeValues.success) {
+          const { values, updatedAt } = result.data.changeValues
           changeSheetValues(values, client, documentId, updatedAt)
         }
       },
       optimisticResponse: {
         __typename: 'Mutation',
-        changeValue: {
-          __typename: 'ChangeValueMutationPayload',
+        changeValues: {
+          __typename: 'ChangeValuesMutationPayload',
           success: true,
           errors: null,
-          values: [
-            {
-              id: '',
-              sheetId: sheetId.value,
-              value,
-              error: null,
-              columnId: cell.columnId,
-              rowId: cell.rowId,
-              payload: null,
-              __typename: 'ValueType'
-            }
-          ],
+          values: values.map((value: ValueInputType) => ({
+            id: '',
+            sheetId: sheetId.value,
+            value: value.value,
+            error: null,
+            columnId: value.cell.columnId,
+            rowId: value.cell.rowId,
+            payload: null,
+            __typename: 'ValueType'
+          })),
           updatedAt: new Date().toISOString()
         }
       }

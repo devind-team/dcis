@@ -3,7 +3,6 @@ items-data-filter(
   v-model="reportDocuments"
   :items="reportDocumentItems"
   :title="String($t(`dcis.periods.report.documentsFilter.title`))"
-  :message-function="documentFilterMessageFunction"
   :get-key="reportDocument => reportDocument.document.id"
   :get-name="reportDocument => reportDocument.document.objectName"
   :message-container-class="messageContainerClass"
@@ -17,6 +16,8 @@ items-data-filter(
   @reset="reset"
   @apply="apply"
 )
+  template(#message="message")
+    slot(name="message" v-bind="message")
   template(#fixed-content="{ tempItems }")
     v-card-text(style="flex: none")
       v-chip.mr-1(
@@ -62,7 +63,6 @@ items-data-filter(
             v-simple-checkbox(v-ripple :value="isSelected" @input="select($event)")
           td {{ item.document.objectName }} ({{ item.document.objectId }})
           td {{ item.document.version }}
-          td {{ item.document.comment }}
           td
             div {{ item.document.lastStatus.status.name }}.
             div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.document.lastStatus.createdAt) }) }}
@@ -212,12 +212,6 @@ export default defineComponent({
       return searchItems
     }
 
-    const documentFilterMessageFunction = (selectedItems: DocumentType[]): string => {
-      if (selectedItems.length === 0) {
-        return t('dcis.periods.report.documentsFilter.noFiltrationMessage') as string
-      }
-      return t('dcis.periods.report.documentsFilter.multipleMessage', { count: selectedItems.length }) as string
-    }
     const documentsFilterTableHeaders = computed<DataTableHeader[]>(() => {
       const result: DataTableHeader[] = []
       if (mainDocumentSelection.value) {
@@ -229,7 +223,6 @@ export default defineComponent({
           value: 'division'
         },
         { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
-        { text: t('dcis.documents.tableHeaders.comment') as string, value: 'comment' },
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
@@ -336,7 +329,6 @@ export default defineComponent({
       aggregationMessageFunction,
       reportDocumentItems,
       getItems,
-      documentFilterMessageFunction,
       documentsFilterTableHeaders,
       activeChanged,
       tempItemsChanged,

@@ -77,7 +77,7 @@ class Style(models.Model):
         choices=KIND_UNDERLINE,
         help_text='Тип подчеркивания'
     )
-    color = models.CharField(max_length=16, default='#000000', help_text='Цвет индекса')
+    color = models.CharField(max_length=16, default='#000000', help_text='Цвет текста')
     background = models.CharField(max_length=16, default='#FFFFFF', help_text='Цвет фона')
     border_style = models.JSONField(default=get_default_border, help_text='Стили границ')
     border_color = models.JSONField(default=get_default_border, help_text='Цвет границ')

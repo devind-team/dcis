@@ -20,6 +20,7 @@ from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import Cell, Document, MergedCell, Period, Sheet, Value
 from apps.dcis.models.sheet import KindCell
 from apps.dcis.permissions import can_view_period_result
+from apps.dcis.services.divisions_services import get_user_period_divisions
 
 
 @dataclass
@@ -80,6 +81,7 @@ class PeriodUnload:
     def __init__(
         self,
         period: Period,
+        user: User,
         organization_ids: list[int],
         status_ids: list[int],
         unload_without_document: bool,
@@ -102,9 +104,7 @@ class PeriodUnload:
         """
         self.period = period
         self.path = Path(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
-        self._organizations = Organization.objects.filter(
-            id__in=self.period.division_set.values_list('object_id', flat=True)
-        )
+        self._organizations = get_user_period_divisions(user, period)
         if len(organization_ids):
             self._organizations = self._organizations.filter(id__in=organization_ids)
         self._status_ids = status_ids
@@ -602,6 +602,7 @@ def unload_period(
     can_view_period_result(user, period)
     return PeriodUnload(
         period=period,
+        user=user,
         organization_ids=organization_ids,
         status_ids=status_ids,
         unload_without_document=unload_without_document,
