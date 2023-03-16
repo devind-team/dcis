@@ -149,7 +149,7 @@ class PeriodType(DjangoObjectType):
     )
     can_view_result = graphene.Boolean(
         required=True,
-        description='Может ли пользователь просматривать сводный отчет выгрузки периода'
+        description='Может ли пользователь просматривать сводный отчет и выгрузки периода'
     )
     can_change_attributes = graphene.Boolean(
         required=True,
