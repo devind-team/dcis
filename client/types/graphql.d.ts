@@ -4143,6 +4143,8 @@ export type Query = {
   periodFilterDepartments: Array<DepartmentType>;
   /** Получение организаций периода */
   periodFilterOrganizations: Array<OrganizationType>;
+  /** Получение типов организаций для периода */
+  periodOrganizationKinds: Array<Scalars['String']>;
   /** Возможные дивизионы периода */
   periodPossibleDivisions?: Maybe<DivisionModelTypeConnection>;
   /** Выгрузка листа для периода */
@@ -4454,6 +4456,11 @@ export type QueryPeriodFilterDepartmentsArgs = {
 
 /** Схема запросов данных. */
 export type QueryPeriodFilterOrganizationsArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
+export type QueryPeriodOrganizationKindsArgs = {
   periodId: Scalars['ID'];
 };
 
@@ -6249,6 +6256,12 @@ export type PeriodFilterOrganizationsQueryVariables = Exact<{
 }>;
 
 export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: Array<{ __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null }> };
+
+export type PeriodOrganizationKindsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type PeriodOrganizationKindsQuery = { __typename?: 'Query', periodOrganizationKinds: Array<string> };
 
 export type PeriodPossibleDivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];

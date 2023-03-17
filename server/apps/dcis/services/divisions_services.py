@@ -139,3 +139,13 @@ def get_user_divisions_model(user: User, period: Period) -> QuerySet[Organizatio
 
     can_view_period(user, period)
     return period.project.division.objects.filter(id__in=[d['id'] for d in get_period_divisions(user, period)])
+
+
+def get_period_organization_kinds(user: User, period: Period) -> set[str]:
+    """Получение типов организаций для периода."""
+    from apps.dcis.permissions import can_view_period
+
+    can_view_period(user, period)
+    return set(t if t else 'Отсутствует' for t in Organization.objects.filter(
+        id__in=period.division_set.values_list('object_id', flat=True)
+    ).values_list('attributes__org_type', flat=True))

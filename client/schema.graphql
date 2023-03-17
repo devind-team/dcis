@@ -3641,6 +3641,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): [OrganizationType!]!
+  """Получение типов организаций для периода"""
+  periodOrganizationKinds(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [String!]!
   """Возможные дивизионы периода"""
   periodPossibleDivisions(
     after: String

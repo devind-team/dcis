@@ -98,6 +98,12 @@ export default {
         code: 'Код департамента'
       }
     },
+    organizationKindFilter: {
+      title: 'Фильтр типов организаций',
+      noFiltrationMessage: 'Выбрать типы организаций',
+      multipleMessage: '{name} и еще {restLength} типов организаций | {name} и еще {restLength} тип организаций |' +
+        ' {name} и еще {restLength} типа организаций'
+    },
     addDivisions: {
       file: 'Выберете файл'
     },
@@ -321,6 +327,7 @@ export default {
       name: '@:dcis.periods.links.unload',
       organizationsFilterTitle: 'Выбор организаций',
       statusFilterTitle: 'Выбор статусов',
+      organizationKindFilterTitle: 'Выбор типов организаций',
       unloadWithoutDocument: 'Выгружать организации без документов',
       unloadDefault: 'Выгружать значение по умолчанию при отсутствии значения в документе',
       applyNumberFormat: 'Применять числовой формат',

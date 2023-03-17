@@ -32,6 +32,7 @@ from apps.dcis.schema.types import (
 )
 from apps.dcis.services.divisions_services import (
     get_organizations_without_document,
+    get_period_organization_kinds,
     get_period_possible_divisions,
     get_user_divisions_model,
 )
@@ -170,6 +171,13 @@ class PeriodQueries(graphene.ObjectType):
         description='Получение департаментов периода'
     )
 
+    period_organization_kinds = graphene.List(
+        graphene.NonNull(graphene.String),
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Получение типов организаций для периода'
+    )
+
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_privileges(root, info: ResolveInfo) -> QuerySet[Privilege]:
@@ -303,12 +311,18 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str, *args, **kwargs):
+    def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_user_divisions_model(info.context.user, period)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_period_filter_departments(root: Any, info: ResolveInfo, period_id: str):
+    def resolve_period_filter_departments(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Department]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_user_divisions_model(info.context.user, period)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_period_organization_kinds(root: Any, info: ResolveInfo, period_id: str) -> set[str]:
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_period_organization_kinds(info.context.user, period)

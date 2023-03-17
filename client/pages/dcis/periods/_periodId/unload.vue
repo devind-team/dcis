@@ -27,6 +27,12 @@ bread-crumbs(:items="bc")
             :title="String($t('dcis.periods.unload.statusFilterTitle'))"
             message-container-class="mr-1"
           )
+          organization-kind-filter(
+            v-model="selectedOrganizationKinds"
+            :period="period"
+            :title="String($t('dcis.periods.unload.organizationKindFilterTitle'))"
+            message-container-class="mr-1"
+          )
           v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
           v-checkbox(v-model="unloadDefault" :label="$t('dcis.periods.unload.unloadDefault')")
           v-checkbox(v-model="applyNumberFormat" :label="$t('dcis.periods.unload.applyNumberFormat')")
@@ -46,17 +52,19 @@ import {
   OrganizationType,
   StatusType,
   UnloadPeriodMutation,
-  UnloadPeriodMutationVariables, ErrorFieldType
+  UnloadPeriodMutationVariables,
+  ErrorFieldType
 } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import MutationResultAlert from '~/components/common/MutationResultAlert.vue'
 import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
 import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
+import OrganizationKindFilter, { OrganizationKindType } from '~/components/dcis/periods/OrganizationKindFilter.vue'
 
 type UnloadPeriodMutationResult = { data: UnloadPeriodMutation }
 
 export default defineComponent({
-  components: { BreadCrumbs, MutationResultAlert, OrganizationFilter, StatusFilter },
+  components: { BreadCrumbs, MutationResultAlert, OrganizationFilter, StatusFilter, OrganizationKindFilter },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -91,6 +99,8 @@ export default defineComponent({
 
     const selectedOrganizations = ref<OrganizationType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
+    const selectedOrganizationKinds = ref<OrganizationKindType[]>([])
+
     const unloadWithoutDocument = ref<boolean>(true)
     const unloadDefault = ref<boolean>(true)
     const applyNumberFormat = ref<boolean>(true)
@@ -155,6 +165,7 @@ export default defineComponent({
       sheetsItems,
       selectedOrganizations,
       selectedStatuses,
+      selectedOrganizationKinds,
       unloadPeriodOnDone,
       unloadWithoutDocument,
       unloadDefault,
