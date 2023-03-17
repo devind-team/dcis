@@ -126,14 +126,14 @@ def is_document_division_member(user: User, document: Document) -> bool:
 
 def get_organizations_without_document(user: User, period: Period) -> QuerySet[Organization]:
     """Получение организаций, у которых не поданы документы в периоде."""
-    return get_user_divisions_model(user, period).filter(
+    return get_user_period_divisions(user, period).filter(
         id__in=period.division_set.exclude(
             object_id__in=period.document_set.values_list('object_id', flat=True)
         ).values_list('object_id', flat=True)
     )
 
 
-def get_user_divisions_model(user: User, period: Period) -> QuerySet[Organization | Department]:
+def get_user_period_divisions(user: User, period: Period) -> QuerySet[Organization | Department]:
     """Получение организаций для фильтра."""
     from apps.dcis.permissions import can_view_period
 

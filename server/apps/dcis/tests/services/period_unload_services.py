@@ -13,7 +13,7 @@ from django.test import TestCase
 from openpyxl.reader.excel import load_workbook
 
 from apps.core.models import User
-from apps.dcis.models import Cell, Document, Period, Project, RowDimension, Sheet, Status
+from apps.dcis.models import Cell, CuratorGroup, Document, Period, Project, RowDimension, Sheet, Status
 from apps.dcis.models.sheet import ColumnDimension, KindCell
 from apps.dcis.services.period_unload_services import unload_period
 
@@ -47,6 +47,9 @@ class UnloadPeriodTestCase(TestCase):
         self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
 
+        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group.users.add(self.superuser)
+
         self.statuses = [Status.objects.create(name=f'Статус №{i}') for i in range(1, 7)]
 
         self.head_sheet = self.period.sheet_set.create(
@@ -76,6 +79,8 @@ class UnloadPeriodTestCase(TestCase):
             )
             self.period.division_set.create(object_id=organization.id)
             self.head_organizations.append(organization)
+
+        self.curator_group.organization.set(self.head_organizations[:2])
 
         self.child_organizations: list[Organization] = []
         for i, parent in enumerate(self.head_organizations, 5):
@@ -121,9 +126,17 @@ class UnloadPeriodTestCase(TestCase):
         if self.actual_path:
             os.remove(self.actual_path)
 
-    def test_without_filter(self) -> None:
-        """Тестирование выгрузки без фильтрации."""
-        expected_path = self.RESOURCES_DIR / 'test_without_filter.xlsx'
+    def test_without_filter_admin(self) -> None:
+        """Тестирование выгрузки без фильтрации, если пользователь видит все организации периода."""
+        expected_path = self.RESOURCES_DIR / 'test_without_filter_admin.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**self._get_unload_default_settings())[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
+    def test_without_filter_curator(self) -> None:
+        """Тестирование выгрузки без фильтрации, если пользователь видит не все организации периода."""
+        self.superuser.is_superuser = False
+        self.superuser.save(update_fields=('is_superuser',))
+        expected_path = self.RESOURCES_DIR / 'test_without_filter_curator.xlsx'
         self.actual_path = settings.BASE_DIR / unload_period(**self._get_unload_default_settings())[1:]
         self._assert_worksheets_equal(expected_path, self.actual_path)
 

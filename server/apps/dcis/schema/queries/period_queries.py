@@ -1,7 +1,7 @@
 from typing import Any
 
 import graphene
-from devind_dictionaries.models import Department, Organization
+from devind_dictionaries.models import Organization
 from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
@@ -22,6 +22,7 @@ from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege,
 from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_result
 from apps.dcis.schema.types import (
     AttributeType,
+    CellAggregationType,
     DivisionModelTypeConnection,
     LimitationType,
     PeriodType,
@@ -30,11 +31,12 @@ from apps.dcis.schema.types import (
     ReportRowGroupInputType,
     SheetType,
 )
+from apps.dcis.services.aggregation_services import CellsAggregation, get_cells_aggregation
 from apps.dcis.services.divisions_services import (
     get_organizations_without_document,
     get_period_organization_kinds,
     get_period_possible_divisions,
-    get_user_divisions_model,
+    get_user_period_divisions,
 )
 from apps.dcis.services.period_services import (
     get_period_attributes,
@@ -140,6 +142,12 @@ class PeriodQueries(graphene.ObjectType):
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Ограничения, накладываемые на листы',
+    )
+
+    aggregation_cells = graphene.List(
+        CellAggregationType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        description='Агрегированные ячейки документов периода'
     )
 
     attributes = graphene.List(
@@ -289,6 +297,12 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
+    def resolve_aggregation_cells(root, info: ResolveInfo, period_id: str | int) -> list[CellsAggregation]:
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return get_cells_aggregation(info.context.user, period)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
     def resolve_attributes(
         root: Any,
         info: ResolveInfo,
@@ -313,13 +327,13 @@ class PeriodQueries(graphene.ObjectType):
     @permission_classes((IsAuthenticated,))
     def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return get_user_divisions_model(info.context.user, period)
+        return get_user_period_divisions(info.context.user, period)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_period_filter_departments(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Department]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
-        return get_user_divisions_model(info.context.user, period)
+        return get_user_period_divisions(info.context.user, period)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
