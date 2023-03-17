@@ -1,7 +1,7 @@
 from typing import Any
 
 import graphene
-from devind_dictionaries.models import Organization
+from devind_dictionaries.models import Department, Organization
 from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404

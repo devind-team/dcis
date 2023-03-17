@@ -146,6 +146,6 @@ def get_period_organization_kinds(user: User, period: Period) -> set[str]:
     from apps.dcis.permissions import can_view_period
 
     can_view_period(user, period)
-    return set(t if t else 'Отсутствует' for t in Organization.objects.filter(
-        id__in=period.division_set.values_list('object_id', flat=True)
+    return set(t if t else 'Отсутствует' for t in get_user_period_divisions(
+        user, period
     ).values_list('attributes__org_type', flat=True))

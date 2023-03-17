@@ -5,7 +5,7 @@ items-data-filter(
   :no-filtration-message="String($t('dcis.periods.organizationKindFilter.noFiltrationMessage'))"
   :multiple-message-function="multipleMessageFunction"
   :items="items"
-  :get-name="item => item.type"
+  :get-name="item => item.kind"
   multiple
   has-select-all
 )
@@ -25,7 +25,7 @@ import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 
 export type OrganizationKindType = {
   id: string,
-  type: string,
+  kind: string,
 }
 
 export default defineComponent({
@@ -62,9 +62,9 @@ export default defineComponent({
     })
 
     const items = computed<OrganizationKindType[]>(() => periodOrganizationTypes.value
-      ? periodOrganizationTypes.value.map((type: string, index: number) => ({
+      ? periodOrganizationTypes.value.map((kind: string, index: number) => ({
         id: String(index),
-        type
+        kind
       }))
       : []
     )

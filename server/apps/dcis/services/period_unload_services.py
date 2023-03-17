@@ -80,10 +80,11 @@ class PeriodUnload:
 
     def __init__(
         self,
-        period: Period,
         user: User,
+        period: Period,
         organization_ids: list[int],
         status_ids: list[int],
+        organization_kinds: list[str],
         unload_without_document: bool,
         unload_default: bool,
         apply_number_format: bool,
@@ -92,9 +93,11 @@ class PeriodUnload:
         empty_cell: str
     ) -> None:
         """Инициализация.
+        - user - текущий пользователь
         - period - выгружаемый период
         - organization_ids - фильтрация по идентификаторам организаций
         - status_ids - фильтрация по идентификаторам статусов
+        - organization_kinds - типы организаций
         - unload_without_document - выгружать организации без документов
         - unload_default - выгружать значение по умолчанию при отсутствии значения в документе
         - apply_number_format - применять числовой формат
@@ -104,9 +107,7 @@ class PeriodUnload:
         """
         self.period = period
         self.path = Path(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
-        self._organizations = get_user_period_divisions(user, period)
-        if len(organization_ids):
-            self._organizations = self._organizations.filter(id__in=organization_ids)
+        self._organizations = self._filter_organizations(user, period, organization_ids, organization_kinds)
         self._status_ids = status_ids
         self._unload_without_document = unload_without_document
         self._unload_default = unload_default
@@ -144,6 +145,27 @@ class PeriodUnload:
             self._save_rows(worksheet, sheet, columns, cell_groups)
         workbook.save(self.path)
         return f'/{self.path.relative_to(settings.BASE_DIR)}'
+
+    @staticmethod
+    def _filter_organizations(
+        user: User,
+        period: Period,
+        organization_ids: list[int],
+        organization_kinds: list[str],
+    ) -> QuerySet[Organization]:
+        """Фильтрация организаций."""
+        organizations = get_user_period_divisions(user, period)
+        if len(organization_kinds):
+            organization_kinds_values = []
+            for organization_kind in organization_kinds:
+                if organization_kind == 'Отсутствует':
+                    organization_kinds_values.extend(['', None])
+                else:
+                    organization_kinds_values.append(organization_kind)
+            organizations = organizations.filter(attributes__org_type__in=organization_kinds_values)
+        if len(organization_ids):
+            organizations = organizations.filter(id__in=organization_ids)
+        return organizations
 
     @classmethod
     def _save_columns(cls, worksheet: Worksheet, columns: list[Column]) -> None:
@@ -591,6 +613,7 @@ def unload_period(
     period: Period,
     organization_ids: list[int],
     status_ids: list[int],
+    organization_kinds: list[str],
     unload_without_document: bool,
     unload_default: bool,
     apply_number_format: bool,
@@ -601,10 +624,11 @@ def unload_period(
     """Выгрузка периода в формате Excel."""
     can_view_period_result(user, period)
     return PeriodUnload(
-        period=period,
         user=user,
+        period=period,
         organization_ids=organization_ids,
         status_ids=status_ids,
+        organization_kinds=organization_kinds,
         unload_without_document=unload_without_document,
         unload_default=unload_default,
         apply_number_format=apply_number_format,

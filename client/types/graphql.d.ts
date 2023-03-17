@@ -3879,7 +3879,7 @@ export type PeriodType = {
   canChangeUsers: Scalars['Boolean'];
   /** Может ли пользователь удалять период */
   canDelete: Scalars['Boolean'];
-  /** Может ли пользователь просматривать сводный отчет выгрузки периода */
+  /** Может ли пользователь просматривать сводный отчет и выгрузки периода */
   canViewResult: Scalars['Boolean'];
   /** Дата создания */
   createdAt: Scalars['DateTime'];
@@ -5060,6 +5060,8 @@ export type UnloadPeriodMutationInput = {
   emptyCell: Scalars['String'];
   /** Идентификаторы организаций */
   organizationIds: Array<Scalars['ID']>;
+  /** Типы организаций */
+  organizationKinds: Array<Scalars['String']>;
   /** Идентификатор периода */
   periodId: Scalars['ID'];
   /** Идентификаторы статусов */
@@ -5999,6 +6001,7 @@ export type UnloadPeriodMutationVariables = Exact<{
   periodId: Scalars['ID'];
   organizationIds: Array<Scalars['ID']> | Scalars['ID'];
   statusIds: Array<Scalars['ID']> | Scalars['ID'];
+  organizationKinds: Array<Scalars['String']> | Scalars['String'];
   unloadWithoutDocument: Scalars['Boolean'];
   unloadDefault: Scalars['Boolean'];
   applyNumberFormat: Scalars['Boolean'];

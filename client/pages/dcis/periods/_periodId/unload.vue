@@ -137,6 +137,8 @@ export default defineComponent({
       periodId: props.period.id,
       organizationIds: selectedOrganizations.value.map((organization: OrganizationType) => organization.id),
       statusIds: selectedStatuses.value.map((status: StatusType) => status.id),
+      organizationKinds: selectedOrganizationKinds.value
+        .map((organizationKind: OrganizationKindType) => organizationKind.kind),
       unloadWithoutDocument: unloadWithoutDocument.value,
       unloadDefault: unloadDefault.value,
       applyNumberFormat: applyNumberFormat.value,
