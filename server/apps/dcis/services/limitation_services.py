@@ -1,16 +1,21 @@
 """Модуль, отвечающий за работу с ограничениями."""
 
 import json
+from datetime import datetime
+from os.path import join
+from posixpath import relpath
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.db import transaction
 from django.db.models import F, Max
+from pydantic import BaseModel
 
 from apps.core.models import User
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
 from apps.dcis.models import Limitation, Period
-from apps.dcis.permissions import can_change_period_limitations
+from apps.dcis.permissions import can_change_period_limitations, can_view_period
 
 
 @transaction.atomic
@@ -32,9 +37,11 @@ def add_limitations_from_file(period: Period, limitations_file: File) -> list[Li
             if not isinstance(limitation, dict):
                 raise_error([f'Ограничение по номеру {i} не является объектом'])
             if list(limitation.keys()) != possible_keys:
-                raise_error([
-                    f'Ключи ограничения по номеру {i} должны совпадать со списком {possible_keys}'.replace("'", '"')
-                ])
+                raise_error(
+                    [
+                        f'Ключи ограничения по номеру {i} должны совпадать со списком {possible_keys}'.replace("'", '"')
+                    ]
+                )
             sheet = next((sheet for sheet in sheets if sheet.name == limitation['form']), None)
             if sheet is None:
                 raise_error([f'Не найдена форма "{limitation["form"]}" для ограничения по номеру {i}'])
@@ -58,6 +65,40 @@ def update_limitations_from_file(user: User, period: Period, limitations_file: F
     can_change_period_limitations(user, period)
     Limitation.objects.filter(sheet__period=period).delete()
     return add_limitations_from_file(period, limitations_file)
+
+
+class LimitationFromJsonFile(BaseModel):
+    """Вспомогательный класс для ограничений через json файл."""
+    form: str
+    check: str
+    message: str
+
+
+def unload_limitations_in_file(user: User, period: Period) -> str:
+    """Выгрузка ограничений периода в json файл."""
+
+    can_view_period(user, period)
+
+    data = [
+        dict(
+            LimitationFromJsonFile(
+                form=limitation.sheet.name,
+                check=limitation.formula,
+                message=limitation.error_message
+            )
+        )
+        for limitation in Limitation.objects.select_related('sheet').filter(sheet__period=period)
+    ]
+
+    path = join(
+        settings.STATICFILES_DIRS[1],
+        'temp_files',
+        f'limitation_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.json'
+    )
+    with open(path, 'w') as file:
+        json.dump(data, file, ensure_ascii=False)
+
+    return relpath(path, settings.BASE_DIR)
 
 
 def add_limitation(user: User, formula: str, error_message: str, sheet_id: int | str) -> Limitation:

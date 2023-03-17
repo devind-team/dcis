@@ -2956,6 +2956,8 @@ export type Mutation = {
   unloadDocument: UnloadDocumentMutationPayload;
   /** Выгрузка архива значения ячейки типа `Файл` */
   unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
+  /** Выгрузка ограничений периода в json файл. */
+  unloadLimitationsInFile: UnloadLimitationsInFileMutationPayload;
   /** Выгрузка периода в формате Excel. */
   unloadPeriod: UnloadPeriodMutationPayload;
   /** Обновление агрегации из json файла. */
@@ -3411,6 +3413,11 @@ export type MutationUnloadDocumentArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUnloadFileValueArchiveArgs = {
   input: UnloadFileValueArchiveMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUnloadLimitationsInFileArgs = {
+  input: UnloadLimitationsInFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3879,7 +3886,7 @@ export type PeriodType = {
   canChangeUsers: Scalars['Boolean'];
   /** Может ли пользователь удалять период */
   canDelete: Scalars['Boolean'];
-  /** Может ли пользователь просматривать сводный отчет выгрузки периода */
+  /** Может ли пользователь просматривать сводный отчет и выгрузки периода */
   canViewResult: Scalars['Boolean'];
   /** Дата создания */
   createdAt: Scalars['DateTime'];
@@ -5045,6 +5052,24 @@ export type UnloadFileValueArchiveMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UnloadLimitationsInFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Выгрузка ограничений периода в json файл. */
+export type UnloadLimitationsInFileMutationPayload = {
+  __typename?: 'UnloadLimitationsInFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UnloadPeriodMutationInput = {
   /** Применять числовой формат */
   applyNumberFormat: Scalars['Boolean'];
@@ -5861,6 +5886,12 @@ export type DeleteLimitationMutationVariables = Exact<{
 }>;
 
 export type DeleteLimitationMutation = { __typename?: 'Mutation', deleteLimitation: { __typename?: 'DeleteLimitationMutationPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UnloadLimitationsInFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type UnloadLimitationsInFileMutation = { __typename?: 'Mutation', unloadLimitationsInFile: { __typename: 'UnloadLimitationsInFileMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UpdateLimitationsFromFileMutationVariables = Exact<{
   periodId: Scalars['ID'];
