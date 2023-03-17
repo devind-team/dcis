@@ -3,7 +3,7 @@ items-data-filter(
   v-model="selectedOrganization"
   :title="title"
   :items="changeOrganizations || []"
-  :message-function="getFilterMessageFunction"
+  :message-function="filterMessageFunction"
   :message-container-class="messageContainerClass"
   :search-function="filterSearchFunction"
   multiple
@@ -59,7 +59,7 @@ export default defineComponent({
       }
     })
 
-    const getFilterMessageFunction = (selectedItems: []): string => {
+    const filterMessageFunction = (selectedItems: []): string => {
       if (selectedItems.length === 0) {
         return t('dcis.periods.organizationFilter.noFiltrationMessage') as string
       }
@@ -117,7 +117,7 @@ export default defineComponent({
 
     return {
       selectedOrganization,
-      getFilterMessageFunction,
+      filterMessageFunction,
       filterSearchFunction,
       tableHeaders,
       count,

@@ -381,17 +381,22 @@ class UnloadPeriodMutation(BaseMutation):
         organization_ids = graphene.List(
             graphene.NonNull(graphene.ID),
             required=True,
-            description='Идентификаторы организаций'
+            description='Идентификаторы организаций',
+        )
+        organization_kinds = graphene.List(
+            graphene.NonNull(graphene.String),
+            required=True,
+            description='Типы организаций',
         )
         status_ids = graphene.List(
             graphene.NonNull(graphene.ID),
             required=True,
-            description='Идентификаторы статусов'
+            description='Идентификаторы статусов',
         )
         unload_without_document = graphene.Boolean(required=True, description='Выгружать организации без документов')
         unload_default = graphene.Boolean(
             required=True,
-            description='Выгружать значение по умолчанию при отсутствии значения в документе'
+            description='Выгружать значение по умолчанию при отсутствии значения в документе',
         )
         apply_number_format = graphene.Boolean(required=True, description='Применять числовой формат')
         unload_heads = graphene.Boolean(required=True, description='Выгружать листы для головных учреждений')
@@ -407,6 +412,7 @@ class UnloadPeriodMutation(BaseMutation):
         info: ResolveInfo,
         period_id: str,
         organization_ids: list[int],
+        organization_kinds: list[str],
         status_ids: list[int],
         unload_without_document: bool,
         unload_default: bool,
@@ -422,6 +428,7 @@ class UnloadPeriodMutation(BaseMutation):
                     user=info.context.user,
                     period=period,
                     organization_ids=[gid2int(organization_id) for organization_id in organization_ids],
+                    organization_kinds=organization_kinds,
                     status_ids=[gid2int(status_id) for status_id in status_ids],
                     unload_without_document=unload_without_document,
                     unload_default=unload_default,

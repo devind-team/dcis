@@ -1,6 +1,7 @@
 mutation UnloadPeriod(
   $periodId: ID!,
   $organizationIds: [ID!]!,
+  $organizationKinds: [String!]!,
   $statusIds: [ID!]!,
   $unloadWithoutDocument: Boolean!,
   $unloadDefault: Boolean!,
@@ -12,6 +13,7 @@ mutation UnloadPeriod(
   unloadPeriod(input: {
     periodId: $periodId,
     organizationIds: $organizationIds,
+    organizationKinds: $organizationKinds,
     statusIds: $statusIds,
     unloadWithoutDocument: $unloadWithoutDocument,
     unloadDefault: $unloadDefault,

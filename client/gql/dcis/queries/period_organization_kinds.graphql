@@ -1,0 +1,3 @@
+query PeriodOrganizationKinds($periodId: ID!) {
+  periodOrganizationKinds(periodId: $periodId)
+}

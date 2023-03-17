@@ -3645,6 +3645,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): [OrganizationType!]!
+  """Получение типов организаций для периода"""
+  periodOrganizationKinds(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [String!]!
   """Возможные дивизионы периода"""
   periodPossibleDivisions(
     after: String
@@ -4235,6 +4240,8 @@ input UnloadPeriodMutationInput {
   emptyCell: String!
   """Идентификаторы организаций"""
   organizationIds: [ID!]!
+  """Типы организаций"""
+  organizationKinds: [String!]!
   """Идентификатор периода"""
   periodId: ID!
   """Идентификаторы статусов"""

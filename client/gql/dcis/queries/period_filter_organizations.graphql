@@ -1,4 +1,3 @@
-
 query PeriodFilterOrganizations($periodId: ID!) {
   periodFilterOrganizations(periodId: $periodId) {
     id
