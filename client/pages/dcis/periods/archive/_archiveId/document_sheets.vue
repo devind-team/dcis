@@ -1,36 +1,41 @@
 <template lang="pug">
-left-navigator-container(
-  v-if="!activeDocumentLoading"
-  :bread-crumbs="breadCrumbs"
-  fluid
-  @update-drawer="$emit('update-drawer')"
-)
-  template(#subheader) {{ activeDocument.objectName }}
-  grid-sheets(
-    v-model="activeSheetIndex"
-    :mode="GridMode.READ"
-    :sheets="activeDocument.sheets"
-    :active-sheet="activeSheet"
-    :update-active-sheet="updateActiveSheet"
-    :active-document="activeDocument"
-    :loading="activeDocumentLoading"
+  left-navigator-container(
+    v-if="!activeDocumentLoading"
+    :bread-crumbs="breadCrumbs"
+    fluid
+    @update-drawer="$emit('update-drawer')"
   )
-    template(#settings)
-      settings-document(:document="activeDocument")
-        template(#activator="{ on, attrs }")
-          v-btn(v-on="on" v-bind="attrs" class="align-self-center mr-4" icon text)
-            v-icon mdi-cog
-v-progress-circular(v-else color="primary" indeterminate)
+    template(#subheader) {{ activeDocument.objectName }}
+    grid-sheets(
+      v-model="activeSheetIndex"
+      :mode="GridMode.READ"
+      :sheets="activeDocument.sheets"
+      :active-sheet="activeSheet"
+      :update-active-sheet="updateActiveSheet"
+      :active-document="activeDocument"
+      :loading="activeDocumentLoading"
+    )
+  v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, useRoute } from '#app'
+import { defineComponent, PropType, ref, computed, useRoute } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
+import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import { useCommonQuery } from '~/composables'
-import { DocumentQuery, DocumentQueryVariables, DocumentSheetQuery, DocumentSheetQueryVariables } from '~/types/graphql'
+import {
+  DocumentQuery,
+  DocumentQueryVariables,
+  DocumentSheetQuery,
+  DocumentSheetQueryVariables,
+  DocumentsQuery,
+  DocumentsQueryVariables,
+  DocumentType,
+  PeriodType
+} from '~/types/graphql'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import { GridMode } from '~/types/grid'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
@@ -38,19 +43,37 @@ import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs, GridSheets },
   props: {
-    breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
+    breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> },
+    period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup () {
     const route = useRoute()
 
     const activeSheetIndex = ref<number>(0)
+    const { data: documents } = useCommonQuery<
+      DocumentsQuery,
+      DocumentsQueryVariables
+    >({
+      document: documentsQuery,
+      variables: () => ({
+        periodId: route.params.archiveId,
+        divisionIds: [],
+        lastStatusIds: []
+      })
+    })
+
+    const doc = computed<DocumentType | null>(() => documents.value ? documents.value[0] : null)
+
     const { data: activeDocument, loading: activeDocumentLoading } = useCommonQuery<
       DocumentQuery,
       DocumentQueryVariables
     >({
       document: documentQuery,
       variables: () => ({
-        documentId: route.params.documentId
+        documentId: doc.value?.id
+      }),
+      options: () => ({
+        enabled: !doc.value
       })
     })
 

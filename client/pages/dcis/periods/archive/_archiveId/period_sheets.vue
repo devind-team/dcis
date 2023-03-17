@@ -1,25 +1,13 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
-  template(#header) {{ $t('dcis.periods.sheets.name') }}
-    v-spacer
-    sheets-settings-menu(v-slot="{ on, attrs }" :sheets="period.sheets")
-      v-btn(v-on="on" v-bind="attrs" icon)
-        v-icon mdi-cog
-  grid-sheets(
-    v-model="activeSheetIndex"
-    :mode="GridMode.READ"
-    :sheets="period.sheets"
-    :active-sheet="activeSheet"
-    :loading="activeSheetLoading"
-  )
-    template(#tabs="{ sheets, updateSize }")
-      template(v-for="sheet in sheets")
-        sheet-control(
-          v-slot="{ on, attrs }"
-          :sheet="sheet"
-          :key="sheet.id"
-        )
-          v-tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
+  left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+    template(#header) {{ $t('dcis.periods.sheets.name') }}
+    grid-sheets(
+      v-model="activeSheetIndex"
+      :mode="GridMode.READ"
+      :sheets="period.sheets"
+      :active-sheet="activeSheet"
+      :loading="activeSheetLoading"
+    )
 </template>
 
 <script lang="ts">

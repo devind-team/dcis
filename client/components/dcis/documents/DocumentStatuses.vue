@@ -1,73 +1,73 @@
 <template lang="pug">
-mutation-modal-form(
-  ref="form"
-  :header="header"
-  :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
-  :button-text="String($t('dcis.documents.status.buttonText'))"
-  :hide-actions="!canAdd"
-  :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
-  :variables="{ documentId: document.id, statusId: status && status.id, comment }"
-  :update="addDocumentStatusUpdate"
-  :hide-alert-timeout="Infinity"
-  :table-errors-mode="ErrorValidateDialogMode.TABLE"
-  :table-errors-message="String($t('dcis.documents.status.tableErrorsMessage'))"
-  :table-errors-title="String($t('dcis.documents.status.tableErrorsTitle'))"
-  :show-table-errors-search="false"
-  mutation-name="addDocumentStatus"
-  errors-in-alert
-  @first-activated="firstActivated"
-  @close="close"
-  @done="addDocumentStatusDone"
-)
-  template(#activator="{ on }")
-    slot(name="activator" :on="on")
-  template(#form)
-    v-list(v-if="documentStatuses" two-line dense)
-      v-list-item(v-for="item in documentStatuses" :key="item.id")
-        v-list-item-content
-          v-list-item-title {{ item.status.name }}
-          v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
-          v-list-item-subtitle {{ getUserName(item.user) }}
-        v-list-item-content
-          v-list-item-subtitle.font-italic {{ item.comment }}
-        v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
+  mutation-modal-form(
+    ref="form"
+    :header="header"
+    :subheader="String($t('dcis.documents.status.subheader', { version: document.version }))"
+    :button-text="String($t('dcis.documents.status.buttonText'))"
+    :hide-actions="!canAdd"
+    :mutation="require('~/gql/dcis/mutations/document/add_document_status.graphql')"
+    :variables="{ documentId: document.id, statusId: status && status.id, comment }"
+    :update="addDocumentStatusUpdate"
+    :hide-alert-timeout="Infinity"
+    :table-errors-mode="ErrorValidateDialogMode.TABLE"
+    :table-errors-message="String($t('dcis.documents.status.tableErrorsMessage'))"
+    :table-errors-title="String($t('dcis.documents.status.tableErrorsTitle'))"
+    :show-table-errors-search="false"
+    mutation-name="addDocumentStatus"
+    errors-in-alert
+    @first-activated="firstActivated"
+    @close="close"
+    @done="addDocumentStatusDone"
+  )
+    template(#activator="{ on }")
+      slot(name="activator" :on="on")
+    template(#form)
+      v-list(v-if="documentStatuses" two-line dense)
+        v-list-item(v-for="item in documentStatuses" :key="item.id")
+          v-list-item-content
+            v-list-item-title {{ item.status.name }}
+            v-list-item-subtitle {{ dateTimeHM(item.createdAt) }}
+            v-list-item-subtitle {{ getUserName(item.user) }}
+          v-list-item-content
+            v-list-item-subtitle.font-italic {{ item.comment }}
           v-tooltip(v-if="item.archivePeriod" bottom)
             template(#activator="{ on }")
               v-btn(v-on="on" :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) } })" :nuxt="true" color="primary" icon)
                 v-icon mdi-archive-outline
             span {{ "Открыть историю" }}
-          delete-menu(
-            :item-name="String($t('dcis.documents.status.delete.itemName'))"
-            @confirm="deleteDocumentStatus(item.id)"
-          )
-            template(#default="{ on: onMenu }")
-              v-tooltip(bottom)
-                template(#activator="{ on: onTooltip }")
-                  v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
-                    v-btn(color="error" icon)
-                      v-icon mdi-delete
-                span {{ $t('dcis.documents.status.delete.tooltip') }}
-    v-progress-linear(v-else indeterminate)
-    template(v-if="canAdd")
-      v-divider
-      v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
-      validation-provider(
-        v-slot="{ errors, valid }"
-        :name="String($t('dcis.documents.status.status'))"
-        rules="required"
-      )
-        v-select(
-          v-model="status"
-          :error-messages="errors"
-          :success="valid"
-          :loading="statusesLoading"
-          :items="statuses"
-          :label="$t('dcis.documents.status.status')"
-          item-text="name"
-          item-value="id"
-          return-object
+          v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
+            delete-menu(
+              :item-name="String($t('dcis.documents.status.delete.itemName'))"
+              @confirm="deleteDocumentStatus(item.id)"
+            )
+              template(#default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
+                      v-btn(color="error" icon)
+                        v-icon mdi-delete
+                  span {{ $t('dcis.documents.status.delete.tooltip') }}
+      v-progress-linear(v-else indeterminate)
+      template(v-if="canAdd")
+        v-divider
+        v-text-field(v-model="comment" :label="$t('dcis.documents.status.comment')" success)
+        validation-provider(
+          v-slot="{ errors, valid }"
+          :name="String($t('dcis.documents.status.status'))"
+          rules="required"
         )
-      v-alert(v-if="status && status.comment" type="warning" dense) {{ status.comment }}
+          v-select(
+            v-model="status"
+            :error-messages="errors"
+            :success="valid"
+            :loading="statusesLoading"
+            :items="statuses"
+            :label="$t('dcis.documents.status.status')"
+            item-text="name"
+            item-value="id"
+            return-object
+          )
+        v-alert(v-if="status && status.comment" type="warning" dense) {{ status.comment }}
 </template>
 
 <script lang="ts">
