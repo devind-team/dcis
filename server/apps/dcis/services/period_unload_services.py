@@ -83,8 +83,8 @@ class PeriodUnload:
         user: User,
         period: Period,
         organization_ids: list[int],
-        status_ids: list[int],
         organization_kinds: list[str],
+        status_ids: list[int],
         unload_without_document: bool,
         unload_default: bool,
         apply_number_format: bool,
@@ -96,8 +96,8 @@ class PeriodUnload:
         - user - текущий пользователь
         - period - выгружаемый период
         - organization_ids - фильтрация по идентификаторам организаций
-        - status_ids - фильтрация по идентификаторам статусов
         - organization_kinds - типы организаций
+        - status_ids - фильтрация по идентификаторам статусов
         - unload_without_document - выгружать организации без документов
         - unload_default - выгружать значение по умолчанию при отсутствии значения в документе
         - apply_number_format - применять числовой формат
@@ -612,8 +612,8 @@ def unload_period(
     user: User,
     period: Period,
     organization_ids: list[int],
-    status_ids: list[int],
     organization_kinds: list[str],
+    status_ids: list[int],
     unload_without_document: bool,
     unload_default: bool,
     apply_number_format: bool,
@@ -627,8 +627,8 @@ def unload_period(
         user=user,
         period=period,
         organization_ids=organization_ids,
-        status_ids=status_ids,
         organization_kinds=organization_kinds,
+        status_ids=status_ids,
         unload_without_document=unload_without_document,
         unload_default=unload_default,
         apply_number_format=apply_number_format,

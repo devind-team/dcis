@@ -149,6 +149,15 @@ class UnloadPeriodTestCase(TestCase):
         })[1:]
         self._assert_worksheets_equal(expected_path, self.actual_path)
 
+    def test_organization_kind_filter(self) -> None:
+        """Тестирование выгрузки с фильтрацией по типу организации."""
+        expected_path = self.RESOURCES_DIR / 'test_organization_kind_filter.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
+            **self._get_unload_default_settings(),
+            'organization_kinds': ['ВУЗ1', 'ВУЗ2'],
+        })[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
     def test_status_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по статусам."""
         expected_path = self.RESOURCES_DIR / 'test_status_filter.xlsx'
@@ -240,6 +249,7 @@ class UnloadPeriodTestCase(TestCase):
             'period': self.period,
             'organization_ids': [],
             'status_ids': [],
+            'organization_kinds': [],
             'unload_without_document': False,
             'unload_default': False,
             'apply_number_format': False,

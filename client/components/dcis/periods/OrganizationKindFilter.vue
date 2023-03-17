@@ -6,6 +6,7 @@ items-data-filter(
   :multiple-message-function="multipleMessageFunction"
   :items="items"
   :get-name="item => item.kind"
+  :message-container-class="messageContainerClass"
   multiple
   has-select-all
 )

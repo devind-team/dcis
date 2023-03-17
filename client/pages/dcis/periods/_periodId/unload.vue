@@ -21,16 +21,16 @@ bread-crumbs(:items="bc")
             :title="String($t('dcis.periods.unload.organizationsFilterTitle'))"
             message-container-class="mr-1"
           )
-          status-filter(
-            v-model="selectedStatuses"
-            :period="period"
-            :title="String($t('dcis.periods.unload.statusFilterTitle'))"
-            message-container-class="mr-1"
-          )
           organization-kind-filter(
             v-model="selectedOrganizationKinds"
             :period="period"
             :title="String($t('dcis.periods.unload.organizationKindFilterTitle'))"
+            message-container-class="mr-1"
+          )
+          status-filter(
+            v-model="selectedStatuses"
+            :period="period"
+            :title="String($t('dcis.periods.unload.statusFilterTitle'))"
             message-container-class="mr-1"
           )
           v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
