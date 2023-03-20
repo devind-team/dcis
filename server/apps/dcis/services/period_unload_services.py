@@ -85,6 +85,8 @@ class PeriodUnload:
         organization_ids: list[int],
         organization_kinds: list[str],
         status_ids: list[int],
+        unload_curator_group: bool,
+        unload_financing_paragraph: bool,
         unload_without_document: bool,
         unload_default: bool,
         apply_number_format: bool,
@@ -98,6 +100,8 @@ class PeriodUnload:
         - organization_ids - фильтрация по идентификаторам организаций
         - organization_kinds - типы организаций
         - status_ids - фильтрация по идентификаторам статусов
+        - unload_curator_group - выгружать кураторскую группу
+        - unload_financing_paragraph - выгружать параграф финансирования
         - unload_without_document - выгружать организации без документов
         - unload_default - выгружать значение по умолчанию при отсутствии значения в документе
         - apply_number_format - применять числовой формат
@@ -109,6 +113,8 @@ class PeriodUnload:
         self.path = Path(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
         self._organizations = self._filter_organizations(user, period, organization_ids, organization_kinds)
         self._status_ids = status_ids
+        self._unload_curator_group = unload_curator_group
+        self._unload_financing_paragraph = unload_financing_paragraph
         self._unload_without_document = unload_without_document
         self._unload_default = unload_default
         self._apply_number_format = apply_number_format
@@ -218,18 +224,16 @@ class PeriodUnload:
             )
         return result
 
-    @classmethod
-    def _build_columns(cls, sheet: Sheet, cell_groups: CellGroups) -> list[Column]:
+    def _build_columns(self, sheet: Sheet, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
-        left_columns = cls._build_left_columns()
-        data_columns = cls._build_data_columns(sheet, cell_groups, len(left_columns) + 1)
-        right_columns = cls._build_right_columns()
+        left_columns = self._build_left_columns()
+        data_columns = self._build_data_columns(sheet, cell_groups, len(left_columns) + 1)
+        right_columns = self._build_right_columns()
         return [*left_columns, *data_columns, *right_columns]
 
-    @staticmethod
-    def _build_left_columns() -> list[Column]:
+    def _build_left_columns(self) -> list[Column]:
         """Получение столбцов слева от данных."""
-        return [
+        columns = [
             Column(
                 get_cell_data=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
                 cells=[UnloadHeaderCell('IdListEdu')],
@@ -272,6 +276,20 @@ class PeriodUnload:
                 cells=[UnloadHeaderCell(name='Тип организации')],
             ),
         ]
+        if self._unload_curator_group:
+            def get_curator_group(s: DataSource) -> CellData:
+                curator_group = s.organization.curatorgroup_set.first()
+                return CellData(curator_group.name if curator_group else None)
+
+            columns.append(Column(get_cell_data=get_curator_group, cells=[UnloadHeaderCell(name='Кураторская группа')]))
+        if self._unload_financing_paragraph:
+            columns.append(Column(
+                get_cell_data=lambda s: CellData(
+                    f'{s.organization.attributes["id_paragraph"]} {s.organization.attributes["paragraph"]}'
+                ),
+                cells=[UnloadHeaderCell(name='Параграф финансирования')]
+            ))
+        return columns
 
     @classmethod
     def _build_data_columns(cls, sheet: Sheet, cell_groups: CellGroups, left_shift: int) -> list[Column]:
@@ -614,6 +632,8 @@ def unload_period(
     organization_ids: list[int],
     organization_kinds: list[str],
     status_ids: list[int],
+    unload_curator_group: bool,
+    unload_financing_paragraph: bool,
     unload_without_document: bool,
     unload_default: bool,
     apply_number_format: bool,
@@ -629,6 +649,8 @@ def unload_period(
         organization_ids=organization_ids,
         organization_kinds=organization_kinds,
         status_ids=status_ids,
+        unload_curator_group=unload_curator_group,
+        unload_financing_paragraph=unload_financing_paragraph,
         unload_without_document=unload_without_document,
         unload_default=unload_default,
         apply_number_format=apply_number_format,

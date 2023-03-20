@@ -5068,8 +5068,12 @@ export type UnloadPeriodMutationInput = {
   statusIds: Array<Scalars['ID']>;
   /** Выгружать листы для филиалов */
   unloadChildren: Scalars['Boolean'];
+  /** Выгружать кураторскую группу */
+  unloadCuratorGroup: Scalars['Boolean'];
   /** Выгружать значение по умолчанию при отсутствии значения в документе */
   unloadDefault: Scalars['Boolean'];
+  /** Выгружать параграф финансирования */
+  unloadFinancingParagraph: Scalars['Boolean'];
   /** Выгружать листы для головных учреждений */
   unloadHeads: Scalars['Boolean'];
   /** Выгружать организации без документов */
@@ -6000,8 +6004,10 @@ export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodG
 export type UnloadPeriodMutationVariables = Exact<{
   periodId: Scalars['ID'];
   organizationIds: Array<Scalars['ID']> | Scalars['ID'];
-  statusIds: Array<Scalars['ID']> | Scalars['ID'];
   organizationKinds: Array<Scalars['String']> | Scalars['String'];
+  statusIds: Array<Scalars['ID']> | Scalars['ID'];
+  unloadCuratorGroup: Scalars['Boolean'];
+  unloadFinancingParagraph: Scalars['Boolean'];
   unloadWithoutDocument: Scalars['Boolean'];
   unloadDefault: Scalars['Boolean'];
   applyNumberFormat: Scalars['Boolean'];
