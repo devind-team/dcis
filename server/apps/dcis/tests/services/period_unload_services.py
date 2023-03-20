@@ -47,7 +47,7 @@ class UnloadPeriodTestCase(TestCase):
         self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
 
-        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа №1')
         self.curator_group.users.add(self.superuser)
 
         self.statuses = [Status.objects.create(name=f'Статус №{i}') for i in range(1, 7)]
@@ -72,6 +72,8 @@ class UnloadPeriodTestCase(TestCase):
                 attributes={
                     'idlistedu': str(i),
                     'org_type': f'ВУЗ{i}',
+                    'id_paragraph': 1000 + i,
+                    'paragraph': f'Параграф финансирования №{i}'
                 },
                 kodbuhg=i + 10,
                 region=Region.objects.create(name=f'Регион №{i}', common_id=i + 20),
@@ -167,6 +169,24 @@ class UnloadPeriodTestCase(TestCase):
         })[1:]
         self._assert_worksheets_equal(expected_path, self.actual_path)
 
+    def test_curator_group(self) -> None:
+        """Тестирование выгрузки с кураторской группой."""
+        expected_path = self.RESOURCES_DIR / 'test_curator_group.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
+            **self._get_unload_default_settings(),
+            'unload_curator_group': True,
+        })[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
+    def test_financing_paragraph(self) -> None:
+        """Тестирование выгрузки с параграфом финансирования."""
+        expected_path = self.RESOURCES_DIR / 'test_financing_paragraph.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
+            **self._get_unload_default_settings(),
+            'unload_financing_paragraph': True,
+        })[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
     def test_unload_without_document(self) -> None:
         """Тестирование выгрузки организаций без документов."""
         expected_path = self.RESOURCES_DIR / 'test_unload_without_document.xlsx'
@@ -249,6 +269,8 @@ class UnloadPeriodTestCase(TestCase):
             'period': self.period,
             'organization_ids': [],
             'status_ids': [],
+            'unload_curator_group': False,
+            'unload_financing_paragraph': False,
             'organization_kinds': [],
             'unload_without_document': False,
             'unload_default': False,

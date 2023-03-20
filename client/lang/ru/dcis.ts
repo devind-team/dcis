@@ -343,6 +343,11 @@ export default {
         onlyChildren: 'Для филиалов',
         headsAndChildrens: 'Для головных учреждений и филиалов'
       },
+      additionalColumns: {
+        label: 'Дополнительные столбцы',
+        curatorGroup: 'Кураторская группа',
+        financingParagraph: 'Параграф финансирования'
+      },
       emptyCell: 'Строка в пустой ячейке'
     }
   },

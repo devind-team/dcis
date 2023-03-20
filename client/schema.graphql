@@ -4248,8 +4248,12 @@ input UnloadPeriodMutationInput {
   statusIds: [ID!]!
   """Выгружать листы для филиалов"""
   unloadChildren: Boolean!
+  """Выгружать кураторскую группу"""
+  unloadCuratorGroup: Boolean!
   """Выгружать значение по умолчанию при отсутствии значения в документе"""
   unloadDefault: Boolean!
+  """Выгружать параграф финансирования"""
+  unloadFinancingParagraph: Boolean!
   """Выгружать листы для головных учреждений"""
   unloadHeads: Boolean!
   """Выгружать организации без документов"""
