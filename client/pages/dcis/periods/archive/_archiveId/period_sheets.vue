@@ -53,7 +53,7 @@ export default defineComponent({
     >({
       document: periodSheetQuery,
       variables: () => ({
-        sheetId: props.period.sheets[activeSheetIndex.value].id
+        sheetId: props.period.sheets[activeSheetIndex.value]?.id
       })
     })
 

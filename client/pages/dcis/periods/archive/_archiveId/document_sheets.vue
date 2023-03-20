@@ -1,7 +1,7 @@
 <template lang="pug">
   left-navigator-container(
     v-if="!activeDocumentLoading"
-    :bread-crumbs="breadCrumbs"
+    :bread-crumbs="bc"
     fluid
     @update-drawer="$emit('update-drawer')"
   )
@@ -25,7 +25,7 @@ import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import { useCommonQuery } from '~/composables'
+import { useCommonQuery, useI18n } from '~/composables'
 import {
   DocumentQuery,
   DocumentQueryVariables,
@@ -46,7 +46,8 @@ export default defineComponent({
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> },
     period: { type: Object as PropType<PeriodType>, required: true }
   },
-  setup () {
+  setup (props) {
+    const { localePath } = useI18n()
     const route = useRoute()
 
     const activeSheetIndex = ref<number>(0)
@@ -92,7 +93,17 @@ export default defineComponent({
       })
     })
 
+    const bc = computed<BreadCrumbsItem[]>(() => ([
+      ...props.breadCrumbs,
+      {
+        text: 'Документ',
+        to: localePath({ name: 'dcis-periods-archive-archiveId-document_sheets' }),
+        exact: true
+      }
+    ]))
+
     return {
+      bc,
       GridMode,
       activeSheetIndex,
       activeDocument,
