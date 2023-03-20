@@ -96,6 +96,9 @@ export default defineComponent({
 
 <style lang="sass">
 .document-sheets__left-navigator-container
+  position: relative
+  z-index: 0
+
   .v-card__subtitle
     padding-bottom: 8px
 </style>
