@@ -131,7 +131,9 @@ export default defineComponent({
       return item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
     }
     watch(() => activeSheetIndex.value, () => {
-      reportRowGroupsFilter.value.reset()
+      if (reportRowGroupsFilter.value) {
+        reportRowGroupsFilter.value.reset()
+      }
     })
 
     const { data: activeSheet, loading: activeSheetLoading } = useCommonQuery<
