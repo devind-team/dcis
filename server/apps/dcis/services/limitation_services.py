@@ -96,7 +96,7 @@ def unload_limitations_in_file(user: User, period: Period) -> str:
         f'limitation_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.json'
     )
     with open(path, 'w') as file:
-        json.dump(data, file, ensure_ascii=False)
+        json.dump(data, file, ensure_ascii=False, indent=2)
 
     return relpath(path, settings.BASE_DIR)
 
