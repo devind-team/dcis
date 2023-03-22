@@ -1,37 +1,36 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ $t('dcis.periods.links.attributes') }}
-    v-spacer
-    add-attribute-menu(
-      v-if="period.canChangeAttributes"
-      v-slot="{ on, attrs}"
-      :period="period"
-      :from-file-update="resetUpdate"
-      :add-update="addAttributeUpdate"
+  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+    template(#header) {{ $t('dcis.periods.links.attributes') }}
+      v-spacer
+      add-attribute-menu(
+        v-slot="{ on, attrs}"
+        :period="period"
+        :from-file-update="resetUpdate"
+        :add-update="addAttributeUpdate"
+      )
+        v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
+    v-data-table(
+      :headers="headers"
+      :items="attributes"
+      :loading="loading"
+      disable-pagination
+      disable-filtering
+      disable-sort
+      hide-default-footer
     )
-      v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
-  v-data-table(
-    :headers="headers"
-    :items="attributes"
-    :loading="loading"
-    disable-pagination
-    disable-filtering
-    disable-sort
-    hide-default-footer
-  )
-    template(#item.action="{ item }")
-      change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
-        v-tooltip(bottom)
-          template(#activator="{ on: onTooltip, attrs}")
-            v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" color="primary" icon)
-              v-icon mdi-pencil
-          span {{ $t('dcis.attributes.change') }}
-      delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
-        v-tooltip(bottom)
-          template(#activator="{ on: onTooltip, attrs}")
-            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" color="error" icon)
-              v-icon mdi-delete
-          span {{ $t('dcis.attributes.delete') }}
+      template(#item.action="{ item }")
+        change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs}")
+              v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" color="primary" icon)
+                v-icon mdi-pencil
+            span {{ $t('dcis.attributes.change') }}
+        delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
+          v-tooltip(bottom)
+            template(#activator="{ on: onTooltip, attrs}")
+              v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" color="error" icon)
+                v-icon mdi-delete
+            span {{ $t('dcis.attributes.delete') }}
 </template>
 
 <script lang="ts">
@@ -106,7 +105,7 @@ export default defineComponent({
 
     const deleteAttribute = (attribute: AttributeType) => {
       useMutation<DeleteAttributeMutation, DeleteAttributeMutationInput>(deleteAttributeMutation, {
-        update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload }}) => {
+        update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload } }) => {
           if (result.data.deleteAttribute.success) {
             deleteUpdate(cache, { data: { deleteAttribute: { id: attribute.id } } })
           }
