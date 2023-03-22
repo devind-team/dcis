@@ -154,6 +154,6 @@ def unload_attributes_in_file(user: User, get_host: Any | None, period: Period) 
         f'period_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.json'
     )
     with open(path, 'w') as file:
-        json.dump(data, file, ensure_ascii=False)
+        json.dump(data, file, ensure_ascii=False, indent=2)
 
     return relpath(path, settings.BASE_DIR)
