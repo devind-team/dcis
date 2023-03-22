@@ -1,27 +1,27 @@
 <template lang="pug">
-  v-menu(v-model="active")
-    template(#activator="{ on, attrs }")
-      slot(name="default" :on="on" :attrs="attrs")
-    v-list(dense)
-      add-attribute(v-if="period.canChangeAttributes" :period="period" :update="addUpdate" @close="close")
-        template(#activator="{ on }")
-          v-list-item(v-on="on")
-            v-list-item-icon
-              v-icon mdi-form-select
-            v-list-item-content {{ $t('dcis.attributes.AddAttributes.buttonText') }}
-      upload-attributes-from-file(v-if="period.canChangeAttributes" :period="period", :update="fromFileUpdate")
-        template(#activator="{ on, attrs }")
-          v-list-item(v-on="on" v-bind="attrs")
-            v-list-item-icon
-              v-icon mdi-file-import-outline
-            v-list-item-content {{ $t('dcis.attributes.uploadAttributes.buttonText') }}
-      v-list-item(
-        loading="loading"
-        @click="unloadAttributesInFile"
-      )
-        v-list-item-icon
-          v-icon mdi-file-export-outline
-        v-list-item-content {{ $t('dcis.attributes.unloadAttributes.buttonText') }}
+v-menu(v-model="active", transition="slide-y-transition" offset-y left)
+  template(#activator="{ on, attrs }")
+    slot(name="activator" :on="on" :attrs="attrs")
+  v-list(dense)
+    add-attribute(v-if="period.canChangeAttributes" :period="period" :update="addUpdate" @close="close")
+      template(#activator="{ on }")
+        v-list-item(v-on="on")
+          v-list-item-icon
+            v-icon mdi-form-select
+          v-list-item-content {{ $t('dcis.attributes.AddAttributes.buttonText') }}
+    upload-attributes-from-file(v-if="period.canChangeAttributes" :period="period", :update="fromFileUpdate")
+      template(#activator="{ on, attrs }")
+        v-list-item(v-on="on" v-bind="attrs")
+          v-list-item-icon
+            v-icon mdi-file-import-outline
+          v-list-item-content {{ $t('dcis.attributes.uploadAttributes.buttonText') }}
+    v-list-item(
+      loading="loading"
+      @click="unloadAttributesInFile"
+    )
+      v-list-item-icon
+        v-icon mdi-file-export-outline
+      v-list-item-content {{ $t('dcis.attributes.unloadAttributes.buttonText') }}
 </template>
 
 <script lang="ts">

@@ -564,7 +564,7 @@ export default {
     }
   },
   attributes: {
-    adds: 'Добавить атрибуты',
+    adds: 'Изменить атрибуты',
     add: 'Добавить атрибут',
     change: '@:change',
     delete: '@:delete',

@@ -1,43 +1,44 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.links.attributes') }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.links.attributes') }}
+    template
       v-spacer
       add-attribute-menu(
-        v-slot="{ on, attrs}"
         :period="period"
         :from-file-update="resetUpdate"
         :add-update="addAttributeUpdate"
       )
-        v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
-    v-data-table(
-      :headers="headers"
-      :items="attributes"
-      :loading="loading"
-      disable-pagination
-      disable-filtering
-      disable-sort
-      hide-default-footer
-    )
-      template(#item.action="{ item }")
-        change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
-          v-tooltip(bottom)
-            template(#activator="{ on: onTooltip, attrs}")
-              v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" color="primary" icon)
-                v-icon mdi-pencil
-            span {{ $t('dcis.attributes.change') }}
-        delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
-          v-tooltip(bottom)
-            template(#activator="{ on: onTooltip, attrs}")
-              v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" color="error" icon)
-                v-icon mdi-delete
-            span {{ $t('dcis.attributes.delete') }}
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
+  template(#subheader) {{ $t('shownOf', { count, totalCount: count }) }}
+  v-data-table(
+    :headers="headers"
+    :items="attributes"
+    :loading="loading"
+    disable-pagination
+    disable-filtering
+    hide-default-footer
+  )
+    template(#item.action="{ item }")
+      change-attribute(v-slot="{ on: onChange }" :attribute="item" :update="changeAttributeUpdate")
+        v-tooltip(bottom)
+          template(#activator="{ on: onTooltip, attrs}")
+            v-btn(v-on="{...onTooltip, ...onChange}" v-bind="attrs" color="primary" icon)
+              v-icon mdi-pencil
+          span {{ $t('dcis.attributes.change') }}
+      delete-menu(v-slot="{ on: onConfirm }" @confirm="deleteAttribute(item)")
+        v-tooltip(bottom)
+          template(#activator="{ on: onTooltip, attrs}")
+            v-btn(v-on="{...onTooltip, ...onConfirm}" v-bind="attrs" color="error" icon)
+              v-icon mdi-delete
+          span {{ $t('dcis.attributes.delete') }}
 </template>
 
 <script lang="ts">
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
-import { DataTableHeader } from 'vuetify'
 import { useMutation } from '@vue/apollo-composable'
+import { DataTableHeader } from 'vuetify'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -103,6 +104,8 @@ export default defineComponent({
       })
     })
 
+    const count = computed<number>(() => attributes.value ? attributes.value.length : 0)
+
     const deleteAttribute = (attribute: AttributeType) => {
       useMutation<DeleteAttributeMutation, DeleteAttributeMutationInput>(deleteAttributeMutation, {
         update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload } }) => {
@@ -129,6 +132,7 @@ export default defineComponent({
       bc,
       headers,
       attributes,
+      count,
       loading,
       resetUpdate,
       changeAttributeUpdate,
