@@ -305,18 +305,6 @@ class UpdateOrCreateValuesTestCase(TestCase):
         )
         self._test_values(self.expected_values, self.parent_document)
 
-    def test_aggregation_direct(self) -> None:
-        """Тестирование изменения ячейки с агрегацией."""
-        result = update_or_create_values(
-            user=self.user,
-            document=self.parent_document,
-            sheet_id=self.aggregation_form.id,
-            value_inputs=[ValueInput(cell=self.aggregation_cell, value='3.0')]
-        )
-        aggregation_value = Value.objects.get(column=self.aggregation_cell.column, row=self.aggregation_cell.row)
-        self.assertEqual([aggregation_value], result.values)
-        self._test_value(aggregation_value, ('12.0', '3.0', None))
-
     def test_aggregation_single(self) -> None:
         """Тестирование изменения одной ячейки с зависимой агрегацией несколько раз подряд.
 
@@ -338,10 +326,10 @@ class UpdateOrCreateValuesTestCase(TestCase):
             self.assertEqual(2, len(result.values))
             value = Value.objects.get(q & Q(document=document))
             self.assertTrue(value in result.values)
-            self._test_value(value, (str_v, None, None))
+            self._test_value(value, (str_v, None))
             aggregation_value = Value.objects.get(column=self.aggregation_cell.column, row=self.aggregation_cell.row)
             self.assertTrue(aggregation_value in result.values)
-            self._test_value(aggregation_value, (f'{7.0 + v:.1f}', '0.0', None))
+            self._test_value(aggregation_value, (f'{7.0 + v:.1f}', None))
 
     def test_aggregation_multiple(self) -> None:
         """Тестирование изменения нескольких ячеек с зависимой агрегацией."""
@@ -361,10 +349,10 @@ class UpdateOrCreateValuesTestCase(TestCase):
         for q, v in [(cell1_q, '4.0'), (cell2_q, '5.0')]:
             value = Value.objects.get(q & Q(document=document))
             self.assertTrue(value in result.values)
-            self._test_value(value, (v, None, None))
+            self._test_value(value, (v, None))
         aggregation_value = Value.objects.get(column=self.aggregation_cell.column, row=self.aggregation_cell.row)
         self.assertTrue(aggregation_value in result.values)
-        self._test_value(aggregation_value, ('15.0', '0.0', None))
+        self._test_value(aggregation_value, ('15.0', None))
 
     def test_aggregation_depends_on_formula(self) -> None:
         """Тестирование изменения ячейки, от которой зависит формула.
@@ -384,10 +372,10 @@ class UpdateOrCreateValuesTestCase(TestCase):
         self.assertEqual(4, len(result.values))
         value = Value.objects.get(q & Q(document=document))
         self.assertTrue(value in result.values)
-        self._test_value(value, ('3.0', None, None))
+        self._test_value(value, ('3.0', None))
         formula1_value = Value.objects.get(column__sheet_id=form.id, column__index=4, row__index=1, document=document)
         self.assertTrue(formula1_value in result.values)
-        self._test_value(formula1_value, ('4.0', None, None))
+        self._test_value(formula1_value, ('4.0', None))
         formula2_value = Value.objects.get(
             column__sheet_id=self.forms[1].id,
             column__index=4,
@@ -395,13 +383,13 @@ class UpdateOrCreateValuesTestCase(TestCase):
             document=document,
         )
         self.assertTrue(formula2_value in result.values)
-        self._test_value(formula2_value, ('8.0', None, None))
+        self._test_value(formula2_value, ('8.0', None))
         aggregation_value = Value.objects.get(
             column=self.aggregation_aggregation_depends_cell.column,
             row=self.aggregation_aggregation_depends_cell.row,
         )
         self.assertTrue(aggregation_value in result.values)
-        self._test_value(aggregation_value, ('24.0', '0.0', None))
+        self._test_value(aggregation_value, ('24.0', None))
 
     def test_formula_depends_on_aggregation(self) -> None:
         """Тестирование изменения ячейки, от которой зависит агрегация.
@@ -427,16 +415,16 @@ class UpdateOrCreateValuesTestCase(TestCase):
         self.assertEqual(3, len(result.values))
         value = Value.objects.get(q & Q(document=document))
         self.assertTrue(value in result.values)
-        self._test_value(value, ('3.0', None, None))
+        self._test_value(value, ('3.0', None))
         aggregation_value = Value.objects.get(column=self.aggregation_cell.column, row=self.aggregation_cell.row)
         self.assertTrue(aggregation_value in result.values)
-        self._test_value(aggregation_value, ('10.0', '0.0', None))
+        self._test_value(aggregation_value, ('10.0', None))
         formula_value = Value.objects.get(
             column=self.aggregation_formula_depends_cell.column,
             row=self.aggregation_formula_depends_cell.row,
         )
         self.assertTrue(formula_value in result.values)
-        self._test_value(formula_value, ('32.0', None, None))
+        self._test_value(formula_value, ('32.0', None))
 
     def _test_values(self, values: dict[Cell, CellData], document: Document) -> None:
         """Тестирование значений ячеек."""
@@ -449,13 +437,12 @@ class UpdateOrCreateValuesTestCase(TestCase):
                     cell_data = values[cell]
                     if cell_data.has_value:
                         value = Value.objects.get(column=column, row=row, document=document)
-                        self._test_value(value, (cell_data.value, cell_data.extra_value, cell_data.error))
+                        self._test_value(value, (cell_data.value, cell_data.error))
                     else:
                         self.assertFalse(Value.objects.filter(column=column, row=row).exists())
                         self.assertEqual(cell.default, cell_data.value)
 
-    def _test_value(self, value: Value, data: tuple[str, str | None, str | None]) -> None:
+    def _test_value(self, value: Value, data: tuple[str, str | None]) -> None:
         """Тестирование данных значения."""
         self.assertEqual(value.value, data[0])
-        self.assertEqual(value.extra_value, data[1])
-        self.assertEqual(value.error, data[2])
+        self.assertEqual(value.error, data[1])
