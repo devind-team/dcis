@@ -32,7 +32,11 @@
             v-list-item-subtitle.font-italic {{ item.comment }}
           v-tooltip(v-if="item.archivePeriod" bottom)
             template(#activator="{ on }")
-              v-btn(v-on="on" :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) } })" :nuxt="true" color="primary" icon)
+              v-btn(
+                v-on="on"
+                :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) }, query: { periodId: toGlobalId('PeriodType', Number(period.id)) } })"
+                :nuxt="true" color="primary" icon
+              )
                 v-icon mdi-archive-outline
             span {{ "Открыть историю" }}
           v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
@@ -88,7 +92,8 @@ import {
   NewStatusesQuery,
   NewStatusesQueryVariables,
   StatusType,
-  StatusFieldsFragment
+  StatusFieldsFragment,
+  PeriodType
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
 import newStatusesQuery from '~/gql/dcis/queries/new_statuses.graphql'
@@ -112,6 +117,7 @@ export default defineComponent({
   props: {
     canDelete: { type: Boolean, required: true },
     document: { type: Object as PropType<DocumentType>, required: true },
+    period: { type: Object as PropType<PeriodType>, required: true },
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
   setup (props, { emit }) {

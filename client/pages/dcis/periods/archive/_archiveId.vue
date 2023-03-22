@@ -1,8 +1,8 @@
 <template lang="pug">
-div
-  left-navigator-driver(v-model="drawer" :items="links")
-  v-progress-circular(v-if="loading" color="primary" indeterminate)
-  nuxt-child(v-else :bread-crumbs="bc" :period="archivePeriod" @update-drawer="drawer = !drawer")
+  div
+    left-navigator-driver(v-model="drawer" :items="links")
+    v-progress-circular(v-if="loading" color="primary" indeterminate)
+    nuxt-child(v-else :bread-crumbs="bc" :period="archivePeriod" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">
@@ -56,7 +56,7 @@ export default defineComponent({
         ...props.breadCrumbs,
         {
           text: archivePeriod.value.name,
-          to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' }),
+          to: localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: route.params.periodId } }),
           exact: true
         },
         {

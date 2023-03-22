@@ -1,6 +1,6 @@
 <template lang="pug">
   left-navigator-container(
-    v-if="!activeDocumentLoading"
+    v-if="activeDocument && !activeDocumentLoading"
     :bread-crumbs="bc"
     fluid
     @update-drawer="$emit('update-drawer')"
@@ -25,7 +25,7 @@ import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import { useCommonQuery, useI18n } from '~/composables'
+import { useCommonQuery, useQueryRelay, useI18n } from '~/composables'
 import {
   DocumentQuery,
   DocumentQueryVariables,
@@ -51,7 +51,7 @@ export default defineComponent({
     const route = useRoute()
 
     const activeSheetIndex = ref<number>(0)
-    const { data: documents } = useCommonQuery<
+    const { data: documents } = useQueryRelay<
       DocumentsQuery,
       DocumentsQueryVariables
     >({
@@ -74,7 +74,7 @@ export default defineComponent({
         documentId: doc.value?.id
       }),
       options: () => ({
-        enabled: !doc.value
+        enabled: !!doc.value
       })
     })
 
@@ -84,7 +84,7 @@ export default defineComponent({
     >({
       document: documentSheetQuery,
       variables: () => ({
-        documentId: route.params.documentId,
+        documentId: doc.value?.id,
         sheetId: activeDocument.value?.sheets[activeSheetIndex.value]?.id
       }),
       options: () => ({
@@ -93,6 +93,9 @@ export default defineComponent({
       })
     })
 
+    watch(activeSheet, (newVal, oldVal) => {
+      console.log(newVal, oldVal)
+    })
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
@@ -104,6 +107,8 @@ export default defineComponent({
 
     return {
       bc,
+      documents,
+      doc,
       GridMode,
       activeSheetIndex,
       activeDocument,
