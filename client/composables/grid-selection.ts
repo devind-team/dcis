@@ -40,7 +40,7 @@ export function useGridSelection (
   const rowsSelectionView = ref<SelectionViewType | null>(null)
 
   const selectedCells = computed<CellType[]>(() => {
-    if (!cellsSelection.value) {
+    if (!activeSheet.value || !cellsSelection.value) {
       return []
     }
     let selectedCells = [cellsSelection.value.first, cellsSelection.value.last]
@@ -62,7 +62,7 @@ export function useGridSelection (
     return newSelectedCells
   })
   const selectedColumns = computed<ColumnDimensionType[]>(() => {
-    if (!columnsSelection.value) {
+    if (!activeSheet.value || !columnsSelection.value) {
       return []
     }
     const indices = [columnsSelection.value.last.index, columnsSelection.value.first.index]
@@ -71,7 +71,7 @@ export function useGridSelection (
     return activeSheet.value.columns.slice(minIndex - 1, maxIndex)
   })
   const selectedRows = computed<RowDimensionType[]>(() => {
-    if (!rowsSelection.value) {
+    if (!activeSheet.value || !rowsSelection.value) {
       return []
     }
     const indices = [rowsSelection.value.last.globalIndex, rowsSelection.value.first.globalIndex]
