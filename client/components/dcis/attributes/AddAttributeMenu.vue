@@ -8,7 +8,7 @@
           v-list-item(v-on="on")
             v-list-item-icon
               v-icon mdi-form-select
-            v-list-item-content Заполнить форму
+            v-list-item-content {{ $t('dcis.attributes.AddAttributes.buttonText') }}
       upload-attributes-from-file(v-if="period.canChangeAttributes" :period="period", :update="fromFileUpdate")
         template(#activator="{ on, attrs }")
           v-list-item(v-on="on" v-bind="attrs")
@@ -21,7 +21,7 @@
       )
         v-list-item-icon
           v-icon mdi-file-export-outline
-        v-list-item-content {{ $t('dcis.attributes.unloadAttributes.content') }}
+        v-list-item-content {{ $t('dcis.attributes.unloadAttributes.buttonText') }}
 </template>
 
 <script lang="ts">
