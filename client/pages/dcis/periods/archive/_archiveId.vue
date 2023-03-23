@@ -56,12 +56,15 @@ export default defineComponent({
         ...props.breadCrumbs,
         {
           text: archivePeriod.value.name,
-          to: localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: route.params.periodId } }),
+          to: localePath({ name: 'dcis-periods-periodId-documents', params: { periodId: route.query.periodId } }),
           exact: true
         },
         {
           text: 'Архив',
-          to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' })
+          to: localePath({
+            name: 'dcis-periods-archive-archiveId-document_sheets',
+            query: route.query
+          })
         }
       ]
     })

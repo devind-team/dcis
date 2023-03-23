@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref } from '#app'
+import { computed, defineComponent, useRoute, inject, PropType, ref } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -33,12 +33,13 @@ export default defineComponent({
   },
   setup (props) {
     const { t, localePath } = useI18n()
+    const route = useRoute()
 
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
         text: t('dcis.periods.sheets.name') as string,
-        to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets' }),
+        to: localePath({ name: 'dcis-periods-archive-archiveId-period_sheets', query: route.query }),
         exact: true
       }
     ]))

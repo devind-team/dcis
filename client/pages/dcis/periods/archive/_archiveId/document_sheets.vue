@@ -100,7 +100,7 @@ export default defineComponent({
       ...props.breadCrumbs,
       {
         text: 'Документ',
-        to: localePath({ name: 'dcis-periods-archive-archiveId-document_sheets' }),
+        to: localePath({ name: 'dcis-periods-archive-archiveId-document_sheets', query: route.query }),
         exact: true
       }
     ]))

@@ -34,7 +34,10 @@
             template(#activator="{ on }")
               v-btn(
                 v-on="on"
-                :to="localeRoute({ name: 'dcis-periods-archive-archiveId', params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) }, query: { periodId: toGlobalId('PeriodType', Number(period.id)) } })"
+                :to=`localeRoute({
+                    name: 'dcis-periods-archive-archiveId',
+                    params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) },
+                    query: { periodId: toGlobalId('PeriodType', Number(period.id)) } })`
                 :nuxt="true" color="primary" icon
               )
                 v-icon mdi-archive-outline

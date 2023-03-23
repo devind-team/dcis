@@ -1,22 +1,22 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
-  template(v-if="!loading")
-    template(v-if="attributes.length")
-      component(
-        v-for="attribute in attributes"
-        :key="attribute.id"
-        :is="AttributeValueComponents[attribute.kind]"
-        :attribute="attribute"
-        :attribute-value="attribute.id in attributesValues ? attributesValues[attribute.id] : null"
-        :readonly="!document.canChangeAttributeValue"
-        @change="changeAttributeValue(attribute, $event)"
-      )
-    v-alert(v-else type="info") {{ $t('dcis.documents.attributes.noAttributes') }}
-  v-progress-circular(v-else color="primary" indeterminate)
+  left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+    template(v-if="!loading")
+      template(v-if="attributes.length")
+        component(
+          v-for="attribute in attributes"
+          :key="attribute.id"
+          :is="AttributeValueComponents[attribute.kind]"
+          :attribute="attribute"
+          :attribute-value="attribute.id in attributesValues ? attributesValues[attribute.id] : null"
+          :readonly="!document.canChangeAttributeValue"
+          @change="changeAttributeValue(attribute, $event)"
+        )
+      v-alert(v-else type="info") {{ $t('dcis.documents.attributes.noAttributes') }}
+    v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '#app'
+import { computed, defineComponent, useRoute, PropType } from '#app'
 import { useApolloClient, useMutation } from '@vue/apollo-composable'
 import { changeSheetValues } from '~/composables/grid-mutations'
 import {
@@ -44,6 +44,7 @@ import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import attributesQuery from '~/gql/dcis/queries/attributes.graphql'
 import attributesValuesQuery from '~/gql/dcis/queries/attributes_values.graphql'
 import changeAttributeValueMutation from '~/gql/dcis/mutations/attributes/change_attribute_value.graphql'
+import { useCommonQuery } from '~/composables'
 
 type AttributeComponentsType = typeof AttributeValueNumeric | typeof AttributeValueMoney | typeof AttributeValueText
 
@@ -76,7 +77,7 @@ export default defineComponent({
       ...props.breadCrumbs,
       {
         text: t('dcis.documents.links.attributes') as string,
-        to: localePath({ name: 'dcis-documents-documentId-attributes' }),
+        to: localePath({ name: 'dcis-periods-archive-archiveId-attributes', query: route.query }),
         exact: true
       }
     ]))
@@ -89,7 +90,7 @@ export default defineComponent({
       AttributesQueryVariables
     >({
       document: attributesQuery,
-      variables: () => ({ periodId: props.document.period.id })
+      variables: () => ({ periodId: route.params.archiveId })
     })
 
     const {

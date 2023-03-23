@@ -14,7 +14,7 @@ export default defineComponent({
     const { localePath } = useI18n()
     const router = useRouter()
     const route = useRoute()
-    router.push(localePath({ name: 'dcis-periods-archive-archiveId-period_sheets', query: route.query }))
+    router.push(localePath({ name: 'dcis-periods-archive-archiveId-document_sheets', query: route.query }))
   }
 })
 </script>
