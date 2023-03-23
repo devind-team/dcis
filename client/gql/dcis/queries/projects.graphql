@@ -1,7 +1,7 @@
 #import "../fragments/project_fields.graphql"
 
-query Projects($first: Int, $after: String) {
-  projects(first: $first, after: $after) {
+query Projects($first: Int, $after: String, $visibility: Boolean, $archive: Boolean) {
+  projects(first: $first, after: $after, visibility: $visibility, archive: $archive) {
     pageInfo {
       startCursor
       endCursor

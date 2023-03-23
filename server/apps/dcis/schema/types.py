@@ -87,7 +87,9 @@ class ProjectType(OptimizedDjangoObjectType):
         )
         filter_fields = {
             'name': ['icontains'],
-            'user': ['exact', 'in']
+            'user': ['exact', 'in'],
+            'visibility': ['exact'],
+            'archive': ['exact'],
         }
         connection_class = CountableConnection
 
@@ -621,7 +623,6 @@ class CellAggregationType(graphene.ObjectType):
 
     aggregation = graphene.String(required=True, description='Метод агрегации')
     cells = graphene.List(graphene.NonNull(graphene.String), description='Ячейки агрегации')
-
 
 
 class ValueType(DjangoObjectType):
