@@ -5,7 +5,7 @@ from devind_helpers.decorators import permission_classes
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from django.db.models import QuerySet
-from graphene_django_filter import AdvancedDjangoFilterConnectionField
+from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
@@ -24,7 +24,7 @@ class ProjectQueries(graphene.ObjectType):
         required=True,
         description='Проект'
     )
-    projects = AdvancedDjangoFilterConnectionField(ProjectType, description='Проекты')
+    projects = DjangoFilterConnectionField(ProjectType, description='Проекты')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

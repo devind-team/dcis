@@ -1810,7 +1810,7 @@ type ContentTypeType {
   model: String!
   permissionSet: [PermissionType!]!
   """Тип дивизиона"""
-  projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
+  projectSet(after: String, archive: Boolean, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID], visibility: Boolean): ProjectTypeConnection!
 }
 
 input CopyPeriodGroupsMutationInput {
@@ -3383,24 +3383,6 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-input ProjectFilterInputType {
-  """`And` field"""
-  and: [ProjectFilterInputType]
-  """`Name` field"""
-  name: ProjectNameFilterInputType
-  """`Not` field"""
-  not: ProjectFilterInputType
-  """`Or` field"""
-  or: [ProjectFilterInputType]
-  """`User` field"""
-  user: ProjectUserFilterInputType
-}
-
-input ProjectNameFilterInputType {
-  """`Icontains` lookup"""
-  icontains: String
-}
-
 """Тип модели проектов."""
 type ProjectType implements Node {
   """Архив"""
@@ -3448,13 +3430,6 @@ type ProjectTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: ProjectType
-}
-
-input ProjectUserFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Схема запросов данных."""
@@ -3697,15 +3672,7 @@ type Query {
     projectId: ID!
   ): ProjectType!
   """Проекты"""
-  projects(
-    after: String
-    before: String
-    """Advanced filter field"""
-    filter: ProjectFilterInputType
-    first: Int
-    last: Int
-    offset: Int
-  ): ProjectTypeConnection
+  projects(after: String, archive: Boolean, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID], visibility: Boolean): ProjectTypeConnection
   region(
     """Region ID"""
     regionId: Int!

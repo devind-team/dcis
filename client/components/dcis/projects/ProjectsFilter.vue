@@ -12,7 +12,6 @@ items-data-filter(
 
 <script lang="ts">
 import { defineComponent, computed, PropType } from '#app'
-import { ProjectType } from '~/types/graphql'
 import { Item } from '~/types/filters'
 import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 
@@ -20,8 +19,7 @@ export default defineComponent({
   components: { ItemsDataFilter },
   props: {
     value: { type: Array as PropType<Item[]>, required: true },
-    defaultValue: { type: Array as PropType<Item[]>, required: true },
-    projects: { type: Array as PropType<ProjectType[]>, required: true }
+    defaultValue: { type: Array as PropType<Item[]>, required: true }
   },
   setup (props, { emit }) {
     const selectedFilters = computed<Item[]>({
@@ -33,16 +31,11 @@ export default defineComponent({
       }
     })
 
-    const items = computed<Item[]>(() => {
-      const result: Item[] = [
-        { id: 'active' },
-        { id: 'archive' }
-      ]
-      if (props.projects.find(x => !x.visibility)) {
-        result.push({ id: 'hidden' })
-      }
-      return result
-    })
+    const items: Item[] = [
+      { id: 'active' },
+      { id: 'archive' },
+      { id: 'hidden' }
+    ]
 
     return { items, selectedFilters }
   }

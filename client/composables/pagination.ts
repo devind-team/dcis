@@ -1,12 +1,13 @@
 import defu from 'defu'
-import type { Ref, ComputedRef } from '#app'
-import { ref, computed } from '#app'
+import type { ComputedRef, Ref } from '#app'
+import { computed, ref } from '#app'
 import { PageInfo } from '~/types/graphql'
 import { cursor } from '~/services/graphql-relay'
 
 export type PaginationMode = 'fetch' | 'paged'
 export type PaginationOptions = { page?: number, pageSize?: number, mode?: PaginationMode }
 export type PaginationVariablesType = { first: number, offset?: number, after?: string }
+
 export interface PaginationInterface {
   mode: PaginationMode,
   page: Ref<number>
