@@ -1,7 +1,13 @@
 <template lang="pug">
-div
+full-screen-in-place(:is-full-screen="view.isFullScreen")
   grid-sheet-menu(:class="{ 'mb-2': mode === GridMode.READ || mode === GridMode.REPORT || mode === GridMode.WRITE }")
-    slot(name="menus" :selected-cells-options="selectedCellsOptions")
+    .d-flex.justify-space-between
+      div
+        edit-menu(:mode="mode" :selected-cells-options="selectedCellsOptions")
+        view-menu(v-model="view")
+        slot(name="menus" :selected-cells-options="selectedCellsOptions" :is-full-screen="view.isFullScreen")
+      v-btn.mr-2(v-if="view.isFullScreen" icon @click="view.isFullScreen = false")
+        v-icon mdi-close
   grid-sheet-toolbar(
     v-if="mode === GridMode.CHANGE"
     :grid-choice="gridChoice"
@@ -44,18 +50,28 @@ import {
   RowDimensionsOptionsType,
   UpdateActiveSheetType
 } from '~/types/grid'
+import FullScreenInPlace from '~/components/common/FullScreenInPlace.vue'
 import GridSheetMenu from '~/components/dcis/grid/GridSheetMenu.vue'
+import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
+import ViewMenu, { ViewType } from '~/components/dcis/grid/menus/ViewMenu.vue'
 import GridSheetToolbar from '~/components/dcis/grid/GridSheetToolbar.vue'
 import Grid from '~/components/dcis/grid/Grid.vue'
 import GridChoiceCells from '~/components/dcis/grid/GridChoiceCells.vue'
 import { CANCEL_EVENT, CancelEventType, END_CHOICE_EVENT, useGridChoice } from '~/composables/grid-choice'
 
 export default defineComponent({
-  components: { GridSheetMenu, GridChoiceCells, GridSheetToolbar, Grid },
+  components: {
+    FullScreenInPlace,
+    GridSheetMenu,
+    EditMenu,
+    ViewMenu,
+    GridChoiceCells,
+    GridSheetToolbar,
+    Grid
+  },
   props: {
     value: { type: Number, required: true },
     mode: { type: Number as PropType<GridMode>, required: true },
-    isFullScreen: { type: Boolean, required: true },
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true },
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
@@ -74,11 +90,13 @@ export default defineComponent({
     provide(UpdateActiveSheetInject, updateActiveSheet)
     provide(ActiveDocumentInject, activeDocument)
 
+    const view = ref<ViewType>({ isFullScreen: false })
+
     const { top: tabItemsTop } = useElementBounding(
       () => tabItems.value ? tabItems.value.$el as HTMLDivElement : null
     )
     const gridHeight = computed<string>(() => {
-      const margin = props.isFullScreen ? 46 : 68
+      const margin = view.value.isFullScreen ? 46 : 68
       return `calc(100vh - ${tabItemsTop.value + margin}px)`
     })
     onMounted(() => {
@@ -129,6 +147,7 @@ export default defineComponent({
       tabItems,
       grid,
       tabs,
+      view,
       gridHeight,
       activeSheetIndex,
       selectedCellsOptions,

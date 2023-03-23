@@ -5,28 +5,24 @@ left-navigator-container.period-sheets__left-navigator-container(
   @update-drawer="$emit('update-drawer')"
 )
   template(#header) {{ $t('dcis.periods.sheets.name') }}
-  full-screen-in-place(:is-full-screen="view.isFullScreen")
-    grid-sheets(
-      v-model="activeSheetIndex"
-      :mode="GridMode.CHANGE"
-      :is-full-screen="view.isFullScreen"
-      :sheets="period.sheets"
-      :active-sheet="activeSheet"
-      :update-active-sheet="updateActiveSheet"
-      :loading="activeSheetLoading"
-    )
-      template(#menus="{ selectedCellsOptions }")
-        edit-menu(:mode="GridMode.CHANGE" :selected-cells-options="selectedCellsOptions")
-        view-menu(v-model="view")
-        table-settings-menu(:sheets="period.sheets")
-      template(#tabs="{ sheets, updateSize }")
-        template(v-for="sheet in sheets")
-          sheet-control(
-            v-slot="{ on, attrs }"
-            :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
-            :key="sheet.id"
-          )
-            v-tab.grid-sheet__tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="GridMode.CHANGE"
+    :sheets="period.sheets"
+    :active-sheet="activeSheet"
+    :update-active-sheet="updateActiveSheet"
+    :loading="activeSheetLoading"
+  )
+    template(#menus)
+      table-settings-menu(:sheets="period.sheets")
+    template(#tabs="{ sheets, updateSize }")
+      template(v-for="sheet in sheets")
+        sheet-control(
+          v-slot="{ on, attrs }"
+          :sheet="sheet" :update="(cache, result) => renameSheetUpdate(cache, result, updateSize)"
+          :key="sheet.id"
+        )
+          v-tab.grid-sheet__tab(v-bind="attrs" @contextmenu.prevent="on.click") {{ sheet.name }}
 </template>
 
 <script lang="ts">
@@ -47,21 +43,10 @@ import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
-import FullScreenInPlace from '~/components/common/FullScreenInPlace.vue'
-import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
-import ViewMenu, { ViewType } from '~/components/dcis/grid/menus/ViewMenu.vue'
 import TableSettingsMenu from '~/components/dcis/grid/menus/TableSettingsMenu.vue'
 
 export default defineComponent({
-  components: {
-    LeftNavigatorContainer,
-    GridSheets,
-    SheetControl,
-    FullScreenInPlace,
-    EditMenu,
-    ViewMenu,
-    TableSettingsMenu
-  },
+  components: { LeftNavigatorContainer, GridSheets, SheetControl, TableSettingsMenu },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -113,8 +98,6 @@ export default defineComponent({
       }
     }
 
-    const view = ref<ViewType>({ isFullScreen: false })
-
     const setFooter = inject<(state: boolean) => void>('setFooter')
     setFooter(false)
     onUnmounted(() => {
@@ -128,8 +111,7 @@ export default defineComponent({
       activeSheet,
       updateActiveSheet,
       activeSheetLoading,
-      renameSheetUpdate,
-      view
+      renameSheetUpdate
     }
   }
 })

@@ -16,6 +16,7 @@ v-menu(offset-y)
 
 <script lang="ts">
 import { defineComponent, PropType } from '#app'
+import { onKeyStroke } from '@vueuse/core'
 
 export type ViewType = {
   isFullScreen: boolean
@@ -29,6 +30,10 @@ export default defineComponent({
     const setIsFullScreen = (isFullScreen: boolean) => {
       emit('input', { ...props.value, isFullScreen })
     }
+
+    onKeyStroke('Escape', () => {
+      setIsFullScreen(false)
+    })
 
     return { setIsFullScreen }
   }

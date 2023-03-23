@@ -6,21 +6,17 @@ left-navigator-container.document-sheets__left-navigator-container(
   @update-drawer="$emit('update-drawer')"
 )
   template(#subheader) {{ activeDocument.objectName }}
-  full-screen-in-place(:is-full-screen="view.isFullScreen")
-    grid-sheets(
-      v-model="activeSheetIndex"
-      :mode="mode"
-      :is-full-screen="view.isFullScreen"
-      :sheets="activeDocument.sheets"
-      :active-sheet="activeSheet"
-      :update-active-sheet="updateActiveSheet"
-      :active-document="activeDocument"
-      :loading="activeDocumentLoading"
-    )
-      template(#menus="{ selectedCellsOptions }")
-        edit-menu(:mode="mode" :selected-cells-options="selectedCellsOptions")
-        document-unload-menu(:document="activeDocument")
-        view-menu(v-model="view")
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="mode"
+    :sheets="activeDocument.sheets"
+    :active-sheet="activeSheet"
+    :update-active-sheet="updateActiveSheet"
+    :active-document="activeDocument"
+    :loading="activeDocumentLoading"
+  )
+    template(#menus)
+      document-unload-menu(:document="activeDocument")
 v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
@@ -33,23 +29,12 @@ import { GridMode } from '~/types/grid'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import FullScreenInPlace from '~/components/common/FullScreenInPlace.vue'
-import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
-import ViewMenu, { ViewType } from '~/components/dcis/grid/menus/ViewMenu.vue'
 import DocumentUnloadMenu from '~/components/dcis/grid/menus/DocumentUnloadMenu.vue'
 import documentQuery from '~/gql/dcis/queries/document.graphql'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 
 export default defineComponent({
-  components: {
-    LeftNavigatorContainer,
-    BreadCrumbs,
-    FullScreenInPlace,
-    GridSheets,
-    EditMenu,
-    ViewMenu,
-    DocumentUnloadMenu
-  },
+  components: { LeftNavigatorContainer, BreadCrumbs, GridSheets, DocumentUnloadMenu },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> }
   },
@@ -86,8 +71,6 @@ export default defineComponent({
       })
     })
 
-    const view = ref<ViewType>({ isFullScreen: false })
-
     return {
       activeSheetIndex,
       activeDocument,
@@ -95,8 +78,7 @@ export default defineComponent({
       mode,
       activeSheet,
       activeSheetLoading,
-      updateActiveSheet,
-      view
+      updateActiveSheet
     }
   }
 })

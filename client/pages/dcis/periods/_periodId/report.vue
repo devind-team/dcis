@@ -5,46 +5,42 @@ left-navigator-container.report-sheets__left-navigator-container(
   @update-drawer="$emit('update-drawer')"
 )
   template(#header) {{ $t('dcis.periods.report.name') }}
-  full-screen-in-place(:is-full-screen="view.isFullScreen")
-    grid-sheets(
-      v-model="activeSheetIndex"
-      :mode="GridMode.REPORT"
-      :is-full-screen="view.isFullScreen"
-      :sheets="period.sheets"
-      :active-sheet="activeSheet"
-      :loading="loading"
-    )
-      template(#menus="{ selectedCellsOptions }")
-        edit-menu(:mode="GridMode.REPORT" :selected-cells-options="selectedCellsOptions")
-        view-menu(v-model="view")
-        report-unload-menu
-          template(#documents-filter="{ title }")
-            report-document-filter(
-              v-model="reportDocumentFilterData"
-              :period="period"
-              @close="reportDocumentFilterAction"
-              @apply="reportDocumentFilterAction"
-            )
-              template(#message="{ on, attrs, disabled }")
-                v-list-item(v-on="on" v-bind="attrs" :disabled="disabled")
-                  v-list-item-title {{ title }}
-          template(#rows-filter="{ title }")
-            items-data-filter(
-              v-model="reportRowGroups"
-              ref="reportRowGroupsFilter"
-              :items="reportRowGroupsItems"
-              :title="String($t('dcis.periods.report.rowsFilter.title'))"
-              :disabled="!reportDocumentFilterData.reportDocuments.length"
-              :search-function="reportRowGroupsSearchFunction"
-              :get-name="item => item.name"
-              item-key="name"
-              message-container-class="mb-2"
-              has-select-all
-              multiple
-            )
-              template(#message="{ on, attrs, disabled }")
-                v-list-item(v-on="on" v-bind="attrs" :disabled="disabled")
-                  v-list-item-title {{ title }}
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="GridMode.REPORT"
+    :sheets="period.sheets"
+    :active-sheet="activeSheet"
+    :loading="loading"
+  )
+    template(#menus="{ isFullScreen }")
+      report-unload-menu
+        template(#documents-filter="{ title }")
+          report-document-filter(
+            v-model="reportDocumentFilterData"
+            :period="period"
+            @close="reportDocumentFilterAction(isFullScreen)"
+            @apply="reportDocumentFilterAction(isFullScreen)"
+          )
+            template(#message="{ on, attrs, disabled }")
+              v-list-item(v-on="on" v-bind="attrs" :disabled="disabled")
+                v-list-item-title {{ title }}
+        template(#rows-filter="{ title }")
+          items-data-filter(
+            v-model="reportRowGroups"
+            ref="reportRowGroupsFilter"
+            :items="reportRowGroupsItems"
+            :title="String($t('dcis.periods.report.rowsFilter.title'))"
+            :disabled="!reportDocumentFilterData.reportDocuments.length"
+            :search-function="reportRowGroupsSearchFunction"
+            :get-name="item => item.name"
+            item-key="name"
+            message-container-class="mb-2"
+            has-select-all
+            multiple
+          )
+            template(#message="{ on, attrs, disabled }")
+              v-list-item(v-on="on" v-bind="attrs" :disabled="disabled")
+                v-list-item-title {{ title }}
 </template>
 
 <script lang="ts">
@@ -64,9 +60,6 @@ import indicesToExpandQuery from '~/gql/dcis/queries/indices_to_expand.graphql'
 import reportSheetQuery from '~/gql/dcis/queries/report_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import FullScreenInPlace from '~/components/common/FullScreenInPlace.vue'
-import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
-import ViewMenu, { ViewType } from '~/components/dcis/grid/menus/ViewMenu.vue'
 import ReportUnloadMenu from '~/components/dcis/grid/menus/ReportUnloadMenu.vue'
 import ReportDocumentFilter, {
   ReportDocumentType,
@@ -77,16 +70,7 @@ import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 type ReportRowGroup = { index: number, indices: number[], name: string }
 
 export default defineComponent({
-  components: {
-    LeftNavigatorContainer,
-    GridSheets,
-    FullScreenInPlace,
-    EditMenu,
-    ViewMenu,
-    ReportUnloadMenu,
-    ReportDocumentFilter,
-    ItemsDataFilter
-  },
+  components: { LeftNavigatorContainer, GridSheets, ReportUnloadMenu, ReportDocumentFilter, ItemsDataFilter },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -117,8 +101,8 @@ export default defineComponent({
         reportRowGroups.value = []
       }
     })
-    const reportDocumentFilterAction = async () => {
-      if (view.value.isFullScreen) {
+    const reportDocumentFilterAction = async (isFullScreen: boolean) => {
+      if (isFullScreen) {
         await nextTick()
         document.documentElement.classList.add('overflow-y-hidden')
       }
@@ -182,8 +166,6 @@ export default defineComponent({
 
     const loading = computed<boolean>(() => indicesGroupsToExpandLoading.value || activeSheetLoading.value)
 
-    const view = ref<ViewType>({ isFullScreen: false })
-
     const setFooter = inject<(state: boolean) => void>('setFooter')
     setFooter(false)
     onUnmounted(() => {
@@ -201,8 +183,7 @@ export default defineComponent({
       reportRowGroupsSearchFunction,
       activeSheetIndex,
       activeSheet,
-      loading,
-      view
+      loading
     }
   }
 })
