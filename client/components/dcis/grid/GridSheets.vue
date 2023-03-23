@@ -55,6 +55,7 @@ export default defineComponent({
   props: {
     value: { type: Number, required: true },
     mode: { type: Number as PropType<GridMode>, required: true },
+    isFullScreen: { type: Boolean, required: true },
     sheets: { type: Array as PropType<BaseSheetType[]>, required: true },
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
@@ -62,9 +63,9 @@ export default defineComponent({
     loading: { type: Boolean, required: true }
   },
   setup (props, { emit }) {
-    const tabs = ref<InstanceType<typeof VTabs> | null>(null)
     const tabItems = ref<InstanceType<typeof VTabsItems> | null>(null)
     const grid = ref<InstanceType<typeof Grid>[] | null>(null)
+    const tabs = ref<InstanceType<typeof VTabs> | null>(null)
 
     const { mode, activeSheet, updateActiveSheet, activeDocument } = toRefs(props)
 
@@ -76,7 +77,10 @@ export default defineComponent({
     const { top: tabItemsTop } = useElementBounding(
       () => tabItems.value ? tabItems.value.$el as HTMLDivElement : null
     )
-    const gridHeight = computed<string>(() => `calc(100vh - ${tabItemsTop.value + 68}px)`)
+    const gridHeight = computed<string>(() => {
+      const margin = props.isFullScreen ? 46 : 68
+      return `calc(100vh - ${tabItemsTop.value + margin}px)`
+    })
     onMounted(() => {
       document.documentElement.scrollTop = 0
     })
@@ -122,9 +126,9 @@ export default defineComponent({
 
     return {
       GridMode,
-      tabs,
       tabItems,
       grid,
+      tabs,
       gridHeight,
       activeSheetIndex,
       selectedCellsOptions,
