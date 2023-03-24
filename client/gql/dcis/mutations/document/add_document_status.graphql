@@ -13,6 +13,14 @@ mutation AddDocumentStatus($comment: String!, $documentId: ID!, $statusId: ID!) 
       id
       comment
       createdAt
+      archivePeriod {
+        id
+        __typename
+      }
+      document {
+        id
+        __typename
+      }
       status {
         ...StatusFields
       }

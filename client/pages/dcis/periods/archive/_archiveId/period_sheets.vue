@@ -1,13 +1,13 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
-    template(#header) {{ $t('dcis.periods.sheets.name') }}
-    grid-sheets(
-      v-model="activeSheetIndex"
-      :mode="GridMode.READ"
-      :sheets="period.sheets"
-      :active-sheet="activeSheet"
-      :loading="activeSheetLoading"
-    )
+left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.sheets.name') }}
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="GridMode.READ"
+    :sheets="period.sheets"
+    :active-sheet="activeSheet"
+    :loading="activeSheetLoading"
+  )
 </template>
 
 <script lang="ts">

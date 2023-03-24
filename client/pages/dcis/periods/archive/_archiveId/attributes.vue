@@ -1,17 +1,17 @@
 <template lang="pug">
-  left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
-    template(v-if="!loading")
-      template(v-if="attributes.length")
-        component(
-          v-for="attribute in attributes"
-          :key="attribute.id"
-          :is="AttributeValueComponents[attribute.kind]"
-          :attribute="attribute"
-          :attribute-value="attribute.id in attributesValues ? attributesValues[attribute.id] : null"
-          :readonly="true"
-        )
-      v-alert(v-else type="info") {{ $t('dcis.documents.attributes.noAttributes') }}
-    v-progress-circular(v-else color="primary" indeterminate)
+left-navigator-container(:bread-crumbs="bc" fluid @update-drawer="$emit('update-drawer')")
+  template(v-if="!loading")
+    template(v-if="attributes.length")
+      component(
+        v-for="attribute in attributes"
+        :key="attribute.id"
+        :is="AttributeValueComponents[attribute.kind]"
+        :attribute="attribute"
+        :attribute-value="attribute.id in attributesValues ? attributesValues[attribute.id] : null"
+        :readonly="true"
+      )
+    v-alert(v-else type="info") {{ $t('dcis.documents.attributes.noAttributes') }}
+  v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">

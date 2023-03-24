@@ -1,21 +1,21 @@
 <template lang="pug">
-  left-navigator-container(
-    v-if="activeDocument && !activeDocumentLoading"
-    :bread-crumbs="bc"
-    fluid
-    @update-drawer="$emit('update-drawer')"
+left-navigator-container(
+  v-if="activeDocument && !activeDocumentLoading"
+  :bread-crumbs="bc"
+  fluid
+  @update-drawer="$emit('update-drawer')"
+)
+  template(#subheader) {{ activeDocument.objectName }}
+  grid-sheets(
+    v-model="activeSheetIndex"
+    :mode="GridMode.READ"
+    :sheets="activeDocument.sheets"
+    :active-sheet="activeSheet"
+    :update-active-sheet="updateActiveSheet"
+    :active-document="activeDocument"
+    :loading="activeDocumentLoading"
   )
-    template(#subheader) {{ activeDocument.objectName }}
-    grid-sheets(
-      v-model="activeSheetIndex"
-      :mode="GridMode.READ"
-      :sheets="activeDocument.sheets"
-      :active-sheet="activeSheet"
-      :update-active-sheet="updateActiveSheet"
-      :active-document="activeDocument"
-      :loading="activeDocumentLoading"
-    )
-  v-progress-circular(v-else color="primary" indeterminate)
+v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
