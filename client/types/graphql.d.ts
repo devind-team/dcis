@@ -1897,17 +1897,11 @@ export type ContentTypeTypeProjectSetArgs = {
   after?: InputMaybe<Scalars['String']>;
   archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
-  createdAt?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Icontains?: InputMaybe<Scalars['DateTime']>;
-  description?: InputMaybe<Scalars['String']>;
   description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
-  name?: InputMaybe<Scalars['String']>;
   name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
-  user?: InputMaybe<Scalars['ID']>;
-  user_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
@@ -4505,17 +4499,11 @@ export type QueryProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
   archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
-  createdAt?: InputMaybe<Scalars['DateTime']>;
-  createdAt_Icontains?: InputMaybe<Scalars['DateTime']>;
-  description?: InputMaybe<Scalars['String']>;
   description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
-  name?: InputMaybe<Scalars['String']>;
   name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
-  user?: InputMaybe<Scalars['ID']>;
-  user_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   visibility?: InputMaybe<Scalars['Boolean']>;
 };
 

@@ -13,7 +13,7 @@ from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.core.schema import UserType
-from apps.dcis.filters import DocumentFilter
+from apps.dcis.filters import DocumentFilter, ProjectFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     AddStatus,
@@ -85,14 +85,7 @@ class ProjectType(OptimizedDjangoObjectType):
             'content_type',
             'user',
         )
-        filter_fields = {
-            'name': ['exact', 'icontains', ],
-            'description': ['exact', 'icontains', ],
-            'created_at': ['exact', 'icontains', ],
-            'user': ['exact', 'in'],
-            'visibility': ['exact'],
-            'archive': ['exact'],
-        }
+        filterset_class = ProjectFilter
         connection_class = CountableConnection
 
     @staticmethod

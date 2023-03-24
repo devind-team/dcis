@@ -41,7 +41,7 @@ import { useRoute, useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
 import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
 import { Item } from '~/types/filters'
-import { useApolloHelpers, useCursorPagination, useI18n, useQueryRelay } from '~/composables'
+import { useDebounceSearch, useApolloHelpers, useCursorPagination, useI18n, useQueryRelay } from '~/composables'
 import { useAuthStore } from '~/stores'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -69,10 +69,10 @@ export default defineComponent({
     const user = toRef(authStore, 'user')
     const hasPerm = toRef(authStore, 'hasPerm')
 
-    const search = ref<string>('')
+    const { search, debounceSearch } = useDebounceSearch()
 
-    const defaultFilter: Item[] = [{ id: 'active' }]
-    const selectedFilters = ref<Item[]>([{ id: 'active' }])
+    const defaultFilter: Item[] = [{ id: 'active' }, { id: 'notArchive' }]
+    const selectedFilters = ref<Item[]>([{ id: 'active' }, { id: 'notArchive' }])
 
     const projectQueryEnabled = ref<boolean>(false)
     const {
@@ -86,20 +86,13 @@ export default defineComponent({
       variables: () => {
         const activeFilter = +!!selectedFilters.value.find(x => x.id === 'active')
         const hiddenFilter = +!!selectedFilters.value.find(x => x.id === 'hidden')
-        const archiveFilter = !!selectedFilters.value.find(x => x.id === 'archive')
-
-        if (!activeFilter && !hiddenFilter && !archiveFilter) {
-          return {
-            visibility: null,
-            archived: null,
-            search: search.value
-          }
-        }
+        const archiveFilter = +!!selectedFilters.value.find(x => x.id === 'archive')
+        const notArchiveFilter = +!!selectedFilters.value.find(x => x.id === 'notArchive')
 
         return {
-          visibility: activeFilter ^ hiddenFilter ? activeFilter || false : null,
-          archive: archiveFilter,
-          search: search.value
+          visibility: activeFilter ^ hiddenFilter ? !!activeFilter || false : null,
+          archive: archiveFilter ^ notArchiveFilter ? !!archiveFilter || false : null,
+          search: debounceSearch.value
         }
       },
       options: computed(() => ({
