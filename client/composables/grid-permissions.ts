@@ -104,7 +104,8 @@ export function useCanChangeValue () {
       mode.value === GridMode.READ ||
       mode.value === GridMode.REPORT ||
       !cell.editable ||
-      cell.kind === 'f'
+      cell.kind === 'f' ||
+      cell.aggregation
     ) {
       return false
     }

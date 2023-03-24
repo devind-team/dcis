@@ -157,7 +157,6 @@ def update_or_create_value(
     sheet_id: int | str,
     cell: Cell,
     value: str,
-    extra_value: str | None = None,
     error: str | None = None,
 ) -> Value:
     """Создание или обновления значения."""
@@ -168,7 +167,6 @@ def update_or_create_value(
         sheet_id=sheet_id,
         defaults={
             'value': value,
-            'extra_value': extra_value,
             'error': error
         }
     )
@@ -199,10 +197,8 @@ def recalculate_aggregation(document: Document, recalculation: RecalculationData
         parent_id=document.object_id
     ).values_list('pk', flat=True)
     if division_ids:
-        # 1. Дочерние дивизионы найдены, значит мы головная организация и необходимо сохранить значение в `extra_value`
+        # 1. Дочерние дивизионы найдены, значит мы головная организация и необходимо пересчитать агрегацию
         source_cells = [relation_cell.from_cell for relation_cell in recalculation.cell.to_cells.all()]
-        value = recalculation.value.value
-        extra_value = recalculation.value.extra_value or recalculation.value.value
         if source_cells:
             cells_filter = Q()
             # 2. Собираем фильтр для значений
@@ -228,14 +224,13 @@ def recalculate_aggregation(document: Document, recalculation: RecalculationData
                     values.append(val.value)
                 else:
                     values.append(cell.default or '0.0')
-            value = str(calculate_aggregation_cell(recalculation.cell, extra_value, *values))
-        recalculation.value = update_or_create_value(
-            document,
-            cast(int, recalculation.cell.column.sheet_id),
-            recalculation.cell,
-            value,
-            extra_value
-        )
+            value = str(calculate_aggregation_cell(recalculation.cell, *values))
+            recalculation.value = update_or_create_value(
+                document=document,
+                sheet_id=cast(int, recalculation.cell.column.sheet_id),
+                cell=recalculation.cell,
+                value=value,
+            )
     return recalculation
 
 
@@ -263,7 +258,12 @@ def recalculate_dependency_aggregation(
             row_id=target_cell.row_id
         ).first()
         if target_value is None:
-            target_value = update_or_create_value(parent_document, target_cell.column.sheet_id, target_cell, '0.0')
+            target_value = update_or_create_value(
+                document=parent_document,
+                sheet_id=target_cell.column.sheet_id,
+                cell=target_cell,
+                value='0.0',
+            )
         to_recalculate_data.append(RecalculationData(cell=target_cell, value=target_value))
     return recalculate_aggregations(parent_document, to_recalculate_data)
 
@@ -303,7 +303,7 @@ def recalculate_values(document: Document, recalculations: list[RecalculationDat
             sheet_id=cast(int, cell.column.sheet_id),
             cell=cell,
             value=result_value['value'],
-            error=result_value['error']
+            error=result_value['error'],
         )
         result_recalculations.append(RecalculationData(cell=cell, value=value))
     return [*recalculations, *result_recalculations]
