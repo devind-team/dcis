@@ -1,11 +1,11 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ t('dcis.periods.name') }}
+  template(#header) {{ $t('dcis.periods.name') }}
     template(v-if="project.canAddPeriod")
       v-spacer
       add-period(:update="addPeriodUpdate" :project="project")
         template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ t('dcis.periods.addPeriod.buttonText') }}
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.addPeriod.buttonText') }}
   template(#subheader)
     template(v-if="periods") {{ $t('shownOf', { count: periods.length, totalCount: periods.length }) }}
   v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
@@ -21,7 +21,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, onMounted } from '#app'
+import { computed, defineComponent, onMounted } from '#app'
 import { useRoute, useRouter } from '#imports'
 import { useApolloHelpers, useCommonQuery, useFilters, useI18n } from '~/composables'
 import { PeriodsQuery, PeriodsQueryVariables, ProjectType } from '~/types/graphql'
@@ -81,7 +81,7 @@ export default defineComponent({
       }
     })
 
-    return { t, headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
+    return { headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>

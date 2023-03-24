@@ -135,7 +135,8 @@ export default defineNuxtConfig({
           success: colors.green.accent3
         }
       }
-    }
+    },
+    customVariables: ['~/assets/variables.sass']
   },
   build: {
     parallel: true,

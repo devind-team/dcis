@@ -291,6 +291,7 @@ export default defineComponent({
       mainDocument.value = null
       aggregation.value = null
       clearReportDocumentItems()
+      emit('clear')
     }
 
     const close = () => {
@@ -298,6 +299,7 @@ export default defineComponent({
       mainDocumentSelection.value = false
       aggregation.value = props.value.aggregation ? { id: props.value.aggregation } : null
       closeReportDocumentItems()
+      emit('close')
     }
 
     const reset = () => {
@@ -305,6 +307,7 @@ export default defineComponent({
       mainDocumentSelection.value = false
       aggregation.value = null
       clearReportDocumentItems()
+      emit('reset')
     }
 
     const apply = () => {
@@ -313,6 +316,7 @@ export default defineComponent({
         mainDocument: mainDocument.value,
         aggregation: aggregation.value ? aggregation.value.id : null
       })
+      emit('apply')
     }
 
     return {

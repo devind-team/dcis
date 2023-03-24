@@ -465,6 +465,11 @@ export default {
           toPaste: 'для вставки'
         }
       },
+      viewMenu: {
+        buttonText: 'Вид',
+        normalMode: 'Обычный режим',
+        fullScreenMode: 'Полноэкранный режим'
+      },
       documentUnloadMenu: {
         buttonText: 'Выгрузка',
         unload: '@:dcis.documents.unloadDocument.name'

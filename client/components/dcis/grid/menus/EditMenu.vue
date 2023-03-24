@@ -27,7 +27,7 @@ v-menu(offset-y)
             .text-h4 {{ $t('dcis.grid.sheetMenu.editMenu.pasteShortcut') }}
             span {{ $t('dcis.grid.sheetMenu.editMenu.shortcutDialog.toPaste') }}
   v-list(dense width="200")
-    v-list-item(:disabled="disabled" @click="cut")
+    v-list-item(v-if="changeVisible" :disabled="disabled" @click="cut")
       v-list-item-title.d-flex.justify-space-between
         span {{ $t('dcis.grid.sheetMenu.editMenu.cut') }}
         span {{ $t('dcis.grid.sheetMenu.editMenu.cutShortcut') }}
@@ -35,7 +35,7 @@ v-menu(offset-y)
       v-list-item-title.d-flex.justify-space-between
         span {{ $t('dcis.grid.sheetMenu.editMenu.copy') }}
         span {{ $t('dcis.grid.sheetMenu.editMenu.copyShortcut') }}
-    v-list-item(v-if="pasteVisible" :disabled="disabled" @click.stop="paste")
+    v-list-item(v-if="changeVisible" :disabled="disabled" @click.stop="paste")
       v-list-item-title.d-flex.justify-space-between
         span {{ $t('dcis.grid.sheetMenu.editMenu.paste') }}
         span {{ $t('dcis.grid.sheetMenu.editMenu.pasteShortcut') }}
@@ -54,7 +54,7 @@ export default defineComponent({
     const shortcutDialogActive = ref(false)
 
     const disabled = computed(() => !props.selectedCellsOptions)
-    const pasteVisible = computed(() => props.mode === GridMode.WRITE || props.mode === GridMode.CHANGE)
+    const changeVisible = computed(() => props.mode === GridMode.WRITE || props.mode === GridMode.CHANGE)
 
     const cut = () => {
       /// Несмотря на статус `deprecated`, работает лучше современного варианта с navigator.clipboard.
@@ -79,7 +79,7 @@ export default defineComponent({
       shortcutDialogActive,
       disabled,
       GridMode,
-      pasteVisible,
+      changeVisible,
       cut,
       copy,
       paste

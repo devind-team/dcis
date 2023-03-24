@@ -12,11 +12,15 @@ left-navigator-container.report-sheets__left-navigator-container(
     :active-sheet="activeSheet"
     :loading="loading"
   )
-    template(#menus="{ selectedCellsOptions }")
-      edit-menu(:mode="GridMode.REPORT" :selected-cells-options="selectedCellsOptions")
+    template(#menus="{ isFullScreen }")
       report-unload-menu
         template(#documents-filter="{ title }")
-          report-document-filter(v-model="reportDocumentFilterData" :period="period")
+          report-document-filter(
+            v-model="reportDocumentFilterData"
+            :period="period"
+            @close="reportDocumentFilterAction(isFullScreen)"
+            @apply="reportDocumentFilterAction(isFullScreen)"
+          )
             template(#message="{ on, attrs, disabled }")
               v-list-item(v-on="on" v-bind="attrs" :disabled="disabled")
                 v-list-item-title {{ title }}
@@ -40,7 +44,7 @@ left-navigator-container.report-sheets__left-navigator-container(
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, PropType, inject, watch } from '#app'
+import { computed, defineComponent, ref, PropType, inject, watch, onUnmounted, nextTick } from '#app'
 import { useCommonQuery, useI18n } from '~/composables'
 import { GridMode } from '~/types/grid'
 import { BreadCrumbsItem } from '~/types/devind'
@@ -56,7 +60,6 @@ import indicesToExpandQuery from '~/gql/dcis/queries/indices_to_expand.graphql'
 import reportSheetQuery from '~/gql/dcis/queries/report_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
 import ReportUnloadMenu from '~/components/dcis/grid/menus/ReportUnloadMenu.vue'
 import ReportDocumentFilter, {
   ReportDocumentType,
@@ -67,14 +70,7 @@ import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 type ReportRowGroup = { index: number, indices: number[], name: string }
 
 export default defineComponent({
-  components: {
-    LeftNavigatorContainer,
-    GridSheets,
-    EditMenu,
-    ReportUnloadMenu,
-    ReportDocumentFilter,
-    ItemsDataFilter
-  },
+  components: { LeftNavigatorContainer, GridSheets, ReportUnloadMenu, ReportDocumentFilter, ItemsDataFilter },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
@@ -105,6 +101,12 @@ export default defineComponent({
         reportRowGroups.value = []
       }
     })
+    const reportDocumentFilterAction = async (isFullScreen: boolean) => {
+      if (isFullScreen) {
+        await nextTick()
+        document.documentElement.classList.add('overflow-y-hidden')
+      }
+    }
 
     const { data: indicesGroupsToExpand, loading: indicesGroupsToExpandLoading } = useCommonQuery<
       IndicesGroupsToExpandQuery,
@@ -174,6 +176,7 @@ export default defineComponent({
       GridMode,
       bc,
       reportDocumentFilterData,
+      reportDocumentFilterAction,
       reportRowGroupsFilter,
       reportRowGroups,
       reportRowGroupsItems,
