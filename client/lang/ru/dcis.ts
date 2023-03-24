@@ -564,7 +564,7 @@ export default {
     }
   },
   attributes: {
-    adds: 'Добавить атрибуты',
+    adds: 'Изменить атрибуты',
     add: 'Добавить атрибут',
     change: '@:change',
     delete: '@:delete',
@@ -597,8 +597,11 @@ export default {
       default: 'Значение по умолчанию',
       mutable: 'Разрешить изменение'
     },
+    AddAttributes: {
+      buttonText: 'Добавить атрибут'
+    },
     unloadAttributes: {
-      content: 'Выгрузить атрибуры'
+      buttonText: 'Выгрузить атрибуты'
     },
     uploadAttributes: {
       buttonText: 'Обновить атребуты из файла',

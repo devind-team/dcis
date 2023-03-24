@@ -1,21 +1,22 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.links.attributes') }}
-    v-spacer
-    add-attribute-menu(
-      v-slot="{ on, attrs}"
-      :period="period"
-      :from-file-update="resetUpdate"
-      :add-update="addAttributeUpdate"
-    )
-      v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
+    template
+      v-spacer
+      add-attribute-menu(
+        :period="period"
+        :from-file-update="resetUpdate"
+        :add-update="addAttributeUpdate"
+      )
+        template(#activator="{ on, attrs }")
+          v-btn(v-on="on" v-bind="attrs" color="primary") {{ $t('dcis.attributes.adds') }}
+  template(#subheader) {{ $t('shownOf', { count, totalCount: count }) }}
   v-data-table(
     :headers="headers"
     :items="attributes"
     :loading="loading"
     disable-pagination
     disable-filtering
-    disable-sort
     hide-default-footer
   )
     template(#item.action="{ item }")
@@ -36,8 +37,8 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
 <script lang="ts">
 import type { ComputedRef, PropType } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
-import { DataTableHeader } from 'vuetify'
 import { useMutation } from '@vue/apollo-composable'
+import { DataTableHeader } from 'vuetify'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
@@ -103,6 +104,8 @@ export default defineComponent({
       })
     })
 
+    const count = computed<number>(() => attributes.value ? attributes.value.length : 0)
+
     const deleteAttribute = (attribute: AttributeType) => {
       useMutation<DeleteAttributeMutation, DeleteAttributeMutationInput>(deleteAttributeMutation, {
         update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload } }) => {
@@ -129,6 +132,7 @@ export default defineComponent({
       bc,
       headers,
       attributes,
+      count,
       loading,
       resetUpdate,
       changeAttributeUpdate,
