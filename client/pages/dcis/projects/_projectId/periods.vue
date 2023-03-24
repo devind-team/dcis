@@ -1,11 +1,11 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
-  template(#header) {{ t('dcis.periods.name') }}
+left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+  template(#header) {{ $t('dcis.periods.name') }}
     template(v-if="project.canAddPeriod")
       v-spacer
       add-period(:update="addPeriodUpdate" :project="project")
         template(#activator="{ on }")
-          v-btn(v-on="on" color="primary") {{ t('dcis.periods.addPeriod.buttonText') }}
+          v-btn(v-on="on" color="primary") {{ $t('dcis.periods.addPeriod.buttonText') }}
   template(#subheader)
     template(v-if="periods") {{ $t('shownOf', { count: periods.length, totalCount: periods.length }) }}
   v-data-table(:headers="headers" :items="periods" :loading="loading" disable-pagination hide-default-footer)
@@ -21,7 +21,7 @@ left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('upda
 import { DataProxy } from 'apollo-cache'
 import { DataTableHeader } from 'vuetify'
 import type { PropType } from '#app'
-import { defineComponent, onMounted } from '#app'
+import { computed, defineComponent, onMounted } from '#app'
 import { useRoute, useRouter } from '#imports'
 import { useApolloHelpers, useCommonQuery, useFilters, useI18n } from '~/composables'
 import { PeriodsQuery, PeriodsQueryVariables, ProjectType } from '~/types/graphql'
@@ -39,13 +39,22 @@ export default defineComponent({
     project: { type: Object as PropType<ProjectType>, required: true },
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
-  setup () {
+  setup (props) {
     const { t } = useI18n()
     const router = useRouter()
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     const { localePath } = useI18n()
     const { defaultClient } = useApolloHelpers()
+
+    const bc = computed<BreadCrumbsItem[]>(() => ([
+      ...props.breadCrumbs,
+      {
+        text: t('dcis.projects.links.periods') as string,
+        to: localePath({ name: 'dcis-projects-projectId-periods' }),
+        exact: true
+      }
+    ]))
 
     const statuses = Object.fromEntries(
       ['preparation', 'open', 'close'].map(e => ([e, t(`dcis.periods.statuses.${e}`) as string]))
@@ -81,7 +90,7 @@ export default defineComponent({
       }
     })
 
-    return { t, headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
+    return { bc, headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>

@@ -6,7 +6,7 @@ div
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onUnmounted, PropType, provide, ref, useRoute } from '#app'
+import { computed, defineComponent, inject, onUnmounted, PropType, ref, useRoute } from '#app'
 import { toGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
@@ -26,39 +26,32 @@ export default defineComponent({
 
     const {
       data: activeDocument,
-      loading,
-      update,
-      changeUpdate
+      loading
     } = useCommonQuery<DocumentQuery, DocumentQueryVariables>({
       document: documentQuery,
       variables: () => ({
         documentId: route.params.documentId
       })
     })
-    provide('documentUpdate', update)
-    provide('changeUpdate', changeUpdate)
 
     const drawer = ref<boolean>(false)
-    const links = computed<LinksType[]>(() => {
-      const result: LinksType[] = [
-        {
-          title: t('dcis.documents.links.sheets') as string,
-          to: 'dcis-documents-documentId-sheets',
-          icon: 'file-table-box-multiple-outline'
-        },
-        {
-          title: t('dcis.documents.links.attributes') as string,
-          to: 'dcis-documents-documentId-attributes',
-          icon: 'page-next'
-        },
-        {
-          title: t('dcis.documents.links.comments') as string,
-          to: 'dcis-documents-documentId-comments',
-          icon: 'comment-multiple'
-        }
-      ]
-      return result
-    })
+    const links = computed<LinksType[]>(() => [
+      {
+        title: t('dcis.documents.links.sheets') as string,
+        to: 'dcis-documents-documentId-sheets',
+        icon: 'file-table-box-multiple-outline'
+      },
+      {
+        title: t('dcis.documents.links.attributes') as string,
+        to: 'dcis-documents-documentId-attributes',
+        icon: 'page-next'
+      },
+      {
+        title: t('dcis.documents.links.comments') as string,
+        to: 'dcis-documents-documentId-comments',
+        icon: 'comment-multiple'
+      }
+    ])
 
     const documentVersion = computed<string>(() =>
       t('dcis.grid.version', { version: activeDocument.value.version }) as string)

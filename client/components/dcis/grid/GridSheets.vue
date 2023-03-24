@@ -76,7 +76,7 @@ export default defineComponent({
     activeSheet: { type: Object as PropType<SheetType>, default: null },
     updateActiveSheet: { type: Function as PropType<UpdateActiveSheetType>, default: null },
     activeDocument: { type: Object as PropType<DocumentType>, default: null },
-    loading: { type: Boolean, required: true }
+    loading: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
     const tabItems = ref<InstanceType<typeof VTabsItems> | null>(null)

@@ -1,5 +1,5 @@
 <template lang="pug">
-bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
+bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="bc")
   v-card
     v-tabs(grow)
       v-tab {{ $t('dcis.documents.tabs.tabNameDocuments.name') }}
@@ -104,7 +104,7 @@ import { DataProxy } from 'apollo-cache'
 import type { PropType } from '#app'
 import { computed, defineComponent, ref, useNuxt2Meta, useRoute } from '#app'
 import { useAuthStore } from '~/stores'
-import { useFilters, useCursorPagination, useCommonQuery, useQueryRelay } from '~/composables'
+import { useFilters, useCursorPagination, useCommonQuery, useQueryRelay, useI18n } from '~/composables'
 import { BreadCrumbsItem } from '~/types/devind'
 import {
   DivisionModelType,
@@ -143,10 +143,22 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
+    const { t, localePath } = useI18n()
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     useNuxt2Meta({ title: props.period.name })
     const userStore = useAuthStore()
+
+    const bc = computed<BreadCrumbsItem[]>(() => ([
+      ...props.breadCrumbs,
+      {
+        text: props.period && (props.period.isAdmin || props.period.isCurator)
+          ? t('dcis.periods.links.monitoring') as string
+          : t('dcis.periods.links.documents') as string,
+        to: localePath({ name: 'dcis-periods-periodId-documents' }),
+        exact: true
+      }
+    ]))
 
     const userPeriodDivision = computed(() => {
       const userDivisionIds = userStore.user.divisions.map((division: DivisionModelType) => division.id)
@@ -217,6 +229,7 @@ export default defineComponent({
     })
 
     return {
+      bc,
       statusesQuery,
       userPeriodDivision,
       selectedDivisions,
