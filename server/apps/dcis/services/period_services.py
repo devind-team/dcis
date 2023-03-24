@@ -88,6 +88,7 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
 
 
 def get_user_periods_without_archives(user: User, project_id: int | str) -> QuerySet[Period]:
+    """Получение не архивных периодов"""
     return get_user_periods(user, project_id).filter(archive=False)
 
 

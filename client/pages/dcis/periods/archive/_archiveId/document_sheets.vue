@@ -93,9 +93,6 @@ export default defineComponent({
       })
     })
 
-    watch(activeSheet, (newVal, oldVal) => {
-      console.log(newVal, oldVal)
-    })
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {

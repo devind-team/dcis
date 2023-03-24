@@ -152,6 +152,8 @@ class AddStatusActions:
         @transaction.atomic
         def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
             cloned_period = document.period.make_clone(attrs={'archive': True})
+            for attribute in document.period.attribute_set.all():
+                attribute.make_clone(attrs={'period_id': cloned_period.id})
             cloned_document = document.make_clone(attrs={'period_id': cloned_period.id})
             document_status.archive_period_id = cloned_period.id
             document_status.save(update_fields=('archive_period_id',))

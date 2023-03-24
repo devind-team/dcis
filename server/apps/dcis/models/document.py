@@ -165,7 +165,7 @@ class DocumentStatus(models.Model, CloneMixin):
         ]
 
 
-class Attribute(models.Model):
+class Attribute(models.Model, CloneMixin):
     """Не табличные данные хранятся в атрибутах.
 
     Модель содержит список не табличных данных для организации сбора в указанный период.

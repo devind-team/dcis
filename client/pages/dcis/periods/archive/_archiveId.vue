@@ -1,13 +1,13 @@
 <template lang="pug">
   div
     left-navigator-driver(v-model="drawer" :items="links")
-    v-progress-circular(v-if="loading" color="primary" indeterminate)
+    v-progress-circular(v-if="periodLoading" color="primary" indeterminate)
     nuxt-child(v-else :bread-crumbs="bc" :period="archivePeriod" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, inject, onUnmounted, PropType, ref, useRoute } from '#app'
-import { useI18n } from '~/composables'
+import { useI18n, useCommonQuery } from '~/composables'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import LeftNavigatorDriver from '~/components/common/grid/LeftNavigatorDriver.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -24,8 +24,9 @@ export default defineComponent({
 
     const {
       data: archivePeriod,
-      loading
+      loading: periodLoading
     } = usePeriodQuery(route.params.archiveId)
+
     const drawer = ref<boolean>(false)
     const links = computed<LinksType[]>(() => {
       const result: LinksType[] = [
@@ -49,7 +50,7 @@ export default defineComponent({
     })
 
     const bc = computed<BreadCrumbsItem[]>(() => {
-      if (loading.value) {
+      if (periodLoading.value) {
         return props.breadCrumbs
       }
       return [
@@ -78,7 +79,7 @@ export default defineComponent({
     return {
       route,
       archivePeriod,
-      loading,
+      periodLoading,
       drawer,
       links,
       bc
