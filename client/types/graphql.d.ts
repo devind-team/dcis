@@ -1895,13 +1895,14 @@ export type ContentTypeType = {
 /** Тип модели Django. */
 export type ContentTypeTypeProjectSetArgs = {
   after?: InputMaybe<Scalars['String']>;
+  archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
+  description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
-  user?: InputMaybe<Scalars['ID']>;
-  user_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
 export type CopyPeriodGroupsMutationInput = {
@@ -4009,24 +4010,6 @@ export type ProfileValueType = {
   visibility: Scalars['Boolean'];
 };
 
-export type ProjectFilterInputType = {
-  /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
-  /** `Name` field */
-  name?: InputMaybe<ProjectNameFilterInputType>;
-  /** `Not` field */
-  not?: InputMaybe<ProjectFilterInputType>;
-  /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
-  /** `User` field */
-  user?: InputMaybe<ProjectUserFilterInputType>;
-};
-
-export type ProjectNameFilterInputType = {
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
 /** Тип модели проектов. */
 export type ProjectType = Node & {
   __typename?: 'ProjectType';
@@ -4077,13 +4060,6 @@ export type ProjectTypeEdge = {
   cursor: Scalars['String'];
   /** The item at the end of the edge */
   node?: Maybe<ProjectType>;
-};
-
-export type ProjectUserFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Схема запросов данных. */
@@ -4521,11 +4497,14 @@ export type QueryProjectArgs = {
 /** Схема запросов данных. */
 export type QueryProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
+  archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<ProjectFilterInputType>;
+  description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
+  visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
 /** Схема запросов данных. */
@@ -6373,6 +6352,9 @@ export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'Proje
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
+  visibility?: InputMaybe<Scalars['Boolean']>;
+  archive?: InputMaybe<Scalars['Boolean']>;
+  search?: InputMaybe<Scalars['String']>;
 }>;
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } | null> } | null };

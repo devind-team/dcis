@@ -1,11 +1,11 @@
 """Модуль описания фильтрации внешних выгрузок."""
-
+from django.db.models import Q, QuerySet
 from django.forms import MultipleChoiceField
 from django_filters import MultipleChoiceFilter, filterset
 from graphene import ID, List
 from graphene_django.forms.converter import convert_form_field
 
-from .models import Document
+from .models import Document, Project
 
 
 class IDMultipleChoiceField(MultipleChoiceField):
@@ -28,6 +28,26 @@ class IDMultipleChoiceFilter(MultipleChoiceFilter):
     """MultipleChoiceFilter для типа ID со значением обычного id типа '1'."""
 
     field_class = IDMultipleChoiceField
+
+
+class ProjectFilter(filterset.FilterSet):
+    """Фильтр проектов."""
+
+    name__icontains = filterset.CharFilter(field_name='name', lookup_expr='icontains')
+    description__icontains = filterset.CharFilter(field_name='description', lookup_expr='icontains')
+    visibility = filterset.BooleanFilter(field_name='visibility', lookup_expr='exact')
+    archive = filterset.BooleanFilter(field_name='archive', lookup_expr='exact')
+
+    @property
+    def qs(self) -> QuerySet:
+        queryset = Project.objects.all()
+        search_q = Q()
+        for field, value in  self.data.items():
+            if field in ('visibility', 'archive'):
+                queryset = queryset.filter(**{field: value})
+            else:
+                search_q |= Q(**{field: value})
+        return queryset.filter(search_q)
 
 
 class DocumentFilter(filterset.FilterSet):

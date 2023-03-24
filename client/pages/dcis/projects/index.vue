@@ -8,14 +8,15 @@ bread-crumbs(v-if="user.divisions.length" :items="breadCrumbs")
         v-card(flat)
           v-card-text
             .d-flex
-              div {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
+              div {{ $t('shownOf', { count: projects.length, totalCount }) }}
               template(v-if="hasPerm('dcis.add_project')")
                 v-spacer
                 add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
                   template(#activator="{ on }")
                     v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
-            projects-filter(v-model="selectedFilters" :default-value="defaultFilter" :projects="projects")
-            projects-table(:projects="visibleProjects" :loading="loading")
+            projects-filter(v-model="selectedFilters" :default-value="defaultFilter")
+            v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+            projects-table(:projects="projects" :loading="loading")
       v-tab-item
         v-list
           v-list-item(v-for="division in user.divisions" :key="division.id")
@@ -27,9 +28,10 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
       add-project(:update="(cache, result) => addUpdate(cache, result, 'project')")
         template(#activator="{ on }")
           v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
-  template(#subheader) {{ $t('shownOf', { count: visibleProjects.length, totalCount }) }}
-  projects-filter(v-model="selectedFilters" :default-value="defaultFilter" :projects="projects")
-  projects-table(:projects="visibleProjects" :loading="loading")
+  template(#subheader) {{ $t('shownOf', { count: projects.length, totalCount }) }}
+  projects-filter(v-model="selectedFilters" :default-value="defaultFilter")
+  v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+  projects-table(:projects="projects" :loading="loading")
 </template>
 
 <script lang="ts">
@@ -39,7 +41,7 @@ import { useRoute, useRouter } from '#imports'
 import { BreadCrumbsItem } from '~/types/devind'
 import { ProjectsQuery, ProjectsQueryVariables, ProjectType } from '~/types/graphql'
 import { Item } from '~/types/filters'
-import { useApolloHelpers, useCursorPagination, useI18n, useQueryRelay } from '~/composables'
+import { useDebounceSearch, useApolloHelpers, useCursorPagination, useI18n, useQueryRelay } from '~/composables'
 import { useAuthStore } from '~/stores'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
@@ -67,6 +69,11 @@ export default defineComponent({
     const user = toRef(authStore, 'user')
     const hasPerm = toRef(authStore, 'hasPerm')
 
+    const { search, debounceSearch } = useDebounceSearch()
+
+    const defaultFilter: Item[] = [{ id: 'active' }, { id: 'notArchive' }]
+    const selectedFilters = ref<Item[]>([{ id: 'active' }, { id: 'notArchive' }])
+
     const projectQueryEnabled = ref<boolean>(false)
     const {
       data: projects,
@@ -76,23 +83,24 @@ export default defineComponent({
       deleteUpdate
     } = useQueryRelay<ProjectsQuery, ProjectsQueryVariables, ProjectType>({
       document: projectsQuery,
+      variables: () => {
+        const activeFilter = +!!selectedFilters.value.find(x => x.id === 'active')
+        const hiddenFilter = +!!selectedFilters.value.find(x => x.id === 'hidden')
+        const archiveFilter = +!!selectedFilters.value.find(x => x.id === 'archive')
+        const notArchiveFilter = +!!selectedFilters.value.find(x => x.id === 'notArchive')
+
+        return {
+          visibility: activeFilter ^ hiddenFilter ? !!activeFilter || false : null,
+          archive: archiveFilter ^ notArchiveFilter ? !!archiveFilter || false : null,
+          search: debounceSearch.value
+        }
+      },
       options: computed(() => ({
         enabled: projectQueryEnabled.value
       }))
     }, {
-      pagination: useCursorPagination()
-    })
-
-    const defaultFilter: Item[] = [{ id: 'active' }]
-    const selectedFilters = ref<Item[]>([{ id: 'active' }])
-
-    const visibleProjects = computed<ProjectType[]>(() => {
-      const filterKeys = selectedFilters.value.map(x => x.id)
-      return projects.value.filter((x) => {
-        return (!x.visibility && filterKeys.includes('hidden')) ||
-          (x.archive && filterKeys.includes('archive')) ||
-          (!x.archive && x.visibility && filterKeys.includes('active'))
-      })
+      pagination: useCursorPagination(),
+      fetchScroll: typeof document === 'undefined' ? null : document
     })
 
     onMounted(() => {
@@ -108,12 +116,12 @@ export default defineComponent({
     })
 
     return {
+      search,
       hasPerm,
       active,
       name,
       projects,
       selectedFilters,
-      visibleProjects,
       count,
       totalCount,
       loading,

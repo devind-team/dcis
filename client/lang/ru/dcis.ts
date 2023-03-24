@@ -6,8 +6,9 @@ export default {
     filter: {
       title: 'Фильтр проектов',
       active: 'Активные проекты',
-      archive: 'Проекты в архиве',
       hidden: 'Скрытые проекты',
+      archive: 'Проекты в архиве',
+      notArchive: 'Проекты не в архиве',
       noFiltrationMessage: 'Фильтры не заданы'
     },
     tableHeaders: {

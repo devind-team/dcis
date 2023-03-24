@@ -13,7 +13,7 @@ from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.core.schema import UserType
-from apps.dcis.filters import DocumentFilter
+from apps.dcis.filters import DocumentFilter, ProjectFilter
 from apps.dcis.helpers.exceptions import is_raises
 from apps.dcis.models import (
     AddStatus,
@@ -85,10 +85,7 @@ class ProjectType(OptimizedDjangoObjectType):
             'content_type',
             'user',
         )
-        filter_fields = {
-            'name': ['icontains'],
-            'user': ['exact', 'in']
-        }
+        filterset_class = ProjectFilter
         connection_class = CountableConnection
 
     @staticmethod
@@ -621,7 +618,6 @@ class CellAggregationType(graphene.ObjectType):
 
     aggregation = graphene.String(required=True, description='Метод агрегации')
     cells = graphene.List(graphene.NonNull(graphene.String), description='Ячейки агрегации')
-
 
 
 class ValueType(DjangoObjectType):
