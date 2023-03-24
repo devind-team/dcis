@@ -76,7 +76,7 @@ export default defineComponent({
         }, {
           text: documentVersion.value,
           to: localePath({
-            name: 'dcis-documents-documentId',
+            name: 'dcis-documents-documentId-sheets',
             params: { documentId: activeDocument.value.id }
           }),
           exact: true

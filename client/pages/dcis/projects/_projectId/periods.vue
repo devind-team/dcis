@@ -1,5 +1,5 @@
 <template lang="pug">
-left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
+left-navigator-container(:bread-crumbs="breadCrumbs" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.name') }}
     template(v-if="project.canAddPeriod")
       v-spacer
@@ -39,22 +39,13 @@ export default defineComponent({
     project: { type: Object as PropType<ProjectType>, required: true },
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true }
   },
-  setup (props) {
+  setup () {
     const { t } = useI18n()
     const router = useRouter()
     const route = useRoute()
     const { dateTimeHM } = useFilters()
     const { localePath } = useI18n()
     const { defaultClient } = useApolloHelpers()
-
-    const bc = computed<BreadCrumbsItem[]>(() => ([
-      ...props.breadCrumbs,
-      {
-        text: t('dcis.projects.links.periods') as string,
-        to: localePath({ name: 'dcis-projects-projectId-periods' }),
-        exact: true
-      }
-    ]))
 
     const statuses = Object.fromEntries(
       ['preparation', 'open', 'close'].map(e => ([e, t(`dcis.periods.statuses.${e}`) as string]))
@@ -90,7 +81,7 @@ export default defineComponent({
       }
     })
 
-    return { bc, headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
+    return { headers, periods, loading, addPeriodUpdate, dateTimeHM, toGlobalId, statuses }
   }
 })
 </script>

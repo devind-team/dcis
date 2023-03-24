@@ -64,7 +64,7 @@ export default defineComponent({
         ...props.breadCrumbs,
         {
           text: project.value.name,
-          to: localePath({ name: 'dcis-projects-projectId', params: route.params }),
+          to: localePath({ name: 'dcis-projects-projectId-periods', params: route.params }),
           exact: true
         }
       ]

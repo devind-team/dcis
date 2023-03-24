@@ -134,7 +134,7 @@ export default defineComponent({
           }),
           exact: true
         },
-        { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId' }), exact: true }
+        { text: period.value.name, to: localePath({ name: 'dcis-periods-periodId-documents' }), exact: true }
       ]
     })
 

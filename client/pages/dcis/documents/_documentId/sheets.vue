@@ -1,6 +1,6 @@
 <template lang="pug">
 left-navigator-container.document-sheets__left-navigator-container(
-  :bread-crumbs="bc"
+  :bread-crumbs="breadCrumbs"
   fluid
   @update-drawer="$emit('update-drawer')"
 )
@@ -20,7 +20,7 @@ left-navigator-container.document-sheets__left-navigator-container(
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useCommonQuery, useI18n } from '~/composables'
+import { useCommonQuery } from '~/composables'
 import {
   DocumentSheetQuery,
   DocumentSheetQueryVariables,
@@ -40,17 +40,6 @@ export default defineComponent({
     document: { type: Object as PropType<DocumentType>, required: true }
   },
   setup (props) {
-    const { t, localePath } = useI18n()
-
-    const bc = computed<BreadCrumbsItem[]>(() => ([
-      ...props.breadCrumbs,
-      {
-        text: t('dcis.documents.links.sheets') as string,
-        to: localePath({ name: 'dcis-documents-documentId-sheets' }),
-        exact: true
-      }
-    ]))
-
     const activeSheetIndex = ref<number>(0)
 
     const mode = computed<GridMode>(
@@ -72,7 +61,6 @@ export default defineComponent({
     })
 
     return {
-      bc,
       activeSheetIndex,
       mode,
       activeSheet,
