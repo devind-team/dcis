@@ -15,6 +15,7 @@ bread-crumbs(v-if="user.divisions.length" :items="breadCrumbs")
                   template(#activator="{ on }")
                     v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
             projects-filter(v-model="selectedFilters" :default-value="defaultFilter")
+            v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
             projects-table(:projects="projects" :loading="loading")
       v-tab-item
         v-list
@@ -29,6 +30,7 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
           v-btn(v-on="on" color="primary") {{ $t('dcis.projects.addProject.buttonText') }}
   template(#subheader) {{ $t('shownOf', { count: projects.length, totalCount }) }}
   projects-filter(v-model="selectedFilters" :default-value="defaultFilter")
+  v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
   projects-table(:projects="projects" :loading="loading")
 </template>
 
@@ -67,6 +69,8 @@ export default defineComponent({
     const user = toRef(authStore, 'user')
     const hasPerm = toRef(authStore, 'hasPerm')
 
+    const search = ref<string>('')
+
     const defaultFilter: Item[] = [{ id: 'active' }]
     const selectedFilters = ref<Item[]>([{ id: 'active' }])
 
@@ -86,7 +90,8 @@ export default defineComponent({
 
         return {
           visibility: !!(activeFilter ^ hiddenFilter ? activeFilter || false : null),
-          archive: archiveFilter ? true : !archiveFilter ? false : null
+          archive: archiveFilter ? true : !archiveFilter ? false : null,
+          search: search.value
         }
       },
       options: computed(() => ({
@@ -110,6 +115,7 @@ export default defineComponent({
     })
 
     return {
+      search,
       hasPerm,
       active,
       name,

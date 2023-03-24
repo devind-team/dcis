@@ -1897,8 +1897,13 @@ export type ContentTypeTypeProjectSetArgs = {
   after?: InputMaybe<Scalars['String']>;
   archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
+  createdAt?: InputMaybe<Scalars['DateTime']>;
+  createdAt_Icontains?: InputMaybe<Scalars['DateTime']>;
+  description?: InputMaybe<Scalars['String']>;
+  description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+  name?: InputMaybe<Scalars['String']>;
   name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
   user?: InputMaybe<Scalars['ID']>;
@@ -4500,8 +4505,13 @@ export type QueryProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
   archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
+  createdAt?: InputMaybe<Scalars['DateTime']>;
+  createdAt_Icontains?: InputMaybe<Scalars['DateTime']>;
+  description?: InputMaybe<Scalars['String']>;
+  description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+  name?: InputMaybe<Scalars['String']>;
   name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
   user?: InputMaybe<Scalars['ID']>;
@@ -6356,6 +6366,7 @@ export type ProjectsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']>;
   visibility?: InputMaybe<Scalars['Boolean']>;
   archive?: InputMaybe<Scalars['Boolean']>;
+  search?: InputMaybe<Scalars['String']>;
 }>;
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } | null> } | null };

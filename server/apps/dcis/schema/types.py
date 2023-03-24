@@ -86,7 +86,9 @@ class ProjectType(OptimizedDjangoObjectType):
             'user',
         )
         filter_fields = {
-            'name': ['icontains'],
+            'name': ['exact', 'icontains', ],
+            'description': ['exact', 'icontains', ],
+            'created_at': ['exact', 'icontains', ],
             'user': ['exact', 'in'],
             'visibility': ['exact'],
             'archive': ['exact'],

@@ -1810,7 +1810,7 @@ type ContentTypeType {
   model: String!
   permissionSet: [PermissionType!]!
   """Тип дивизиона"""
-  projectSet(after: String, archive: Boolean, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID], visibility: Boolean): ProjectTypeConnection!
+  projectSet(after: String, archive: Boolean, before: String, createdAt: DateTime, createdAt_Icontains: DateTime, description: String, description_Icontains: String, first: Int, last: Int, name: String, name_Icontains: String, offset: Int, user: ID, user_In: [ID], visibility: Boolean): ProjectTypeConnection!
 }
 
 input CopyPeriodGroupsMutationInput {
@@ -3672,7 +3672,7 @@ type Query {
     projectId: ID!
   ): ProjectType!
   """Проекты"""
-  projects(after: String, archive: Boolean, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID], visibility: Boolean): ProjectTypeConnection
+  projects(after: String, archive: Boolean, before: String, createdAt: DateTime, createdAt_Icontains: DateTime, description: String, description_Icontains: String, first: Int, last: Int, name: String, name_Icontains: String, offset: Int, user: ID, user_In: [ID], visibility: Boolean): ProjectTypeConnection
   region(
     """Region ID"""
     regionId: Int!
