@@ -3,7 +3,6 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   template(#header) {{ $t('dcis.periods.links.attributes') }}
     v-spacer
     add-attribute-menu(
-      v-if="period.canChangeAttributes"
       v-slot="{ on, attrs}"
       :period="period"
       :from-file-update="resetUpdate"
@@ -106,7 +105,7 @@ export default defineComponent({
 
     const deleteAttribute = (attribute: AttributeType) => {
       useMutation<DeleteAttributeMutation, DeleteAttributeMutationInput>(deleteAttributeMutation, {
-        update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload }}) => {
+        update: (cache, result: { data: { deleteAttribute: DeleteAttributeMutationPayload } }) => {
           if (result.data.deleteAttribute.success) {
             deleteUpdate(cache, { data: { deleteAttribute: { id: attribute.id } } })
           }
