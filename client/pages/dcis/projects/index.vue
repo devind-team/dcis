@@ -88,9 +88,17 @@ export default defineComponent({
         const hiddenFilter = +!!selectedFilters.value.find(x => x.id === 'hidden')
         const archiveFilter = !!selectedFilters.value.find(x => x.id === 'archive')
 
+        if (!activeFilter && !hiddenFilter && !archiveFilter) {
+          return {
+            visibility: null,
+            archived: null,
+            search: search.value
+          }
+        }
+
         return {
-          visibility: !!(activeFilter ^ hiddenFilter ? activeFilter || false : null),
-          archive: archiveFilter ? true : !archiveFilter ? false : null,
+          visibility: activeFilter ^ hiddenFilter ? activeFilter || false : null,
+          archive: archiveFilter,
           search: search.value
         }
       },
