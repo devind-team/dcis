@@ -28,7 +28,7 @@ export enum GridMode {
 export type UpdateActiveSheetType = UpdateType<PeriodSheetQuery | DocumentSheetQuery>
 
 export const GridModeInject: InjectionKey<Ref<GridMode>> = Symbol('Mode')
-export const ActiveSheetInject: InjectionKey<Ref<SheetType>> = Symbol('ActiveSheet')
+export const ActiveSheetInject: InjectionKey<Ref<SheetType | null>> = Symbol('ActiveSheet')
 export const UpdateActiveSheetInject: InjectionKey<
   Ref<UpdateActiveSheetType | null>
 > = Symbol('UpdateActiveSheet')
