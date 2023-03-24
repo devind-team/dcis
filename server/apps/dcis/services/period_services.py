@@ -87,6 +87,10 @@ def get_user_periods(user: User, project_id: int | str) -> QuerySet[Period]:
     ).distinct()
 
 
+def get_user_periods_without_archives(user: User, project_id: int | str) -> QuerySet[Period]:
+    return get_user_periods(user, project_id).filter(archive=False)
+
+
 def get_period_users(period: Period | int | str) -> QuerySet[User]:
     """Получение пользователей, связанных с периодом."""
     period = Period.objects.get(pk=period) if type(period) in (int, str) else period

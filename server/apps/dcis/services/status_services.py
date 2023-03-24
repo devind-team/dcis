@@ -111,12 +111,14 @@ class AddStatusActions:
             state = resolve_evaluate_state(cells, values, [])
             for i, limitation in enumerate(limitations, 1):
                 error_message = limitation.error_message.replace('"', '""')
-                state[f'{cls.VIRTUAL_SHEET_NAME}!A{i}'] = cast(ValueState, {
-                    'value': None,
-                    'error': None,
-                    'formula': f'=IF({limitation.formula}, "", "{error_message}")',
-                    'limitation': limitation
-                })
+                state[f'{cls.VIRTUAL_SHEET_NAME}!A{i}'] = cast(
+                    ValueState, {
+                        'value': None,
+                        'error': None,
+                        'formula': f'=IF({limitation.formula}, "", "{error_message}")',
+                        'limitation': limitation
+                    }
+                )
             evaluate_result = evaluate_state(state, [cls.VIRTUAL_SHEET_NAME])
             errors: list[LimitationError] = []
             for coordinate, result_value in evaluate_result.items():
@@ -132,12 +134,14 @@ class AddStatusActions:
                         dependency_values: dict[str, str] = {}
                         for key in limitation_dependencies.keys():
                             dependency_values[key] = evaluate_result[key]['value']
-                        errors.append(LimitationError(
-                            form=result_value['limitation'].sheet.name,
-                            formula=result_value['limitation'].formula,
-                            error_message=error,
-                            dependencies=encode(dependency_values).encode().decode('unicode-escape')
-                        ))
+                        errors.append(
+                            LimitationError(
+                                form=result_value['limitation'].sheet.name,
+                                formula=result_value['limitation'].formula,
+                                error_message=error,
+                                dependencies=encode(dependency_values).encode().decode('unicode-escape')
+                            )
+                        )
             if len(errors):
                 raise ValidationError(message=None, code=None, params=errors)
 
@@ -147,7 +151,7 @@ class AddStatusActions:
         @classmethod
         @transaction.atomic
         def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
-            cloned_period = document.period.make_clone()
+            cloned_period = document.period.make_clone(attrs={'archive': True})
             cloned_document = document.make_clone(attrs={'period_id': cloned_period.id})
             document_status.archive_period_id = cloned_period.id
             document_status.save(update_fields=('archive_period_id',))
@@ -179,12 +183,14 @@ class AddStatusActions:
                             row_id=row.id
                         ).first()
                         if value:
-                            value.make_clone(attrs={
-                                'row_id': cloned_row.id,
-                                'column_id': cloned_col.id,
-                                'sheet_id': cloned_sheet.id,
-                                'document_id': cloned_document.id
-                            })
+                            value.make_clone(
+                                attrs={
+                                    'row_id': cloned_row.id,
+                                    'column_id': cloned_col.id,
+                                    'sheet_id': cloned_sheet.id,
+                                    'document_id': cloned_document.id
+                                }
+                            )
                 for old_row, cloned_row in zip(old_row_dimensions, cloned_row_dimensions):
                     if old_row.document_id == document.id and old_row.parent_id:
                         cloned_row.parent_id = old_cloned_row_dimensions[old_row.parent_id]

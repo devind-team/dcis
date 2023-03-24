@@ -87,6 +87,7 @@ class Period(models.Model, CloneMixin):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, help_text='Организатор сборов')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, help_text='Проект сборов')
     methodical_support = models.ManyToManyField(File, help_text='Методическая поддержка')
+    archive = models.BooleanField(default=False, help_text='Архивный период')
 
     class Meta:
         """Мета класс с описанием параметров периода."""
