@@ -47,7 +47,7 @@ export default defineComponent({
     period: { type: Object as PropType<PeriodType>, required: true }
   },
   setup (props) {
-    const { localePath } = useI18n()
+    const { t, localePath } = useI18n()
     const route = useRoute()
 
     const activeSheetIndex = ref<number>(0)
@@ -96,7 +96,7 @@ export default defineComponent({
     const bc = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
-        text: 'Документ',
+        text: t('dcis.periods.archive.document') as string,
         to: localePath({ name: 'dcis-periods-archive-archiveId-document_sheets', query: route.query }),
         exact: true
       }

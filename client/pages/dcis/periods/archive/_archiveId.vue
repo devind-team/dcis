@@ -31,7 +31,7 @@ export default defineComponent({
     const links = computed<LinksType[]>(() => {
       const result: LinksType[] = [
         {
-          title: t('dcis.documents.links.sheets') as string,
+          title: t('dcis.periods.archive.document') as string,
           to: 'dcis-periods-archive-archiveId-document_sheets',
           query: { periodId: route.query.periodId as string },
           icon: 'file-table-box-multiple-outline'
@@ -64,7 +64,7 @@ export default defineComponent({
           exact: true
         },
         {
-          text: 'Архив',
+          text: t('dcis.periods.archive.name') as string,
           to: localePath({
             name: 'dcis-periods-archive-archiveId-document_sheets',
             query: route.query

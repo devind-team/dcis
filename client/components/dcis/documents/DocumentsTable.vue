@@ -1,37 +1,37 @@
 <template lang="pug">
-  v-data-table(
-    :headers="headers"
-    :items="documents"
-    :loading="loading"
-    :custom-sort="customSort"
-    disable-pagination
-    hide-default-footer
-    multi-sort
-  )
-    template(#item.division="{ item }")
-      nuxt-link(
-        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-      ) {{ item.objectName }} ({{ item.objectId }})
-    template(#item.version="{ item }")
-      template(v-if="period.multiple") {{ item.version }}
-      nuxt-link(
-        v-else
-        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-      ) {{ item.version }}
-    template(#item.lastStatus="{ item }")
-      template(v-if="item.lastStatus")
-        document-statuses(
-          :can-delete="canDeleteDocumentStatus(item)"
-          :update="updateDocuments"
-          :document="item"
-          :period="period"
-          @add-status="$emit('add-status')"
-        )
-          template(#activator="{ on }")
-            a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
-        div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
-        .font-italic {{ item.lastStatus.comment }}
-    template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
+v-data-table(
+  :headers="headers"
+  :items="documents"
+  :loading="loading"
+  :custom-sort="customSort"
+  disable-pagination
+  hide-default-footer
+  multi-sort
+)
+  template(#item.division="{ item }")
+    nuxt-link(
+      :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+    ) {{ item.objectName }} ({{ item.objectId }})
+  template(#item.version="{ item }")
+    template(v-if="period.multiple") {{ item.version }}
+    nuxt-link(
+      v-else
+      :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+    ) {{ item.version }}
+  template(#item.lastStatus="{ item }")
+    template(v-if="item.lastStatus")
+      document-statuses(
+        :can-delete="canDeleteDocumentStatus(item)"
+        :update="updateDocuments"
+        :document="item"
+        :period="period"
+        @add-status="$emit('add-status')"
+      )
+        template(#activator="{ on }")
+          a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
+      div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
+      .font-italic {{ item.lastStatus.comment }}
+  template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
 <script lang="ts">
