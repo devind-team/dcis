@@ -34,10 +34,7 @@ mutation-modal-form(
           template(#activator="{ on }")
             v-btn(
               v-on="on"
-              :to=`localeRoute({
-                  name: 'dcis-periods-archive-archiveId',
-                  params: { archiveId: toGlobalId('PeriodType', item.archivePeriod.id) },
-                  query: { periodId: toGlobalId('PeriodType', Number(period.id)) } })`
+              :to='archivePath(item)'
               :nuxt="true" color="primary" icon
             )
               v-icon mdi-archive-outline
@@ -96,7 +93,8 @@ import {
   NewStatusesQueryVariables,
   StatusType,
   StatusFieldsFragment,
-  PeriodType
+  PeriodType,
+  DocumentStatusType
 } from '~/types/graphql'
 import { useCommonQuery, useFilters } from '~/composables'
 import newStatusesQuery from '~/gql/dcis/queries/new_statuses.graphql'
@@ -124,7 +122,7 @@ export default defineComponent({
     update: { type: Function as PropType<PeriodUpdateType>, required: true }
   },
   setup (props, { emit }) {
-    const { t } = useI18n()
+    const { t, localePath } = useI18n()
     const { dateTimeHM, getUserName } = useFilters()
 
     onMounted(() => {
@@ -231,6 +229,14 @@ export default defineComponent({
       await refetchStatuses()
     }
 
+    const archivePath = (documentStatus: DocumentStatusType) => {
+      return localePath({
+        name: 'dcis-periods-archive-archiveId',
+        params: { archiveId: toGlobalId('PeriodType', Number(documentStatus.archivePeriod.id)) },
+        query: { periodId: toGlobalId('PeriodType', Number(props.period.id)) }
+      })
+    }
+
     const close = () => {
       status.value = statuses.value[0] || null
       comment.value = ''
@@ -248,6 +254,7 @@ export default defineComponent({
       statusesLoading,
       addDocumentStatusDone,
       documentStatuses,
+      archivePath,
       dateTimeHM,
       getUserName,
       addDocumentStatusUpdate,
