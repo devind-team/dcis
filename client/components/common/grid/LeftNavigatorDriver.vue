@@ -14,7 +14,7 @@ v-navigation-drawer(
     template(v-for="item in items")
       v-list-item(
         v-if="item.permissions === undefined || item.permissions && hasPerm(item.permissions)"
-        :to="localePath({ name: item.to, params: item.params })"
+        :to="localePath({ name: item.to, params: item.params, query: item.query })"
         link
       )
         v-list-item-icon

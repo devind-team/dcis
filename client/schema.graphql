@@ -520,8 +520,8 @@ type AddRowDimensionMutationPayload {
 
 """Тип переназначений статусов документов."""
 type AddStatusType {
-  """Функция, проверяющая может ли статус быть изменен"""
-  check: String!
+  """Действие при добавлении статуса в документ"""
+  action: String!
   """Изначальный статус"""
   fromStatus: StatusType
   id: ID!
@@ -2343,6 +2343,8 @@ type DocumentMessageTypeEdge {
 
 """Тип статусов для документов."""
 type DocumentStatusType {
+  """Архивированный период"""
+  archivePeriod: PeriodType
   """Комментарий"""
   comment: String!
   """Дата создания"""

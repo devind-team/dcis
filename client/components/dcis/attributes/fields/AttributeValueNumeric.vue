@@ -8,7 +8,7 @@ v-text-field(
   :key="attribute.key"
   :readonly="!attribute.mutable || readonly"
   type="number"
-  clearable
+  :clearable="!readonly"
 )
 </template>
 

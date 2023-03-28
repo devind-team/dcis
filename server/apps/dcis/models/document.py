@@ -1,4 +1,5 @@
 from django.db import models
+from model_clone import CloneMixin
 
 from apps.core.models import User
 from .project import Period
@@ -32,10 +33,10 @@ class AddStatus(models.Model):
         help_text='Новый статус'
     )
     roles = models.JSONField(help_text='Роли пользователей, которые могут изменять статус')
-    check = models.CharField(max_length=250, help_text='Функция, проверяющая может ли статус быть изменен')
+    action = models.CharField(max_length=250, help_text='Действие при добавлении статуса в документ')
 
 
-class Sheet(models.Model):
+class Sheet(models.Model, CloneMixin):
     """Модель листа для вывода."""
 
     name = models.CharField(max_length=250, help_text='Наименование')
@@ -57,7 +58,7 @@ class Sheet(models.Model):
         ]
 
 
-class Document(models.Model):
+class Document(models.Model, CloneMixin):
     """Модель документа.
 
     Когда начинается сбор, берутся атрибуты и листы привязанные к периоду.
@@ -124,7 +125,7 @@ class DocumentStatusManager(models.Manager):
         return document_status
 
 
-class DocumentStatus(models.Model):
+class DocumentStatus(models.Model, CloneMixin):
     """Модель статуса документа."""
 
     comment = models.TextField(max_length=1023, help_text='Комментарий')
@@ -132,6 +133,7 @@ class DocumentStatus(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата создания')
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, help_text='Документ')
+    archive_period = models.ForeignKey(Period, null=True, on_delete=models.CASCADE, help_text='Архивированный период')
     status = models.ForeignKey(Status, on_delete=models.CASCADE, help_text='Статус')
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='Пользователь')
 
@@ -163,7 +165,7 @@ class DocumentStatus(models.Model):
         ]
 
 
-class Attribute(models.Model):
+class Attribute(models.Model, CloneMixin):
     """Не табличные данные хранятся в атрибутах.
 
     Модель содержит список не табличных данных для организации сбора в указанный период.

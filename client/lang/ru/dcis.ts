@@ -51,6 +51,10 @@ export default {
       status: 'Статус',
       createdAt: 'Дата добавления'
     },
+    archive: {
+      name: 'Архив',
+      document: 'Документ'
+    },
     links: {
       documents: 'Документы',
       monitoring: 'Мониторинг',

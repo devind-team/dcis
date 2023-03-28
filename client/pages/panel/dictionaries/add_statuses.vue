@@ -14,6 +14,7 @@ import { defineComponent, computed, useNuxt2Meta } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
 import { useI18n } from '~/composables'
 import UniversalDictionary, { Header } from '~/components/dcis/dictionaries/UniversalDictionary.vue'
+
 export default defineComponent({
   components: { UniversalDictionary },
   middleware: ['auth'],
@@ -25,7 +26,7 @@ export default defineComponent({
     const headers: Header[] = [
       'id',
       'roles',
-      'check',
+      'action',
       { name: 'fromStatus', value: 'fromStatus.name' },
       { name: 'toStatus', value: 'toStatus.name' }
     ]

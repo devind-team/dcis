@@ -41,8 +41,7 @@ from apps.dcis.services.divisions_services import (
 from apps.dcis.services.period_services import (
     get_period_attributes,
     get_period_users,
-    get_user_period_privileges,
-    get_user_periods,
+    get_user_period_privileges, get_user_periods_without_archives,
 )
 from apps.dcis.services.row_dimension_services import get_indices_groups_to_expand
 from apps.dcis.services.sheet_unload_services import (
@@ -201,7 +200,7 @@ class PeriodQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_periods(root: Any, info: ResolveInfo, project_id: str) -> QuerySet[Period]:
-        return get_user_periods(info.context.user, from_global_id(project_id)[1])
+        return get_user_periods_without_archives(info.context.user, from_global_id(project_id)[1])
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

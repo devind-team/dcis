@@ -328,7 +328,7 @@ class AddStatusType(DjangoObjectType):
 
     class Meta:
         model = AddStatus
-        fields = ('id', 'roles', 'check', 'from_status', 'to_status')
+        fields = ('id', 'roles', 'action', 'from_status', 'to_status')
 
 
 class DocumentType(DjangoObjectType):
@@ -385,6 +385,7 @@ class DocumentStatusType(DjangoObjectType):
     document = graphene.Field(DocumentType, description='Документ')
     status = graphene.Field(StatusType, required=True, description='Установленный статус')
     user = graphene.Field(UserType, required=True, description='Пользователь')
+    archive_period = graphene.Field(PeriodType, description='Архивированный период')
 
     class Meta:
         model = DocumentStatus
@@ -395,6 +396,7 @@ class DocumentStatusType(DjangoObjectType):
             'document',
             'status',
             'user',
+            'archive_period'
         )
 
 

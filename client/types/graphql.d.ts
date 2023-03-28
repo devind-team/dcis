@@ -555,8 +555,8 @@ export type AddRowDimensionMutationPayload = {
 /** Тип переназначений статусов документов. */
 export type AddStatusType = {
   __typename?: 'AddStatusType';
-  /** Функция, проверяющая может ли статус быть изменен */
-  check: Scalars['String'];
+  /** Действие при добавлении статуса в документ */
+  action: Scalars['String'];
   /** Изначальный статус */
   fromStatus?: Maybe<StatusType>;
   id: Scalars['ID'];
@@ -2451,6 +2451,8 @@ export type DocumentMessageTypeEdge = {
 /** Тип статусов для документов. */
 export type DocumentStatusType = {
   __typename?: 'DocumentStatusType';
+  /** Архивированный период */
+  archivePeriod?: Maybe<PeriodType>;
   /** Комментарий */
   comment: Scalars['String'];
   /** Дата создания */
@@ -5579,7 +5581,7 @@ export type RequestStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type RequestStatisticsQuery = { __typename?: 'Query', requestStatistics: { __typename?: 'RequestStatisticsType', browsers: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, os: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null>, device: Array<{ __typename?: 'PointStatisticsType', name: string, value: number } | null> } };
 
-export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
+export type AddStatusFieldsFragment = { __typename: 'AddStatusType', id: string, roles: any, action: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } };
 
 export type AttributeFieldsFragment = { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null };
 
@@ -6148,7 +6150,7 @@ export type ActiveBudgetClassificationsQuery = { __typename?: 'Query', activeBud
 
 export type AddStatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type AddStatusesQuery = { __typename?: 'Query', addStatuses?: Array<{ __typename: 'AddStatusType', id: string, roles: any, check: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } }> | null };
+export type AddStatusesQuery = { __typename?: 'Query', addStatuses?: Array<{ __typename: 'AddStatusType', id: string, roles: any, action: string, fromStatus?: { __typename: 'StatusType', id: string, name: string } | null, toStatus: { __typename: 'StatusType', id: string, name: string } }> | null };
 
 export type AggregationCellsQueryVariables = Exact<{
   periodId: Scalars['ID'];
@@ -6238,7 +6240,7 @@ export type DocumentStatusesQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: Array<{ __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } }> | null };
+export type DocumentStatusesQuery = { __typename?: 'Query', documentStatuses?: Array<{ __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, archivePeriod?: { __typename: 'PeriodType', id: string } | null, document?: { __typename: 'DocumentType', id: string } | null, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } }> | null };
 
 export type DocumentsQueryVariables = Exact<{
   periodId: Scalars['ID'];
