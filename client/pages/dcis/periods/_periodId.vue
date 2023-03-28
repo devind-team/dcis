@@ -107,6 +107,11 @@ export default defineComponent({
             })
           }
         }
+        result.push({
+          title: t('dcis.periods.links.support') as string,
+          to: 'dcis-periods-periodId-support',
+          icon: 'book'
+        })
         if (period.value.canChangeSettings || period.value.canDelete) {
           result.push({
             title: t('dcis.periods.links.settings') as string,

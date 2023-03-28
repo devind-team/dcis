@@ -63,6 +63,7 @@ export default {
       sheets: 'Таблица',
       report: 'Сводный отчет',
       unload: 'Выгрузка',
+      support: 'Методическое обеспечение',
       settings: '@:settings',
       aggregations: 'Агрегация'
     },
