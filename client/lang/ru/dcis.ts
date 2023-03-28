@@ -6,8 +6,9 @@ export default {
     filter: {
       title: 'Фильтр проектов',
       active: 'Активные проекты',
-      archive: 'Проекты в архиве',
       hidden: 'Скрытые проекты',
+      archive: 'Проекты в архиве',
+      notArchive: 'Проекты не в архиве',
       noFiltrationMessage: 'Фильтры не заданы'
     },
     tableHeaders: {
@@ -102,6 +103,12 @@ export default {
         code: 'Код департамента'
       }
     },
+    organizationKindFilter: {
+      title: 'Фильтр типов организаций',
+      noFiltrationMessage: 'Выбрать типы организаций',
+      multipleMessage: '{name} и еще {restLength} типов организаций | {name} и еще {restLength} тип организаций |' +
+        ' {name} и еще {restLength} типа организаций'
+    },
     addDivisions: {
       file: 'Выберете файл'
     },
@@ -157,18 +164,21 @@ export default {
       name: '@:dcis.periods.links.limitations',
       changeMenu: {
         buttonText: 'Изменить ограничения',
-        updateLimitationFromFile: {
-          buttonText: 'Обновить ограничения из файла',
-          header: 'Обновление ограничения из файла',
-          limitationsFile: 'Файл с новыми ограничениями',
-          downloadTemplate: 'Скачать шаблон файла'
-        },
         addLimitation: {
           buttonText: 'Добавить ограничение',
           header: 'Добавление ограничения',
           formula: 'Формула ограничения',
           errorMessage: 'Сообщение об ошибке',
           sheet: 'Форма'
+        },
+        updateLimitationFromFile: {
+          buttonText: 'Обновить ограничения из файла',
+          header: 'Обновление ограничения из файла',
+          limitationsFile: 'Файл с новыми ограничениями',
+          downloadTemplate: 'Скачать шаблон файла'
+        },
+        unloadLimitation: {
+          content: 'Выгрузить ограничения'
         }
       },
       tableHeaders: {
@@ -328,6 +338,7 @@ export default {
       name: '@:dcis.periods.links.unload',
       organizationsFilterTitle: 'Выбор организаций',
       statusFilterTitle: 'Выбор статусов',
+      organizationKindFilterTitle: 'Выбор типов организаций',
       unloadWithoutDocument: 'Выгружать организации без документов',
       unloadDefault: 'Выгружать значение по умолчанию при отсутствии значения в документе',
       applyNumberFormat: 'Применять числовой формат',
@@ -336,6 +347,11 @@ export default {
         onlyHeads: 'Для головных учреждений',
         onlyChildren: 'Для филиалов',
         headsAndChildrens: 'Для головных учреждений и филиалов'
+      },
+      additionalColumns: {
+        label: 'Дополнительные столбцы',
+        curatorGroup: 'Кураторская группа',
+        financingParagraph: 'Параграф финансирования'
       },
       emptyCell: 'Строка в пустой ячейке'
     }
@@ -453,6 +469,11 @@ export default {
           toPaste: 'для вставки'
         }
       },
+      viewMenu: {
+        buttonText: 'Вид',
+        normalMode: 'Обычный режим',
+        fullScreenMode: 'Полноэкранный режим'
+      },
       documentUnloadMenu: {
         buttonText: 'Выгрузка',
         unload: '@:dcis.documents.unloadDocument.name'
@@ -553,7 +574,7 @@ export default {
     }
   },
   attributes: {
-    adds: 'Добавить атрибуты',
+    adds: 'Изменить атрибуты',
     add: 'Добавить атрибут',
     change: '@:change',
     delete: '@:delete',
@@ -586,8 +607,11 @@ export default {
       default: 'Значение по умолчанию',
       mutable: 'Разрешить изменение'
     },
+    AddAttributes: {
+      buttonText: 'Добавить атрибут'
+    },
     unloadAttributes: {
-      content: 'Выгрузить атрибуры'
+      buttonText: 'Выгрузить атрибуты'
     },
     uploadAttributes: {
       buttonText: 'Обновить атребуты из файла',

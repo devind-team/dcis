@@ -1,9 +1,12 @@
 """Тесты модуля, отвечающего за работу с ограничениями."""
-
+import json
 from collections import Counter
+from os import listdir, remove
+from os.path import isfile, join
 from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase, override_settings
@@ -16,7 +19,7 @@ from apps.dcis.services.limitation_services import (
     add_limitations_from_file,
     change_limitation,
     delete_limitation,
-    update_limitations_from_file,
+    unload_limitations_in_file, update_limitations_from_file,
 )
 from apps.dcis.tests.tests_helpers import create_in_memory_file
 
@@ -283,3 +286,23 @@ class LimitationTestCase(TestCase):
             },
             limitation_container_cache.dependency_cache.inversion
         )
+
+    def test_unload_limitations_in_file(self):
+        """Тестирование функции `unload_limitations_in_file`."""
+        result = unload_limitations_in_file(self.superuser, self.update_file_period)
+
+        self.assertIsInstance(result, str)
+        self.assertTrue(result.endswith('.json'))
+
+        with open(join(settings.BASE_DIR, result)) as file:
+            data = json.load(file)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 1)
+
+    def tearDown(self):
+        """Remove the temporary files created during the test."""
+        temp_dir = join(settings.STATICFILES_DIRS[1], 'temp_files')
+        for file in listdir(temp_dir):
+            file_path = join(temp_dir, file)
+            if isfile(file_path):
+                remove(file_path)

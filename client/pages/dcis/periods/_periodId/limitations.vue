@@ -1,7 +1,7 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.limitations.name') }}
-    template(v-if="period.canChangeLimitations")
+    template
       v-spacer
       change-period-limitations-menu(
         :period="period"

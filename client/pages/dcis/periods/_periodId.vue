@@ -79,13 +79,11 @@ export default defineComponent({
             icon: 'account-multiple'
           })
         }
-        if (period.value.canChangeAttributes) {
-          result.push({
-            title: t('dcis.periods.links.attributes') as string,
-            to: 'dcis-periods-periodId-attributes',
-            icon: 'page-next'
-          })
-        }
+        result.push({
+          title: t('dcis.periods.links.attributes') as string,
+          to: 'dcis-periods-periodId-attributes',
+          icon: 'page-next'
+        })
         if (period.value.canChangeSheet) {
           result.push({
             title: t('dcis.periods.links.sheets') as string,

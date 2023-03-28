@@ -47,7 +47,7 @@ class UnloadPeriodTestCase(TestCase):
         self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
 
-        self.curator_group = CuratorGroup.objects.create()
+        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа №1')
         self.curator_group.users.add(self.superuser)
 
         self.statuses = [Status.objects.create(name=f'Статус №{i}') for i in range(1, 7)]
@@ -72,6 +72,8 @@ class UnloadPeriodTestCase(TestCase):
                 attributes={
                     'idlistedu': str(i),
                     'org_type': f'ВУЗ{i}',
+                    'id_paragraph': 1000 + i,
+                    'paragraph': f'Параграф финансирования №{i}'
                 },
                 kodbuhg=i + 10,
                 region=Region.objects.create(name=f'Регион №{i}', common_id=i + 20),
@@ -149,12 +151,39 @@ class UnloadPeriodTestCase(TestCase):
         })[1:]
         self._assert_worksheets_equal(expected_path, self.actual_path)
 
+    def test_organization_kind_filter(self) -> None:
+        """Тестирование выгрузки с фильтрацией по типу организации."""
+        expected_path = self.RESOURCES_DIR / 'test_organization_kind_filter.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
+            **self._get_unload_default_settings(),
+            'organization_kinds': ['ВУЗ1', 'ВУЗ2'],
+        })[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
     def test_status_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по статусам."""
         expected_path = self.RESOURCES_DIR / 'test_status_filter.xlsx'
         self.actual_path = settings.BASE_DIR / unload_period(**{
             **self._get_unload_default_settings(),
             'status_ids': [self.statuses[0].id, self.statuses[2].id],
+        })[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
+    def test_curator_group(self) -> None:
+        """Тестирование выгрузки с кураторской группой."""
+        expected_path = self.RESOURCES_DIR / 'test_curator_group.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
+            **self._get_unload_default_settings(),
+            'unload_curator_group': True,
+        })[1:]
+        self._assert_worksheets_equal(expected_path, self.actual_path)
+
+    def test_financing_paragraph(self) -> None:
+        """Тестирование выгрузки с параграфом финансирования."""
+        expected_path = self.RESOURCES_DIR / 'test_financing_paragraph.xlsx'
+        self.actual_path = settings.BASE_DIR / unload_period(**{
+            **self._get_unload_default_settings(),
+            'unload_financing_paragraph': True,
         })[1:]
         self._assert_worksheets_equal(expected_path, self.actual_path)
 
@@ -240,6 +269,9 @@ class UnloadPeriodTestCase(TestCase):
             'period': self.period,
             'organization_ids': [],
             'status_ids': [],
+            'unload_curator_group': False,
+            'unload_financing_paragraph': False,
+            'organization_kinds': [],
             'unload_without_document': False,
             'unload_default': False,
             'apply_number_format': False,

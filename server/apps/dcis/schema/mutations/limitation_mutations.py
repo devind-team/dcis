@@ -18,7 +18,7 @@ from apps.dcis.services.limitation_services import (
     add_limitation,
     change_limitation,
     delete_limitation,
-    update_limitations_from_file,
+    unload_limitations_in_file, update_limitations_from_file,
 )
 
 
@@ -37,6 +37,26 @@ class UpdateLimitationsFromFileMutation(BaseMutation):
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return UpdateLimitationsFromFileMutation(
             limitations=update_limitations_from_file(info.context.user, period, limitations_file)
+        )
+
+
+class UnloadLimitationsInFileMutation(BaseMutation):
+    """Выгрузка ограничений периода в json файл."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+
+    src = graphene.String(description='Ссылка на сгенерированный файл')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: None, info: ResolveInfo, period_id: str):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return UnloadLimitationsInFileMutation(
+            src=unload_limitations_in_file(
+                user=info.context.user,
+                period=period
+            )
         )
 
 
@@ -104,6 +124,7 @@ class LimitationMutations(graphene.ObjectType):
     """Мутации, связанные с ограничениями, накладываемыми на лист."""
 
     update_limitations_from_file = UpdateLimitationsFromFileMutation.Field(required=True)
+    unload_limitations_in_file = UnloadLimitationsInFileMutation.Field(required=True)
     add_limitation = AddLimitationMutation.Field(required=True)
     change_limitation = ChangeLimitationMutation.Field(required=True)
     delete_limitation = DeleteLimitationMutation.Field(required=True)

@@ -142,7 +142,7 @@ export function useGridResizing<T extends DimensionType> (
 
   const setResizingHover = (dimension: T, mousePosition: MousePositionType) => {
     const key = getDimensionSizeKey(activeDocument, dimension)
-    let size = 0
+    let size
     if (isRemoteSource(dimension)) {
       size = dimension[dimensionKey] ?? defaultElementSize.value
     } else {

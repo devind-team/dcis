@@ -1810,7 +1810,7 @@ type ContentTypeType {
   model: String!
   permissionSet: [PermissionType!]!
   """Тип дивизиона"""
-  projectSet(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int, user: ID, user_In: [ID]): ProjectTypeConnection!
+  projectSet(after: String, archive: Boolean, before: String, description_Icontains: String, first: Int, last: Int, name_Icontains: String, offset: Int, visibility: Boolean): ProjectTypeConnection!
 }
 
 input CopyPeriodGroupsMutationInput {
@@ -2826,6 +2826,8 @@ type Mutation {
   unloadDocument(input: UnloadDocumentMutationInput!): UnloadDocumentMutationPayload!
   """Выгрузка архива значения ячейки типа `Файл`"""
   unloadFileValueArchive(input: UnloadFileValueArchiveMutationInput!): UnloadFileValueArchiveMutationPayload!
+  """Выгрузка ограничений периода в json файл."""
+  unloadLimitationsInFile(input: UnloadLimitationsInFileMutationInput!): UnloadLimitationsInFileMutationPayload!
   """Выгрузка периода в формате Excel."""
   unloadPeriod(input: UnloadPeriodMutationInput!): UnloadPeriodMutationPayload!
   """Обновление агрегации из json файла."""
@@ -3264,7 +3266,7 @@ type PeriodType {
   canChangeUsers: Boolean!
   """Может ли пользователь удалять период"""
   canDelete: Boolean!
-  """Может ли пользователь просматривать сводный отчет выгрузки периода"""
+  """Может ли пользователь просматривать сводный отчет и выгрузки периода"""
   canViewResult: Boolean!
   """Дата создания"""
   createdAt: DateTime!
@@ -3383,24 +3385,6 @@ type ProfileValueType {
   visibility: Boolean!
 }
 
-input ProjectFilterInputType {
-  """`And` field"""
-  and: [ProjectFilterInputType]
-  """`Name` field"""
-  name: ProjectNameFilterInputType
-  """`Not` field"""
-  not: ProjectFilterInputType
-  """`Or` field"""
-  or: [ProjectFilterInputType]
-  """`User` field"""
-  user: ProjectUserFilterInputType
-}
-
-input ProjectNameFilterInputType {
-  """`Icontains` lookup"""
-  icontains: String
-}
-
 """Тип модели проектов."""
 type ProjectType implements Node {
   """Архив"""
@@ -3448,13 +3432,6 @@ type ProjectTypeEdge {
   cursor: String!
   """The item at the end of the edge"""
   node: ProjectType
-}
-
-input ProjectUserFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
 }
 
 """Схема запросов данных."""
@@ -3645,6 +3622,11 @@ type Query {
     """Идентификатор периода"""
     periodId: ID!
   ): [OrganizationType!]!
+  """Получение типов организаций для периода"""
+  periodOrganizationKinds(
+    """Идентификатор периода"""
+    periodId: ID!
+  ): [String!]!
   """Возможные дивизионы периода"""
   periodPossibleDivisions(
     after: String
@@ -3692,15 +3674,7 @@ type Query {
     projectId: ID!
   ): ProjectType!
   """Проекты"""
-  projects(
-    after: String
-    before: String
-    """Advanced filter field"""
-    filter: ProjectFilterInputType
-    first: Int
-    last: Int
-    offset: Int
-  ): ProjectTypeConnection
+  projects(after: String, archive: Boolean, before: String, description_Icontains: String, first: Int, last: Int, name_Icontains: String, offset: Int, visibility: Boolean): ProjectTypeConnection
   region(
     """Region ID"""
     regionId: Int!
@@ -4210,6 +4184,23 @@ type UnloadFileValueArchiveMutationPayload {
   success: Boolean!
 }
 
+input UnloadLimitationsInFileMutationInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Выгрузка ограничений периода в json файл."""
+type UnloadLimitationsInFileMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Ссылка на сгенерированный файл"""
+  src: String
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input UnloadPeriodMutationInput {
   """Применять числовой формат"""
   applyNumberFormat: Boolean!
@@ -4218,14 +4209,20 @@ input UnloadPeriodMutationInput {
   emptyCell: String!
   """Идентификаторы организаций"""
   organizationIds: [ID!]!
+  """Типы организаций"""
+  organizationKinds: [String!]!
   """Идентификатор периода"""
   periodId: ID!
   """Идентификаторы статусов"""
   statusIds: [ID!]!
   """Выгружать листы для филиалов"""
   unloadChildren: Boolean!
+  """Выгружать кураторскую группу"""
+  unloadCuratorGroup: Boolean!
   """Выгружать значение по умолчанию при отсутствии значения в документе"""
   unloadDefault: Boolean!
+  """Выгружать параграф финансирования"""
+  unloadFinancingParagraph: Boolean!
   """Выгружать листы для головных учреждений"""
   unloadHeads: Boolean!
   """Выгружать организации без документов"""

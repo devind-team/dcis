@@ -1,4 +1,3 @@
-
 query PeriodFilterDepartments($periodId: ID!) {
   periodFilterDepartments(periodId: $periodId) {
     id

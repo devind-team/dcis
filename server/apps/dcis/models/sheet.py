@@ -343,7 +343,6 @@ class Value(models.Model, CloneMixin):
     """
 
     value = models.TextField(help_text='Значение')
-    extra_value = models.TextField(null=True, help_text='Дополнительное значение')
     payload = models.JSONField(null=True, help_text='Дополнительные данные')
     error = models.CharField(max_length=255, null=True, help_text='Текст ошибки')
 

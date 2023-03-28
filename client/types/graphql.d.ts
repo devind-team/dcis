@@ -1895,13 +1895,14 @@ export type ContentTypeType = {
 /** Тип модели Django. */
 export type ContentTypeTypeProjectSetArgs = {
   after?: InputMaybe<Scalars['String']>;
+  archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
+  description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
-  user?: InputMaybe<Scalars['ID']>;
-  user_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
 export type CopyPeriodGroupsMutationInput = {
@@ -2958,6 +2959,8 @@ export type Mutation = {
   unloadDocument: UnloadDocumentMutationPayload;
   /** Выгрузка архива значения ячейки типа `Файл` */
   unloadFileValueArchive: UnloadFileValueArchiveMutationPayload;
+  /** Выгрузка ограничений периода в json файл. */
+  unloadLimitationsInFile: UnloadLimitationsInFileMutationPayload;
   /** Выгрузка периода в формате Excel. */
   unloadPeriod: UnloadPeriodMutationPayload;
   /** Обновление агрегации из json файла. */
@@ -3413,6 +3416,11 @@ export type MutationUnloadDocumentArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUnloadFileValueArchiveArgs = {
   input: UnloadFileValueArchiveMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUnloadLimitationsInFileArgs = {
+  input: UnloadLimitationsInFileMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3881,7 +3889,7 @@ export type PeriodType = {
   canChangeUsers: Scalars['Boolean'];
   /** Может ли пользователь удалять период */
   canDelete: Scalars['Boolean'];
-  /** Может ли пользователь просматривать сводный отчет выгрузки периода */
+  /** Может ли пользователь просматривать сводный отчет и выгрузки периода */
   canViewResult: Scalars['Boolean'];
   /** Дата создания */
   createdAt: Scalars['DateTime'];
@@ -4004,24 +4012,6 @@ export type ProfileValueType = {
   visibility: Scalars['Boolean'];
 };
 
-export type ProjectFilterInputType = {
-  /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
-  /** `Name` field */
-  name?: InputMaybe<ProjectNameFilterInputType>;
-  /** `Not` field */
-  not?: InputMaybe<ProjectFilterInputType>;
-  /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<ProjectFilterInputType>>>;
-  /** `User` field */
-  user?: InputMaybe<ProjectUserFilterInputType>;
-};
-
-export type ProjectNameFilterInputType = {
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
 /** Тип модели проектов. */
 export type ProjectType = Node & {
   __typename?: 'ProjectType';
@@ -4072,13 +4062,6 @@ export type ProjectTypeEdge = {
   cursor: Scalars['String'];
   /** The item at the end of the edge */
   node?: Maybe<ProjectType>;
-};
-
-export type ProjectUserFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
 };
 
 /** Схема запросов данных. */
@@ -4152,6 +4135,8 @@ export type Query = {
   periodFilterDepartments: Array<DepartmentType>;
   /** Получение организаций периода */
   periodFilterOrganizations: Array<OrganizationType>;
+  /** Получение типов организаций для периода */
+  periodOrganizationKinds: Array<Scalars['String']>;
   /** Возможные дивизионы периода */
   periodPossibleDivisions?: Maybe<DivisionModelTypeConnection>;
   /** Выгрузка листа для периода */
@@ -4467,6 +4452,11 @@ export type QueryPeriodFilterOrganizationsArgs = {
 };
 
 /** Схема запросов данных. */
+export type QueryPeriodOrganizationKindsArgs = {
+  periodId: Scalars['ID'];
+};
+
+/** Схема запросов данных. */
 export type QueryPeriodPossibleDivisionsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -4509,11 +4499,14 @@ export type QueryProjectArgs = {
 /** Схема запросов данных. */
 export type QueryProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
+  archive?: InputMaybe<Scalars['Boolean']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<ProjectFilterInputType>;
+  description_Icontains?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
+  visibility?: InputMaybe<Scalars['Boolean']>;
 };
 
 /** Схема запросов данных. */
@@ -5047,6 +5040,24 @@ export type UnloadFileValueArchiveMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UnloadLimitationsInFileMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Выгрузка ограничений периода в json файл. */
+export type UnloadLimitationsInFileMutationPayload = {
+  __typename?: 'UnloadLimitationsInFileMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Ссылка на сгенерированный файл */
+  src?: Maybe<Scalars['String']>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UnloadPeriodMutationInput = {
   /** Применять числовой формат */
   applyNumberFormat: Scalars['Boolean'];
@@ -5055,14 +5066,20 @@ export type UnloadPeriodMutationInput = {
   emptyCell: Scalars['String'];
   /** Идентификаторы организаций */
   organizationIds: Array<Scalars['ID']>;
+  /** Типы организаций */
+  organizationKinds: Array<Scalars['String']>;
   /** Идентификатор периода */
   periodId: Scalars['ID'];
   /** Идентификаторы статусов */
   statusIds: Array<Scalars['ID']>;
   /** Выгружать листы для филиалов */
   unloadChildren: Scalars['Boolean'];
+  /** Выгружать кураторскую группу */
+  unloadCuratorGroup: Scalars['Boolean'];
   /** Выгружать значение по умолчанию при отсутствии значения в документе */
   unloadDefault: Scalars['Boolean'];
+  /** Выгружать параграф финансирования */
+  unloadFinancingParagraph: Scalars['Boolean'];
   /** Выгружать листы для головных учреждений */
   unloadHeads: Scalars['Boolean'];
   /** Выгружать организации без документов */
@@ -5864,6 +5881,12 @@ export type DeleteLimitationMutationVariables = Exact<{
 
 export type DeleteLimitationMutation = { __typename?: 'Mutation', deleteLimitation: { __typename?: 'DeleteLimitationMutationPayload', success: boolean, id?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
+export type UnloadLimitationsInFileMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type UnloadLimitationsInFileMutation = { __typename?: 'Mutation', unloadLimitationsInFile: { __typename: 'UnloadLimitationsInFileMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
 export type UpdateLimitationsFromFileMutationVariables = Exact<{
   periodId: Scalars['ID'];
   limitationsFile: Scalars['Upload'];
@@ -5993,7 +6016,10 @@ export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodG
 export type UnloadPeriodMutationVariables = Exact<{
   periodId: Scalars['ID'];
   organizationIds: Array<Scalars['ID']> | Scalars['ID'];
+  organizationKinds: Array<Scalars['String']> | Scalars['String'];
   statusIds: Array<Scalars['ID']> | Scalars['ID'];
+  unloadCuratorGroup: Scalars['Boolean'];
+  unloadFinancingParagraph: Scalars['Boolean'];
   unloadWithoutDocument: Scalars['Boolean'];
   unloadDefault: Scalars['Boolean'];
   applyNumberFormat: Scalars['Boolean'];
@@ -6283,6 +6309,12 @@ export type PeriodFilterOrganizationsQueryVariables = Exact<{
 
 export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: Array<{ __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null }> };
 
+export type PeriodOrganizationKindsQueryVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type PeriodOrganizationKindsQuery = { __typename?: 'Query', periodOrganizationKinds: Array<string> };
+
 export type PeriodPossibleDivisionsQueryVariables = Exact<{
   periodId: Scalars['ID'];
   search?: InputMaybe<Scalars['String']>;
@@ -6322,6 +6354,9 @@ export type ProjectQuery = { __typename?: 'Query', project: { __typename: 'Proje
 export type ProjectsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
+  visibility?: InputMaybe<Scalars['Boolean']>;
+  archive?: InputMaybe<Scalars['Boolean']>;
+  search?: InputMaybe<Scalars['String']>;
 }>;
 
 export type ProjectsQuery = { __typename?: 'Query', projects?: { __typename: 'ProjectTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean }, edges: Array<{ __typename?: 'ProjectTypeEdge', node?: { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } } | null } | null> } | null };

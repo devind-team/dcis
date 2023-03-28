@@ -13,9 +13,8 @@ left-navigator-container.period-sheets__left-navigator-container(
     :update-active-sheet="updateActiveSheet"
     :loading="activeSheetLoading"
   )
-    template(#menus="{ selectedCellsOptions }")
-      edit-menu(:mode="GridMode.CHANGE" :selected-cells-options="selectedCellsOptions")
-      table-settings(:sheets="period.sheets")
+    template(#menus)
+      table-settings-menu(:sheets="period.sheets")
     template(#tabs="{ sheets, updateSize }")
       template(v-for="sheet in sheets")
         sheet-control(
@@ -42,13 +41,12 @@ import {
 } from '~/types/graphql'
 import periodSheetQuery from '~/gql/dcis/queries/period_sheet.graphql'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
-import EditMenu from '~/components/dcis/grid/menus/EditMenu.vue'
-import TableSettings from '~/components/dcis/grid/menus/TableSettingsMenu.vue'
+import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
+import TableSettingsMenu from '~/components/dcis/grid/menus/TableSettingsMenu.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, SheetControl, GridSheets, EditMenu, TableSettings },
+  components: { LeftNavigatorContainer, GridSheets, SheetControl, TableSettingsMenu },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }

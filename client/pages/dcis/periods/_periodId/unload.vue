@@ -21,6 +21,12 @@ bread-crumbs(:items="bc")
             :title="String($t('dcis.periods.unload.organizationsFilterTitle'))"
             message-container-class="mr-1"
           )
+          organization-kind-filter(
+            v-model="selectedOrganizationKinds"
+            :period="period"
+            :title="String($t('dcis.periods.unload.organizationKindFilterTitle'))"
+            message-container-class="mr-1"
+          )
           status-filter(
             v-model="selectedStatuses"
             :period="period"
@@ -30,7 +36,15 @@ bread-crumbs(:items="bc")
           v-checkbox(v-model="unloadWithoutDocument" :label="$t('dcis.periods.unload.unloadWithoutDocument')")
           v-checkbox(v-model="unloadDefault" :label="$t('dcis.periods.unload.unloadDefault')")
           v-checkbox(v-model="applyNumberFormat" :label="$t('dcis.periods.unload.applyNumberFormat')")
-          v-select(v-model="sheets" :label="$t('dcis.periods.unload.sheets.label')" :items="sheetsItems")
+          v-select(v-model="sheets" :label="$t('dcis.periods.unload.sheets.label')" :items="sheetItems")
+          v-select(
+            v-model="additionalColumns"
+            :label="$t('dcis.periods.unload.additionalColumns.label')"
+            :items="additionalColumnItems"
+            chips
+            deletable-chips
+            multiple
+          )
           v-text-field(v-model="emptyCell" :label="$t('dcis.periods.unload.emptyCell')")
         v-card-actions
           v-btn(:loading="loading" type="submit" color="primary") {{ $t('upload') }}
@@ -46,17 +60,19 @@ import {
   OrganizationType,
   StatusType,
   UnloadPeriodMutation,
-  UnloadPeriodMutationVariables, ErrorFieldType
+  UnloadPeriodMutationVariables,
+  ErrorFieldType
 } from '~/types/graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import MutationResultAlert from '~/components/common/MutationResultAlert.vue'
 import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
 import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
+import OrganizationKindFilter, { OrganizationKindType } from '~/components/dcis/periods/OrganizationKindFilter.vue'
 
 type UnloadPeriodMutationResult = { data: UnloadPeriodMutation }
 
 export default defineComponent({
-  components: { BreadCrumbs, MutationResultAlert, OrganizationFilter, StatusFilter },
+  components: { BreadCrumbs, MutationResultAlert, OrganizationFilter, StatusFilter, OrganizationKindFilter },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }
@@ -83,14 +99,21 @@ export default defineComponent({
       mutationResultAlert.value.setError(message, 'BusinessLogicError')
     }
 
-    const sheetsItems = computed<string[]>(() => [
+    const sheetItems = computed<string[]>(() => [
       t('dcis.periods.unload.sheets.onlyHeads') as string,
       t('dcis.periods.unload.sheets.onlyChildren') as string,
       t('dcis.periods.unload.sheets.headsAndChildrens') as string
     ])
 
+    const additionalColumnItems = computed<{ text: string, value: string }[]>(() => [
+      { text: t('dcis.periods.unload.additionalColumns.curatorGroup') as string, value: 'curatorGroup' },
+      { text: t('dcis.periods.unload.additionalColumns.financingParagraph') as string, value: 'financingParagraph' }
+    ])
+
     const selectedOrganizations = ref<OrganizationType[]>([])
     const selectedStatuses = ref<StatusType[]>([])
+    const selectedOrganizationKinds = ref<OrganizationKindType[]>([])
+
     const unloadWithoutDocument = ref<boolean>(true)
     const unloadDefault = ref<boolean>(true)
     const applyNumberFormat = ref<boolean>(true)
@@ -100,33 +123,38 @@ export default defineComponent({
     const sheets = computed<string>({
       get () {
         if (unloadHeads.value && !unloadChildren.value) {
-          return sheetsItems.value[0]
+          return sheetItems.value[0]
         }
         if (!unloadHeads.value && unloadChildren.value) {
-          return sheetsItems.value[1]
+          return sheetItems.value[1]
         }
-        return sheetsItems.value[2]
+        return sheetItems.value[2]
       },
       set (value: string) {
-        if (value === sheetsItems.value[0]) {
+        if (value === sheetItems.value[0]) {
           unloadHeads.value = true
           unloadChildren.value = false
         }
-        if (value === sheetsItems.value[1]) {
+        if (value === sheetItems.value[1]) {
           unloadHeads.value = false
           unloadChildren.value = true
         }
-        if (value === sheetsItems.value[2]) {
+        if (value === sheetItems.value[2]) {
           unloadHeads.value = true
           unloadChildren.value = true
         }
       }
     })
+    const additionalColumns = ref<string[]>(['curatorGroup', 'financingParagraph'])
 
     const variables = computed<UnloadPeriodMutationVariables>(() => ({
       periodId: props.period.id,
       organizationIds: selectedOrganizations.value.map((organization: OrganizationType) => organization.id),
       statusIds: selectedStatuses.value.map((status: StatusType) => status.id),
+      unloadCuratorGroup: additionalColumns.value.includes('curatorGroup'),
+      unloadFinancingParagraph: additionalColumns.value.includes('financingParagraph'),
+      organizationKinds: selectedOrganizationKinds.value
+        .map((organizationKind: OrganizationKindType) => organizationKind.kind),
       unloadWithoutDocument: unloadWithoutDocument.value,
       unloadDefault: unloadDefault.value,
       applyNumberFormat: applyNumberFormat.value,
@@ -152,14 +180,17 @@ export default defineComponent({
     return {
       bc,
       mutationResultAlert,
-      sheetsItems,
+      sheetItems,
+      additionalColumnItems,
       selectedOrganizations,
       selectedStatuses,
+      selectedOrganizationKinds,
       unloadPeriodOnDone,
       unloadWithoutDocument,
       unloadDefault,
       applyNumberFormat,
       sheets,
+      additionalColumns,
       emptyCell,
       variables,
       unloadPeriodOnError

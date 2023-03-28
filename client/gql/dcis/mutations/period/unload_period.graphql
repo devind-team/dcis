@@ -1,7 +1,10 @@
 mutation UnloadPeriod(
   $periodId: ID!,
   $organizationIds: [ID!]!,
+  $organizationKinds: [String!]!,
   $statusIds: [ID!]!,
+  $unloadCuratorGroup: Boolean!,
+  $unloadFinancingParagraph: Boolean!,
   $unloadWithoutDocument: Boolean!,
   $unloadDefault: Boolean!,
   $applyNumberFormat: Boolean!,
@@ -12,7 +15,10 @@ mutation UnloadPeriod(
   unloadPeriod(input: {
     periodId: $periodId,
     organizationIds: $organizationIds,
+    organizationKinds: $organizationKinds,
     statusIds: $statusIds,
+    unloadCuratorGroup: $unloadCuratorGroup,
+    unloadFinancingParagraph: $unloadFinancingParagraph,
     unloadWithoutDocument: $unloadWithoutDocument,
     unloadDefault: $unloadDefault,
     applyNumberFormat: $applyNumberFormat,

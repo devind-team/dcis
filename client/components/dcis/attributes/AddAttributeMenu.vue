@@ -1,15 +1,15 @@
 <template lang="pug">
-v-menu(v-model="active")
+v-menu(v-model="active", transition="slide-y-transition" offset-y left)
   template(#activator="{ on, attrs }")
-    slot(name="default" :on="on" :attrs="attrs")
+    slot(name="activator" :on="on" :attrs="attrs")
   v-list(dense)
-    add-attribute(@close="close" :period="period" :update="addUpdate")
+    add-attribute(v-if="period.canChangeAttributes" :period="period" :update="addUpdate" @close="close")
       template(#activator="{ on }")
         v-list-item(v-on="on")
           v-list-item-icon
             v-icon mdi-form-select
-          v-list-item-content Заполнить форму
-    upload-attributes-from-file(:period="period", :update="fromFileUpdate")
+          v-list-item-content {{ $t('dcis.attributes.AddAttributes.buttonText') }}
+    upload-attributes-from-file(v-if="period.canChangeAttributes" :period="period", :update="fromFileUpdate")
       template(#activator="{ on, attrs }")
         v-list-item(v-on="on" v-bind="attrs")
           v-list-item-icon
@@ -21,7 +21,7 @@ v-menu(v-model="active")
     )
       v-list-item-icon
         v-icon mdi-file-export-outline
-      v-list-item-content {{ $t('dcis.attributes.unloadAttributes.content') }}
+      v-list-item-content {{ $t('dcis.attributes.unloadAttributes.buttonText') }}
 </template>
 
 <script lang="ts">
@@ -39,6 +39,7 @@ import {
 import unloadAttributesInFileMutation from '~/gql/dcis/mutations/attributes/unload_attributes_in_file.graphql'
 import AddAttribute, { AddAttributeMutationResult } from '~/components/dcis/attributes/AddAttribute.vue'
 import UploadAttributesFromFile from '~/components/dcis/attributes/UploadAttributesFromFile.vue'
+
 export type UnloadAttributesInFileMutationResult = { data: UnloadAttributesInFileMutation }
 
 export const getAttributeKinds = t => ([
@@ -49,7 +50,7 @@ export const getAttributeKinds = t => ([
   'DATE',
   'FILES',
   'MONEY'
-].map<{text: TranslateResult, value: AttributeKind}>((tp: AttributeKind) => ({
+].map<{ text: TranslateResult, value: AttributeKind }>((tp: AttributeKind) => ({
   text: t(`dcis.attributes.addMenu.${tp.toLowerCase()}`),
   value: tp
 })))

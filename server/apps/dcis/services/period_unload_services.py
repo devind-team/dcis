@@ -80,10 +80,13 @@ class PeriodUnload:
 
     def __init__(
         self,
-        period: Period,
         user: User,
+        period: Period,
         organization_ids: list[int],
+        organization_kinds: list[str],
         status_ids: list[int],
+        unload_curator_group: bool,
+        unload_financing_paragraph: bool,
         unload_without_document: bool,
         unload_default: bool,
         apply_number_format: bool,
@@ -92,9 +95,13 @@ class PeriodUnload:
         empty_cell: str
     ) -> None:
         """Инициализация.
+        - user - текущий пользователь
         - period - выгружаемый период
         - organization_ids - фильтрация по идентификаторам организаций
+        - organization_kinds - типы организаций
         - status_ids - фильтрация по идентификаторам статусов
+        - unload_curator_group - выгружать кураторскую группу
+        - unload_financing_paragraph - выгружать параграф финансирования
         - unload_without_document - выгружать организации без документов
         - unload_default - выгружать значение по умолчанию при отсутствии значения в документе
         - apply_number_format - применять числовой формат
@@ -104,10 +111,10 @@ class PeriodUnload:
         """
         self.period = period
         self.path = Path(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
-        self._organizations = get_user_period_divisions(user, period)
-        if len(organization_ids):
-            self._organizations = self._organizations.filter(id__in=organization_ids)
+        self._organizations = self._filter_organizations(user, period, organization_ids, organization_kinds)
         self._status_ids = status_ids
+        self._unload_curator_group = unload_curator_group
+        self._unload_financing_paragraph = unload_financing_paragraph
         self._unload_without_document = unload_without_document
         self._unload_default = unload_default
         self._apply_number_format = apply_number_format
@@ -144,6 +151,27 @@ class PeriodUnload:
             self._save_rows(worksheet, sheet, columns, cell_groups)
         workbook.save(self.path)
         return f'/{self.path.relative_to(settings.BASE_DIR)}'
+
+    @staticmethod
+    def _filter_organizations(
+        user: User,
+        period: Period,
+        organization_ids: list[int],
+        organization_kinds: list[str],
+    ) -> QuerySet[Organization]:
+        """Фильтрация организаций."""
+        organizations = get_user_period_divisions(user, period)
+        if len(organization_kinds):
+            organization_kinds_values = []
+            for organization_kind in organization_kinds:
+                if organization_kind == 'Отсутствует':
+                    organization_kinds_values.extend(['', None])
+                else:
+                    organization_kinds_values.append(organization_kind)
+            organizations = organizations.filter(attributes__org_type__in=organization_kinds_values)
+        if len(organization_ids):
+            organizations = organizations.filter(id__in=organization_ids)
+        return organizations
 
     @classmethod
     def _save_columns(cls, worksheet: Worksheet, columns: list[Column]) -> None:
@@ -196,18 +224,16 @@ class PeriodUnload:
             )
         return result
 
-    @classmethod
-    def _build_columns(cls, sheet: Sheet, cell_groups: CellGroups) -> list[Column]:
+    def _build_columns(self, sheet: Sheet, cell_groups: CellGroups) -> list[Column]:
         """Построение столбцов."""
-        left_columns = cls._build_left_columns()
-        data_columns = cls._build_data_columns(sheet, cell_groups, len(left_columns) + 1)
-        right_columns = cls._build_right_columns()
+        left_columns = self._build_left_columns()
+        data_columns = self._build_data_columns(sheet, cell_groups, len(left_columns) + 1)
+        right_columns = self._build_right_columns()
         return [*left_columns, *data_columns, *right_columns]
 
-    @staticmethod
-    def _build_left_columns() -> list[Column]:
+    def _build_left_columns(self) -> list[Column]:
         """Получение столбцов слева от данных."""
-        return [
+        columns = [
             Column(
                 get_cell_data=lambda s: CellData(s.organization.attributes['idlistedu'], KindCell.NUMERIC),
                 cells=[UnloadHeaderCell('IdListEdu')],
@@ -250,6 +276,20 @@ class PeriodUnload:
                 cells=[UnloadHeaderCell(name='Тип организации')],
             ),
         ]
+        if self._unload_curator_group:
+            def get_curator_group(s: DataSource) -> CellData:
+                curator_group = s.organization.curatorgroup_set.first()
+                return CellData(curator_group.name if curator_group else None)
+
+            columns.append(Column(get_cell_data=get_curator_group, cells=[UnloadHeaderCell(name='Кураторская группа')]))
+        if self._unload_financing_paragraph:
+            columns.append(Column(
+                get_cell_data=lambda s: CellData(
+                    f'{s.organization.attributes["id_paragraph"]} {s.organization.attributes["paragraph"]}'
+                ),
+                cells=[UnloadHeaderCell(name='Параграф финансирования')]
+            ))
+        return columns
 
     @classmethod
     def _build_data_columns(cls, sheet: Sheet, cell_groups: CellGroups, left_shift: int) -> list[Column]:
@@ -590,7 +630,10 @@ def unload_period(
     user: User,
     period: Period,
     organization_ids: list[int],
+    organization_kinds: list[str],
     status_ids: list[int],
+    unload_curator_group: bool,
+    unload_financing_paragraph: bool,
     unload_without_document: bool,
     unload_default: bool,
     apply_number_format: bool,
@@ -601,10 +644,13 @@ def unload_period(
     """Выгрузка периода в формате Excel."""
     can_view_period_result(user, period)
     return PeriodUnload(
-        period=period,
         user=user,
+        period=period,
         organization_ids=organization_ids,
+        organization_kinds=organization_kinds,
         status_ids=status_ids,
+        unload_curator_group=unload_curator_group,
+        unload_financing_paragraph=unload_financing_paragraph,
         unload_without_document=unload_without_document,
         unload_default=unload_default,
         apply_number_format=apply_number_format,

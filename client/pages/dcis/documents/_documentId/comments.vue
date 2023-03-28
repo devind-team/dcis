@@ -1,5 +1,5 @@
 <template lang="pug">
-bread-crumbs(:items="breadCrumbs")
+bread-crumbs(:items="bc")
   v-card(flat)
     v-card-text
       v-row(justify="center")
@@ -65,6 +65,16 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     const { timeHM, date, getUserName } = useFilters()
+
+    const bc = computed<BreadCrumbsItem[]>(() => ([
+      ...props.breadCrumbs,
+      {
+        text: t('dcis.documents.links.comments') as string,
+        to: localePath({ name: 'dcis-documents-documentId-comments' }),
+        exact: true
+      }
+    ]))
+
     const inputMessage = ref<string>('')
     const pageSize = ref<number>(15)
 
@@ -124,15 +134,6 @@ export default defineComponent({
       message: inputMessage.value.trim(),
       kind: 'message'
     }))
-
-    const bc = computed<BreadCrumbsItem[]>(() => ([
-      ...props.breadCrumbs,
-      {
-        text: t('dcis.documents.links.comments') as string,
-        to: localePath({ name: 'dcis-documents-documentId-comments' }),
-        exact: true
-      }
-    ]))
 
     return {
       bc,
