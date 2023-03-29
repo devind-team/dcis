@@ -1,6 +1,8 @@
-from typing import Any
+from typing import Any, List
 
 import graphene
+from devind_core.models import File
+from devind_core.schema import FileType
 from devind_dictionaries.models import Department, Organization
 from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.decorators import permission_classes
@@ -10,6 +12,7 @@ from devind_helpers.utils import gid2int
 from django.db.models import QuerySet
 from graphene import ConnectionField
 from graphene_django import DjangoListField
+from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
@@ -185,6 +188,25 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Получение типов организаций для периода'
     )
+
+    methodical_support = DjangoFilterConnectionField(
+        FileType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Получение методического обеспечения периода'
+    )
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_methodical_support(root, info: ResolveInfo, user_id=None, **kwargs) -> List[File]:
+        """Разрешение выгрузки файлов"""
+
+        if user_id is not None:
+            user: User = get_object_or_404(User, pk=from_global_id(user_id)[1])
+        else:
+            user: User = info.context.user
+        info.context.check_object_permissions(info.context, user)
+        return File.objects.filter(user=user)
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
