@@ -4115,6 +4115,8 @@ export type Query = {
   logRequests: LogRequestTypeConnection;
   /** Информация обо мне */
   me?: Maybe<UserType>;
+  /** Получение методического обеспечения периода */
+  methodicalSupport: FileTypeConnection;
   /** Возможные новые статусы для документа */
   newStatuses?: Maybe<Array<StatusType>>;
   /** Источник уведомлений */
@@ -4380,6 +4382,17 @@ export type QueryLogRequestsArgs = {
   offset?: InputMaybe<Scalars['Int']>;
   page_Icontains?: InputMaybe<Scalars['String']>;
   userId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Схема запросов данных. */
+export type QueryMethodicalSupportArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  periodId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -5603,6 +5616,8 @@ export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name:
 
 export type PeriodGroupFieldsFragment = { __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null };
 
+export type MethodicalSupportFieldsFragment = { __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any };
+
 export type PrivilegesFieldsFragment = { __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any };
 
 export type ProjectFieldsFragment = { __typename: 'ProjectType', id: string, name: string, short: string, description: string, visibility: boolean, archive: boolean, createdAt: any, contentType: { __typename?: 'ContentTypeType', id: string, model: string } };
@@ -6306,6 +6321,16 @@ export type PeriodFilterOrganizationsQueryVariables = Exact<{
 }>;
 
 export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: Array<{ __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null }> };
+
+export type MethodicalSupportQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  periodId: Scalars['ID'];
+  nameContains?: InputMaybe<Scalars['String']>;
+}>;
+
+export type MethodicalSupportQuery = { __typename?: 'Query', methodicalSupport: { __typename: 'FileTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'FileTypeEdge', node?: { __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null } | null> } };
 
 export type PeriodOrganizationKindsQueryVariables = Exact<{
   periodId: Scalars['ID'];

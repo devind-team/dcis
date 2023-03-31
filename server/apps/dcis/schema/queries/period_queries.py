@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 import graphene
 from devind_core.models import File
@@ -198,18 +198,6 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_methodical_support(root, info: ResolveInfo, user_id=None, **kwargs) -> List[File]:
-        """Разрешение выгрузки файлов"""
-
-        if user_id is not None:
-            user: User = get_object_or_404(User, pk=from_global_id(user_id)[1])
-        else:
-            user: User = info.context.user
-        info.context.check_object_permissions(info.context, user)
-        return File.objects.filter(user=user)
-
-    @staticmethod
-    @permission_classes((IsAuthenticated,))
     def resolve_privileges(root, info: ResolveInfo) -> QuerySet[Privilege]:
         return Privilege.objects.all()
 
@@ -362,3 +350,11 @@ class PeriodQueries(graphene.ObjectType):
     def resolve_period_organization_kinds(root: Any, info: ResolveInfo, period_id: str) -> set[str]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_period_organization_kinds(info.context.user, period)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_methodical_support(root, info: ResolveInfo, period_id: str, **kwargs) -> QuerySet[File]:
+
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        can_view_period(info.context.user, period)
+        return period.methodical_support.all()

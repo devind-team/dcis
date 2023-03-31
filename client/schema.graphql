@@ -3573,6 +3573,17 @@ type Query {
   logRequests(after: String, before: String, createdAt_Gt: DateTime, createdAt_Gte: DateTime, createdAt_Lt: DateTime, createdAt_Lte: DateTime, first: Int, last: Int, offset: Int, page_Icontains: String, userId: ID): LogRequestTypeConnection!
   """Информация обо мне"""
   me: UserType
+  """Получение методического обеспечения периода"""
+  methodicalSupport(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    name_Icontains: String
+    offset: Int
+    """Идентификатор периода"""
+    periodId: ID!
+  ): FileTypeConnection!
   """Возможные новые статусы для документа"""
   newStatuses(
     """Идентификатор документа"""
