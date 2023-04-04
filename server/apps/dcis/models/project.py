@@ -1,6 +1,5 @@
 from typing import Type, cast
 
-from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -85,7 +84,6 @@ class Period(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, help_text='Организатор сборов')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, help_text='Проект сборов')
-    methodical_support = models.ManyToManyField(File, help_text='Методическая поддержка')
 
     class Meta:
         """Мета класс с описанием параметров периода."""

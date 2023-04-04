@@ -1,8 +1,6 @@
 from typing import Any
 
 import graphene
-from devind_core.models import File
-from devind_core.schema import FileType
 from devind_dictionaries.models import Department, Organization
 from devind_dictionaries.schema import DepartmentType, OrganizationType
 from devind_helpers.decorators import permission_classes
@@ -21,7 +19,7 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
+from apps.dcis.models import Attribute, Document, Limitation, Period, PeriodMethodicalSupport, Privilege, Sheet
 from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_result
 from apps.dcis.schema.types import (
     AttributeType,
@@ -190,7 +188,7 @@ class PeriodQueries(graphene.ObjectType):
     )
 
     methodical_support = DjangoFilterConnectionField(
-        FileType,
+        PeriodMethodicalSupportType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Получение методического обеспечения периода'
@@ -353,8 +351,13 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_methodical_support(root, info: ResolveInfo, period_id: str, **kwargs) -> QuerySet[File]:
+    def resolve_methodical_support(
+        root,
+        info: ResolveInfo,
+        period_id: str,
+        **kwargs
+    ) -> QuerySet[PeriodMethodicalSupport]:
 
         period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
-        return period.methodical_support.all()
+        return PeriodMethodicalSupport.objects.all()

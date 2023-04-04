@@ -1,7 +1,7 @@
 import json
 
 import graphene
-from devind_core.schema.types import ContentTypeType, FileType, GroupType
+from devind_core.schema.types import ContentTypeType, GroupType
 from devind_dictionaries.schema import OrganizationType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
@@ -111,7 +111,6 @@ class PeriodType(DjangoObjectType):
 
     user = graphene.Field(UserType, required=True, description='Пользователь')
     project = graphene.Field(ProjectType, description='Проект')
-    methodical_support = DjangoListField(FileType, description='Методическая поддержка')
     divisions = graphene.List(lambda: DivisionModelType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
@@ -693,6 +692,10 @@ class LimitationType(DjangoObjectType):
             'error_message',
             'sheet',
         )
+
+
+class PeriodMethodicalSupportType(DjangoObjectType):
+    """Тип методического обеспечения."""
 
 
 class ChangedCellOptionType(graphene.ObjectType):
