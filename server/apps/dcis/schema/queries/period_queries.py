@@ -26,7 +26,7 @@ from apps.dcis.schema.types import (
     CellAggregationType,
     DivisionModelTypeConnection,
     LimitationType,
-    PeriodType,
+    PeriodMethodicalSupportType, PeriodType,
     PrivilegeType,
     ReportDocumentInputType,
     ReportRowGroupInputType,
@@ -360,4 +360,4 @@ class PeriodQueries(graphene.ObjectType):
 
         period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
-        return PeriodMethodicalSupport.objects.all()
+        return PeriodMethodicalSupport.objects.filter(period_id=period.id)

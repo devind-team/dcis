@@ -7,6 +7,7 @@ from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
 from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
+from graphene.relay import Node
 from graphene_django import DjangoListField, DjangoObjectType
 from graphene_django_optimizer import resolver_hints
 from graphql import ResolveInfo
@@ -28,7 +29,7 @@ from apps.dcis.models import (
     Limitation,
     Period,
     PeriodGroup,
-    PeriodPrivilege,
+    PeriodMethodicalSupport, PeriodPrivilege,
     Privilege,
     Project,
     RowDimension,
@@ -696,6 +697,28 @@ class LimitationType(DjangoObjectType):
 
 class PeriodMethodicalSupportType(DjangoObjectType):
     """Тип методического обеспечения."""
+
+    ext = graphene.String(description='Расширение файла')
+    size = graphene.Int(description='Размер файла в байтах')
+    period = graphene.Field(Period, description='Пользователь, добавивший файл')
+
+    class Meta:
+        model = PeriodMethodicalSupport
+        interfaces = (Node,)
+        fields = (
+            'id',
+            'name',
+            'src',
+            'size',
+            'deleted',
+            'created_at',
+            'updated_at',
+            'period',
+            'ext',
+            'size',
+        )
+        filter_fields = {'name': ['icontains']}
+        connection_class = CountableConnection
 
 
 class ChangedCellOptionType(graphene.ObjectType):

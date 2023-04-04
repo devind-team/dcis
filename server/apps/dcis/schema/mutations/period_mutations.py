@@ -1,13 +1,13 @@
 from datetime import date
-from typing import Any
+from typing import Any, List, Optional
 
 import graphene
 from devind_helpers.decorators import permission_classes
-from devind_helpers.orm_utils import get_object_or_404
+from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
-from devind_helpers.utils import gid2int
+from devind_helpers.utils import from_gid_or_none, gid2int
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
@@ -15,7 +15,7 @@ from graphql import ResolveInfo
 
 from apps.core.models import User
 from apps.core.schema import UserType
-from apps.dcis.models import Period, PeriodGroup, Project
+from apps.dcis.models import Period, PeriodGroup, PeriodMethodicalSupport, Project
 from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
 from apps.dcis.services.period_services import (
     add_divisions_from_file,
@@ -75,6 +75,7 @@ class AddPeriodMutation(BaseMutation):
                 readonly_fill_color=readonly_fill_color,
             )
         )
+
 
 class ChangePeriodMutation(BaseMutation):
     """Мутация на изменение настроек периода."""
@@ -371,6 +372,38 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
                 privileges_ids=privileges_ids
             )
         )
+
+
+class AddPeriodMethodicalSupportMutation(BaseMutation):
+    """Мутация для загрузки методических рекомендаций"""
+
+    class Input:
+        period_id = graphene.ID(description='Идентификатор пользователя')
+        files = graphene.List(graphene.NonNull(Upload), required=True, description='Загружаемые файлы')
+
+    files = graphene.List(PeriodMethodicalSupport, required=True, description='Загруженные файлы')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root, info: ResolveInfo, period_id: Optional[str], files: List[InMemoryUploadedFile]):
+        period: Optional[Period] = get_object_or_none(Period, pk=from_gid_or_none(period_id)[1])
+        return AddPeriodMethodicalSupportMutation(
+            files=reversed(
+                [PeriodMethodicalSupport.objects.create(
+                    period=period,
+                    name=file.name,
+                    src=file
+                ) for file in files]
+            )
+        )
+
+
+class ChangeFileMutation(BaseMutation):
+    """Мутация для изменения файла"""
+
+
+class DeleteFileMutation(BaseMutation):
+    """Мутация для полного удаления файла"""
 
 
 class UnloadPeriodMutation(BaseMutation):
