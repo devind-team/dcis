@@ -75,7 +75,12 @@ export default {
       open: 'Открыто',
       close: 'Закрыто'
     },
-
+    statusFilter: {
+      title: 'Фильтр статусов периода',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
     organizationFilter: {
       title: 'Фильтр организаций',
       noFiltrationMessage: 'Выбрать организации',
