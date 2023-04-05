@@ -106,7 +106,7 @@ class ProjectType(OptimizedDjangoObjectType):
         return not is_raises(PermissionDenied, can_add_period_base, info.context.user, project)
 
 
-class PeriodType(DjangoObjectType):
+class PeriodType(OptimizedDjangoObjectType):
     """Тип периода."""
 
     user = graphene.Field(UserType, required=True, description='Пользователь')
@@ -167,6 +167,7 @@ class PeriodType(DjangoObjectType):
 
     class Meta:
         model = Period
+        interfaces = (graphene.relay.Node,)
         fields = (
             'id',
             'name',
@@ -183,6 +184,11 @@ class PeriodType(DjangoObjectType):
             'methodical_support',
         )
         convert_choices_to_enum = False
+        filter_fields = {
+            'name': ['icontains'],
+            'status': ['exact'],
+        }
+        connection_class = CountableConnection
 
     @staticmethod
     @resolver_hints(model_field='division_set')

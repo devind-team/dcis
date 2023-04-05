@@ -10,6 +10,7 @@ from devind_helpers.utils import gid2int
 from django.db.models import QuerySet
 from graphene import ConnectionField
 from graphene_django import DjangoListField
+from graphene_django.filter import DjangoFilterConnectionField
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 from stringcase import snakecase
@@ -67,9 +68,9 @@ class PeriodQueries(graphene.ObjectType):
         required=True,
         description='Период',
     )
-    periods = DjangoListField(
+    periods = DjangoFilterConnectionField(
         PeriodType,
-        project_id=graphene.ID(required=True, description='Идентификатор периода'),
+        project_id=graphene.ID(required=True, description='Идентификатор проекта'),
         required=True,
         description='Периоды',
     )
@@ -193,13 +194,13 @@ class PeriodQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_period(root: Any, info: ResolveInfo, period_id: str) -> Period:
-        period = get_object_or_404(Period, pk=from_global_id(period_id)[1])
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         return period
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_periods(root: Any, info: ResolveInfo, project_id: str) -> QuerySet[Period]:
+    def resolve_periods(root: Any, info: ResolveInfo, project_id: str, *args, **kwargs) -> QuerySet[Period]:
         return get_user_periods_without_archives(info.context.user, from_global_id(project_id)[1])
 
     @staticmethod
@@ -212,14 +213,14 @@ class PeriodQueries(graphene.ObjectType):
         *args,
         **kwargs
     ) -> list[dict[str, int | str]]:
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         return get_period_possible_divisions(period, search or '')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_period_users(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[User]:
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         return get_period_users(period)
 
@@ -231,7 +232,7 @@ class PeriodQueries(graphene.ObjectType):
         user_id: str | None,
         period_id: str,
     ) -> QuerySet[Privilege]:
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         can_view_period(info.context.user, period)
         user = get_user_from_id_or_context(info, user_id)
         return get_user_period_privileges(user.id, period.id)
