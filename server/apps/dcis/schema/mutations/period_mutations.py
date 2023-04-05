@@ -1,13 +1,14 @@
+import os
 from datetime import date
-from typing import Any, List, Optional
+from typing import Any, List
 
 import graphene
 from devind_helpers.decorators import permission_classes
-from devind_helpers.orm_utils import get_object_or_404, get_object_or_none
+from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import ErrorFieldType
-from devind_helpers.utils import from_gid_or_none, gid2int
+from devind_helpers.utils import gid2int
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
@@ -375,18 +376,18 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
 
 
 class AddPeriodMethodicalSupportMutation(BaseMutation):
-    """Мутация для загрузки методических рекомендаций"""
+    """Мутация для загрузки методических рекомендаций."""
 
     class Input:
-        period_id = graphene.ID(description='Идентификатор пользователя')
+        period_id = graphene.ID(description='Идентификатор периода')
         files = graphene.List(graphene.NonNull(Upload), required=True, description='Загружаемые файлы')
 
     files = graphene.List(PeriodMethodicalSupport, required=True, description='Загруженные файлы')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(root, info: ResolveInfo, period_id: Optional[str], files: List[InMemoryUploadedFile]):
-        period: Optional[Period] = get_object_or_none(Period, pk=from_gid_or_none(period_id)[1])
+    def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, files: List[InMemoryUploadedFile]):
+        period: Period = get_object_or_404(Period, pk=gid2int(period_id))
         return AddPeriodMethodicalSupportMutation(
             files=reversed(
                 [PeriodMethodicalSupport.objects.create(
@@ -398,12 +399,44 @@ class AddPeriodMethodicalSupportMutation(BaseMutation):
         )
 
 
-class ChangeFileMutation(BaseMutation):
-    """Мутация для изменения файла"""
+class ChangePeriodMethodicalSupportMutation(BaseMutation):
+    """Мутация для изменения файла методического обеспечения периода."""
+
+    class Input:
+        file_id = graphene.ID(required=True, description='Идентификатор файла')
+        field = graphene.String(required=True, description='Поле файла')
+        value = graphene.String(required=True, description='Значение поля файла')
+
+    file = graphene.Field(PeriodMethodicalSupport, description='Измененный файл')
+
+    @staticmethod
+    @permission_classes([IsAuthenticated, ChangeFile])
+    def mutate_and_get_payload(root, info: ResolveInfo, file_id, field: str, value: str, *args, **kwargs):
+        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=gid2int(file_id))
+        info.context.check_object_permissions(info.context, file.user)
+        if field == 'deleted':
+            value: bool = value == 'true'
+        setattr(file, field, value)
+        file.save(update_fields=(field,))
+        return ChangePeriodMethodicalSupportMutation(file=file)
 
 
-class DeleteFileMutation(BaseMutation):
+class DeletePeriodMethodicalSupportMutation(BaseMutation):
     """Мутация для полного удаления файла"""
+
+    class Input:
+        file_id = graphene.ID(required=True, description='Идентификатор файла')
+
+    id = graphene.ID(required=True, description='Идентификатор удаляемого файла')
+
+    @staticmethod
+    @permission_classes([IsAuthenticated, DeleteFile])
+    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, *args, **kwargs):
+        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=gid2int(file_id))
+        if os.path.isfile(file.src.path):
+            os.remove(file.src.path)
+        file.delete()
+        return DeletePeriodMethodicalSupportMutation(id=file_id)
 
 
 class UnloadPeriodMutation(BaseMutation):
@@ -503,5 +536,7 @@ class PeriodMutations(graphene.ObjectType):
 
     change_user_period_groups = ChangeUserPeriodGroupsMutation.Field(required=True)
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)
+
+    add_period_methodical_support = AddPeriodMethodicalSupportMutation.Field(required=True)
 
     unload_period = UnloadPeriodMutation.Field(required=True)

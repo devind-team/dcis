@@ -180,7 +180,6 @@ class PeriodType(DjangoObjectType):
             'updated_at',
             'user',
             'project',
-            'methodical_support',
         )
         convert_choices_to_enum = False
 
@@ -706,7 +705,7 @@ class PeriodMethodicalSupportType(DjangoObjectType):
         model = PeriodMethodicalSupport
         interfaces = (Node,)
         fields = (
-            'id',
+            'unique_id',
             'name',
             'src',
             'size',

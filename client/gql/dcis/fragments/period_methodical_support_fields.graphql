@@ -1,4 +1,4 @@
-fragment MethodicalSupportFields on FileType {
+fragment MethodicalSupportFields on PeriodMethodicalSupportType {
   id
   name
   src

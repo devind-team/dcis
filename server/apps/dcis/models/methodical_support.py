@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from django.db import models
 
@@ -13,6 +14,7 @@ def period_directory_path(instance, filename: str):
 class PeriodMethodicalSupport(models.Model):
     """Класс для описания модели методических рекомендаций."""
 
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=255, help_text='Название файла')
     src = models.FileField(upload_to=period_directory_path, help_text='Путь к файлу')
     deleted = models.BooleanField(default=False, help_text='Помечаем удаленный файл')
