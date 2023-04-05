@@ -3247,7 +3247,7 @@ type PeriodGroupType {
 }
 
 """Тип периода."""
-type PeriodType {
+type PeriodType implements Node {
   """Может ли пользователь добавлять документы в период"""
   canAddAnyDivisionDocument: Boolean!
   """Может ли пользователь изменять атрибуты периода"""
@@ -3274,6 +3274,7 @@ type PeriodType {
   divisions: [DivisionModelType]
   """Дата окончания"""
   expiration: Date
+  """The ID of the object."""
   id: ID!
   """Является ли пользователь администратором для периода"""
   isAdmin: Boolean!
@@ -3303,6 +3304,23 @@ type PeriodType {
   user: UserType!
   """Множество версий"""
   versioning: Boolean!
+}
+
+type PeriodTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [PeriodTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `PeriodType` and its cursor."""
+type PeriodTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: PeriodType
 }
 
 """Привилегия пользователя или группы пользователей."""
@@ -3650,9 +3668,16 @@ type Query {
   ): [UserType!]!
   """Периоды"""
   periods(
-    """Идентификатор периода"""
+    after: String
+    before: String
+    first: Int
+    last: Int
+    name_Icontains: String
+    offset: Int
+    """Идентификатор проекта"""
     projectId: ID!
-  ): [PeriodType!]!
+    status: String
+  ): PeriodTypeConnection!
   permissions: [PermissionType!]!
   """Привилегии"""
   privileges: [PrivilegeType!]!
