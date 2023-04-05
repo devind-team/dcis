@@ -620,9 +620,9 @@ export default {
       buttonText: 'Выгрузить атрибуты'
     },
     uploadAttributes: {
-      buttonText: 'Обновить атребуты из файла',
-      header: 'Обновление атребуты из файла',
-      attributesFile: 'Файл с новыми атребутами',
+      buttonText: 'Обновить атрибуты из файла',
+      header: 'Обновление атрибутов из файла',
+      attributesFile: 'Файл с новыми атрибутами',
       downloadTemplate: 'Скачать шаблон файла'
     },
     tableHeaders: {
