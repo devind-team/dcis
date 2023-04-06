@@ -1,0 +1,7 @@
+mutation DeletePeriodMethodicalSupport($fileId: ID!) {
+  deletePeriodMethodicalSupport(input: { fileId: $fileId }) {
+    success
+    id
+    __typename
+  }
+}

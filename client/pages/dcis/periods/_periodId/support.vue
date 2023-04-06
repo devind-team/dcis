@@ -44,7 +44,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
                     v-card-actions
                       v-btn(
                         v-if="hasPerm('devind_core.delete_file')"
-                        @click="deleteFileMutate({ fileId: item.id }).then()" color="error"
+                        @click="deletePeriodMethodicalSupportMutate({ fileId: item.id }).then()" color="error"
                       ) {{ $t('profile.files.delete') }}
                       v-btn(@click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'true' }).then()" color="warning") {{ $t('profile.files.delete') }}
               span {{ $t('profile.files.deleteFile') }}
@@ -62,8 +62,8 @@ import {
   AddPeriodMethodicalSupportMutationVariables,
   ChangeFileMutation,
   ChangeFileMutationVariables,
-  DeleteFileMutation,
-  DeleteFileMutationVariables,
+  DeletePeriodMethodicalSupportMutation,
+  DeletePeriodMethodicalSupportMutationVariables,
   PeriodMethodicalSupportQuery,
   PeriodMethodicalSupportQueryVariables,
   PeriodType,
@@ -72,8 +72,8 @@ import {
 import periodMethodicalSupportQuery from '~/gql/dcis/queries/period_methodical_support.graphql'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
 import addPeriodMethodicalSupport from '~/gql/dcis/mutations/period/add_period_methodical_support.graphql'
+import deletePeriodMethodicalSupport from '~/gql/dcis/mutations/period/delete_period_methodical_support.graphql'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
-import deleteFile from '~/gql/core/mutations/file/delete_file.graphql'
 import changeFile from '~/gql/core/mutations/file/change_file.graphql'
 
 export default defineComponent({
@@ -130,7 +130,7 @@ export default defineComponent({
     const { mutate: changeFileMutate } = useMutation<ChangeFileMutation, ChangeFileMutationVariables>(changeFile, {
       update: (cache, result) => changeUpdate(cache, result, 'file')
     })
-    const { mutate: deleteFileMutate } = useMutation<DeleteFileMutation, DeleteFileMutationVariables>(deleteFile, {
+    const { mutate: deletePeriodMethodicalSupportMutate } = useMutation<DeletePeriodMethodicalSupportMutation, DeletePeriodMethodicalSupportMutationVariables>(deletePeriodMethodicalSupport, {
       update: (cache, result) => deleteUpdate(cache, result)
     })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
@@ -156,7 +156,7 @@ export default defineComponent({
       setPage,
       addFilesHandle,
       changeFileMutate,
-      deleteFileMutate
+      deletePeriodMethodicalSupportMutate
     }
   }
 })

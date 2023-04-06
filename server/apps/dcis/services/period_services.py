@@ -1,5 +1,5 @@
 """Модуль, отвечающий за работу с периодами."""
-
+import os
 from datetime import date
 from io import BytesIO
 from typing import Iterable
@@ -33,6 +33,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
+from apps.dcis.permissions.period_permissions import can_change_period
 from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
@@ -332,9 +333,11 @@ def change_user_period_privileges(
 
 
 def add_period_methodical_support(
+    user: User,
     period: Period,
     files: list[InMemoryUploadedFile]
 ) -> Iterable[PeriodMethodicalSupport]:
+    can_change_period(user, period)
     return reversed(
         [PeriodMethodicalSupport.objects.create(
             period=period,
@@ -342,6 +345,24 @@ def add_period_methodical_support(
             src=file
         ) for file in files]
     )
+
+
+def change_period_methodical_support(
+    period: Period,
+    files: list[InMemoryUploadedFile]
+) -> None:
+    return
+
+
+def delete_period_methodical_support(
+    user: User,
+    period: Period,
+    file: PeriodMethodicalSupport
+) -> None:
+    can_change_period(user, period)
+    if os.path.isfile(file.src.path):
+        os.remove(file.src.path)
+    file.delete()
 
 
 def change_settings_period(

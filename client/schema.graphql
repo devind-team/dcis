@@ -2102,6 +2102,23 @@ type DeletePeriodGroupMutationPayload {
   success: Boolean!
 }
 
+input DeletePeriodMethodicalSupportMutationInput {
+  clientMutationId: String
+  """Идентификатор файла"""
+  fileId: ID!
+}
+
+"""Мутация для полного удаления методического обеспечения периода."""
+type DeletePeriodMethodicalSupportMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаляемого файла"""
+  id: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeletePeriodMutationInput {
   clientMutationId: String
   """Идентификатор периода"""
@@ -2805,6 +2822,8 @@ type Mutation {
   deletePeriod(input: DeletePeriodMutationInput!): DeletePeriodMutationPayload!
   """Мутация на удаление группы периода."""
   deletePeriodGroup(input: DeletePeriodGroupMutationInput!): DeletePeriodGroupMutationPayload!
+  """Мутация для полного удаления методического обеспечения периода."""
+  deletePeriodMethodicalSupport(input: DeletePeriodMethodicalSupportMutationInput!): DeletePeriodMethodicalSupportMutationPayload!
   """Мутация для удаления записи профиля."""
   deleteProfile(input: DeleteProfileMutationInput!): DeleteProfileMutationPayload!
   """Мутация на удаление проекта."""

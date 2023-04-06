@@ -1,4 +1,3 @@
-import os
 from datetime import date
 from typing import Any
 
@@ -37,7 +36,7 @@ from apps.dcis.services.period_services import (
     create_period,
     delete_divisions_period,
     delete_period,
-    delete_period_groups,
+    delete_period_groups, delete_period_methodical_support,
 )
 from apps.dcis.services.period_unload_services import unload_period
 
@@ -394,7 +393,7 @@ class AddPeriodMethodicalSupportMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, files: list[InMemoryUploadedFile]):
         period: Period = get_object_or_404(Period, pk=gid2int(period_id))
-        return AddPeriodMethodicalSupportMutation(files=add_period_methodical_support(period, files))
+        return AddPeriodMethodicalSupportMutation(files=add_period_methodical_support(info.context.user, period, files))
 
 
 class ChangePeriodMethodicalSupportMutation(BaseMutation):
@@ -419,7 +418,7 @@ class ChangePeriodMethodicalSupportMutation(BaseMutation):
 
 
 class DeletePeriodMethodicalSupportMutation(BaseMutation):
-    """Мутация для полного удаления файла"""
+    """Мутация для полного удаления методического обеспечения периода."""
 
     class Input:
         file_id = graphene.ID(required=True, description='Идентификатор файла')
@@ -428,11 +427,10 @@ class DeletePeriodMethodicalSupportMutation(BaseMutation):
 
     @staticmethod
     @permission_classes([IsAuthenticated])
-    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, *args, **kwargs):
+    def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, file_id: str, *args, **kwargs):
         file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=gid2int(file_id))
-        if os.path.isfile(file.src.path):
-            os.remove(file.src.path)
-        file.delete()
+        period: Period = get_object_or_404(Period, pk=gid2int(period_id))
+        delete_period_methodical_support(info.context.user, period, file)
         return DeletePeriodMethodicalSupportMutation(id=file_id)
 
 
@@ -535,5 +533,6 @@ class PeriodMutations(graphene.ObjectType):
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)
 
     add_period_methodical_support = AddPeriodMethodicalSupportMutation.Field(required=True)
+    delete_period_methodical_support = DeletePeriodMethodicalSupportMutation.Field(required=True)
 
     unload_period = UnloadPeriodMutation.Field(required=True)
