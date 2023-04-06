@@ -7,7 +7,7 @@ from typing import Type
 from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
-from devind_helpers.utils import convert_str_to_int
+from devind_helpers.utils import convert_str_to_int, gid2int
 from django.core.files.base import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
@@ -154,7 +154,7 @@ def create_period(
 
 def add_divisions_period(user: User, period_id: str | int, division_ids: list[str | int]) -> list[dict[str, int | str]]:
     """Добавление дивизионов в период."""
-    period = get_object_or_404(Period, pk=period_id)
+    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_divisions(user=user, period=period)
     division_links = Division.objects.bulk_create(
         [
@@ -172,7 +172,7 @@ def add_divisions_from_file(
     field: str = 'idlistedu'
 ) -> tuple[list[dict[str, int | str]], list[int], list[ErrorFieldType] | None]:
     """Добавление дивизионов из файла формата csv/xlsx."""
-    period = get_object_or_404(Period, pk=period_id)
+    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_divisions(user, period)
     reader: ExcelReader = ExcelReader(BytesIO(file.read()))  # noqa
     divisions_id: dict[int, int] = {}
@@ -242,14 +242,14 @@ def add_divisions_from_period(
 
 def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:
     """Удаление дивизиона из периода."""
-    period = get_object_or_404(Period, pk=period_id)
+    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_divisions(user=user, period=period)
     Division.objects.get(period_id=period_id, object_id=division_id).delete()
 
 
 def add_period_group(user: User, name: str, period_id: str | int) -> PeriodGroup:
     """Добавление группы в период."""
-    period = get_object_or_404(Period, pk=period_id)
+    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_groups(user=user, period=period)
     return PeriodGroup.objects.create(
         name=name,
@@ -264,7 +264,7 @@ def copy_period_groups(
     selected_period_id: str | int
 ) -> list[PeriodGroup]:
     """Перенос групп из другого периода."""
-    period = get_object_or_404(Period, pk=period_id)
+    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_groups(user, period)
     selected_period = get_object_or_404(Period, pk=selected_period_id)
     can_view_period(user, selected_period)
@@ -316,7 +316,7 @@ def change_user_period_privileges(
     privileges_ids: list[str | int]
 ) -> list[Privilege]:
     """Изменение отдельных привилегий пользователя в периоде."""
-    period = get_object_or_404(Period, pk=period_id)
+    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_users(user, period)
     PeriodPrivilege.objects.filter(period_id=period_id, user_id=user_id).delete()
     privileges: list[Privilege] = []

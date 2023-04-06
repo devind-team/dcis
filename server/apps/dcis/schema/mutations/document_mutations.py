@@ -8,6 +8,7 @@ from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.schema.types import TableCellType, TableRowType, TableType
+from devind_helpers.utils import gid2int
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
@@ -63,7 +64,7 @@ class AddDocumentMutation(BaseMutation):
         division_id: str | None = None,
     ) -> 'AddDocumentMutation':
         """Мутация для добавления документа."""
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         status = get_object_or_404(Status, pk=status_id)
         document_id: int | None = from_global_id(document_id)[1] if document_id else None
         document, errors = create_document(
@@ -112,12 +113,14 @@ class AddDocumentStatusMutation(BaseMutation):
         document: Document = get_object_or_404(Document, pk=from_global_id(document_id)[1])
         status: Status = get_object_or_404(Status, pk=status_id)
         try:
-            return AddDocumentStatusMutation(document_status=add_document_status(
-                user=info.context.user,
-                document=document,
-                status=status,
-                comment=comment,
-            ))
+            return AddDocumentStatusMutation(
+                document_status=add_document_status(
+                    user=info.context.user,
+                    document=document,
+                    status=status,
+                    comment=comment,
+                )
+            )
         except ValidationError as error:
             headers_map = OrderedDict()
             headers_map['form'] = 'Форма'
@@ -126,10 +129,12 @@ class AddDocumentStatusMutation(BaseMutation):
             headers_map['dependencies'] = 'Зависимости'
             rows: list[TableRowType] = []
             for i, le in enumerate(error.params):
-                rows.append(TableRowType(
-                    index=i,
-                    cells=[TableCellType(header=v, value=getattr(le, k)) for k, v in headers_map.items()]
-                ))
+                rows.append(
+                    TableRowType(
+                        index=i,
+                        cells=[TableCellType(header=v, value=getattr(le, k)) for k, v in headers_map.items()]
+                    )
+                )
             return AddDocumentStatusMutation(
                 success=False,
                 table=TableType(
@@ -202,11 +207,13 @@ class UnloadDocumentMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
-        return UnloadDocumentMutation(src=document_upload(
-            user=info.context.user,
-            get_host=info.context.get_host(),
-            document_id=document_id,
-            additional=additional)
+        return UnloadDocumentMutation(
+            src=document_upload(
+                user=info.context.user,
+                get_host=info.context.get_host(),
+                document_id=document_id,
+                additional=additional
+            )
         )
 
 

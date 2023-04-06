@@ -76,6 +76,7 @@ class AddPeriodMutation(BaseMutation):
             )
         )
 
+
 class ChangePeriodMutation(BaseMutation):
     """Мутация на изменение настроек периода."""
 
@@ -105,7 +106,7 @@ class ChangePeriodMutation(BaseMutation):
         expiration: date,
         versioning: bool
     ):
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         return ChangePeriodMutation(
             period=change_settings_period(
                 user=info.context.user,
@@ -132,7 +133,7 @@ class DeletePeriodMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str):
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         delete_period(user=info.context.user, period=period)
         return DeletePeriodMutation(delete_id=period_id)
 

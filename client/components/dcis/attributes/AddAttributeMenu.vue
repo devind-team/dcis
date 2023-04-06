@@ -77,7 +77,7 @@ export default defineComponent({
         close()
         const a = document.createElement('a')
         a.href = `/${src}`
-        a.download = 'attrebutes.json'
+        a.download = 'attributes.json'
         a.click()
       }
     })
