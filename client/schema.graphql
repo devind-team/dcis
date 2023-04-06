@@ -418,6 +418,25 @@ type AddPeriodGroupMutationPayload {
   success: Boolean!
 }
 
+input AddPeriodMethodicalSupportMutationInput {
+  clientMutationId: String
+  """Загружаемые файлы"""
+  files: [Upload!]!
+  """Идентификатор периода"""
+  periodId: ID
+}
+
+"""Мутация для загрузки методических рекомендаций."""
+type AddPeriodMethodicalSupportMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Загруженные файлы"""
+  files: [PeriodMethodicalSupportType]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input AddPeriodMutationInput {
   clientMutationId: String
   """json файл c ограничениями, накладываемыми на листы"""
@@ -2682,6 +2701,8 @@ type Mutation {
   addPeriod(input: AddPeriodMutationInput!): AddPeriodMutationPayload!
   """Мутация на добавление группы в период."""
   addPeriodGroup(input: AddPeriodGroupMutationInput!): AddPeriodGroupMutationPayload!
+  """Мутация для загрузки методических рекомендаций."""
+  addPeriodMethodicalSupport(input: AddPeriodMethodicalSupportMutationInput!): AddPeriodMethodicalSupportMutationPayload!
   """Мутация для добавления записи профиля."""
   addProfile(input: AddProfileMutationInput!): AddProfileMutationPayload!
   """Мутация для добавления проекта."""
@@ -3244,6 +3265,46 @@ type PeriodGroupType {
   users: [UserType!]
 }
 
+"""Тип методического обеспечения периода."""
+type PeriodMethodicalSupportType implements Node {
+  """Дата добавления файла"""
+  createdAt: DateTime!
+  """Помечаем удаленный файл"""
+  deleted: Boolean!
+  """Расширение файла"""
+  ext: String
+  """The ID of the object."""
+  id: ID!
+  """Название файла"""
+  name: String!
+  """Период сбора"""
+  period: PeriodType
+  """Размер файла в байтах"""
+  size: Int
+  """Путь к файлу"""
+  src: String!
+  uniqueId: UUID!
+  """Дата обновления файла"""
+  updatedAt: DateTime!
+}
+
+type PeriodMethodicalSupportTypeConnection {
+  """Contains the nodes in this connection."""
+  edges: [PeriodMethodicalSupportTypeEdge]!
+  """Pagination data for this connection."""
+  pageInfo: PageInfo!
+  """Number of items in the queryset."""
+  totalCount: Int!
+}
+
+"""A Relay edge containing a `PeriodMethodicalSupportType` and its cursor."""
+type PeriodMethodicalSupportTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge"""
+  node: PeriodMethodicalSupportType
+}
+
 """Тип периода."""
 type PeriodType {
   """Может ли пользователь добавлять документы в период"""
@@ -3277,8 +3338,6 @@ type PeriodType {
   isAdmin: Boolean!
   """Является ли пользователь куратором для периода"""
   isCurator: Boolean!
-  """Методическая поддержка"""
-  methodicalSupport: [FileType!]
   """Множественное заполнение"""
   multiple: Boolean!
   """Наименование периода"""
@@ -3583,7 +3642,7 @@ type Query {
     offset: Int
     """Идентификатор периода"""
     periodId: ID!
-  ): FileTypeConnection!
+  ): PeriodMethodicalSupportTypeConnection!
   """Возможные новые статусы для документа"""
   newStatuses(
     """Идентификатор документа"""
@@ -4114,6 +4173,12 @@ type TableType {
   """Строки документа"""
   rows: [TableRowType]!
 }
+
+"""
+Leverages the internal Python implmeentation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
 
 input UnloadAggregationsInFileMutationInput {
   clientMutationId: String

@@ -1,6 +1,6 @@
 #import "../fragments/period_methodical_support_fields.graphql"
 
-query methodicalSupport($first: Int, $after: String,  $offset: Int, $periodId: ID!, $nameContains: String) {
+query PeriodMethodicalSupport($first: Int, $after: String,  $offset: Int, $periodId: ID!, $nameContains: String) {
   methodicalSupport(periodId: $periodId, name_Icontains: $nameContains, after: $after, first: $first, offset: $offset) {
     totalCount
     pageInfo {
@@ -12,7 +12,7 @@ query methodicalSupport($first: Int, $after: String,  $offset: Int, $periodId: I
     }
     edges {
       node {
-        ...MethodicalSupportFields
+        ...PeriodMethodicalSupportFields
       }
       __typename
     }

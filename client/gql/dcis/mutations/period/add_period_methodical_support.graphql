@@ -1,7 +1,7 @@
 #import "../../fragments/period_methodical_support_fields.graphql"
 
 mutation AddPeriodMethodicalSupport($periodId: ID!, $files: [Upload!]!) {
-  AddPeriodMethodicalSupport(input: {
+  addPeriodMethodicalSupport(input: {
     periodId: $periodId,
     files: $files
   }) {

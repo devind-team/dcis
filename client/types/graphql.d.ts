@@ -13,6 +13,7 @@ export type Scalars = {
   Date: any;
   DateTime: any;
   JSONString: any;
+  UUID: any;
   Upload: any;
 };
 
@@ -444,6 +445,26 @@ export type AddPeriodGroupMutationPayload = {
   errors: Array<ErrorFieldType>;
   /** Добавленная группа периода */
   periodGroup?: Maybe<PeriodGroupType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type AddPeriodMethodicalSupportMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Загружаемые файлы */
+  files: Array<Scalars['Upload']>;
+  /** Идентификатор периода */
+  periodId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Мутация для загрузки методических рекомендаций. */
+export type AddPeriodMethodicalSupportMutationPayload = {
+  __typename?: 'AddPeriodMethodicalSupportMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Загруженные файлы */
+  files: Array<Maybe<PeriodMethodicalSupportType>>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2815,6 +2836,8 @@ export type Mutation = {
   addPeriod: AddPeriodMutationPayload;
   /** Мутация на добавление группы в период. */
   addPeriodGroup: AddPeriodGroupMutationPayload;
+  /** Мутация для загрузки методических рекомендаций. */
+  addPeriodMethodicalSupport: AddPeriodMethodicalSupportMutationPayload;
   /** Мутация для добавления записи профиля. */
   addProfile: AddProfileMutationPayload;
   /** Мутация для добавления проекта. */
@@ -3059,6 +3082,11 @@ export type MutationAddPeriodArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationAddPeriodGroupArgs = {
   input: AddPeriodGroupMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationAddPeriodMethodicalSupportArgs = {
+  input: AddPeriodMethodicalSupportMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -3866,6 +3894,49 @@ export type PeriodGroupType = {
   users?: Maybe<Array<UserType>>;
 };
 
+/** Тип методического обеспечения периода. */
+export type PeriodMethodicalSupportType = Node & {
+  __typename?: 'PeriodMethodicalSupportType';
+  /** Дата добавления файла */
+  createdAt: Scalars['DateTime'];
+  /** Помечаем удаленный файл */
+  deleted: Scalars['Boolean'];
+  /** Расширение файла */
+  ext?: Maybe<Scalars['String']>;
+  /** The ID of the object. */
+  id: Scalars['ID'];
+  /** Название файла */
+  name: Scalars['String'];
+  /** Период сбора */
+  period?: Maybe<PeriodType>;
+  /** Размер файла в байтах */
+  size?: Maybe<Scalars['Int']>;
+  /** Путь к файлу */
+  src: Scalars['String'];
+  uniqueId: Scalars['UUID'];
+  /** Дата обновления файла */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type PeriodMethodicalSupportTypeConnection = {
+  __typename?: 'PeriodMethodicalSupportTypeConnection';
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<PeriodMethodicalSupportTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  /** Number of items in the queryset. */
+  totalCount: Scalars['Int'];
+};
+
+/** A Relay edge containing a `PeriodMethodicalSupportType` and its cursor. */
+export type PeriodMethodicalSupportTypeEdge = {
+  __typename?: 'PeriodMethodicalSupportTypeEdge';
+  /** A cursor for use in pagination */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge */
+  node?: Maybe<PeriodMethodicalSupportType>;
+};
+
 /** Тип периода. */
 export type PeriodType = {
   __typename?: 'PeriodType';
@@ -3900,8 +3971,6 @@ export type PeriodType = {
   isAdmin: Scalars['Boolean'];
   /** Является ли пользователь куратором для периода */
   isCurator: Scalars['Boolean'];
-  /** Методическая поддержка */
-  methodicalSupport?: Maybe<Array<FileType>>;
   /** Множественное заполнение */
   multiple: Scalars['Boolean'];
   /** Наименование периода */
@@ -4116,7 +4185,7 @@ export type Query = {
   /** Информация обо мне */
   me?: Maybe<UserType>;
   /** Получение методического обеспечения периода */
-  methodicalSupport: FileTypeConnection;
+  methodicalSupport: PeriodMethodicalSupportTypeConnection;
   /** Возможные новые статусы для документа */
   newStatuses?: Maybe<Array<StatusType>>;
   /** Источник уведомлений */
@@ -5616,7 +5685,7 @@ export type PeriodFieldsFragment = { __typename: 'PeriodType', id: string, name:
 
 export type PeriodGroupFieldsFragment = { __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null };
 
-export type MethodicalSupportFieldsFragment = { __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any };
+export type PeriodMethodicalSupportFieldsFragment = { __typename: 'PeriodMethodicalSupportType', uniqueId: any, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any };
 
 export type PrivilegesFieldsFragment = { __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any };
 
@@ -5946,6 +6015,13 @@ export type AddPeriodGroupMutationVariables = Exact<{
 }>;
 
 export type AddPeriodGroupMutation = { __typename?: 'Mutation', addPeriodGroup: { __typename?: 'AddPeriodGroupMutationPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', messages: Array<string>, field: string }>, periodGroup?: { __typename: 'PeriodGroupType', id: string, name: string, createdAt: any, users?: Array<{ __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }> | null, privileges?: Array<{ __typename: 'PrivilegeType', id: string, name: string, key: string, createdAt: any }> | null } | null } };
+
+export type AddPeriodMethodicalSupportMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+  files: Array<Scalars['Upload']> | Scalars['Upload'];
+}>;
+
+export type AddPeriodMethodicalSupportMutation = { __typename?: 'Mutation', addPeriodMethodicalSupport: { __typename?: 'AddPeriodMethodicalSupportMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, files: Array<{ __typename: 'PeriodMethodicalSupportType', uniqueId: any, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> } };
 
 export type AddPeriodUserMutationVariables = Exact<{
   userId: Scalars['ID'];
@@ -6322,7 +6398,7 @@ export type PeriodFilterOrganizationsQueryVariables = Exact<{
 
 export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: Array<{ __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null }> };
 
-export type MethodicalSupportQueryVariables = Exact<{
+export type PeriodMethodicalSupportQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -6330,7 +6406,7 @@ export type MethodicalSupportQueryVariables = Exact<{
   nameContains?: InputMaybe<Scalars['String']>;
 }>;
 
-export type MethodicalSupportQuery = { __typename?: 'Query', methodicalSupport: { __typename: 'FileTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'FileTypeEdge', node?: { __typename: 'FileType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null } | null> } };
+export type PeriodMethodicalSupportQuery = { __typename?: 'Query', methodicalSupport: { __typename: 'PeriodMethodicalSupportTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename: 'PeriodMethodicalSupportTypeEdge', node?: { __typename: 'PeriodMethodicalSupportType', uniqueId: any, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null } | null> } };
 
 export type PeriodOrganizationKindsQueryVariables = Exact<{
   periodId: Scalars['ID'];
