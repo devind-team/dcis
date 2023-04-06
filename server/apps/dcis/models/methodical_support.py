@@ -6,9 +6,9 @@ from django.db import models
 from .project import Period
 
 
-def period_directory_path(instance, filename: str):
+def file_directory_path(instance, filename: str):
     """Формируем автоматический путь директории методических рекомендаций."""
-    return f'storage/period_methodical_support/{instance.period.id}/{filename}'
+    return f'storage/period_methodical_support/{filename[:2]}/{filename}'
 
 
 class PeriodMethodicalSupport(models.Model):
@@ -16,7 +16,7 @@ class PeriodMethodicalSupport(models.Model):
 
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=255, help_text='Название файла')
-    src = models.FileField(upload_to=period_directory_path, help_text='Путь к файлу')
+    src = models.FileField(upload_to=file_directory_path, help_text='Путь к файлу')
     deleted = models.BooleanField(default=False, help_text='Помечаем удаленный файл')
 
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата добавления файла')

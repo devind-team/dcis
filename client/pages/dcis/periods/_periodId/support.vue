@@ -58,20 +58,20 @@ import { BreadCrumbsItem } from '~/types/devind'
 import { useCursorPagination, useDebounceSearch, useI18n, useQueryRelay, useSelectFiles } from '~/composables'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
 import {
-  AddFileMutation,
-  AddFileMutationVariables,
+  AddPeriodMethodicalSupportMutation,
+  AddPeriodMethodicalSupportMutationVariables,
   ChangeFileMutation,
   ChangeFileMutationVariables,
   DeleteFileMutation,
   DeleteFileMutationVariables,
-  MethodicalSupportQuery,
-  MethodicalSupportQueryVariables,
+  PeriodMethodicalSupportQuery,
+  PeriodMethodicalSupportQueryVariables,
   PeriodType,
   UserType
 } from '~/types/graphql'
 import periodMethodicalSupportQuery from '~/gql/dcis/queries/period_methodical_support.graphql'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
-import addFile from '~/gql/core/mutations/file/add_file.graphql'
+import addPeriodMethodicalSupport from '~/gql/dcis/mutations/period/add_period_methodical_support.graphql'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import deleteFile from '~/gql/core/mutations/file/delete_file.graphql'
 import changeFile from '~/gql/core/mutations/file/change_file.graphql'
@@ -101,7 +101,7 @@ export default defineComponent({
       addUpdate,
       changeUpdate,
       deleteUpdate
-    } = useQueryRelay<MethodicalSupportQuery, MethodicalSupportQueryVariables>({
+    } = useQueryRelay<PeriodMethodicalSupportQuery, PeriodMethodicalSupportQueryVariables>({
       document: periodMethodicalSupportQuery,
       variables: () => ({
         periodId: props.period.id,
@@ -121,11 +121,11 @@ export default defineComponent({
       { text: t('profile.files.tableHeaders.actions') as string, value: 'actions', sortable: false, width: 150 }
     ]))
 
-    const { mutate: addFileMutate } = useMutation<AddFileMutation, AddFileMutationVariables>(addFile, {
+    const { mutate: addPeriodMethodicalSupportMutate } = useMutation<AddPeriodMethodicalSupportMutation, AddPeriodMethodicalSupportMutationVariables>(addPeriodMethodicalSupport, {
       update: (cache, result) => addUpdate(cache, result)
     })
     const { select: addFilesHandle } = useSelectFiles((files: FileList) => {
-      addFileMutate({ userId: user.value.id, files })
+      addPeriodMethodicalSupportMutate({ periodId: props.period.id, files })
     })
     const { mutate: changeFileMutate } = useMutation<ChangeFileMutation, ChangeFileMutationVariables>(changeFile, {
       update: (cache, result) => changeUpdate(cache, result, 'file')
