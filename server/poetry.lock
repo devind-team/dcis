@@ -888,14 +888,14 @@ user-agents = ">=2.2.0,<3.0.0"
 
 [[package]]
 name = "devind-dictionaries"
-version = "0.8.0"
+version = "0.8.1"
 description = "Common dictionaries for devind applications."
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "devind_dictionaries-0.8.0-py3-none-any.whl", hash = "sha256:e6ed38038cc6602e412e6e843bc4102b8f167852372ba10b49fc08a5d61a53f2"},
-    {file = "devind_dictionaries-0.8.0.tar.gz", hash = "sha256:7d5f43b9c179e27a81a7ca1a8e8ac90c392218387c2525302f229bda905ba2d1"},
+    {file = "devind_dictionaries-0.8.1-py3-none-any.whl", hash = "sha256:4b1084845bf0fd27e121500ce2333be0c9321b8186950d7c24232d3bf51d8e90"},
+    {file = "devind_dictionaries-0.8.1.tar.gz", hash = "sha256:f5492a6f2183e7618fc71d2c2e6a5ca6cc87f5425b847b7268f3251c4072d5cf"},
 ]
 
 [package.dependencies]
@@ -3875,4 +3875,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "1c6a4d2f70ca3a8959e5bcb78e4eee545c039d5266ffa4c53cd086a4b509b3d2"
+content-hash = "f35ec5c7cea29a9577ab8843c22620d929906754f34e6c915ba14118c3a0e341"
