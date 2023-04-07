@@ -8,6 +8,7 @@ from typing import Iterable, Union
 
 from devind_helpers.orm_utils import get_object_or_404
 from devind_helpers.schema.types import ErrorFieldType
+from devind_helpers.utils import gid2int
 from django.db.models import Max, Q
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
@@ -88,7 +89,7 @@ def add_document_data(
     status_id: str | int
 ) -> tuple[list[Document] | None, list[ErrorFieldType]]:
     """Функция для создания документов."""
-    period: Period = get_object_or_404(Period, pk=period_id)
+    period: Period = get_object_or_404(Period, pk=gid2int(period_id))
     status: Status = get_object_or_404(Status, pk=status_id)
     can_add_document(user, period, status, None)
     reader: ExcelReaderSheets = ExcelReaderSheets(file)
@@ -218,17 +219,19 @@ def add_documents(
         document.sheets.add(*sheets.values())
         document.documentstatus_set.create(status=status, user=user)
         cell_data: CellData
-        values.extend([
-            Value(
-                value=cell_data.value,
-                document=document,
-                sheet=sheets[sheet_name],
-                column_id=cell_data.column_id,
-                row_id=cell_data.row_id
-            )
-            for sheet_name, cells_data in sheets_data.items()
-            for cell_data in cells_data if check_value(cell_data)
-        ])
+        values.extend(
+            [
+                Value(
+                    value=cell_data.value,
+                    document=document,
+                    sheet=sheets[sheet_name],
+                    column_id=cell_data.column_id,
+                    row_id=cell_data.row_id
+                )
+                for sheet_name, cells_data in sheets_data.items()
+                for cell_data in cells_data if check_value(cell_data)
+            ]
+        )
         documents.append(document)
     Value.objects.bulk_create(values)
     return documents

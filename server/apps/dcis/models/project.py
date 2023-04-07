@@ -1,8 +1,10 @@
 from typing import Type, cast
 
+from devind_core.models import File
 from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from model_clone import CloneMixin
 
 from apps.core.models import User
 
@@ -49,7 +51,7 @@ class Project(models.Model):
         return self.DIVISION_KIND.get(self.division_name, Department)
 
 
-class Period(models.Model):
+class Period(models.Model, CloneMixin):
     """Модель периода проекта.
 
     - multiple - множественное заполнение, в случае если False, предоставляется один документ на все дивизионы.
@@ -84,6 +86,8 @@ class Period(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, help_text='Организатор сборов')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, help_text='Проект сборов')
+    methodical_support = models.ManyToManyField(File, help_text='Методическая поддержка')
+    archive = models.BooleanField(default=False, help_text='Архивный период')
 
     class Meta:
         """Мета класс с описанием параметров периода."""

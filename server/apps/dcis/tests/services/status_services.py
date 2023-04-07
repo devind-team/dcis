@@ -21,7 +21,7 @@ from apps.dcis.models import (
     Status, Value,
 )
 from apps.dcis.services.status_services import (
-    AddStatusCheck,
+    AddStatusActions,
     LimitationError,
     add_document_status,
     delete_document_status,
@@ -174,8 +174,8 @@ class StatusTestCase(TestCase):
         delete_document_status(user=self.superuser, status=self.delete_document_status)
 
 
-class AddStatusCheckTestCase(TestCase):
-    """Тестирование класса `AddStatusCheck`."""
+class CheckLimitationsTestCase(TestCase):
+    """Тестирование класса `CheckLimitations`."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
@@ -250,7 +250,7 @@ class AddStatusCheckTestCase(TestCase):
     def test_check_limitations_with_calculation_errors(self) -> None:
         """Тестирование функции `check_limitations` с ошибками вычислений."""
         with self.assertRaises(ValidationError) as error:
-            AddStatusCheck.check_limitations(self.document_with_calculation_errors)
+            AddStatusActions.CheckLimitations.pre_execute(self.document_with_calculation_errors)
         self.assertEqual(
             [
                 LimitationError(
@@ -267,7 +267,7 @@ class AddStatusCheckTestCase(TestCase):
     def test_check_limitations_with_limitation_errors(self) -> None:
         """Тестирование функции `check_limitations` с ошибками ограничений."""
         with self.assertRaises(ValidationError) as error:
-            AddStatusCheck.check_limitations(self.document_with_limitation_errors)
+            AddStatusActions.CheckLimitations.pre_execute(self.document_with_limitation_errors)
         self.assertEqual(
             [
                 LimitationError(
@@ -303,7 +303,7 @@ class AddStatusCheckTestCase(TestCase):
     @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
     def test_check_limitations(self) -> None:
         """Тестирование функции `check_limitations` без ошибок."""
-        AddStatusCheck.check_limitations(self.document_without_errors)
+        AddStatusActions.CheckLimitations.pre_execute(self.document_without_errors)
 
     def _create_document(
         self,
@@ -339,3 +339,52 @@ class AddStatusCheckTestCase(TestCase):
                 row=dimensions[0],
             )
         return document
+
+
+class ArchivePeriodTestCase(TestCase):
+    """Тестирование класса `ArchivePeriod`."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.department_content_type = ContentType.objects.get_for_model(Department)
+        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.period = Period.objects.create(project=self.project)
+        self.document = Document.objects.create(period=self.period)
+        self.status = Status.objects.create(name='new_status')
+        self.document_status = DocumentStatus.objects.create(
+            document=self.document,
+            status=self.status,
+            user_id=self.user.id
+        )
+
+        self.sheet = Sheet.objects.create(period=self.period, name='sheet1')
+        self.sheet_columns = [ColumnDimension.objects.create(index=i, sheet=self.sheet) for i in range(1, 4)]
+        self.sheet_row1 = RowDimension.objects.create(index=1, sheet=self.sheet)
+        self.sheet_row2 = RowDimension.objects.create(index=2, sheet=self.sheet)
+        self.sheet_row3 = RowDimension.objects.create(
+            dynamic=False,
+            index=1,
+            parent_id=self.sheet_row1.id,
+            sheet=self.sheet,
+            fixed=True,
+            hidden=True
+        )
+        self.sheet_row4 = RowDimension.objects.create(index=1, parent_id=self.sheet_row3.id, sheet=self.sheet)
+        self.sheet_row5 = RowDimension.objects.create(index=2, parent_id=self.sheet_row1.id, sheet=self.sheet)
+
+    def test_archive_period(self) -> None:
+        """Тестирование функции архивирования периода"""
+
+        AddStatusActions.ArchivePeriod.post_execute(self.document, self.document_status)
+        archive_period = self.document_status.archive_period
+        archive_document = archive_period.document_set.all().first()
+        test_rows = self.document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
+        archive_rows = archive_document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
+        for test_row, archive_row in zip(test_rows, archive_rows):
+            self.assertEqual(test_row.height, archive_row.height)
+            self.assertEqual(test_row.dynamic, archive_row.dynamic)
+            self.assertEqual(test_row.index, archive_row.index)
+            self.assertEqual(test_row.fixed, archive_row.fixed)
+            self.assertEqual(test_row.hidden, archive_row.hidden)

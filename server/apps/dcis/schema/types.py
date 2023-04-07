@@ -106,7 +106,7 @@ class ProjectType(OptimizedDjangoObjectType):
         return not is_raises(PermissionDenied, can_add_period_base, info.context.user, project)
 
 
-class PeriodType(DjangoObjectType):
+class PeriodType(OptimizedDjangoObjectType):
     """Тип периода."""
 
     user = graphene.Field(UserType, required=True, description='Пользователь')
@@ -166,6 +166,7 @@ class PeriodType(DjangoObjectType):
 
     class Meta:
         model = Period
+        interfaces = (graphene.relay.Node,)
         fields = (
             'id',
             'name',
@@ -181,6 +182,11 @@ class PeriodType(DjangoObjectType):
             'project',
         )
         convert_choices_to_enum = False
+        filter_fields = {
+            'name': ['icontains'],
+            'status': ['exact'],
+        }
+        connection_class = CountableConnection
 
     @staticmethod
     @resolver_hints(model_field='division_set')
@@ -326,7 +332,7 @@ class AddStatusType(DjangoObjectType):
 
     class Meta:
         model = AddStatus
-        fields = ('id', 'roles', 'check', 'from_status', 'to_status')
+        fields = ('id', 'roles', 'action', 'from_status', 'to_status')
 
 
 class DocumentType(DjangoObjectType):
@@ -383,6 +389,7 @@ class DocumentStatusType(DjangoObjectType):
     document = graphene.Field(DocumentType, description='Документ')
     status = graphene.Field(StatusType, required=True, description='Установленный статус')
     user = graphene.Field(UserType, required=True, description='Пользователь')
+    archive_period = graphene.Field(PeriodType, description='Архивированный период')
 
     class Meta:
         model = DocumentStatus
@@ -393,6 +400,7 @@ class DocumentStatusType(DjangoObjectType):
             'document',
             'status',
             'user',
+            'archive_period'
         )
 
 

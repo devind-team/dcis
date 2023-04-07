@@ -35,7 +35,7 @@ bread-crumbs(v-if="period.isAdmin || period.isCurator" :items="breadCrumbs")
                 :title="String($t('dcis.periods.departmentFilter.title'))"
                 message-container-class="mb-2 mr-1"
               )
-            status-filter(
+            document-status-filter(
               v-model="selectedStatuses"
               :period="period"
               message-container-class="mb-2 mr-1"
@@ -82,7 +82,7 @@ left-navigator-container(v-else :bread-crumbs="breadCrumbs" @update-drawer="$emi
       :title="String($t('dcis.periods.departmentFilter.title'))"
       message-container-class="mb-2 mr-1"
     )
-  status-filter(
+  document-status-filter(
     v-model="selectedStatuses"
     :period="period"
     message-container-class="mr-1 mb-1"
@@ -122,7 +122,7 @@ import documentsQuery from '~/gql/dcis/queries/documents.graphql'
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import AddDocumentMenu from '~/components/dcis/documents/AddDocumentMenu.vue'
 import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContainer.vue'
-import StatusFilter from '~/components/dcis/periods/StatusFilter.vue'
+import DocumentStatusFilter from '~/components/dcis/periods/DocumentStatusFilter.vue'
 import DocumentsTable from '~/components/dcis/documents/DocumentsTable.vue'
 import OrganizationFilter from '~/components/dcis/periods/OrganizationFilter.vue'
 import DepartmentFilter from '~/components/dcis/periods/DepartmentFilter.vue'
@@ -132,7 +132,7 @@ export default defineComponent({
     BreadCrumbs,
     AddDocumentMenu,
     LeftNavigatorContainer,
-    StatusFilter,
+    DocumentStatusFilter,
     DocumentsTable,
     OrganizationFilter,
     DepartmentFilter

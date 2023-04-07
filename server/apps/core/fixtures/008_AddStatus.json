@@ -15,7 +15,7 @@
       "from_status": 1,
       "to_status": 2,
       "roles": ["admin", "division_member"],
-      "check": "check_limitations"
+      "action": "CheckLimitations"
     }
   },
   {
@@ -33,7 +33,8 @@
     "fields": {
       "from_status": 2,
       "to_status": 4,
-      "roles": ["admin", "curator"]
+      "roles": ["admin", "curator"],
+      "action": "ArchivePeriod"
     }
   },
   {
@@ -52,7 +53,7 @@
       "from_status": 4,
       "to_status": 2,
       "roles": ["admin", "division_member"],
-      "check": "check_limitations"
+      "action": "CheckLimitations"
     }
   }
 ]

@@ -2,8 +2,8 @@
 items-data-filter(
   ref="filter"
   v-model="selectedStatuses"
-  :title="title || String($t('dcis.periods.statusFilter.title'))"
-  :no-filtration-message="String($t('dcis.periods.statusFilter.noFiltrationMessage'))"
+  :title="title || String($t('dcis.documents.statusFilter.title'))"
+  :no-filtration-message="String($t('dcis.documents.statusFilter.noFiltrationMessage'))"
   :multiple-message-function="multipleMessageFunction"
   :items="statuses ? statuses : []"
   :get-name="status => status.name"
@@ -44,7 +44,7 @@ export default defineComponent({
     })
 
     const multipleMessageFunction = (name: string, restLength: number) =>
-      tc('dcis.periods.statusFilter.multipleMessage', restLength, { name, restLength }) as string
+      tc('dcis.documents.statusFilter.multipleMessage', restLength, { name, restLength }) as string
 
     const { data: statuses } = useCommonQuery<
       StatusesQuery,

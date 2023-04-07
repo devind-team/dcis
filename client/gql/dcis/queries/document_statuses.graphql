@@ -6,6 +6,14 @@ query DocumentStatuses($documentId: ID!) {
     id
     comment
     createdAt
+    archivePeriod {
+      id
+      __typename
+    }
+    document {
+      id
+      __typename
+    }
     user {
       ...UserFields
     }

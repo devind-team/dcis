@@ -12,7 +12,8 @@ export type LinksType = {
   permOr?: boolean
   icon: string
   to: string
-  params?: { [key: string]: string }
+  params?: Record<string, string>
+  query?: Record<string, string>
   color?: string
 }
 

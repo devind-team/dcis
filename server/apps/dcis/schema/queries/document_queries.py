@@ -145,7 +145,7 @@ class DocumentQueries(graphene.ObjectType):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def resolve_initial_statuses(root: Any, info: ResolveInfo, period_id: str) -> Iterable[Status]:
-        period = get_object_or_404(Period, pk=period_id)
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_initial_statuses(info.context.user, period)
 
     @staticmethod

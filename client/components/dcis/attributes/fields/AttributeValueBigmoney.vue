@@ -7,7 +7,7 @@ v-text-field(
   :placeholder="attribute.placeholder"
   :key="attribute.key"
   :readonly="!attribute.mutable || readonly"
-  clearable
+  :clearable="!readonly"
 )
 </template>
 

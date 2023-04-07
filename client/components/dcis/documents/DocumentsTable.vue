@@ -24,6 +24,7 @@ v-data-table(
         :can-delete="canDeleteDocumentStatus(item)"
         :update="updateDocuments"
         :document="item"
+        :period="period"
         @add-status="$emit('add-status')"
       )
         template(#activator="{ on }")

@@ -55,7 +55,7 @@ export default {
     tableHeaders: {
       id: '@:id',
       roles: 'Роли',
-      check: 'Комментарий',
+      action: 'Действие при добавлении',
       fromStatus: 'Изначальный статус',
       toStatus: 'Новый статус'
     }

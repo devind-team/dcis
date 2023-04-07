@@ -1,4 +1,5 @@
 from django.db import models
+from model_clone import CloneMixin
 from openpyxl.utils.cell import get_column_letter
 
 from apps.core.models import User
@@ -142,7 +143,7 @@ class KindCell(models.Model):
         abstract = True
 
 
-class ColumnDimension(KindCell, models.Model):
+class ColumnDimension(KindCell, models.Model, CloneMixin):
     """Модель стилей для колонки таблицы.
 
     Ссылка на оригинальный класс из openpyxl:
@@ -165,7 +166,7 @@ class ColumnDimension(KindCell, models.Model):
         unique_together = [['index', 'sheet']]
 
 
-class RowDimension(models.Model):
+class RowDimension(models.Model, CloneMixin):
     """Модель стилей для строки таблицы.
 
     Кроме того, что таблица плоская, могут быть еще промежуточные агрегаций,
@@ -231,7 +232,7 @@ class RowDimension(models.Model):
         ordering = ('index', 'id',)
 
 
-class Cell(Style, KindCell, models.Model):
+class Cell(Style, KindCell, models.Model, CloneMixin):
     """Модель ячейки."""
     AGGREGATION_SUM = 'sum'
     AGGREGATION_AVG = 'avg'
@@ -293,7 +294,7 @@ class RelationshipCells(models.Model):
     to_cell = models.ForeignKey(Cell, related_name='to_cells', on_delete=models.CASCADE)
 
 
-class MergedCell(models.Model):
+class MergedCell(models.Model, CloneMixin):
     """Модель объединенной ячейки."""
 
     min_col = models.IntegerField(help_text='Начальная позиция в колонке')
@@ -333,7 +334,7 @@ class MergedCell(models.Model):
         return not_cell
 
 
-class Value(models.Model):
+class Value(models.Model, CloneMixin):
     """Модель значения поля таблицы.
 
     Привязка значения осуществляется к дивизиону через документ,

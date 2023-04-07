@@ -51,6 +51,10 @@ export default {
       status: 'Статус',
       createdAt: 'Дата добавления'
     },
+    archive: {
+      name: 'Архив',
+      document: 'Документ'
+    },
     links: {
       documents: 'Документы',
       monitoring: 'Мониторинг',
@@ -73,7 +77,7 @@ export default {
       close: 'Закрыто'
     },
     statusFilter: {
-      title: 'Фильтр статусов',
+      title: 'Фильтр статусов периода',
       noFiltrationMessage: 'Все статусы',
       multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
         ' {name} и еще {restLength} статуса'
@@ -403,6 +407,12 @@ export default {
         tooltip: '@:delete'
       }
     },
+    statusFilter: {
+      title: 'Фильтр статусов',
+      noFiltrationMessage: 'Все статусы',
+      multipleMessage: '{name} и еще {restLength} статусов | {name} и еще {restLength} статус |' +
+        ' {name} и еще {restLength} статуса'
+    },
     unloadDocument: {
       name: 'Выгрузить документ',
       additional: 'Дополнительные колонки',
@@ -611,9 +621,9 @@ export default {
       buttonText: 'Выгрузить атрибуты'
     },
     uploadAttributes: {
-      buttonText: 'Обновить атребуты из файла',
-      header: 'Обновление атребуты из файла',
-      attributesFile: 'Файл с новыми атребутами',
+      buttonText: 'Обновить атрибуты из файла',
+      header: 'Обновление атрибутов из файла',
+      attributesFile: 'Файл с новыми атрибутами',
       downloadTemplate: 'Скачать шаблон файла'
     },
     tableHeaders: {
