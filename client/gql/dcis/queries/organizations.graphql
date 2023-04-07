@@ -4,7 +4,7 @@ query Organizations($first: Int, $after: String, $search: String) {
   organizations(
     first: $first,
     after: $after,
-    filter: { name: { icontains: $search } }
+    name_Icontains: $search
   ) {
     edges {
       node {
