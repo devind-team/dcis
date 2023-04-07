@@ -91,6 +91,16 @@ export default {
         kpp: 'Кбк',
         inn: 'ИНН',
         kodbuhg: 'Бухгалтерский код'
+      },
+      levelFilter: {
+        title: 'Фильтр типа организации',
+        noFiltrationMessage: 'Все типы',
+        multipleMessage: '{name} и еще {restLength} типы | {name} и еще {restLength} тип |' +
+          ' {name} и еще {restLength} типа',
+        types: {
+          head: 'Головное',
+          branch: 'Филиал'
+        }
       }
     },
     departmentFilter: {
