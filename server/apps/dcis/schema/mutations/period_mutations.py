@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.core.schema import UserType
@@ -400,6 +401,7 @@ class ChangePeriodMethodicalSupportMutation(BaseMutation):
     """Мутация для изменения файла методического обеспечения периода."""
 
     class Input:
+        period_id = graphene.ID(description='Идентификатор периода')
         file_id = graphene.ID(required=True, description='Идентификатор файла')
         field = graphene.String(required=True, description='Поле файла')
         value = graphene.String(required=True, description='Значение поля файла')
@@ -421,14 +423,15 @@ class DeletePeriodMethodicalSupportMutation(BaseMutation):
     """Мутация для полного удаления методического обеспечения периода."""
 
     class Input:
-        file_id = graphene.ID(required=True, description='Идентификатор файла')
+        period_id = graphene.ID(description='Идентификатор периода')
+        file_id = graphene.UUID(required=True, description='Идентификатор файла')
 
-    id = graphene.ID(required=True, description='Идентификатор удаляемого файла')
+    id = graphene.UUID(required=True, description='Идентификатор удаляемого файла')
 
     @staticmethod
     @permission_classes([IsAuthenticated])
     def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, file_id: str, *args, **kwargs):
-        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=gid2int(file_id))
+        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
         period: Period = get_object_or_404(Period, pk=gid2int(period_id))
         delete_period_methodical_support(info.context.user, period, file)
         return DeletePeriodMethodicalSupportMutation(id=file_id)

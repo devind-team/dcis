@@ -2105,7 +2105,9 @@ type DeletePeriodGroupMutationPayload {
 input DeletePeriodMethodicalSupportMutationInput {
   clientMutationId: String
   """Идентификатор файла"""
-  fileId: ID!
+  fileId: UUID!
+  """Идентификатор периода"""
+  periodId: ID
 }
 
 """Мутация для полного удаления методического обеспечения периода."""
@@ -2114,7 +2116,7 @@ type DeletePeriodMethodicalSupportMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор удаляемого файла"""
-  id: ID!
+  id: UUID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -3304,7 +3306,6 @@ type PeriodMethodicalSupportType implements Node {
   size: Int
   """Путь к файлу"""
   src: String!
-  uniqueId: UUID!
   """Дата обновления файла"""
   updatedAt: DateTime!
 }

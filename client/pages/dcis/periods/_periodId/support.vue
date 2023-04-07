@@ -28,26 +28,20 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
             text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changeFileMutate({ fileId: item.id, field: 'name', value: $event }).then()")
               v-tooltip(bottom)
                 template(#activator="{ on: onTooltipEdit }")
-                  v-btn(v-on="{...onMenu, ...onTooltipEdit}" icon color="success")
+                  v-btn(v-on="{...onMenu, ...onTooltipEdit}" icon color="primary")
                     v-icon mdi-pencil
                 span {{ $t('profile.files.changeName') }}
-            v-btn(v-if="item.deleted" @click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'false' }).then()" icon color="warning")
-              v-icon mdi-delete-restore
-            v-tooltip(v-else bottom)
-              template(#activator="{ on: onTooltip }")
-                v-menu(bottom)
-                  template(#activator="{ on: onMenu }")
-                    v-btn(v-on="{...onTooltip, ...onMenu}" icon color="red")
-                      v-icon mdi-delete
-                  v-card
-                    v-card-text {{ $t('profile.files.deletingFile') }}
-                    v-card-actions
-                      v-btn(
-                        v-if="hasPerm('devind_core.delete_file')"
-                        @click="deletePeriodMethodicalSupportMutate({ fileId: item.id }).then()" color="error"
-                      ) {{ $t('profile.files.delete') }}
-                      v-btn(@click="changeFileMutate({ fileId: item.id, field: 'deleted', value: 'true' }).then()" color="warning") {{ $t('profile.files.delete') }}
-              span {{ $t('profile.files.deleteFile') }}
+            delete-menu(
+              :item-name="String($t('profile.files.file'))"
+              @confirm="deletePeriodMethodicalSupportMutate({ fileId: item.id, periodId: period.id }).then()" color="error"
+            )
+              template(#default="{ on: onMenu }")
+                v-tooltip(bottom)
+                  template(#activator="{ on: onTooltip }")
+                    v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
+                      v-btn(color="error" icon)
+                        v-icon mdi-delete
+                  span {{ $t('profile.files.deleteFile') }}
   pre {{ files }}
 </template>
 <script lang="ts">
@@ -75,9 +69,10 @@ import addPeriodMethodicalSupport from '~/gql/dcis/mutations/period/add_period_m
 import deletePeriodMethodicalSupport from '~/gql/dcis/mutations/period/delete_period_methodical_support.graphql'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
 import changeFile from '~/gql/core/mutations/file/change_file.graphql'
+import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({
-  components: { TextMenu, LeftNavigatorContainer },
+  components: { DeleteMenu, TextMenu, LeftNavigatorContainer },
   middleware: 'auth',
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },

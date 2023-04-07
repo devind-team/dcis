@@ -1,5 +1,5 @@
 fragment PeriodMethodicalSupportFields on PeriodMethodicalSupportType {
-  uniqueId
+  id
   name
   src
   ext

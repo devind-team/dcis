@@ -269,6 +269,9 @@ export default {
         }
       }
     },
+    methodical_support: {
+      name: '@:name'
+    },
     users: {
       name: '@:dcis.periods.links.users',
       tableHeaders: {

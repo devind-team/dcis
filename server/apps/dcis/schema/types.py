@@ -712,7 +712,7 @@ class PeriodMethodicalSupportType(DjangoObjectType):
         model = PeriodMethodicalSupport
         interfaces = (graphene.relay.Node,)
         fields = (
-            'unique_id',
+            'id',
             'name',
             'src',
             'size',

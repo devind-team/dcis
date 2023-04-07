@@ -1,5 +1,5 @@
-mutation DeletePeriodMethodicalSupport($fileId: ID!) {
-  deletePeriodMethodicalSupport(input: { fileId: $fileId }) {
+mutation DeletePeriodMethodicalSupport($fileId: UUID!, $periodId: ID!) {
+  deletePeriodMethodicalSupport(input: { fileId: $fileId, periodId: $periodId }) {
     success
     id
     __typename

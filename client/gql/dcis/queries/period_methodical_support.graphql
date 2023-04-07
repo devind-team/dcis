@@ -1,6 +1,6 @@
 #import "../fragments/period_methodical_support_fields.graphql"
 
-query PeriodMethodicalSupport($first: Int, $after: String,  $offset: Int, $periodId: ID!, $nameContains: String) {
+query PeriodMethodicalSupport($first: Int, $after: String, $offset: Int, $periodId: ID!, $nameContains: String) {
   methodicalSupport(periodId: $periodId, name_Icontains: $nameContains, after: $after, first: $first, offset: $offset) {
     totalCount
     pageInfo {

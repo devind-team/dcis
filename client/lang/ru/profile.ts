@@ -60,6 +60,7 @@ export default {
   },
   files: {
     name: 'Мои файлы',
+    file: 'файл',
     shownOf: '@:shownOf',
     changeName: 'Изменить название',
     kB: 'кБ',
