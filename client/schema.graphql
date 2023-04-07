@@ -3485,9 +3485,45 @@ type Query {
   ): [DepartmentType!]!
   """Получение организаций периода"""
   periodFilterOrganizations(
+    address: String
+    address_Icontains: String
+    after: String
+    attributes: String
+    before: String
+    department: [ID]
+    department_In: [String]
+    first: Int
+    id: ID
+    id_In: [String]
+    inn: String
+    inn_Icontains: String
+    kind: String
+    kind_Icontains: String
+    kodbuhg: String
+    kodbuhg_Icontains: String
+    kpp: String
+    kpp_Icontains: String
+    last: Int
+    mail: String
+    mail_Icontains: String
+    name: String
+    name_Icontains: String
+    offset: Int
+    okpo: String
+    okpo_Icontains: String
+    parent: ID
+    parent_Isnull: Boolean
     """Идентификатор периода"""
     periodId: ID!
-  ): [OrganizationType!]!
+    phone: String
+    phone_Icontains: String
+    region: ID
+    region_In: [ID]
+    rubpnubp: String
+    rubpnubp_Icontains: String
+    site: String
+    site_Icontains: String
+  ): OrganizationTypeConnection!
   """Получение типов организаций для периода"""
   periodOrganizationKinds(
     """Идентификатор периода"""
