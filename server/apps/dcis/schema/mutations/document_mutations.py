@@ -72,7 +72,7 @@ class AddDocumentMutation(BaseMutation):
             period=period,
             status=status,
             document_id=document_id,
-            division_id=division_id
+            division_id=gid2int(division_id)
         )
         return AddDocumentMutation(success=not errors, errors=errors, document=document)
 
