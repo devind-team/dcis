@@ -4,7 +4,7 @@ mutation-modal-form(
   :subheader="period.name"
   :mutation="require('~/gql/dcis/mutations/attributes/add_attribute.graphql')"
   :button-text="String($t('dcis.attributes.addMenu.buttonText'))"
-  :variables="{ period: period.id, name, placeholder, key, kind: kind.toLowerCase(), default: def, mutable }"
+  :variables="{ period: fromGlobalId(period.id).id, name, placeholder, key, kind: kind.toLowerCase(), default: def, mutable }"
   :update="update"
   mutation-name="addAttribute"
   i18n-path="dcis.attributes.addMenu"
@@ -76,6 +76,7 @@ import { useI18n } from '~/composables'
 import { AddAttributeMutationPayload, AttributeKind, PeriodType } from '~/types/graphql'
 import MutationModalForm from '~/components/common/forms/MutationModalForm.vue'
 import { getAttributeKinds } from '~/components/dcis/attributes/AddAttributeMenu.vue'
+import { fromGlobalId } from '~/services/graphql-relay'
 
 export type AddAttributeMutationResult = { data: { addAttribute: AddAttributeMutationPayload } }
 
@@ -111,6 +112,7 @@ export default defineComponent({
     }
 
     return {
+      fromGlobalId,
       name,
       placeholder,
       key,
