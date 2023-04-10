@@ -13,11 +13,12 @@ v-data-table(
       :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
     ) {{ item.objectName }} ({{ item.objectId }})
   template(#item.version="{ item }")
-    template(v-if="period.multiple") {{ item.version }}
-    nuxt-link(
-      v-else
-      :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
-    ) {{ item.version }}
+    template(v-if="period.versioning")
+      template(v-if="period.multiple") {{ item.version }}
+      nuxt-link(
+        v-else
+        :to="localePath({ name: 'dcis-documents-documentId', params: { documentId: item.id } })"
+      ) {{ item.version }}
   template(#item.lastStatus="{ item }")
     template(v-if="item.lastStatus")
       document-statuses(
@@ -62,8 +63,10 @@ export default defineComponent({
             value: 'division'
           }]
         : []
+      if (props.period.versioning) {
+        result.push({ text: t('dcis.documents.tableHeaders.version') as string, value: 'version' })
+      }
       result.push(
-        { text: t('dcis.documents.tableHeaders.version') as string, value: 'version' },
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
