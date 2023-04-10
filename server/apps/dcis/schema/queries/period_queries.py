@@ -165,7 +165,7 @@ class PeriodQueries(graphene.ObjectType):
         description='Получение организаций, у которых не поданы документы в периоде'
     )
 
-    period_filter_organizations = DjangoListField(
+    period_filter_organizations = DjangoFilterConnectionField(
         OrganizationType,
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
@@ -325,7 +325,13 @@ class PeriodQueries(graphene.ObjectType):
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
-    def resolve_period_filter_organizations(root: Any, info: ResolveInfo, period_id: str) -> QuerySet[Organization]:
+    def resolve_period_filter_organizations(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        *args,
+        **kwargs
+    ) -> QuerySet[Organization]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_user_period_divisions(info.context.user, period)
 

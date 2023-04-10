@@ -2997,150 +2997,6 @@ type NotificationsSubscription {
   notification: NotificationType
 }
 
-input OrganizationAddressFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationDepartmentFilterInputType {
-  """`Exact` lookup"""
-  exact: [ID]
-  """`In` lookup"""
-  in: [String]
-}
-
-input OrganizationFilterInputType {
-  """`Address` field"""
-  address: OrganizationAddressFilterInputType
-  """`And` field"""
-  and: [OrganizationFilterInputType]
-  """`Department` field"""
-  department: OrganizationDepartmentFilterInputType
-  """`Id` field"""
-  id: OrganizationIdFilterInputType
-  """`Inn` field"""
-  inn: OrganizationInnFilterInputType
-  """`Kind` field"""
-  kind: OrganizationKindFilterInputType
-  """`Kodbuhg` field"""
-  kodbuhg: OrganizationKodbuhgFilterInputType
-  """`Kpp` field"""
-  kpp: OrganizationKppFilterInputType
-  """`Mail` field"""
-  mail: OrganizationMailFilterInputType
-  """`Name` field"""
-  name: OrganizationNameFilterInputType
-  """`Not` field"""
-  not: OrganizationFilterInputType
-  """`Okpo` field"""
-  okpo: OrganizationOkpoFilterInputType
-  """`Or` field"""
-  or: [OrganizationFilterInputType]
-  """`Parent` field"""
-  parent: OrganizationParentFilterInputType
-  """`Phone` field"""
-  phone: OrganizationPhoneFilterInputType
-  """`Region` field"""
-  region: OrganizationRegionFilterInputType
-  """`Rubpnubp` field"""
-  rubpnubp: OrganizationRubpnubpFilterInputType
-  """`Site` field"""
-  site: OrganizationSiteFilterInputType
-}
-
-input OrganizationIdFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [String]
-}
-
-input OrganizationInnFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationKindFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationKodbuhgFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationKppFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationMailFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationNameFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationOkpoFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationParentFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`Isnull` lookup"""
-  isnull: Boolean
-}
-
-input OrganizationPhoneFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationRegionFilterInputType {
-  """`Exact` lookup"""
-  exact: ID
-  """`In` lookup"""
-  in: [ID]
-}
-
-input OrganizationRubpnubpFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
-input OrganizationSiteFilterInputType {
-  """`Exact` lookup"""
-  exact: String
-  """`Icontains` lookup"""
-  icontains: String
-}
-
 """Optimized type for Organizations."""
 type OrganizationType implements Node {
   """Address"""
@@ -3502,7 +3358,7 @@ type Query {
     curatorGroupId: ID!
   ): CuratorGroupType!
   """Получение организаций не входящих ни в одну кураторскую группу"""
-  curatorGroupNewOrganizations(address: String, address_Icontains: String, after: String, before: String, department: [ID], department_In: [String], first: Int, id: ID, id_In: [String], inn: String, inn_Icontains: String, kind: String, kind_Icontains: String, kodbuhg: String, kodbuhg_Icontains: String, kpp: String, kpp_Icontains: String, last: Int, mail: String, mail_Icontains: String, name: String, name_Icontains: String, offset: Int, okpo: String, okpo_Icontains: String, parent: ID, parent_Isnull: Boolean, phone: String, phone_Icontains: String, region: ID, region_In: [ID], rubpnubp: String, rubpnubp_Icontains: String, site: String, site_Icontains: String): OrganizationTypeConnection!
+  curatorGroupNewOrganizations(address: String, address_Icontains: String, after: String, attributes: String, before: String, department: [ID], department_In: [String], first: Int, id: ID, id_In: [String], inn: String, inn_Icontains: String, kind: String, kind_Icontains: String, kodbuhg: String, kodbuhg_Icontains: String, kpp: String, kpp_Icontains: String, last: Int, mail: String, mail_Icontains: String, name: String, name_Icontains: String, offset: Int, okpo: String, okpo_Icontains: String, parent: ID, parent_Isnull: Boolean, phone: String, phone_Icontains: String, region: ID, region_In: [ID], rubpnubp: String, rubpnubp_Icontains: String, site: String, site_Icontains: String): OrganizationTypeConnection!
   curatorGroupNewUsers(
     after: String
     before: String
@@ -3611,15 +3467,7 @@ type Query {
     """Organization ID"""
     organizationId: Int!
   ): OrganizationType
-  organizations(
-    after: String
-    before: String
-    """Advanced filter field"""
-    filter: OrganizationFilterInputType
-    first: Int
-    last: Int
-    offset: Int
-  ): OrganizationTypeConnection
+  organizations(address: String, address_Icontains: String, after: String, attributes: String, before: String, department: [ID], department_In: [String], first: Int, id: ID, id_In: [String], inn: String, inn_Icontains: String, kind: String, kind_Icontains: String, kodbuhg: String, kodbuhg_Icontains: String, kpp: String, kpp_Icontains: String, last: Int, mail: String, mail_Icontains: String, name: String, name_Icontains: String, offset: Int, okpo: String, okpo_Icontains: String, parent: ID, parent_Isnull: Boolean, phone: String, phone_Icontains: String, region: ID, region_In: [ID], rubpnubp: String, rubpnubp_Icontains: String, site: String, site_Icontains: String): OrganizationTypeConnection
   """Получение организаций, у которых не поданы документы в периоде"""
   organizationsWithoutDocument(
     """Идентификатор периода"""
@@ -3637,9 +3485,45 @@ type Query {
   ): [DepartmentType!]!
   """Получение организаций периода"""
   periodFilterOrganizations(
+    address: String
+    address_Icontains: String
+    after: String
+    attributes: String
+    before: String
+    department: [ID]
+    department_In: [String]
+    first: Int
+    id: ID
+    id_In: [String]
+    inn: String
+    inn_Icontains: String
+    kind: String
+    kind_Icontains: String
+    kodbuhg: String
+    kodbuhg_Icontains: String
+    kpp: String
+    kpp_Icontains: String
+    last: Int
+    mail: String
+    mail_Icontains: String
+    name: String
+    name_Icontains: String
+    offset: Int
+    okpo: String
+    okpo_Icontains: String
+    parent: ID
+    parent_Isnull: Boolean
     """Идентификатор периода"""
     periodId: ID!
-  ): [OrganizationType!]!
+    phone: String
+    phone_Icontains: String
+    region: ID
+    region_In: [ID]
+    rubpnubp: String
+    rubpnubp_Icontains: String
+    site: String
+    site_Icontains: String
+  ): OrganizationTypeConnection!
   """Получение типов организаций для периода"""
   periodOrganizationKinds(
     """Идентификатор периода"""

@@ -10,7 +10,10 @@ items-data-filter(
   modal
   fullscreen
 )
-  template(#subtitle) {{ $t('shownOf', { count, totalCount: count }) }}
+  template(#subtitle) {{ $t('shownOf', { count, totalCount: totalCount }) }}
+  template(#filter)
+    v-card-text(style="flex: none")
+      organization-level-filter(v-model="selectedFilters")
   template(#items="{ searchItems, tempItems, setSelected, setAllSelected }")
     v-data-table(
       :value="tempItems"
@@ -25,22 +28,23 @@ items-data-filter(
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '#app'
+import { computed, defineComponent, PropType, ref } from '#app'
 import { DataTableHeader } from 'vuetify'
 import { fromGlobalId } from '~/services/graphql-relay'
-import { useCommonQuery, useI18n } from '~/composables'
-import { Class } from '~/types/filters'
+import { useQueryRelay, useI18n, useCursorPagination } from '~/composables'
+import { Class, Item } from '~/types/filters'
 import {
   PeriodType,
   OrganizationType,
   PeriodFilterOrganizationsQuery,
   PeriodFilterOrganizationsQueryVariables
 } from '~/types/graphql'
-import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
 import periodFilterOrganizationsQuery from '~/gql/dcis/queries/period_filter_organizations.graphql'
+import ItemsDataFilter from '~/components/common/filters/ItemsDataFilter.vue'
+import OrganizationLevelFilter from '~/components/dcis/periods/OrganizationLevelFilter.vue'
 
 export default defineComponent({
-  components: { ItemsDataFilter },
+  components: { ItemsDataFilter, OrganizationLevelFilter },
   props: {
     value: { type: Array as PropType<OrganizationType[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true },
@@ -83,7 +87,7 @@ export default defineComponent({
       }
       return result
     }
-
+    const selectedFilters = ref<Item[]>([] || null)
     const tableHeaders = computed<DataTableHeader[]>(() => [
       { text: t('dcis.periods.organizationFilter.tableHeaders.id') as string, value: 'id' },
       { text: t('dcis.periods.organizationFilter.tableHeaders.name') as string, value: 'name' },
@@ -92,17 +96,23 @@ export default defineComponent({
       { text: t('dcis.periods.organizationFilter.tableHeaders.kodbuhg') as string, value: 'kodbuhg' }
     ])
 
-    const { data: organizations } = useCommonQuery<
+    const {
+      data: organizations,
+      pagination: { count, totalCount }
+    } = useQueryRelay<
       PeriodFilterOrganizationsQuery,
-      PeriodFilterOrganizationsQueryVariables
+      PeriodFilterOrganizationsQueryVariables,
+      OrganizationType
     >({
       document: periodFilterOrganizationsQuery,
       variables: () => ({
-        periodId: props.period.id
+        periodId: props.period.id,
+        attributesLevel: selectedFilters.value.length ? String(t(`dcis.periods.organizationFilter.levelFilter.types.${selectedFilters.value[0].id}`)) : null
       })
+    }, {
+      pagination: useCursorPagination(),
+      fetchScroll: typeof document === 'undefined' ? null : document
     })
-
-    const count = computed<number>(() => organizations.value ? organizations.value.length : 0)
 
     const changeOrganizations = computed(() => {
       if (!organizations.value) {
@@ -119,8 +129,10 @@ export default defineComponent({
       selectedOrganization,
       filterMessageFunction,
       filterSearchFunction,
+      selectedFilters,
       tableHeaders,
       count,
+      totalCount,
       changeOrganizations
     }
   }
