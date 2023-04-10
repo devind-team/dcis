@@ -1,10 +1,24 @@
-query PeriodFilterOrganizations($periodId: ID!) {
-  periodFilterOrganizations(periodId: $periodId) {
-    id
-    name
-    kpp
-    inn
-    kodbuhg
+query PeriodFilterOrganizations($periodId: ID!, $attributesLevel: String) {
+  periodFilterOrganizations(periodId: $periodId, attributes: $attributesLevel) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+      __typename
+    }
+    totalCount
+    edges {
+      node {
+        id
+        name
+        kpp
+        inn
+        kodbuhg
+        __typename
+      }
+      cursor
+    }
     __typename
   }
 }

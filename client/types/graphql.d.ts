@@ -3613,150 +3613,6 @@ export type NotificationsSubscription = {
   notification?: Maybe<NotificationType>;
 };
 
-export type OrganizationAddressFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationDepartmentFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-};
-
-export type OrganizationFilterInputType = {
-  /** `Address` field */
-  address?: InputMaybe<OrganizationAddressFilterInputType>;
-  /** `And` field */
-  and?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
-  /** `Department` field */
-  department?: InputMaybe<OrganizationDepartmentFilterInputType>;
-  /** `Id` field */
-  id?: InputMaybe<OrganizationIdFilterInputType>;
-  /** `Inn` field */
-  inn?: InputMaybe<OrganizationInnFilterInputType>;
-  /** `Kind` field */
-  kind?: InputMaybe<OrganizationKindFilterInputType>;
-  /** `Kodbuhg` field */
-  kodbuhg?: InputMaybe<OrganizationKodbuhgFilterInputType>;
-  /** `Kpp` field */
-  kpp?: InputMaybe<OrganizationKppFilterInputType>;
-  /** `Mail` field */
-  mail?: InputMaybe<OrganizationMailFilterInputType>;
-  /** `Name` field */
-  name?: InputMaybe<OrganizationNameFilterInputType>;
-  /** `Not` field */
-  not?: InputMaybe<OrganizationFilterInputType>;
-  /** `Okpo` field */
-  okpo?: InputMaybe<OrganizationOkpoFilterInputType>;
-  /** `Or` field */
-  or?: InputMaybe<Array<InputMaybe<OrganizationFilterInputType>>>;
-  /** `Parent` field */
-  parent?: InputMaybe<OrganizationParentFilterInputType>;
-  /** `Phone` field */
-  phone?: InputMaybe<OrganizationPhoneFilterInputType>;
-  /** `Region` field */
-  region?: InputMaybe<OrganizationRegionFilterInputType>;
-  /** `Rubpnubp` field */
-  rubpnubp?: InputMaybe<OrganizationRubpnubpFilterInputType>;
-  /** `Site` field */
-  site?: InputMaybe<OrganizationSiteFilterInputType>;
-};
-
-export type OrganizationIdFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-};
-
-export type OrganizationInnFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationKindFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationKodbuhgFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationKppFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationMailFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationNameFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationOkpoFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationParentFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `Isnull` lookup */
-  isnull?: InputMaybe<Scalars['Boolean']>;
-};
-
-export type OrganizationPhoneFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationRegionFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['ID']>;
-  /** `In` lookup */
-  in?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-};
-
-export type OrganizationRubpnubpFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
-export type OrganizationSiteFilterInputType = {
-  /** `Exact` lookup */
-  exact?: InputMaybe<Scalars['String']>;
-  /** `Icontains` lookup */
-  icontains?: InputMaybe<Scalars['String']>;
-};
-
 /** Optimized type for Organizations. */
 export type OrganizationType = Node & {
   __typename?: 'OrganizationType';
@@ -4154,7 +4010,7 @@ export type Query = {
   /** Получение департаментов периода */
   periodFilterDepartments: Array<DepartmentType>;
   /** Получение организаций периода */
-  periodFilterOrganizations: Array<OrganizationType>;
+  periodFilterOrganizations: OrganizationTypeConnection;
   /** Получение типов организаций для периода */
   periodOrganizationKinds: Array<Scalars['String']>;
   /** Возможные дивизионы периода */
@@ -4252,6 +4108,7 @@ export type QueryCuratorGroupNewOrganizationsArgs = {
   address?: InputMaybe<Scalars['String']>;
   address_Icontains?: InputMaybe<Scalars['String']>;
   after?: InputMaybe<Scalars['String']>;
+  attributes?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
   department?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
   department_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
@@ -4443,12 +4300,42 @@ export type QueryOrganizationArgs = {
 
 /** Схема запросов данных. */
 export type QueryOrganizationsArgs = {
+  address?: InputMaybe<Scalars['String']>;
+  address_Icontains?: InputMaybe<Scalars['String']>;
   after?: InputMaybe<Scalars['String']>;
+  attributes?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<OrganizationFilterInputType>;
+  department?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  department_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   first?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['ID']>;
+  id_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  inn?: InputMaybe<Scalars['String']>;
+  inn_Icontains?: InputMaybe<Scalars['String']>;
+  kind?: InputMaybe<Scalars['String']>;
+  kind_Icontains?: InputMaybe<Scalars['String']>;
+  kodbuhg?: InputMaybe<Scalars['String']>;
+  kodbuhg_Icontains?: InputMaybe<Scalars['String']>;
+  kpp?: InputMaybe<Scalars['String']>;
+  kpp_Icontains?: InputMaybe<Scalars['String']>;
   last?: InputMaybe<Scalars['Int']>;
+  mail?: InputMaybe<Scalars['String']>;
+  mail_Icontains?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
   offset?: InputMaybe<Scalars['Int']>;
+  okpo?: InputMaybe<Scalars['String']>;
+  okpo_Icontains?: InputMaybe<Scalars['String']>;
+  parent?: InputMaybe<Scalars['ID']>;
+  parent_Isnull?: InputMaybe<Scalars['Boolean']>;
+  phone?: InputMaybe<Scalars['String']>;
+  phone_Icontains?: InputMaybe<Scalars['String']>;
+  region?: InputMaybe<Scalars['ID']>;
+  region_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  rubpnubp?: InputMaybe<Scalars['String']>;
+  rubpnubp_Icontains?: InputMaybe<Scalars['String']>;
+  site?: InputMaybe<Scalars['String']>;
+  site_Icontains?: InputMaybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -4468,7 +4355,43 @@ export type QueryPeriodFilterDepartmentsArgs = {
 
 /** Схема запросов данных. */
 export type QueryPeriodFilterOrganizationsArgs = {
+  address?: InputMaybe<Scalars['String']>;
+  address_Icontains?: InputMaybe<Scalars['String']>;
+  after?: InputMaybe<Scalars['String']>;
+  attributes?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  department?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  department_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  first?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['ID']>;
+  id_In?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  inn?: InputMaybe<Scalars['String']>;
+  inn_Icontains?: InputMaybe<Scalars['String']>;
+  kind?: InputMaybe<Scalars['String']>;
+  kind_Icontains?: InputMaybe<Scalars['String']>;
+  kodbuhg?: InputMaybe<Scalars['String']>;
+  kodbuhg_Icontains?: InputMaybe<Scalars['String']>;
+  kpp?: InputMaybe<Scalars['String']>;
+  kpp_Icontains?: InputMaybe<Scalars['String']>;
+  last?: InputMaybe<Scalars['Int']>;
+  mail?: InputMaybe<Scalars['String']>;
+  mail_Icontains?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  name_Icontains?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  okpo?: InputMaybe<Scalars['String']>;
+  okpo_Icontains?: InputMaybe<Scalars['String']>;
+  parent?: InputMaybe<Scalars['ID']>;
+  parent_Isnull?: InputMaybe<Scalars['Boolean']>;
   periodId: Scalars['ID'];
+  phone?: InputMaybe<Scalars['String']>;
+  phone_Icontains?: InputMaybe<Scalars['String']>;
+  region?: InputMaybe<Scalars['ID']>;
+  region_In?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  rubpnubp?: InputMaybe<Scalars['String']>;
+  rubpnubp_Icontains?: InputMaybe<Scalars['String']>;
+  site?: InputMaybe<Scalars['String']>;
+  site_Icontains?: InputMaybe<Scalars['String']>;
 };
 
 /** Схема запросов данных. */
@@ -6332,9 +6255,10 @@ export type PeriodFilterDepartmentsQuery = { __typename?: 'Query', periodFilterD
 
 export type PeriodFilterOrganizationsQueryVariables = Exact<{
   periodId: Scalars['ID'];
+  attributesLevel?: InputMaybe<Scalars['String']>;
 }>;
 
-export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: Array<{ __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null }> };
+export type PeriodFilterOrganizationsQuery = { __typename?: 'Query', periodFilterOrganizations: { __typename: 'OrganizationTypeConnection', totalCount: number, pageInfo: { __typename: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'OrganizationTypeEdge', cursor: string, node?: { __typename: 'OrganizationType', id: string, name: string, kpp?: string | null, inn?: string | null, kodbuhg?: string | null } | null } | null> } };
 
 export type PeriodOrganizationKindsQueryVariables = Exact<{
   periodId: Scalars['ID'];

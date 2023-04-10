@@ -22,6 +22,7 @@ base-data-filter(
   template(#subtitle)
     slot(name="subtitle")
   template(#fixed-content)
+    slot(name="filter")
     slot(name="search" :search-label="searchLabelComputed" :search-function="searchFunction" :on="searchOn")
       v-card-text(v-if="searchFunction" style="flex: none")
         v-text-field(
