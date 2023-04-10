@@ -353,9 +353,14 @@ def add_period_methodical_support(
 
 
 def change_period_methodical_support(
-    period: Period,
-    files: list[InMemoryUploadedFile]
+    field: str,
+    value: str,
+    file: PeriodMethodicalSupport
 ) -> None:
+    if field == 'deleted':
+        value: bool = value == 'true'
+    setattr(file, field, value)
+    file.save(update_fields=(field,))
     return
 
 

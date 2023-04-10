@@ -1434,6 +1434,29 @@ type ChangePeriodGroupPrivilegesMutationPayload {
   success: Boolean!
 }
 
+input ChangePeriodMethodicalSupportMutationInput {
+  clientMutationId: String
+  """Поле файла"""
+  field: String!
+  """Идентификатор файла"""
+  fileId: ID!
+  """Идентификатор периода"""
+  periodId: ID
+  """Значение поля файла"""
+  value: String!
+}
+
+"""Мутация для изменения файла методического обеспечения периода."""
+type ChangePeriodMethodicalSupportMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Измененный файл"""
+  file: PeriodMethodicalSupportType
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input ChangePeriodMutationInput {
   clientMutationId: String
   """Дата окончания"""
@@ -2105,7 +2128,7 @@ type DeletePeriodGroupMutationPayload {
 input DeletePeriodMethodicalSupportMutationInput {
   clientMutationId: String
   """Идентификатор файла"""
-  fileId: UUID!
+  fileId: ID!
   """Идентификатор периода"""
   periodId: ID
 }
@@ -2116,7 +2139,7 @@ type DeletePeriodMethodicalSupportMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор удаляемого файла"""
-  id: UUID!
+  id: ID!
   """Успех мутации"""
   success: Boolean!
 }
@@ -2772,6 +2795,8 @@ type Mutation {
   changePeriod(input: ChangePeriodMutationInput!): ChangePeriodMutationPayload!
   """Мутация на изменение привилегий группы."""
   changePeriodGroupPrivileges(input: ChangePeriodGroupPrivilegesMutationInput!): ChangePeriodGroupPrivilegesMutationPayload!
+  """Мутация для изменения файла методического обеспечения периода."""
+  changePeriodMethodicalSupport(input: ChangePeriodMethodicalSupportMutationInput!): ChangePeriodMethodicalSupportMutationPayload!
   """Мутация на изменение значения профиля."""
   changeProfileValue(input: ChangeProfileValueMutationInput!): ChangeProfileValueMutationPayload!
   """Матция для изменения видимости."""
@@ -4220,12 +4245,6 @@ type TableType {
   """Строки документа"""
   rows: [TableRowType]!
 }
-
-"""
-Leverages the internal Python implmeentation of UUID (uuid.UUID) to provide native UUID objects
-in fields, resolvers and input.
-"""
-scalar UUID
 
 input UnloadAggregationsInFileMutationInput {
   clientMutationId: String

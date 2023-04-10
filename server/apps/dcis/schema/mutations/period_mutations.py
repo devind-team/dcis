@@ -30,7 +30,7 @@ from apps.dcis.services.period_services import (
     add_divisions_period,
     add_period_group,
     add_period_methodical_support, change_period_group_privileges,
-    change_settings_period,
+    change_period_methodical_support, change_settings_period,
     change_user_period_groups,
     change_user_period_privileges,
     copy_period_groups,
@@ -410,12 +410,9 @@ class ChangePeriodMethodicalSupportMutation(BaseMutation):
 
     @staticmethod
     @permission_classes([IsAuthenticated])
-    def mutate_and_get_payload(root, info: ResolveInfo, file_id, field: str, value: str, *args, **kwargs):
-        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=gid2int(file_id))
-        if field == 'deleted':
-            value: bool = value == 'true'
-        setattr(file, field, value)
-        file.save(update_fields=(field,))
+    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, field: str, value: str, *args, **kwargs):
+        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
+        change_period_methodical_support(field, value, file)
         return ChangePeriodMethodicalSupportMutation(file=file)
 
 
@@ -424,9 +421,9 @@ class DeletePeriodMethodicalSupportMutation(BaseMutation):
 
     class Input:
         period_id = graphene.ID(description='Идентификатор периода')
-        file_id = graphene.UUID(required=True, description='Идентификатор файла')
+        file_id = graphene.ID(required=True, description='Идентификатор файла')
 
-    id = graphene.UUID(required=True, description='Идентификатор удаляемого файла')
+    id = graphene.ID(required=True, description='Идентификатор удаляемого файла')
 
     @staticmethod
     @permission_classes([IsAuthenticated])
@@ -536,6 +533,7 @@ class PeriodMutations(graphene.ObjectType):
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)
 
     add_period_methodical_support = AddPeriodMethodicalSupportMutation.Field(required=True)
+    change_period_methodical_support = ChangePeriodMethodicalSupportMutation.Field(required=True)
     delete_period_methodical_support = DeletePeriodMethodicalSupportMutation.Field(required=True)
 
     unload_period = UnloadPeriodMutation.Field(required=True)

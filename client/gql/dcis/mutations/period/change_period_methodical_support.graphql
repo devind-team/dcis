@@ -1,0 +1,15 @@
+#import "../../fragments/period_methodical_support_fields.graphql"
+
+mutation ChangePeriodMethodicalSupport($fileId: ID!, $field: String!, $value: String!) {
+  changePeriodMethodicalSupport(input: {
+    fileId: $fileId,
+    field: $field,
+    value: $value
+  }) {
+    success
+    file {
+      ...PeriodMethodicalSupportFields
+    }
+    __typename
+  }
+}

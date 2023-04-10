@@ -1,4 +1,4 @@
-mutation DeletePeriodMethodicalSupport($fileId: UUID!, $periodId: ID!) {
+mutation DeletePeriodMethodicalSupport($fileId: ID!, $periodId: ID!) {
   deletePeriodMethodicalSupport(input: { fileId: $fileId, periodId: $periodId }) {
     success
     id

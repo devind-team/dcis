@@ -6,9 +6,10 @@ from django.db import models
 from .project import Period
 
 
-def file_directory_path(instance, filename: str):
+def file_directory_path(instance: 'PeriodMethodicalSupport', filename: str) -> str:
     """Формируем автоматический путь директории методических рекомендаций."""
-    return f'storage/period_methodical_support/{filename[:2]}/{filename}'
+    uuid_name = str(instance.id)[:2].lower()
+    return f'storage/period_methodical_support/{uuid_name}/{uuid_name}_{instance.id}{os.path.splitext(filename)[1]}'
 
 
 class PeriodMethodicalSupport(models.Model):

@@ -25,23 +25,23 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
           template(#item.updated="{ item }") {{ $filters.dateTimeHM(item.updatedAt) }}
           template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('profile.files.kB') }}
           template(#item.actions="{ item }")
-            text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changeFileMutate({ fileId: item.id, field: 'name', value: $event }).then()")
+            text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changePeriodMethodicalSupportMutate({ fileId: item.id, field: 'name', value: $event }).then()")
               v-tooltip(bottom)
-                template(#activator="{ on: onTooltipEdit }")
-                  v-btn(v-on="{...onMenu, ...onTooltipEdit}" icon color="primary")
+                template(#activator="{ on: onTooltip }")
+                  v-btn(v-on="{...onMenu, ...onTooltip}" icon color="primary")
                     v-icon mdi-pencil
                 span {{ $t('profile.files.changeName') }}
             delete-menu(
+              v-slot="{ on: onMenu }"
               :item-name="String($t('profile.files.file'))"
               @confirm="deletePeriodMethodicalSupportMutate({ fileId: item.id, periodId: period.id }).then()" color="error"
             )
-              template(#default="{ on: onMenu }")
-                v-tooltip(bottom)
-                  template(#activator="{ on: onTooltip }")
-                    v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
-                      v-btn(color="error" icon)
-                        v-icon mdi-delete
-                  span {{ $t('profile.files.deleteFile') }}
+              v-tooltip(bottom)
+                template(#activator="{ on: onTooltip }")
+                  v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
+                    v-btn(color="error" icon)
+                      v-icon mdi-delete
+                span {{ $t('profile.files.deleteFile') }}
   pre {{ files }}
 </template>
 <script lang="ts">
@@ -54,8 +54,8 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import {
   AddPeriodMethodicalSupportMutation,
   AddPeriodMethodicalSupportMutationVariables,
-  ChangeFileMutation,
-  ChangeFileMutationVariables,
+  ChangePeriodMethodicalSupportMutation,
+  ChangePeriodMethodicalSupportMutationVariables,
   DeletePeriodMethodicalSupportMutation,
   DeletePeriodMethodicalSupportMutationVariables,
   PeriodMethodicalSupportQuery,
@@ -66,9 +66,9 @@ import {
 import periodMethodicalSupportQuery from '~/gql/dcis/queries/period_methodical_support.graphql'
 import { HasPermissionFnType, useAuthStore } from '~/stores'
 import addPeriodMethodicalSupport from '~/gql/dcis/mutations/period/add_period_methodical_support.graphql'
-import deletePeriodMethodicalSupport from '~/gql/dcis/mutations/period/delete_period_methodical_support.graphql'
+import changePeriodMethodicalSupport from '~/gql/dcis/mutations/period/change_period_methodical_support.graphql'
+import deletePeriodMethodicalSupportMutation from '~/gql/dcis/mutations/period/delete_period_methodical_support.graphql'
 import TextMenu from '~/components/common/menu/TextMenu.vue'
-import changeFile from '~/gql/core/mutations/file/change_file.graphql'
 import DeleteMenu from '~/components/common/menu/DeleteMenu.vue'
 
 export default defineComponent({
@@ -81,7 +81,7 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     const authStore = useAuthStore()
-    const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
+    const { hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
 
     const { search, debounceSearch } = useDebounceSearch({
       callback: () => setPage(1)
@@ -116,17 +116,36 @@ export default defineComponent({
       { text: t('profile.files.tableHeaders.actions') as string, value: 'actions', sortable: false, width: 150 }
     ]))
 
-    const { mutate: addPeriodMethodicalSupportMutate } = useMutation<AddPeriodMethodicalSupportMutation, AddPeriodMethodicalSupportMutationVariables>(addPeriodMethodicalSupport, {
-      update: (cache, result) => addUpdate(cache, result)
-    })
+    const { mutate: addPeriodMethodicalSupportMutate } = useMutation<
+      AddPeriodMethodicalSupportMutation,
+      AddPeriodMethodicalSupportMutationVariables
+    >(
+      addPeriodMethodicalSupport,
+      {
+        update: (cache, result) => {
+          if (!result.data.addPeriodMethodicalSupport.errors.length) {
+            addUpdate(cache, result, 'periodMethodicalSupport')
+          }
+        }
+      }
+    )
     const { select: addFilesHandle } = useSelectFiles((files: FileList) => {
       addPeriodMethodicalSupportMutate({ periodId: props.period.id, files })
     })
-    const { mutate: changeFileMutate } = useMutation<ChangeFileMutation, ChangeFileMutationVariables>(changeFile, {
-      update: (cache, result) => changeUpdate(cache, result, 'file')
+
+    const { mutate: changePeriodMethodicalSupportMutate } = useMutation<ChangePeriodMethodicalSupportMutation, ChangePeriodMethodicalSupportMutationVariables>(changePeriodMethodicalSupport, {
+      update: (cache, result) => {
+        if (!result.data.changePeriodMethodicalSupport.success) {
+          changeUpdate(cache, result, 'periodMethodicalSupport')
+        }
+      }
     })
-    const { mutate: deletePeriodMethodicalSupportMutate } = useMutation<DeletePeriodMethodicalSupportMutation, DeletePeriodMethodicalSupportMutationVariables>(deletePeriodMethodicalSupport, {
-      update: (cache, result) => deleteUpdate(cache, result)
+    const { mutate: deletePeriodMethodicalSupportMutate } = useMutation<DeletePeriodMethodicalSupportMutation, DeletePeriodMethodicalSupportMutationVariables>(deletePeriodMethodicalSupportMutation, {
+      update: (cache, result) => {
+        if (result.data.deletePeriodMethodicalSupport.success) {
+          deleteUpdate(cache, result, true)
+        }
+      }
     })
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
@@ -136,6 +155,7 @@ export default defineComponent({
         exact: true
       }
     ]))
+
     return {
       bc,
       hasPerm,
@@ -150,7 +170,7 @@ export default defineComponent({
       fetchMoreData,
       setPage,
       addFilesHandle,
-      changeFileMutate,
+      changePeriodMethodicalSupportMutate,
       deletePeriodMethodicalSupportMutate
     }
   }
