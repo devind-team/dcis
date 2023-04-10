@@ -243,11 +243,12 @@ class AddPeriodGroupMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, period_id: str | int):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         return AddPeriodGroupMutation(
             period_group=add_period_group(
                 user=info.context.user,
                 name=name,
-                period_id=period_id
+                period=period
             )
         )
 
