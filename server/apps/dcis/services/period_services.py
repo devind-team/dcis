@@ -246,13 +246,12 @@ def delete_divisions_period(user: User, period: Period, division_id: str | int) 
     Division.objects.get(period=period, object_id=division_id).delete()
 
 
-def add_period_group(user: User, name: str, period_id: str | int) -> PeriodGroup:
+def add_period_group(user: User, name: str, period: Period) -> PeriodGroup:
     """Добавление группы в период."""
-    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_groups(user=user, period=period)
     return PeriodGroup.objects.create(
         name=name,
-        period_id=period_id,
+        period_id=period.id,
     )
 
 
