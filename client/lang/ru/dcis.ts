@@ -270,8 +270,20 @@ export default {
       }
     },
     methodical_support: {
-      name: '@:name',
-      downloadFile: 'Скачать файл'
+      file: 'файл',
+      shownOf: '@:shownOf',
+      uploadFiles: 'Загрузить файлы',
+      downloadFile: 'Скачать файл',
+      changeName: 'Изменить название',
+      deleteFile: 'Удалить файл',
+      kB: 'кБ',
+      tableHeaders: {
+        name: '@:name',
+        ext: 'Тип файла',
+        updated: 'Загружен',
+        size: 'Размер',
+        actions: 'Действия'
+      }
     },
     users: {
       name: '@:dcis.periods.links.users',
