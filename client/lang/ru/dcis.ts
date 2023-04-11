@@ -270,7 +270,8 @@ export default {
       }
     },
     methodical_support: {
-      name: '@:name'
+      name: '@:name',
+      downloadFile: 'Скачать файл'
     },
     users: {
       name: '@:dcis.periods.links.users',

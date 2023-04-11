@@ -21,14 +21,17 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
           hide-default-footer
         )
           template(#item.name="{ item }")
-            a(:href="`/${item.src}`" target="__blank") {{ item.name }}
+            v-tooltip(bottom)
+              template(#activator="{ on: onTooltip }")
+                a(v-on="{...onTooltip}" :href="`/${item.src}`" target="__blank") {{ item.name }}
+              span {{ $t('dcis.periods.methodical_support.downloadFile') }}
           template(#item.updated="{ item }") {{ $filters.dateTimeHM(item.updatedAt) }}
           template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('profile.files.kB') }}
           template(#item.actions="{ item }")
             text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changePeriodMethodicalSupportMutate({ fileId: item.id, field: 'name', value: $event }).then()")
               v-tooltip(bottom)
                 template(#activator="{ on: onTooltip }")
-                  v-btn(v-on="{...onMenu, ...onTooltip}" icon color="primary")
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" icon color="primary")
                     v-icon mdi-pencil
                 span {{ $t('profile.files.changeName') }}
             delete-menu(
@@ -38,9 +41,8 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
             )
               v-tooltip(bottom)
                 template(#activator="{ on: onTooltip }")
-                  v-list-item-action(v-on="{ ...onMenu, ...onTooltip }")
-                    v-btn(color="error" icon)
-                      v-icon mdi-delete
+                  v-btn(v-on="{ ...onMenu, ...onTooltip }" icon color="error")
+                    v-icon mdi-delete
                 span {{ $t('profile.files.deleteFile') }}
   pre {{ files }}
 </template>

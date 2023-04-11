@@ -9,7 +9,7 @@ from .project import Period
 def file_directory_path(instance: 'PeriodMethodicalSupport', filename: str) -> str:
     """Формируем автоматический путь директории методических рекомендаций."""
     uuid_name = str(instance.id)[:2].lower()
-    return f'storage/period_methodical_support/{uuid_name}/{uuid_name}_{instance.id}{os.path.splitext(filename)[1]}'
+    return f'storage/period_methodical_support/{uuid_name}/{instance.id}{os.path.splitext(filename)[1]}'
 
 
 class PeriodMethodicalSupport(models.Model):
