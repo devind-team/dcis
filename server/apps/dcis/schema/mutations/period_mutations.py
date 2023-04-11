@@ -410,9 +410,19 @@ class ChangePeriodMethodicalSupportMutation(BaseMutation):
 
     @staticmethod
     @permission_classes([IsAuthenticated])
-    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, field: str, value: str, *args, **kwargs):
+    def mutate_and_get_payload(
+        root,
+        info: ResolveInfo,
+        period_id: str,
+        file_id: str,
+        field: str,
+        value: str,
+        *args,
+        **kwargs
+    ):
+        period: Period = get_object_or_404(Period, pk=gid2int(period_id))
         file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
-        change_period_methodical_support(field, value, file)
+        change_period_methodical_support(info.context.user, period, field, value, file)
         return ChangePeriodMethodicalSupportMutation(file=file)
 
 

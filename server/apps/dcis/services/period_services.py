@@ -33,7 +33,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
-from apps.dcis.permissions.period_permissions import can_change_period
+from apps.dcis.permissions.period_permissions import can_change_period_methodical_support
 from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
@@ -342,7 +342,7 @@ def add_period_methodical_support(
     period: Period,
     files: list[InMemoryUploadedFile]
 ) -> Iterable[PeriodMethodicalSupport]:
-    can_change_period(user, period)
+    can_change_period_methodical_support(user, period)
     return reversed(
         [PeriodMethodicalSupport.objects.create(
             period=period,
@@ -353,10 +353,13 @@ def add_period_methodical_support(
 
 
 def change_period_methodical_support(
+    user: User,
+    period: Period,
     field: str,
     value: str,
     file: PeriodMethodicalSupport
 ) -> None:
+    can_change_period_methodical_support(user, period)
     if field == 'deleted':
         value: bool = value == 'true'
     setattr(file, field, value)
@@ -369,7 +372,7 @@ def delete_period_methodical_support(
     period: Period,
     file: PeriodMethodicalSupport
 ) -> None:
-    can_change_period(user, period)
+    can_change_period_methodical_support(user, period)
     if os.path.isfile(file.src.path):
         os.remove(file.src.path)
     file.delete()
