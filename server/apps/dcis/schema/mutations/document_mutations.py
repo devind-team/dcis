@@ -210,8 +210,7 @@ class UnloadDocumentMutation(BaseMutation):
         return UnloadDocumentMutation(
             src=document_upload(
                 user=info.context.user,
-                get_host=info.context.get_host(),
-                document_id=document_id,
+                document_id=gid2int(document_id),
                 additional=additional
             )
         )
