@@ -4,7 +4,7 @@ mutation-modal-form(
   :subheader="period.name"
   :mutation="require('~/gql/dcis/mutations/attributes/add_attribute.graphql')"
   :button-text="String($t('dcis.attributes.addMenu.buttonText'))"
-  :variables="{ period: fromGlobalId(period.id).id, name, placeholder, key, kind: kind.toLowerCase(), default: def, mutable }"
+  :variables="{ periodId: period.id, name: name, placeholder: placeholder, key: key, kind: kind.toLowerCase(), default: def, mutable: mutable }"
   :update="update"
   mutation-name="addAttribute"
   i18n-path="dcis.attributes.addMenu"
