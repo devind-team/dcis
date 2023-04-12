@@ -463,7 +463,7 @@ export type AddPeriodMethodicalSupportMutationPayload = {
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Загруженные файлы */
-  files: Array<Maybe<PeriodMethodicalSupportType>>;
+  methodicalSupport: Array<Maybe<PeriodMethodicalSupportType>>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -1503,8 +1503,6 @@ export type ChangePeriodMethodicalSupportMutationInput = {
   field: Scalars['String'];
   /** Идентификатор файла */
   fileId: Scalars['ID'];
-  /** Идентификатор периода */
-  periodId?: InputMaybe<Scalars['ID']>;
   /** Значение поля файла */
   value: Scalars['String'];
 };
@@ -1516,7 +1514,7 @@ export type ChangePeriodMethodicalSupportMutationPayload = {
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Измененный файл */
-  file?: Maybe<PeriodMethodicalSupportType>;
+  methodicalSupport?: Maybe<PeriodMethodicalSupportType>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2222,8 +2220,6 @@ export type DeletePeriodMethodicalSupportMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор файла */
   fileId: Scalars['ID'];
-  /** Идентификатор периода */
-  periodId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Мутация для полного удаления методического обеспечения периода. */
@@ -4008,6 +4004,8 @@ export type PeriodType = Node & {
   canChangeGroups: Scalars['Boolean'];
   /** Может ли пользователь изменять ограничения периода */
   canChangeLimitations: Scalars['Boolean'];
+  /** Может ли пользователь изменять методические рекомендации */
+  canChangePeriodMethodicalSupport: Scalars['Boolean'];
   /** Может ли пользователь изменять настройки периода */
   canChangeSettings: Scalars['Boolean'];
   /** Может ли пользователь изменять структуру листа периода */
@@ -6106,7 +6104,7 @@ export type AddPeriodMethodicalSupportMutationVariables = Exact<{
   files: Array<Scalars['Upload']> | Scalars['Upload'];
 }>;
 
-export type AddPeriodMethodicalSupportMutation = { __typename?: 'Mutation', addPeriodMethodicalSupport: { __typename?: 'AddPeriodMethodicalSupportMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, files: Array<{ __typename: 'PeriodMethodicalSupportType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> } };
+export type AddPeriodMethodicalSupportMutation = { __typename?: 'Mutation', addPeriodMethodicalSupport: { __typename?: 'AddPeriodMethodicalSupportMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, methodicalSupport: Array<{ __typename: 'PeriodMethodicalSupportType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null> } };
 
 export type AddPeriodUserMutationVariables = Exact<{
   userId: Scalars['ID'];
@@ -6143,7 +6141,7 @@ export type ChangePeriodMethodicalSupportMutationVariables = Exact<{
   value: Scalars['String'];
 }>;
 
-export type ChangePeriodMethodicalSupportMutation = { __typename?: 'Mutation', changePeriodMethodicalSupport: { __typename: 'ChangePeriodMethodicalSupportMutationPayload', success: boolean, file?: { __typename: 'PeriodMethodicalSupportType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null } };
+export type ChangePeriodMethodicalSupportMutation = { __typename?: 'Mutation', changePeriodMethodicalSupport: { __typename: 'ChangePeriodMethodicalSupportMutationPayload', success: boolean, methodicalSupport?: { __typename: 'PeriodMethodicalSupportType', id: string, name: string, src: string, ext?: string | null, size?: number | null, deleted: boolean, createdAt: any, updatedAt: any } | null } };
 
 export type ChangeShowSheetMutationVariables = Exact<{
   sheetId: Scalars['ID'];
@@ -6197,7 +6195,6 @@ export type DeletePeriodGroupMutation = { __typename?: 'Mutation', deletePeriodG
 
 export type DeletePeriodMethodicalSupportMutationVariables = Exact<{
   fileId: Scalars['ID'];
-  periodId: Scalars['ID'];
 }>;
 
 export type DeletePeriodMethodicalSupportMutation = { __typename?: 'Mutation', deletePeriodMethodicalSupport: { __typename: 'DeletePeriodMethodicalSupportMutationPayload', success: boolean, id: string } };

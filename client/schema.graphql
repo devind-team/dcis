@@ -432,7 +432,7 @@ type AddPeriodMethodicalSupportMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Загруженные файлы"""
-  files: [PeriodMethodicalSupportType]!
+  methodicalSupport: [PeriodMethodicalSupportType]!
   """Успех мутации"""
   success: Boolean!
 }
@@ -1440,8 +1440,6 @@ input ChangePeriodMethodicalSupportMutationInput {
   field: String!
   """Идентификатор файла"""
   fileId: ID!
-  """Идентификатор периода"""
-  periodId: ID
   """Значение поля файла"""
   value: String!
 }
@@ -1452,7 +1450,7 @@ type ChangePeriodMethodicalSupportMutationPayload {
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Измененный файл"""
-  file: PeriodMethodicalSupportType
+  methodicalSupport: PeriodMethodicalSupportType
   """Успех мутации"""
   success: Boolean!
 }
@@ -2129,8 +2127,6 @@ input DeletePeriodMethodicalSupportMutationInput {
   clientMutationId: String
   """Идентификатор файла"""
   fileId: ID!
-  """Идентификатор периода"""
-  periodId: ID
 }
 
 """Мутация для полного удаления методического обеспечения периода."""
@@ -3364,6 +3360,8 @@ type PeriodType implements Node {
   canChangeGroups: Boolean!
   """Может ли пользователь изменять ограничения периода"""
   canChangeLimitations: Boolean!
+  """Может ли пользователь изменять методические рекомендации"""
+  canChangePeriodMethodicalSupport: Boolean!
   """Может ли пользователь изменять настройки периода"""
   canChangeSettings: Boolean!
   """Может ли пользователь изменять структуру листа периода"""

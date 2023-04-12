@@ -195,12 +195,13 @@ def can_change_period_sheet(user: User, period: Period):
 
 
 def can_change_period_methodical_support_base(user: User, period: Period):
-    """Пропускает пользователей, которые могут изменять методические рекомендации периода без проверки возможности просмотра."""
+    """Пропускает пользователей, которые могут изменять методические рекомендации периода без проверки возможности
+    просмотра."""
     try:
         can_change_period_base(user, period)
         return
     except PermissionDenied:
-        if has_privilege(user.id, period.id, 'change_period_methodical_support'):
+        if has_privilege(user.id, period.id, 'change_period_methodical_support') or is_period_curator(user, period):
             return
     raise PermissionDenied('Недостаточно прав для изменения методических рекомендаций периода.')
 

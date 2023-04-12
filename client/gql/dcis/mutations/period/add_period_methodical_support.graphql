@@ -10,7 +10,7 @@ mutation AddPeriodMethodicalSupport($periodId: ID!, $files: [Upload!]!) {
       field
       messages
     }
-    files {
+    methodicalSupport {
       ...PeriodMethodicalSupportFields
     }
   }

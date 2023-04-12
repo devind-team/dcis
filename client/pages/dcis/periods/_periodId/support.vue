@@ -4,7 +4,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
   v-card-text
     v-row(align="center")
       v-col(cols="12")
-        v-btn(v-if="period.isAdmin || period.isCurator" @click="addFilesHandle" color="primary")
+        v-btn(v-if="period.isAdmin || period.isCurator || period.canChangePeriodMethodicalSupport" @click="addFilesHandle" color="primary")
           v-icon(left) mdi-upload
           | {{ $t('dcis.periods.methodical_support.uploadFiles') }}
     v-row
@@ -28,7 +28,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
           template(#item.updated="{ item }") {{ $filters.dateTimeHM(item.updatedAt) }}
           template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('dcis.periods.methodical_support.kB') }}
           template(#item.actions="{ item }")
-            template(v-if="period.isAdmin || period.isCurator")
+            template(v-if="period.isAdmin || period.isCurator || period.canChangePeriodMethodicalSupport")
               text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changePeriodMethodicalSupportMutate({ fileId: item.id, field: 'name', value: $event }).then()")
                 v-tooltip(bottom)
                   template(#activator="{ on: onTooltip }")
@@ -45,7 +45,6 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
                     v-btn(v-on="{ ...onMenu, ...onTooltip }" icon color="error")
                       v-icon mdi-delete
                   span {{ $t('dcis.periods.methodical_support.deleteFile') }}
-  pre {{ files }}
 </template>
 <script lang="ts">
 import { defineComponent, computed, ComputedRef, PropType, toRefs } from '#app'
@@ -113,12 +112,12 @@ export default defineComponent({
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => {
       const result = [
-        { text: t('dcis.periods.methodical_support.tableHeaders.name') as string, value: 'name' },
-        { text: t('dcis.periods.methodical_support.tableHeaders.ext') as string, value: 'ext', width: 120 },
-        { text: t('dcis.periods.methodical_support.tableHeaders.updated') as string, value: 'updated' },
-        { text: t('dcis.periods.methodical_support.tableHeaders.size') as string, value: 'size', width: 120 }
+        { text: t('dcis.periods.methodical_support.tableHeaders.name') as string, value: 'name', sortable: false },
+        { text: t('dcis.periods.methodical_support.tableHeaders.ext') as string, value: 'ext', sortable: false, width: 120 },
+        { text: t('dcis.periods.methodical_support.tableHeaders.updated') as string, value: 'updated', sortable: false },
+        { text: t('dcis.periods.methodical_support.tableHeaders.size') as string, value: 'size', sortable: false, width: 120 }
       ]
-      if (props.period.isAdmin || props.period.isCurator) {
+      if (props.period.isAdmin || props.period.isCurator || props.period.canChangePeriodMethodicalSupport) {
         result.push({ text: t('dcis.periods.methodical_support.tableHeaders.actions') as string, value: 'actions', sortable: false, width: 150 })
       }
       return result
@@ -132,19 +131,11 @@ export default defineComponent({
       {
         update: (cache, result) => {
           if (!result.data.addPeriodMethodicalSupport.errors.length) {
-            addUpdate(cache, result, 'periodMethodicalSupport')
+            addUpdate(cache, result)
           }
         }
       }
     )
-
-    const addPeriodMethodicalSupportVariables = computed<AddPeriodMethodicalSupportMutationVariables>(() => ({
-      periodId: props.period.id,
-      files: data
-    }))
-    const addMethodicalSupport = async () => {
-      await addPeriodMethodicalSupportMutate(addPeriodMethodicalSupportVariables.value)
-    }
 
     const { select: addFilesHandle } = useSelectFiles((file: FileList) => {
       addPeriodMethodicalSupportMutate({ periodId: props.period.id, files: file })
@@ -153,10 +144,11 @@ export default defineComponent({
     const { mutate: changePeriodMethodicalSupportMutate } = useMutation<ChangePeriodMethodicalSupportMutation, ChangePeriodMethodicalSupportMutationVariables>(changePeriodMethodicalSupport, {
       update: (cache, result) => {
         if (!result.data.changePeriodMethodicalSupport.success) {
-          changeUpdate(cache, result, 'periodMethodicalSupport')
+          changeUpdate(cache, result)
         }
       }
     })
+
     const { mutate: deletePeriodMethodicalSupportMutate } = useMutation<DeletePeriodMethodicalSupportMutation, DeletePeriodMethodicalSupportMutationVariables>(deletePeriodMethodicalSupportMutation, {
       update: (cache, result) => {
         if (result.data.deletePeriodMethodicalSupport.success) {
@@ -164,6 +156,7 @@ export default defineComponent({
         }
       }
     })
+
     const bc: ComputedRef<BreadCrumbsItem[]> = computed<BreadCrumbsItem[]>(() => ([
       ...props.breadCrumbs,
       {
@@ -187,8 +180,6 @@ export default defineComponent({
       fetchMoreData,
       setPage,
       addFilesHandle,
-      addMethodicalSupport,
-      addPeriodMethodicalSupportMutate,
       changePeriodMethodicalSupportMutate,
       deletePeriodMethodicalSupportMutate
     }

@@ -7,7 +7,7 @@ mutation ChangePeriodMethodicalSupport($fileId: ID!, $field: String!, $value: St
     value: $value
   }) {
     success
-    file {
+    methodicalSupport {
       ...PeriodMethodicalSupportFields
     }
     __typename

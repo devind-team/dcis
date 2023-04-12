@@ -388,58 +388,57 @@ class AddPeriodMethodicalSupportMutation(BaseMutation):
         period_id = graphene.ID(description='Идентификатор периода')
         files = graphene.List(graphene.NonNull(Upload), required=True, description='Загружаемые файлы')
 
-    files = graphene.List(PeriodMethodicalSupportType, required=True, description='Загруженные файлы')
+    methodical_support = graphene.List(PeriodMethodicalSupportType, required=True, description='Загруженные файлы')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, files: list[InMemoryUploadedFile]):
         period: Period = get_object_or_404(Period, pk=gid2int(period_id))
-        return AddPeriodMethodicalSupportMutation(files=add_period_methodical_support(info.context.user, period, files))
+        return AddPeriodMethodicalSupportMutation(
+            methodical_support=add_period_methodical_support(info.context.user, period, files)
+        )
 
 
 class ChangePeriodMethodicalSupportMutation(BaseMutation):
     """Мутация для изменения файла методического обеспечения периода."""
 
     class Input:
-        period_id = graphene.ID(description='Идентификатор периода')
         file_id = graphene.ID(required=True, description='Идентификатор файла')
         field = graphene.String(required=True, description='Поле файла')
         value = graphene.String(required=True, description='Значение поля файла')
 
-    file = graphene.Field(PeriodMethodicalSupportType, description='Измененный файл')
+    methodical_support = graphene.Field(PeriodMethodicalSupportType, description='Измененный файл')
 
     @staticmethod
     @permission_classes([IsAuthenticated])
     def mutate_and_get_payload(
         root,
         info: ResolveInfo,
-        period_id: str,
         file_id: str,
         field: str,
         value: str,
         *args,
         **kwargs
     ):
-        period: Period = get_object_or_404(Period, pk=gid2int(period_id))
         file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
+        period: Period = file.period
         change_period_methodical_support(info.context.user, period, field, value, file)
-        return ChangePeriodMethodicalSupportMutation(file=file)
+        return ChangePeriodMethodicalSupportMutation(methodical_support=file)
 
 
 class DeletePeriodMethodicalSupportMutation(BaseMutation):
     """Мутация для полного удаления методического обеспечения периода."""
 
     class Input:
-        period_id = graphene.ID(description='Идентификатор периода')
         file_id = graphene.ID(required=True, description='Идентификатор файла')
 
     id = graphene.ID(required=True, description='Идентификатор удаляемого файла')
 
     @staticmethod
     @permission_classes([IsAuthenticated])
-    def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, file_id: str, *args, **kwargs):
+    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, *args, **kwargs):
         file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
-        period: Period = get_object_or_404(Period, pk=gid2int(period_id))
+        period: Period = file.period
         delete_period_methodical_support(info.context.user, period, file)
         return DeletePeriodMethodicalSupportMutation(id=file_id)
 
