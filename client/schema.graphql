@@ -87,8 +87,8 @@ type AddAggregationMutationPayload {
 
 input AddAttributeMutationInput {
   clientMutationId: String
-  default: String
-  id: ID
+  """Значение по умолчанию"""
+  default: String!
   """Ключ"""
   key: String!
   """Тип атрибута"""
@@ -97,17 +97,21 @@ input AddAttributeMutationInput {
   mutable: Boolean
   """Наименование атрибута"""
   name: String!
-  parent: ID
-  period: ID!
+  """Идентификатор периода"""
+  periodId: ID!
   """Подсказка"""
   placeholder: String!
-  position: Int
 }
 
+"""Мутация для создания атрибута в периоде."""
 type AddAttributeMutationPayload {
+  """Добавленный аттрибут"""
   attribute: AttributeType
   clientMutationId: String
-  errors: [ErrorType]
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input AddBudgetClassificationMutationInput {
@@ -988,9 +992,11 @@ type CellType {
 }
 
 input ChangeAttributeMutationInput {
+  """Идентификатор периода"""
+  attributeId: ID!
   clientMutationId: String
-  default: String
-  id: ID
+  """Значение по умолчанию"""
+  default: String!
   """Ключ"""
   key: String!
   """Тип атрибута"""
@@ -999,17 +1005,19 @@ input ChangeAttributeMutationInput {
   mutable: Boolean
   """Наименование атрибута"""
   name: String!
-  parent: ID
   """Подсказка"""
   placeholder: String!
-  position: Int
 }
 
 """Мутация для изменения периода."""
 type ChangeAttributeMutationPayload {
+  """Добавленный аттрибут"""
   attribute: AttributeType
   clientMutationId: String
-  errors: [ErrorType]
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input ChangeAttributeValueMutationInput {

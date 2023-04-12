@@ -101,8 +101,8 @@ export type AddAggregationMutationPayload = {
 
 export type AddAttributeMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
-  default?: InputMaybe<Scalars['String']>;
-  id?: InputMaybe<Scalars['ID']>;
+  /** Значение по умолчанию */
+  default: Scalars['String'];
   /** Ключ */
   key: Scalars['String'];
   /** Тип атрибута */
@@ -111,18 +111,22 @@ export type AddAttributeMutationInput = {
   mutable?: InputMaybe<Scalars['Boolean']>;
   /** Наименование атрибута */
   name: Scalars['String'];
-  parent?: InputMaybe<Scalars['ID']>;
-  period: Scalars['ID'];
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
   /** Подсказка */
   placeholder: Scalars['String'];
-  position?: InputMaybe<Scalars['Int']>;
 };
 
+/** Мутация для создания атрибута в периоде. */
 export type AddAttributeMutationPayload = {
   __typename?: 'AddAttributeMutationPayload';
+  /** Добавленный аттрибут */
   attribute?: Maybe<AttributeType>;
   clientMutationId?: Maybe<Scalars['String']>;
-  errors?: Maybe<Array<Maybe<ErrorType>>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
 };
 
 export type AddBudgetClassificationMutationInput = {
@@ -1031,9 +1035,11 @@ export type CellType = {
 };
 
 export type ChangeAttributeMutationInput = {
+  /** Идентификатор периода */
+  attributeId: Scalars['ID'];
   clientMutationId?: InputMaybe<Scalars['String']>;
-  default?: InputMaybe<Scalars['String']>;
-  id?: InputMaybe<Scalars['ID']>;
+  /** Значение по умолчанию */
+  default: Scalars['String'];
   /** Ключ */
   key: Scalars['String'];
   /** Тип атрибута */
@@ -1042,18 +1048,20 @@ export type ChangeAttributeMutationInput = {
   mutable?: InputMaybe<Scalars['Boolean']>;
   /** Наименование атрибута */
   name: Scalars['String'];
-  parent?: InputMaybe<Scalars['ID']>;
   /** Подсказка */
   placeholder: Scalars['String'];
-  position?: InputMaybe<Scalars['Int']>;
 };
 
 /** Мутация для изменения периода. */
 export type ChangeAttributeMutationPayload = {
   __typename?: 'ChangeAttributeMutationPayload';
+  /** Добавленный аттрибут */
   attribute?: Maybe<AttributeType>;
   clientMutationId?: Maybe<Scalars['String']>;
-  errors?: Maybe<Array<Maybe<ErrorType>>>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
 };
 
 export type ChangeAttributeValueMutationInput = {
@@ -5596,20 +5604,19 @@ export type UpdateAggregationsFromFileMutationVariables = Exact<{
 export type UpdateAggregationsFromFileMutation = { __typename?: 'Mutation', updateAggregationsFromFile: { __typename: 'UpdateAggregationsFromFileMutationPayload', success: boolean, aggregationCells?: Array<{ __typename: 'CellAggregationType', id: string, aggregation: string, cells?: Array<string> | null, position: string } | null> | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type AddAttributeMutationVariables = Exact<{
-  period: Scalars['ID'];
+  periodId: Scalars['ID'];
   name: Scalars['String'];
   placeholder: Scalars['String'];
   key: Scalars['String'];
   kind: Scalars['String'];
   default: Scalars['String'];
   mutable?: InputMaybe<Scalars['Boolean']>;
-  parent?: InputMaybe<Scalars['ID']>;
 }>;
 
-export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
+export type AddAttributeMutation = { __typename?: 'Mutation', addAttribute: { __typename?: 'AddAttributeMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
 
 export type ChangeAttributeMutationVariables = Exact<{
-  id: Scalars['ID'];
+  attributeId: Scalars['ID'];
   name: Scalars['String'];
   placeholder: Scalars['String'];
   key: Scalars['String'];
@@ -5618,7 +5625,7 @@ export type ChangeAttributeMutationVariables = Exact<{
   mutable?: InputMaybe<Scalars['Boolean']>;
 }>;
 
-export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors?: Array<{ __typename: 'ErrorType', field: string, messages: Array<string> } | null> | null, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
+export type ChangeAttributeMutation = { __typename?: 'Mutation', changeAttribute: { __typename?: 'ChangeAttributeMutationPayload', errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, attribute?: { __typename: 'AttributeType', id: string, name: string, placeholder: string, key: string, kind: AttributeKind, default?: string | null, mutable: boolean, period?: { __typename: 'PeriodType', id: string } | null } | null } };
 
 export type ChangeAttributeValueMutationVariables = Exact<{
   attributeId: Scalars['ID'];
