@@ -309,7 +309,7 @@ class PeriodDivisionTestCase(TestCase):
         """Вызов функции `delete_divisions_period`."""
         return delete_divisions_period(
             user=self.superuser,
-            period_id=self.period.id,
+            period=self.period,
             division_id=self.organization_to_delete.id
         )
 

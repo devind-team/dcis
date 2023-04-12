@@ -2,7 +2,7 @@
 
 
 mutation ChangeAttribute(
-  $id: ID!,
+  $attributeId: ID!,
   $name: String!,
   $placeholder: String!,
   $key: String!,
@@ -11,7 +11,7 @@ mutation ChangeAttribute(
   $mutable: Boolean
 ) {
   changeAttribute(input: {
-    id: $id,
+    attributeId: $attributeId,
     name: $name,
     placeholder: $placeholder,
     key: $key,
@@ -22,10 +22,10 @@ mutation ChangeAttribute(
     errors {
       field
       messages
-    	__typename
+      __typename
     }
     attribute {
-     ...AttributeFields
+      ...AttributeFields
     }
   }
 }
