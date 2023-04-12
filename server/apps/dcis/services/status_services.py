@@ -1,4 +1,5 @@
 """Модуль, отвечающий за работу со статусами."""
+
 from dataclasses import dataclass
 from typing import cast
 

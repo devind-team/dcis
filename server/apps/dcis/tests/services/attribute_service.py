@@ -1,9 +1,9 @@
-"""Тесты модуля, отвечающего за работу с атребутами."""
+"""Тесты модуля, отвечающего за работу с атрибутами."""
+
 import json
 from io import BytesIO
 from os import listdir, remove
 from os.path import isfile, join
-from unittest.mock import MagicMock
 
 from devind_dictionaries.models import Organization
 from django.conf import settings
@@ -18,7 +18,7 @@ from apps.dcis.models import (
 )
 from apps.dcis.services.attribute_services import (
     unload_attributes_in_file,
-    upload_attributes_from_file
+    upload_attributes_from_file,
 )
 
 
@@ -100,8 +100,7 @@ class AttributeTestCase(TestCase):
 
     def test_upload_attributes_in_file(self):
         """Тестирование функции `unload_attributes_in_file`."""
-        get_host = MagicMock(return_value='http://testserver')
-        result = unload_attributes_in_file(self.superuser, get_host, self.period)
+        result = unload_attributes_in_file(self.superuser, self.period)
 
         self.assertIsInstance(result, str)
         self.assertTrue(result.endswith('.json'))
@@ -110,8 +109,6 @@ class AttributeTestCase(TestCase):
             data = json.load(file)
         self.assertIsInstance(data, list)
         self.assertEqual(len(data), 2)
-
-        get_host.assert_called_once_with(None)
 
     def tearDown(self):
         """Remove the temporary files created during the test."""

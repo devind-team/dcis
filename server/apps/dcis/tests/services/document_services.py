@@ -1,4 +1,5 @@
 """Тестирование модуля, отвечающего за работу с документами."""
+
 from unittest.mock import Mock, patch
 
 from devind_dictionaries.models import Department, Organization

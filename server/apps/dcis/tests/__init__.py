@@ -14,6 +14,11 @@ from .permissions import (
     ProjectPermissionsTestCase,
 )
 from .services import (
+    AggregationTestCase,
+    ArchivePeriodTestCase,
+    AttributeTestCase,
+    CheckCellOptionsTestCase,
+    CheckLimitationsTestCase,
     ColumnDimensionTestCase,
     CuratorGroupTestCase,
     DivisionTestCase,
@@ -23,12 +28,16 @@ from .services import (
     GetUserPeriodsTestCase,
     GetUserProjectsTestCase,
     LimitationTestCase,
+    PasteTestCase,
     PeriodDivisionTestCase,
     PeriodGroupTestCase,
+    PeriodOrganizationsWithoutDocumentTestCase,
     PeriodTestCase,
     PeriodUserTestCase,
     PrivilegeTestCase,
     ProjectTestCase,
     RowDimensionTestCase,
+    StatusTestCase,
     UnloadPeriodTestCase,
+    UpdateOrCreateValuesTestCase,
 )
