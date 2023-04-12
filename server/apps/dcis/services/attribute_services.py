@@ -133,9 +133,9 @@ def create_attribute_context(user: User, document: Document) -> Context:
             'org_name': mark_safe(document.object_name)
         }
     )
-
+    # Расширяем контекст для организаций
     if document.period.project.division is Organization:
-        organization: Organization = Organization.objects.get(pk=document.object_id)
+        organization: Organization = Organization.objects.filter(pk=document.object_id).select_related('parent').get()
         organization_context = {
             'org_inn': mark_safe(organization.inn),
             'org_kpp': mark_safe(organization.kpp),
