@@ -9,47 +9,103 @@ from devind_helpers.permissions import IsAuthenticated
 from devind_helpers.schema.mutations import BaseMutation
 from devind_helpers.utils import gid2int
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from graphene_django.forms.mutation import DjangoModelFormMutation
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 
-from apps.dcis.forms import AddAttributeForm, ChangeAttributeForm
 from apps.dcis.models import Attribute, Document, Period
 from apps.dcis.permissions import can_change_period_attributes
 from apps.dcis.schema.types import AttributeType, AttributeValueType, ValueType
 from apps.dcis.services.attribute_services import (
+    change_attribute,
     change_attribute_value,
+    create_attribute,
     unload_attributes_in_file,
     upload_attributes_from_file,
 )
 
 
-class AddAttributeMutation(DjangoModelFormMutation):
-    class Meta:
-        form_class = AddAttributeForm
-        return_field_name = 'attribute'
+class AddAttributeMutation(BaseMutation):
+    """Мутация для создания атрибута в периоде."""
 
-    @classmethod
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+        name = graphene.String(required=True, description='Наименование атрибута')
+        placeholder = graphene.String(required=True, description='Подсказка')
+        key = graphene.String(required=True, description='Ключ')
+        kind = graphene.String(required=True, description='Тип атрибута')
+        default = graphene.String(required=True, description='Значение по умолчанию')
+        mutable = graphene.Boolean(description='Можно ли изменять')
+
+    attribute = graphene.Field(AttributeType, description='Добавленный аттрибут')
+
+    @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(cls, root, info, **data):
-        period = get_object_or_404(Period, pk=data.get('period'))
-        can_change_period_attributes(info.context.user, period)
-        return super().mutate_and_get_payload(root, info, **data)
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        period_id: str,
+        name: str,
+        placeholder: str,
+        key: str,
+        kind: str,
+        default: str,
+        mutable: bool
+    ):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        return AddAttributeMutation(
+            attribute=create_attribute(
+                user=info.context.user,
+                period=period,
+                name=name,
+                placeholder=placeholder,
+                key=key,
+                kind=kind,
+                default=default,
+                mutable=mutable
+            )
+        )
 
 
-class ChangeAttributeMutation(DjangoModelFormMutation):
+class ChangeAttributeMutation(BaseMutation):
     """Мутация для изменения периода."""
 
-    class Meta:
-        form_class = ChangeAttributeForm
-        return_field_name = 'attribute'
+    class Input:
+        attribute_id = graphene.ID(required=True, description='Идентификатор периода')
+        name = graphene.String(required=True, description='Наименование атрибута')
+        placeholder = graphene.String(required=True, description='Подсказка')
+        key = graphene.String(required=True, description='Ключ')
+        kind = graphene.String(required=True, description='Тип атрибута')
+        default = graphene.String(required=True, description='Значение по умолчанию')
+        mutable = graphene.Boolean(description='Можно ли изменять')
 
-    @classmethod
+    attribute = graphene.Field(AttributeType, description='Добавленный аттрибут')
+
+    @staticmethod
     @permission_classes((IsAuthenticated,))
-    def mutate_and_get_payload(cls, root, info, **data):
-        attribute: Attribute = get_object_or_404(Attribute, pk=data.get('id'))
-        can_change_period_attributes(info.context.user, attribute.period)
-        return super().mutate_and_get_payload(root, info, **data)
+    def mutate_and_get_payload(
+        root: Any,
+        info: ResolveInfo,
+        attribute_id: int,
+        name: str,
+        placeholder: str,
+        key: str,
+        kind: str,
+        default: str,
+        mutable: bool
+    ):
+        attribute: Attribute = get_object_or_404(Attribute, pk=attribute_id)
+        return AddAttributeMutation(
+            attribute=change_attribute(
+                user=info.context.user,
+                attribute=attribute,
+                name=name,
+                placeholder=placeholder,
+                key=key,
+                kind=kind,
+                default=default,
+                mutable=mutable
+            )
+        )
 
 
 class ChangeAttributeValueMutation(BaseMutation):

@@ -70,7 +70,7 @@ export default defineComponent({
           text: activeDocument.value.period.name,
           to: localePath({
             name: 'dcis-periods-periodId-documents',
-            params: { periodId: toGlobalId('PeriodType', Number(activeDocument.value.period.id)) }
+            params: { periodId: activeDocument.value.period.id }
           }),
           exact: true
         }, {

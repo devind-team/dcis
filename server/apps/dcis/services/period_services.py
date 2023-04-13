@@ -168,7 +168,7 @@ def add_divisions_period(user: User, period_id: str | int, division_ids: list[st
     can_change_period_divisions(user=user, period=period)
     division_links = Division.objects.bulk_create(
         [
-            Division(period=period, object_id=division_id) for division_id in division_ids
+            Division(period=period, object_id=gid2int(division_id)) for division_id in division_ids
         ]
     )
     divisions = period.project.division.objects.filter(pk__in=[link.object_id for link in division_links])
@@ -250,20 +250,18 @@ def add_divisions_from_period(
     return get_divisions(divisions.values()), None
 
 
-def delete_divisions_period(user: User, period_id: str | int, division_id: str | int) -> None:
+def delete_divisions_period(user: User, period: Period, division_id: str | int) -> None:
     """Удаление дивизиона из периода."""
-    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_divisions(user=user, period=period)
-    Division.objects.get(period_id=period_id, object_id=division_id).delete()
+    Division.objects.get(period=period, object_id=division_id).delete()
 
 
-def add_period_group(user: User, name: str, period_id: str | int) -> PeriodGroup:
+def add_period_group(user: User, name: str, period: Period) -> PeriodGroup:
     """Добавление группы в период."""
-    period = get_object_or_404(Period, pk=gid2int(period_id))
     can_change_period_groups(user=user, period=period)
     return PeriodGroup.objects.create(
         name=name,
-        period_id=period_id,
+        period_id=period.id,
     )
 
 

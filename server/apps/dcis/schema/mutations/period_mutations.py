@@ -230,10 +230,11 @@ class DeleteDivisionMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: str, division_id: str):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         delete_divisions_period(
             user=info.context.user,
-            period_id=period_id,
-            division_id=division_id
+            period=period,
+            division_id=gid2int(division_id)
         )
         return DeleteDivisionMutation(delete_id=division_id)
 
@@ -250,11 +251,12 @@ class AddPeriodGroupMutation(BaseMutation):
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, name: str, period_id: str | int):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
         return AddPeriodGroupMutation(
             period_group=add_period_group(
                 user=info.context.user,
                 name=name,
-                period_id=period_id
+                period=period
             )
         )
 

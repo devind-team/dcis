@@ -309,7 +309,7 @@ class PeriodDivisionTestCase(TestCase):
         """Вызов функции `delete_divisions_period`."""
         return delete_divisions_period(
             user=self.superuser,
-            period_id=self.period.id,
+            period=self.period,
             division_id=self.organization_to_delete.id
         )
 
@@ -409,7 +409,7 @@ class PeriodGroupTestCase(TestCase):
 
     def _add_period_group(self) -> PeriodGroup:
         """Вызов функции `add_period_group`."""
-        return add_period_group(user=self.superuser, name='Period group', period_id=self.period.id)
+        return add_period_group(user=self.superuser, name='Period group', period=self.period)
 
     def _copy_period_groups(self) -> list[PeriodGroup]:
         """Вызов функции `copy_period_groups`."""

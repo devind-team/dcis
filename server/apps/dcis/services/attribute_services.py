@@ -21,6 +21,51 @@ from apps.dcis.permissions import can_change_attribute_value, can_change_period_
 from .value_services import UpdateOrCrateValuesResult, ValueInput, update_or_create_values
 
 
+def create_attribute(
+    user: User,
+    period: Period,
+    name: str,
+    placeholder: str,
+    key: str,
+    kind: str,
+    default: str,
+    mutable: bool
+) -> Attribute:
+    """Сервис добавления атрибута."""
+    can_change_period_attributes(user, period)
+    return Attribute.objects.create(
+        period=period,
+        name=name,
+        placeholder=placeholder,
+        key=key,
+        kind=kind,
+        default=default,
+        mutable=mutable
+    )
+
+
+def change_attribute(
+    user: User,
+    attribute: Attribute,
+    name: str,
+    placeholder: str,
+    key: str,
+    kind: str,
+    default: str,
+    mutable: bool
+) -> Attribute:
+    """Сервис изменения атрибута."""
+    can_change_period_attributes(user, attribute.period)
+    attribute.name = name
+    attribute.placeholder = placeholder
+    attribute.key = key
+    attribute.kind = kind
+    attribute.default = default
+    attribute.mutable = mutable
+    attribute.save()
+    return attribute
+
+
 def change_attribute_value(
     user: User,
     attribute: Attribute,
