@@ -36,7 +36,6 @@ from apps.dcis.services.period_services import (
     get_user_periods,
     get_user_privileges_periods,
 )
-from apps.dcis.tests.tests_helpers import create_in_memory_file
 
 
 class GetUserPeriodsTestCase(TestCase):
@@ -239,8 +238,6 @@ class PeriodTestCase(TestCase):
             project=self.project,
             multiple=True,
             versioning=True,
-            readonly_fill_color=False,
-            xlsx_file=create_in_memory_file('test_create_period.xlsx'),
             limitations_file=None,
         )
 

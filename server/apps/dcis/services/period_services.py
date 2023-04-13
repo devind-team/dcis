@@ -36,7 +36,6 @@ from apps.dcis.permissions import (
 from apps.dcis.permissions.period_permissions import can_change_period_methodical_support
 from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
-from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.services.limitation_services import add_limitations_from_file
 
 
@@ -136,9 +135,7 @@ def create_period(
     project: Project,
     multiple: bool,
     versioning: bool,
-    xlsx_file: File,
-    limitations_file: File | None,
-    readonly_fill_color: bool
+    limitations_file: File | None
 ) -> Period:
     """Создание периода."""
     can_add_period(user=user, project=project)
@@ -149,14 +146,6 @@ def create_period(
         multiple=multiple,
         versioning=versioning
     )
-    fl = period.methodical_support.create(
-        name=xlsx_file.name,
-        src=xlsx_file,
-        deleted=False,
-        user=user
-    )
-    extractor = ExcelExtractor(fl.src.path, readonly_fill_color)
-    extractor.save(period)
     if limitations_file is not None:
         add_limitations_from_file(period, limitations_file)
     return period
@@ -356,13 +345,13 @@ def change_period_methodical_support(
     field: str,
     value: str,
     file: PeriodMethodicalSupport
-) -> None:
+) -> PeriodMethodicalSupport:
     can_change_period_methodical_support(user, period)
     if field == 'deleted':
         value: bool = value == 'true'
     setattr(file, field, value)
     file.save(update_fields=(field,))
-    return
+    return file
 
 
 def delete_period_methodical_support(

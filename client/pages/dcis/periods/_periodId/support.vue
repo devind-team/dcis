@@ -38,7 +38,7 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
               delete-menu(
                 v-slot="{ on: onMenu }"
                 :item-name="String($t('dcis.periods.methodical_support.file'))"
-                @confirm="deletePeriodMethodicalSupportMutate({ fileId: item.id, periodId: period.id }).then()" color="error"
+                @confirm="deletePeriodMethodicalSupportMutate({ fileId: item.id }).then()" color="error"
               )
                 v-tooltip(bottom)
                   template(#activator="{ on: onTooltip }")
