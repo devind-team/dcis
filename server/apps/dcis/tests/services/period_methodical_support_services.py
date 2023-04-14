@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TransactionTestCase
 
 from apps.core.models import User
-from apps.dcis.models import CuratorGroup, Period, PeriodMethodicalSupport, Project
+from apps.dcis.models import Period, PeriodMethodicalSupport, Project
 from apps.dcis.permissions.period_permissions import can_change_period_methodical_support
 from apps.dcis.services.period_services import (
     add_period_methodical_support,
@@ -22,17 +22,14 @@ class PeriodMethodicalSupportTestCase(TransactionTestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
-        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
 
-        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа')
-        self.curator_group.users.add(self.curator)
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
         self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
         self.period_methodical_support = PeriodMethodicalSupport.objects.create(
             period=self.period,
             name='Methodical support name',
-            src='storage/period_methodical_support/Me/Methodical support name'
+            src='storage/period_methodical_support/Me/Methodical support name.doc'
         )
         self.file1 = create_in_memory_file('test_create_period.xlsx')
         self.file2 = create_in_memory_file('test_add_update_limitations_from_file.json')
