@@ -347,8 +347,6 @@ def change_period_methodical_support(
     file: PeriodMethodicalSupport
 ) -> PeriodMethodicalSupport:
     can_change_period_methodical_support(user, period)
-    if field == 'deleted':
-        value: bool = value == 'true'
     setattr(file, field, value)
     file.save(update_fields=(field,))
     return file

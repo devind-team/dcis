@@ -9,7 +9,7 @@ from devind.settings import BASE_DIR
 
 
 def create_in_memory_file(file_name: str) -> InMemoryUploadedFile:
-    """Создание файла ф памяти."""
+    """Создание файла в памяти."""
     with open(file=join(BASE_DIR, 'apps', 'dcis', 'tests', 'resources', file_name), mode='rb') as file:
         stream = BytesIO()
         stream.write(file.read())
