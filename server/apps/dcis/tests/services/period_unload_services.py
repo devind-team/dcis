@@ -9,6 +9,7 @@ from pathlib import Path
 from devind_dictionaries.models import Organization, Region
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 from openpyxl.reader.excel import load_workbook
 
@@ -41,6 +42,13 @@ class UnloadPeriodTestCase(TestCase):
             last_name='Иванов',
             sir_name='Иванович',
             is_superuser=True,
+        )
+        self.extra_user = User.objects.create(
+            username='extra_user',
+            email='extra_user@gmail.com',
+            first_name='Василий',
+            last_name='Васильев',
+            sir_name='Васильевич',
         )
 
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
@@ -128,11 +136,19 @@ class UnloadPeriodTestCase(TestCase):
         if self.actual_path:
             os.remove(self.actual_path)
 
+    def test_without_permissions(self) -> None:
+        """Тестирование выгрузки без разрешений."""
+        with self.assertRaises(PermissionDenied):
+            unload_period(**{
+                **self._get_unload_default_settings(),
+                'user': self.extra_user,
+            })
+
     def test_without_filter_admin(self) -> None:
         """Тестирование выгрузки без фильтрации, если пользователь видит все организации периода."""
         expected_path = self.RESOURCES_DIR / 'test_without_filter_admin.xlsx'
         self.actual_path = settings.BASE_DIR / unload_period(**self._get_unload_default_settings())[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_without_filter_curator(self) -> None:
         """Тестирование выгрузки без фильтрации, если пользователь видит не все организации периода."""
@@ -140,7 +156,7 @@ class UnloadPeriodTestCase(TestCase):
         self.superuser.save(update_fields=('is_superuser',))
         expected_path = self.RESOURCES_DIR / 'test_without_filter_curator.xlsx'
         self.actual_path = settings.BASE_DIR / unload_period(**self._get_unload_default_settings())[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_organization_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по организациям."""
@@ -149,7 +165,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'organization_ids': [self.head_organizations[0].id, self.head_organizations[1].id],
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_organization_kind_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по типу организации."""
@@ -158,7 +174,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'organization_kinds': ['ВУЗ1', 'ВУЗ2'],
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_status_filter(self) -> None:
         """Тестирование выгрузки с фильтрацией по статусам."""
@@ -167,7 +183,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'status_ids': [self.statuses[0].id, self.statuses[2].id],
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_curator_group(self) -> None:
         """Тестирование выгрузки с кураторской группой."""
@@ -176,7 +192,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'unload_curator_group': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_financing_paragraph(self) -> None:
         """Тестирование выгрузки с параграфом финансирования."""
@@ -185,7 +201,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'unload_financing_paragraph': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_unload_without_document(self) -> None:
         """Тестирование выгрузки организаций без документов."""
@@ -194,7 +210,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'unload_without_document': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_unload_default(self) -> None:
         """Тестирование выгрузки значений по умолчанию при отсутствии значений в документе."""
@@ -203,7 +219,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'unload_default': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_apply_number_format(self) -> None:
         """Тестирование применения числового формата."""
@@ -212,7 +228,7 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'apply_number_format': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_unload_children(self) -> None:
         """Тестирование выгрузки листов только для филиалов."""
@@ -222,7 +238,7 @@ class UnloadPeriodTestCase(TestCase):
             'unload_heads': False,
             'unload_children': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_unload_heads_and_children(self) -> None:
         """Тестирование выгрузки листов для головных учреждений и филиалов."""
@@ -232,7 +248,7 @@ class UnloadPeriodTestCase(TestCase):
             'unload_heads': True,
             'unload_children': True,
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
     def test_empty_cell(self) -> None:
         """Тестирование выгрузки строки в пустой ячейке."""
@@ -241,10 +257,10 @@ class UnloadPeriodTestCase(TestCase):
             **self._get_unload_default_settings(),
             'empty_cell': '-',
         })[1:]
-        self._assert_worksheets_equal(expected_path, self.actual_path)
+        self._assert_workbooks_equal(expected_path, self.actual_path)
 
-    def _assert_worksheets_equal(self, expected_path: Path, actual_path: Path) -> None:
-        """Проверка книг на равенство по значениям, типу данных и числовому формату."""
+    def _assert_workbooks_equal(self, expected_path: Path, actual_path: Path) -> None:
+        """Проверка книг Excel на равенство."""
         expected_wb = load_workbook(filename=expected_path)
         actual_wb = load_workbook(filename=actual_path)
         self.assertEqual(expected_wb.sheetnames, actual_wb.sheetnames)

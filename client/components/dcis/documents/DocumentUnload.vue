@@ -22,23 +22,21 @@ v-dialog(v-model="active" width="600")
       v-btn(
         :loading="loading"
         color="primary"
-        @click="unloadDocument"
+        @click="$emit('unload-document', additional)"
       ) {{ $t('dcis.documents.unloadDocument.unload') }}
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '#app'
-import { useMutation } from '@vue/apollo-composable'
-import { DocumentType, UnloadDocumentMutation, UnloadDocumentMutationVariables } from '~/types/graphql'
-import unloadDocumentMutation from '~/gql/dcis/mutations/document/unload_document.graphql'
+import { defineComponent, ref } from '#app'
+import { UnloadDocumentMutation } from '~/types/graphql'
 
 export type UnloadDocumentMutationResult = { data: UnloadDocumentMutation }
 
 export default defineComponent({
   props: {
-    document: { type: Object as PropType<DocumentType>, required: true }
+    loading: { type: Boolean, required: true }
   },
-  setup (props, { emit }) {
+  setup (_, { emit }) {
     const { t } = useI18n()
 
     const active = ref<boolean>(false)
@@ -49,39 +47,17 @@ export default defineComponent({
     const paramsTranslations = computed<Record<string, string>>(() => ({
       row_add_date: t('dcis.documents.unloadDocument.rowAddDate') as string,
       row_update_date: t('dcis.documents.unloadDocument.rowUpdateDate') as string,
-      division_name: props.document.period.project.contentType.model === 'department'
-        ? t('dcis.documents.unloadDocument.departmentName') as string
-        : t('dcis.documents.unloadDocument.organizationName') as string,
-      division_head: props.document.period.project.contentType.model === 'department'
-        ? t('dcis.documents.unloadDocument.departmentHead') as string
-        : t('dcis.documents.unloadDocument.organizationHead') as string,
+      division_name: t('dcis.documents.unloadDocument.departmentName') as string,
+      division_head: t('dcis.documents.unloadDocument.departmentHead') as string,
       user: t('dcis.documents.unloadDocument.user') as string
     }))
-
-    const { mutate, loading, onDone } = useMutation<
-      UnloadDocumentMutation,
-      UnloadDocumentMutationVariables
-    >(unloadDocumentMutation)
-    onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
-      if (success) {
-        close()
-        window.open(`/${src}`, '_blank')
-      }
-    })
-
-    const unloadDocument = () => {
-      mutate({
-        documentId: props.document.id,
-        additional: params.filter((param: string) => additional.value.includes(param))
-      })
-    }
 
     const close = () => {
       active.value = false
       emit('close')
     }
 
-    return { active, params, additional, paramsTranslations, unloadDocument, loading, close }
+    return { active, params, additional, paramsTranslations, close }
   }
 })
 </script>

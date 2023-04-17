@@ -7,7 +7,7 @@ left-navigator-container(
     template(v-if="project.canAddPeriod")
       v-spacer
       add-period(
-        :update="addUpdate"
+        :update="(cache, result) => addUpdate(cache, result, 'period')"
         :project="project"
       )
         template(#activator="{ on }")

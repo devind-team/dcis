@@ -1,4 +1,5 @@
 """Общая логика для тестирования сервисов."""
+
 from devind_dictionaries.models import Department
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase

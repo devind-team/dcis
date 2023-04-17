@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import Callable
 
 from devind_dictionaries.models import Organization
@@ -110,7 +109,7 @@ class PeriodUnload:
         - empty_cell - строка в пустой ячейке
         """
         self.period = period
-        self.path = Path(settings.DOCUMENTS_DIR, f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx')
+        self.path = settings.DOCUMENTS_DIR / f'document_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.xlsx'
         self._organizations = self._filter_organizations(user, period, organization_ids, organization_kinds)
         self._status_ids = status_ids
         self._unload_curator_group = unload_curator_group

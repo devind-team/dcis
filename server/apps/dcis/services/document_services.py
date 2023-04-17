@@ -1,8 +1,5 @@
 """Модуль, отвечающий за работу с документами."""
 
-from typing import Type
-
-from devind_dictionaries.models import Department, Organization
 from devind_helpers.orm_utils import get_object_or_none
 from devind_helpers.schema.types import ErrorFieldType
 from django.core.exceptions import PermissionDenied
@@ -11,7 +8,7 @@ from django.db.models import Max, Q, QuerySet
 
 from apps.core.models import User
 from apps.dcis.helpers.exceptions import is_raises
-from apps.dcis.models import (Cell, Document, DocumentMessage, Period, Project, RowDimension, Sheet, Status, Value)
+from apps.dcis.models import Cell, Document, DocumentMessage, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
     can_add_document_message,
@@ -154,10 +151,10 @@ def get_documents_max_version(period_id: int | str, division_id: int | str | Non
 
 
 def get_document_sheets(document: Document) -> QuerySet[Sheet]:
-    project: Project = document.period.project
-    division_model: Type[Organization | Department] = project.division
-    division = division_model.objects.get(pk=document.object_id)
-    is_child: bool = hasattr(division, 'parent_id') and getattr(division, 'parent_id') is not None
+    """Получение листов документа."""
+    project = document.period.project
+    division = project.division.objects.get(pk=document.object_id)
+    is_child= hasattr(division, 'parent_id') and getattr(division, 'parent_id') is not None
     sheet_filter = Q(show_child=True) if is_child else Q(show_head=True)
     return document.sheets.filter(sheet_filter).all()
 

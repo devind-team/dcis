@@ -445,9 +445,7 @@ export default {
       rowAddDate: 'Дата добавления строки',
       rowUpdateDate: 'Дата последних изменений в строке',
       departmentName: 'Название департамента',
-      organizationName: 'Название организации',
       departmentHead: 'Начальник департамента',
-      organizationHead: 'Начальник организации',
       user: 'Пользователь, добавивший строку',
       unload: 'Выгрузить'
     },

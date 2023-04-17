@@ -49,7 +49,8 @@ class Command(BaseCommand):
             files_sort = sorted(files_list, reverse=True)
             file_name = files_sort[0]
             remote_path = path.join(cls.remote_path_dir, file_name)
-            mkdir(cls.tmp_dir)
+            if not path.exists(cls.tmp_dir):
+                mkdir(cls.tmp_dir)
             local_path = path.join(cls.tmp_dir, file_name.replace(':', ''))
             sftp.get(remote_path, local_path)
             sftp.close()

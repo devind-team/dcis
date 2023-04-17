@@ -5,6 +5,10 @@ left-navigator-container.document-sheets__left-navigator-container(
   @update-drawer="$emit('update-drawer')"
 )
   template(#subheader) {{ document.objectName }}
+  v-progress-linear(
+    v-if="unloadLoading && document.period.project.contentType.model === 'organization'"
+    indeterminate
+  )
   grid-sheets(
     v-model="activeSheetIndex"
     :mode="mode"
@@ -14,7 +18,7 @@ left-navigator-container.document-sheets__left-navigator-container(
     :active-document="document"
   )
     template(#menus)
-      document-unload-menu(:document="document")
+      document-unload-menu(:document="document" :loading.sync="unloadLoading")
 </template>
 
 <script lang="ts">
@@ -60,12 +64,15 @@ export default defineComponent({
       })
     })
 
+    const unloadLoading = ref<boolean>(false)
+
     return {
       activeSheetIndex,
       mode,
       activeSheet,
       activeSheetLoading,
-      updateActiveSheet
+      updateActiveSheet,
+      unloadLoading
     }
   }
 })

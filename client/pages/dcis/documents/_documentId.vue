@@ -7,7 +7,6 @@ div
 
 <script lang="ts">
 import { computed, defineComponent, inject, onUnmounted, PropType, ref, useRoute } from '#app'
-import { toGlobalId } from '~/services/graphql-relay'
 import { useCommonQuery, useI18n } from '~/composables'
 import { BreadCrumbsItem, LinksType } from '~/types/devind'
 import type { DocumentQuery, DocumentQueryVariables } from '~/types/graphql'

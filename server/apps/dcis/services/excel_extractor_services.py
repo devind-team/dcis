@@ -319,6 +319,8 @@ class ExcelExtractor:
         if cell.data_type == KindCell.NUMERIC or cell.data_type == KindCell.DATE:
             k = self._NUMBER_FORMAT_KIND_MAP.get(cell.number_format)
             return k or (cell.data_type, cell.number_format)
+        if '\n' in cell.value:
+            return 'text', None
         return cell.data_type, None
 
     @staticmethod

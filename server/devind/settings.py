@@ -9,9 +9,8 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+
 import os
-from datetime import timedelta
-from os.path import dirname, exists, join
 from pathlib import Path
 
 import sentry_sdk
@@ -25,16 +24,16 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 
 # Настройки окружения
-ENV_PATH = join(BASE_DIR, '.env')
+ENV_PATH = BASE_DIR / '.env'
 load_dotenv(dotenv_path=ENV_PATH)
 
 
 # Вспомогательные настройки
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', None)
-assert SECRET_KEY,  'Не установлен SECRET_KEY в переменную окружения.'
+assert SECRET_KEY, 'Не установлен SECRET_KEY в переменную окружения.'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG: bool = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 250000000
 AUTH_USER_MODEL = 'core.User'
@@ -80,7 +79,6 @@ MIDDLEWARE = [
     'devind_core.middleware.SessionMiddleware',
     'devind_core.middleware.TimeRequestMiddleware',
     'devind_core.middleware.LangRequestMiddleware',
-    # 'apps.core.middleware.DatabaseRequestsMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
 ]
 
@@ -88,7 +86,7 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -145,7 +143,7 @@ GRAPHENE = {
     'SCHEMA': 'devind.schema.schema',
     'MIDDLEWARE': [
         'graphene_django.debug.DjangoDebugMiddleware',
-    ]
+    ],
 }
 
 # Настройка канальных слоев
@@ -153,9 +151,9 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [(os.getenv('REDIS_SERVER', 'localhost'), 6379)]
-        }
-    }
+            'hosts': [(os.getenv('REDIS_SERVER', 'localhost'), 6379)],
+        },
+    },
 }
 
 
@@ -166,7 +164,7 @@ if SENTRY_DNS:
 
 
 # Настройки Email
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.google.com')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
@@ -220,19 +218,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'dist'),
-    os.path.join(BASE_DIR, 'storage'),
-    os.path.join(dirname(BASE_DIR), '.nuxt')
+    BASE_DIR / 'dist',
+    BASE_DIR / 'storage',
+    BASE_DIR.parent / '.nuxt',
 ]
 
 
 # Настройки вспомогательных директорий
-USERS_DIR = os.path.join(BASE_DIR, 'storage', 'user_files')
-DOCUMENTS_DIR = os.path.join(BASE_DIR, 'storage', 'documents')
-if not exists(DOCUMENTS_DIR):
+USERS_DIR = BASE_DIR / 'storage' / 'user_files'
+DOCUMENTS_DIR = BASE_DIR / 'storage' / 'documents'
+if not DOCUMENTS_DIR.exists():
     os.makedirs(DOCUMENTS_DIR)
-TEMP_FILES_DIR = os.path.join(BASE_DIR, 'storage', 'temp_files')
-if not exists(TEMP_FILES_DIR):
+TEMP_FILES_DIR = BASE_DIR / 'storage' / 'temp_files'
+if not TEMP_FILES_DIR.exists():
     os.makedirs(TEMP_FILES_DIR)
 
 
@@ -245,7 +243,7 @@ DEVIND_NOTIFICATION_NOTICE_INTERFACE = 'apps.notifications.schema.NoticeInterfac
 
 
 EXTERNAL_URLS = {
-    'cbias': 'https://cbias.ru/sso_app/remote_auth.spf?uid=%s&ris=61'
+    'cbias': 'https://cbias.ru/sso_app/remote_auth.spf?uid=%s&ris=61',
 }
 
 SSH_CONNECT = {
@@ -256,4 +254,4 @@ SSH_CONNECT = {
     'DB_NAME': os.getenv('SSH_DB_NAME'),
 }
 
-EXTERNAL_TOKEN: str = os.getenv('EXTERNAL_TOKEN', None)
+EXTERNAL_TOKEN: str | None = os.getenv('EXTERNAL_TOKEN', None)

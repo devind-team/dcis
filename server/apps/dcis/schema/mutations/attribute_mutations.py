@@ -173,7 +173,6 @@ class UnloadAttributesInFileMutation(BaseMutation):
         return UnloadAttributesInFileMutation(
             src=unload_attributes_in_file(
                 user=info.context.user,
-                get_host=info.context.get_host(),
                 period=period
             )
         )
