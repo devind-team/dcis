@@ -29,15 +29,18 @@ from apps.dcis.services.period_services import (
     add_divisions_from_period,
     add_divisions_period,
     add_period_group,
-    add_period_methodical_support, change_period_group_privileges,
-    change_period_methodical_support, change_settings_period,
+    add_period_methodical_support,
+    change_period_group_privileges,
+    change_period_methodical_support,
+    change_settings_period,
     change_user_period_groups,
     change_user_period_privileges,
     copy_period_groups,
     create_period,
     delete_divisions_period,
     delete_period,
-    delete_period_groups, delete_period_methodical_support,
+    delete_period_groups,
+    delete_period_methodical_support,
 )
 from apps.dcis.services.period_unload_services import unload_period
 
