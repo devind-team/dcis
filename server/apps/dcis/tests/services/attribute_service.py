@@ -4,10 +4,12 @@ import json
 from io import BytesIO
 from os import listdir, remove
 from os.path import isfile, join
+from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
 from apps.core.models import User
@@ -16,8 +18,9 @@ from apps.dcis.models import (
     Period,
     Project,
 )
+from apps.dcis.permissions import can_change_period_attributes
 from apps.dcis.services.attribute_services import (
-    unload_attributes_in_file,
+    change_attribute, create_attribute, unload_attributes_in_file,
     upload_attributes_from_file,
 )
 
@@ -53,6 +56,60 @@ class AttributeTestCase(TestCase):
             default=False,
             mutable=False,
             period=self.period
+        )
+
+    def test_create_attributes(self):
+        """Test creating attributes."""
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm not in ('dcis.change_period', 'dcis.add_project', 'dcis.add_period')
+        ):
+            self.assertRaises(
+                PermissionDenied,
+                can_change_period_attributes,
+                self.superuser,
+                self.period
+            )
+        self.assertEqual(
+            create_attribute(
+                user=self.superuser,
+                period=self.period,
+                name='Attribute 3',
+                placeholder='Placeholder 3',
+                key='key3',
+                kind='string',
+                default='7',
+                mutable=True
+            ),
+            Attribute.objects.get(name='Attribute 3')
+        )
+
+    def test_change_attributes(self):
+        """Test change attributes."""
+        with patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm not in ('dcis.change_period', 'dcis.add_project', 'dcis.add_period')
+        ):
+            self.assertRaises(
+                PermissionDenied,
+                can_change_period_attributes,
+                self.superuser,
+                self.period
+            )
+        self.assertEqual(
+            change_attribute(
+                user=self.superuser,
+                attribute=self.attribute1,
+                name='Attribute 3',
+                placeholder='Placeholder 3',
+                key='key3',
+                kind='string',
+                default='7',
+                mutable=True,
+            ),
+            Attribute.objects.get(name='Attribute 3')
         )
 
     def test_upload_attributes_from_file(self):
