@@ -26,7 +26,8 @@ from apps.dcis.schema.types import (
     CellAggregationType,
     DivisionModelTypeConnection,
     LimitationType,
-    PeriodMethodicalSupportType, PeriodType,
+    PeriodMethodicalSupportType,
+    PeriodType,
     PrivilegeType,
     ReportDocumentInputType,
     ReportRowGroupInputType,
@@ -42,7 +43,8 @@ from apps.dcis.services.divisions_services import (
 from apps.dcis.services.period_services import (
     get_period_attributes,
     get_period_users,
-    get_user_period_privileges, get_user_periods_without_archives,
+    get_user_period_privileges,
+    get_user_periods_without_archives,
 )
 from apps.dcis.services.row_dimension_services import get_indices_groups_to_expand
 from apps.dcis.services.sheet_unload_services import (

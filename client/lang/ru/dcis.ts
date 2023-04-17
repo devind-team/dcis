@@ -279,7 +279,7 @@ export default {
         }
       }
     },
-    methodical_support: {
+    methodicalSupport: {
       file: 'файл',
       shownOf: '@:shownOf',
       uploadFiles: 'Загрузить файлы',
