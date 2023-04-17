@@ -1,4 +1,5 @@
 """Модуль, отвечающий за работу с периодами."""
+
 import os
 from datetime import date
 from io import BytesIO
@@ -36,6 +37,7 @@ from apps.dcis.permissions import (
 from apps.dcis.permissions.period_permissions import can_change_period_methodical_support
 from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
+from apps.dcis.services.excel_extractor_services import ExcelExtractor
 from apps.dcis.services.limitation_services import add_limitations_from_file
 
 
@@ -135,7 +137,9 @@ def create_period(
     project: Project,
     multiple: bool,
     versioning: bool,
-    limitations_file: File | None
+    xlsx_file: File,
+    limitations_file: File | None,
+    readonly_fill_color: bool
 ) -> Period:
     """Создание периода."""
     can_add_period(user=user, project=project)
@@ -146,6 +150,8 @@ def create_period(
         multiple=multiple,
         versioning=versioning
     )
+    extractor = ExcelExtractor(xlsx_file, readonly_fill_color)
+    extractor.save(period)
     if limitations_file is not None:
         add_limitations_from_file(period, limitations_file)
     return period
