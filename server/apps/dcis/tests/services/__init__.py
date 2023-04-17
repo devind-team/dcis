@@ -4,6 +4,7 @@ from .column_dimension_services import ColumnDimensionTestCase
 from .curator_services import CuratorGroupTestCase
 from .divisions_services import DivisionTestCase, PeriodOrganizationsWithoutDocumentTestCase
 from .document_services import DocumentMessageTestCase, DocumentTestCase, GetUserDocumentsTestCase
+from .document_unload_services import UnloadDocumentTestCase
 from .limitation_services import LimitationTestCase
 from .period_services import (
     GetUserPeriodsTestCase,

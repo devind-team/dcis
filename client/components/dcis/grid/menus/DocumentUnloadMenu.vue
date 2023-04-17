@@ -44,7 +44,7 @@ export default defineComponent({
     onDone(({ data: { unloadDocument: { success, src } } }: UnloadDocumentMutationResult) => {
       if (success) {
         close()
-        window.open(`/${src}`, '_blank')
+        window.open(src, '_blank')
       }
     })
     watch(loading, (newValue) => {

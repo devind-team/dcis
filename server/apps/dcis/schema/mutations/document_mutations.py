@@ -26,7 +26,7 @@ from apps.dcis.schema.types import (
 )
 from apps.dcis.services.add_document_data_services import add_document_data
 from apps.dcis.services.document_services import create_document, create_document_message
-from apps.dcis.services.document_unload_services import document_upload
+from apps.dcis.services.document_unload_services import unload_document
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
     change_row_dimension_height,
@@ -208,7 +208,7 @@ class UnloadDocumentMutation(BaseMutation):
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: None, info: ResolveInfo, document_id: str, additional: list[str] | None = None):
         return UnloadDocumentMutation(
-            src=document_upload(
+            src=unload_document(
                 user=info.context.user,
                 document_id=gid2int(document_id),
                 additional=additional

@@ -1,6 +1,5 @@
-"""Модуль, отвечающий за обновление с документов."""
+"""Модуль, отвечающий за выгрузку документа."""
 
-import posixpath
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -86,7 +85,7 @@ class DocumentUnload:
                 ws.column_dimensions[get_column_letter(ci)].width = 20
 
         wb.save(self.path)
-        return posixpath.relpath(self.path, settings.BASE_DIR)
+        return f'/{self.path.relative_to(settings.BASE_DIR)}'
 
     def _save_rows(
         self,
@@ -264,7 +263,7 @@ class DocumentUnload:
         )
 
 
-def document_upload(user: User, document_id: int, additional: list[str] | None = None) -> str:
+def unload_document(user: User, document_id: int, additional: list[str] | None = None) -> str:
     """Функция выгрузки документа."""
     if not additional:
         additional = []
