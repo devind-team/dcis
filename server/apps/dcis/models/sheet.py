@@ -30,9 +30,9 @@ class Style(models.Model):
         (RIGHT, 'right')
     )
 
-    TOP = 0
-    BOTTOM = 1
-    MIDDLE = 2
+    TOP = 'top'
+    MIDDLE = 'middle'
+    BOTTOM = 'bottom'
 
     KIND_VERTICAL_ALIGN = (
         (TOP, 'top'),

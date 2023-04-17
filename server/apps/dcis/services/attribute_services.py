@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from os.path import join
 from posixpath import relpath
-from typing import Any, Sequence
+from typing import Sequence
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -174,7 +174,7 @@ def upload_attributes_from_file(user: User, period: Period, attributes_file: Fil
     ]
 
 
-def unload_attributes_in_file(user: User, get_host: Any | None, period: Period) -> str:
+def unload_attributes_in_file(user: User, period: Period) -> str:
     """Выгрузка атребутов периода в json файл."""
 
     can_change_period_attributes(user, period)

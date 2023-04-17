@@ -1,4 +1,5 @@
 """Тесты модуля, отвечающего за работу со статусами."""
+
 from itertools import product
 from unittest.mock import Mock, patch
 
@@ -11,18 +12,22 @@ from jsonpickle import encode
 from apps.core.models import User
 from apps.dcis.models import (
     AddStatus,
-    Cell, ColumnDimension,
+    Cell,
+    ColumnDimension,
     Document,
     DocumentStatus,
-    Limitation, Period,
+    Limitation,
+    Period,
     Project,
     RowDimension,
     Sheet,
-    Status, Value,
+    Status,
+    Value,
 )
 from apps.dcis.services.status_services import (
     AddStatusActions,
     LimitationError,
+    StatusAction,
     add_document_status,
     delete_document_status,
     get_initial_statuses,
@@ -32,6 +37,20 @@ from apps.dcis.services.status_services import (
 
 class StatusTestCase(TestCase):
     """Тестирование разных функций работы со статусами."""
+
+    class TestAction(StatusAction):
+        """Тестовое действие при добавлении статуса."""
+
+        pre_mock: Mock = Mock()
+        post_mock: Mock = Mock()
+
+        @classmethod
+        def pre_execute(cls, document: Document) -> None:
+            cls.pre_mock(document)
+
+        @classmethod
+        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+            cls.post_mock(document, document_status)
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
@@ -88,7 +107,7 @@ class StatusTestCase(TestCase):
             from_status=self.exist_status,
             to_status=self.status_to_add,
             roles=['admin'],
-            check='test_check',
+            action='TestAction',
         )
         self.add_document = Document.objects.create(user=self.superuser, period=self.period)
         self.add_document_status = DocumentStatus.objects.create(
@@ -143,12 +162,13 @@ class StatusTestCase(TestCase):
         ), self.assertRaises(PermissionDenied):
             self._add_document_status()
         with patch(
-            'apps.dcis.services.status_services.AddStatusCheck.test_check',
+            'apps.dcis.services.status_services.AddStatusActions.TestAction',
             create=True,
-            new=Mock()
-        ) as mock:
+            new=self.TestAction
+        ):
             actual_document_status = self._add_document_status()
-            mock.assert_called_once_with(self.add_document)
+            self.TestAction.pre_mock.assert_called_once_with(self.add_document)
+            self.TestAction.post_mock.assert_called_once_with(self.add_document, actual_document_status)
         expected_document_status = DocumentStatus.objects.get(comment='Add document status')
         self.assertEqual(expected_document_status, actual_document_status)
 

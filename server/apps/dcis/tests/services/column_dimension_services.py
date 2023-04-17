@@ -1,4 +1,5 @@
 """Тесты модуля, отвечающего за работу с колонками."""
+
 from itertools import product
 from unittest.mock import patch
 

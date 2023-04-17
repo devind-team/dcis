@@ -138,7 +138,7 @@ def update_or_create_file_value(
 def create_file_value_archive(user: User, document: Document, value: Value, name: str) -> str:
     """Создание архива значения ячейки типа `Файл`."""
     can_view_document(user, document)
-    archive_path = f'{path.join(settings.TEMP_FILES_DIR, name)}.zip'
+    archive_path = f'{settings.TEMP_FILES_DIR / name}.zip'
     with ZipFile(archive_path, 'w') as zip_file:
         for file in get_file_value_files(value):
             zip_file.write(file.src.path, path.basename(file.src.path))
