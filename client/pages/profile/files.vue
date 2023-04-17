@@ -1,6 +1,6 @@
 <template lang="pug">
 v-card
-  v-card-title {{ $t('name') }}
+  v-card-title {{ $t('profile.files.name') }}
   v-card-text
     v-row(align="center")
       v-col(cols="12")

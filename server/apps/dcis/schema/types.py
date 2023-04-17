@@ -1,7 +1,7 @@
 import json
 
 import graphene
-from devind_core.schema.types import ContentTypeType, FileType, GroupType
+from devind_core.schema.types import ContentTypeType, GroupType
 from devind_dictionaries.schema import OrganizationType
 from devind_helpers.optimized import OptimizedDjangoObjectType
 from devind_helpers.schema.connections import CountableConnection
@@ -28,6 +28,7 @@ from apps.dcis.models import (
     Limitation,
     Period,
     PeriodGroup,
+    PeriodMethodicalSupport,
     PeriodPrivilege,
     Privilege,
     Project,
@@ -53,7 +54,7 @@ from apps.dcis.permissions import (
     can_delete_project_base,
     can_view_period_result_base,
 )
-from apps.dcis.permissions.period_permissions import can_change_period_base
+from apps.dcis.permissions.period_permissions import can_change_period_base, can_change_period_methodical_support_base
 from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.services.document_services import get_document_sheets
@@ -111,7 +112,6 @@ class PeriodType(OptimizedDjangoObjectType):
 
     user = graphene.Field(UserType, required=True, description='Пользователь')
     project = graphene.Field(ProjectType, description='Проект')
-    methodical_support = DjangoListField(FileType, description='Методическая поддержка')
     divisions = graphene.List(lambda: DivisionModelType, description='Участвующие дивизионы')
     period_groups = graphene.List(lambda: PeriodGroupType, description='Группы пользователей назначенных в сборе')
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
@@ -152,6 +152,10 @@ class PeriodType(OptimizedDjangoObjectType):
         required=True,
         description='Может ли пользователь изменять атрибуты периода',
     )
+    can_change_period_methodical_support = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь изменять методические рекомендации'
+    )
     can_change_settings = graphene.Boolean(
         required=True,
         description='Может ли пользователь изменять настройки периода',
@@ -181,7 +185,6 @@ class PeriodType(OptimizedDjangoObjectType):
             'updated_at',
             'user',
             'project',
-            'methodical_support',
         )
         convert_choices_to_enum = False
         filter_fields = {
@@ -240,6 +243,10 @@ class PeriodType(OptimizedDjangoObjectType):
     @staticmethod
     def resolve_can_view_result(period: Period, info: ResolveInfo) -> bool:
         return not is_raises(PermissionDenied, can_view_period_result_base, info.context.user, period)
+
+    @staticmethod
+    def resolve_can_change_period_methodical_support(period: Period, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_change_period_methodical_support_base, info.context.user, period)
 
     @staticmethod
     def resolve_can_change_settings(period: Period, info: ResolveInfo) -> bool:
@@ -701,6 +708,31 @@ class LimitationType(DjangoObjectType):
             'error_message',
             'sheet',
         )
+
+
+class PeriodMethodicalSupportType(DjangoObjectType):
+    """Тип методического обеспечения периода."""
+
+    ext = graphene.String(description='Расширение файла')
+    size = graphene.Int(description='Размер файла в байтах')
+    period = graphene.Field(PeriodType, description='Период сбора')
+
+    class Meta:
+        model = PeriodMethodicalSupport
+        interfaces = (graphene.relay.Node,)
+        fields = (
+            'id',
+            'name',
+            'src',
+            'size',
+            'deleted',
+            'created_at',
+            'updated_at',
+            'period',
+            'ext',
+        )
+        filter_fields = {'name': ['icontains']}
+        connection_class = CountableConnection
 
 
 class ChangedCellOptionType(graphene.ObjectType):

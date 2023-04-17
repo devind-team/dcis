@@ -19,13 +19,14 @@ from apps.core.models import User
 from apps.core.schema import UserType
 from apps.core.services.user_services import get_user_from_id_or_context
 from apps.dcis.helpers.info_fields import get_fields
-from apps.dcis.models import Attribute, Document, Limitation, Period, Privilege, Sheet
+from apps.dcis.models import Attribute, Document, Limitation, Period, PeriodMethodicalSupport, Privilege, Sheet
 from apps.dcis.permissions import can_change_period_sheet, can_view_period, can_view_period_result
 from apps.dcis.schema.types import (
     AttributeType,
     CellAggregationType,
     DivisionModelTypeConnection,
     LimitationType,
+    PeriodMethodicalSupportType,
     PeriodType,
     PrivilegeType,
     ReportDocumentInputType,
@@ -42,7 +43,8 @@ from apps.dcis.services.divisions_services import (
 from apps.dcis.services.period_services import (
     get_period_attributes,
     get_period_users,
-    get_user_period_privileges, get_user_periods_without_archives,
+    get_user_period_privileges,
+    get_user_periods_without_archives,
 )
 from apps.dcis.services.row_dimension_services import get_indices_groups_to_expand
 from apps.dcis.services.sheet_unload_services import (
@@ -184,6 +186,13 @@ class PeriodQueries(graphene.ObjectType):
         period_id=graphene.ID(required=True, description='Идентификатор периода'),
         required=True,
         description='Получение типов организаций для периода'
+    )
+
+    methodical_support = DjangoFilterConnectionField(
+        PeriodMethodicalSupportType,
+        period_id=graphene.ID(required=True, description='Идентификатор периода'),
+        required=True,
+        description='Получение методического обеспечения периода'
     )
 
     @staticmethod
@@ -346,3 +355,16 @@ class PeriodQueries(graphene.ObjectType):
     def resolve_period_organization_kinds(root: Any, info: ResolveInfo, period_id: str) -> set[str]:
         period = get_object_or_404(Period, pk=gid2int(period_id))
         return get_period_organization_kinds(info.context.user, period)
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_methodical_support(
+        root,
+        info: ResolveInfo,
+        period_id: str,
+        **kwargs
+    ) -> QuerySet[PeriodMethodicalSupport]:
+
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        can_view_period(info.context.user, period)
+        return PeriodMethodicalSupport.objects.filter(period_id=period.id)

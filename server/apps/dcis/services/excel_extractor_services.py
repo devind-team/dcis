@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import PosixPath
 from typing import Iterator
 
+from django.core.files.base import File
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell.cell import Cell as OpenpyxlCell
 from openpyxl.styles.colors import COLOR_INDEX, Color, WHITE
@@ -95,13 +96,14 @@ class BuildSheet:
 class ExcelExtractor:
     """Парсинг xlsx файла в структуру данных для последовательной загрузки в базу данных."""
 
-    def __init__(self, path: PosixPath, readonly_fill_color: bool):
+    def __init__(self, filename: PosixPath | File, readonly_fill_color: bool) -> None:
         """Инициализация.
 
-        :param path - путь к файлу Excel.
+        :param filename - путь к файлу Excel или файл Excel
+        :param readonly_fill_color - запретить редактирование ячеек с заливкой
         """
-        self.path = path
-        self.work_book = load_workbook(path)
+        self.path = filename
+        self.work_book = load_workbook(filename)
         self.readonly_fill_color = readonly_fill_color
 
     def save(self, period: Period):

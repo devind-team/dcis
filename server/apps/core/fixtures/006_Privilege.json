@@ -95,7 +95,7 @@
     "fields": {
       "name": "Изменение документа",
       "key": "change_document",
-       "created_at": "2021-01-01T12:00:00.000Z"
+      "created_at": "2021-01-01T12:00:00.000Z"
     }
   },
   {
@@ -140,6 +140,15 @@
     "fields": {
       "name": "Изменение значения ячейки документа",
       "key": "change_value",
+      "created_at": "2021-01-01T12:00:00.000Z"
+    }
+  },
+  {
+    "model": "dcis.Privilege",
+    "pk": 17,
+    "fields": {
+      "name": "Изменение методических рекомендаций периода сбора",
+      "key": "change_period_methodical_support",
       "created_at": "2021-01-01T12:00:00.000Z"
     }
   }

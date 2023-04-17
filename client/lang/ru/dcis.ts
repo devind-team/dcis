@@ -67,6 +67,7 @@ export default {
       sheets: 'Таблица',
       report: 'Сводный отчет',
       unload: 'Выгрузка',
+      support: 'Методическое обеспечение',
       settings: '@:settings',
       aggregations: 'Агрегация'
     },
@@ -276,6 +277,22 @@ export default {
           name: 'Название привилегии',
           key: 'Ключ'
         }
+      }
+    },
+    methodicalSupport: {
+      file: 'файл',
+      shownOf: '@:shownOf',
+      uploadFiles: 'Загрузить файлы',
+      downloadFile: 'Скачать файл',
+      changeName: 'Изменить название',
+      deleteFile: 'Удалить файл',
+      kB: 'кБ',
+      tableHeaders: {
+        name: '@:name',
+        ext: 'Тип файла',
+        updated: 'Загружен',
+        size: 'Размер',
+        actions: 'Действия'
       }
     },
     users: {

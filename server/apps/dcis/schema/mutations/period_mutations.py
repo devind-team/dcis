@@ -12,17 +12,26 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
+from graphql_relay import from_global_id
 
 from apps.core.models import User
 from apps.core.schema import UserType
-from apps.dcis.models import Period, PeriodGroup, Project
-from apps.dcis.schema.types import DivisionModelType, PeriodGroupType, PeriodType, PrivilegeType
+from apps.dcis.models import Period, PeriodGroup, PeriodMethodicalSupport, Project
+from apps.dcis.schema.types import (
+    DivisionModelType,
+    PeriodGroupType,
+    PeriodMethodicalSupportType,
+    PeriodType,
+    PrivilegeType,
+)
 from apps.dcis.services.period_services import (
     add_divisions_from_file,
     add_divisions_from_period,
     add_divisions_period,
     add_period_group,
+    add_period_methodical_support,
     change_period_group_privileges,
+    change_period_methodical_support,
     change_settings_period,
     change_user_period_groups,
     change_user_period_privileges,
@@ -31,6 +40,7 @@ from apps.dcis.services.period_services import (
     delete_divisions_period,
     delete_period,
     delete_period_groups,
+    delete_period_methodical_support,
 )
 from apps.dcis.services.period_unload_services import unload_period
 
@@ -376,6 +386,68 @@ class ChangeUserPeriodPrivilegesMutation(BaseMutation):
         )
 
 
+class AddPeriodMethodicalSupportMutation(BaseMutation):
+    """Мутация для загрузки методических рекомендаций."""
+
+    class Input:
+        period_id = graphene.ID(description='Идентификатор периода')
+        files = graphene.List(graphene.NonNull(Upload), required=True, description='Загружаемые файлы')
+
+    methodical_support = graphene.List(PeriodMethodicalSupportType, required=True, description='Загруженные файлы')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root, info: ResolveInfo, period_id: str, files: list[InMemoryUploadedFile]):
+        period: Period = get_object_or_404(Period, pk=gid2int(period_id))
+        return AddPeriodMethodicalSupportMutation(
+            methodical_support=add_period_methodical_support(info.context.user, period, files)
+        )
+
+
+class ChangePeriodMethodicalSupportMutation(BaseMutation):
+    """Мутация для изменения файла методического обеспечения периода."""
+
+    class Input:
+        file_id = graphene.ID(required=True, description='Идентификатор файла')
+        field = graphene.String(required=True, description='Поле файла')
+        value = graphene.String(required=True, description='Значение поля файла')
+
+    methodical_support = graphene.Field(PeriodMethodicalSupportType, description='Измененный файл')
+
+    @staticmethod
+    @permission_classes([IsAuthenticated])
+    def mutate_and_get_payload(
+        root,
+        info: ResolveInfo,
+        file_id: str,
+        field: str,
+        value: str,
+        *args,
+        **kwargs
+    ):
+        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
+        period: Period = file.period
+        change_period_methodical_support(info.context.user, period, field, value, file)
+        return ChangePeriodMethodicalSupportMutation(methodical_support=file)
+
+
+class DeletePeriodMethodicalSupportMutation(BaseMutation):
+    """Мутация для полного удаления методического обеспечения периода."""
+
+    class Input:
+        file_id = graphene.ID(required=True, description='Идентификатор файла')
+
+    id = graphene.ID(required=True, description='Идентификатор удаляемого файла')
+
+    @staticmethod
+    @permission_classes([IsAuthenticated])
+    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, *args, **kwargs):
+        file: PeriodMethodicalSupport = get_object_or_404(PeriodMethodicalSupport, pk=from_global_id(file_id)[1])
+        period: Period = file.period
+        delete_period_methodical_support(info.context.user, period, file)
+        return DeletePeriodMethodicalSupportMutation(id=file_id)
+
+
 class UnloadPeriodMutation(BaseMutation):
     """Выгрузка периода в формате Excel."""
 
@@ -473,5 +545,9 @@ class PeriodMutations(graphene.ObjectType):
 
     change_user_period_groups = ChangeUserPeriodGroupsMutation.Field(required=True)
     change_user_period_privileges = ChangeUserPeriodPrivilegesMutation.Field(required=True)
+
+    add_period_methodical_support = AddPeriodMethodicalSupportMutation.Field(required=True)
+    change_period_methodical_support = ChangePeriodMethodicalSupportMutation.Field(required=True)
+    delete_period_methodical_support = DeletePeriodMethodicalSupportMutation.Field(required=True)
 
     unload_period = UnloadPeriodMutation.Field(required=True)

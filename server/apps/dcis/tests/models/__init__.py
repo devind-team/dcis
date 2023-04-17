@@ -1,2 +1,3 @@
 from .document import DocumentModelTestCase, DocumentStatusModelTestCase
+from .methodical_support import PeriodMethodicalSupportModelTestCase
 from .project import ProjectModelTestCase

@@ -1,0 +1,17 @@
+#import "../../fragments/period_methodical_support_fields.graphql"
+
+mutation AddPeriodMethodicalSupport($periodId: ID!, $files: [Upload!]!) {
+  addPeriodMethodicalSupport(input: {
+    periodId: $periodId,
+    files: $files
+  }) {
+    success
+    errors {
+      field
+      messages
+    }
+    methodicalSupport {
+      ...PeriodMethodicalSupportFields
+    }
+  }
+}

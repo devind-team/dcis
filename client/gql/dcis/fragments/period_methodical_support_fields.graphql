@@ -1,0 +1,11 @@
+fragment PeriodMethodicalSupportFields on PeriodMethodicalSupportType {
+  id
+  name
+  src
+  ext
+  size
+  deleted
+  createdAt
+  updatedAt
+  __typename
+}

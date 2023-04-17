@@ -1,8 +1,9 @@
 """Модуль, отвечающий за работу с периодами."""
 
+import os
 from datetime import date
 from io import BytesIO
-from typing import Type
+from typing import Iterable
 
 from devind_helpers.import_from_file import ExcelReader
 from devind_helpers.orm_utils import get_object_or_404
@@ -14,7 +15,16 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from apps.core.models import User
-from apps.dcis.models import Attribute, Division, Period, PeriodGroup, PeriodPrivilege, Privilege, Project
+from apps.dcis.models import (
+    Attribute,
+    Division,
+    Period,
+    PeriodGroup,
+    PeriodMethodicalSupport,
+    PeriodPrivilege,
+    Privilege,
+    Project,
+)
 from apps.dcis.permissions import (
     can_add_period,
     can_change_period_divisions,
@@ -24,6 +34,7 @@ from apps.dcis.permissions import (
     can_delete_period,
     can_view_period,
 )
+from apps.dcis.permissions.period_permissions import can_change_period_methodical_support
 from apps.dcis.services.curator_services import get_curator_organizations
 from apps.dcis.services.divisions_services import get_divisions, get_user_division_ids
 from apps.dcis.services.excel_extractor_services import ExcelExtractor
@@ -139,13 +150,7 @@ def create_period(
         multiple=multiple,
         versioning=versioning
     )
-    fl = period.methodical_support.create(
-        name=xlsx_file.name,
-        src=xlsx_file,
-        deleted=False,
-        user=user
-    )
-    extractor = ExcelExtractor(fl.src.path, readonly_fill_color)
+    extractor = ExcelExtractor(xlsx_file, readonly_fill_color)
     extractor.save(period)
     if limitations_file is not None:
         add_limitations_from_file(period, limitations_file)
@@ -186,7 +191,7 @@ def add_divisions_from_file(
         ],
     project: Project = period.project
     # 1. Подбираем найденные дивизионы
-    divisions: dict[int, Type[project.division]] = project.division.objects \
+    divisions: dict[int, type[project.division]] = project.division.objects \
         .filter(pk__in=divisions_id.keys()).in_bulk()
     # 2. Определяем переданные, но не найденные в базе данных
     for division_id in divisions:
@@ -197,7 +202,7 @@ def add_divisions_from_file(
     for division_exist in divisions_exist:
         divisions_id[division_exist] = 2
     # 4. Сохраняем в БД необходимые дивизионы
-    income_divisions: dict[int, Type[project.division]] = {
+    income_divisions: dict[int, type[project.division]] = {
         division_id: divisions[division_id]
         for division_id, freq in divisions_id.items() if freq == 1
     }
@@ -231,7 +236,7 @@ def add_divisions_from_period(
     for period_division in period_divisions:
         period_divisions_from[period_division] = 1
     Division = period.project.division  # noqa
-    divisions: dict[int, Type[Division]] = Division.objects \
+    divisions: dict[int, type[Division]] = Division.objects \
         .filter(pk__in=[division_id for division_id, freq in period_divisions_from.items() if freq == 0]) \
         .in_bulk()
     with transaction.atomic():
@@ -323,6 +328,45 @@ def change_user_period_privileges(
         PeriodPrivilege.objects.create(period_id=period_id, user_id=user_id, privilege=privilege)
         privileges.append(privilege)
     return privileges
+
+
+def add_period_methodical_support(
+    user: User,
+    period: Period,
+    files: list[InMemoryUploadedFile]
+) -> Iterable[PeriodMethodicalSupport]:
+    can_change_period_methodical_support(user, period)
+    return reversed(
+        [PeriodMethodicalSupport.objects.create(
+            period=period,
+            name=file.name,
+            src=file
+        ) for file in files]
+    )
+
+
+def change_period_methodical_support(
+    user: User,
+    period: Period,
+    field: str,
+    value: str,
+    file: PeriodMethodicalSupport
+) -> PeriodMethodicalSupport:
+    can_change_period_methodical_support(user, period)
+    setattr(file, field, value)
+    file.save(update_fields=(field,))
+    return file
+
+
+def delete_period_methodical_support(
+    user: User,
+    period: Period,
+    file: PeriodMethodicalSupport
+) -> None:
+    can_change_period_methodical_support(user, period)
+    if os.path.isfile(file.src.path):
+        os.remove(file.src.path)
+    file.delete()
 
 
 def change_settings_period(
