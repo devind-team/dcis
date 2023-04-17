@@ -5,6 +5,7 @@ from os.path import join
 from posixpath import relpath
 from typing import Sequence
 
+from devind_dictionaries.models import Organization
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import File
@@ -132,6 +133,18 @@ def create_attribute_context(user: User, document: Document) -> Context:
             'org_name': mark_safe(document.object_name)
         }
     )
+    # Расширяем контекст для организаций
+    if document.period.project.division is Organization:
+        organization: Organization = Organization.objects.filter(pk=document.object_id).select_related('parent').get()
+        organization_context = {
+            'org_inn': mark_safe(organization.inn),
+            'org_kpp': mark_safe(organization.kpp),
+            'org_okpo': mark_safe(organization.okpo)
+        }
+        export_organization: Organization | None = organization.parent
+        if export_organization:
+            organization_context['exp_name'] = mark_safe(export_organization.name)
+        context.update(organization_context)
     return Context(context)
 
 

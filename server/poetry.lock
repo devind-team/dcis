@@ -329,14 +329,14 @@ typecheck = ["mypy"]
 
 [[package]]
 name = "beautifulsoup4"
-version = "4.12.1"
+version = "4.12.2"
 description = "Screen-scraping library"
 category = "main"
 optional = false
 python-versions = ">=3.6.0"
 files = [
-    {file = "beautifulsoup4-4.12.1-py3-none-any.whl", hash = "sha256:e44795bb4f156d94abb5fbc56efff871c1045bfef72e9efe77558db9f9616ac3"},
-    {file = "beautifulsoup4-4.12.1.tar.gz", hash = "sha256:c7bdbfb20a0dbe09518b96a809d93351b2e2bcb8046c0809466fa6632a10c257"},
+    {file = "beautifulsoup4-4.12.2-py3-none-any.whl", hash = "sha256:bd2520ca0d9d7d12694a53d44ac482d181b4ec1888909b035a3dbf40d0f57d4a"},
+    {file = "beautifulsoup4-4.12.2.tar.gz", hash = "sha256:492bbc69dca35d12daac71c4db1bfff0c876c00ef4a2ffacce226d4638eb72da"},
 ]
 
 [package.dependencies]
@@ -2932,14 +2932,14 @@ files = [
 
 [[package]]
 name = "pygments"
-version = "2.14.0"
+version = "2.15.0"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 files = [
-    {file = "Pygments-2.14.0-py3-none-any.whl", hash = "sha256:fa7bd7bd2771287c0de303af8bfdfc731f51bd2c6a47ab69d117138893b82717"},
-    {file = "Pygments-2.14.0.tar.gz", hash = "sha256:b3ed06a9e8ac9a9aae5a6f5dbe78a8a58655d17b43b93c078f094ddc476ae297"},
+    {file = "Pygments-2.15.0-py3-none-any.whl", hash = "sha256:77a3299119af881904cd5ecd1ac6a66214b6e9bed1f2db16993b54adede64094"},
+    {file = "Pygments-2.15.0.tar.gz", hash = "sha256:f7e36cffc4c517fbc252861b9a6e4644ca0e5abadf9a113c72d1358ad09b9500"},
 ]
 
 [package.extras]
@@ -3697,14 +3697,14 @@ files = [
 
 [[package]]
 name = "xlsx-evaluate"
-version = "0.4.8"
+version = "0.5.0"
 description = "Calculate XLSX formulas"
 category = "main"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "xlsx_evaluate-0.4.8-py3-none-any.whl", hash = "sha256:97b9db3b6b5c650d7b447c8e9f63f1878195ce349d6b90230b74ccd109937476"},
-    {file = "xlsx_evaluate-0.4.8.tar.gz", hash = "sha256:daedf148172b21e989ff6a747b54cd0abe501a991e92cfa030d31f62c52e7c10"},
+    {file = "xlsx_evaluate-0.5.0-py3-none-any.whl", hash = "sha256:a327f7ac653f2436e2eb4119aaf9fe8dc75a3820ffa458d67314715a0acb0b83"},
+    {file = "xlsx_evaluate-0.5.0.tar.gz", hash = "sha256:29a7cbd6e5bea0014678d7ec2e29581715fdb6ef7ecb9e27a4b8523da7abfdf1"},
 ]
 
 [package.dependencies]
@@ -3856,4 +3856,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "ce72ebc99c27c19a982942b884a08a7ad96b502602f546a5ae9517fde51916c1"
+content-hash = "9600fb7f5942b511c9bf3e9e46e51515306c3d5e3d77310b2ec2b0d7ebdb3dcd"

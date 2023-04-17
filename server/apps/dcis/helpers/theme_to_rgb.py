@@ -46,9 +46,14 @@ def get_theme_colors(wb):
     first_color_scheme = color_schemes[0]
 
     colors = []
+    themes = [
+        'lt1', 'dk1', 'lt2', 'dk2',
+        'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6',
+        'hlink', 'folHlink'
+    ]
 
-    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6']:
-        accent = first_color_scheme.find(QName(xlmns, c).text)
+    for theme in themes:
+        accent = first_color_scheme.find(QName(xlmns, theme).text)
 
         if 'window' in accent.getchildren()[0].attrib['val']:
             colors.append(accent.getchildren()[0].attrib['lastClr'])
