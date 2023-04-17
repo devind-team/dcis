@@ -87,7 +87,7 @@ class UnloadDocumentTestCase(TestCase):
         self.department_period = Period.objects.create(project=self.department_project)
         self.department_period.division_set.create(object_id=self.department.id)
 
-        self.department_form1 = self.department_period.sheet_set.create(name='Форма 1')
+        self.department_form1 = self.department_period.sheet_set.create(name='Форма 1', position=0)
         self.department_form1_column_dimensions = [ColumnDimension.objects.create(
             sheet=self.department_form1,
             index=i,
@@ -118,7 +118,7 @@ class UnloadDocumentTestCase(TestCase):
         MergedCell.objects.create(sheet=self.department_form1, min_col=2, min_row=1, max_col=3, max_row=1)
         MergedCell.objects.create(sheet=self.department_form1, min_col=1, min_row=1, max_col=1, max_row=2)
 
-        self.department_form2 = self.department_period.sheet_set.create(name='Форма 2')
+        self.department_form2 = self.department_period.sheet_set.create(name='Форма 2', position=1)
         self.department_form2_column_dimensions = [ColumnDimension.objects.create(
             sheet=self.department_form2,
             index=i,
@@ -196,11 +196,13 @@ class UnloadDocumentTestCase(TestCase):
 
         self.head_organization_form = self.organization_period.sheet_set.create(
             name='Головная форма',
+            position=0,
             show_head=True,
             show_child=False,
         )
         self.branch_organization_form = self.organization_period.sheet_set.create(
             name='Форма филиала',
+            position=1,
             show_head=False,
             show_child=True,
         )
