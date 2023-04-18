@@ -29,7 +29,6 @@ import { DataTableHeader } from 'vuetify'
 import type { PropType, ComputedRef } from '#app'
 import { computed, defineComponent, useNuxt2Meta } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { ActionType, logEntryHeaders, logEntryActions } from '~/pages/profile/activity.vue'
 import { useCursorPagination, useDebounceSearch, useFilters, useI18n, useQueryRelay } from '~/composables'
 import { LogEntryGeneralQuery, LogEntryGeneralQueryVariables } from '~/types/graphql'
 import logEntryGeneralQuery from '~/gql/core/queries/log_entry_general.graphql'
@@ -45,7 +44,22 @@ export default defineComponent({
   setup (props) {
     const { t, localePath } = useI18n()
     const { dateTimeHM } = useFilters()
+    type ActionType = { A_1: string, A_2: string, A_3: string }
 
+    const logEntryHeaders = (t: any): DataTableHeader[] => ([
+      { text: t('profile.activity.tableHeaders.action') as string, value: 'action' },
+      { text: t('profile.activity.tableHeaders.contentType') as string, value: 'contentType' },
+      { text: t('profile.activity.tableHeaders.objectId') as string, value: 'objectId', align: 'center' },
+      { text: t('profile.activity.tableHeaders.session') as string, value: 'session' },
+      { text: t('profile.activity.tableHeaders.createdAt') as string, value: 'createdAt' },
+      { text: t('profile.activity.tableHeaders.info') as string, value: 'info', align: 'center', width: 150 }
+    ])
+
+    const logEntryActions = (t: any): ActionType => ({
+      A_1: t('profile.activity.actions.created') as string,
+      A_2: t('profile.activity.actions.changed') as string,
+      A_3: t('profile.activity.actions.deleted') as string
+    })
     useNuxt2Meta({ title: t('profile.activity.name') as string })
     const { search, debounceSearch } = useDebounceSearch()
 
