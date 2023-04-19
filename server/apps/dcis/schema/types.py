@@ -58,6 +58,7 @@ from apps.dcis.permissions.period_permissions import can_change_period_base, can
 from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
 from apps.dcis.services.document_services import get_document_sheets
+from apps.dcis.services.formula_services import translate_formula_en2ru
 
 
 class ProjectType(OptimizedDjangoObjectType):
@@ -708,6 +709,10 @@ class LimitationType(DjangoObjectType):
             'error_message',
             'sheet',
         )
+
+    @classmethod
+    def resolve_formula(cls, limitation: Limitation, info: ResolveInfo) -> str:
+        return translate_formula_en2ru(limitation.formula)
 
 
 class PeriodMethodicalSupportType(DjangoObjectType):
