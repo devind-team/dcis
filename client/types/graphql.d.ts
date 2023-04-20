@@ -908,8 +908,6 @@ export type CellKind =
   | 'DEPARTMENT'
   /** e */
   | 'E'
-  /** f */
-  | 'F'
   /** fl */
   | 'FL'
   /** inlineStr */
@@ -1140,12 +1138,36 @@ export type ChangeCellDefaultInput = {
 export type ChangeCellDefaultPayload = {
   __typename?: 'ChangeCellDefaultPayload';
   /** Идентификатор ячейки */
-  cellId: Scalars['ID'];
+  cellId?: Maybe<Scalars['ID']>;
   clientMutationId?: Maybe<Scalars['String']>;
   /** Значение по умолчанию */
-  default: Scalars['String'];
+  default?: Maybe<Scalars['String']>;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
+export type ChangeCellFormulaInput = {
+  /** Идентификатор ячейки */
+  cellId: Scalars['ID'];
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Формула */
+  formula: Scalars['String'];
+  /** Пересчитать значения в документах */
+  recalculate: Scalars['Boolean'];
+};
+
+/** Изменение формулы ячейки. */
+export type ChangeCellFormulaPayload = {
+  __typename?: 'ChangeCellFormulaPayload';
+  /** Идентификатор ячейки */
+  cellId?: Maybe<Scalars['ID']>;
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Формула */
+  formula?: Maybe<Scalars['String']>;
   /** Успех мутации */
   success: Scalars['Boolean'];
 };
@@ -2907,6 +2929,8 @@ export type Mutation = {
   changeAvatar: ChangeAvatarMutationPayload;
   /** Изменение значения ячейки по умолчанию */
   changeCellDefault: ChangeCellDefaultPayload;
+  /** Изменение формулы ячейки */
+  changeCellFormula: ChangeCellFormulaPayload;
   /** Изменения опций ячейки */
   changeCellsOption: ChangeCellsOptionMutationPayload;
   /** Изменение высоты дочерней строки. */
@@ -3190,6 +3214,11 @@ export type MutationChangeAvatarArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationChangeCellDefaultArgs = {
   input: ChangeCellDefaultInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationChangeCellFormulaArgs = {
+  input: ChangeCellFormulaInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5819,7 +5848,15 @@ export type ChangeCellDefaultMutationVariables = Exact<{
   default: Scalars['String'];
 }>;
 
-export type ChangeCellDefaultMutation = { __typename?: 'Mutation', changeCellDefault: { __typename: 'ChangeCellDefaultPayload', success: boolean, cellId: string, default: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type ChangeCellDefaultMutation = { __typename?: 'Mutation', changeCellDefault: { __typename: 'ChangeCellDefaultPayload', success: boolean, cellId?: string | null, default?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type ChangeCellFormulaMutationVariables = Exact<{
+  cellId: Scalars['ID'];
+  formula: Scalars['String'];
+  recalculate: Scalars['Boolean'];
+}>;
+
+export type ChangeCellFormulaMutation = { __typename?: 'Mutation', changeCellFormula: { __typename: 'ChangeCellFormulaPayload', success: boolean, cellId?: string | null, formula?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type ChangeCellsOptionMutationVariables = Exact<{
   cellIds: Array<Scalars['ID']> | Scalars['ID'];

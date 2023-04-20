@@ -27,6 +27,7 @@ from apps.dcis.services.sheet_services import (
     CheckCellOptions,
     add_budget_classification,
     change_cell_default,
+    change_cell_formula,
     change_cells_option,
     check_cells_permissions,
     paste_into_cells,
@@ -40,15 +41,34 @@ class ChangeCellDefault(BaseMutation):
         cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
         default = graphene.String(required=True, description='Значение по умолчанию')
 
-    cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
-    default = graphene.String(required=True, description='Значение по умолчанию')
+    cell_id = graphene.ID(description='Идентификатор ячейки')
+    default = graphene.String(description='Значение по умолчанию')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
     def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, default: str):
         cell: Cell = get_object_or_404(Cell, pk=gid2int(cell_id))
-        change_cell_default(user=info.context.user, cell=cell, default=default)
+        cell = change_cell_default(user=info.context.user, cell=cell, default=default)
         return ChangeCellDefault(cell_id=cell.id, default=cell.default)
+
+
+class ChangeCellFormula(BaseMutation):
+    """Изменение формулы ячейки."""
+
+    class Input:
+        cell_id = graphene.ID(required=True, description='Идентификатор ячейки')
+        formula = graphene.String(required=True, description='Формула')
+        recalculate = graphene.Boolean(required=True, description='Пересчитать значения в документах')
+
+    cell_id = graphene.ID(description='Идентификатор ячейки')
+    formula = graphene.String(description='Формула')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, cell_id: str, formula: str, recalculate: bool):
+        cell: Cell = get_object_or_404(Cell, pk=gid2int(cell_id))
+        cell = change_cell_formula(user=info.context.user, cell=cell, formula=formula, recalculate=recalculate)
+        return ChangeCellFormula(cell_id=cell.id, formula=cell.formula)
 
 
 class ChangeCellsOptionMutation(BaseMutation):
@@ -62,7 +82,7 @@ class ChangeCellsOptionMutation(BaseMutation):
         - vertical_align - ['top', 'middle', 'bottom']
         - size - число от 6 до 24
         - kind - [
-            'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
+            'n', 's', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
             'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
         ]
         - number_format - форматирование чисел
@@ -219,6 +239,7 @@ class CellMutations(graphene.ObjectType):
     """Мутации, связанные с ячейками."""
 
     change_cell_default = ChangeCellDefault.Field(required=True, description='Изменение значения ячейки по умолчанию')
+    change_cell_formula = ChangeCellFormula.Field(required=True, description='Изменение формулы ячейки')
     change_cells_option = ChangeCellsOptionMutation.Field(required=True, description='Изменения опций ячейки')
     paste_into_cells = PasteIntoCellsMutation.Field(required=True, description='Вставка в ячейки')
     add_budget_classification = AddBudgetClassificationMutation.Field(

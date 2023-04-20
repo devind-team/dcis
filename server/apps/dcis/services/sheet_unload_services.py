@@ -490,10 +490,10 @@ class ReportAggregation(Enum):
 
 _AGGREGATION_TYPE_MAP = {
     ReportAggregation.CONCAT: [KindCell.STRING, KindCell.TEXT],
-    ReportAggregation.SUM: [KindCell.NUMERIC, KindCell.FORMULA],
-    ReportAggregation.AVG: [KindCell.NUMERIC, KindCell.FORMULA],
-    ReportAggregation.MIN: [KindCell.NUMERIC, KindCell.FORMULA],
-    ReportAggregation.MAX: [KindCell.NUMERIC, KindCell.FORMULA],
+    ReportAggregation.SUM: [KindCell.NUMERIC],
+    ReportAggregation.AVG: [KindCell.NUMERIC],
+    ReportAggregation.MIN: [KindCell.NUMERIC],
+    ReportAggregation.MAX: [KindCell.NUMERIC],
 }
 
 

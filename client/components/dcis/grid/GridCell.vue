@@ -10,8 +10,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType } from '#app'
 import numfmt from 'numfmt'
+import { computed, defineComponent, inject, PropType } from '#app'
 import { useCommonQuery } from '~/composables'
 import { useCanChangeValue } from '~/composables/grid-permissions'
 import { useChangeValue, useChangeFileValue, useUnloadFileValueArchive } from '~/composables/grid-actions'
@@ -93,15 +93,8 @@ export default defineComponent({
       if (props.cell.value === null) {
         return props.cell.value
       }
-      if (cellKind.value === 'Numeric') {
+      if (props.cell.kind === 'n') {
         return Number(props.cell.value)
-      }
-      if (cellKind.value === 'Formula') {
-        const numberValue = parseFloat(props.cell.value)
-        if (isNaN(numberValue)) {
-          return props.cell.value
-        }
-        return numberValue
       }
       if (props.cell.kind === 'd' || props.cell.kind === 'time') {
         return new Date(props.cell.value)

@@ -502,11 +502,6 @@ class PeriodUnload:
             data_type = cell.kind
             if data_type not in VALID_TYPES:
                 data_type = KindCell.STRING
-            if data_type == KindCell.FORMULA:
-                if self._is_numeric(val):
-                    data_type = KindCell.NUMERIC
-                else:
-                    data_type = KindCell.STRING
             result.append(CellData(
                 value=val,
                 data_type=data_type,

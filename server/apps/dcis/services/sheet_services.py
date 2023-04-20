@@ -10,10 +10,12 @@ from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import QuerySet
+from django.utils.timezone import now
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
+from apps.dcis.helpers.cell import get_coordinate, get_dependency_cells, resolve_cells
 from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Period, Sheet, Value
 from apps.dcis.models.sheet import Cell
@@ -21,6 +23,8 @@ from apps.dcis.permissions import (
     can_add_budget_classification,
     can_change_period_sheet,
 )
+from apps.dcis.services.value_services import RecalculationData, recalculate_cells
+from apps.dcis.tasks import recalculate_cell_formula_task
 
 
 @transaction.atomic
@@ -148,6 +152,38 @@ def change_cell_default(user: User, cell: Cell, default: str) -> Cell:
     cell.default = default
     cell.save(update_fields=('default', 'is_template',))
     return cell
+
+
+def change_cell_formula(user: User, cell: Cell, formula: str, recalculate: bool) -> Cell:
+    """Изменение формулы ячейки."""
+    can_change_period_sheet(user, cell.row.sheet.period)
+    old_formula = cell.formula
+    cell.formula = formula if formula else None
+    cell.save(update_fields=('formula',))
+    cache_container = SheetFormulaContainerCache.get(cell.row.sheet)
+    coordinate = get_coordinate(cell.row.sheet, cell)
+    if old_formula and cell.formula:
+        cache_container.change_formula(coordinate, cell.formula)
+    elif old_formula:
+        cache_container.delete_formula(coordinate)
+    elif cell.formula:
+        cache_container.add_formula(coordinate, cell.formula)
+    if cell.formula and recalculate:
+        recalculate_cell_formula_task.delay(user.id, cell.id)
+    return cell
+
+
+def recalculate_cell_formula(user: User, cell: Cell) -> None:
+    """Пересчет значений в документах для ячейки."""
+    sheets = cell.column.sheet.period.sheet_set.all()
+    sheet_containers = [SheetFormulaContainerCache.get(sheet) for sheet in sheets]
+    for value in Value.objects.filter(column=cell.column, row=cell.row):
+        dependency_cells = get_dependency_cells(sheet_containers, [value])[0]
+        recalculations: list[RecalculationData] = []
+        cells, resolve_values = resolve_cells(sheets, value.document, {*dependency_cells})
+        for c, v in zip(cells, resolve_values):
+            recalculations.append(RecalculationData(cell=c, value=v))
+        recalculate_cells(user, value.document, recalculations, now())
 
 
 def check_cells_permissions(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:

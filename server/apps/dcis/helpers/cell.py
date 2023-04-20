@@ -1,4 +1,5 @@
 """Вспомогательный модуль для расчета формул."""
+
 from collections import defaultdict
 from itertools import groupby
 from typing import Iterable, TypedDict
@@ -84,9 +85,9 @@ def resolve_cells(
             )
     related: list[str] = ['row', 'column', 'column__sheet']
     cells: QuerySet[Cell] = Cell.objects.filter(cells_query_filter) \
-        .select_related(*related).all()
-    values: QuerySet[Value] = Value.objects.filter(values_query_filter)\
-        .select_related(*related).all()
+        .select_related(*related).order_by('column', 'row')
+    values: QuerySet[Value] = Value.objects.filter(values_query_filter) \
+        .select_related(*related).order_by('column', 'row').all()
     return cells, values
 
 
@@ -121,7 +122,7 @@ def resolve_evaluate_state(
     for cell in cells:
         coord = get_coordinate(cell.column.sheet, cell)
         value = values_state.get(coord, cell.default)
-        if (cell.kind == KindCell.NUMERIC or cell.kind == KindCell.FORMULA) and value is not None:
+        if cell.kind == KindCell.NUMERIC and value is not None:
             try:
                 value = float(value)
             except ValueError:
@@ -169,6 +170,7 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
 
 
 def get_coordinate(sheet: Sheet, vc: Value | Cell) -> str:
+    """Получение координаты ячейки."""
     return f'{sheet.name}!{get_column_letter(vc.column.index)}{vc.row.index}'
 
 

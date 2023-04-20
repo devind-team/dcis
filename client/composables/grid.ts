@@ -25,7 +25,6 @@ import { useColumnDimensionWidthMap, useRowDimensionHeightMap } from '~/composab
 export const cellKinds = {
   n: 'Numeric',
   s: 'String',
-  f: 'Formula',
   text: 'Text',
   fl: 'Files',
   // money: 'Money', // Временно скрыто, так как не правильно обрабатывается

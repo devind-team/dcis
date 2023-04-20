@@ -25,7 +25,6 @@ from apps.dcis.helpers.cell import (
 )
 from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Cell, Document, Period, RowDimension, Sheet, Value
-from apps.dcis.models.sheet import KindCell
 from apps.dcis.permissions import can_view_document
 from apps.dcis.services.aggregation_services import calculate_aggregation_cell
 
@@ -83,21 +82,13 @@ def update_or_create_values(
             value=value_input.value
         )
         recalculations.append(RecalculationData(cell=value_input.cell, value=value))
-    old_recalculations: list[RecalculationData] = []
-    while len(recalculations) != len(old_recalculations):
-        old_recalculations = recalculations
-        recalculations_copy = recalculations
-        recalculations = []
-        for doc, recs in group_by_documents(recalculations_copy):
-            recalculations.extend(recalculate_aggregations(doc, recs))
-        recalculations_copy = recalculations
-        recalculations = []
-        for doc, recs in group_by_documents(recalculations_copy):
-            recalculations.extend(recalculate_values(doc, recs))
-    values = [recalculation.value for recalculation in recalculations]
     updated_at = now()
-    RowDimension.objects.filter(pk__in=[val.row_id for val in values]).update(updated_at=updated_at)
-    Document.objects.filter(pk=document.pk).update(updated_at=updated_at, updated_by=user)
+    values = recalculate_cells(
+        user=user,
+        document=document,
+        recalculations=recalculations,
+        updated_at=updated_at,
+    )
     return UpdateOrCrateValuesResult(values=values, updated_at=updated_at)
 
 
@@ -171,6 +162,31 @@ def update_or_create_value(
         }
     )
     return value
+
+
+def recalculate_cells(
+    user: User,
+    document: Document,
+    recalculations: list[RecalculationData],
+    updated_at: datetime,
+) -> list[Value]:
+    """Перерасчет ячеек."""
+    recalculations = [*recalculations]
+    old_recalculations: list[RecalculationData] = []
+    while len(recalculations) != len(old_recalculations):
+        old_recalculations = recalculations
+        recalculations_copy = recalculations
+        recalculations = []
+        for doc, recs in group_by_documents(recalculations_copy):
+            recalculations.extend(recalculate_aggregations(doc, recs))
+        recalculations_copy = recalculations
+        recalculations = []
+        for doc, recs in group_by_documents(recalculations_copy):
+            recalculations.extend(recalculate_values(doc, recs))
+    values = [recalculation.value for recalculation in recalculations]
+    RowDimension.objects.filter(pk__in=[val.row_id for val in values]).update(updated_at=updated_at)
+    Document.objects.filter(pk=document.pk).update(updated_at=updated_at, updated_by=user)
+    return values
 
 
 def recalculate_aggregations(document: Document, recalculations: list[RecalculationData]) -> list[RecalculationData]:
@@ -275,7 +291,7 @@ def recalculate_values(document: Document, recalculations: list[RecalculationDat
     # 1. Собираем зависимости и последовательность операций
     dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(
         sheet_containers,
-        [recalculation.value for recalculation in recalculations if recalculation.cell.kind != KindCell.FORMULA]
+        [recalculation.value for recalculation in recalculations if recalculation.cell.formula is None]
     )
     # 1.1 Если у нас нет ячеек необходимых для пересчета, возвращаем изначальные значения
     if not inversion_cells:

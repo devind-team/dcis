@@ -520,12 +520,13 @@ export default {
       }
     },
     sheetToolbar: {
-      readonly: 'Только для чтения',
-      fix: 'Закрепление столбцов/строк',
-      fontSize: 'Размер шрифта',
-      kind: 'Тип',
-      commaDecrease: 'Уменьшить разрядность',
-      commaIncrease: 'Увеличить разрядность',
+      formula: {
+        tooltip: 'Формула',
+        header: 'Изменение формулы',
+        buttonText: '@:change',
+        formula: 'Формула',
+        recalculate: 'Пересчитать значения в документах'
+      },
       aggregation: {
         tooltip: 'Агрегация ячеек',
         title: 'Настройки агрегации',
@@ -539,7 +540,13 @@ export default {
           max: 'Максимальное значение',
           min: 'Минимальное значение'
         }
-      }
+      },
+      readonly: 'Только для чтения',
+      fix: 'Закрепление столбцов/строк',
+      fontSize: 'Размер шрифта',
+      kind: 'Тип',
+      commaDecrease: 'Уменьшить разрядность',
+      commaIncrease: 'Увеличить разрядность'
     },
     columnWidth: 'Ширина: ',
     rowHeight: 'Высота: ',

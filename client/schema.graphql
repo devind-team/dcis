@@ -865,8 +865,6 @@ enum CellKind {
   DEPARTMENT
   """e"""
   E
-  """f"""
-  F
   """fl"""
   FL
   """inlineStr"""
@@ -1092,12 +1090,35 @@ input ChangeCellDefaultInput {
 """Изменение значения ячейки по умолчанию."""
 type ChangeCellDefaultPayload {
   """Идентификатор ячейки"""
-  cellId: ID!
+  cellId: ID
   clientMutationId: String
   """Значение по умолчанию"""
-  default: String!
+  default: String
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input ChangeCellFormulaInput {
+  """Идентификатор ячейки"""
+  cellId: ID!
+  clientMutationId: String
+  """Формула"""
+  formula: String!
+  """Пересчитать значения в документах"""
+  recalculate: Boolean!
+}
+
+"""Изменение формулы ячейки."""
+type ChangeCellFormulaPayload {
+  """Идентификатор ячейки"""
+  cellId: ID
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Формула"""
+  formula: String
   """Успех мутации"""
   success: Boolean!
 }
@@ -2771,6 +2792,8 @@ type Mutation {
   changeAvatar(input: ChangeAvatarMutationInput!): ChangeAvatarMutationPayload!
   """Изменение значения ячейки по умолчанию"""
   changeCellDefault(input: ChangeCellDefaultInput!): ChangeCellDefaultPayload!
+  """Изменение формулы ячейки"""
+  changeCellFormula(input: ChangeCellFormulaInput!): ChangeCellFormulaPayload!
   """Изменения опций ячейки"""
   changeCellsOption(input: ChangeCellsOptionMutationInput!): ChangeCellsOptionMutationPayload!
   """Изменение высоты дочерней строки."""

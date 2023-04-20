@@ -27,14 +27,37 @@ v-row
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
         div(v-on="on" v-bind="attrs")
+          formula-property(:cell="singleCell" :update-active-sheet="updateActiveSheet")
+            template(#activator="{ on, attrs }")
+              .v-btn-toggle.mx-1(:class="themeClass" style="border-radius: 4px")
+                v-btn(
+                  v-on="on"
+                  v-bind="attrs"
+                  :disabled="disabled || !singleCell || Boolean(singleCell.aggregation)"
+                  :class="{ 'v-btn--active': singleCell && singleCell.formula }"
+                  height="40"
+                )
+                  v-icon mdi-calculator
+      span {{ $t('dcis.grid.sheetToolbar.formula.tooltip') }}
+    v-tooltip(bottom)
+      template(#activator="{ on, attrs }")
+        div(v-on="on" v-bind="attrs")
           aggregation-property(
             :grid-choice="gridChoice"
             :active-sheet-index="activeSheetIndex"
-            :cell="aggregationCell"
-            :disabled="disabled"
-            :theme-class="themeClass"
-            @changeKind="aggregationCell ? changeCellsOption([aggregationCell], 'aggregation', $event) : null"
+            :cell="singleCell"
+            @changeKind="singleCell ? changeCellsOption([singleCell], 'aggregation', $event) : null"
           )
+            template(#activator="{ on, attrs }")
+              .v-btn-toggle.mx-1(:class="themeClass" style="border-radius: 4px")
+                v-btn(
+                  v-on="on"
+                  v-bind="attrs"
+                  :disabled="disabled || !singleCell || Boolean(singleCell.formula)"
+                  :class="{ 'v-btn--active': singleCell && singleCell.aggregation }"
+                  height="40"
+                )
+                  v-icon mdi-sigma
       span {{ $t('dcis.grid.sheetToolbar.aggregation.tooltip') }}
     v-tooltip(bottom)
       template(#activator="{ on, attrs }")
@@ -98,16 +121,18 @@ import {
   RowDimensionsOptionsType
 } from '~/types/grid'
 import { useVuetify, useI18n, UpdateType } from '~/composables'
+import { cellKinds } from '~/composables/grid'
 import {
   useChangeCellsOptionMutation,
   useChangeColumnDimensionsFixedMutation,
   useChangeRowDimensionsFixedMutation
 } from '~/composables/grid-mutations'
 import { GridChoiceType } from '~/composables/grid-choice'
+import FormulaProperty from '~/components/dcis/grid/properties/FormulaProperty.vue'
 import AggregationProperty from '~/components/dcis/grid/properties/AggregationProperty.vue'
 
 export default defineComponent({
-  components: { AggregationProperty },
+  components: { FormulaProperty, AggregationProperty },
   props: {
     gridChoice: { type: Object as PropType<GridChoiceType>, required: true },
     activeSheetIndex: { type: Number, default: null },
@@ -218,11 +243,18 @@ export default defineComponent({
       }
     })
 
-    const aggregationCell = computed<CellType | null>(() => (
-      props.selectedCellsOptions && props.selectedCellsOptions.cells.length === 1
-        ? props.selectedCellsOptions.cells[0]
-        : null)
-    )
+    const singleCell = computed<CellType | null>(() => {
+      const columnsCount = props.selectedColumnDimensionsOptions
+        ? props.selectedColumnDimensionsOptions.columnDimensions.length
+        : 0
+      const rowsCount = props.selectedRowDimensionsOptions
+        ? props.selectedRowDimensionsOptions.rowDimensions.length
+        : 0
+      if (columnsCount !== 0 || rowsCount !== 0 || !props.selectedCellsOptions) {
+        return null
+      }
+      return props.selectedCellsOptions.cells.length === 1 ? props.selectedCellsOptions.cells[0] : null
+    })
 
     const dimensionsProperties = computed<string[]>({
       get: () => {
@@ -300,6 +332,7 @@ export default defineComponent({
 
     return {
       themeClass,
+      updateActiveSheet,
       disabled,
       fixedDisabled,
       commaDisabled,
@@ -308,7 +341,7 @@ export default defineComponent({
       horizontalAlign,
       verticalAlign,
       properties,
-      aggregationCell,
+      singleCell,
       dimensionsProperties,
       sizes,
       size,

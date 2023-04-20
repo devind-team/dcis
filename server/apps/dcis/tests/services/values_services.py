@@ -74,7 +74,7 @@ class UpdateOrCreateValuesTestCase(TestCase):
                     elif i != 2 and j == 3:
                         if f == 1:
                             formula = f'=SUM(B{i + 1}:C{i + 1})'
-                            cell = Cell.objects.create(kind=KindCell.FORMULA, formula=formula, column=column, row=row)
+                            cell = Cell.objects.create(kind=KindCell.NUMERIC, formula=formula, column=column, row=row)
                             cache_container.add_formula(f'{get_column_letter(column.index)}{row.index}', formula)
                             for document in self.documents:
                                 Value.objects.create(
@@ -87,7 +87,7 @@ class UpdateOrCreateValuesTestCase(TestCase):
                             self.expected_values[cell] = CellData(True, '2.0')
                         else:
                             formula = f'=SUM(Форма1!B{i + 1}:D{i + 1})'
-                            cell = Cell.objects.create(kind=KindCell.FORMULA, formula=formula, column=column, row=row)
+                            cell = Cell.objects.create(kind=KindCell.NUMERIC, formula=formula, column=column, row=row)
                             cache_container.add_formula(f'{get_column_letter(column.index)}{row.index}', formula)
                             for document in self.documents:
                                 Value.objects.create(
@@ -143,7 +143,7 @@ class UpdateOrCreateValuesTestCase(TestCase):
             from_cell=Cell.objects.get(column__sheet_id=self.forms[1].id, column__index=4, row__index=1),
         )
         self.aggregation_formula_depends_cell = Cell.objects.create(
-            kind=KindCell.FORMULA,
+            kind=KindCell.NUMERIC,
             formula='=0.0',
             default='0.0',
             column=self.aggregation_columns[3],
