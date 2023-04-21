@@ -114,10 +114,30 @@ TRANSLATED_FUNCTIONS = {
 def translate_formula_en2ru(formula: str) -> str:
     for en, ru in TRANSLATED_FUNCTIONS.items():
         formula = formula.replace(en, ru)
-    return formula
+    result = ''
+    is_quote = False
+    for char in formula:
+        if char == '"':
+            is_quote = not is_quote
+        if not is_quote:
+            char = ';' if char == ',' else char
+            char = ',' if char == '.' else char
+        result += char
+    return result
 
 
 def translate_formula_ru2en(formula: str) -> str:
     for en, ru in TRANSLATED_FUNCTIONS.items():
         formula = formula.replace(ru, en)
-    return formula
+    result = ''
+    is_quote = False
+    for char in formula:
+        if char == '"':
+            is_quote = not is_quote
+        if not is_quote:
+            if char == ';':
+                char = ','
+            elif char == ',':
+                char = '.'
+        result += char
+    return result
