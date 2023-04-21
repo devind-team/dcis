@@ -5,7 +5,6 @@ v-menu(transition="slide-y-transition" left)
       v-icon mdi-dots-horizontal
   v-list
     apollo-mutation(
-      v-if="notifications.length"
       v-slot="{ mutate }"
       @error="setAlertApolloError"
       :mutation="require('~/gql/notifications/mutations/change_notifications.graphql')"
@@ -18,7 +17,6 @@ v-menu(transition="slide-y-transition" left)
         v-list-item-content
           v-list-item-title {{ $t('notifications.markAsReadAll') }}
     apollo-mutation(
-      v-if="notifications.length"
       v-slot="{ mutate }"
       @error="setAlertApolloError"
       :mutation="require('~/gql/notifications/mutations/change_notifications.graphql')"
@@ -30,11 +28,6 @@ v-menu(transition="slide-y-transition" left)
           v-icon mdi-close-circle-multiple-outline
         v-list-item-content
           v-list-item-title {{ $t('notifications.deleteAll') }}
-    v-list-item(:to="localePath('profile-settings')")
-      v-list-item-icon
-        v-icon mdi-cog
-      v-list-item-content
-        v-list-item-title {{ $t('notifications.settings') }}
 </template>
 
 <script lang="ts">
