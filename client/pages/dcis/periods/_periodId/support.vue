@@ -1,19 +1,18 @@
 <template lang="pug">
 left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer')")
   template(#header) {{ $t('dcis.periods.links.support') }}
-  v-card-text
-    v-row(align="center")
-      v-col(cols="12")
-        v-btn(v-if="period.isAdmin || period.isCurator || period.canChangePeriodMethodicalSupport" @click="addFilesHandle" color="primary")
-          v-icon(left) mdi-upload
-          | {{ $t('dcis.periods.methodical_support.uploadFiles') }}
-    v-row
-      v-col(cols="12" sm="6")
-        v-text-field(v-model="search" :label="$t('search')" prepend-icon="mdi-magnify" clearable)
-      v-col.text-right(cols="12" sm="6") {{ $t('dcis.periods.methodical_support.shownOf', { count, totalCount }) }}
-    v-row
-      v-col
-       v-data-table(
+    template
+      v-spacer
+      v-btn(v-if="period.isAdmin || period.isCurator || period.canChangePeriodMethodicalSupport" @click="addFilesHandle" color="primary")
+        v-icon(left) mdi-upload
+        | {{ $t('dcis.periods.methodicalSupport.uploadFiles') }}
+  v-row(align="center")
+    v-col(cols="12" md="8")
+      v-text-field(v-model="search" :placeholder="$t('search')" prepend-icon="mdi-magnify" clearable)
+    v-col.text-right.pr-5(cols="12" md="4") {{ $t('shownOf', { count, totalCount }) }}
+    v-card(flat)
+      v-card-text
+        v-data-table(
           :headers="headers"
           :items="files"
           :loading="loading"
@@ -24,9 +23,9 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
             v-tooltip(bottom)
               template(#activator="{ on: onTooltip }")
                 a(v-on="{...onTooltip}" :href="`/${item.src}`" target="__blank") {{ item.name }}
-              span {{ $t('dcis.periods.methodical_support.downloadFile') }}
+              span {{ $t('dcis.periods.methodicalSupport.downloadFile') }}
           template(#item.updated="{ item }") {{ $filters.dateTimeHM(item.updatedAt) }}
-          template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('dcis.periods.methodical_support.kB') }}
+          template(#item.size="{ item }") {{ (item.size / 1024).toFixed(2) }} {{ $t('dcis.periods.methodicalSupport.kB') }}
           template(#item.actions="{ item }")
             template(v-if="period.isAdmin || period.isCurator || period.canChangePeriodMethodicalSupport")
               text-menu(v-slot="{ on: onMenu }" :value="item.name" @update="changePeriodMethodicalSupportMutate({ fileId: item.id, field: 'name', value: $event }).then()")
@@ -34,17 +33,17 @@ left-navigator-container(:bread-crumbs="bc" @update-drawer="$emit('update-drawer
                   template(#activator="{ on: onTooltip }")
                     v-btn(v-on="{ ...onMenu, ...onTooltip }" icon color="primary")
                       v-icon mdi-pencil
-                  span {{ $t('dcis.periods.methodical_support.changeName') }}
+                  span {{ $t('dcis.periods.methodicalSupport.changeName') }}
               delete-menu(
                 v-slot="{ on: onMenu }"
-                :item-name="String($t('dcis.periods.methodical_support.file'))"
+                :item-name="String($t('dcis.periods.methodicalSupport.file'))"
                 @confirm="deletePeriodMethodicalSupportMutate({ fileId: item.id }).then()" color="error"
               )
                 v-tooltip(bottom)
                   template(#activator="{ on: onTooltip }")
                     v-btn(v-on="{ ...onMenu, ...onTooltip }" icon color="error")
                       v-icon mdi-delete
-                  span {{ $t('dcis.periods.methodical_support.deleteFile') }}
+                  span {{ $t('dcis.periods.methodicalSupport.deleteFile') }}
 </template>
 <script lang="ts">
 import { defineComponent, computed, ComputedRef, PropType, toRefs } from '#app'
@@ -112,13 +111,13 @@ export default defineComponent({
 
     const headers: ComputedRef<DataTableHeader[]> = computed<DataTableHeader[]>(() => {
       const result = [
-        { text: t('dcis.periods.methodical_support.tableHeaders.name') as string, value: 'name', sortable: false },
-        { text: t('dcis.periods.methodical_support.tableHeaders.ext') as string, value: 'ext', sortable: false, width: 120 },
-        { text: t('dcis.periods.methodical_support.tableHeaders.updated') as string, value: 'updated', sortable: false },
-        { text: t('dcis.periods.methodical_support.tableHeaders.size') as string, value: 'size', sortable: false, width: 120 }
+        { text: t('dcis.periods.methodicalSupport.tableHeaders.name') as string, value: 'name', sortable: false },
+        { text: t('dcis.periods.methodicalSupport.tableHeaders.ext') as string, value: 'ext', sortable: false, width: 120 },
+        { text: t('dcis.periods.methodicalSupport.tableHeaders.updated') as string, value: 'updated', sortable: false },
+        { text: t('dcis.periods.methodicalSupport.tableHeaders.size') as string, value: 'size', sortable: false, width: 120 }
       ]
       if (props.period.isAdmin || props.period.isCurator || props.period.canChangePeriodMethodicalSupport) {
-        result.push({ text: t('dcis.periods.methodical_support.tableHeaders.actions') as string, value: 'actions', sortable: false, width: 150 })
+        result.push({ text: t('dcis.periods.methodicalSupport.tableHeaders.actions') as string, value: 'actions', sortable: false, width: 150 })
       }
       return result
     })
