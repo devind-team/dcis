@@ -17,6 +17,7 @@ from .services import (
     AggregationTestCase,
     ArchivePeriodTestCase,
     AttributeTestCase,
+    ChangeCellFormulaTestCase,
     CheckCellOptionsTestCase,
     CheckLimitationsTestCase,
     ColumnDimensionTestCase,

@@ -20,7 +20,7 @@ from ..models.sheet import KindCell
 
 def get_dependency_cells(
     sheet_containers: list[SheetFormulaContainerCache],
-    values: list[Value]
+    vcs: list[Value | Cell]
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
@@ -32,8 +32,11 @@ def get_dependency_cells(
     dependency_cells: list[str] = []
     inversion_cells: list[str] = []
     sequence_evaluate: list[str] = []
-    cells = [f'{value.sheet.name}!{get_column_letter(value.column.index)}{value.row.index}' for value in values]
 
+    cells: list[str] = []
+    for vc in vcs:
+        sheet_name = vc.sheet.name if isinstance(vc, Value) else vc.column.sheet.name
+        cells.append(f'{sheet_name}!{get_column_letter(vc.column.index)}{vc.row.index}')
     while cells:
         cell = cells.pop()
         sheet_name, column_letter, row_index = parse_coordinate(cell)

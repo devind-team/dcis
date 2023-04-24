@@ -1,12 +1,25 @@
 """Тестирование модуля, отвечающего за работу с листами."""
 
+from typing import Iterable
+from unittest.mock import patch
+
 from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
-from apps.dcis.models import Cell, ColumnDimension, Period, Project, RowDimension, Sheet
-from apps.dcis.models.sheet import KindCell, Style
-from apps.dcis.services.sheet_services import CellPasteOptions, CellPasteStyle, CheckCellOptions, paste_into_cells
+from apps.core.models import User
+from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
+from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet
+from apps.dcis.models.sheet import KindCell, Style, Value
+from apps.dcis.services.sheet_services import (
+    CellPasteOptions,
+    CellPasteStyle,
+    CheckCellOptions,
+    change_cell_formula,
+    paste_into_cells,
+)
+from apps.dcis.services.value_services import ValueInput, update_or_create_values
+from apps.dcis.tasks import recalculate_cell_formula_task
 
 
 class CheckCellOptionsTestCase(TestCase):
@@ -67,6 +80,183 @@ class CheckCellOptionsTestCase(TestCase):
                 self.assertEqual(value, result.value)
 
 
+@override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
+@patch(
+    'apps.dcis.services.sheet_services.recalculate_cell_formula_task.delay',
+    new=lambda *args: recalculate_cell_formula_task.apply(args=args),
+)
+class ChangeCellFormulaTestCase(TestCase):
+    """Тестирование функции `change_cell_formula`."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
+        self.period = Period.objects.create(project=self.project)
+
+        self.form1 = Sheet.objects.create(name='Форма 1', period=self.period)
+        self.form1_row = RowDimension.objects.create(index=1, sheet=self.form1)
+        self.form1_columns = [ColumnDimension.objects.create(index=i, sheet=self.form1) for i in range(1, 4)]
+        self.form1_cache_container = SheetFormulaContainerCache(name=self.form1.name)
+        self.form1_cells: list[Cell] = []
+        for i, column in enumerate(self.form1_columns, 1):
+            if i == 1:
+                formula = "=SUM(B1:C1) + SUM('Форма 2'!A1:C1)"
+                self.form1_cells.append(Cell.objects.create(
+                    kind=KindCell.NUMERIC,
+                    formula=formula,
+                    default=f'11.0',
+                    column=column,
+                    row=self.form1_row,
+                ))
+                self.form1_cache_container.add_formula('A1', formula)
+            else:
+                self.form1_cells.append(Cell.objects.create(
+                    kind=KindCell.NUMERIC,
+                    default=f'{i:.1f}',
+                    column=column,
+                    row=self.form1_row,
+                ))
+        self.form1_cache_container.save(sheet_id=self.form1.id)
+
+        self.form2 = Sheet.objects.create(name='Форма 2', period=self.period)
+        self.form2_row = RowDimension.objects.create(index=1, sheet=self.form2)
+        self.form2_columns = [ColumnDimension.objects.create(index=i, sheet=self.form2) for i in range(1, 4)]
+        self.form2_cells: list[Cell] = []
+        for i, column in enumerate(self.form2_columns):
+            self.form2_cells.append(Cell.objects.create(
+                kind=KindCell.NUMERIC,
+                default=f'{i:.1f}',
+                column=column,
+                row=self.form2_row,
+            ))
+
+        self.organization = Organization.objects.create(attributes='')
+        self.period.division_set.create(object_id=self.organization.id)
+
+        self.document = Document.objects.create(period=self.period, object_id=self.organization.id)
+        self.document.sheets.set([self.form1, self.form2])
+        for i, column in enumerate(self.form2_columns, 1):
+            Value.objects.create(
+                document=self.document,
+                sheet=self.form2,
+                column=column,
+                row=self.form2_row,
+                value=f'{i:.1f}',
+            )
+
+        self.default_values = (
+            ('11.0', False),
+            ('2.0', False),
+            ('3.0', False),
+            ('1.0', True),
+            ('2.0', True),
+            ('3.0', True),
+        )
+
+    def test_add_formula_not_recalculate(self) -> None:
+        """Тестирование добавления формулы без пересчета значений в документах."""
+        self._test_values(self.default_values)
+        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма 2'!A1:C1)", False)
+        self._test_values(self.default_values)
+        update_or_create_values(
+            self.superuser,
+            self.document,
+            self.form2.id,
+            [ValueInput(cell=self.form2_cells[2], value='4.0')]
+        )
+        self._test_values((
+            ('17.0', True),
+            ('7.0', True),
+            ('3.0', False),
+            ('1.0', True),
+            ('2.0', True),
+            ('4.0', True),
+        ))
+
+    def test_add_formula_recalculate(self) -> None:
+        """Тестирование добавления формулы с перерасчетом значений в документах."""
+        self._test_values(self.default_values)
+        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма 2'!A1:C1)", True)
+        self._test_values((
+            ('15.0', True),
+            ('6.0', True),
+            ('3.0', False),
+            ('1.0', True),
+            ('2.0', True),
+            ('3.0', True),
+        ))
+
+    def test_change_formula_not_recalculate(self) -> None:
+        """Тестирование изменения формулы без перерасчета значений в документах."""
+        self._test_values(self.default_values)
+        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма 2'!A1:C1) + 10", False)
+        self._test_values(self.default_values)
+        update_or_create_values(
+            self.superuser,
+            self.document,
+            self.form2.id,
+            [ValueInput(cell=self.form2_cells[2], value='4.0')]
+        )
+        self._test_values((
+            ('22.0', True),
+            ('2.0', False),
+            ('3.0', False),
+            ('1.0', True),
+            ('2.0', True),
+            ('4.0', True),
+        ))
+
+    def test_change_formula_recalculate(self) -> None:
+        """Тестирование изменения формулы с перерасчетом значений в документах."""
+        self._test_values(self.default_values)
+        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма 2'!A1:C1) + 10", True)
+        self._test_values((
+            ('21.0', True),
+            ('2.0', False),
+            ('3.0', False),
+            ('1.0', True),
+            ('2.0', True),
+            ('3.0', True),
+        ))
+
+    def test_delete_formula_not_recalculate(self) -> None:
+        """Тестирование удаления формулы без перерасчета значений в документах."""
+        self._test_values(self.default_values)
+        change_cell_formula(self.superuser, self.form1_cells[0], '', False)
+        self._test_values(self.default_values)
+        update_or_create_values(
+            self.superuser,
+            self.document,
+            self.form2.id,
+            [ValueInput(cell=self.form2_cells[2], value='4.0')]
+        )
+        self._test_values((
+            ('11.0', False),
+            ('2.0', False),
+            ('3.0', False),
+            ('1.0', True),
+            ('2.0', True),
+            ('4.0', True),
+        ))
+
+    def test_delete_formula_recalculate(self) -> None:
+        """Тестирование удаления формулы с перерасчетом значений в документах."""
+        self._test_values(self.default_values)
+        change_cell_formula(self.superuser, self.form1_cells[0], '', True)
+        self._test_values(self.default_values)
+
+    def _test_values(self, values: Iterable[tuple[str, bool]]) -> None:
+        """Тестирование значений ячеек."""
+        for column, value_exist in zip([*self.form1_columns, *self.form2_columns], values):
+            expected_value, exist = value_exist
+            value = Value.objects.filter(document=self.document, column=column).first()
+            self.assertEqual(exist, bool(value))
+            actual_value = value.value if value else Cell.objects.filter(column=column).first().default
+            self.assertEqual(expected_value, actual_value)
+
 class PasteTestCase(TestCase):
     """Тестирование функции `paste_into_cells`."""
 
@@ -81,11 +271,11 @@ class PasteTestCase(TestCase):
         self.cells: dict[(int, int), Cell] = {}
         for row in self.rows:
             for column in self.columns:
-                self.cells[(row.index, row.index)] = Cell.objects.create(
+                self.cells[(row.index, column.index)] = Cell.objects.create(
                     kind=KindCell.NUMERIC,
                     default='0.0',
                     column=column,
-                    row=row
+                    row=row,
                 )
 
     def test_single_cell_without_style(self) -> None:
