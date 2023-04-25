@@ -22,10 +22,10 @@ from apps.dcis.schema.types import (
     DocumentStatusType,
     DocumentType,
     GlobalIndicesInputType,
-    RowDimensionType,
+    PeriodDocumentScanType, RowDimensionType,
 )
 from apps.dcis.services.add_document_data_services import add_document_data
-from apps.dcis.services.document_services import create_document, create_document_message
+from apps.dcis.services.document_services import create_document, create_document_message, upload_document_scan
 from apps.dcis.services.document_unload_services import unload_document
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
@@ -300,6 +300,24 @@ class DeleteChildRowDimensionMutation(BaseMutation):
         return DeleteRowDimensionMutation(row_dimension_id=delete_child_row_dimension(info.context.user, row_dimension))
 
 
+class UploadDocumentScanMutation(BaseMutation):
+    """Мутация для загрузки скана документа."""
+
+    class Input:
+        document_id = graphene.ID(description='Идентификатор документа')
+        scan_file = Upload(required=True, description='Загружаемый файл скана')
+
+    document_scan = graphene.Field(PeriodDocumentScanType, required=True, description='Скан документа')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root, info: ResolveInfo, document_id: str, scan_file: InMemoryUploadedFile):
+        document: Document = get_object_or_404(Document, pk=gid2int(document_id))
+        return UploadDocumentScanMutation(
+            document_scan=upload_document_scan(info.context.user, document, scan_file)
+        )
+
+
 class DocumentMutations(graphene.ObjectType):
     """Мутации, связанные с документами."""
 
@@ -309,6 +327,7 @@ class DocumentMutations(graphene.ObjectType):
     delete_document_status = DeleteDocumentStatusMutation.Field(required=True)
     unload_document = UnloadDocumentMutation.Field(required=True)
     add_document_data = AddDocumentDataMutation.Field(required=True)
+    upload_document_scan = UploadDocumentScanMutation.Field(required=True)
 
     add_child_row_dimension = AddChildRowDimensionMutation.Field(required=True)
     change_child_row_dimension_height = ChangeChildRowDimensionHeightMutation.Field(required=True)

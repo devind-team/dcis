@@ -375,3 +375,7 @@ def can_delete_child_row_dimension(user: User, row: RowDimension):
         can_view_document(user, row.document)
         return
     raise PermissionDenied('Недостаточно прав для удаления строки.')
+
+def can_upload_document_scan(user: User, document: Document):
+    can_view_document(user, document)
+    can_change_document_base(user, document)

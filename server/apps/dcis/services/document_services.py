@@ -3,17 +3,19 @@
 from devind_helpers.orm_utils import get_object_or_none
 from devind_helpers.schema.types import ErrorFieldType
 from django.core.exceptions import PermissionDenied
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.db.models import Max, Q, QuerySet
 
 from apps.core.models import User
 from apps.dcis.helpers.exceptions import is_raises
-from apps.dcis.models import Cell, Document, DocumentMessage, Period, RowDimension, Sheet, Status, Value
+from apps.dcis.models import Cell, Document, DocumentMessage, DocumentScan, Period, RowDimension, Sheet, Status, Value
 from apps.dcis.permissions import (
     can_add_document,
     can_add_document_message,
     can_change_document_base,
 )
+from apps.dcis.permissions.document_permissions import can_upload_document_scan
 from apps.dcis.services.attribute_services import create_attribute_context, rerender_values
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
 from apps.dcis.services.divisions_services import get_user_divisions, is_document_division_member
@@ -141,6 +143,9 @@ def create_document_message(user: User, document: Document, message: str, kind: 
     can_add_document_message(user, document)
     return DocumentMessage.objects.create(comment=message, user=user, document=document, kind=kind)
 
+def upload_document_scan(user: User, document: Document, file: InMemoryUploadedFile) -> DocumentScan:
+    can_upload_document_scan(user, document)
+    return DocumentScan.objects.create(document=document, name=file.name, src=file)
 
 def get_documents_max_version(period_id: int | str, division_id: int | str | None) -> int | None:
     """Получение максимальной версии документа для периода."""
