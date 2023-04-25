@@ -1,0 +1,10 @@
+fragment DocumentScanFields on DocumentScanType {
+  id
+  name
+  src
+  size
+  createdAt
+  updatedAt
+  ext
+  __typename
+}

@@ -2406,6 +2406,25 @@ type DocumentMessageTypeEdge {
   node: DocumentMessageType
 }
 
+"""Тип скана документа."""
+type DocumentScanType {
+  """Дата добавления файла"""
+  createdAt: DateTime!
+  """Документ"""
+  document: DocumentType
+  """Расширение файла"""
+  ext: String
+  id: UUID!
+  """Название файла"""
+  name: String!
+  """Размер файла в байтах"""
+  size: Int
+  """Путь к файлу"""
+  src: String!
+  """Дата обновления файла"""
+  updatedAt: DateTime!
+}
+
 """Тип статусов для документов."""
 type DocumentStatusType {
   """Архивированный период"""
@@ -2907,6 +2926,8 @@ type Mutation {
   updateLimitationsFromFile(input: UpdateLimitationsFromFileMutationInput!): UpdateLimitationsFromFileMutationPayload!
   """Загрузка атребутов через json файл"""
   uploadAttributesFromFile(input: UploadAttributesFromFileMutationInput!): UploadAttributesFromFileMutationPayload!
+  """Мутация для загрузки скана документа."""
+  uploadDocumentScan(input: UploadDocumentScanMutationInput!): UploadDocumentScanMutationPayload!
   """Мутация для загрузки пользователей из файла excel | csv."""
   uploadUsers(input: UploadUsersMutationInput!): UploadUsersMutationPayload!
 }
@@ -4136,6 +4157,12 @@ type TableType {
   rows: [TableRowType]!
 }
 
+"""
+Leverages the internal Python implmeentation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
 input UnloadAggregationsInFileMutationInput {
   clientMutationId: String
   """Идентификатор периода"""
@@ -4327,6 +4354,25 @@ type UploadAttributesFromFileMutationPayload {
   """Новая агрегация"""
   attributes: [AttributeType]
   clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
+}
+
+input UploadDocumentScanMutationInput {
+  clientMutationId: String
+  """Идентификатор документа"""
+  documentId: ID!
+  """Загружаемый файл скана"""
+  scanFile: Upload!
+}
+
+"""Мутация для загрузки скана документа."""
+type UploadDocumentScanMutationPayload {
+  clientMutationId: String
+  """Скан документа"""
+  documentScan: DocumentScanType!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Успех мутации"""

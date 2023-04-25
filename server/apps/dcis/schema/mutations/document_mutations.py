@@ -19,10 +19,11 @@ from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, She
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import (
     DocumentMessageType,
+    DocumentScanType,
     DocumentStatusType,
     DocumentType,
     GlobalIndicesInputType,
-    PeriodDocumentScanType, RowDimensionType,
+    RowDimensionType,
 )
 from apps.dcis.services.add_document_data_services import add_document_data
 from apps.dcis.services.document_services import create_document, create_document_message, upload_document_scan
@@ -304,10 +305,10 @@ class UploadDocumentScanMutation(BaseMutation):
     """Мутация для загрузки скана документа."""
 
     class Input:
-        document_id = graphene.ID(description='Идентификатор документа')
+        document_id = graphene.ID(required=True, description='Идентификатор документа')
         scan_file = Upload(required=True, description='Загружаемый файл скана')
 
-    document_scan = graphene.Field(PeriodDocumentScanType, required=True, description='Скан документа')
+    document_scan = graphene.Field(DocumentScanType, required=True, description='Скан документа')
 
     @staticmethod
     @permission_classes((IsAuthenticated,))

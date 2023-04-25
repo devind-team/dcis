@@ -1,0 +1,15 @@
+mutation UploadDocumentScan($documentId: ID!, $scanFile: Upload!) {
+  uploadDocumentScan(input: {
+    documentId: $documentId
+    scanFile: $scanFile
+  }) {
+    success
+    errors {
+      field
+      messages
+    }
+    documentScan {
+      ...DocumentScanFields
+    }
+  }
+}

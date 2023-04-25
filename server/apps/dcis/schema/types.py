@@ -24,7 +24,8 @@ from apps.dcis.models import (
     CuratorGroup,
     Document,
     DocumentMessage,
-    DocumentScan, DocumentStatus,
+    DocumentScan,
+    DocumentStatus,
     Limitation,
     Period,
     PeriodGroup,
@@ -734,7 +735,7 @@ class PeriodMethodicalSupportType(DjangoObjectType):
         filter_fields = {'name': ['icontains']}
         connection_class = CountableConnection
 
-class PeriodDocumentScanType(DjangoObjectType):
+class DocumentScanType(DjangoObjectType):
     """Тип скана документа."""
     ext = graphene.String(description='Расширение файла')
     size = graphene.Int(description='Размер файла в байтах')
