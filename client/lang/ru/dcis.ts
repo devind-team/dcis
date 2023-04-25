@@ -509,6 +509,12 @@ export default {
         buttonText: 'Выгрузка',
         unload: '@:dcis.documents.unloadDocument.name'
       },
+      scanMenu: {
+        buttonText: 'Скан',
+        uploadScan: 'Загрузить скан',
+        unloadScan: 'Скачать скан',
+        deleteScan: 'Удалить скан'
+      },
       tableSettings: {
         buttonText: '@:settings',
         showSettings: '@:dcis.sheets.settings.show'

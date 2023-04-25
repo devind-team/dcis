@@ -19,6 +19,7 @@ left-navigator-container.document-sheets__left-navigator-container(
   )
     template(#menus)
       document-unload-menu(:document="document" :loading.sync="unloadLoading")
+      scan-menu(:document="document")
 </template>
 
 <script lang="ts">
@@ -35,10 +36,11 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import BreadCrumbs from '~/components/common/BreadCrumbs.vue'
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import DocumentUnloadMenu from '~/components/dcis/grid/menus/DocumentUnloadMenu.vue'
+import ScanMenu from '~/components/dcis/grid/menus/ScanMenu.vue'
 import documentSheetQuery from '~/gql/dcis/queries/document_sheet.graphql'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, BreadCrumbs, GridSheets, DocumentUnloadMenu },
+  components: { LeftNavigatorContainer, BreadCrumbs, GridSheets, DocumentUnloadMenu, ScanMenu },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> },
     document: { type: Object as PropType<DocumentType>, required: true }
