@@ -102,6 +102,7 @@ def unload_limitations_in_file(user: User, period: Period) -> str:
     return relpath(path, settings.BASE_DIR)
 
 
+@transaction.atomic
 def add_limitation(user: User, formula: str, error_message: str, sheet_id: int | str) -> Limitation:
     """Добавление ограничения, накладываемого на лист."""
     period = Period.objects.get(sheet__id=sheet_id)
