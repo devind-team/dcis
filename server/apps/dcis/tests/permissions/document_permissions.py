@@ -24,7 +24,6 @@ from apps.dcis.models import (
 from apps.dcis.permissions.document_permissions import (
     can_add_child_row_dimension,
     can_add_document,
-    can_add_document_message,
     can_add_document_status,
     can_change_attribute_value,
     can_change_child_row_dimension_height,
@@ -234,11 +233,6 @@ class DocumentPermissionsTestCase(TestCase):
     def test_can_delete_document_status(self) -> None:
         """Тестирование функции `can_delete_document_status`."""
         self._test_common(can_delete_document_status)
-
-    def test_can_add_document_message(self) -> None:
-        """Тестирование функции `can_add_document_message`."""
-        self._test_common(can_add_document_message)
-        can_add_document_message(self.curator, self.organization_document)
 
     def test_can_change_attribute_value(self) -> None:
         """Тестирование функции `can_change_attribute_value`."""

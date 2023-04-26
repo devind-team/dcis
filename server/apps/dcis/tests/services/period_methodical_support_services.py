@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
@@ -32,7 +33,7 @@ class PeriodMethodicalSupportTestCase(TransactionTestCase):
             src='storage/period_methodical_support/Me/Methodical support name.doc'
         )
         self.file1 = create_in_memory_file('test_create_period.xlsx')
-        self.file2 = create_in_memory_file('test_add_update_limitations_from_file.json')
+        self.file2 = create_in_memory_file(Path('limitation_services') / 'test_add_update_limitations_from_file.json')
         self.files = [self.file1, self.file2]
 
     def test_add_period_methodical_support(self) -> None:
