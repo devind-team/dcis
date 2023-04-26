@@ -15,7 +15,7 @@ from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 from graphql_relay import from_global_id
 
-from apps.dcis.models import Document, DocumentStatus, Period, RowDimension, Sheet, Status
+from apps.dcis.models import Document, DocumentScan, DocumentStatus, Period, RowDimension, Sheet, Status
 from apps.dcis.schema.mutations.sheet_mutations import DeleteRowDimensionMutation
 from apps.dcis.schema.types import (
     DocumentMessageType,
@@ -26,7 +26,12 @@ from apps.dcis.schema.types import (
     RowDimensionType,
 )
 from apps.dcis.services.add_document_data_services import add_document_data
-from apps.dcis.services.document_services import create_document, create_document_message, upload_document_scan
+from apps.dcis.services.document_services import (
+    create_document,
+    create_document_message,
+    delete_document_scan,
+    upload_document_scan,
+)
 from apps.dcis.services.document_unload_services import unload_document
 from apps.dcis.services.row_dimension_services import (
     add_child_row_dimension,
@@ -317,6 +322,23 @@ class UploadDocumentScanMutation(BaseMutation):
         return UploadDocumentScanMutation(
             document_scan=upload_document_scan(info.context.user, document, scan_file)
         )
+
+
+class DeleteDocumentScanMutation(BaseMutation):
+    """Мутация для полного удаления скана документа."""
+
+    class Input:
+        file_id = graphene.ID(required=True, description='Идентификатор файла')
+
+    id = graphene.ID(required=True, description='Идентификатор удаляемого файла')
+
+    @staticmethod
+    @permission_classes([IsAuthenticated])
+    def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, *args, **kwargs):
+        file: DocumentScan = get_object_or_404(DocumentScan, pk=from_global_id(file_id)[1])
+        document: Document = file.document
+        delete_document_scan(info.context.user, document, file)
+        return DeleteDocumentScanMutation(id=file_id)
 
 
 class DocumentMutations(graphene.ObjectType):

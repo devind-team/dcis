@@ -339,8 +339,8 @@ def can_change_child_row_dimension_height(user: User, row: RowDimension):
     if (
         row.parent_id is not None and
         row.document_id is not None and ChangeChildRowDimensionHeightBase(
-            user, row.document
-        ).has_object_permission(row)
+        user, row.document
+    ).has_object_permission(row)
     ):
         can_view_document(user, row.document)
         return
@@ -369,13 +369,18 @@ def can_delete_child_row_dimension(user: User, row: RowDimension):
     if (
         row.parent_id is not None and
         row.document_id is not None and DeleteChildRowDimensionBase(
-            user, row.document
-        ).has_object_permission(row)
+        user, row.document
+    ).has_object_permission(row)
     ):
         can_view_document(user, row.document)
         return
     raise PermissionDenied('Недостаточно прав для удаления строки.')
 
+
 def can_upload_document_scan(user: User, document: Document):
     can_view_document(user, document)
     can_change_document_base(user, document)
+
+
+def can_delete_document_scan(user: User, document: Document):
+    can_view_document(user, document)
