@@ -37,6 +37,7 @@ from .services import (
     PeriodUserTestCase,
     PrivilegeTestCase,
     ProjectTestCase,
+    RecalculateAllCellsTestCase,
     RowDimensionTestCase,
     StatusTestCase,
     UnloadDocumentTestCase,

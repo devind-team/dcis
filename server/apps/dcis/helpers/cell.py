@@ -20,7 +20,7 @@ from ..models.sheet import KindCell
 
 def get_dependency_cells(
     sheet_containers: list[SheetFormulaContainerCache],
-    vcs: list[Value | Cell]
+    vcs: Iterable[Value | Cell]
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
@@ -86,11 +86,9 @@ def resolve_cells(
                 column__index=column_index,
                 row__index=row_index
             )
-    related: list[str] = ['row', 'column', 'column__sheet']
-    cells: QuerySet[Cell] = Cell.objects.filter(cells_query_filter) \
-        .select_related(*related).order_by('column', 'row')
-    values: QuerySet[Value] = Value.objects.filter(values_query_filter) \
-        .select_related(*related).order_by('column', 'row').all()
+    related = ['row', 'column', 'column__sheet']
+    cells: QuerySet[Cell] = Cell.objects.filter(cells_query_filter).select_related(*related)
+    values: QuerySet[Value] = Value.objects.filter(values_query_filter).select_related(*related)
     return cells, values
 
 

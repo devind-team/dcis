@@ -1,6 +1,7 @@
 """Тесты модуля, отвечающего за работу со значениями."""
 
 from dataclasses import dataclass
+from typing import Iterable
 
 from devind_dictionaries.models import Organization
 from django.contrib.contenttypes.models import ContentType
@@ -12,7 +13,7 @@ from apps.core.models import User
 from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Cell, ColumnDimension, Document, Period, Project, RowDimension, Sheet
 from apps.dcis.models.sheet import KindCell, Value
-from apps.dcis.services.value_services import ValueInput, update_or_create_values
+from apps.dcis.services.value_services import ValueInput, recalculate_all_cells, update_or_create_values
 
 
 @dataclass
@@ -446,3 +447,159 @@ class UpdateOrCreateValuesTestCase(TestCase):
         """Тестирование данных значения."""
         self.assertEqual(value.value, data[0])
         self.assertEqual(value.error, data[1])
+
+
+@override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
+class RecalculateAllCellsTestCase(TestCase):
+    """Тестирование функции `recalculate_all_cells`."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
+        self.period = Period.objects.create(project=self.project)
+
+        self.forms: list[Sheet] = []
+        self.columns: list[ColumnDimension] = []
+        for i in range(1, 3):
+            form = Sheet.objects.create(name=f'Форма №{i}', period=self.period, show_head=False)
+            row = RowDimension.objects.create(index=1, sheet=form)
+            columns = [ColumnDimension.objects.create(index=i, sheet=form) for i in range(1, 4)]
+            self.columns.extend(columns)
+            form_cache_container = SheetFormulaContainerCache(name=form.name)
+            for j, column in enumerate(columns, 1):
+                if j == 1:
+                    formula = "=SUM(B1:C1)"
+                    Cell.objects.create(
+                        kind=KindCell.NUMERIC,
+                        formula=formula,
+                        default=f'5.0',
+                        column=column,
+                        row=row,
+                    )
+                    form_cache_container.add_formula('A1', formula)
+                else:
+                    Cell.objects.create(
+                        kind=KindCell.NUMERIC,
+                        default=f'{j:.1f}',
+                        column=column,
+                        row=row,
+                    )
+            form_cache_container.save(sheet_id=form.id)
+            self.forms.append(form)
+
+        form3 = Sheet.objects.create(name=f'Форма №3', period=self.period, show_head=False)
+        row = RowDimension.objects.create(index=1, sheet=form3)
+        column = ColumnDimension.objects.create(index=1, sheet=form3)
+        self.columns.append(column)
+        form3_cache_container = SheetFormulaContainerCache(name=form3.name)
+        form3_formula = "='Форма №1'!A1 + 'Форма №2'!A1"
+        Cell.objects.create(
+            kind=KindCell.NUMERIC,
+            formula=form3_formula,
+            default=f'10.0',
+            column=column,
+            row=row,
+        )
+        form_3_aggregate_column = ColumnDimension.objects.create(index=2, sheet=form3)
+        form3_aggregate_cell =  Cell.objects.create(
+            kind=KindCell.NUMERIC,
+            default=f'15.0',
+            column=form_3_aggregate_column,
+            row=row,
+        )
+        form3_cache_container.add_formula('A1', form3_formula)
+        form3_cache_container.save(sheet_id=form3.id)
+        self.forms.append(form3)
+
+        aggregation_form = Sheet.objects.create(name='Форма агрегации', period=self.period, show_child=False)
+        row = RowDimension.objects.create(index=1, sheet=aggregation_form)
+        self.aggregation_column = ColumnDimension.objects.create(index=1, sheet=aggregation_form)
+        aggregation_cell = Cell.objects.create(
+            kind=KindCell.NUMERIC,
+            aggregation=True,
+            default=f'0.0',
+            column=self.aggregation_column,
+            row=row,
+        )
+        aggregation_cell.to_cells.create(from_cell=form3_aggregate_cell)
+        self.forms.append(aggregation_form)
+
+        parent_organization = Organization.objects.create(attributes='')
+        self.period.division_set.create(object_id=parent_organization.id)
+        self.parent_document = Document.objects.create(period=self.period, object_id=parent_organization.id)
+        self.parent_document.sheets.set(self.forms)
+
+        self.documents: list[Document] = []
+        for i in range(2):
+            organization = Organization.objects.create(attributes='', parent=parent_organization)
+            self.period.division_set.create(object_id=organization.id)
+            document = Document.objects.create(period=self.period, object_id=organization.id)
+            document.sheets.set(self.forms)
+            form = self.forms[0] if i == 0 else self.forms[1]
+            Value.objects.create(
+                document=document,
+                sheet=form,
+                column=form.columndimension_set.last(),
+                row=form.rowdimension_set.last(),
+                value=f'{10 + i:.1f}',
+            )
+            self.documents.append(document)
+
+    def test_recalculate_all_cells(self) -> None:
+        """Тестирование функции `recalculate_all_cells`."""
+        self._test_values(self.documents[0], self.columns, (
+            ('5.0', False),
+            ('2.0', False),
+            ('10.0', True),
+            ('5.0', False),
+            ('2.0', False),
+            ('3.0', False),
+            ('10.0', False),
+        ))
+        self._test_values(self.documents[1], self.columns, (
+            ('5.0', False),
+            ('2.0', False),
+            ('3.0', False),
+            ('5.0', False),
+            ('2.0', False),
+            ('11.0', True),
+            ('10.0', False),
+        ))
+        self._test_values(self.parent_document, [self.aggregation_column], (('0.0', False),))
+        recalculate_all_cells(self.superuser, self.period)
+        self._test_values(self.documents[0], self.columns, (
+            ('12.0', True),
+            ('2.0', False),
+            ('10.0', True),
+            ('5.0', True),
+            ('2.0', False),
+            ('3.0', False),
+            ('17.0', True),
+        ))
+        self._test_values(self.documents[1], self.columns, (
+            ('5.0', True),
+            ('2.0', False),
+            ('3.0', False),
+            ('13.0', True),
+            ('2.0', False),
+            ('11.0', True),
+            ('18.0', True),
+        ))
+        self._test_values(self.parent_document, [self.aggregation_column], (('30.0', True),))
+
+    def _test_values(
+        self,
+        document: Document,
+        columns: list[ColumnDimension],
+        values: Iterable[tuple[str, bool]]
+    ) -> None:
+        """Тестирование значений ячеек."""
+        for column, value_exist in zip(columns, values):
+            expected_value, exist = value_exist
+            value = Value.objects.filter(document=document, column=column).first()
+            self.assertEqual(exist, bool(value))
+            actual_value = value.value if value else Cell.objects.filter(column=column).first().default
+            self.assertEqual(expected_value, actual_value)

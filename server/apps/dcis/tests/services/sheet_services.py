@@ -1,4 +1,4 @@
-"""Тестирование модуля, отвечающего за работу с листами."""
+"""Тесты модуля, отвечающего за работу с листами."""
 
 from typing import Iterable
 from unittest.mock import patch
@@ -19,7 +19,7 @@ from apps.dcis.services.sheet_services import (
     paste_into_cells,
 )
 from apps.dcis.services.value_services import ValueInput, update_or_create_values
-from apps.dcis.tasks import recalculate_cell_formula_task
+from apps.dcis.tasks import recalculate_cell_task
 
 
 class CheckCellOptionsTestCase(TestCase):
@@ -82,8 +82,8 @@ class CheckCellOptionsTestCase(TestCase):
 
 @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
 @patch(
-    'apps.dcis.services.sheet_services.recalculate_cell_formula_task.delay',
-    new=lambda *args: recalculate_cell_formula_task.apply(args=args),
+    'apps.dcis.services.sheet_services.recalculate_cell_task.delay',
+    new=lambda *args: recalculate_cell_task.apply(args=args),
 )
 class ChangeCellFormulaTestCase(TestCase):
     """Тестирование функции `change_cell_formula`."""
@@ -96,14 +96,14 @@ class ChangeCellFormulaTestCase(TestCase):
         self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
 
-        self.form1 = Sheet.objects.create(name='Форма 1', period=self.period)
+        self.form1 = Sheet.objects.create(name='Форма №1', period=self.period)
         self.form1_row = RowDimension.objects.create(index=1, sheet=self.form1)
         self.form1_columns = [ColumnDimension.objects.create(index=i, sheet=self.form1) for i in range(1, 4)]
         self.form1_cache_container = SheetFormulaContainerCache(name=self.form1.name)
         self.form1_cells: list[Cell] = []
         for i, column in enumerate(self.form1_columns, 1):
             if i == 1:
-                formula = "=SUM(B1:C1) + SUM('Форма 2'!A1:C1)"
+                formula = "=SUM(B1:C1) + SUM('Форма №2'!A1:C1)"
                 self.form1_cells.append(Cell.objects.create(
                     kind=KindCell.NUMERIC,
                     formula=formula,
@@ -121,7 +121,7 @@ class ChangeCellFormulaTestCase(TestCase):
                 ))
         self.form1_cache_container.save(sheet_id=self.form1.id)
 
-        self.form2 = Sheet.objects.create(name='Форма 2', period=self.period)
+        self.form2 = Sheet.objects.create(name='Форма №2', period=self.period)
         self.form2_row = RowDimension.objects.create(index=1, sheet=self.form2)
         self.form2_columns = [ColumnDimension.objects.create(index=i, sheet=self.form2) for i in range(1, 4)]
         self.form2_cells: list[Cell] = []
@@ -159,7 +159,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_add_formula_not_recalculate(self) -> None:
         """Тестирование добавления формулы без пересчета значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма 2'!A1:C1)", False)
+        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма №2'!A1:C1)", False)
         self._test_values(self.default_values)
         update_or_create_values(
             self.superuser,
@@ -179,7 +179,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_add_formula_recalculate(self) -> None:
         """Тестирование добавления формулы с перерасчетом значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма 2'!A1:C1)", True)
+        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма №2'!A1:C1)", True)
         self._test_values((
             ('15.0', True),
             ('6.0', True),
@@ -192,7 +192,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_change_formula_not_recalculate(self) -> None:
         """Тестирование изменения формулы без перерасчета значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма 2'!A1:C1) + 10", False)
+        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма №2'!A1:C1) + 10", False)
         self._test_values(self.default_values)
         update_or_create_values(
             self.superuser,
@@ -212,7 +212,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_change_formula_recalculate(self) -> None:
         """Тестирование изменения формулы с перерасчетом значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма 2'!A1:C1) + 10", True)
+        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма №2'!A1:C1) + 10", True)
         self._test_values((
             ('21.0', True),
             ('2.0', False),
@@ -256,6 +256,7 @@ class ChangeCellFormulaTestCase(TestCase):
             self.assertEqual(exist, bool(value))
             actual_value = value.value if value else Cell.objects.filter(column=column).first().default
             self.assertEqual(expected_value, actual_value)
+
 
 class PasteTestCase(TestCase):
     """Тестирование функции `paste_into_cells`."""

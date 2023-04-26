@@ -111,7 +111,7 @@ def transformation_position_cell(cell: Cell) -> str:
     return f"'{cell.column.sheet.name}'!{get_column_letter(cell.column.index)}{cell.row.index}"
 
 
-def dependent_cells(cells: list[Cell]) -> list[str]:
+def dependent_cells(cells: list[RelationshipCells]) -> list[str]:
     """Получение зависимых ячеек агрегации."""
     return [transformation_position_cell(cell.from_cell) for cell in cells]
 

@@ -10,13 +10,11 @@ from devind_helpers.exceptions import PermissionDenied
 from devind_helpers.utils import convert_str_to_bool, convert_str_to_int
 from django.db import transaction
 from django.db.models import QuerySet
-from django.utils.timezone import now
 from openpyxl.utils import get_column_letter
 from stringcase import camelcase
 from xlsx_evaluate.tokenizer import ExcelParser, f_token
 
 from apps.core.models import User
-from apps.dcis.helpers.cell import get_dependency_cells, resolve_cells
 from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Period, Sheet, Value
 from apps.dcis.models.sheet import Cell
@@ -24,8 +22,7 @@ from apps.dcis.permissions import (
     can_add_budget_classification,
     can_change_period_sheet,
 )
-from apps.dcis.services.value_services import RecalculationData, recalculate_cells
-from apps.dcis.tasks import recalculate_cell_formula_task
+from apps.dcis.tasks import recalculate_cell_task
 
 
 @transaction.atomic
@@ -171,21 +168,8 @@ def change_cell_formula(user: User, cell: Cell, formula: str, recalculate: bool)
         cache_container.add_formula(coordinate, cell.formula)
     cache_container.save()
     if cell.formula and recalculate:
-        recalculate_cell_formula_task.delay(user.id, cell.id)
+        recalculate_cell_task.delay(user.id, cell.id)
     return cell
-
-
-def recalculate_cell_formula(user: User, cell: Cell) -> None:
-    """Пересчет значений в документах для ячейки."""
-    sheets = cell.column.sheet.period.sheet_set.all()
-    sheet_containers = [SheetFormulaContainerCache.get(sheet) for sheet in sheets]
-    for document in cell.column.sheet.period.document_set.all():
-        dependency_cells = get_dependency_cells(sheet_containers, [cell])[0]
-        recalculations: list[RecalculationData] = []
-        cells, resolve_values = resolve_cells(sheets, document, {*dependency_cells})
-        for c, v in zip(cells, resolve_values):
-            recalculations.append(RecalculationData(cell=c, value=v))
-        recalculate_cells(user, document, recalculations, now())
 
 
 def check_cells_permissions(user: User, cells: QuerySet[Cell]) -> QuerySet[Cell]:
