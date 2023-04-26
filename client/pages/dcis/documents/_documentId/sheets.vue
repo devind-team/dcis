@@ -18,8 +18,8 @@ left-navigator-container.document-sheets__left-navigator-container(
     :active-document="document"
   )
     template(#menus)
-      document-unload-menu(:document="document" :loading.sync="unloadLoading")
       scan-menu(:document="document")
+      document-unload-menu(:document="document" :loading.sync="unloadLoading")
 </template>
 
 <script lang="ts">

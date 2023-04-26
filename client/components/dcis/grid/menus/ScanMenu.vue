@@ -1,6 +1,10 @@
 <template lang="pug">
 v-menu(offset-y)
   template(#activator="{ on, attrs }")
+    v-snackbar(v-model="successActive" right ) {{ 'Файл загружен' }}
+      template(#action="{ attrs: snackbarAttrs }")
+        v-btn(v-bind="{ snackbarAttrs }" icon @click="successActive = false")
+          v-icon mdi-close
     v-btn.grid-sheet-menu__button(
       v-on="on"
       v-bind="attrs"
@@ -8,22 +12,42 @@ v-menu(offset-y)
       tile
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
   v-list(dense width="200")
+    v-list-item(@click="open")
+      v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
     v-list-item
-      v-list-item-title.d-flex.justify-space-between {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
+      v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
+        a(:href="`/${documentScan.src}`" target="__blank")
+    v-list-item
+      v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '#app'
-import { DocumentType } from '~/types/graphql'
+import { ref, watch, defineComponent, PropType } from '#app'
+import { useMutation } from '@vue/apollo-composable'
+import { useFileDialog } from '@vueuse/core'
+import {
+  DocumentType,
+  UploadDocumentScanMutation,
+  UploadDocumentScanMutationVariables
+} from '~/types/graphql'
+import uploadDocumentScan from '~/gql/dcis/mutations/document/upload_document_scan.graphql'
 
 export default defineComponent({
-  props: { document: { type: Object as PropType<DocumentType>, required: true } },
-  setup(props) {
-    return
+  props: {
+    document: { type: Object as PropType<DocumentType>, required: true }
+  },
+  setup (props) {
+    const { mutate: uploadDocumentScanMutate, onDone: uploadDocumentScanOnDone } = useMutation<UploadDocumentScanMutation, UploadDocumentScanMutationVariables>(uploadDocumentScan)
+    uploadDocumentScanOnDone((result) => {
+      successActive.value = result.data.uploadDocumentScan.success
+    })
+
+    const successActive = ref<boolean>(false)
+    const { files, open } = useFileDialog({ multiple: false, accept: 'application/pdf' })
+    watch(files, (files: FileList) => {
+      uploadDocumentScanMutate({ documentId: props.document.id, scanFile: files[0] })
+    })
+    return { open, successActive }
   }
 })
 </script>
-
-<style scoped>
-
-</style>

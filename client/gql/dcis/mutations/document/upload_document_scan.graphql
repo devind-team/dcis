@@ -1,3 +1,4 @@
+#import "../../fragments/document_scan_fields.graphql"
 mutation UploadDocumentScan($documentId: ID!, $scanFile: Upload!) {
   uploadDocumentScan(input: {
     documentId: $documentId

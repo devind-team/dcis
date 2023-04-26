@@ -512,7 +512,7 @@ export default {
       scanMenu: {
         buttonText: 'Скан',
         uploadScan: 'Загрузить скан',
-        unloadScan: 'Скачать скан',
+        downloadScan: 'Скачать скан',
         deleteScan: 'Удалить скан'
       },
       tableSettings: {

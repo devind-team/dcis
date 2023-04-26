@@ -13,6 +13,7 @@ export type Scalars = {
   Date: any;
   DateTime: any;
   JSONString: any;
+  UUID: any;
   Upload: any;
 };
 
@@ -2516,6 +2517,26 @@ export type DocumentMessageTypeEdge = {
   node?: Maybe<DocumentMessageType>;
 };
 
+/** Тип скана документа. */
+export type DocumentScanType = {
+  __typename?: 'DocumentScanType';
+  /** Дата добавления файла */
+  createdAt: Scalars['DateTime'];
+  /** Документ */
+  document?: Maybe<DocumentType>;
+  /** Расширение файла */
+  ext?: Maybe<Scalars['String']>;
+  id: Scalars['UUID'];
+  /** Название файла */
+  name: Scalars['String'];
+  /** Размер файла в байтах */
+  size?: Maybe<Scalars['Int']>;
+  /** Путь к файлу */
+  src: Scalars['String'];
+  /** Дата обновления файла */
+  updatedAt: Scalars['DateTime'];
+};
+
 /** Тип статусов для документов. */
 export type DocumentStatusType = {
   __typename?: 'DocumentStatusType';
@@ -3043,6 +3064,8 @@ export type Mutation = {
   updateLimitationsFromFile: UpdateLimitationsFromFileMutationPayload;
   /** Загрузка атребутов через json файл */
   uploadAttributesFromFile: UploadAttributesFromFileMutationPayload;
+  /** Мутация для загрузки скана документа. */
+  uploadDocumentScan: UploadDocumentScanMutationPayload;
   /** Мутация для загрузки пользователей из файла excel | csv. */
   uploadUsers: UploadUsersMutationPayload;
 };
@@ -3530,6 +3553,11 @@ export type MutationUpdateLimitationsFromFileArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationUploadAttributesFromFileArgs = {
   input: UploadAttributesFromFileMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationUploadDocumentScanArgs = {
+  input: UploadDocumentScanMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5252,6 +5280,26 @@ export type UploadAttributesFromFileMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type UploadDocumentScanMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор документа */
+  documentId: Scalars['ID'];
+  /** Загружаемый файл скана */
+  scanFile: Scalars['Upload'];
+};
+
+/** Мутация для загрузки скана документа. */
+export type UploadDocumentScanMutationPayload = {
+  __typename?: 'UploadDocumentScanMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Скан документа */
+  documentScan: DocumentScanType;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type UploadUsersMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Источник данных, файл xlsx или csv */
@@ -5691,6 +5739,8 @@ export type DocumentFieldsFragment = { __typename: 'DocumentType', id: string, v
 
 export type DocumentMessageFieldsFragment = { __typename: 'DocumentMessageType', id: string, comment: string, kind: DocumentMessageKind, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null };
 
+export type DocumentScanFieldsFragment = { __typename: 'DocumentScanType', id: any, name: string, src: string, size?: number | null, createdAt: any, updatedAt: any, ext?: string | null };
+
 export type LimitationFieldsFragment = { __typename: 'LimitationType', id: string, formula: string, errorMessage: string, sheet?: { __typename: 'BaseSheetType', id: string, name: string } | null };
 
 export type OrganizationFieldFragment = { __typename: 'OrganizationType', id: string, name: string, createdAt: any };
@@ -5952,6 +6002,13 @@ export type UnloadDocumentMutationVariables = Exact<{
 }>;
 
 export type UnloadDocumentMutation = { __typename?: 'Mutation', unloadDocument: { __typename: 'UnloadDocumentMutationPayload', success: boolean, src?: string | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type UploadDocumentScanMutationVariables = Exact<{
+  documentId: Scalars['ID'];
+  scanFile: Scalars['Upload'];
+}>;
+
+export type UploadDocumentScanMutation = { __typename?: 'Mutation', uploadDocumentScan: { __typename?: 'UploadDocumentScanMutationPayload', success: boolean, errors: Array<{ __typename?: 'ErrorFieldType', field: string, messages: Array<string> }>, documentScan: { __typename: 'DocumentScanType', id: any, name: string, src: string, size?: number | null, createdAt: any, updatedAt: any, ext?: string | null } } };
 
 export type AddLimitationMutationVariables = Exact<{
   formula: Scalars['String'];
