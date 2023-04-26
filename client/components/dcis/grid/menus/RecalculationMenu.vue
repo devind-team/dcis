@@ -7,7 +7,7 @@ v-menu(offset-y)
       elevation="0"
       tile
     ) {{ $t('dcis.grid.sheetMenu.recalculationMenu.buttonText') }}
-  v-list(dense width="200")
+  v-list(dense)
     v-list-item(@click="recalculateAllCells({ periodId: period.id })")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.recalculationMenu.recalculateAll') }}
 </template>

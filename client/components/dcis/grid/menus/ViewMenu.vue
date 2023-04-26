@@ -7,7 +7,7 @@ v-menu(offset-y)
       elevation="0"
       tile
     ) {{ $t('dcis.grid.sheetMenu.viewMenu.buttonText') }}
-  v-list(dense width="200")
+  v-list(dense)
     v-list-item(v-if="value.isFullScreen" @click="setIsFullScreen(false)")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.viewMenu.normalMode') }}
     v-list-item(v-else @click="setIsFullScreen(true)")
