@@ -1,3 +1,5 @@
+"""Модуль, отвечающий за работу с формулами."""
+
 TRANSLATED_FUNCTIONS = {
     'ABS': 'ABS',
     'ACOS': 'ACOS',
@@ -112,6 +114,7 @@ TRANSLATED_FUNCTIONS = {
 
 
 def translate_formula_en2ru(formula: str) -> str:
+    """Перевод формулы с английского на русский."""
     for en, ru in TRANSLATED_FUNCTIONS.items():
         formula = formula.replace(en, ru)
     result = ''
@@ -127,6 +130,7 @@ def translate_formula_en2ru(formula: str) -> str:
 
 
 def translate_formula_ru2en(formula: str) -> str:
+    """Перевод формулы с русского на английский."""
     for en, ru in TRANSLATED_FUNCTIONS.items():
         formula = formula.replace(ru, en)
     result = ''
