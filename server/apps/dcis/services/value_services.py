@@ -193,11 +193,12 @@ def recalculate_cells(user: User, period: Period, cells: Iterable[Cell]) -> None
     """Пересчет значений в документах для ячеек периода."""
     sheets = period.sheet_set.all()
     sheet_containers = [SheetFormulaContainerCache.get(sheet) for sheet in sheets]
+    formula_dependency_cells = get_dependency_cells(sheet_containers, cells)[0]
+    aggregation_cells = [get_coordinate(c.column.sheet, c) for c in cells if c.aggregation]
+    dependency_cells = {*formula_dependency_cells, *aggregation_cells}
     for document in period.document_set.all():
-        dependency_cells = get_dependency_cells(sheet_containers, cells)[0]
-        aggregation_cells = [get_coordinate(c.column.sheet, c) for c in cells if c.aggregation]
         recalculations: list[RecalculationData] = []
-        resolved_cells, resolved_values = resolve_cells(sheets, document, {*dependency_cells, *aggregation_cells})
+        resolved_cells, resolved_values = resolve_cells(sheets, document, dependency_cells)
         for cell in resolved_cells:
             value = next((v for v in resolved_values if cell.column == v.column and cell.row == v.row), None)
             recalculations.append(RecalculationData(cell=cell, value=value))
@@ -206,11 +207,11 @@ def recalculate_cells(user: User, period: Period, cells: Iterable[Cell]) -> None
 
 def recalculate_all_cells(user: User, period: Period) -> None:
     """Пересчет значений в документах для всех ячеек периода."""
-    recalculate_cells(user, period, Cell.objects.filter(
-        column__sheet__period=period,
-        formula__isnull=False,
-        aggregation__isnull=False,
-    ))
+    cells = Cell.objects.filter(
+        column__sheet__period=period
+    ).filter(Q(formula__isnull=False) | Q(aggregation__isnull=False))
+    if cells.count():
+        recalculate_cells(user, period, cells)
 
 
 def recalculate_aggregations(document: Document, recalculations: list[RecalculationData]) -> list[RecalculationData]:
@@ -315,15 +316,15 @@ def recalculate_values(document: Document, recalculations: list[RecalculationDat
     # 1. Собираем зависимости и последовательность операций
     dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(
         sheet_containers,
-        [recalculation.cell for recalculation in recalculations if recalculation.cell.formula is None]
+        [r.cell for r in recalculations if r.cell.formula is None]
     )
     # 1.1 Если у нас нет ячеек необходимых для пересчета, возвращаем изначальные значения
     if not inversion_cells:
         return recalculations
     # 2. Получаем связанные ячейки и значения из базы данных
-    cells, resolve_values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
+    resolved_cells, resolved_values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
     # 3. Строим изначальное состояние всех значений
-    state: dict[str, ValueState] = resolve_evaluate_state(cells, resolve_values, inversion_cells)
+    state: dict[str, ValueState] = resolve_evaluate_state(resolved_cells, resolved_values, inversion_cells)
     # 4. Рассчитываем значения
     evaluate_result: dict[str, ValueState] = evaluate_state(state, sequence_evaluate)
     # 5. Сохраняем значения

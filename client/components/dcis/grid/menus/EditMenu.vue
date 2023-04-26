@@ -51,10 +51,10 @@ export default defineComponent({
     selectedCellsOptions: { type: Object as PropType<CellsOptionsType>, default: null }
   },
   setup (props) {
-    const shortcutDialogActive = ref(false)
+    const shortcutDialogActive = ref<boolean>(false)
 
-    const disabled = computed(() => !props.selectedCellsOptions)
-    const changeVisible = computed(() => props.mode === GridMode.WRITE || props.mode === GridMode.CHANGE)
+    const disabled = computed<boolean>(() => !props.selectedCellsOptions)
+    const changeVisible = computed<boolean>(() => props.mode === GridMode.WRITE || props.mode === GridMode.CHANGE)
 
     const cut = () => {
       /// Несмотря на статус `deprecated`, работает лучше современного варианта с navigator.clipboard.

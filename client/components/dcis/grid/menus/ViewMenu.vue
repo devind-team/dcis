@@ -15,8 +15,8 @@ v-menu(offset-y)
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '#app'
 import { onKeyStroke } from '@vueuse/core'
+import { defineComponent, PropType } from '#app'
 
 export type ViewType = {
   isFullScreen: boolean

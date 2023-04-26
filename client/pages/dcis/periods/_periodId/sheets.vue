@@ -14,6 +14,7 @@ left-navigator-container.period-sheets__left-navigator-container(
     :loading="activeSheetLoading"
   )
     template(#menus)
+      recalculation-menu(:period="period")
       table-settings-menu(:sheets="period.sheets")
     template(#tabs="{ sheets, updateSize }")
       template(v-for="sheet in sheets")
@@ -44,9 +45,10 @@ import LeftNavigatorContainer from '~/components/common/grid/LeftNavigatorContai
 import GridSheets from '~/components/dcis/grid/GridSheets.vue'
 import SheetControl from '~/components/dcis/grid/controls/SheetControl.vue'
 import TableSettingsMenu from '~/components/dcis/grid/menus/TableSettingsMenu.vue'
+import RecalculationMenu from '~/components/dcis/grid/menus/RecalculationMenu.vue'
 
 export default defineComponent({
-  components: { LeftNavigatorContainer, GridSheets, SheetControl, TableSettingsMenu },
+  components: { LeftNavigatorContainer, GridSheets, SheetControl, TableSettingsMenu, RecalculationMenu },
   props: {
     breadCrumbs: { type: Array as PropType<BreadCrumbsItem[]>, required: true },
     period: { type: Object as PropType<PeriodType>, required: true }

@@ -1175,7 +1175,7 @@ input ChangeCellsOptionMutationInput {
 - vertical_align - ['top', 'middle', 'bottom']
 - size - число от 6 до 24
 - kind - [
-    'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
+    'n', 's', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
     'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
 ]
 - number_format - форматирование чисел
@@ -2898,6 +2898,8 @@ type Mutation {
   logout(input: LogoutMutationInput!): LogoutMutationPayload!
   """Вставка в ячейки"""
   pasteIntoCells(input: PasteIntoCellsMutationInput!): PasteIntoCellsMutationPayload!
+  """Пересчет значений в документах для всех ячеек периода"""
+  recalculateAllCells(input: RecalculateAllCellsInput!): RecalculateAllCellsPayload!
   """Мутация для сброса пароля пользователя."""
   recoveryPassword(input: RecoveryPasswordMutationInput!): RecoveryPasswordMutationPayload!
   """Мутация регистрации новых пользователей."""
@@ -3793,6 +3795,21 @@ type Query {
     """Идентификатор листа"""
     sheetId: ID!
   ): [FileType!]
+}
+
+input RecalculateAllCellsInput {
+  clientMutationId: String
+  """Идентификатор периода"""
+  periodId: ID!
+}
+
+"""Пересчет значений в документах для всех ячеек периода."""
+type RecalculateAllCellsPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Успех мутации"""
+  success: Boolean!
 }
 
 input RecoveryPasswordMutationInput {

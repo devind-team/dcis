@@ -1225,7 +1225,7 @@ export type ChangeCellsOptionMutationInput = {
  * - vertical_align - ['top', 'middle', 'bottom']
  * - size - число от 6 до 24
  * - kind - [
- *     'n', 's', 'f', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
+ *     'n', 's', 'b', 'inlineStr', 'e', 'str', 'd', 'time', 'text', 'money',
  *     'bigMoney', 'fl', 'user', 'department', 'organization', 'classification'
  * ]
  * - number_format - форматирование чисел
@@ -3035,6 +3035,8 @@ export type Mutation = {
   logout: LogoutMutationPayload;
   /** Вставка в ячейки */
   pasteIntoCells: PasteIntoCellsMutationPayload;
+  /** Пересчет значений в документах для всех ячеек периода */
+  recalculateAllCells: RecalculateAllCellsPayload;
   /** Мутация для сброса пароля пользователя. */
   recoveryPassword: RecoveryPasswordMutationPayload;
   /** Мутация регистрации новых пользователей. */
@@ -3479,6 +3481,11 @@ export type MutationLogoutArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationPasteIntoCellsArgs = {
   input: PasteIntoCellsMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationRecalculateAllCellsArgs = {
+  input: RecalculateAllCellsInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -4698,6 +4705,22 @@ export type QueryValueFilesArgs = {
   documentId: Scalars['ID'];
   rowId: Scalars['ID'];
   sheetId: Scalars['ID'];
+};
+
+export type RecalculateAllCellsInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор периода */
+  periodId: Scalars['ID'];
+};
+
+/** Пересчет значений в документах для всех ячеек периода. */
+export type RecalculateAllCellsPayload = {
+  __typename?: 'RecalculateAllCellsPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Успех мутации */
+  success: Scalars['Boolean'];
 };
 
 export type RecoveryPasswordMutationInput = {
@@ -6282,6 +6305,12 @@ export type ChangeValuesMutationVariables = Exact<{
 }>;
 
 export type ChangeValuesMutation = { __typename?: 'Mutation', changeValues: { __typename: 'ChangeValuesMutationPayload', success: boolean, updatedAt?: any | null, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }>, values?: Array<{ __typename: 'ValueType', id: string, value: string, payload?: string | null, error?: string | null, columnId: string, rowId: string, sheetId: string } | null> | null } };
+
+export type RecalculateAllCellsMutationVariables = Exact<{
+  periodId: Scalars['ID'];
+}>;
+
+export type RecalculateAllCellsMutation = { __typename?: 'Mutation', recalculateAllCells: { __typename?: 'RecalculateAllCellsPayload', success: boolean, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UnloadFileValueArchiveMutationVariables = Exact<{
   documentId: Scalars['ID'];

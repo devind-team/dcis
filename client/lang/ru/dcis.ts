@@ -509,6 +509,10 @@ export default {
         buttonText: 'Выгрузка',
         unload: '@:dcis.documents.unloadDocument.name'
       },
+      recalculationMenu: {
+        buttonText: 'Пересчет',
+        recalculateAll: 'Пересчитать все'
+      },
       tableSettings: {
         buttonText: '@:settings',
         showSettings: '@:dcis.sheets.settings.show'
