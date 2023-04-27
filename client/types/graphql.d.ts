@@ -2099,6 +2099,24 @@ export type DeleteDivisionMutationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type DeleteDocumentScanMutationInput = {
+  clientMutationId?: InputMaybe<Scalars['String']>;
+  /** Идентификатор файла */
+  fileId: Scalars['ID'];
+};
+
+/** Мутация для полного удаления скана документа. */
+export type DeleteDocumentScanMutationPayload = {
+  __typename?: 'DeleteDocumentScanMutationPayload';
+  clientMutationId?: Maybe<Scalars['String']>;
+  /** Ошибки мутации */
+  errors: Array<ErrorFieldType>;
+  /** Идентификатор удаляемого файла */
+  id: Scalars['ID'];
+  /** Успех мутации */
+  success: Scalars['Boolean'];
+};
+
 export type DeleteDocumentStatusMutationInput = {
   clientMutationId?: InputMaybe<Scalars['String']>;
   /** Идентификатор статуса документа */
@@ -2996,6 +3014,8 @@ export type Mutation = {
   deleteCuratorGroup: DeleteCuratorGroupMutationPayload;
   /** Мутация на удаление дивизиона из периода. */
   deleteDivision: DeleteDivisionMutationPayload;
+  /** Мутация для полного удаления скана документа. */
+  deleteDocumentScan: DeleteDocumentScanMutationPayload;
   /** Удаление статуса документа. */
   deleteDocumentStatus: DeleteDocumentStatusMutationPayload;
   /** Мутация для полного удаления файла */
@@ -3383,6 +3403,11 @@ export type MutationDeleteCuratorGroupArgs = {
 /** Мутации на изменение чего-либо. */
 export type MutationDeleteDivisionArgs = {
   input: DeleteDivisionMutationInput;
+};
+
+/** Мутации на изменение чего-либо. */
+export type MutationDeleteDocumentScanArgs = {
+  input: DeleteDocumentScanMutationInput;
 };
 
 /** Мутации на изменение чего-либо. */
@@ -5989,6 +6014,12 @@ export type DeleteChildRowDimensionMutationVariables = Exact<{
 }>;
 
 export type DeleteChildRowDimensionMutation = { __typename?: 'Mutation', deleteChildRowDimension: { __typename: 'DeleteChildRowDimensionMutationPayload', success: boolean, rowDimensionId: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+
+export type DeleteDocumentScanMutationVariables = Exact<{
+  fileId: Scalars['ID'];
+}>;
+
+export type DeleteDocumentScanMutation = { __typename?: 'Mutation', deleteDocumentScan: { __typename: 'DeleteDocumentScanMutationPayload', success: boolean, id: string } };
 
 export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];

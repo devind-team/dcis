@@ -17,7 +17,7 @@ v-menu(offset-y)
     v-list-item
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
         a(:href="`/${documentScan.src}`" target="__blank")
-    v-list-item
+    v-list-item(@click="deleteScan")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}
 </template>
 
@@ -26,18 +26,24 @@ import { ref, watch, defineComponent, PropType } from '#app'
 import { useMutation } from '@vue/apollo-composable'
 import { useFileDialog } from '@vueuse/core'
 import {
+  DeleteDocumentScanMutation,
+  DeleteDocumentScanMutationVariables,
   DocumentType,
   UploadDocumentScanMutation,
   UploadDocumentScanMutationVariables
 } from '~/types/graphql'
 import uploadDocumentScan from '~/gql/dcis/mutations/document/upload_document_scan.graphql'
+import deleteDocumentScan from '~/gql/dcis/mutations/document/delete_document_scan.graphql'
 
 export default defineComponent({
   props: {
     document: { type: Object as PropType<DocumentType>, required: true }
   },
   setup (props) {
-    const { mutate: uploadDocumentScanMutate, onDone: uploadDocumentScanOnDone } = useMutation<UploadDocumentScanMutation, UploadDocumentScanMutationVariables>(uploadDocumentScan)
+    const {
+      mutate: uploadDocumentScanMutate,
+      onDone: uploadDocumentScanOnDone
+    } = useMutation<UploadDocumentScanMutation, UploadDocumentScanMutationVariables>(uploadDocumentScan)
     uploadDocumentScanOnDone((result) => {
       successActive.value = result.data.uploadDocumentScan.success
     })
@@ -47,6 +53,8 @@ export default defineComponent({
     watch(files, (files: FileList) => {
       uploadDocumentScanMutate({ documentId: props.document.id, scanFile: files[0] })
     })
+    const { mutate: deleteDocumnetScanMutate } = useMutation<DeleteDocumentScanMutation, DeleteDocumentScanMutationVariables>(deleteDocumentScan)
+    const deleteScan = deleteDocumnetScanMutate({ fileId: file.id })
     return { open, successActive }
   }
 })

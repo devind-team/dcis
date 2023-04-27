@@ -351,6 +351,7 @@ class DocumentMutations(graphene.ObjectType):
     unload_document = UnloadDocumentMutation.Field(required=True)
     add_document_data = AddDocumentDataMutation.Field(required=True)
     upload_document_scan = UploadDocumentScanMutation.Field(required=True)
+    delete_document_scan = DeleteDocumentScanMutation.Field(required=True)
 
     add_child_row_dimension = AddChildRowDimensionMutation.Field(required=True)
     change_child_row_dimension_height = ChangeChildRowDimensionHeightMutation.Field(required=True)

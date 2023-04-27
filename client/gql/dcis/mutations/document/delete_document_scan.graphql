@@ -1,0 +1,7 @@
+mutation DeleteDocumentScan($fileId: ID!) {
+  deleteDocumentScan(input: { fileId: $fileId }) {
+    success
+    id
+    __typename
+  }
+}

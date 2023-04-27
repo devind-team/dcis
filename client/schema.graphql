@@ -2012,6 +2012,23 @@ type DeleteDivisionMutationPayload {
   success: Boolean!
 }
 
+input DeleteDocumentScanMutationInput {
+  clientMutationId: String
+  """Идентификатор файла"""
+  fileId: ID!
+}
+
+"""Мутация для полного удаления скана документа."""
+type DeleteDocumentScanMutationPayload {
+  clientMutationId: String
+  """Ошибки мутации"""
+  errors: [ErrorFieldType!]!
+  """Идентификатор удаляемого файла"""
+  id: ID!
+  """Успех мутации"""
+  success: Boolean!
+}
+
 input DeleteDocumentStatusMutationInput {
   clientMutationId: String
   """Идентификатор статуса документа"""
@@ -2858,6 +2875,8 @@ type Mutation {
   deleteCuratorGroup(input: DeleteCuratorGroupMutationInput!): DeleteCuratorGroupMutationPayload!
   """Мутация на удаление дивизиона из периода."""
   deleteDivision(input: DeleteDivisionMutationInput!): DeleteDivisionMutationPayload!
+  """Мутация для полного удаления скана документа."""
+  deleteDocumentScan(input: DeleteDocumentScanMutationInput!): DeleteDocumentScanMutationPayload!
   """Удаление статуса документа."""
   deleteDocumentStatus(input: DeleteDocumentStatusMutationInput!): DeleteDocumentStatusMutationPayload!
   """Мутация для полного удаления файла"""
