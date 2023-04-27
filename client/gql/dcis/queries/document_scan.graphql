@@ -1,0 +1,7 @@
+#import "../fragments/document_scan_fields.graphql"
+
+query DocumentScan($documentId: ID!) {
+  documentScan(documentId: $documentId) {
+    ...DocumentScanFields
+  }
+}

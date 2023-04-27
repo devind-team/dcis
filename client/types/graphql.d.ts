@@ -4157,6 +4157,8 @@ export type Query = {
   document?: Maybe<DocumentType>;
   /** Комментарии документов */
   documentMessages?: Maybe<DocumentMessageTypeConnection>;
+  /** Скан документа */
+  documentScan?: Maybe<DocumentScanType>;
   /** Выгрузка листа с несколькими документами */
   documentSheet: SheetType;
   /** Статусы документов */
@@ -4367,6 +4369,11 @@ export type QueryDocumentMessagesArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
+};
+
+/** Схема запросов данных. */
+export type QueryDocumentScanArgs = {
+  documentId: Scalars['ID'];
 };
 
 /** Схема запросов данных. */
@@ -6432,6 +6439,12 @@ export type DocumentMessagesQueryVariables = Exact<{
 }>;
 
 export type DocumentMessagesQuery = { __typename?: 'Query', documentMessages?: { __typename?: 'DocumentMessageTypeConnection', totalCount: number, edges: Array<{ __typename?: 'DocumentMessageTypeEdge', node?: { __typename: 'DocumentMessageType', id: string, comment: string, kind: DocumentMessageKind, createdAt: any, user: { __typename: 'UserType', id: string, username: string, avatar?: string | null, email: string, firstName: string, lastName: string, sirName?: string | null, isActive: boolean, createdAt: any }, document?: { __typename: 'DocumentType', id: string } | null } | null } | null>, pageInfo: { __typename: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+
+export type DocumentScanQueryVariables = Exact<{
+  documentId: Scalars['ID'];
+}>;
+
+export type DocumentScanQuery = { __typename?: 'Query', documentScan?: { __typename: 'DocumentScanType', id: any, name: string, src: string, size?: number | null, createdAt: any, updatedAt: any, ext?: string | null } | null };
 
 export type DocumentSheetQueryVariables = Exact<{
   documentId: Scalars['ID'];

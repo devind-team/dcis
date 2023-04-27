@@ -11,12 +11,13 @@ v-menu(offset-y)
       elevation="0"
       tile
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
+  pre {{ file }}
   v-list(dense width="200")
     v-list-item(@click="open")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
     v-list-item
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
-        a(:href="`/${documentScan.src}`" target="__blank")
+        a(:href="`/${file.src}`" target="__blank")
     v-list-item(@click="deleteScan")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}
 </template>
@@ -25,13 +26,17 @@ v-menu(offset-y)
 import { ref, watch, defineComponent, PropType } from '#app'
 import { useMutation } from '@vue/apollo-composable'
 import { useFileDialog } from '@vueuse/core'
+import { useCommonQuery } from '~/composables'
 import {
   DeleteDocumentScanMutation,
   DeleteDocumentScanMutationVariables,
+  DocumentScanQuery,
+  DocumentScanQueryVariables,
   DocumentType,
   UploadDocumentScanMutation,
   UploadDocumentScanMutationVariables
 } from '~/types/graphql'
+import documentScanQuery from '~/gql/dcis/queries/document_scan.graphql'
 import uploadDocumentScan from '~/gql/dcis/mutations/document/upload_document_scan.graphql'
 import deleteDocumentScan from '~/gql/dcis/mutations/document/delete_document_scan.graphql'
 
@@ -40,6 +45,12 @@ export default defineComponent({
     document: { type: Object as PropType<DocumentType>, required: true }
   },
   setup (props) {
+    const { data: file } = useCommonQuery<DocumentScanQuery, DocumentScanQueryVariables>(
+      {
+        document: documentScanQuery,
+        variables: () => ({ documentId: props.document.id })
+      }
+    )
     const {
       mutate: uploadDocumentScanMutate,
       onDone: uploadDocumentScanOnDone
@@ -53,9 +64,10 @@ export default defineComponent({
     watch(files, (files: FileList) => {
       uploadDocumentScanMutate({ documentId: props.document.id, scanFile: files[0] })
     })
-    const { mutate: deleteDocumnetScanMutate } = useMutation<DeleteDocumentScanMutation, DeleteDocumentScanMutationVariables>(deleteDocumentScan)
-    const deleteScan = deleteDocumnetScanMutate({ fileId: file.id })
-    return { open, successActive }
+    const { mutate: deleteDocumentScanMutate } = useMutation<DeleteDocumentScanMutation, DeleteDocumentScanMutationVariables>(deleteDocumentScan)
+    const deleteScan = deleteDocumentScanMutate({ fileId: file.value.id })
+
+    return { open, successActive, file, deleteScan }
   }
 })
 </script>

@@ -19,7 +19,7 @@ from apps.dcis.models import (
     Cell,
     Document,
     DocumentMessage,
-    DocumentStatus,
+    DocumentScan, DocumentStatus,
     Period,
     Sheet,
     Status,
@@ -32,6 +32,7 @@ from apps.dcis.schema.types import (
     AttributeValueType,
     ChangeCellType,
     DocumentMessageType,
+    DocumentScanType,
     DocumentStatusType,
     DocumentType,
     SheetType,
@@ -87,6 +88,12 @@ class DocumentQueries(graphene.ObjectType):
         document_id=graphene.ID(required=True, description='Идентификатор документа'),
         required=True,
         description='Атрибуты со значениями документа'
+    )
+
+    document_scan = graphene.Field(
+        DocumentScanType,
+        document_id=graphene.ID(required=True, description='Идентификатор документа'),
+        description='Скан документа'
     )
 
     document_sheet = graphene.Field(
@@ -160,6 +167,12 @@ class DocumentQueries(graphene.ObjectType):
         document = get_object_or_404(Document, pk=gid2int(document_id))
         can_view_document(info.context.user, document)
         return document.documentstatus_set.all()
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def resolve_document_scan(root: Any, info: ResolveInfo, document_id: str) -> DocumentScan:
+        document = get_object_or_404(Document, pk=gid2int(document_id))
+        return DocumentScan.objects.filter(document=document).first()
 
     @staticmethod
     @permission_classes((IsAuthenticated,))
