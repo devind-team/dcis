@@ -150,8 +150,8 @@ def upload_document_scan(user: User, document: Document, file: InMemoryUploadedF
     return DocumentScan.objects.create(document=document, name=file.name, src=file)
 
 
-def delete_document_scan(user: User, document: Document, file: DocumentScan):
-    can_delete_document_scan(user, document)
+def delete_document_scan(user: User, file: DocumentScan):
+    can_delete_document_scan(user, file.document)
     if os.path.isfile(file.src.path):
         os.remove(file.src.path)
     file.delete()

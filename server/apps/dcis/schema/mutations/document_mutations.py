@@ -335,9 +335,8 @@ class DeleteDocumentScanMutation(BaseMutation):
     @staticmethod
     @permission_classes([IsAuthenticated])
     def mutate_and_get_payload(root, info: ResolveInfo, file_id: str, *args, **kwargs):
-        file: DocumentScan = get_object_or_404(DocumentScan, pk=from_global_id(file_id)[1])
-        document: Document = file.document
-        delete_document_scan(info.context.user, document, file)
+        file: DocumentScan = get_object_or_404(DocumentScan, pk=file_id)
+        delete_document_scan(info.context.user, file)
         return DeleteDocumentScanMutation(id=file_id)
 
 

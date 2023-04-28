@@ -354,6 +354,7 @@ class DocumentType(DjangoObjectType):
     sheets = graphene.List(lambda: BaseSheetType, required=True, description='Листы')
     last_status = graphene.Field(lambda: DocumentStatusType, description='Последний статус документа')
 
+    scan = graphene.Field(lambda: DocumentScanType, required=False, description='Скан документа')
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
     can_change_attribute_value = graphene.Boolean(
         required=True,
@@ -376,6 +377,7 @@ class DocumentType(DjangoObjectType):
             'object_id',
             'object_name',
             'last_status',
+            'scan',
         )
         filterset_class = DocumentFilter
         connection_class = CountableConnection
@@ -734,6 +736,7 @@ class PeriodMethodicalSupportType(DjangoObjectType):
         )
         filter_fields = {'name': ['icontains']}
         connection_class = CountableConnection
+
 
 class DocumentScanType(DjangoObjectType):
     """Тип скана документа."""

@@ -11,20 +11,18 @@ v-menu(offset-y)
       elevation="0"
       tile
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
-  pre {{ file }}
   v-list(dense width="200")
     v-list-item(@click="open")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
-    v-list-item
+    v-list-item(v-if="document.scan" :href="`/${document.scan.src}`" target="__blank")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
-        a(:href="`/${file.src}`" target="__blank")
-    v-list-item(@click="deleteScan")
+    v-list-item(v-if="document.scan" @click="deleteDocumentScanMutate({ fileId: document.scan.id }).then()")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}
 </template>
 
 <script lang="ts">
 import { ref, watch, defineComponent, PropType } from '#app'
-import { useMutation } from '@vue/apollo-composable'
+import { useApolloClient, useMutation } from '@vue/apollo-composable'
 import { useFileDialog } from '@vueuse/core'
 import { useCommonQuery } from '~/composables'
 import {
@@ -45,12 +43,6 @@ export default defineComponent({
     document: { type: Object as PropType<DocumentType>, required: true }
   },
   setup (props) {
-    const { data: file } = useCommonQuery<DocumentScanQuery, DocumentScanQueryVariables>(
-      {
-        document: documentScanQuery,
-        variables: () => ({ documentId: props.document.id })
-      }
-    )
     const {
       mutate: uploadDocumentScanMutate,
       onDone: uploadDocumentScanOnDone
@@ -65,9 +57,8 @@ export default defineComponent({
       uploadDocumentScanMutate({ documentId: props.document.id, scanFile: files[0] })
     })
     const { mutate: deleteDocumentScanMutate } = useMutation<DeleteDocumentScanMutation, DeleteDocumentScanMutationVariables>(deleteDocumentScan)
-    const deleteScan = deleteDocumentScanMutate({ fileId: file.value.id })
 
-    return { open, successActive, file, deleteScan }
+    return { open, successActive, deleteDocumentScanMutate }
   }
 })
 </script>

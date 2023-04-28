@@ -6,6 +6,11 @@ query Document($documentId: ID!) {
     version
     createdAt
     updatedAt
+    scan {
+      id
+      src
+      __typename
+    }
     user {
       id
       __typename

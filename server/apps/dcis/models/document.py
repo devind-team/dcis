@@ -7,10 +7,12 @@ from model_clone import CloneMixin
 from apps.core.models import User
 from .project import Period
 
+
 def file_directory_path(instance: 'DocumentScan', filename: str) -> str:
     """Формируем автоматический путь директории методических рекомендаций."""
     uuid_name = str(instance.id)[:2].lower()
     return f'storage/documents_scans/{uuid_name}/{instance.id}{os.path.splitext(filename)[1]}'
+
 
 class Status(models.Model):
     """Модель статусов документов."""
@@ -109,6 +111,7 @@ class Document(models.Model, CloneMixin):
         related_name='last_status_document_set',
         help_text='Последний статус документа',
     )
+    scan: 'DocumentScan'
 
     @property
     def is_editable(self) -> bool:
@@ -247,6 +250,7 @@ class Limitation(models.Model):
     class Meta:
         ordering = ('index',)
 
+
 class DocumentScan(models.Model):
     """Модель скана документа"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -256,4 +260,11 @@ class DocumentScan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, help_text='Дата добавления файла')
     updated_at = models.DateTimeField(auto_now=True, help_text='Дата обновления файла')
 
-    document = models.ForeignKey(Document, null=True, on_delete=models.CASCADE, help_text='Скан документа')
+    document = models.OneToOneField(
+        Document,
+        null=True,
+        primary_key=False,
+        related_name='scan',
+        on_delete=models.CASCADE,
+        help_text='Скан документа'
+    )

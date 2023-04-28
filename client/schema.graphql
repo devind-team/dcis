@@ -2477,6 +2477,8 @@ type DocumentType implements Node {
   objectName: String
   """Период сбора"""
   period: PeriodType
+  """Скан документа"""
+  scan: DocumentScanType
   """Листы"""
   sheets: [BaseSheetType]!
   """Дата обновления"""
