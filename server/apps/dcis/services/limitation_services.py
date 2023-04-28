@@ -16,6 +16,7 @@ from apps.core.models import User
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
 from apps.dcis.models import Limitation, Period
 from apps.dcis.permissions import can_change_period_limitations, can_view_period
+from apps.dcis.services.formula_services import translate_formula_ru2en
 
 
 @transaction.atomic
@@ -47,7 +48,7 @@ def add_limitations_from_file(period: Period, limitations_file: File) -> list[Li
                 raise_error([f'Не найдена форма "{limitation["form"]}" для ограничения по номеру {i}'])
             limitation = Limitation.objects.create(
                 index=i,
-                formula=limitation['check'],
+                formula=translate_formula_ru2en(str(limitation['check'])),
                 error_message=limitation['message'],
                 sheet=sheet
             )
@@ -101,6 +102,7 @@ def unload_limitations_in_file(user: User, period: Period) -> str:
     return relpath(path, settings.BASE_DIR)
 
 
+@transaction.atomic
 def add_limitation(user: User, formula: str, error_message: str, sheet_id: int | str) -> Limitation:
     """Добавление ограничения, накладываемого на лист."""
     period = Period.objects.get(sheet__id=sheet_id)
@@ -108,7 +110,7 @@ def add_limitation(user: User, formula: str, error_message: str, sheet_id: int |
     max_index = Limitation.objects.filter(sheet__period=period).aggregate(Max('index'))['index__max'] or 1
     limitation = Limitation.objects.create(
         index=max_index + 1,
-        formula=formula,
+        formula=translate_formula_ru2en(formula),
         error_message=error_message,
         sheet_id=sheet_id,
     )
@@ -126,7 +128,7 @@ def change_limitation(
 ) -> Limitation:
     """Изменение ограничения, накладываемого на лист."""
     can_change_period_limitations(user, limitation.sheet.period)
-    limitation.formula = formula
+    limitation.formula = translate_formula_ru2en(formula)
     limitation.error_message = error_message
     limitation.sheet_id = sheet_id
     limitation.save(update_fields=('formula', 'error_message', 'sheet_id'))

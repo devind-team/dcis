@@ -4,6 +4,7 @@ import json
 from collections import Counter
 from os import listdir, remove
 from os.path import isfile, join
+from pathlib import Path
 from unittest.mock import patch
 
 from devind_dictionaries.models import Organization
@@ -113,28 +114,28 @@ class LimitationTestCase(TestCase):
     def test_add_limitations_from_file_with_errors(self) -> None:
         """Тестирование функции `add_limitations_from` c ошибками."""
         self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_wrong_json.json', [
+            Path('limitation_services') / 'test_add_limitations_from_file_wrong_json.json', [
                 'Не удалось разобрать json файл',
                 'Expecting property name enclosed in double quotes',
             ]
         )
         self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_not_list.json', [
+            Path('limitation_services') / 'test_add_limitations_from_file_not_list.json', [
                 'json файл не содержит массив на верхнем уровне'
             ]
         )
         self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_not_dict.json', [
+            Path('limitation_services') / 'test_add_limitations_from_file_not_dict.json', [
                 'Ограничение по номеру 2 не является объектом'
             ]
         )
         self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_wrong_keys.json', [
+            Path('limitation_services') / 'test_add_limitations_from_file_wrong_keys.json', [
                 'Ключи ограничения по номеру 2 должны совпадать со списком ["form", "check", "message"]'
             ]
         )
         self._test_add_limitations_from_file_with_error(
-            'test_add_limitations_from_file_wrong_sheet.json', [
+            Path('limitation_services') / 'test_add_limitations_from_file_wrong_sheet.json', [
                 'Не найдена форма "Форма3" для ограничения по номеру 2'
             ]
         )
@@ -143,7 +144,7 @@ class LimitationTestCase(TestCase):
         """Тестирование функции `add_limitations_from` без ошибок."""
         limitations = add_limitations_from_file(
             self.add_file_period,
-            create_in_memory_file('test_add_update_limitations_from_file.json')
+            create_in_memory_file(Path('limitation_services') / 'test_add_update_limitations_from_file.json')
         )
         self._test_add_update_limitations_from_file(limitations, self.add_file_period)
 
@@ -155,13 +156,13 @@ class LimitationTestCase(TestCase):
             update_limitations_from_file(
                 self.superuser,
                 self.update_file_period,
-                create_in_memory_file('test_add_update_limitations_from_file.json')
+                create_in_memory_file(Path('limitation_services') / 'test_add_update_limitations_from_file.json')
             )
         self.assertEqual('Недостаточно прав для изменения ограничений периода.', str(error.exception))
         limitations = update_limitations_from_file(
             self.superuser,
             self.update_file_period,
-            create_in_memory_file('test_add_update_limitations_from_file.json')
+            create_in_memory_file(Path('limitation_services') / 'test_add_update_limitations_from_file.json')
         )
         self.assertFalse(Limitation.objects.filter(id=self.update_file_period_limitation.id).exists())
         self._test_add_update_limitations_from_file(limitations, self.update_file_period)
@@ -169,7 +170,7 @@ class LimitationTestCase(TestCase):
     def test_add_limitation(self) -> None:
         """Тестирование функции `add_limitation`."""
         add_data = {
-            'formula': 'Форма2!B1 > Форма1!A1',
+            'formula': 'СУММ(Форма2!B1:C1) > Форма1!A1',
             'error_message': 'add_limitation',
             'sheet_id': self.add_period_form2.id,
         }
@@ -181,24 +182,26 @@ class LimitationTestCase(TestCase):
         limitation = add_limitation(self.superuser, **add_data)
         self.assertEqual(limitation.index, 2)
         for k, v in add_data.items():
+            if k == 'formula':
+                v = v.replace('СУММ', 'SUM')
             self.assertEqual(v, getattr(limitation, k))
         self.add_period_container_cache = LimitationFormulaContainerCache.get(self.add_period)
         self.assertEqual(
             {
                 'A1': Counter(['Форма1!A1', 'Форма2!A1']),
-                'A2': Counter(['Форма1!A1', 'Форма2!B1']),
+                'A2': Counter(['Форма1!A1', 'Форма2!B1', 'Форма2!C1']),
             },
-            self.add_period_container_cache.dependency_cache.dependency,
+            self.add_period_container_cache.dependency,
         )
         self.assertEqual(
-            {'Форма1!A1': ['A1', 'A2'], 'Форма2!A1': ['A1'], 'Форма2!B1': ['A2']},
-            self.add_period_container_cache.dependency_cache.inversion,
+            {'Форма1!A1': ['A1', 'A2'], 'Форма2!A1': ['A1'], 'Форма2!B1': ['A2'], 'Форма2!C1': ['A2']},
+            self.add_period_container_cache.inversion,
         )
 
     def test_change_limitation(self) -> None:
         """Тестирование функции `change_limitation`."""
         change_data = {
-            'formula': 'Форма1!A1 >= Форма2!B1 + Форма2!C1',
+            'formula': 'Форма1!A1 >= СУММ(Форма2!B1:C1)',
             'error_message': 'change_period_limitation2_changed',
             'sheet_id': self.change_period_form1.id,
         }
@@ -211,6 +214,8 @@ class LimitationTestCase(TestCase):
         self.assertEqual(self.change_period_limitation2, limitation)
         self.change_period_limitation2.refresh_from_db()
         for k, v in change_data.items():
+            if k == 'formula':
+                v = v.replace('СУММ', 'SUM')
             self.assertEqual(v, getattr(self.change_period_limitation2, k))
         self.change_period_container_cache = LimitationFormulaContainerCache.get(self.change_period)
         self.assertEqual(
@@ -255,7 +260,7 @@ class LimitationTestCase(TestCase):
             self.delete_period_container_cache.dependency_cache.inversion,
         )
 
-    def _test_add_limitations_from_file_with_error(self, file_path: str, messages: list[str]) -> None:
+    def _test_add_limitations_from_file_with_error(self, file_path: Path, messages: list[str]) -> None:
         """Тестирование функции `add_limitations_from` c ошибкой."""
         with self.assertRaises(ValidationError) as error:
             add_limitations_from_file(
@@ -270,13 +275,17 @@ class LimitationTestCase(TestCase):
             set(Limitation.objects.filter(sheet__period=period)),
             set(limitations)
         )
+        self.assertEqual(
+            'SUM(Форма1!A2:A3) >= SUM(Форма2!A2:A3)',
+            next(l.formula for l in limitations if l.sheet.name == 'Форма2')
+        )
         limitation_container_cache = LimitationFormulaContainerCache.get(period)
         self.assertEqual(
             {
                 'A1': Counter(['Форма1!A1', 'Форма2!A1']),
-                'A2': Counter(['Форма1!A2', 'Форма2!A2'])
+                'A2': Counter(['Форма1!A2', 'Форма1!A3', 'Форма2!A2', 'Форма2!A3'])
             },
-            limitation_container_cache.dependency_cache.dependency
+            limitation_container_cache.dependency
         )
         self.assertEqual(
             {
@@ -284,8 +293,10 @@ class LimitationTestCase(TestCase):
                 'Форма2!A1': ['A1'],
                 'Форма1!A2': ['A2'],
                 'Форма2!A2': ['A2'],
+                'Форма1!A3': ['A2'],
+                'Форма2!A3': ['A2'],
             },
-            limitation_container_cache.dependency_cache.inversion
+            limitation_container_cache.inversion
         )
 
     def test_unload_limitations_in_file(self):
@@ -301,9 +312,9 @@ class LimitationTestCase(TestCase):
         self.assertEqual(len(data), 1)
 
     def tearDown(self):
-        """Remove the temporary files created during the test."""
-        temp_dir = join(settings.STATICFILES_DIRS[1], 'temp_files')
+        """Удаление временно созданных файлов."""
+        temp_dir = settings.STATICFILES_DIRS[1] / 'temp_files'
         for file in listdir(temp_dir):
-            file_path = join(temp_dir, file)
+            file_path = temp_dir / file
             if isfile(file_path):
                 remove(file_path)
