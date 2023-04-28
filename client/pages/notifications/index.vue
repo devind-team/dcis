@@ -5,7 +5,7 @@ bread-crumbs(:items="breadCrumbs")
       v-card
         v-card-title {{ $t('notifications.name') }}
           v-spacer
-          notifications-menu(:notifications="notifications")
+          notifications-menu(v-if="notifications.length" :notifications="notifications")
         v-card-text
           mutation-result-alert(ref="mutationResultAlert")
           notifications-view(:notifications="notifications")

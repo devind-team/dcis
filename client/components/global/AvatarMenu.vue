@@ -31,7 +31,6 @@ export default defineComponent({
     const authStore = useAuthStore()
     const { user, hasPerm } = toRefs<{ user: UserType, hasPerm: HasPermissionFnType }>(authStore)
     const items: AvatarMenuItem[] = [
-      { name: 'profile', icon: 'face-man', path: 'profile-me' },
       { name: 'dcis', icon: 'table-network', path: 'dcis' },
       { name: 'controlPanel', icon: 'cog', path: 'panel', permissions: 'core.view_user' },
       { name: 'infoPanel', icon: 'view-dashboard-outline', path: 'dashboard', permissions: 'core.view_user' },

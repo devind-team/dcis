@@ -5,7 +5,7 @@ from django_filters import MultipleChoiceFilter, filterset
 from graphene import ID, List
 from graphene_django.forms.converter import convert_form_field
 
-from .models import Document, Project
+from .models import Document
 
 
 class IDMultipleChoiceField(MultipleChoiceField):
@@ -14,7 +14,7 @@ class IDMultipleChoiceField(MultipleChoiceField):
     def valid_value(self, value) -> bool:
         """Проверка, что пришел идентификатор."""
         if value.isdigit():
-           return True
+            return True
         return False
 
 
@@ -40,9 +40,9 @@ class ProjectFilter(filterset.FilterSet):
 
     @property
     def qs(self) -> QuerySet:
-        queryset = Project.objects.all()
+        queryset = self.queryset
         search_q = Q()
-        for field, value in  self.data.items():
+        for field, value in self.data.items():
             if field in ('visibility', 'archive'):
                 queryset = queryset.filter(**{field: value})
             else:
