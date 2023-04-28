@@ -159,7 +159,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_add_formula_not_recalculate(self) -> None:
         """Тестирование добавления формулы без пересчета значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма №2'!A1:C1)", False)
+        change_cell_formula(self.superuser, self.form1_cells[1], "=СУММ('Форма №2'!A1:C1)", False)
         self._test_values(self.default_values)
         update_or_create_values(
             self.superuser,
@@ -179,7 +179,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_add_formula_recalculate(self) -> None:
         """Тестирование добавления формулы с перерасчетом значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[1], "=SUM('Форма №2'!A1:C1)", True)
+        change_cell_formula(self.superuser, self.form1_cells[1], "=СУММ('Форма №2'!A1:C1)", True)
         self._test_values((
             ('15.0', True),
             ('6.0', True),
@@ -192,7 +192,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_change_formula_not_recalculate(self) -> None:
         """Тестирование изменения формулы без перерасчета значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма №2'!A1:C1) + 10", False)
+        change_cell_formula(self.superuser, self.form1_cells[0], "=СУММ(B1:C1) + СУММ('Форма №2'!A1:C1) + 10", False)
         self._test_values(self.default_values)
         update_or_create_values(
             self.superuser,
@@ -212,7 +212,7 @@ class ChangeCellFormulaTestCase(TestCase):
     def test_change_formula_recalculate(self) -> None:
         """Тестирование изменения формулы с перерасчетом значений в документах."""
         self._test_values(self.default_values)
-        change_cell_formula(self.superuser, self.form1_cells[0], "=SUM(B1:C1) + SUM('Форма №2'!A1:C1) + 10", True)
+        change_cell_formula(self.superuser, self.form1_cells[0], "=СУММ(B1:C1) + СУММ('Форма №2'!A1:C1) + 10", True)
         self._test_values((
             ('21.0', True),
             ('2.0', False),

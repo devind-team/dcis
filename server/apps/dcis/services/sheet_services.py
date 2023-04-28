@@ -22,6 +22,7 @@ from apps.dcis.permissions import (
     can_add_budget_classification,
     can_change_period_sheet,
 )
+from apps.dcis.services.formula_services import translate_formula_ru2en
 from apps.dcis.tasks import recalculate_cell_task
 
 
@@ -156,7 +157,7 @@ def change_cell_formula(user: User, cell: Cell, formula: str, recalculate: bool)
     """Изменение формулы ячейки."""
     can_change_period_sheet(user, cell.row.sheet.period)
     old_formula = cell.formula
-    cell.formula = formula if formula else None
+    cell.formula = translate_formula_ru2en(formula) if formula else None
     cell.save(update_fields=('formula',))
     cache_container = SheetFormulaContainerCache.get(cell.row.sheet)
     coordinate = f'{get_column_letter(cell.column.index)}{cell.row.index}'

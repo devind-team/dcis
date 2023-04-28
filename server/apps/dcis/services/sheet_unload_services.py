@@ -20,6 +20,7 @@ from apps.dcis.permissions import (
     ChangeValueBase,
     DeleteChildRowDimensionBase,
 )
+from apps.dcis.services.formula_services import translate_formula_en2ru
 
 
 class DataUnloader(ABC):
@@ -138,7 +139,11 @@ class SheetRowsUnloaderBase(DataUnloader, ABC):
 
     def _unload_raw_cells(self) -> list[dict]:
         """Выгрузка необработанных ячеек листа."""
-        return self.unload_raw_data(self.cells, self._cells_fields)
+        cells = self.unload_raw_data(self.cells, self._cells_fields)
+        for cell in cells:
+            if cell['formula']:
+                cell['formula'] = translate_formula_en2ru(cell['formula'])
+        return cells
 
     def _unload_raw_values(self) -> list[dict]:
         """Выгрузка необработанных значений листа."""
