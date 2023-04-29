@@ -4,7 +4,7 @@ from typing import Iterator
 
 from django.core.files.base import File
 from openpyxl import Workbook, load_workbook
-from openpyxl.cell.cell import Cell as OpenpyxlCell
+from openpyxl.cell.cell import Cell as OpenpyxlCell, TYPE_FORMULA
 from openpyxl.styles.colors import COLOR_INDEX, Color, WHITE
 from openpyxl.utils.cell import column_index_from_string, coordinate_from_string, get_column_letter
 from openpyxl.worksheet.dimensions import (
@@ -15,11 +15,11 @@ from openpyxl.worksheet.dimensions import (
 from openpyxl.worksheet.merge import MergeCell as OpenpyxlMergedCell
 from xlsx_evaluate import Evaluator, ModelCompiler
 
+from apps.dcis.helpers.cell import evaluate_formula
 from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.helpers.theme_to_rgb import theme_and_tint_to_rgb
-from ..helpers.cell import evaluate_formula
-from ..models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
-from ..models.sheet import KindCell
+from apps.dcis.models import Cell, ColumnDimension, MergedCell, Period, RowDimension, Sheet
+from apps.dcis.models.sheet import KindCell
 
 
 @dataclass
@@ -316,11 +316,12 @@ class ExcelExtractor:
 
     def _get_cell_kind_and_number_format(self, cell: OpenpyxlCell) -> tuple[str, str | None]:
         """Получение типа и форматирования чисел для ячейки."""
-        if cell.data_type == KindCell.NUMERIC or cell.data_type == KindCell.DATE:
+        if cell.data_type in (KindCell.NUMERIC, KindCell.DATE, TYPE_FORMULA):
             k = self._NUMBER_FORMAT_KIND_MAP.get(cell.number_format)
-            return k or (cell.data_type, cell.number_format)
+            data_type = KindCell.NUMERIC if cell.data_type == TYPE_FORMULA else cell.data_type
+            return k or (data_type, cell.number_format)
         if '\n' in cell.value:
-            return 'text', None
+            return KindCell.TEXT, None
         return cell.data_type, None
 
     @staticmethod

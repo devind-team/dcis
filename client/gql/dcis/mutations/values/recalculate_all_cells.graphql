@@ -1,0 +1,10 @@
+mutation RecalculateAllCells($periodId: ID!) {
+  recalculateAllCells(input: { periodId: $periodId }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+  }
+}

@@ -1,0 +1,13 @@
+mutation ChangeCellFormula($cellId: ID!, $formula: String!, $recalculate: Boolean!) {
+  changeCellFormula(input: { cellId: $cellId, formula: $formula, recalculate: $recalculate }) {
+    success
+    errors {
+      field
+      messages
+      __typename
+    }
+    cellId
+    formula
+    __typename
+  }
+}

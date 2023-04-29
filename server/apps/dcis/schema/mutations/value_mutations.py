@@ -15,15 +15,17 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from graphene_file_upload.scalars import Upload
 from graphql import ResolveInfo
 
-from apps.dcis.models import Cell, Document, Value
-from apps.dcis.permissions import can_change_value
+from apps.dcis.models import Cell, Document, Period, Value
+from apps.dcis.permissions import can_change_period_sheet, can_change_value
 from apps.dcis.schema.types import ValueInputType, ValueType
 from apps.dcis.services.value_services import (
     ValueInput,
     create_file_value_archive,
-    get_file_value_files, update_or_create_file_value,
+    get_file_value_files,
+    update_or_create_file_value,
     update_or_create_values,
 )
+from apps.dcis.tasks import recalculate_all_cells_task
 
 
 class ChangeValuesMutation(BaseMutation):
@@ -161,15 +163,34 @@ class UnloadFileValueArchiveMutation(BaseMutation):
         )
 
 
+class RecalculateAllCells(BaseMutation):
+    """Пересчет значений в документах для всех ячеек периода."""
+
+    class Input:
+        period_id = graphene.ID(required=True, description='Идентификатор периода')
+
+    @staticmethod
+    @permission_classes((IsAuthenticated,))
+    def mutate_and_get_payload(root: Any, info: ResolveInfo, period_id: int):
+        period = get_object_or_404(Period, pk=gid2int(period_id))
+        can_change_period_sheet(info.context.user, period)
+        recalculate_all_cells_task.delay(info.context.user.id, period.id)
+        return RecalculateAllCells()
+
+
 class ValueMutations(graphene.ObjectType):
     """Мутации, связанные с ячейками."""
 
     change_values = ChangeValuesMutation.Field(required=True, description='Изменение значения ячейки')
     change_file_value = ChangeFileValueMutation.Field(
         required=True,
-        description='Изменение значения ячейки типа `Файл`'
+        description='Изменение значения ячейки типа `Файл`',
     )
     unload_file_value_archive = UnloadFileValueArchiveMutation.Field(
         required=True,
-        description='Выгрузка архива значения ячейки типа `Файл`'
+        description='Выгрузка архива значения ячейки типа `Файл`',
+    )
+    recalculate_all_cells = RecalculateAllCells.Field(
+        required=True,
+        description='Пересчет значений в документах для всех ячеек периода',
     )

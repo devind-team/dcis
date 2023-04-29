@@ -5,7 +5,7 @@ from datetime import datetime
 from itertools import groupby, product
 from os import path
 from pathlib import Path
-from typing import Any, Generator, cast
+from typing import Any, Generator, Iterable, cast
 from zipfile import ZipFile
 
 from devind_core.models import File
@@ -19,13 +19,12 @@ from apps.core.models import User
 from apps.dcis.helpers.cell import (
     ValueState,
     evaluate_state,
-    get_dependency_cells,
+    get_coordinate, get_dependency_cells,
     resolve_cells,
     resolve_evaluate_state,
 )
 from apps.dcis.helpers.sheet_formula_cache import SheetFormulaContainerCache
 from apps.dcis.models import Cell, Document, Period, RowDimension, Sheet, Value
-from apps.dcis.models.sheet import KindCell
 from apps.dcis.permissions import can_view_document
 from apps.dcis.services.aggregation_services import calculate_aggregation_cell
 
@@ -48,7 +47,7 @@ class ValueInput:
 class RecalculationData:
     """Данные для пересчета."""
     cell: Cell
-    value: Value
+    value: Value | None
     is_aggregation_recalculated: bool = False
 
 
@@ -83,21 +82,13 @@ def update_or_create_values(
             value=value_input.value
         )
         recalculations.append(RecalculationData(cell=value_input.cell, value=value))
-    old_recalculations: list[RecalculationData] = []
-    while len(recalculations) != len(old_recalculations):
-        old_recalculations = recalculations
-        recalculations_copy = recalculations
-        recalculations = []
-        for doc, recs in group_by_documents(recalculations_copy):
-            recalculations.extend(recalculate_aggregations(doc, recs))
-        recalculations_copy = recalculations
-        recalculations = []
-        for doc, recs in group_by_documents(recalculations_copy):
-            recalculations.extend(recalculate_values(doc, recs))
-    values = [recalculation.value for recalculation in recalculations]
     updated_at = now()
-    RowDimension.objects.filter(pk__in=[val.row_id for val in values]).update(updated_at=updated_at)
-    Document.objects.filter(pk=document.pk).update(updated_at=updated_at, updated_by=user)
+    values = recalculate_dependency_cells(
+        user=user,
+        document=document,
+        recalculations=recalculations,
+        updated_at=updated_at,
+    )
     return UpdateOrCrateValuesResult(values=values, updated_at=updated_at)
 
 
@@ -171,6 +162,56 @@ def update_or_create_value(
         }
     )
     return value
+
+
+def recalculate_dependency_cells(
+    user: User,
+    document: Document,
+    recalculations: list[RecalculationData],
+    updated_at: datetime,
+) -> list[Value]:
+    """Перерасчет зависимых ячеек для документа."""
+    recalculations = [*recalculations]
+    old_recalculations: list[RecalculationData] = []
+    while len(recalculations) != len(old_recalculations):
+        old_recalculations = recalculations
+        recalculations_copy = recalculations
+        recalculations = []
+        for doc, recs in group_by_documents(recalculations_copy, document):
+            recalculations.extend(recalculate_aggregations(doc, recs))
+        recalculations_copy = recalculations
+        recalculations = []
+        for doc, recs in group_by_documents(recalculations_copy, document):
+            recalculations.extend(recalculate_values(doc, recs))
+    values = [recalculation.value for recalculation in recalculations if recalculation.value is not None]
+    RowDimension.objects.filter(pk__in=[val.row_id for val in values]).update(updated_at=updated_at)
+    Document.objects.filter(pk=document.pk).update(updated_at=updated_at, updated_by=user)
+    return values
+
+
+def recalculate_cells(user: User, period: Period, cells: Iterable[Cell]) -> None:
+    """Пересчет значений в документах для ячеек периода."""
+    sheets = period.sheet_set.all()
+    sheet_containers = [SheetFormulaContainerCache.get(sheet) for sheet in sheets]
+    formula_dependency_cells = get_dependency_cells(sheet_containers, cells)[0]
+    aggregation_cells = [get_coordinate(c.column.sheet, c) for c in cells if c.aggregation]
+    dependency_cells = {*formula_dependency_cells, *aggregation_cells}
+    for document in period.document_set.all():
+        recalculations: list[RecalculationData] = []
+        resolved_cells, resolved_values = resolve_cells(sheets, document, dependency_cells)
+        for cell in resolved_cells:
+            value = next((v for v in resolved_values if cell.column == v.column and cell.row == v.row), None)
+            recalculations.append(RecalculationData(cell=cell, value=value))
+        recalculate_dependency_cells(user, document, recalculations, now())
+
+
+def recalculate_all_cells(user: User, period: Period) -> None:
+    """Пересчет значений в документах для всех ячеек периода."""
+    cells = Cell.objects.filter(
+        column__sheet__period=period
+    ).filter(Q(formula__isnull=False) | Q(aggregation__isnull=False))
+    if cells.count():
+        recalculate_cells(user, period, cells)
 
 
 def recalculate_aggregations(document: Document, recalculations: list[RecalculationData]) -> list[RecalculationData]:
@@ -275,28 +316,31 @@ def recalculate_values(document: Document, recalculations: list[RecalculationDat
     # 1. Собираем зависимости и последовательность операций
     dependency_cells, inversion_cells, sequence_evaluate = get_dependency_cells(
         sheet_containers,
-        [recalculation.value for recalculation in recalculations if recalculation.cell.kind != KindCell.FORMULA]
+        [r.cell for r in recalculations if r.cell.formula is None]
     )
     # 1.1 Если у нас нет ячеек необходимых для пересчета, возвращаем изначальные значения
     if not inversion_cells:
         return recalculations
     # 2. Получаем связанные ячейки и значения из базы данных
-    cells, resolve_values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
+    resolved_cells, resolved_values = resolve_cells(sheets, document, {*dependency_cells, *inversion_cells})
     # 3. Строим изначальное состояние всех значений
-    state: dict[str, ValueState] = resolve_evaluate_state(cells, resolve_values, inversion_cells)
+    state: dict[str, ValueState] = resolve_evaluate_state(resolved_cells, resolved_values, inversion_cells)
     # 4. Рассчитываем значения
     evaluate_result: dict[str, ValueState] = evaluate_state(state, sequence_evaluate)
     # 5. Сохраняем значения
     result_recalculations: list[RecalculationData] = []
     for cell_name, result_value in evaluate_result.items():
         cell = result_value['cell']
-        exist_cell = next((
+        exist_recalculation = next((
             recalculation for recalculation in recalculations if
-            cell.column_id == recalculation.value.column_id and
-            cell.row_id == recalculation.value.row_id and
-            cell.column.sheet_id == recalculation.value.sheet_id
+            cell.column_id == recalculation.cell.column_id and
+            cell.row_id == recalculation.cell.row_id
         ), None)
-        if result_value['value'] is None or cell_name not in inversion_cells or exist_cell is not None:
+        if (
+            result_value['value'] is None or
+            cell_name not in inversion_cells or
+            (exist_recalculation is not None and exist_recalculation.value is not None)
+        ):
             continue
         value = update_or_create_value(
             document=document,
@@ -305,15 +349,24 @@ def recalculate_values(document: Document, recalculations: list[RecalculationDat
             value=result_value['value'],
             error=result_value['error'],
         )
-        result_recalculations.append(RecalculationData(cell=cell, value=value))
+        if exist_recalculation is None:
+            result_recalculations.append(RecalculationData(cell=cell, value=value))
+        else:
+            exist_recalculation.value = value
     return [*recalculations, *result_recalculations]
 
 
-def group_by_documents(recalculations: list[RecalculationData]) -> Generator[tuple[Document, list], Any, None]:
+def group_by_documents(
+    recalculations: list[RecalculationData],
+    document: Document
+) -> Generator[tuple[Document, list], Any, None]:
     """Группировка данных для пересчета по документам."""
-    for _, recs in groupby(sorted(recalculations, key=lambda r: r.value.document.id), lambda r: r.value.document.id):
+    def key(recalculation: RecalculationData) -> int:
+        return recalculation.value.document_id if recalculation.value else document.id
+
+    for _, recs in groupby(sorted(recalculations, key=key), key):
         recs = list(recs)
-        yield recs[0].value.document, recs
+        yield recs[0].value.document if recs[0].value else document, recs
 
 
 def get_file_value_payload(value: Value) -> list[int]:

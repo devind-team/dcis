@@ -1,4 +1,5 @@
 """Вспомогательный модуль для расчета формул."""
+
 from collections import defaultdict
 from itertools import groupby
 from typing import Iterable, TypedDict
@@ -19,7 +20,7 @@ from ..models.sheet import KindCell
 
 def get_dependency_cells(
     sheet_containers: list[SheetFormulaContainerCache],
-    values: list[Value]
+    vcs: Iterable[Value | Cell]
 ) -> tuple[list[str], list[str], list[str]]:
     """Получаем связанные ячейки.
 
@@ -31,8 +32,11 @@ def get_dependency_cells(
     dependency_cells: list[str] = []
     inversion_cells: list[str] = []
     sequence_evaluate: list[str] = []
-    cells = [f'{value.sheet.name}!{get_column_letter(value.column.index)}{value.row.index}' for value in values]
 
+    cells: list[str] = []
+    for vc in vcs:
+        sheet_name = vc.sheet.name if isinstance(vc, Value) else vc.column.sheet.name
+        cells.append(f'{sheet_name}!{get_column_letter(vc.column.index)}{vc.row.index}')
     while cells:
         cell = cells.pop()
         sheet_name, column_letter, row_index = parse_coordinate(cell)
@@ -82,11 +86,9 @@ def resolve_cells(
                 column__index=column_index,
                 row__index=row_index
             )
-    related: list[str] = ['row', 'column', 'column__sheet']
-    cells: QuerySet[Cell] = Cell.objects.filter(cells_query_filter) \
-        .select_related(*related).all()
-    values: QuerySet[Value] = Value.objects.filter(values_query_filter)\
-        .select_related(*related).all()
+    related = ['row', 'column', 'column__sheet']
+    cells: QuerySet[Cell] = Cell.objects.filter(cells_query_filter).select_related(*related)
+    values: QuerySet[Value] = Value.objects.filter(values_query_filter).select_related(*related)
     return cells, values
 
 
@@ -121,7 +123,7 @@ def resolve_evaluate_state(
     for cell in cells:
         coord = get_coordinate(cell.column.sheet, cell)
         value = values_state.get(coord, cell.default)
-        if (cell.kind == KindCell.NUMERIC or cell.kind == KindCell.FORMULA) and value is not None:
+        if cell.kind == KindCell.NUMERIC and value is not None:
             try:
                 value = float(value)
             except ValueError:
@@ -169,6 +171,7 @@ def evaluate_state(state: dict[str, ValueState], sequence_evaluate: list[str]):
 
 
 def get_coordinate(sheet: Sheet, vc: Value | Cell) -> str:
+    """Получение координаты ячейки."""
     return f'{sheet.name}!{get_column_letter(vc.column.index)}{vc.row.index}'
 
 

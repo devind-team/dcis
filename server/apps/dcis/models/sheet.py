@@ -92,7 +92,6 @@ class KindCell(models.Model):
     # Формат из openpyxl
     NUMERIC = 'n'
     STRING = 's'
-    FORMULA = 'f'
     BOOL = 'b'
     INLINE = 'inlineStr'
     ERROR = 'e'
@@ -115,7 +114,6 @@ class KindCell(models.Model):
     KIND_VALUE = (
         (NUMERIC, 'n'),
         (STRING, 's'),
-        (FORMULA, 'f'),
         (BOOL, 'b'),
         (INLINE, 'inlineStr'),
         (ERROR, 'e'),
@@ -234,6 +232,7 @@ class RowDimension(models.Model, CloneMixin):
 
 class Cell(Style, KindCell, models.Model, CloneMixin):
     """Модель ячейки."""
+
     AGGREGATION_SUM = 'sum'
     AGGREGATION_AVG = 'avg'
     AGGREGATION_MIN = 'min'

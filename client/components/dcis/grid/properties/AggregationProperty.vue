@@ -1,45 +1,37 @@
 <template lang="pug">
-  v-dialog(v-model="active" v-show="!gridChoice.active.value" width="600")
-    template(#activator="{ on, attrs }")
-      .v-btn-toggle.mx-1(:class="themeClass" style="border-radius: 4px")
-        v-btn(
-          v-on="on"
-          v-bind="attrs"
-          :disabled="disabled || !cell"
-          :class="{ 'v-btn--active': cell && cell.aggregation }"
-          height="40"
-        )
-          v-icon mdi-sigma
-    v-card
-      v-card-title {{ $t('dcis.grid.sheetToolbar.aggregation.title') }}
-        v-spacer
-        v-btn(@click="cancel" icon)
-          v-icon mdi-close
-      v-card-text
-        v-row(align="center")
-          v-col
-            v-combobox(
-              v-model="aggregationKind"
-              :items="aggregationItems"
-              :label="$t('dcis.grid.sheetToolbar.aggregation.choice')"
-            )
-          v-col.text-right(v-if="aggregationKind && aggregationKind.value")
-            v-btn(@click="startChoice" color="primary") {{ $t('dcis.grid.sheetToolbar.aggregation.addCells') }}
-        v-list(v-if="!fromCellsLoading")
-          v-list-item(v-for="fromCell in fromCells" :key="fromCell.id")
-            v-list-item-content
-              v-list-item-title {{ cellPosition(fromCell) }}
-              v-list-item-subtitle
-                | {{ $t('dcis.grid.sheetToolbar.aggregation.defaultValue', { value: fromCell.default }) }}
-            v-list-item-action
-              v-btn(@click="deleteMutate({ cellId: cell.id, targetCellId: fromCell.id })" icon)
-                v-icon(color="error") mdi-close
-        v-progress-circular(v-else color="primary" indeterminate)
+v-dialog(v-model="active" v-show="!gridChoice.active.value" width="600")
+  template(#activator="{ on, attrs }")
+    slot(name="activator" :on="on" :attrs="attrs")
+  v-card
+    v-card-title {{ $t('dcis.grid.sheetToolbar.aggregation.title') }}
+      v-spacer
+      v-btn(@click="cancel" icon)
+        v-icon mdi-close
+    v-card-text
+      v-row(align="center")
+        v-col
+          v-combobox(
+            v-model="aggregationKind"
+            :items="aggregationItems"
+            :label="$t('dcis.grid.sheetToolbar.aggregation.choice')"
+          )
+        v-col.text-right(v-if="aggregationKind && aggregationKind.value")
+          v-btn(@click="startChoice" color="primary") {{ $t('dcis.grid.sheetToolbar.aggregation.addCells') }}
+      v-list(v-if="!fromCellsLoading")
+        v-list-item(v-for="fromCell in fromCells" :key="fromCell.id")
+          v-list-item-content
+            v-list-item-title {{ cellPosition(fromCell) }}
+            v-list-item-subtitle
+              | {{ $t('dcis.grid.sheetToolbar.aggregation.defaultValue', { value: fromCell.default }) }}
+          v-list-item-action
+            v-btn(@click="deleteMutate({ cellId: cell.id, targetCellId: fromCell.id })" icon)
+              v-icon(color="error") mdi-close
+      v-progress-circular(v-else color="primary" indeterminate)
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onUnmounted, PropType, ref } from '#app'
 import { useMutation } from '@vue/apollo-composable'
+import { computed, defineComponent, onUnmounted, PropType, ref } from '#app'
 import {
   AddValuesCellsMutation,
   AddValuesCellsMutationVariables,
@@ -63,13 +55,10 @@ const aggregationKinds = t => ([
 ])
 
 export default defineComponent({
-  inheritAttrs: false,
   props: {
     gridChoice: { type: Object as PropType<GridChoiceType>, required: true },
     activeSheetIndex: { type: Number, default: null },
-    disabled: { type: Boolean, default: true },
-    cell: { type: Object as PropType<CellType>, default: null },
-    themeClass: { type: String, required: true }
+    cell: { type: Object as PropType<CellType>, default: null }
   },
   emits: ['changeKind'],
   setup (props, { emit }) {
