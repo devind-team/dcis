@@ -113,9 +113,9 @@ def get_period_users(period: Period | int | str) -> QuerySet[User]:
         Q(project__period__id=period.id) |
         Q(period__id=period.id) |
         Q(periodgroup__period__id=period.id) |
-        Q(pk__in=[*divisions.values_list('user_id', flat=True), *divisions.values_list('users__id', flat=True)]) |
-        Q(periodgroup__period__id=period.id) |
-        Q(periodprivilege__period__id=period.id)
+        Q(id__in=[*divisions.values_list('user_id', flat=True), *divisions.values_list('users__id', flat=True)]) |
+        Q(periodprivilege__period__id=period.id) |
+        Q(curatorgroup__organization__id__in=divisions.values_list('id', flat=True))
     ).distinct()
 
 
