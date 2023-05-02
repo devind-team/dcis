@@ -14,18 +14,19 @@ left-navigator-container.document-sheets__left-navigator-container(
     :mode="mode"
     :sheets="document.sheets"
     :active-sheet="activeSheet"
+    :update="update"
     :update-active-sheet="updateActiveSheet"
     :active-document="document"
   )
     template(#menus)
-      scan-menu(:document="document")
+      scan-menu(:document="document" :update="update")
       document-unload-menu(:document="document" :loading.sync="unloadLoading")
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from '#app'
 import { BreadCrumbsItem } from '~/types/devind'
-import { useCommonQuery } from '~/composables'
+import { UpdateType, useCommonQuery } from '~/composables'
 import {
   DocumentSheetQuery,
   DocumentSheetQueryVariables,
@@ -43,7 +44,8 @@ export default defineComponent({
   components: { LeftNavigatorContainer, BreadCrumbs, GridSheets, DocumentUnloadMenu, ScanMenu },
   props: {
     breadCrumbs: { required: true, type: Array as PropType<BreadCrumbsItem[]> },
-    document: { type: Object as PropType<DocumentType>, required: true }
+    document: { type: Object as PropType<DocumentType>, required: true },
+    update: { type: Function as PropType<UpdateType>, required: true }
   },
   setup (props) {
     const activeSheetIndex = ref<number>(0)

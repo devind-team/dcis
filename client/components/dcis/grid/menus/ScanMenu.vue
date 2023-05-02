@@ -1,9 +1,13 @@
 <template lang="pug">
 v-menu(offset-y)
   template(#activator="{ on, attrs }")
-    v-snackbar(v-model="successActive" right ) {{ 'Файл загружен' }}
+    v-snackbar(v-model="successUpload" right) {{ 'Скан загружен' }}
       template(#action="{ attrs: snackbarAttrs }")
-        v-btn(v-bind="{ snackbarAttrs }" icon @click="successActive = false")
+        v-btn(v-bind="{ snackbarAttrs }" icon @click="successUpload = false")
+          v-icon mdi-close
+    v-snackbar(v-model="successDelete" right) {{ 'Скан удалён' }}
+      template(#action="{ attrs: snackbarAttrs }")
+        v-btn(v-bind="{ snackbarAttrs }" icon @click="successDelete = false")
           v-icon mdi-close
     v-btn.grid-sheet-menu__button(
       v-on="on"
@@ -12,7 +16,7 @@ v-menu(offset-y)
       tile
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
   v-list(dense width="200")
-    v-list-item(@click="open")
+    v-list-item(v-if="!document.scan" @click="open")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
     v-list-item(v-if="document.scan" :href="`/${document.scan.src}`" target="__blank")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
@@ -22,43 +26,94 @@ v-menu(offset-y)
 
 <script lang="ts">
 import { ref, watch, defineComponent, PropType } from '#app'
-import { useApolloClient, useMutation } from '@vue/apollo-composable'
+import { useMutation } from '@vue/apollo-composable'
 import { useFileDialog } from '@vueuse/core'
-import { useCommonQuery } from '~/composables'
 import {
   DeleteDocumentScanMutation,
+  DeleteDocumentScanMutationPayload,
   DeleteDocumentScanMutationVariables,
-  DocumentScanQuery,
-  DocumentScanQueryVariables,
+  DocumentQuery,
+  DocumentScanFieldsFragment,
   DocumentType,
   UploadDocumentScanMutation,
+  UploadDocumentScanMutationPayload,
   UploadDocumentScanMutationVariables
 } from '~/types/graphql'
-import documentScanQuery from '~/gql/dcis/queries/document_scan.graphql'
 import uploadDocumentScan from '~/gql/dcis/mutations/document/upload_document_scan.graphql'
 import deleteDocumentScan from '~/gql/dcis/mutations/document/delete_document_scan.graphql'
+import { UpdateType } from '~/composables'
 
 export default defineComponent({
   props: {
-    document: { type: Object as PropType<DocumentType>, required: true }
+    document: { type: Object as PropType<DocumentType>, required: true },
+    update: { type: Function as PropType<UpdateType>, required: true }
   },
   setup (props) {
+    const successUpload = ref<boolean>(false)
+    const successDelete = ref<boolean>(false)
+
     const {
       mutate: uploadDocumentScanMutate,
       onDone: uploadDocumentScanOnDone
-    } = useMutation<UploadDocumentScanMutation, UploadDocumentScanMutationVariables>(uploadDocumentScan)
+    } = useMutation<
+      UploadDocumentScanMutation,
+      UploadDocumentScanMutationVariables
+    >(
+      uploadDocumentScan,
+      {
+        update: (cache, result) => {
+          if (result.data.uploadDocumentScan.success) {
+            props.update(
+              cache,
+              result,
+              (data: DocumentQuery, result) => {
+                data.document.scan = result.data.uploadDocumentScan.documentScan as DocumentScanFieldsFragment
+                return data
+              }
+            )
+          }
+        }
+      }
+    )
     uploadDocumentScanOnDone((result) => {
-      successActive.value = result.data.uploadDocumentScan.success
+      successUpload.value = result.data.uploadDocumentScan.success
     })
 
-    const successActive = ref<boolean>(false)
     const { files, open } = useFileDialog({ multiple: false, accept: 'application/pdf' })
     watch(files, (files: FileList) => {
       uploadDocumentScanMutate({ documentId: props.document.id, scanFile: files[0] })
     })
-    const { mutate: deleteDocumentScanMutate } = useMutation<DeleteDocumentScanMutation, DeleteDocumentScanMutationVariables>(deleteDocumentScan)
 
-    return { open, successActive, deleteDocumentScanMutate }
+    const {
+      mutate: deleteDocumentScanMutate,
+      onDone: deleteDocumentScanOnDone
+    } = useMutation<
+      DeleteDocumentScanMutation,
+      DeleteDocumentScanMutationVariables
+    >(
+      deleteDocumentScan,
+      {
+        update: (cache, result) => {
+          if (result.data.deleteDocumentScan.success) {
+            props.update(
+              cache,
+              result,
+              (data: DocumentQuery) => {
+                data.document.scan = null
+                return data
+              }
+            )
+          }
+        }
+      }
+    )
+    deleteDocumentScanOnDone(
+      (result) => {
+        successDelete.value = result.data.deleteDocumentScan.success
+      }
+    )
+
+    return { open, successUpload, successDelete, deleteDocumentScanMutate }
   }
 })
 </script>

@@ -1,4 +1,5 @@
 #import "../fragments/status_fields.graphql"
+#import "../fragments/document_scan_fields.graphql"
 
 query Document($documentId: ID!) {
   document(documentId: $documentId) {
@@ -7,9 +8,7 @@ query Document($documentId: ID!) {
     createdAt
     updatedAt
     scan {
-      id
-      src
-      __typename
+      ...DocumentScanFields
     }
     user {
       id

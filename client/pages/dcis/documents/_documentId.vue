@@ -2,7 +2,7 @@
 div
   left-navigator-driver(v-model="drawer" :items="links")
   v-progress-circular(v-if="loading" color="primary" indeterminate)
-  nuxt-child(v-else :breadCrumbs="bc" :document="activeDocument" @update-drawer="drawer = !drawer")
+  nuxt-child(v-else :breadCrumbs="bc" :document="activeDocument" :update="update" @update-drawer="drawer = !drawer")
 </template>
 
 <script lang="ts">
@@ -25,6 +25,7 @@ export default defineComponent({
 
     const {
       data: activeDocument,
+      update,
       loading
     } = useCommonQuery<DocumentQuery, DocumentQueryVariables>({
       document: documentQuery,
@@ -92,6 +93,7 @@ export default defineComponent({
 
     return {
       activeDocument,
+      update,
       loading,
       drawer,
       links,
