@@ -30,6 +30,7 @@ from apps.dcis.services.period_services import (
     delete_divisions_period,
     delete_period,
     delete_period_groups,
+    get_period_users,
     get_user_curator_periods,
     get_user_divisions_periods,
     get_user_participant_periods,
@@ -158,7 +159,7 @@ class GetUserPeriodsTestCase(TestCase):
         )
 
     def _create_curator_periods(self, project: Project) -> list[Period]:
-        """Создание периодов для проекта c кураторской группой."""
+        """Создание периодов для проекта с кураторской группой."""
         periods: list[Period] = []
         for _ in range(3):
             organization = Organization.objects.create(attributes='')
@@ -169,6 +170,71 @@ class GetUserPeriodsTestCase(TestCase):
             curator_group.organization.add(organization)
             periods.append(period)
         return periods
+
+
+class PeriodUsersTestCase(TestCase):
+    """Тестирование получения пользователей периода."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+
+        self.project_creator = User.objects.create(username='project_creator', email='project_creator@gmail.com')
+        self.period_creator = User.objects.create(username='period_creator', email='period_creator@gmail.com')
+        self.period_group_users = [User.objects.create(
+            username=f'period_group_user{i}',
+            email=f'period_group_user{i}@gmail.com',
+        ) for i in range(1, 4)]
+        self.organization_head = User.objects.create(username='organization_head', email='organization_head@gmail.com')
+        self.organization_users = [User.objects.create(
+            username=f'organization_user{i}',
+            email=f'organization_user{i}@gmail.com',
+        ) for i in range(1, 4)]
+        self.privilege_users = [User.objects.create(
+            username=f'privilege_user{i}',
+            email=f'privilege_user{i}@gmail.com',
+        ) for i in range(1, 4)]
+        self.curators = [User.objects.create(
+            username=f'curator{i}',
+            email=f'curator{i}@gmail.com',
+        ) for i in range(1, 4)]
+        self.extra_users = [User.objects.create(
+            username=f'extra_user{i}',
+            email=f'extra_user{i}@gmail.com',
+        ) for i in range(1, 4)]
+
+        self.project = Project.objects.create(user=self.project_creator, content_type=self.organization_content_type)
+        self.period = Period.objects.create(project=self.project, user=self.period_creator)
+        self.period_group = PeriodGroup.objects.create(name='Группа периода', period=self.period)
+        self.period_group.users.set(self.period_group_users)
+        self.organization = Organization.objects.create(
+            name='Организация периода',
+            attributes='',
+            user=self.organization_head,
+        )
+        self.period.division_set.create(object_id=self.organization.id)
+        self.organization.users.set(self.organization_users)
+        self.privilege = Privilege.objects.create(name='Привилегия', key='privilege')
+        self.period_privileges = [PeriodPrivilege.objects.create(
+            period=self.period,
+            privilege=self.privilege,
+            user=user,
+        ) for user in self.privilege_users]
+        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа')
+        self.curator_group.organization.add(self.organization)
+        self.curator_group.users.set(self.curators)
+
+    def test_get_period_users(self) -> None:
+        """Тестирование получения пользователей периода."""
+        self.assertEqual({
+            self.project_creator,
+            self.period_creator,
+            *self.period_group_users,
+            self.organization_head,
+            *self.organization_users,
+            *self.privilege_users,
+            *self.curators,
+        }, set(get_period_users(self.period)))
 
 
 class PeriodTestCase(TestCase):

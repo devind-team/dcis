@@ -14,6 +14,7 @@ from .period_services import (
     PeriodGroupTestCase,
     PeriodTestCase,
     PeriodUserTestCase,
+    PeriodUsersTestCase,
 )
 from .period_unload_services import UnloadPeriodTestCase
 from .privilege_services import PrivilegeTestCase
