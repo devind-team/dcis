@@ -1,5 +1,6 @@
 #import "../fragments/document_fields.graphql"
 #import "../fragments/status_fields.graphql"
+#import "../fragments/document_scan_fields.graphql"
 
 query Documents(
   $periodId: ID!,
@@ -41,6 +42,9 @@ query Documents(
             ...StatusFields
           }
           __typename
+        }
+        scan {
+          ...DocumentScanFields
         }
       }
     }

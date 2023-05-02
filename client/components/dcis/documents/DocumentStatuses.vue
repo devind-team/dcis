@@ -38,7 +38,7 @@ mutation-modal-form(
               :nuxt="true" color="primary" icon
             )
               v-icon mdi-archive-outline
-          span {{ "Открыть историю" }}
+          span {{ $t('dcis.documents.status.openArchive') }}
         v-list-item-action(v-if="canDelete && documentStatuses.length > 1")
           delete-menu(
             :item-name="String($t('dcis.documents.status.delete.itemName'))"

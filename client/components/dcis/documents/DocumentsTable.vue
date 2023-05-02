@@ -32,6 +32,11 @@ v-data-table(
           a(v-on="on" class="font-weight-bold") {{ item.lastStatus.status.name }}.
       div {{ $t('dcis.documents.tableItems.statusAssigned', { assigned: dateTimeHM(item.lastStatus.createdAt) }) }}
       .font-italic {{ item.lastStatus.comment }}
+  template(#item.scan="{ item }")
+    template(v-if="item.scan")
+      a(:href="`/${item.scan.src}`" target="__blank") {{ $t('dcis.documents.tableItems.scanSrc') }}
+    template(v-else)
+      span {{ $t('dcis.documents.tableItems.notLoadedScan') }}
   template(v-for="dti in ['createdAt', 'updatedAt']" v-slot:[`item.${dti}`]="{ item }") {{ dateTimeHM(item[dti]) }}
 </template>
 
@@ -68,6 +73,7 @@ export default defineComponent({
       }
       result.push(
         { text: t('dcis.documents.tableHeaders.lastStatus') as string, value: 'lastStatus' },
+        { text: t('dcis.documents.tableHeaders.scan') as string, value: 'scan' },
         { text: t('dcis.documents.tableHeaders.createdAt') as string, value: 'createdAt' },
         { text: t('dcis.documents.tableHeaders.updatedAt') as string, value: 'updatedAt' }
       )

@@ -397,11 +397,14 @@ export default {
       updatedAt: 'Дата последнего изменения',
       organization: '@:dcis.documents.addDocument.organization',
       department: '@:dcis.documents.addDocument.department',
-      lastStatus: 'Статус'
+      lastStatus: 'Статус',
+      scan: 'Скан'
     },
     tableItems: {
       version: '@:dcis.documents.version',
-      statusAssigned: 'Назначен: {assigned}'
+      statusAssigned: 'Назначен: {assigned}',
+      scanSrc: 'Скан',
+      notLoadedScan: 'Скан не загружен'
     },
     addDocument: {
       buttonText: 'Добавить документ',
@@ -426,6 +429,7 @@ export default {
       tableErrorsMessage: 'Возникли ошибки в ограничениях',
       tableErrorsTitle: 'Ошибки в ограничениях',
       status: 'Статус',
+      openArchive: 'Открыть архив',
       comment: 'Комментарий',
       buttonText: '@:add',
       delete: {
@@ -513,7 +517,11 @@ export default {
         buttonText: 'Скан',
         uploadScan: 'Загрузить скан',
         downloadScan: 'Скачать скан',
-        deleteScan: 'Удалить скан'
+        deleteScan: 'Удалить скан',
+        snackbars: {
+          scanIsLoaded: 'Скан загружен',
+          scanIsDeleted: 'Скан удалён'
+        }
       },
       tableSettings: {
         buttonText: '@:settings',

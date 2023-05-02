@@ -1,11 +1,11 @@
 <template lang="pug">
 v-menu(offset-y)
   template(#activator="{ on, attrs }")
-    v-snackbar(v-model="successUpload" right) {{ 'Скан загружен' }}
+    v-snackbar(v-model="successUpload" right) {{ $t('dcis.grid.sheetMenu.scanMenu.snackbars.scanIsLoaded') }}
       template(#action="{ attrs: snackbarAttrs }")
         v-btn(v-bind="{ snackbarAttrs }" icon @click="successUpload = false")
           v-icon mdi-close
-    v-snackbar(v-model="successDelete" right) {{ 'Скан удалён' }}
+    v-snackbar(v-model="successDelete" right) {{ $t('dcis.grid.sheetMenu.scanMenu.snackbars.scanIsDeleted') }}
       template(#action="{ attrs: snackbarAttrs }")
         v-btn(v-bind="{ snackbarAttrs }" icon @click="successDelete = false")
           v-icon mdi-close
@@ -30,13 +30,11 @@ import { useMutation } from '@vue/apollo-composable'
 import { useFileDialog } from '@vueuse/core'
 import {
   DeleteDocumentScanMutation,
-  DeleteDocumentScanMutationPayload,
   DeleteDocumentScanMutationVariables,
   DocumentQuery,
   DocumentScanFieldsFragment,
   DocumentType,
   UploadDocumentScanMutation,
-  UploadDocumentScanMutationPayload,
   UploadDocumentScanMutationVariables
 } from '~/types/graphql'
 import uploadDocumentScan from '~/gql/dcis/mutations/document/upload_document_scan.graphql'
