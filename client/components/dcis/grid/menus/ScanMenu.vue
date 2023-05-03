@@ -16,11 +16,18 @@ v-menu(offset-y)
       tile
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
   v-list(dense width="200")
-    v-list-item(v-if="!document.scan" @click="open")
+    v-list-item(
+      v-if="!document.scan && !(document.period.isAdmin || document.period.isCurator)"
+      :disabled="!(Number(document.lastStatus.status.id) === 2) && !(Number(document.lastStatus.status.id) === 3)"
+      @click="open"
+    )
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
     v-list-item(v-if="document.scan" :href="`/${document.scan.src}`" target="__blank")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
-    v-list-item(v-if="document.scan" @click="deleteDocumentScanMutate({ fileId: document.scan.id }).then()")
+    v-list-item(
+      v-if="(document.period.isAdmin || document.period.isCurator) && document.scan"
+      @click="deleteDocumentScanMutate({ fileId: document.scan.id }).then()"
+    )
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}
 </template>
 
@@ -110,7 +117,6 @@ export default defineComponent({
         successDelete.value = result.data.deleteDocumentScan.success
       }
     )
-
     return { open, successUpload, successDelete, deleteDocumentScanMutate }
   }
 })

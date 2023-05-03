@@ -18,6 +18,8 @@ query Document($documentId: ID!) {
       id
       name
       multiple
+      isAdmin
+      isCurator
       project {
         id
         name
