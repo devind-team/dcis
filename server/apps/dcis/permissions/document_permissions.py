@@ -5,8 +5,8 @@ from apps.core.models import User
 from apps.dcis.models import AddStatus, Attribute, Cell, Document, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
-from .period_permissions import can_change_period_sheet_base, can_view_period
-from ..services.curator_services import is_document_curator
+from .period_permissions import can_change_period_base, can_change_period_sheet_base, can_view_period
+from ..services.curator_services import is_document_curator, is_period_curator
 
 
 def can_add_budget_classification(user: User):
@@ -378,9 +378,12 @@ def can_delete_child_row_dimension(user: User, row: RowDimension):
 
 
 def can_upload_document_scan(user: User, document: Document):
+    """Пропускает пользователей, которые могут загружать скан документа."""
     can_view_document(user, document)
     can_change_document_base(user, document)
 
 
 def can_delete_document_scan(user: User, document: Document):
-    can_view_document(user, document)
+    """Пропускает пользователей, которые могут удалять скан документа."""
+    if can_change_period_base(user, document.period) or is_period_curator(user, document.period):
+        return
