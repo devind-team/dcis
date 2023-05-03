@@ -1,5 +1,5 @@
 """Модуль, отвечающий за работу со статусами."""
-
+import os
 from dataclasses import dataclass
 from typing import cast
 
@@ -12,7 +12,7 @@ from apps.core.models import User
 from apps.dcis.helpers.cell import ValueState, evaluate_state, parse_coordinate, resolve_cells, resolve_evaluate_state
 from apps.dcis.helpers.limitation_formula_cache import LimitationFormulaContainerCache
 from apps.dcis.models import Document, Limitation, Period, Status
-from apps.dcis.models.document import AddStatus, DocumentStatus
+from apps.dcis.models.document import AddStatus, DocumentScan, DocumentStatus
 from apps.dcis.permissions import AddDocumentBase, can_add_document_status, can_delete_document_status
 from apps.dcis.services.divisions_services import is_period_division_member
 from apps.dcis.services.document_services import create_document_message, get_user_roles
@@ -198,3 +198,15 @@ class AddStatusActions:
                     if old_row.document_id == document.id and old_row.parent_id:
                         cloned_row.parent_id = old_cloned_row_dimensions[old_row.parent_id]
                         cloned_row.save(update_fields=('parent_id',))
+
+    class DeleteDocumentScan(StatusAction):
+        """Удаление скана документа при добавлении статуса."""
+
+        @classmethod
+        @transaction.atomic
+        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+            if document_status.status.id == 3:
+                file = DocumentScan.objects.get(document=document)
+                if os.path.isfile(file.src.path):
+                    os.remove(file.src.path)
+                file.delete()
