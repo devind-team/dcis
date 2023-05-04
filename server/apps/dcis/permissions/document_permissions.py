@@ -378,9 +378,14 @@ def can_delete_child_row_dimension(user: User, row: RowDimension):
 
 
 def can_upload_document_scan(user: User, document: Document):
-    if not is_document_curator(user, document):
-        return
+    """Пропускает пользователей, которые могут загружать скан документа."""
     can_view_document(user, document)
+    if document.scan:
+        raise PermissionDenied('Скан уже загружен')
+    if document.last_status.status.name not in ('Ввод завершен', 'Принят'):
+        raise PermissionDenied('Статус документа должен быть "Ввод завершен" или "Принят".')
+    if is_document_curator(user, document):
+        raise PermissionDenied('Куратор не может загружать скан документа.')
 
 
 def can_delete_document_scan(user: User, document: Document):

@@ -149,11 +149,13 @@ def create_document_message(user: User, document: Document, message: str, kind: 
 
 
 def upload_document_scan(user: User, document: Document, file: InMemoryUploadedFile) -> DocumentScan:
+    """Загрузка скана документа"""
     can_upload_document_scan(user, document)
     return DocumentScan.objects.create(document=document, name=file.name, src=file)
 
 
 def delete_document_scan(user: User, file: DocumentScan):
+    """Удаление скана документа"""
     can_delete_document_scan(user, file.document)
     if os.path.isfile(file.src.path):
         os.remove(file.src.path)

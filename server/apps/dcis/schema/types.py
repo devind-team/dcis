@@ -57,7 +57,7 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.permissions.document_permissions import (
     can_delete_document_scan,
-    can_view_document,
+    can_upload_document_scan,
 )
 from apps.dcis.permissions.period_permissions import can_change_period_base, can_change_period_methodical_support_base
 from apps.dcis.services.curator_services import is_period_curator
@@ -407,7 +407,7 @@ class DocumentType(DjangoObjectType):
 
     @staticmethod
     def resolve_can_upload_document_scan(document: Document, info: ResolveInfo) -> bool:
-        return not is_raises(PermissionDenied, can_view_document, info.context.user, document)
+        return not is_raises(PermissionDenied, can_upload_document_scan, info.context.user, document)
 
     @staticmethod
     def resolve_can_delete_document_scan(document: Document, info: ResolveInfo) -> bool:
