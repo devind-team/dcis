@@ -2038,6 +2038,8 @@ input DeleteDocumentStatusMutationInput {
 """Удаление статуса документа."""
 type DeleteDocumentStatusMutationPayload {
   clientMutationId: String
+  """Скан документа"""
+  document: DocumentType!
   """Ошибки мутации"""
   errors: [ErrorFieldType!]!
   """Идентификатор статуса документа"""

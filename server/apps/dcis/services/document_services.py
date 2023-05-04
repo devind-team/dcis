@@ -18,7 +18,7 @@ from apps.dcis.permissions import (
 )
 from apps.dcis.permissions.document_permissions import (
     can_delete_document_scan,
-    can_view_document,
+    can_upload_document_scan,
 )
 from apps.dcis.services.attribute_services import create_attribute_context, rerender_values
 from apps.dcis.services.curator_services import get_curator_organizations, is_document_curator
@@ -149,7 +149,7 @@ def create_document_message(user: User, document: Document, message: str, kind: 
 
 
 def upload_document_scan(user: User, document: Document, file: InMemoryUploadedFile) -> DocumentScan:
-    can_view_document(user, document)
+    can_upload_document_scan(user, document)
     return DocumentScan.objects.create(document=document, name=file.name, src=file)
 
 

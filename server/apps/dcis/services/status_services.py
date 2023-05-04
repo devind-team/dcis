@@ -55,7 +55,7 @@ def get_new_statuses(user: User, document: Document) -> list[Status]:
     return [add_status.to_status for add_status in add_statuses if len(user_roles & set(add_status.roles)) > 0]
 
 
-def delete_document_status(user: User, status: DocumentStatus) -> None:
+def delete_document_status(user: User, status: DocumentStatus) -> Document:
     """Удаление статуса документа."""
     can_delete_document_status(user, status.document)
     create_document_message(
@@ -64,7 +64,11 @@ def delete_document_status(user: User, status: DocumentStatus) -> None:
         message=f'Статус документа "{status.status.name}" удалён.',
         kind='status',
     )
+    document = status.document
     status.delete()
+    if document.last_status.status.name not in ('Ввод завершен', 'Принят'):
+        DocumentScan.objects.get(document=document).delete()
+    return document
 
 
 @dataclass
@@ -95,7 +99,7 @@ class StatusAction:
 class AddStatusActions:
     """Действие при добавлении статуса в документ."""
 
-    class CheckLimitations(StatusAction):
+    class ToInputCompleted(StatusAction):
         """Проверка ограничений, накладываемых на лист."""
 
         VIRTUAL_SHEET_NAME = '__virtual_sheet__'
@@ -146,23 +150,12 @@ class AddStatusActions:
             if len(errors):
                 raise ValidationError(message=None, code=None, params=errors)
 
-    class DeleteDocumentScan(StatusAction):
-        """Удаление скана документа при добавлении статуса."""
-
-        @classmethod
-        @transaction.atomic
-        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
-            file = DocumentScan.objects.get(document=document)
-            if os.path.isfile(file.src.path):
-                os.remove(file.src.path)
-            file.delete()
-
-    class ArchivePeriod(StatusAction):
+    class FromInputCompletedToRequiresRevision(StatusAction):
         """Архивирование периода при добавлении статуса."""
 
         @classmethod
         @transaction.atomic
-        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+        def archive_period(cls, document: Document, document_status: DocumentStatus) -> None:
             cloned_period = document.period.make_clone(attrs={'archive': True})
             for attribute in document.period.attribute_set.all():
                 attribute.make_clone(attrs={'period_id': cloned_period.id})
@@ -209,4 +202,16 @@ class AddStatusActions:
                     if old_row.document_id == document.id and old_row.parent_id:
                         cloned_row.parent_id = old_cloned_row_dimensions[old_row.parent_id]
                         cloned_row.save(update_fields=('parent_id',))
-            AddStatusActions.DeleteDocumentScan.post_execute(document, document_status)
+
+        @classmethod
+        @transaction.atomic
+        def delete_document_scan(cls, document: Document) -> None:
+            file = DocumentScan.objects.get(document=document)
+            if os.path.isfile(file.src.path):
+                os.remove(file.src.path)
+            file.delete()
+
+        @classmethod
+        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+            cls.archive_period(document, document_status)
+            cls.delete_document_scan(document)

@@ -2127,6 +2127,8 @@ export type DeleteDocumentStatusMutationInput = {
 export type DeleteDocumentStatusMutationPayload = {
   __typename?: 'DeleteDocumentStatusMutationPayload';
   clientMutationId?: Maybe<Scalars['String']>;
+  /** Скан документа */
+  document: DocumentType;
   /** Ошибки мутации */
   errors: Array<ErrorFieldType>;
   /** Идентификатор статуса документа */
@@ -6038,7 +6040,7 @@ export type DeleteDocumentStatusMutationVariables = Exact<{
   documentStatusId: Scalars['ID'];
 }>;
 
-export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', id: string, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
+export type DeleteDocumentStatusMutation = { __typename?: 'Mutation', deleteDocumentStatus: { __typename: 'DeleteDocumentStatusMutationPayload', id: string, document: { __typename: 'DocumentType', canChange: boolean, id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, user?: { __typename: 'UserType', id: string } | null, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, createdAt: any, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null, scan?: { __typename: 'DocumentScanType', id: any, name: string, src: string, size?: number | null, createdAt: any, updatedAt: any, ext?: string | null } | null }, errors: Array<{ __typename: 'ErrorFieldType', field: string, messages: Array<string> }> } };
 
 export type UnloadDocumentMutationVariables = Exact<{
   documentId: Scalars['ID'];
