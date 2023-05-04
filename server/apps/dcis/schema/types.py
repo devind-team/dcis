@@ -55,6 +55,10 @@ from apps.dcis.permissions import (
     can_delete_project_base,
     can_view_period_result_base,
 )
+from apps.dcis.permissions.document_permissions import (
+    can_delete_document_scan,
+    can_view_document,
+)
 from apps.dcis.permissions.period_permissions import can_change_period_base, can_change_period_methodical_support_base
 from apps.dcis.services.curator_services import is_period_curator
 from apps.dcis.services.divisions_services import get_period_divisions
@@ -358,9 +362,16 @@ class DocumentType(DjangoObjectType):
     can_change = graphene.Boolean(required=True, description='Может ли пользователь изменять документ')
     can_change_attribute_value = graphene.Boolean(
         required=True,
-        description='Может ли пользователь изменять значение атрибута в документе',
+        description='Может ли пользователь изменять значение атрибута в документе'
     )
-
+    can_upload_document_scan = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь загружать скан документа'
+    )
+    can_delete_document_scan = graphene.Boolean(
+        required=True,
+        description='Может ли пользователь удалять скан документа'
+    )
     object_id = graphene.ID(description='Идентификатор дивизиона')
 
     class Meta:
@@ -393,6 +404,14 @@ class DocumentType(DjangoObjectType):
     @staticmethod
     def resolve_can_change_attribute_value(document: Document, info: ResolveInfo) -> bool:
         return ChangeAttributeValueBase(info.context.user, document).can_change_some_attribute
+
+    @staticmethod
+    def resolve_can_upload_document_scan(document: Document, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_view_document, info.context.user, document)
+
+    @staticmethod
+    def resolve_can_delete_document_scan(document: Document, info: ResolveInfo) -> bool:
+        return not is_raises(PermissionDenied, can_delete_document_scan, info.context.user, document)
 
 
 class DocumentStatusType(DjangoObjectType):

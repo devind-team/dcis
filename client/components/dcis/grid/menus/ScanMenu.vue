@@ -17,7 +17,7 @@ v-menu(offset-y)
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
   v-list(dense width="200")
     v-list-item(
-      v-if="!document.scan && !(document.period.isAdmin || document.period.isCurator)"
+      v-if="!document.scan && document.canUploadDocumentScan"
       :disabled="!(Number(document.lastStatus.status.id) === 2) && !(Number(document.lastStatus.status.id) === 3)"
       @click="open"
     )
@@ -25,7 +25,7 @@ v-menu(offset-y)
     v-list-item(v-if="document.scan" :href="`/${document.scan.src}`" target="__blank")
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
     v-list-item(
-      v-if="(document.period.isAdmin || document.period.isCurator) && document.scan"
+      v-if="document.canDeleteDocumentScan && document.scan"
       @click="deleteDocumentScanMutate({ fileId: document.scan.id }).then()"
     )
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}

@@ -2465,6 +2465,10 @@ type DocumentType implements Node {
   canChange: Boolean!
   """Может ли пользователь изменять значение атрибута в документе"""
   canChangeAttributeValue: Boolean!
+  """Может ли пользователь удалять скан документа"""
+  canDeleteDocumentScan: Boolean!
+  """Может ли пользователь загружать скан документа"""
+  canUploadDocumentScan: Boolean!
   """Дата создания"""
   createdAt: DateTime!
   """The ID of the object."""

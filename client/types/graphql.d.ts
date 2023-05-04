@@ -2580,6 +2580,10 @@ export type DocumentType = Node & {
   canChange: Scalars['Boolean'];
   /** Может ли пользователь изменять значение атрибута в документе */
   canChangeAttributeValue: Scalars['Boolean'];
+  /** Может ли пользователь удалять скан документа */
+  canDeleteDocumentScan: Scalars['Boolean'];
+  /** Может ли пользователь загружать скан документа */
+  canUploadDocumentScan: Scalars['Boolean'];
   /** Дата создания */
   createdAt: Scalars['DateTime'];
   /** The ID of the object. */
@@ -6432,7 +6436,7 @@ export type DocumentQueryVariables = Exact<{
   documentId: Scalars['ID'];
 }>;
 
-export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, canChangeAttributeValue: boolean, scan?: { __typename: 'DocumentScanType', id: any, name: string, src: string, size?: number | null, createdAt: any, updatedAt: any, ext?: string | null } | null, user?: { __typename: 'UserType', id: string } | null, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, project?: { __typename: 'ProjectType', id: string, name: string, contentType: { __typename: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, name: string } | null> | null } | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null>, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null };
+export type DocumentQuery = { __typename?: 'Query', document?: { __typename: 'DocumentType', id: string, version: number, createdAt: any, updatedAt: any, objectId?: string | null, objectName?: string | null, canChangeAttributeValue: boolean, canUploadDocumentScan: boolean, canDeleteDocumentScan: boolean, scan?: { __typename: 'DocumentScanType', id: any, name: string, src: string, size?: number | null, createdAt: any, updatedAt: any, ext?: string | null } | null, user?: { __typename: 'UserType', id: string } | null, period?: { __typename: 'PeriodType', id: string, name: string, multiple: boolean, isAdmin: boolean, isCurator: boolean, project?: { __typename: 'ProjectType', id: string, name: string, contentType: { __typename: 'ContentTypeType', id: string, model: string } } | null, divisions?: Array<{ __typename: 'DivisionModelType', id: string, name: string } | null> | null } | null, sheets: Array<{ __typename: 'BaseSheetType', id: string, name: string } | null>, lastStatus?: { __typename: 'DocumentStatusType', id: string, comment: string, status: { __typename: 'StatusType', id: string, name: string, comment?: string | null, edit: boolean } } | null } | null };
 
 export type DocumentMessagesQueryVariables = Exact<{
   documentId: Scalars['ID'];

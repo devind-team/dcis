@@ -53,6 +53,8 @@ query Document($documentId: ID!) {
     objectId
     objectName
     canChangeAttributeValue
+    canUploadDocumentScan
+    canDeleteDocumentScan
     __typename
   }
 }

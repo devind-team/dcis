@@ -377,12 +377,6 @@ def can_delete_child_row_dimension(user: User, row: RowDimension):
     raise PermissionDenied('Недостаточно прав для удаления строки.')
 
 
-def can_upload_document_scan(user: User, document: Document):
-    """Пропускает пользователей, которые могут загружать скан документа."""
-    can_view_document(user, document)
-    can_change_document_base(user, document)
-
-
 def can_delete_document_scan(user: User, document: Document):
     """Пропускает пользователей, которые могут удалять скан документа."""
     if can_change_period_base(user, document.period) or is_period_curator(user, document.period):
