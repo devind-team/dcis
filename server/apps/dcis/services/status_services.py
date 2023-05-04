@@ -146,6 +146,17 @@ class AddStatusActions:
             if len(errors):
                 raise ValidationError(message=None, code=None, params=errors)
 
+    class DeleteDocumentScan(StatusAction):
+        """Удаление скана документа при добавлении статуса."""
+
+        @classmethod
+        @transaction.atomic
+        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
+            file = DocumentScan.objects.get(document=document)
+            if os.path.isfile(file.src.path):
+                os.remove(file.src.path)
+            file.delete()
+
     class ArchivePeriod(StatusAction):
         """Архивирование периода при добавлении статуса."""
 
@@ -198,15 +209,4 @@ class AddStatusActions:
                     if old_row.document_id == document.id and old_row.parent_id:
                         cloned_row.parent_id = old_cloned_row_dimensions[old_row.parent_id]
                         cloned_row.save(update_fields=('parent_id',))
-
-    class DeleteDocumentScan(StatusAction):
-        """Удаление скана документа при добавлении статуса."""
-
-        @classmethod
-        @transaction.atomic
-        def post_execute(cls, document: Document, document_status: DocumentStatus) -> None:
-            if document_status.status.id == 3:
-                file = DocumentScan.objects.get(document=document)
-                if os.path.isfile(file.src.path):
-                    os.remove(file.src.path)
-                file.delete()
+            AddStatusActions.DeleteDocumentScan.post_execute(document, document_status)
