@@ -2,11 +2,11 @@
 from django.core.exceptions import PermissionDenied
 
 from apps.core.models import User
-from apps.dcis.models import AddStatus, Attribute, Cell, Document, Period, RowDimension, Status
+from apps.dcis.models import AddStatus, Attribute, Cell, Document, DocumentScan, Period, RowDimension, Status
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_base, can_change_period_sheet_base, can_view_period
-from ..services.curator_services import is_document_curator, is_period_curator
+from ..services.curator_services import is_document_curator
 
 
 def can_add_budget_classification(user: User):
@@ -380,7 +380,7 @@ def can_delete_child_row_dimension(user: User, row: RowDimension):
 def can_upload_document_scan(user: User, document: Document):
     """Пропускает пользователей, которые могут загружать скан документа."""
     can_view_document(user, document)
-    if document.scan:
+    if DocumentScan.objects.filter(document=document).first():
         raise PermissionDenied('Скан уже загружен')
     if document.last_status.status.name not in ('Ввод завершен', 'Принят'):
         raise PermissionDenied('Статус документа должен быть "Ввод завершен" или "Принят".')
@@ -390,5 +390,8 @@ def can_upload_document_scan(user: User, document: Document):
 
 def can_delete_document_scan(user: User, document: Document):
     """Пропускает пользователей, которые могут удалять скан документа."""
-    if can_change_period_base(user, document.period) or is_period_curator(user, document.period):
-        return
+    if not DocumentScan.objects.filter(document=document).first():
+        raise PermissionDenied('Скан не загружен')
+    can_change_period_base(user, document.period)
+    if not is_document_curator(user, document):
+        raise PermissionDenied('Недостаточно прав для удаления скана документа.')

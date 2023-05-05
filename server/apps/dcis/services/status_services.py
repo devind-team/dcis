@@ -67,7 +67,7 @@ def delete_document_status(user: User, status: DocumentStatus) -> Document:
     document = status.document
     status.delete()
     if document.last_status.status.name not in ('Ввод завершен', 'Принят'):
-        DocumentScan.objects.get(document=document).delete()
+        DocumentScan.objects.filter(document=document).delete()
     return document
 
 
