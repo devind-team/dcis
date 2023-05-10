@@ -26,7 +26,7 @@ v-menu(offset-y)
     v-list-item(v-else disabled)
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
     v-list-item(
-      :disabled="!(document.canDeleteDocumentScan && document.scan)"
+      :disabled="!document.canDeleteDocumentScan"
       @click="deleteDocumentScanMutate({ fileId: document.scan.id }).then()"
     )
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}

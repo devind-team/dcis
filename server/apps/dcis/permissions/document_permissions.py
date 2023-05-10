@@ -6,6 +6,7 @@ from apps.dcis.models import AddStatus, Attribute, Cell, Document, DocumentScan,
 from apps.dcis.services.divisions_services import get_user_divisions
 from apps.dcis.services.privilege_services import has_privilege
 from .period_permissions import can_change_period_base, can_change_period_sheet_base, can_view_period
+from ..helpers.exceptions import is_raises
 from ..services.curator_services import is_document_curator
 
 
@@ -390,8 +391,9 @@ def can_upload_document_scan(user: User, document: Document):
 
 def can_delete_document_scan(user: User, document: Document):
     """Пропускает пользователей, которые могут удалять скан документа."""
+    if is_raises(PermissionDenied, can_change_period_base, user, document.period) and (
+        not is_document_curator(user, document)
+    ):
+        raise PermissionDenied('Недостаточно прав для удаления скана документа.')
     if not DocumentScan.objects.filter(document=document).first():
         raise PermissionDenied('Скан не загружен')
-    can_change_period_base(user, document.period)
-    if not is_document_curator(user, document):
-        raise PermissionDenied('Недостаточно прав для удаления скана документа.')
