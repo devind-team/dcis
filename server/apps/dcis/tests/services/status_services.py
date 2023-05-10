@@ -195,7 +195,7 @@ class StatusTestCase(TestCase):
 
 
 class CheckLimitationsTestCase(TestCase):
-    """Тестирование класса `CheckLimitations`."""
+    """Тестирование ограничений."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
@@ -366,7 +366,7 @@ class CheckLimitationsTestCase(TestCase):
 
 
 class ArchivePeriodTestCase(TestCase):
-    """Тестирование класса `ArchivePeriod`."""
+    """Тестирование архивирования периода."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
@@ -412,3 +412,11 @@ class ArchivePeriodTestCase(TestCase):
             self.assertEqual(test_row.index, archive_row.index)
             self.assertEqual(test_row.fixed, archive_row.fixed)
             self.assertEqual(test_row.hidden, archive_row.hidden)
+
+
+class DocumentScanTestCase(TestCase):
+    """Тестирование скана документа."""
+
+    def setUp(self) -> None:
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
