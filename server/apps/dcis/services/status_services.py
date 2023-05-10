@@ -100,7 +100,7 @@ class AddStatusActions:
     """Действие при добавлении статуса в документ."""
 
     class ToInputCompleted(StatusAction):
-        """Проверка ограничений, накладываемых на лист."""
+        """Изменение статуса на 'Ввод завершен'."""
 
         VIRTUAL_SHEET_NAME = '__virtual_sheet__'
 
@@ -151,7 +151,7 @@ class AddStatusActions:
                 raise ValidationError(message=None, code=None, params=errors)
 
     class FromInputCompletedToRequiresRevision(StatusAction):
-        """Архивирование периода при добавлении статуса."""
+        """Изменение статуса с 'Ввод завершен' на 'Требует доработки'."""
 
         @classmethod
         @transaction.atomic

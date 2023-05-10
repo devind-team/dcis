@@ -270,7 +270,7 @@ class CheckLimitationsTestCase(TestCase):
     def test_check_limitations_with_calculation_errors(self) -> None:
         """Тестирование функции `check_limitations` с ошибками вычислений."""
         with self.assertRaises(ValidationError) as error:
-            AddStatusActions.CheckLimitations.pre_execute(self.document_with_calculation_errors)
+            AddStatusActions.ToInputCompleted.pre_execute(self.document_with_calculation_errors)
         self.assertEqual(
             [
                 LimitationError(
@@ -287,7 +287,7 @@ class CheckLimitationsTestCase(TestCase):
     def test_check_limitations_with_limitation_errors(self) -> None:
         """Тестирование функции `check_limitations` с ошибками ограничений."""
         with self.assertRaises(ValidationError) as error:
-            AddStatusActions.CheckLimitations.pre_execute(self.document_with_limitation_errors)
+            AddStatusActions.ToInputCompleted.pre_execute(self.document_with_limitation_errors)
         self.assertEqual(
             [
                 LimitationError(
@@ -300,21 +300,25 @@ class CheckLimitationsTestCase(TestCase):
                     form='sheet2',
                     formula='sheet2!A2 < sheet1!C1',
                     error_message='sheet2!A2 меньше sheet1!C1',
-                    dependencies=encode({
-                        'sheet2!A2': 4.0,
-                        'sheet1!C1': 3.0,
-                    }),
+                    dependencies=encode(
+                        {
+                            'sheet2!A2': 4.0,
+                            'sheet1!C1': 3.0,
+                        }
+                    ),
                 ),
                 LimitationError(
                     form='sheet3',
                     formula='SUM(sheet3!A1:B2) > 10',
                     error_message='SUM(sheet3!A1:B2) меньше или равно 10',
-                    dependencies=encode({
-                        'sheet3!A1': 2.0,
-                        'sheet3!B1': 3.0,
-                        'sheet3!A2': 2.0,
-                        'sheet3!B2': 3.0,
-                    }),
+                    dependencies=encode(
+                        {
+                            'sheet3!A1': 2.0,
+                            'sheet3!B1': 3.0,
+                            'sheet3!A2': 2.0,
+                            'sheet3!B2': 3.0,
+                        }
+                    ),
                 ),
             ],
             error.exception.params,
@@ -323,7 +327,7 @@ class CheckLimitationsTestCase(TestCase):
     @override_settings(CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}})
     def test_check_limitations(self) -> None:
         """Тестирование функции `check_limitations` без ошибок."""
-        AddStatusActions.CheckLimitations.pre_execute(self.document_without_errors)
+        AddStatusActions.ToInputCompleted.pre_execute(self.document_without_errors)
 
     def _create_document(
         self,
@@ -397,7 +401,7 @@ class ArchivePeriodTestCase(TestCase):
     def test_archive_period(self) -> None:
         """Тестирование функции архивирования периода"""
 
-        AddStatusActions.ArchivePeriod.post_execute(self.document, self.document_status)
+        AddStatusActions.FromInputCompletedToRequiresRevision.post_execute(self.document, self.document_status)
         archive_period = self.document_status.archive_period
         archive_document = archive_period.document_set.all().first()
         test_rows = self.document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()

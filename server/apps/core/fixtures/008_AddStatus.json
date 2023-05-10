@@ -5,7 +5,10 @@
     "fields": {
       "from_status": null,
       "to_status": 1,
-      "roles": ["admin", "division_member"]
+      "roles": [
+        "admin",
+        "division_member"
+      ]
     }
   },
   {
@@ -14,7 +17,10 @@
     "fields": {
       "from_status": 1,
       "to_status": 2,
-      "roles": ["admin", "division_member"],
+      "roles": [
+        "admin",
+        "division_member"
+      ],
       "action": "CheckLimitations"
     }
   },
@@ -24,7 +30,10 @@
     "fields": {
       "from_status": 2,
       "to_status": 3,
-      "roles": ["admin", "curator"]
+      "roles": [
+        "admin",
+        "curator"
+      ]
     }
   },
   {
@@ -33,8 +42,11 @@
     "fields": {
       "from_status": 2,
       "to_status": 4,
-      "roles": ["admin", "curator"],
-      "action": "ArchivePeriod"
+      "roles": [
+        "admin",
+        "curator"
+      ],
+      "action": "FromInputCompletedToRequiresRevision"
     }
   },
   {
@@ -43,7 +55,10 @@
     "fields": {
       "from_status": 2,
       "to_status": 5,
-      "roles": ["admin", "curator"]
+      "roles": [
+        "admin",
+        "curator"
+      ]
     }
   },
   {
@@ -52,8 +67,11 @@
     "fields": {
       "from_status": 4,
       "to_status": 2,
-      "roles": ["admin", "division_member"],
-      "action": "CheckLimitations"
+      "roles": [
+        "admin",
+        "division_member"
+      ],
+      "action": "ToInputCompleted"
     }
   }
 ]
