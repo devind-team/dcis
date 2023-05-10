@@ -383,7 +383,7 @@ def can_upload_document_scan(user: User, document: Document):
     can_view_document(user, document)
     if DocumentScan.objects.filter(document=document).first():
         raise PermissionDenied('Скан уже загружен')
-    if document.last_status.status.name not in ('Ввод завершен', 'Принят'):
+    if not document.last_status.status.upload_scan:
         raise PermissionDenied('Статус документа должен быть "Ввод завершен" или "Принят".')
     if is_document_curator(user, document):
         raise PermissionDenied('Куратор не может загружать скан документа.')

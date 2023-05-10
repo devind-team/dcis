@@ -13,7 +13,8 @@
     "fields": {
       "name": "Ввод завершен",
       "edit": false,
-      "comment": "Документ переходит на проверку Куратору"
+      "comment": "Документ переходит на проверку Куратору",
+      "upload_scan": true
     }
   },
   {
@@ -21,7 +22,8 @@
     "pk": 3,
     "fields": {
       "name": "Принят",
-      "edit": false
+      "edit": false,
+      "upload_scan": true
     }
   },
   {

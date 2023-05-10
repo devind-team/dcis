@@ -21,7 +21,7 @@
         "admin",
         "division_member"
       ],
-      "action": "CheckLimitations"
+      "action": "ToInputCompleted"
     }
   },
   {

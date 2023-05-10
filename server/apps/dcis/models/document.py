@@ -20,6 +20,7 @@ class Status(models.Model):
     name = models.CharField(max_length=250, help_text='Название статуса')
     edit = models.BooleanField(default=False, help_text='Можно ли редактировать документ со статусом')
     comment = models.TextField(null=True, help_text='Комментарий')
+    upload_scan = models.BooleanField(default=False, help_text='Можно ли загружать скан документа')
 
     class Meta:
         ordering = ('id',)
