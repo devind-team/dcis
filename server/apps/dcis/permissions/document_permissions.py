@@ -391,6 +391,7 @@ def can_upload_document_scan(user: User, document: Document):
 
 def can_delete_document_scan(user: User, document: Document):
     """Пропускает пользователей, которые могут удалять скан документа."""
+    can_view_document(user, document)
     if is_raises(PermissionDenied, can_change_period_base, user, document.period) and (
         not is_document_curator(user, document)
     ):

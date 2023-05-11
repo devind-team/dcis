@@ -14,20 +14,20 @@ from apps.dcis.models import (
     Division,
     Document,
     DocumentMessage,
-    DocumentScan, DocumentStatus, Period,
+    Period,
     Project,
     RowDimension,
     Sheet,
     Status,
 )
 from apps.dcis.permissions import can_add_document
-from apps.dcis.permissions.document_permissions import can_add_document_message, can_upload_document_scan
+from apps.dcis.permissions.document_permissions import can_add_document_message
 from apps.dcis.services.document_services import (
     create_document,
-    create_document_message, get_user_documents,
-    get_user_roles, upload_document_scan,
+    create_document_message,
+    get_user_documents,
+    get_user_roles,
 )
-from apps.dcis.tests.tests_helpers import create_in_memory_file
 
 
 class GetUserDocumentsTestCase(TestCase):
@@ -364,66 +364,3 @@ class DocumentMessageTestCase(TestCase):
         )
         expected_document_message = DocumentMessage.objects.get(comment='Test message')
         self.assertEqual(expected_document_message, actual_document_message)
-
-
-class DocumentScanTestCase(TestCase):
-    """Тестирование скана документа."""
-
-    def setUp(self) -> None:
-        """Создание данных для тестирования."""
-        self.user = User.objects.create(username='user', email='user@gmail.com')
-        self.curator = User.objects.create(username='curator', email='curator@gmail.com')
-        self.another_curator = User.objects.create(username='another_curator', email='another_curator@gmail.com')
-        self.organization_member = User.objects.create(
-            username='organization_member',
-            email='organization_member@gmail.com',
-        )
-        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
-
-        self.organization_content_type = ContentType.objects.get_for_model(Organization)
-        self.organization = Organization.objects.create(name=f'Организация', attributes='')
-        self.organization.users.add(self.organization_member)
-
-        self.curator_group = CuratorGroup.objects.create(name='Кураторская группа')
-        self.curator_group.users.add(self.curator)
-        self.curator_group.organization.add(self.organization)
-
-        self.organization_project = Project.objects.create(content_type=self.organization_content_type)
-        self.organization_period = Period.objects.create(project=self.organization_project)
-
-        self.status1 = Status.objects.create(name='Ввод завершен', edit=False, upload_scan=True)
-        self.user_document = Document.objects.create(
-            user=self.user,
-            period=self.organization_period,
-            object_id=self.organization.id,
-        )
-        self.document_status1 = DocumentStatus.objects.create(
-            user=self.user,
-            document=self.user_document,
-            status=self.status1
-        )
-        self.file = create_in_memory_file('test_create_period.xlsx')
-
-    def test_upload_document_scan(self) -> None:
-        """Тестирование функции 'upload_document_scan'."""
-        with patch.object(self.user_document, 'user_id', new=None), patch.object(
-            self.user_document.period.project,
-            'user_id',
-            new=None
-        ), patch.object(
-            self.user_document.period,
-            'user_id',
-            new=None
-        ), patch.object(
-            self.superuser,
-            'has_perm',
-            new=lambda perm: perm not in ('dcis.change_document', 'dcis.add_project', 'dcis.add_period')
-        ):
-            self.assertRaises(PermissionDenied, can_upload_document_scan, self.superuser, self.user_document)
-        actual_document_scan = upload_document_scan(
-            user=self.user,
-            document=self.user_document,
-            file=self.file
-        )
-        expected_document_scan = DocumentScan.objects.get(file=self.file)
-        self.assertEqual(actual_document_scan, expected_document_scan)

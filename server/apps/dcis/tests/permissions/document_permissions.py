@@ -14,7 +14,10 @@ from apps.dcis.models import (
     Attribute,
     Cell,
     ColumnDimension,
-    CuratorGroup, Document,
+    CuratorGroup,
+    Document,
+    DocumentScan,
+    DocumentStatus,
     Period,
     Project,
     RowDimension,
@@ -33,6 +36,8 @@ from apps.dcis.permissions.document_permissions import (
     can_delete_document_status,
     can_view_document,
 )
+from apps.dcis.services.document_services import delete_document_scan, upload_document_scan
+from apps.dcis.tests.tests_helpers import create_in_memory_file
 from apps.dcis.tests.tests_helpers.mock import patch_db_object
 
 
@@ -222,7 +227,6 @@ class DocumentPermissionsTestCase(TestCase):
                     self.assertRaises(PermissionDenied, can_add_document, self.user, self.period, self.status_edit, 1)
                     can_add_document(self.user, self.user_period, self.status_edit, 1)
 
-
     def test_can_add_document_status(self) -> None:
         """Тестирование функции `can_add_document_status`."""
         with self.assertRaises(PermissionDenied):
@@ -401,15 +405,17 @@ class DocumentPermissionsTestCase(TestCase):
 
     def _test_can_change_attribute_value(self, values: tuple[bool, bool, bool], attribute_mutable: bool) -> None:
         """Тестирование функции `can_change_attribute_value`."""
-        for document, attribute, value in zip((
-            self.document,
-            self.user_document,
-            self.user_period_document
-        ), (
-            self.period_attribute_mutable if attribute_mutable else self.period_attribute,
-            self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
-            self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
-        ), values):
+        for document, attribute, value in zip(
+            (
+                self.document,
+                self.user_document,
+                self.user_period_document
+            ), (
+                self.period_attribute_mutable if attribute_mutable else self.period_attribute,
+                self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
+                self.user_period_attribute_mutable if attribute_mutable else self.user_period_attribute,
+            ), values
+        ):
             if value:
                 can_change_attribute_value(self.user, document, attribute)
             else:
@@ -423,14 +429,16 @@ class DocumentPermissionsTestCase(TestCase):
 
     def _test_can_change_value(self, values: tuple[bool, bool, bool, bool, bool, bool]) -> None:
         """Тестирование функции `can_change_value` для 6 типов ячеек."""
-        for cell_obj, value in zip((
-            self.not_editable_cell_obj,
-            self.formula_cell_obj,
-            self.cell_obj,
-            self.child_cell_obj,
-            self.user_period_cell_obj,
-            self.user_document_cell_obj,
-        ), values):
+        for cell_obj, value in zip(
+            (
+                self.not_editable_cell_obj,
+                self.formula_cell_obj,
+                self.cell_obj,
+                self.child_cell_obj,
+                self.user_period_cell_obj,
+                self.user_document_cell_obj,
+            ), values
+        ):
             if value:
                 can_change_value(self.user, cell_obj['document'], cell_obj['cell'])
             else:
@@ -444,13 +452,15 @@ class DocumentPermissionsTestCase(TestCase):
 
     def _test_can_add_child_row_dimension(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
         """Тестирование функции `can_add_child_row_dimension` для 5 типов строк."""
-        for row_dimension, value in zip((
-            {'document': self.user_period_document, 'row_dimension': self.row_dimension},
-            {'document': self.user_period_document, 'row_dimension': self.document_row_dimension},
-            {'document': self.user_period_document, 'row_dimension': self.dynamic_row_dimension},
-            {'document': self.user_period_document, 'row_dimension': self.document_dynamic_row_dimension},
-            {'document': self.user_document, 'row_dimension': self.user_document_row_dimension},
-        ), values):
+        for row_dimension, value in zip(
+            (
+                {'document': self.user_period_document, 'row_dimension': self.row_dimension},
+                {'document': self.user_period_document, 'row_dimension': self.document_row_dimension},
+                {'document': self.user_period_document, 'row_dimension': self.dynamic_row_dimension},
+                {'document': self.user_period_document, 'row_dimension': self.document_dynamic_row_dimension},
+                {'document': self.user_document, 'row_dimension': self.user_document_row_dimension},
+            ), values
+        ):
             if value:
                 can_add_child_row_dimension(
                     self.user,
@@ -468,12 +478,14 @@ class DocumentPermissionsTestCase(TestCase):
 
     def _test_can_change_child_row_dimension_height(self, values: tuple[bool, bool, bool, bool]) -> None:
         """Тестирование функции `can_change_child_row_dimension_height` для 4 типов строк."""
-        for row_dimension, value in zip((
-            self.row_dimension,
-            self.document_row_dimension,
-            self.user_period_document_row_dimension,
-            self.user_document_row_dimension,
-        ), values):
+        for row_dimension, value in zip(
+            (
+                self.row_dimension,
+                self.document_row_dimension,
+                self.user_period_document_row_dimension,
+                self.user_document_row_dimension,
+            ), values
+        ):
             if value:
                 can_change_child_row_dimension_height(self.user, row_dimension)
             else:
@@ -486,14 +498,99 @@ class DocumentPermissionsTestCase(TestCase):
 
     def _test_can_delete_child_row_dimension(self, values: tuple[bool, bool, bool, bool, bool]) -> None:
         """Тестирование функции `can_delete_child_row_dimension` для 5 типов строк."""
-        for row_dimension, value in zip((
-            self.row_dimension,
-            self.document_row_dimension_with_child,
-            self.document_row_dimension,
-            self.user_period_document_row_dimension,
-            self.user_document_row_dimension,
-        ), values):
+        for row_dimension, value in zip(
+            (
+                self.row_dimension,
+                self.document_row_dimension_with_child,
+                self.document_row_dimension,
+                self.user_period_document_row_dimension,
+                self.user_document_row_dimension,
+            ), values
+        ):
             if value:
                 can_delete_child_row_dimension(self.user, row_dimension)
             else:
                 self.assertRaises(PermissionDenied, can_delete_child_row_dimension, self.user, row_dimension)
+
+
+class DocumentScanTestCase(TestCase):
+    """Тестирование скана документа."""
+
+    def setUp(self) -> None:
+        """Создание данных для тестирования."""
+        self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.organization_member = User.objects.create(
+            username='organization_member',
+            email='organization_member@gmail.com',
+        )
+        self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
+
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.organization = Organization.objects.create(name=f'Организация', attributes='')
+        self.organization.users.add(self.organization_member)
+        self.organization_project = Project.objects.create(content_type=self.organization_content_type)
+        self.organization_period = Period.objects.create(project=self.organization_project)
+
+        self.status1 = Status.objects.create(name='Черновик')
+        self.status2 = Status.objects.create(name='Ввод завершен', upload_scan=True)
+        self.status3 = Status.objects.create(name='Принят', upload_scan=True)
+        self.status4 = Status.objects.create(name='Требует доработки')
+        self.not_upload_scan_statuses = [self.status1, self.status4]
+        self.upload_scan_statuses = [self.status2, self.status3]
+        self.add_status = AddStatus.objects.create(
+            from_status=self.status4,
+            to_status=self.status2,
+            roles=['admin', 'division_member'],
+        )
+        self.superuser_document = Document.objects.create(
+            user=self.superuser,
+            period=self.organization_period,
+            object_id=self.organization.id,
+        )
+        self.not_upload_scan_document_statuses = [
+            DocumentStatus.objects.create(
+                user=self.superuser,
+                document=self.superuser_document,
+                status=status
+            ) for status in self.not_upload_scan_statuses
+        ]
+        self.upload_scan_document_statuses = [
+            DocumentStatus.objects.create(
+                user=self.superuser,
+                document=self.superuser_document,
+                status=status
+            ) for status in self.upload_scan_statuses
+        ]
+
+        self.file = create_in_memory_file('test_document_scan.pdf')
+
+    def test_upload_document_scan(self) -> None:
+        """Тестирование функции 'upload_document_scan'."""
+        for document_status in self.not_upload_scan_document_statuses:
+            self.superuser_document.last_status = document_status
+            self.superuser_document.save(update_fields=('last_status',))
+            self.assertRaises(
+                PermissionDenied,
+                upload_document_scan,
+                self.superuser,
+                self.superuser_document,
+                self.file
+            )
+        for document_status in self.upload_scan_document_statuses:
+            self.superuser_document.last_status = document_status
+            self.superuser_document.save(update_fields=('last_status',))
+            actual_document_scan = upload_document_scan(
+                user=self.superuser,
+                document=self.superuser_document,
+                file=self.file
+            )
+            expected_document_scan = DocumentScan.objects.filter(name='test_document_scan.pdf').first()
+            self.assertEqual(actual_document_scan, expected_document_scan)
+            self.assertRaises(
+                PermissionDenied,
+                upload_document_scan,
+                self.superuser,
+                self.superuser_document,
+                self.file
+            )
+            delete_document_scan(self.superuser, actual_document_scan)
