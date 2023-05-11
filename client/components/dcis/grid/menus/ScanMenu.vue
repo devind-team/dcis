@@ -17,7 +17,7 @@ v-menu(offset-y)
     ) {{ $t('dcis.grid.sheetMenu.scanMenu.buttonText') }}
   v-list(dense width="200")
     v-list-item(
-      :disabled="!document.canUploadDocumentScan"
+      :disabled="!document.canUploadDocumentScan || document.scan"
       @click="open"
     )
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.uploadScan') }}
@@ -26,7 +26,7 @@ v-menu(offset-y)
     v-list-item(v-else disabled)
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.downloadScan') }}
     v-list-item(
-      :disabled="!document.canDeleteDocumentScan"
+      :disabled="!document.canDeleteDocumentScan || !document.scan"
       @click="deleteDocumentScanMutate({ fileId: document.scan.id }).then()"
     )
       v-list-item-title {{ $t('dcis.grid.sheetMenu.scanMenu.deleteScan') }}
