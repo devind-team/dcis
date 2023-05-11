@@ -519,14 +519,21 @@ class DocumentScanTestCase(TestCase):
     def setUp(self) -> None:
         """Создание данных для тестирования."""
         self.user = User.objects.create(username='user', email='user@gmail.com')
+        self.curator1 = User.objects.create(username='curator1', email='curator1@gmail.com')
+        self.curator2 = User.objects.create(username='curator2', email='curator2@gmail.com')
         self.organization_member = User.objects.create(
             username='organization_member',
             email='organization_member@gmail.com',
         )
         self.superuser = User.objects.create(username='superuser', email='superuser@gmain.com', is_superuser=True)
+        self.curator_group1 = CuratorGroup.objects.create(name='Кураторская группа 1')
+        self.curator_group2 = CuratorGroup.objects.create(name='Кураторская группа 2')
+        self.curator_group1.users.add(self.curator1)
+        self.curator_group2.users.add(self.curator2)
 
         self.organization_content_type = ContentType.objects.get_for_model(Organization)
         self.organization = Organization.objects.create(name=f'Организация', attributes='')
+        self.curator_group1.organization.add(self.organization)
         self.organization.users.add(self.organization_member)
         self.organization_project = Project.objects.create(content_type=self.organization_content_type)
         self.organization_period = Period.objects.create(project=self.organization_project)
@@ -564,8 +571,30 @@ class DocumentScanTestCase(TestCase):
 
         self.file = create_in_memory_file('test_document_scan.pdf')
 
-    def test_upload_document_scan(self) -> None:
-        """Тестирование функции 'upload_document_scan'."""
+    def test_can_upload_document_scan(self) -> None:
+        """Тестирование функции 'can_upload_document_scan'."""
+        with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
+            self.superuser_document.period.project,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser_document.period,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser_document,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm not in (
+                'dcis.view_project',
+                'dcis.view_period',
+                'dcis.view_document'
+            )
+        ):
+            self.assertRaises(PermissionDenied, can_add_document_message, self.superuser, self.superuser_document)
         for document_status in self.not_upload_scan_document_statuses:
             self.superuser_document.last_status = document_status
             self.superuser_document.save(update_fields=('last_status',))
@@ -594,3 +623,10 @@ class DocumentScanTestCase(TestCase):
                 self.file
             )
             delete_document_scan(self.superuser, actual_document_scan)
+        self.assertRaises(
+            PermissionDenied,
+            upload_document_scan,
+            self.curator1,
+            self.superuser_document,
+            self.file
+        )
