@@ -33,7 +33,9 @@ from apps.dcis.permissions.document_permissions import (
     can_change_child_row_dimension_height,
     can_change_value,
     can_delete_child_row_dimension,
+    can_delete_document_scan,
     can_delete_document_status,
+    can_upload_document_scan,
     can_view_document,
 )
 from apps.dcis.services.document_services import delete_document_scan, upload_document_scan
@@ -537,6 +539,7 @@ class DocumentScanTestCase(TestCase):
         self.organization.users.add(self.organization_member)
         self.organization_project = Project.objects.create(content_type=self.organization_content_type)
         self.organization_period = Period.objects.create(project=self.organization_project)
+        self.organization_period.division_set.create(object_id=self.organization.id)
 
         self.status1 = Status.objects.create(name='Черновик')
         self.status2 = Status.objects.create(name='Ввод завершен', upload_scan=True)
@@ -594,7 +597,7 @@ class DocumentScanTestCase(TestCase):
                 'dcis.view_document'
             )
         ):
-            self.assertRaises(PermissionDenied, can_add_document_message, self.superuser, self.superuser_document)
+            self.assertRaises(PermissionDenied, can_upload_document_scan, self.superuser, self.superuser_document)
         for document_status in self.not_upload_scan_document_statuses:
             self.superuser_document.last_status = document_status
             self.superuser_document.save(update_fields=('last_status',))
@@ -623,10 +626,53 @@ class DocumentScanTestCase(TestCase):
                 self.file
             )
             delete_document_scan(self.superuser, actual_document_scan)
+
+    def test_can_delete_document_scan(self) -> None:
+        """Тестирование функции 'can_delete_document_scan'."""
+        document_scan = DocumentScan.objects.create(
+            name='test_document_scan.pdf',
+            src='apps/dcis/tests/resources/test_document_scan.pdf',
+            document=self.superuser_document
+        )
+        with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
+            self.superuser_document.period.project,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser_document.period,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser_document,
+            'user_id',
+            new=None
+        ), patch.object(
+            self.superuser,
+            'has_perm',
+            new=lambda perm: perm not in (
+                'dcis.view_project',
+                'dcis.add_project',
+                'dcis.view_period',
+                'dcis.add_period',
+                'dcis.change_period',
+                'dcis.view_document',
+            )
+        ):
+            self.assertRaises(PermissionDenied, can_delete_document_scan, self.superuser, self.superuser_document)
         self.assertRaises(
             PermissionDenied,
-            upload_document_scan,
-            self.curator1,
-            self.superuser_document,
-            self.file
+            delete_document_scan,
+            self.curator2,
+            document_scan
+        )
+        self.assertRaises(
+            PermissionDenied,
+            delete_document_scan,
+            self.organization_member,
+            document_scan
+        )
+        delete_document_scan(user=self.curator1, file=document_scan)
+        self.assertQuerysetEqual(
+            DocumentScan.objects.none(),
+            DocumentScan.objects.filter(name='test_document_scan.pdf')
         )
