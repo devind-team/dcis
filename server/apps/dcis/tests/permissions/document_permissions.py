@@ -629,11 +629,6 @@ class DocumentScanTestCase(TestCase):
 
     def test_can_delete_document_scan(self) -> None:
         """Тестирование функции 'can_delete_document_scan'."""
-        document_scan = DocumentScan.objects.create(
-            name='test_document_scan.pdf',
-            src='apps/dcis/tests/resources/test_document_scan.pdf',
-            document=self.superuser_document
-        )
         with patch.object(self.superuser_document, 'user_id', new=None), patch.object(
             self.superuser_document.period.project,
             'user_id',
@@ -659,6 +654,11 @@ class DocumentScanTestCase(TestCase):
             )
         ):
             self.assertRaises(PermissionDenied, can_delete_document_scan, self.superuser, self.superuser_document)
+        document_scan = DocumentScan.objects.create(
+            name='test_document_scan.pdf',
+            src='apps/dcis/tests/resources/test_document_scan.pdf',
+            document=self.superuser_document
+        )
         self.assertRaises(
             PermissionDenied,
             delete_document_scan,

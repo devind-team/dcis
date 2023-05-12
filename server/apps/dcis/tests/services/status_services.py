@@ -3,7 +3,7 @@
 from itertools import product
 from unittest.mock import Mock, patch
 
-from devind_dictionaries.models import Department
+from devind_dictionaries.models import Department, Organization
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase, override_settings
@@ -15,7 +15,7 @@ from apps.dcis.models import (
     Cell,
     ColumnDimension,
     Document,
-    DocumentStatus,
+    DocumentScan, DocumentStatus,
     Limitation,
     Period,
     Project,
@@ -116,12 +116,18 @@ class StatusTestCase(TestCase):
             user=self.superuser,
         )
 
-        self.status_to_delete = Status.objects.create(name='delete_status')
         self.delete_document = Document.objects.create(period=self.period)
-        self.delete_document_status = DocumentStatus.objects.create(
+        self.status1 = Status.objects.create(name='Черновик')
+        self.status2 = Status.objects.create(name='Ввод завершен', upload_scan=True)
+        self.delete_document_status1 = DocumentStatus.objects.create(
             user=self.superuser,
             document=self.delete_document,
-            status=self.status_to_delete,
+            status=self.status1,
+        )
+        self.delete_document_status2 = DocumentStatus.objects.create(
+            user=self.superuser,
+            document=self.delete_document,
+            status=self.status2,
         )
 
     def test_get_initial_statuses(self) -> None:
@@ -178,7 +184,20 @@ class StatusTestCase(TestCase):
             self.superuser, 'has_perm', new=lambda perm: perm != 'dcis.change_document'
         ), self.assertRaises(PermissionDenied):
             self._delete_document_status()
-        self.assertIsNone(delete_document_status(user=self.superuser, status=self.delete_document_status))
+        DocumentScan.objects.create(
+            name='test_document_scan.pdf',
+            src='apps/dcis/tests/resources/test_document_scan.pdf',
+            document=self.delete_document
+        )
+        delete_document_status(user=self.superuser, status=self.delete_document_status2)
+        self.assertQuerysetEqual(
+            DocumentStatus.objects.none(),
+            DocumentStatus.objects.filter(status=self.status2)
+        )
+        self.assertQuerysetEqual(
+            DocumentScan.objects.none(),
+            DocumentScan.objects.filter(name='test_document_scan.pdf')
+        )
 
     def _add_document_status(self) -> DocumentStatus:
         """Добавление статуса документа."""
@@ -191,7 +210,7 @@ class StatusTestCase(TestCase):
 
     def _delete_document_status(self) -> None:
         """Удаление статуса документа."""
-        delete_document_status(user=self.superuser, status=self.delete_document_status)
+        delete_document_status(user=self.superuser, status=self.delete_document_status2)
 
 
 class CheckLimitationsTestCase(TestCase):
@@ -365,21 +384,21 @@ class CheckLimitationsTestCase(TestCase):
         return document
 
 
-class ArchivePeriodTestCase(TestCase):
-    """Тестирование архивирования периода."""
+class FromInputCompletedToRequiresRevisionTestCase(TestCase):
+    """Тестирование методов класса 'FromInputCompletedToRequiresRevision'."""
 
     def setUp(self) -> None:
         """Создание данных для тестирования."""
 
         self.user = User.objects.create(username='user', email='user@gmail.com')
-        self.department_content_type = ContentType.objects.get_for_model(Department)
-        self.project = Project.objects.create(content_type=self.department_content_type)
+        self.organization_content_type = ContentType.objects.get_for_model(Organization)
+        self.project = Project.objects.create(content_type=self.organization_content_type)
         self.period = Period.objects.create(project=self.project)
         self.document = Document.objects.create(period=self.period)
-        self.status = Status.objects.create(name='new_status')
+        self.status1 = Status.objects.create(name='Черновик')
         self.document_status = DocumentStatus.objects.create(
             document=self.document,
-            status=self.status,
+            status=self.status1,
             user_id=self.user.id
         )
 
@@ -401,7 +420,7 @@ class ArchivePeriodTestCase(TestCase):
     def test_archive_period(self) -> None:
         """Тестирование функции архивирования периода"""
 
-        AddStatusActions.FromInputCompletedToRequiresRevision.post_execute(self.document, self.document_status)
+        AddStatusActions.FromInputCompletedToRequiresRevision.archive_period(self.document, self.document_status)
         archive_period = self.document_status.archive_period
         archive_document = archive_period.document_set.all().first()
         test_rows = self.document.rowdimension_set.filter(parent_id__isnull=False).order_by('id').all()
@@ -412,3 +431,16 @@ class ArchivePeriodTestCase(TestCase):
             self.assertEqual(test_row.index, archive_row.index)
             self.assertEqual(test_row.fixed, archive_row.fixed)
             self.assertEqual(test_row.hidden, archive_row.hidden)
+
+    def test_delete_scan_when_status_change(self) -> None:
+        """Тестирование удаления скана при изменении статуса."""
+        DocumentScan.objects.create(
+            name='test_document_scan.pdf',
+            src='apps/dcis/tests/resources/test_document_scan.pdf',
+            document=self.document
+        )
+        AddStatusActions.FromInputCompletedToRequiresRevision.delete_document_scan(self.document)
+        self.assertQuerysetEqual(
+            DocumentScan.objects.none(),
+            DocumentScan.objects.filter(name='test_document_scan.pdf')
+        )
