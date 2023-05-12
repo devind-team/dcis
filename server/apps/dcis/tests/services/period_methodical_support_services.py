@@ -86,7 +86,7 @@ class PeriodMethodicalSupportTestCase(TransactionTestCase):
         self.assertEqual(None, self._delete_period_methodical_support())
         self.assertQuerysetEqual(
             PeriodMethodicalSupport.objects.none(),
-            PeriodMethodicalSupport.objects.filter(name='Methodical support')
+            PeriodMethodicalSupport.objects.filter(name='Methodical support name')
         )
 
     def _delete_period_methodical_support(self) -> None:
