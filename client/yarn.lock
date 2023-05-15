@@ -5035,10 +5035,10 @@ anymatch@^2.0.0:
     micromatch "^3.1.4"
     normalize-path "^2.1.1"
 
-apexcharts@^3.36.0:
-  version "3.36.0"
-  resolved "https://registry.yarnpkg.com/apexcharts/-/apexcharts-3.36.0.tgz#eba378167be3ebe5044b8980d5907bad9e9a7fff"
-  integrity sha512-9r7M/SOfnYS1g4G1gmRRgeIN1Oj+ct1S0G6PpMPPD3F4jGHgWl5EzxqvoQkk3vpTxN8MbZB5ZHWIAQvPuFiA+w==
+apexcharts@^3.40.0:
+  version "3.40.0"
+  resolved "https://registry.yarnpkg.com/apexcharts/-/apexcharts-3.40.0.tgz#9eccb50e38f12ddaeb6803ec781fb26e161853e3"
+  integrity sha512-dSi3BUfCJkFd67uFp+xffrJVd3lDT7AAUUyRp0qPYiglJ76CeZLddVhM3FAk1P9GCzf8VewqGYUPCYQvXm+b9A==
   dependencies:
     svg.draggable.js "^2.2.2"
     svg.easing.js "^2.0.0"
