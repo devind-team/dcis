@@ -22,7 +22,7 @@
     "@vueuse/core": "^9.4.0",
     "@vueuse/integrations": "^9.4.0",
     "accounting": "^0.4.1",
-    "apexcharts": "^3.36.0",
+    "apexcharts": "^3.40.0",
     "cross-undici-fetch": "^0.4.14",
     "detect-browser": "^5.3.0",
     "graphql-tag": "^2.12.6",
