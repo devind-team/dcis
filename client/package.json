@@ -34,7 +34,7 @@
     "v-viewer": "^1.6.4",
     "vee-validate": "^3.4.14",
     "vue-apexcharts": "^1.6.2",
-    "vuetify": "^2.6.12"
+    "vuetify": "^3.2.5"
   },
   "devDependencies": {
     "@babel/core": "^7.19.6",
